@@ -37,7 +37,7 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250822.0",
+    "@cloudflare/workers-types": "^4.20250910.0",
     "@remix-run/dev": "^2.17.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
