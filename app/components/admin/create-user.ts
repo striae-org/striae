@@ -30,7 +30,7 @@ const INFINITY_ATTRIBUTE_IDS = {
 } as const;
 
 const INFINITY_CONFIG = {
-  API_URL: 'https://admin.striae.org/api/v2/workspaces/Wm4J6dTmNuj/boards/Gz2boYV4VmL/items',
+  API_URL: 'https://app.startinfinity.com/api/v2/workspaces/Wm4J6dTmNuj/boards/Gz2boYV4VmL/items',
   FOLDER_ID: 'Wm4J6dTmNuj',
   API_VERSION: '2025-02-26.morava'
 } as const;
