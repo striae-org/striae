@@ -42,7 +42,7 @@ const NoticeText = () => {
             <strong>Data Storage:</strong> Your data is encrypted and protected against unauthorized access. Measures include data segregation, AES-256 encryption, and no plaintext storage of sensitive information.
         </li>
         <li>
-            <strong>Data Transit:</strong> All Data transfers are encrypted via TLS, and access is controlled through the use of signed URLs.
+            <strong>Data Transit:</strong> All data transfers are encrypted via TLS, and access is controlled through the use of signed URLs.
         </li>
         <li>
             <strong>Controlled Access and Monitoring:</strong> Access requests are logged for auditing and security. Data access is limited to you or authorized troubleshooting only. CORS support restricts data requests to Striae&apos;s domain exclusively.
