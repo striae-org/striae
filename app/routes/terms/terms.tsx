@@ -90,7 +90,7 @@ export const Terms = () => {
 <li>Unlawful or promoting unlawful activity.</li>
 <li>Defamatory, discriminatory, or mean-spirited content, including references or commentary about religion, race, sexual orientation, gender, national/ethnic origin, or other targeted groups.</li>
 <li>Spam, machine – or randomly – generated, constituting unauthorized or unsolicited advertising, chain letters, any other form of unauthorized solicitation, or any form of lottery or gambling.</li>
-<li>Containing or installing any viruses, worms, malware, trojan horses, or other content that is designed or intended to disrupt, damage, or limit the functioning of any software, hardware or telecommunications equipment or to damage or obtain unauthorized access to any data or other information of a third person.</li>
+<li>Containing or installing any viruses, worms, malware, trojan horses, or other content that is designed or intended to disrupt, damage, or limit the functioning of any software, hardware or telecommunications equipment or to damage or obtain unauthorized access to any Data or other information of a third person.</li>
 <li>Infringing on any proprietary rights of any party, including patent, trademark, trade secret, copyright, right of publicity or other rights.</li>
 <li>Impersonating any person or entity including the Company and its employees or representatives.</li>
 <li>Violating the privacy of any third person.</li>
@@ -140,7 +140,7 @@ Upon receipt of a notification, the Company will take whatever action, in its so
         <section className={styles.section}>
           <h2>Limitation of Liability</h2>
 <p>Notwithstanding any damages that You might incur, the entire liability of the Company and any of its suppliers under any provision of this Terms and Your exclusive remedy for all of the foregoing shall be limited to the amount actually paid by You through the Service or 100 USD if You haven't purchased anything through the Service.</p>
-<p>To the maximum extent permitted by applicable law, in no event shall the Company or its suppliers be liable for any special, incidental, indirect, or consequential damages whatsoever (including, but not limited to, damages for loss of profits, loss of data or other information, for business interruption, for personal injury, loss of privacy arising out of or in any way related to the use of or inability to use the Service, third-party software and/or third-party hardware used with the Service, or otherwise in connection with any provision of this Terms), even if the Company or any supplier has been advised of the possibility of such damages and even if the remedy fails of its essential purpose.</p>
+<p>To the maximum extent permitted by applicable law, in no event shall the Company or its suppliers be liable for any special, incidental, indirect, or consequential damages whatsoever (including, but not limited to, damages for loss of profits, loss of Data or other information, for business interruption, for personal injury, loss of privacy arising out of or in any way related to the use of or inability to use the Service, third-party software and/or third-party hardware used with the Service, or otherwise in connection with any provision of this Terms), even if the Company or any supplier has been advised of the possibility of such damages and even if the remedy fails of its essential purpose.</p>
 <p>Some states do not allow the exclusion of implied warranties or limitation of liability for incidental or consequential damages, which means that some of the above limitations may not apply. In these states, each party's liability will be limited to the greatest extent permitted by law.</p>
         </section>
         <section className={styles.section}>
@@ -245,7 +245,7 @@ You agree that the original English text shall prevail in the case of a dispute.
   <li><p><strong>Transport Layer Security</strong></p>
   <p>All Data transfers are encrypted using TLS, ensuring protection from interception or tampering while in transit.</p></li>
   <li><p><strong>Signed URLs</strong></p>
-  <p>Using HMAC-SHA-256, temporary signed URLs provide authenticated, tamper-evident, time-limited access to your images and files.</p></li>
+  <p>Using HMAC-SHA-256, temporary signed URLs provide authenticated, tamper-evident, time-limited access to Your images and files.</p></li>
   <li><p><strong>Logging and Monitoring</strong></p>
   <p>Access requests and Data transfers are logged in detail, allowing Us to audit activities and identify any unauthorized access attempts.</p></li>
   <li><p><strong>Cross-Origin Resource Sharing (CORS) Support</strong></p>

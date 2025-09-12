@@ -177,16 +177,16 @@ export const Privacy = () => {
 <ul>
 <li>
 <p><strong>Firebase Authentication</strong></p>
-<p>Firebase Authentication is an authentication service provided by Google Inc.</p>
-<p>You may opt-out of certain Firebase features through Your mobile device settings, such as Your device advertising settings or by following the instructions provided by Google in their Privacy Policy:
+<p>Firebase Authentication is a secure authentication service provided by Google Inc., enabling users to sign in to apps using passwords, phone numbers, and popular federated identity providers such as Google, Facebook, and more.</p>
+<p>Your authentication information and data are handled in accordance with Google’s Privacy Policy. To learn more, please visit:
   <br />
-  <a href="https://policies.google.com/privacy" rel="noopener noreferrer" target="_blank">https://policies.google.com/privacy</a></p>
-<p>We also encourage You to review the Google's policy for safeguarding Your data:
+  <a href="https://policies.google.com/privacy" rel="noopener noreferrer" target="_blank">Google's Privacy Policy</a></p>
+<p>For details on how Google helps safeguard your data with Firebase, see:
   <br />
-  <a href="https://support.google.com/analytics/answer/6004245" rel="noopener noreferrer" target="_blank">https://support.google.com/analytics/answer/6004245</a></p>
-<p>For more information on what type of information Firebase collects, please visit the How Google uses data when You use Our partners' sites or apps webpage:
+  <a href="https://firebase.google.com/support/privacy" rel="noopener noreferrer" target="_blank">Firebase's Privacy Policy</a></p>
+<p>To better understand what types of information Firebase Authentication may collect and how that information is used when you interact with our app, review Google's documentation on “How Google uses information from sites or apps that use our services”:
   <br />
-  <a href="https://policies.google.com/technologies/partner-sites" rel="noopener noreferrer" target="_blank">https://policies.google.com/technologies/partner-sites</a></p>
+  <a href="https://policies.google.com/technologies/partner-sites" rel="noopener noreferrer" target="_blank">Google Technologies Terms</a></p>
 </li>
 </ul>
 <h3>Email Service</h3>
@@ -196,38 +196,38 @@ export const Privacy = () => {
 <p><strong>SendLayer</strong></p>
 <p>Their Privacy Policy can be viewed at:
   <br />
-  <a href="https://sendlayer.com/privacy-policy/" rel="noopener noreferrer" target="_blank">https://sendlayer.com/privacy-policy/</a></p>
+  <a href="https://sendlayer.com/privacy-policy/" rel="noopener noreferrer" target="_blank">SendLayer's Privacy Policy</a></p>
 </li>
 </ul>
 <h3>Payments/Contributions</h3>
-<p>Users and contributors may choose to support the development of the Service through paid contributions. In that case, we may use third-party services for payment processing (e.g. payment processors).</p>
+<p>Users and contributors may choose to support the development of the Service through paid contributions. In that case, We may use third-party services for payment processing (e.g. payment processors).</p>
 <p>We will not store or collect Your payment card details. That information is provided directly to Our third-party payment processors whose use of Your personal information is governed by their Privacy Policy. These payment processors adhere to the standards set by PCI-DSS as managed by the PCI Security Standards Council, which is a joint effort of brands like Visa, Mastercard, American Express and Discover. PCI-DSS requirements help ensure the secure handling of payment information.</p>
 <ul>
 <li>
 <p><strong>Open Collective</strong></p>
 <p>Their Privacy Policy can be viewed at:
   <br />
-  <a href="https://opencollective.com/privacypolicy" rel="external nofollow noopener" target="_blank">https://opencollective.com/privacypolicy</a></p>
+  <a href="https://opencollective.com/privacypolicy" rel="external nofollow noopener" target="_blank">Open Collective's Privacy Policy</a></p>
 </li>
 </ul>
 <h3>Usage, Performance and Miscellaneous</h3>
-<p>We may use third-party Service Providers to provide, maintain, and improve our Service.</p>
+<p>We may use third-party Service Providers to provide, maintain, and improve Our Service.</p>
 <ul>
 <li>
 <p><strong>Cloudflare</strong></p>
 <p>Their Privacy Policy can be viewed at:
   <br />
-  <a href="https://www.cloudflare.com/privacypolicy/" rel="external nofollow noopener" target="_blank">https://www.cloudflare.com/privacypolicy/</a></p>
+  <a href="https://www.cloudflare.com/privacypolicy/" rel="external nofollow noopener" target="_blank">Cloudflare's Privacy Policy</a></p>
 </li>
 <li>
 <p><strong>Infinity</strong></p>
 <p>Their Privacy Policy can be viewed at:
   <br />
-  <a href="https://startinfinity.com/privacy-policy" rel="external nofollow noopener" target="_blank">https://startinfinity.com/privacy-policy</a></p>
+  <a href="https://startinfinity.com/privacy-policy" rel="external nofollow noopener" target="_blank">Infinity's Privacy Policy</a></p>
 </li>
 </ul>                
 <h3>Sensitive Data</h3>
-<p>Striae does not collect, process, or disclose sensitive forensic case data for external use. All Data remains encrypted and under user control.</p>
+<p>Striae does not collect, process, or disclose sensitive forensic case data for external use. All Data remains encrypted and under User control.</p>
 <h3>Children's Privacy</h3>
 <p>The Service is only available to individuals 18 years and older who are employed at a forensic laboratory or related company. We do not knowingly collect data from minors.</p>
         </section>
@@ -446,15 +446,15 @@ export const Privacy = () => {
 <p>If applicable, click &quot;Privacy Preferences&quot;, &quot;Update Privacy Preferences&quot; or &quot;Do Not Sell My Personal Information&quot; buttons listed on the Service to review Your privacy preferences and opt out of cookies and other technologies that We may use. Please note that You will need to opt out from each browser that You use to access the Service.</p>
 <p>Additionally, You can opt out of receiving ads that are personalized as served by Our Service Providers by following Our instructions presented on the Service:</p>
 <ul>
-<li>The NAI's opt-out platform: 
+<li>The NAI's opt-out platform:   
   <br />
-  <br /><a href="http://www.networkadvertising.org/choices/" rel="noopener noreferrer" target="_blank">http://www.networkadvertising.org/choices/</a></li>
+  <a href="https://www.networkadvertising.org/choices/" rel="noopener noreferrer" target="_blank">NAI Opt-Out</a></li>
 <li>The EDAA's opt-out platform:
   <br />
-  <a href="http://www.youronlinechoices.com/" rel="noopener noreferrer" target="_blank">http://www.youronlinechoices.com/</a></li>
-<li>The DAA's opt-out platform: 
+  <a href="https://www.youronlinechoices.com/" rel="noopener noreferrer" target="_blank">EDAA Opt-Out</a></li>
+<li>The DAA's opt-out platform:
   <br />
-  <a href="http://optout.aboutads.info/?c=2&amp;lang=EN" rel="noopener noreferrer" target="_blank">http://optout.aboutads.info/?c=2&amp;lang=EN</a></li>
+  <a href="https://optout.aboutads.info/?c=2&amp;lang=EN" rel="noopener noreferrer" target="_blank">DAA Opt-Out</a></li>
 </ul>
 <p>The opt out will place a cookie on Your computer that is unique to the browser You use to opt out. If You change browsers or delete the cookies saved by Your browser, You will need to opt out again.</p>
 <h4>Mobile Devices</h4>
