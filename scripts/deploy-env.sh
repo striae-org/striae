@@ -38,6 +38,7 @@ required_vars=(
     "R2_KEY_SECRET"
     "ACCOUNT_HASH"
     "IMAGES_API_TOKEN"
+    "INFINITY_ADMIN_TOKEN"
     "API_TOKEN"
     "CFT_SECRET_KEY"
     "HMAC_KEY"
@@ -127,7 +128,7 @@ fi
 
 # Keys Worker
 if ! set_worker_secrets "Keys Worker" "workers/keys-worker" \
-    "KEYS_AUTH" "USER_DB_AUTH" "R2_KEY_SECRET" "ACCOUNT_HASH" "IMAGES_API_TOKEN"; then
+    "KEYS_AUTH" "USER_DB_AUTH" "R2_KEY_SECRET" "ACCOUNT_HASH" "IMAGES_API_TOKEN" "INFINITY_ADMIN_TOKEN"; then
     echo -e "${YELLOW}⚠️  Skipping Keys Worker (not configured)${NC}"
 fi
 

@@ -57,6 +57,7 @@ $requiredVars = @(
     "R2_KEY_SECRET",
     "ACCOUNT_HASH",
     "IMAGES_API_TOKEN",
+    "INFINITY_ADMIN_TOKEN",
     "API_TOKEN",
     "CFT_SECRET_KEY",
     "HMAC_KEY"
@@ -188,7 +189,7 @@ if ($workersConfigured -eq 0) {
 
 # Keys Worker
 if (-not (Set-WorkerSecrets -WorkerName "Keys Worker" -WorkerPath "workers/keys-worker" -Secrets @(
-    "KEYS_AUTH", "USER_DB_AUTH", "R2_KEY_SECRET", "ACCOUNT_HASH", "IMAGES_API_TOKEN"
+    "KEYS_AUTH", "USER_DB_AUTH", "R2_KEY_SECRET", "ACCOUNT_HASH", "IMAGES_API_TOKEN", "INFINITY_ADMIN_TOKEN"
 ))) {
     Write-Host "⚠️  Skipping Keys Worker (not configured)" -ForegroundColor Yellow
 }

@@ -22,6 +22,7 @@ import styles from './login.module.css';
 import { baseMeta } from '~/utils/meta';
 import { Striae } from '~/routes/striae/striae';
 import { getUserApiKey } from '~/utils/auth';
+import { registerUserInAdminDashboard } from '~/components/admin/create-user';
 import paths from '~/config/config.json';
 import freeEmailDomains from 'free-email-domains';
 
@@ -214,6 +215,19 @@ export const Login = () => {
 
       if (!response.ok) {
         throw new Error('Failed to create user data');
+      }
+
+      // Register user in admin dashboard (Infinity)
+      try {
+        await registerUserInAdminDashboard(
+          createCredential.user,
+          firstName,
+          lastName,
+          company || ''
+        );
+      } catch (adminError) {
+        // Log error but don't fail registration if admin dashboard fails
+        console.error('Failed to register user in admin dashboard:', adminError);
       }
 
       await sendEmailVerification(createCredential.user);

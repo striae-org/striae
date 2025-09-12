@@ -5,6 +5,7 @@
  * @property {string} IMAGES_API_TOKEN
  * @property {string} USER_DB_AUTH
  * @property {string} KEYS_AUTH 
+ * @property {string} INFINITY_ADMIN_TOKEN
  */
 
 const corsHeaders = {

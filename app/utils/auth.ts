@@ -3,7 +3,7 @@ import paths from '~/config/config.json';
 const KEYS_URL = paths.keys_url;
 const KEYS_AUTH = paths.keys_auth;
 
-type KeyType = 'USER_DB_AUTH' | 'R2_KEY_SECRET' | 'IMAGES_API_TOKEN' | 'ACCOUNT_HASH';
+type KeyType = 'USER_DB_AUTH' | 'R2_KEY_SECRET' | 'IMAGES_API_TOKEN' | 'ACCOUNT_HASH' | 'INFINITY_ADMIN_TOKEN';
 
 async function getApiKey(keyType: KeyType): Promise<string> {
   const keyResponse = await fetch(`${KEYS_URL}/${keyType}`, {
@@ -31,4 +31,8 @@ export async function getImageApiKey(): Promise<string> {
 
 export async function getAccountHash(): Promise<string> {
   return getApiKey('ACCOUNT_HASH');
+}
+
+export async function getAdminApiToken(): Promise<string> {
+  return getApiKey('INFINITY_ADMIN_TOKEN');
 }
