@@ -61,14 +61,24 @@ const generateDocument = (data) => {
         margin: 10px 0;
         position: relative;
       }
+      .image-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        position: relative;
+      }
       .image-container img {
         width: 100%;
+        max-height: 65vh;
         height: auto;
         display: block;
         box-sizing: border-box;
+        object-fit: contain;
       }
       .image-with-border {
-        width: calc(100% - 20px);
+        max-width: calc(100% - 10px);
+        max-height: calc(100% - 10px);
         margin: 0 auto;
       }
       .annotations-overlay {
@@ -91,12 +101,12 @@ const generateDocument = (data) => {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
       .left-annotation {
-        top: 16px;
-        left: 16px;
+        top: 2%;
+        left: 4%;
       }
       .right-annotation {
-        top: 16px;
-        right: 16px;
+        top: 2%;
+        right: 4%;
       }
       .case-text {
         font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
@@ -241,6 +251,10 @@ const generateDocument = (data) => {
         display: flex;
         flex-direction: column;
       }
+      .content-wrapper {
+        flex-grow: 0;
+        flex-shrink: 0;
+      }
       .footer-left {
         font-weight: 500;
       }
@@ -259,6 +273,7 @@ const generateDocument = (data) => {
   </head>
   <body>
     <div class="main-content">
+    <div class="content-wrapper">
     <div class="header">
       <div class="header-content">
         <div class="date">${displayDate}</div>
@@ -274,24 +289,27 @@ const generateDocument = (data) => {
     ` : ''}
     
     <div class="image-container">
-      <img src="${imageUrl}" alt="Comparison Image" ${annotationData && annotationsSet?.has('index') && annotationData.indexType === 'color' && annotationData.indexColor ? `class="image-with-border" style="border: 5px solid ${annotationData.indexColor};"` : ''} />
+      <div class="image-wrapper">
+        <img src="${imageUrl}" alt="Comparison Image" ${annotationData && annotationsSet?.has('index') && annotationData.indexType === 'color' && annotationData.indexColor ? `class="image-with-border" style="border: 5px solid ${annotationData.indexColor};"` : ''} />
 
-      ${annotationData && annotationsSet?.has('number') ? `
-      <div class="annotations-overlay">
-        <div class="left-annotation">
-          <div class="case-text" style="color: ${annotationData.caseFontColor || '#FFDE21'}; ${(annotationData.caseFontColor === '#000000' || annotationData.caseFontColor === 'black' || annotationData.caseFontColor === '#000') ? 'background-color: rgba(255, 255, 255, 0.9);' : ''}">
-            ${annotationData.leftCase}${annotationData.leftItem ? ` ${annotationData.leftItem}` : ''}
+        ${annotationData && annotationsSet?.has('number') ? `
+        <div class="annotations-overlay">
+          <div class="left-annotation" style="${(annotationData.caseFontColor === '#000000' || annotationData.caseFontColor === 'black' || annotationData.caseFontColor === '#000') ? 'background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(0, 0, 0, 0.2); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);' : ''}">
+            <div class="case-text" style="color: ${annotationData.caseFontColor || '#FFDE21'};">
+              ${annotationData.leftCase}${annotationData.leftItem ? ` ${annotationData.leftItem}` : ''}
+            </div>
+          </div>
+          <div class="right-annotation" style="${(annotationData.caseFontColor === '#000000' || annotationData.caseFontColor === 'black' || annotationData.caseFontColor === '#000') ? 'background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(0, 0, 0, 0.2); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);' : ''}">
+            <div class="case-text" style="color: ${annotationData.caseFontColor || '#FFDE21'};">
+              ${annotationData.rightCase}${annotationData.rightItem ? ` ${annotationData.rightItem}` : ''}
+            </div>
           </div>
         </div>
-        <div class="right-annotation">
-          <div class="case-text" style="color: ${annotationData.caseFontColor || '#FFDE21'}; ${(annotationData.caseFontColor === '#000000' || annotationData.caseFontColor === 'black' || annotationData.caseFontColor === '#000') ? 'background-color: rgba(255, 255, 255, 0.9);' : ''}">
-            ${annotationData.rightCase}${annotationData.rightItem ? ` ${annotationData.rightItem}` : ''}
-          </div>
-        </div>
+        ` : ''}
       </div>
-      ` : ''}
+    </div>
       
-      <div class="below-image-annotations">
+    <div class="below-image-annotations">
         ${annotationData && annotationsSet?.has('id') ? `
         <div class="support-level-annotation">
           <div class="support-level-text" style="color: ${annotationData.supportLevel === 'ID' ? '#28a745' : annotationData.supportLevel === 'Exclusion' ? '#dc3545' : '#ffc107'}; background: ${annotationData.supportLevel === 'Inconclusive' ? 'rgba(120, 120, 120, 0.95)' : 'rgba(240, 240, 240, 0.95)'};">
@@ -336,6 +354,7 @@ const generateDocument = (data) => {
     </div>
     ` : ''}
     
+    </div>
     </div>
     
     <div class="footer">

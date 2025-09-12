@@ -18,16 +18,16 @@
      - [Cases Modal](#cases-modal-appcomponentssidebarcases-modaltsx)
      - [Notes Modal](#notes-modal-appcomponentssidebarnotes-modaltsx)
    - [4. Action Components](#4-action-components)
-     - [Case Management](#case-management-appcomponentsactionscase-managetsx)
-     - [Image Management](#image-management-appcomponentsactionsimage-managetsx)
-     - [PDF Generation](#pdf-generation-appcomponentsactionsgenerate-pdftsx)
-     - [Notes Management](#notes-management-appcomponentsactionsnotes-managetsx)
+     - [Case Management](#case-management-appcomponentsactionscase-managets)
+     - [Image Management](#image-management-appcomponentsactionsimage-managets)
+     - [PDF Generation](#pdf-generation-appcomponentsactionsgenerate-pdfts)
+     - [Notes Management](#notes-management-appcomponentsactionsnotes-managets)
      - [Sign Out](#sign-out-appcomponentsactionssignouttsx)
    - [5. UI Components](#5-ui-components)
      - [Button System](#button-system-appcomponentsbutton)
      - [Color System](#color-system-appcomponentscolorscolorstsx)
      - [Footer Component](#footer-component-appcomponentsfooterfootertsx)
-     - [Icon System](#icon-system-appcomponentsiconiconstsx)
+     - [Icon System](#icon-system-appcomponentsiconicontsx)
      - [Mobile Warning](#mobile-warning-appcomponentsmobilemobile-warningtsx)
      - [Notice System](#notice-system-appcomponentsnoticenoticetsx)
      - [Toast System](#toast-system-appcomponentstoasttoasttsx)
@@ -35,14 +35,14 @@
      - [Turnstile CAPTCHA](#turnstile-captcha-appcomponentsturnstileturnstiletsx)
      - [Theme Provider](#theme-provider-appcomponentstheme-providertheme-providertsx)
    - [6. User Management Components](#6-user-management-components)
-     - [User Profile Management](#user-profile-management-appcomponentsuseraanage-profiletsx)
+     - [User Profile Management](#user-profile-management-appcomponentsusermanage-profiletsx)
      - [InactivityWarning](#inactivitywarning-appcomponentsuserinactivity-warningtsx)
 4. [Component State Management](#component-state-management)
    - [Local State Patterns](#local-state-patterns)
    - [Context Usage](#context-usage)
      - [AuthContext](#authcontext-appcontextsauthcontexttsx)
    - [Custom Hooks](#custom-hooks)
-     - [useEmailSyncToKV](#useemailsynctokv-apphooksuseemailsynctots)
+     - [useEmailSyncToKV](#useemailsynctokv-apphooksuseemailsynctokvts)
      - [useInactivityTimeout](#useinactivitytimeout-apphooksuseinactivitytimeoutts)
 5. [Component Communication Patterns](#component-communication-patterns)
    - [Props Down, Events Up](#props-down-events-up)
@@ -303,7 +303,7 @@ interface NotesModalProps {
 
 ### 4. Action Components
 
-#### Case Management (`app/components/actions/case-manage.tsx`)
+#### Case Management (`app/components/actions/case-manage.ts`)
 
 **Purpose**: Complete case lifecycle management
 
@@ -339,7 +339,7 @@ export const listCases = async (user: User): Promise<string[]>
 - Case renaming functionality
 - User case list management
 
-#### Image Management (`app/components/actions/image-manage.tsx`)
+#### Image Management (`app/components/actions/image-manage.ts`)
 
 **Purpose**: Image upload and retrieval operations
 
@@ -380,7 +380,7 @@ export const deleteFile = async (
 ): Promise<{ success: boolean; message: string }>
 ```
 
-#### PDF Generation (`app/components/actions/generate-pdf.tsx`)
+#### PDF Generation (`app/components/actions/generate-pdf.ts`)
 
 **Purpose**: PDF report generation
 
@@ -403,7 +403,7 @@ export const generatePDF = async (
 ): Promise<{ success: boolean; message: string }>
 ```
 
-#### Notes Management (`app/components/actions/notes-manage.tsx`)
+#### Notes Management (`app/components/actions/notes-manage.ts`)
 
 **Purpose**: Annotation and notes data management
 
