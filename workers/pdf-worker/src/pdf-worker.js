@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const generateDocument = (data) => {
-  const { imageUrl, caseNumber, annotationData, activeAnnotations, currentDate, notesUpdatedFormatted } = data;
+  const { imageUrl, caseNumber, annotationData, activeAnnotations, currentDate, notesUpdatedFormatted, userCompany } = data;
   const annotationsSet = new Set(activeAnnotations);
   
   // Use passed currentDate or generate fallback
@@ -257,9 +257,19 @@ const generateDocument = (data) => {
       }
       .footer-left {
         font-weight: 500;
+        flex: 1;
+        text-align: left;
+      }
+      .footer-center {
+        font-weight: 600;
+        flex: 1;
+        text-align: center;
+        color: #333;
       }
       .footer-right {
         font-style: italic;
+        flex: 1;
+        text-align: right;
       }
       .index-section {
         text-align: center;
@@ -359,6 +369,9 @@ const generateDocument = (data) => {
     
     <div class="footer">
       <div class="footer-left">Notes formatted by Striae©</div>
+      <div class="footer-center">
+        ${userCompany ? userCompany : ''}
+      </div>
       <div class="footer-right">
         ${notesUpdatedFormatted ? `Notes updated ${notesUpdatedFormatted}` : ''}
       </div>

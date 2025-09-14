@@ -8,4 +8,4 @@
 
 ## Reporting a Vulnerability
 
-Please refer to our [Security Policy](https://www.striae.org/security) for information on how to report vulnerabilities
+Please refer to our **[Security Policy](https://www.striae.org/security)** for information on how to report vulnerabilities

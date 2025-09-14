@@ -56,10 +56,45 @@ const NoticeText = () => {
       </ul>
       <p>If you have any questions or concerns regarding our security protocols, please refer to the <Link to="/terms#storage">Data Storage Addendum</Link> in the Terms & Conditions, or contact us at <Link to="mailto:info@striae.org" target="_blank" rel="noopener noreferrer">info@striae.org</Link>.</p>
       <p>
-        <strong>Open Source Commitment & Supporting Striae</strong>
+        <strong>Community, Collaboration & Open Innovation</strong>
+      </p>
+      <p>
+        Striae is built on the principles of open collaboration, community-driven development, and shared innovation. Our commitment to openness extends beyond just making our code available—we actively participate in initiatives that protect and promote the free exchange of ideas and technology for the benefit of the entire forensic science community.
+      </p>
+      <p>
+        <strong>Open Source Foundation</strong>
       </p>
       <p>
         Striae is an open-source and free service dedicated to providing streamlined comparison annotation services for forensic firearms and tool mark examiners worldwide. The entire codebase is available on <a href="https://github.com/striae-org/striae" target="_blank" rel="noopener noreferrer">GitHub</a>, supporting transparency, collaboration, and continuous improvement from the firearms examiner community.
+      </p>
+      <p>
+        <strong>Patent Protection & Innovation Freedom</strong>
+      </p>
+      <p>
+        Striae is proud to be a member of the <a href="https://openinventionnetwork.com/" target="_blank" rel="noopener noreferrer">Open Invention Network (OIN)</a>, the world's largest patent non-aggression community. The OIN is a collaborative defense platform that enables freedom of action in Linux and other open source technologies by creating a patent-free zone for innovation.
+      </p>
+      <div className={styles.oinBadgeContainer}>
+        <a
+          href="https://openinventionnetwork.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.oinBadgeLink}
+        >
+          <img 
+            src="/oin-badge.png" 
+            alt="Open Invention Network Community Member" 
+            className={styles.oinBadgeImage}
+          />
+        </a>
+      </div>
+      <p>
+        As an OIN community member, Striae contributes to a patent non-aggression environment that protects the entire open source ecosystem. This membership demonstrates our commitment to fostering innovation without the threat of patent litigation, ensuring that forensic tools remain accessible and freely available to the forensic science community. The OIN's defensive patent strategy helps protect not only Striae but thousands of other open source projects that advance technology for the public good.
+      </p>
+      <p>
+        This protection is particularly important for forensic science applications, where transparency, reproducibility, and peer review are fundamental principles. By participating in the OIN, Striae helps maintain an environment where forensic technology can evolve through collaborative development, free from patent-related barriers that could impede scientific progress or limit access to critical examination tools.
+      </p>
+      <p>
+        <strong>Supporting Continued Development</strong>
       </p>
       <p>
         By supporting Striae, you help cover essential cloud hosting, ongoing development, and improved user support—ensuring continued free access for the forensic community. Your support allows us to maintain this valuable resource while fostering community involvement and accountability for security and privacy.
@@ -69,18 +104,13 @@ const NoticeText = () => {
           href="https://opencollective.com/striae" 
           target="_blank" 
           rel="noopener noreferrer"
-          style={{
-            backgroundColor: '#1f87ff',
-            borderRadius: '6px',
-            color: 'white',
-            padding: '8px 16px',
-            textDecoration: 'none',
-            fontSize: '14px',
-            fontWeight: '500',
-            display: 'inline-block'
-          }}
+          className={styles.openCollectiveLink}
         >
-          Contribute to our Collective
+          <img 
+            src="/open-collective.svg" 
+            alt="Contribute to our Open Collective" 
+            className={styles.openCollectiveImage}
+          />
         </a>
       </div>
       <p>

@@ -8,5 +8,7 @@
   "image_worker_url": "IMAGE_WORKER_CUSTOM_DOMAIN",
   "user_worker_url": "USER_WORKER_CUSTOM_DOMAIN",
   "pdf_worker_url": "PDF_WORKER_CUSTOM_DOMAIN",
-  "keys_auth": "YOUR_KEYS_AUTH_TOKEN"
+  "keys_auth": "YOUR_KEYS_AUTH_TOKEN",
+  "max_cases_free": 1,
+  "max_files_per_case_free": 2
 }

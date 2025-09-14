@@ -5,6 +5,7 @@ import {
   getDataApiKey,
   getAccountHash 
 } from '~/utils/auth';
+import { canUploadFile } from '~/utils/permissions';
 
 const WORKER_URL = paths.data_worker_url;
 const IMAGE_URL = paths.image_worker_url;
@@ -46,6 +47,15 @@ export const uploadFile = async (
   file: File, 
   onProgress?: (progress: number) => void
 ): Promise<FileData> => {
+  // First, get current files to check count
+  const currentFiles = await fetchFiles(user, caseNumber);
+  
+  // Check if user can upload another file
+  const permission = await canUploadFile(user, caseNumber, currentFiles.length);
+  if (!permission.canUpload) {
+    throw new Error(permission.reason || 'You cannot upload more files to this case.');
+  }
+
   const imagesApiToken = await getImageApiKey();
   
   return new Promise((resolve, reject) => {

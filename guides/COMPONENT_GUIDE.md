@@ -40,9 +40,8 @@
 4. [Component State Management](#component-state-management)
    - [Local State Patterns](#local-state-patterns)
    - [Context Usage](#context-usage)
-     - [AuthContext](#authcontext-appcontextsauthcontexttsx)
+     - [AuthContext](#authcontext-appcontextsauthcontextts)
    - [Custom Hooks](#custom-hooks)
-     - [useEmailSyncToKV](#useemailsynctokv-apphooksuseemailsynctokvts)
      - [useInactivityTimeout](#useinactivitytimeout-apphooksuseinactivitytimeoutts)
 5. [Component Communication Patterns](#component-communication-patterns)
    - [Props Down, Events Up](#props-down-events-up)
@@ -700,7 +699,7 @@ const [data, setData] = useState<DataType | null>(null);
 
 ### Context Usage
 
-#### AuthContext (`app/contexts/auth.context.tsx`)
+#### AuthContext (`app/contexts/auth.context.ts`)
 
 **Purpose**: Global authentication state
 
@@ -711,16 +710,6 @@ const [data, setData] = useState<DataType | null>(null);
 - Login/logout functions
 
 ### Custom Hooks
-
-#### useEmailSyncToKV (`app/hooks/useEmailSyncToKV.ts`)
-
-**Purpose**: Synchronize user email with KV storage
-
-**Features**:
-
-- Automatic email sync on auth state change
-- Error handling for sync failures
-- Retry logic for failed operations
 
 #### useInactivityTimeout (`app/hooks/useInactivityTimeout.ts`)
 

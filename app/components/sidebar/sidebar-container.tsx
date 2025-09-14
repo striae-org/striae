@@ -92,37 +92,48 @@ export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
             </div>
             <div className={styles.footerModalContent}>
               <div className={styles.footerModalLinks}>
-                <a href="https://help.striae.org" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>User&apos;s Guide</a>
+                <a href="https://help.striae.org" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>User&apos;s Guide</a>                
                 <Link to="/support" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>Need Help?</Link>
                 <Link to="/bugs" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>Report a Bug</Link>
                 <Link to="/privacy" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>Privacy Policy</Link>
                 <Link to="/terms" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>Terms of Service</Link>
                 <Link to="/security" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>Security Policy</Link>
               </div>
+              <div className={styles.badgeContainer}>
+                <div className={styles.openCollectiveWidget}>
+                  <a 
+                    href="https://opencollective.com/striae" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles.openCollectiveLink}
+                  >
+                    <img 
+                      src="/open-collective.svg" 
+                      alt="Contribute to our Open Collective" 
+                      className={styles.openCollectiveImage}
+                    />
+                  </a>
+                </div>
+                <div className={styles.oinBadge}>
+                  <a
+                    href="https://openinventionnetwork.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.oinBadgeLink}
+                  >
+                    <img 
+                      src="/oin-badge.png" 
+                      alt="Open Invention Network Community Member" 
+                      className={styles.oinBadgeImage}
+                    />
+                  </a>
+                </div>
+              </div>
               <div className={styles.footerModalCopyright}>
-                Striae {appVersion} © {year}. All rights reserved.              
+                <a href="https://github.com/striae-org/striae/blob/master/LICENSE" className={styles.footerModalCopyrightLinklink} target="_blank" rel="noopener noreferrer">Striae {appVersion}</a> © {year}. All rights reserved.              
                 <div className={styles.footerModalCopyrightLink}>
                 Designed and developed by <a href="https://stephenjlu.com" target="_blank" rel="noopener noreferrer">Stephen J. Lu</a>
                 </div>
-              </div>
-              <div className={styles.openCollectiveWidget}>
-                <a 
-                  href="https://opencollective.com/striae" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  style={{
-                    backgroundColor: '#1f87ff',
-                    borderRadius: '6px',
-                    color: 'white',
-                    padding: '8px 16px',
-                    textDecoration: 'none',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    display: 'inline-block'
-                  }}
-                >
-                  Contribute to our Collective
-                </a>
               </div>              
             </div>
           </div>

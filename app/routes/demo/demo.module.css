@@ -1,0 +1,149 @@
+.container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: var(--spaceL);
+  z-index: var(--zIndex0);
+}
+
+.logo {
+  position: fixed;
+  top: var(--spaceL);
+  left: var(--spaceL);
+  width: 150px;
+  height: 150px;
+  background-image: url('/logo-dark.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: var(--zIndex2);
+  transition: transform var(--durationM) var(--bezierFastoutSlowin);
+}
+
+.logoLink {
+  position: absolute;
+  top: var(--spaceL);
+  left: var(--spaceL);
+  text-decoration: none;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.formWrapper {
+  background: color-mix(in lab, var(--backgroundLight) 95%, transparent);
+  padding: var(--space2XL);
+  border-radius: var(--spaceXS);
+  box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
+  width: 100%;
+  max-width: var(--maxWidthS);
+}
+
+.title {
+  text-align: center;
+  color: var(--textTitle);
+  margin-bottom: var(--spaceXL);
+  font-size: var(--fontSizeH4);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceM);
+}
+
+.input {
+  padding: var(--spaceM);
+  border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
+  border-radius: var(--spaceXS);
+  font-size: var(--fontSizeBodyS);
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 25%, transparent);
+}
+
+.input:disabled {
+  background-color: color-mix(in lab, var(--background) 95%, transparent);
+  cursor: not-allowed;
+}
+
+.button {
+  padding: var(--spaceM) var(--spaceL);
+  border-radius: var(--spaceXS);
+  font-size: var(--fontSizeBodyS);
+  cursor: pointer;
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.button:hover:not(:disabled) {
+  background-color: color-mix(in lab, var(--primary) 85%, var(--black));
+}
+
+.button:disabled {
+  background-color: color-mix(in lab, var(--background) 95%, transparent);
+  color: var(--textLight);
+  cursor: not-allowed;
+}
+
+.error {
+  color: var(--error);
+  text-align: center;
+  margin: var(--spaceS) 0;
+  font-size: var(--fontSizeBodyXS);
+}
+
+.turnstile {
+  justify-self: flex-start;
+  margin: var(--spaceM) 0;
+}
+
+.successMessage {
+  text-align: center;
+  padding: var(--spaceM);
+  margin-top: var(--spaceM);
+  background-color: color-mix(in lab, var(--accent) 10%, transparent);
+  border: 1px solid var(--accent);
+  border-radius: var(--spaceXS);
+  color: var(--accent);
+  animation: fadeIn var(--durationM) var(--bezierFastoutSlowin);
+}
+
+.successMessage p {
+  font-size: var(--fontSizeBodyS);
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--spaceS)));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .logo {
+    display: none;
+  }
+
+  .turnstile {
+    justify-self: center;
+  }
+
+  .formWrapper {
+    padding: var(--spaceL);
+  }
+}

@@ -74,7 +74,6 @@ export default function App() {
 ### State Management
 - **Auth**: React Context (`app/contexts/auth.context.tsx`) with Firebase Auth
 - **Local State**: useState/useEffect with custom hooks in `app/hooks/`
-- **Data Sync**: Custom hooks like `useEmailSyncToKV` for worker communication
 
 ### API Communication
 - **Worker URLs**: Defined in `app/config/config.json`

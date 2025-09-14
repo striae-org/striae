@@ -33,7 +33,7 @@ async function handleGetUser(env, userUid) {
 
 async function handleAddUser(request, env, userUid) {
   try {
-    const { email, firstName, lastName, company, permitted = false } = await request.json();
+    const { email, firstName, lastName, company, permitted } = await request.json();
     
     // Check for existing user
     const value = await env.USER_DB.get(userUid);
@@ -59,7 +59,7 @@ async function handleAddUser(request, env, userUid) {
         firstName,
         lastName,
         company,
-        permitted,
+        permitted: permitted !== undefined ? permitted : true,
         cases: [],
         createdAt: new Date().toISOString()
       };

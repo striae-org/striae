@@ -68,7 +68,7 @@ export const generatePDF = async ({
     const pdfData = {
       imageUrl: selectedImage,
       filename: selectedFilename,
-      company: userCompany,
+      userCompany: userCompany,
       firstName: userFirstName,
       caseNumber: currentCase,
       annotationData,

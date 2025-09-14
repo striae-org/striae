@@ -210,13 +210,55 @@
   font-size: 0.7rem;  
 }
 
+.badgeContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spaceM, 1rem);
+  margin-top: var(--spaceXS, 0.5rem);
+  flex-wrap: wrap;
+  width: 100%;
+}
+
 .openCollectiveWidget {
-  margin-top: var(--spaceXS);
   text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
+}
+
+.openCollectiveLink {
+  display: inline-block;
+  transition: opacity var(--durationS, 0.2s) var(--bezierFastoutSlowin, ease-out);
+}
+
+.openCollectiveLink:hover {
+  opacity: 0.8;
+}
+
+.openCollectiveImage {
+  height: 30px;
+  width: auto;
+  border-radius: 4px;
+}
+
+.oinBadge {
+  text-align: center;
+}
+
+.oinBadgeLink {
+  display: inline-block;
+  transition: opacity var(--durationS, 0.2s) var(--bezierFastoutSlowin, ease-out);
+}
+
+.oinBadgeLink:hover {
+  opacity: 0.8;
+}
+
+.oinBadgeImage {
+  height: 40px;
+  width: auto;
+  border-radius: 4px;
 }
 
 

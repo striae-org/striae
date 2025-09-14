@@ -6,6 +6,7 @@ import {
   getDataApiKey,
   getUserApiKey
 } from '~/utils/auth';
+import { canCreateCase } from '~/utils/permissions';
 
 interface CaseData {
   createdAt: string;
@@ -122,6 +123,12 @@ export const checkExistingCase = async (user: User, caseNumber: string): Promise
 
 export const createNewCase = async (user: User, caseNumber: string): Promise<CaseData> => {
   try {
+    // Check if user can create a new case
+    const permission = await canCreateCase(user);
+    if (!permission.canCreate) {
+      throw new Error(permission.reason || 'You cannot create more cases.');
+    }
+
     const dataApiKey = await getDataApiKey();
     const userApiKey = await getUserApiKey();
 

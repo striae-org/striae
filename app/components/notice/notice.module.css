@@ -130,6 +130,44 @@
   margin: var(--spaceL) 0;
 }
 
+.openCollectiveLink {
+  display: inline-block;
+  transition: opacity var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.openCollectiveLink:hover {
+  opacity: 0.8;
+}
+
+.openCollectiveImage {
+  height: 30px;
+  width: auto;
+  border-radius: 4px;
+}
+
+.oinBadgeContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: var(--spaceM) 0;
+}
+
+.oinBadgeLink {
+  display: inline-block;
+  transition: opacity var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.oinBadgeLink:hover {
+  opacity: 0.8;
+}
+
+.oinBadgeImage {
+  height: 50px;
+  width: auto;
+  border-radius: 4px;
+}
+
 @media (max-width: 768px) {
   .modal {
     padding: var(--spaceL);

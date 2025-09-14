@@ -58,10 +58,13 @@ export default function Home() {
           <div className={styles.buttonGroup}>            
             <Link to="/auth" className={styles.signInButton}>
               Sign In
-            </Link>
+            </Link>            
             <button onClick={() => setNoticeOpen(true)} className={styles.actionButton}>
               What is this?
             </button>
+            <Link to="/demo" className={styles.actionButton}>
+              Access Demo
+            </Link>
           </div>
           <div className={styles.subtitle}>
             <p>Beta Period Ends January 1, 2026 @ 11:00 AM MST</p>
@@ -149,6 +152,33 @@ export default function Home() {
                       aria-label="LinkedIn Profile"
                     >
                       <Icon icon="linkedin" size={24} />
+                    </a>
+                    <a 
+                      href="https://github.com/StephenJLu" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.socialLink}
+                      aria-label="GitHub Profile"
+                    >
+                      <Icon icon="github" size={24} />
+                    </a>
+                    <a 
+                      href="https://bsky.app/profile/stephenjlu.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.socialLink}
+                      aria-label="Bluesky Profile"
+                    >
+                      <Icon icon="bluesky" size={24} />
+                    </a>
+                    <a 
+                      href="https://stephenjlu.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.socialLink}
+                      aria-label="Website"
+                    >
+                      <Icon icon="globe" size={24} />
                     </a>
                   </div>
                 </div>
