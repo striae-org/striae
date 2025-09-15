@@ -195,8 +195,7 @@ export const Support = () => {
             className={styles.textarea}
           />
           <Turnstile
-            className={styles.turnstile}
-            theme="light"
+            className={styles.turnstile}            
           />          
           <button 
             type="submit" 

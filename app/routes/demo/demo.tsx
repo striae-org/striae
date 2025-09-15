@@ -138,8 +138,7 @@ export const Demo = () => {
           )}
 
           <Turnstile
-            className={styles.turnstile}
-            theme="light"
+            className={styles.turnstile}            
           />
           <button 
           type="submit"                     

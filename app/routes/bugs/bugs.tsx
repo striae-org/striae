@@ -205,8 +205,7 @@ export const Bugs = () => {
             <p className={styles.error}>{actionData.errors.actual}</p>
           )}
           <Turnstile
-            className={styles.turnstile}
-            theme="light"
+            className={styles.turnstile}            
           />
           
           <button 
