@@ -14,7 +14,13 @@ export default function NotFound() {
     <div className={styles.errorContainer}>
       <div className={styles.errorTitle}>404</div>
       <p className={styles.errorMessage}>Page not found</p>
-      <Link to="/#top" className={styles.errorLink}>Return Home</Link>
+      <Link 
+        viewTransition
+        prefetch="intent"
+        to="/#top" 
+        className={styles.errorLink}>
+        Return Home
+      </Link>
     </div>
   );
 }

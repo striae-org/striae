@@ -93,11 +93,51 @@ export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
             <div className={styles.footerModalContent}>
               <div className={styles.footerModalLinks}>
                 <a href="https://help.striae.org" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>User&apos;s Guide</a>                
-                <Link to="/support" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>Need Help?</Link>
-                <Link to="/bugs" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>Report a Bug</Link>
-                <Link to="/privacy" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>Privacy Policy</Link>
-                <Link to="/terms" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>Terms of Service</Link>
-                <Link to="/security" target="_blank" rel="noopener noreferrer" className={styles.footerModalLink}>Security Policy</Link>
+                <Link 
+                  viewTransition
+                  prefetch="intent"
+                  to="/support" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className={styles.footerModalLink}>
+                  Need Help?
+                </Link>
+                <Link 
+                  viewTransition
+                  prefetch="intent"
+                  to="/bugs" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className={styles.footerModalLink}>
+                  Report a Bug
+                </Link>
+                <Link 
+                  viewTransition
+                  prefetch="intent"
+                  to="/privacy" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className={styles.footerModalLink}>
+                  Privacy Policy
+                </Link>
+                <Link 
+                  viewTransition
+                  prefetch="intent"
+                  to="/terms" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className={styles.footerModalLink}>
+                  Terms of Service
+                </Link>
+                <Link 
+                  viewTransition
+                  prefetch="intent"
+                  to="/security" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className={styles.footerModalLink}>
+                  Security Policy
+                </Link>
               </div>
               <div className={styles.badgeContainer}>
                 <div className={styles.openCollectiveWidget}>

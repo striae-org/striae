@@ -13,9 +13,13 @@ export const meta = () => {
 export const Terms = () => {
   return (    
     <div id="top" className={styles.container}>
-      <Link to="/#top" className={styles.logoLink}>
-  <div className={styles.logo} />
-</Link>
+      <Link 
+        viewTransition
+        prefetch="intent"
+        to="/#top" 
+        className={styles.logoLink}>
+        <div className={styles.logo} />
+      </Link>
       <div className={styles.content}>
         <h1>Terms and Conditions</h1>
         <p className={styles.lastUpdated}>Last updated: September 12, 2025</p>
@@ -251,7 +255,12 @@ You agree that the original English text shall prevail in the case of a dispute.
   <li><p><strong>Cross-Origin Resource Sharing (CORS) Support</strong></p>
   <p>To prevent unauthorized access, Striae restricts Data requests to its domain exclusively.</p></li>
   <li><p><strong>Security Policy</strong></p>
-  <p>The open security policy encourages users and researchers to safely and responsibly report vulnerabilities. This collaborative approach ensures the security measures remain robust and up-to-date. Please refer to Our <Link to="/security">Security Policy</Link> for more information.</p></li>
+  <p>The open security policy encourages users and researchers to safely and responsibly report vulnerabilities. This collaborative approach ensures the security measures remain robust and up-to-date. Please refer to Our <Link 
+    viewTransition
+    prefetch="intent"
+    to="/security">
+    Security Policy
+  </Link> for more information.</p></li>
 </ul>
 </li>
 <li>

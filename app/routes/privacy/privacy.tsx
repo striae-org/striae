@@ -13,9 +13,13 @@ export const meta = () => {
 export const Privacy = () => {
   return (
     <div id="top" className={styles.container}>
-      <Link to="/#top" className={styles.logoLink}>
-  <div className={styles.logo} />
-</Link>
+      <Link 
+        viewTransition
+        prefetch="intent"
+        to="/#top" 
+        className={styles.logoLink}>
+        <div className={styles.logo} />
+      </Link>
       <div className={styles.content}>
         <h1>Privacy Policy</h1>
         <p className={styles.lastUpdated}>Last updated: September 12, 2025</p>        

@@ -13,9 +13,13 @@ export const meta = () => {
 export const Policy = () => {
   return (
     <div id="top" className={styles.container}>
-      <Link to="/#top" className={styles.logoLink}>
-  <div className={styles.logo} />
-</Link>
+      <Link 
+        viewTransition
+        prefetch="intent"
+        to="/#top" 
+        className={styles.logoLink}>
+        <div className={styles.logo} />
+      </Link>
       <div className={styles.content}>
         <h1>Security Policy</h1>
         
@@ -24,7 +28,7 @@ export const Policy = () => {
           <p>We take the security of Striae seriously. If you believe you have found a security vulnerability, please report it to us responsibly.</p>
           <p>You may:
             <ol>
-              <li>Email security findings to: <Link to="mailto:info@striae.org">info@striae.org</Link></li>
+              <li>Email security findings to: <a href="mailto:info@striae.org">info@striae.org</a></li>
               <li>Submit a security issue on <a href="https://github.com/striae-org/striae/security/advisories/new" target="_blank" rel="noopener noreferrer">GitHub</a></li>              
             </ol>
             For encryption, please use our <a href="https://keybase.io/stephenjlu/pgp_keys.asc" target="_blank" rel="noopener noreferrer">PGP key</a>

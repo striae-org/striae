@@ -14,7 +14,13 @@ export default function ServerError() {
     <div className={styles.errorContainer}>
       <div className={styles.errorTitle}>500</div>
       <p className={styles.errorMessage}>Something went wrong. Please try again later.</p>
-      <Link to="/#top" className={styles.errorLink}>Return Home</Link>
+      <Link 
+        viewTransition
+        prefetch="intent"
+        to="/#top" 
+        className={styles.errorLink}>
+        Return Home
+      </Link>
     </div>
   );
 }

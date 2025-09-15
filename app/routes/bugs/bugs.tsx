@@ -137,7 +137,11 @@ export const Bugs = () => {
 
   return (
     <div id="top" className={styles.container}>
-      <Link to="/#top" className={styles.logoLink}>
+      <Link 
+        viewTransition
+        prefetch="intent"
+        to="/#top" 
+        className={styles.logoLink}>
         <div className={styles.logo} />
       </Link>      
       <div className={styles.formWrapper}>

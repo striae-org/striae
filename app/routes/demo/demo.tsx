@@ -110,9 +110,13 @@ export const Demo = () => {
 
   return (
     <div className={styles.container}>
-      <Link to="/" className={styles.logoLink}>
-  <div className={styles.logo} />
-</Link>      
+      <Link 
+        viewTransition
+        prefetch="intent"
+        to="/" 
+        className={styles.logoLink}>
+        <div className={styles.logo} />
+      </Link>      
       <div className={styles.formWrapper}>
         <h1 className={styles.title}>Access the Striae Demo Account</h1>
         {actionData?.success ? (

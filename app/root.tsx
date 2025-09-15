@@ -142,7 +142,13 @@ export function ErrorBoundary() {
             <div className={styles.errorContainer}>
               <div className={styles.errorTitle}>{error.status}</div>
               <p className={styles.errorMessage}>{error.statusText}</p>
-              <Link to="/#top" className={styles.errorLink}>Return Home</Link>
+              <Link 
+                viewTransition
+                prefetch="intent"
+                to="/#top" 
+                className={styles.errorLink}>
+                Return Home
+              </Link>
             </div>
           </main>
           </ThemeProvider>          
@@ -162,7 +168,13 @@ export function ErrorBoundary() {
           <div className={styles.errorContainer}>
             <div className={styles.errorTitle}>500</div>
             <p className={styles.errorMessage}>Something went wrong. Please try again later.</p>
-            <Link to="/#top" className={styles.errorLink}>Return Home</Link>
+            <Link 
+              viewTransition
+              prefetch="intent"
+              to="/#top" 
+              className={styles.errorLink}>
+              Return Home
+            </Link>
           </div>
         </main>
         </ThemeProvider>        

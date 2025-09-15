@@ -54,7 +54,12 @@ const NoticeText = () => {
             <strong>Control Over Your Data:</strong> Striae will never edit or modify the contents of your data. The only edits made to your data will be resizing and compression for optimal display, storage, and performance. When you delete your data, it is permanently removed from our systems.
         </li>        
       </ul>
-      <p>If you have any questions or concerns regarding our security protocols, please refer to the <Link to="/terms#storage">Data Storage Addendum</Link> in the Terms & Conditions, or contact us at <Link to="mailto:info@striae.org" target="_blank" rel="noopener noreferrer">info@striae.org</Link>.</p>
+      <p>If you have any questions or concerns regarding our security protocols, please refer to the <Link 
+        viewTransition
+        prefetch="intent"
+        to="/terms#storage">
+        Data Storage Addendum
+      </Link> in the Terms & Conditions, or contact us at <a href="mailto:info@striae.org" target="_blank" rel="noopener noreferrer">info@striae.org</a>.</p>
       <p>
         <strong>Community, Collaboration & Open Innovation</strong>
       </p>

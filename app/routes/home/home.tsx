@@ -56,13 +56,21 @@ export default function Home() {
             <p>Striae: A Firearms Examiner&apos;s Comparison Companion</p>
           </div>
           <div className={styles.buttonGroup}>            
-            <Link to="/auth" className={styles.signInButton}>
+            <Link 
+              viewTransition
+              prefetch="intent"
+              to="/auth" 
+              className={styles.signInButton}>
               Sign In
             </Link>            
             <button onClick={() => setNoticeOpen(true)} className={styles.actionButton}>
               What is this?
             </button>
-            <Link to="/demo" className={styles.actionButton}>
+            <Link 
+              viewTransition
+              prefetch="intent"
+              to="/demo" 
+              className={styles.actionButton}>
               Access Demo
             </Link>
           </div>

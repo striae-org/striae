@@ -1,5 +1,4 @@
 import { Link } from '@remix-run/react';
-import { useEffect } from 'react';
 import styles from './footer.module.css';
 import { getAppVersion } from '../../utils/version';
 
@@ -16,20 +15,40 @@ export default function Footer() {
           </a>
           <a href="https://blog.striae.org" target="_blank" rel="noopener noreferrer" className={styles.link}>
             Blog
-          </a>
-          <Link to="/privacy#top" className={styles.link}>
+          </a>          
+          <Link 
+            viewTransition
+            prefetch="intent"
+            to="/privacy#top" 
+            className={styles.link}>
             Privacy Policy
           </Link>
-          <Link to="/terms#top" className={styles.link}>
+          <Link 
+            viewTransition
+            prefetch="intent"
+            to="/terms#top" 
+            className={styles.link}>
             Terms & Conditions
           </Link>          
-          <Link to="/security#top" className={styles.link}>
+          <Link 
+            viewTransition
+            prefetch="intent"
+            to="/security#top" 
+            className={styles.link}>
             Security Policy
           </Link>
-          <Link to="/support#top" className={styles.link}>
+          <Link 
+            viewTransition
+            prefetch="intent"
+            to="/support#top" 
+            className={styles.link}>
             Need Help?
           </Link>
-          <Link to="/bugs#top" className={styles.link}>
+          <Link 
+            viewTransition
+            prefetch="intent"
+            to="/bugs#top" 
+            className={styles.link}>
             Submit a Bug Report
           </Link>
         </nav>
