@@ -165,6 +165,19 @@
   color: var(--textBody);
 }
 
+.signOutContainer {
+  margin-top: var(--spaceL);
+  padding-top: var(--spaceL);
+  border-top: 1px solid var(--borderLight);
+  text-align: center;
+}
+
+.signOutText {
+  color: var(--textLight);
+  font-size: var(--fontSizeSmall);
+  margin-bottom: var(--spaceM);
+}
+
 .sendCode,
 .verifyCode {
   text-align: center;

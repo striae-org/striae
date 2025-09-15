@@ -9,6 +9,7 @@ import {
   User
 } from 'firebase/auth';
 import { handleAuthError, getValidationError } from '~/services/firebase-errors';
+import { SignOut } from '~/components/actions/signout';
 import styles from './mfa-enrollment.module.css';
 
 interface MFAEnrollmentProps {
@@ -283,6 +284,11 @@ export const MFAEnrollment: React.FC<MFAEnrollmentProps> = ({
             </button>
           </div>
         )}
+
+        <div className={styles.signOutContainer}>
+          <p className={styles.signOutText}>Need to sign in with a different account?</p>
+          <SignOut redirectTo="/auth" />
+        </div>
 
         <div id="recaptcha-container-enrollment" />
       </div>

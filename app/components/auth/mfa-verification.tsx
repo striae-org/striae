@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '~/services/firebase';
 import { handleAuthError, getValidationError } from '~/services/firebase-errors';
+import { SignOut } from '~/components/actions/signout';
 import styles from './mfa-verification.module.css';
 
 interface MFAVerificationProps {
@@ -223,6 +224,10 @@ export const MFAVerification = ({ resolver, onSuccess, onError, onCancel }: MFAV
           <button onClick={onCancel} className={styles.cancelButton}>
             Cancel
           </button>
+          <div className={styles.signOutContainer}>
+            <p className={styles.signOutText}>Need to sign in with a different account?</p>
+            <SignOut redirectTo="/auth" />
+          </div>
         </div>        
         <div id="recaptcha-container"></div>
       </div>
