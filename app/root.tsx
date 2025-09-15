@@ -7,7 +7,8 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
   useRouteError,
-  Link,  
+  Link,
+  useLocation
 } from "@remix-run/react";
 import { 
   ThemeProvider,
@@ -44,10 +45,33 @@ export const links: LinksFunction = () => [
   { rel: 'apple-touch-icon', href: '/icon-256.png', sizes: '256x256' },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
-  const theme = 'light';
+// Custom scroll restoration key for better control
+export function getScrollRestorationKey({ pathname, search, hash }: { pathname: string; search: string; hash: string }) {
+  // For routes with #top, always scroll to top
+  if (hash === '#top') {
+    return null; // This will always restore to top
+  }
+  // For other routes, use pathname + search as the key
+  return pathname + search;
+}
 
-  
+export function Layout({ children }: { children: React.ReactNode }) {
+  const theme = 'light'; // Changed back to light theme
+  const location = useLocation();
+
+  // Handle hash navigation for smooth scrolling
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.querySelector(location.hash);
+      if (element) {
+        // Small delay to ensure the page has rendered
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, [location.hash]);
+
   return (
     <html lang="en" data-theme={theme}>
       <head>
@@ -70,9 +94,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
         <Footer />
-        </ThemeProvider>        
+        </ThemeProvider>
+        <ScrollRestoration 
+          getKey={(location) => getScrollRestorationKey(location)}
+        />
         <Scripts />
-        <ScrollRestoration />
       </body>
     </html>
   );
@@ -158,7 +184,9 @@ export function ErrorBoundary() {
             </div>
           </main>
           </ThemeProvider>
-          <ScrollRestoration />
+          <ScrollRestoration 
+            getKey={(location) => getScrollRestorationKey(location)}
+          />
           <Scripts />          
         </body>
       </html>
@@ -186,7 +214,9 @@ export function ErrorBoundary() {
           </div>
         </main>
         </ThemeProvider>
-        <ScrollRestoration />
+        <ScrollRestoration 
+          getKey={(location) => getScrollRestorationKey(location)}
+        />
         <Scripts />        
       </body>
     </html>
