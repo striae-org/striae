@@ -30,6 +30,28 @@
 - **⚙️ Conditional Rendering** - Box annotations appear in PDFs only when box annotation tool is active in the original document
 - **🔄 Data Flow Integration** - Seamless integration with existing PDF generation pipeline for automatic inclusion
 
+## 📸 Feature Demonstrations
+
+### Interactive Box Annotation Examples
+
+**Box Annotation Interface in Action:**
+
+### Canvas screenshots showing box annotation creation with color selection
+
+![Box Annotation Example 1](https://www.striae.org/assets/box-test-1.png)
+
+![Box Annotation Example 2](https://www.striae.org/assets/box-test-2.png)
+
+### Generated PDF Reports with Box Annotations
+
+**Complete PDF Reports with Box Annotation Integration:**
+
+- **[Example Report 1: BOX-TEST-1.1 vs BOX-TEST-1.2](https://www.striae.org/assets/striae-report-123456-BOX-TEST-1.1--123456-BOX-TEST-1.2.pdf)** - Demonstrates box annotations in comparison image report with multiple annotations and precise positioning
+
+- **[Example Report 2: BOX-TEST-5.2 vs BOX-TEST-6.8](https://www.striae.org/assets/striae-report-123456-BOX-TEST-5.2--123456-BOX-TEST-6.8.pdf)** - Shows box annotation rendering consistency between canvas interface and final PDF output
+
+*These examples showcase the complete workflow from interactive annotation creation through final PDF report generation, demonstrating the seamless integration of box annotations throughout the comparison image annotation process.*
+
 ## 🛠️ Technical Infrastructure Improvements
 
 ### UI/UX Component Refinements
