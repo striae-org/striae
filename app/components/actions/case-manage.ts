@@ -7,28 +7,7 @@ import {
   getUserApiKey
 } from '~/utils/auth';
 import { canCreateCase } from '~/utils/permissions';
-
-interface CaseData {
-  createdAt: string;
-  caseNumber: string;
-  files: FileData[];
-}
-
-interface UserData {
-  cases: Omit<CaseData, 'files'>[];
-  updatedAt: string;
-  [key: string]: any;
-}
-
-interface FileData {
-  id: string;
-  originalFilename: string;
-  uploadedAt: string;
-}
-
-interface CasesToDelete {
-  casesToDelete: string[];
-}
+import { CaseData, UserData, FileData, CasesToDelete } from '~/types';
 
 const USER_WORKER_URL = paths.user_worker_url;
 const DATA_WORKER_URL = paths.data_worker_url;

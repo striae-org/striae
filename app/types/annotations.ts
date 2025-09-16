@@ -8,14 +8,14 @@ export interface AnnotationData {
   caseFontColor: string;
   classType: 'Bullet' | 'Cartridge Case' | 'Other';
   customClass?: string;
-  classNote: string;
+  classNote?: string;
   indexType: 'number' | 'color';
   indexNumber?: string;
   indexColor?: string;
   supportLevel: 'ID' | 'Exclusion' | 'Inconclusive';
   hasSubclass?: boolean;
   includeConfirmation?: boolean;
-  additionalNotes: string;
+  additionalNotes?: string;
   boxAnnotations?: BoxAnnotation[];
-  updatedAt?: string;
+  updatedAt: string;
 }

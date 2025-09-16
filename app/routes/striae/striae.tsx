@@ -9,18 +9,12 @@ import { getImageUrl } from '~/components/actions/image-manage';
 import { getNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
 import { getUserApiKey } from '~/utils/auth';
-import { AnnotationData } from '~/types/annotations';
+import { AnnotationData, FileData } from '~/types';
 import paths from '~/config/config.json';
 import styles from './striae.module.css';
 
 interface StriaePage {
-  user: User;    
-}
-
-interface FileData {
-  id: string;
-  originalFilename: string;
-  uploadedAt: string;
+  user: User;
 }
 
 export const Striae = ({ user }: StriaePage) => {

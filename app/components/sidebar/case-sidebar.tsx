@@ -20,6 +20,7 @@ import {
   getLimitsDescription,
   getUserData
 } from '~/utils/permissions';
+import { FileData } from '~/types';
 
 interface CaseSidebarProps {
   user: User;
@@ -38,14 +39,6 @@ interface CaseSidebarProps {
   setError: (error: string) => void;
   successAction: string | null;
   setSuccessAction: (action: 'loaded' | 'created' | 'deleted' | null) => void;
-}
-
-
-
-interface FileData {
-  id: string;
-  originalFilename: string;
-  uploadedAt: string;
 }
 
 const SUCCESS_MESSAGE_TIMEOUT = 3000;

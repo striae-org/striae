@@ -22,6 +22,7 @@ import styles from './login.module.css';
 import { baseMeta } from '~/utils/meta';
 import { Striae } from '~/routes/striae/striae';
 import { getUserApiKey } from '~/utils/auth';
+import { UserData } from '~/types';
 import paths from '~/config/config.json';
 import freeEmailDomains from 'free-email-domains';
 
@@ -31,21 +32,6 @@ export const meta = () => {
     description: 'Login to your Striae account to access your projects and data',
   });
 };
-
-interface UserData {
-  uid: string;
-  email: string | null;
-  firstName: string;
-  lastName: string;
-  company: string;
-  permitted: boolean;
-  cases: Array<{
-    caseNumber: string;
-    createdAt: string;
-  }>;
-  createdAt: string;
-  updatedAt: string;
-}
 
 const USER_WORKER_URL = paths.user_worker_url;
 

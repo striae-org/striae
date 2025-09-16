@@ -4,14 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from '@remix-run/react';
 import { Sidebar } from './sidebar';
 import { User } from 'firebase/auth';
+import { FileData } from '~/types';
 import styles from './sidebar.module.css';
 import { getAppVersion } from '../../utils/version';
-
-interface FileData {
-  id: string;
-  originalFilename: string;
-  uploadedAt: string;
-}
 
 interface SidebarContainerProps {
   user: User;

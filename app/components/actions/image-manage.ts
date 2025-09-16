@@ -6,30 +6,13 @@ import {
   getAccountHash 
 } from '~/utils/auth';
 import { canUploadFile } from '~/utils/permissions';
+import { CaseData, FileData, ImageUploadResponse } from '~/types';
 
 const WORKER_URL = paths.data_worker_url;
 const IMAGE_URL = paths.image_worker_url;
 
-
-interface CaseData {
-    files?: FileData[];
-    [key: string]: unknown;
-  }
-interface FileData {
-  id: string;
-  originalFilename: string;
-  uploadedAt: string;
-}
-
 interface ApiResponse {
   files: FileData[];
-}
-
-interface ImageUploadResponse {
-  success: boolean;
-  result: {
-    id: string;
-  };
 }
 
 export const fetchFiles = async (user: User, caseNumber: string): Promise<FileData[]> => {

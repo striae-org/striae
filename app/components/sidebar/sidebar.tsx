@@ -5,12 +5,7 @@ import { ManageProfile } from '../user/manage-profile';
 import { SignOut } from '../actions/signout';
 import { CaseSidebar } from './case-sidebar';
 import { NotesSidebar } from './notes-sidebar';
-
-interface FileData {
-  id: string;
-  originalFilename: string;
-  uploadedAt: string;
-}
+import { FileData } from '~/types';
 
 interface SidebarProps {
   user: User;
