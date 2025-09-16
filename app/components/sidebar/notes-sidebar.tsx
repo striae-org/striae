@@ -116,8 +116,6 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
     try {
       // First, get existing annotation data to preserve box annotations
       const existingData = await getNotes(user, currentCase, imageId);
-      console.log('Existing data from server:', existingData);
-      console.log('Existing box annotations:', existingData?.boxAnnotations);
       
       // Create updated annotation data, preserving box annotations
       const annotationData: AnnotationData = {
@@ -153,7 +151,6 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
         updatedAt: new Date().toISOString()
       };
 
-      console.log('Saving annotation data with box annotations:', annotationData.boxAnnotations);
       await saveNotes(user, currentCase, imageId, annotationData);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);

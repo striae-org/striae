@@ -40,18 +40,13 @@ export const Canvas = ({
 
   // Handle box annotation changes
   const handleBoxAnnotationsChange = (boxAnnotations: BoxAnnotation[]) => {
-    console.log('Box annotations changed:', boxAnnotations);
-    if (!onAnnotationUpdate || !annotationData) {
-      console.log('Cannot update - missing onAnnotationUpdate or annotationData');
-      return;
-    }
+    if (!onAnnotationUpdate || !annotationData) return;
     
     const updatedAnnotationData: AnnotationData = {
       ...annotationData,
       boxAnnotations
     };
     
-    console.log('Calling onAnnotationUpdate with:', updatedAnnotationData);
     onAnnotationUpdate(updatedAnnotationData);
   };
 

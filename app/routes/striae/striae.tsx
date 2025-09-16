@@ -234,9 +234,6 @@ export const Striae = ({ user }: StriaePage) => {
 
   // Automatic save handler for annotation updates
   const handleAnnotationUpdate = async (data: AnnotationData) => {
-    console.log('handleAnnotationUpdate called with:', data);
-    console.log('Box annotations in data:', data.boxAnnotations);
-    
     // Update local state immediately
     setAnnotationData(data);
     
@@ -249,9 +246,7 @@ export const Striae = ({ user }: StriaePage) => {
           includeConfirmation: data.includeConfirmation ?? false, // Required field
         };
         
-        console.log('Saving data with box annotations:', dataToSave.boxAnnotations);
         await saveNotes(user, currentCase, imageId, dataToSave);
-        console.log('Annotations auto-saved successfully');
       } catch (saveError) {
         console.error('Failed to auto-save annotations:', saveError);
         // Still show the annotations locally even if save fails
