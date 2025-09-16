@@ -13,7 +13,7 @@ export interface BoxAnnotation {
 }
 
 interface BoxAnnotationsProps {
-  imageRef: React.RefObject<HTMLImageElement>;
+  imageRef: React.RefObject<HTMLImageElement | null>;
   annotations: BoxAnnotation[];
   onAnnotationsChange: (annotations: BoxAnnotation[]) => void;
   isAnnotationMode: boolean;

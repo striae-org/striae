@@ -178,19 +178,32 @@ export const Canvas = ({
             )}
             
             <img 
+            ref={imageRef}
             src={imageUrl}
             alt="Case evidence"
             className={styles.image}
             style={{
               border: activeAnnotations?.has('index') && annotationData?.indexType === 'color' && annotationData?.indexColor
                 ? `6px solid ${annotationData.indexColor}`
-                : undefined
+                : undefined,
+              userSelect: 'none'
             }}
             onError={() => setLoadError({
               type: 'network',
               message: 'Failed to load image from network'
             })}
+            draggable={false}
           />
+          
+          {/* Box Annotations Component */}
+          <BoxAnnotations
+            imageRef={imageRef}
+            annotations={annotationData?.boxAnnotations || []}
+            onAnnotationsChange={handleBoxAnnotationsChange}
+            isAnnotationMode={isBoxAnnotationMode}
+            annotationColor={boxAnnotationColor}
+          />
+          
           {/* Annotations Overlay */}
           {activeAnnotations?.has('number') && annotationData && (
             <div className={styles.annotationsOverlay}>
