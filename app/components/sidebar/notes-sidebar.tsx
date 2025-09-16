@@ -3,6 +3,7 @@ import { User } from 'firebase/auth';
 import { ColorSelector } from '~/components/colors/colors';
 import { NotesModal } from './notes-modal';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
+import { AnnotationData } from '~/types/annotations';
 import styles from './notes.module.css';
 
 interface NotesSidebarProps {
@@ -11,25 +12,6 @@ interface NotesSidebarProps {
   user: User;
   imageId: string;
   onAnnotationRefresh?: () => void;
-}
-
-interface NotesData {
-  leftCase: string;
-  rightCase: string;
-  leftItem: string;
-  rightItem: string;
-  caseFontColor: string;
-  classType: ClassType;
-  customClass?: string;
-  classNote: string;
-  hasSubclass?: boolean;
-  indexType: IndexType;
-  indexNumber?: string;
-  indexColor?: string;
-  supportLevel: SupportLevel;
-  includeConfirmation: boolean;
-  additionalNotes: string;
-  updatedAt: string;
 }
 
 type SupportLevel = 'ID' | 'Exclusion' | 'Inconclusive';
@@ -88,14 +70,14 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
           setCaseFontColor(existingNotes.caseFontColor || '#FFDE21');
           setClassType(existingNotes.classType || 'Bullet');
           setCustomClass(existingNotes.customClass || '');
-          setClassNote(existingNotes.classNote);
+          setClassNote(existingNotes.classNote || '');
           setHasSubclass(existingNotes.hasSubclass ?? false);
           setIndexType(existingNotes.indexType);
           setIndexNumber(existingNotes.indexNumber || '');
           setIndexColor(existingNotes.indexColor || '#000000');
           setSupportLevel(existingNotes.supportLevel || 'ID');
           setIncludeConfirmation(existingNotes.includeConfirmation);
-          setAdditionalNotes(existingNotes.additionalNotes);
+          setAdditionalNotes(existingNotes.additionalNotes || '');
         }
       } catch (error) {
         setLoadError('Failed to load existing notes');
@@ -132,37 +114,47 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
     }
 
     try {
-    const notesData: NotesData = {
-      // Case Information
-      leftCase: leftCase || '',
-      rightCase: rightCase || '',
-      leftItem: leftItem || '',
-      rightItem: rightItem || '',
-      caseFontColor: caseFontColor || '#FFDE21',
+      // First, get existing annotation data to preserve box annotations
+      const existingData = await getNotes(user, currentCase, imageId);
+      console.log('Existing data from server:', existingData);
+      console.log('Existing box annotations:', existingData?.boxAnnotations);
       
-      // Class Characteristics
-      classType: classType || 'Bullet',
-      customClass: customClass,
-      classNote: classNote || '',
-      hasSubclass: hasSubclass,
-      
-      // Index Information
-      indexType: indexType,
-      indexNumber: indexNumber,
-      indexColor: indexColor || '#000000',
+      // Create updated annotation data, preserving box annotations
+      const annotationData: AnnotationData = {
+        // Case Information
+        leftCase: leftCase || '',
+        rightCase: rightCase || '',
+        leftItem: leftItem || '',
+        rightItem: rightItem || '',
+        caseFontColor: caseFontColor || '#FFDE21',
+        
+        // Class Characteristics
+        classType: classType || 'Bullet',
+        customClass: customClass,
+        classNote: classNote || undefined, // Keep as optional
+        hasSubclass: hasSubclass,
+        
+        // Index Information
+        indexType: indexType,
+        indexNumber: indexNumber,
+        indexColor: indexColor || '#000000',
 
-      // Support Level & Confirmation
-      supportLevel: supportLevel || 'ID',
-      includeConfirmation: includeConfirmation,
-      
-      // Additional Notes
-      additionalNotes: additionalNotes || '',
-      
-      // Metadata
-      updatedAt: new Date().toISOString()
-    };
+        // Support Level & Confirmation
+        supportLevel: supportLevel || 'ID',
+        includeConfirmation: includeConfirmation,
+        
+        // Additional Notes
+        additionalNotes: additionalNotes || undefined, // Keep as optional
+        
+        // Preserve existing box annotations
+        boxAnnotations: existingData?.boxAnnotations || [],
+        
+        // Metadata
+        updatedAt: new Date().toISOString()
+      };
 
-      await saveNotes(user, currentCase, imageId, notesData);
+      console.log('Saving annotation data with box annotations:', annotationData.boxAnnotations);
+      await saveNotes(user, currentCase, imageId, annotationData);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
       
