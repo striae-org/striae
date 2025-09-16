@@ -58,7 +58,14 @@ export const BoxAnnotations = ({
 
   // Handle mouse down - start drawing
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    // Only start drawing if in annotation mode and not clicking on an existing box
     if (!isAnnotationMode || !imageRef.current) return;
+    
+    // Check if clicking on an existing annotation
+    const target = e.target as HTMLElement;
+    if (target.classList.contains(styles.savedAnnotationBox)) {
+      return; // Don't start drawing if clicking on an existing box
+    }
     
     e.preventDefault();
     e.stopPropagation();
@@ -172,9 +179,13 @@ export const BoxAnnotations = ({
           width: `${annotation.width}%`,
           height: `${annotation.height}%`,
           border: `2px solid ${annotation.color}`,
-          backgroundColor: `${annotation.color}20`
+          backgroundColor: `${annotation.color}20`,
+          pointerEvents: 'auto' // Always allow interactions with saved boxes
         }}
-        onDoubleClick={() => removeBoxAnnotation(annotation.id)}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          removeBoxAnnotation(annotation.id);
+        }}
         onContextMenu={(e) => handleAnnotationRightClick(e, annotation.id)}
         title="Double-click or right-click to remove"
       />
@@ -190,7 +201,7 @@ export const BoxAnnotations = ({
       onMouseLeave={handleMouseUp}
       style={{ 
         cursor: isAnnotationMode ? 'crosshair' : 'default',
-        pointerEvents: isAnnotationMode ? 'auto' : 'none'
+        pointerEvents: 'auto' // Always allow pointer events for box interactions
       }}
     >
       {renderSavedAnnotations()}
