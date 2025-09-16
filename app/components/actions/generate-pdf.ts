@@ -1,23 +1,5 @@
 import paths from '~/config/config.json';
-
-interface AnnotationData {
-  leftCase: string;
-  rightCase: string;
-  leftItem: string;
-  rightItem: string;
-  caseFontColor: string;
-  classType: 'Bullet' | 'Cartridge Case' | 'Other';
-  customClass?: string;
-  classNote: string;
-  indexType: 'number' | 'color';
-  indexNumber?: string;
-  indexColor?: string;
-  supportLevel: 'ID' | 'Exclusion' | 'Inconclusive';
-  hasSubclass?: boolean;
-  includeConfirmation: boolean;
-  additionalNotes: string;
-  updatedAt?: string;
-}
+import { AnnotationData } from '~/types/annotations';
 
 interface GeneratePDFParams {
   selectedImage: string | undefined;

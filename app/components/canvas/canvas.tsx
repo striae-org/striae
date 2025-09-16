@@ -1,25 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { BoxAnnotations, BoxAnnotation } from './box-annotations/box-annotations';
+import { AnnotationData } from '~/types/annotations';
 import styles from './canvas.module.css';
-
-interface AnnotationData {
-  leftCase: string;
-  rightCase: string;
-  leftItem: string;
-  rightItem: string;
-  caseFontColor: string;
-  classType: 'Bullet' | 'Cartridge Case' | 'Other';
-  customClass?: string;
-  classNote: string;
-  indexType: 'number' | 'color';
-  indexNumber?: string;
-  indexColor?: string;
-  supportLevel: 'ID' | 'Exclusion' | 'Inconclusive';
-  includeConfirmation?: boolean;
-  hasSubclass?: boolean;
-  additionalNotes: string;
-  boxAnnotations?: BoxAnnotation[];
-}
 
 interface CanvasProps {
   imageUrl?: string;

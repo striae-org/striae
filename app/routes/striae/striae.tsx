@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react';
 import { SidebarContainer } from '~/components/sidebar/sidebar-container';
 import { Toolbar } from '~/components/toolbar/toolbar';
 import { Canvas } from '~/components/canvas/canvas';
+import { BoxAnnotation } from '~/components/canvas/box-annotations/box-annotations';
 import { Toast } from '~/components/toast/toast';
 import { getImageUrl } from '~/components/actions/image-manage';
 import { getNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
 import { getUserApiKey } from '~/utils/auth';
+import { AnnotationData } from '~/types/annotations';
 import paths from '~/config/config.json';
 import styles from './striae.module.css';
 
@@ -19,25 +21,6 @@ interface FileData {
   id: string;
   originalFilename: string;
   uploadedAt: string;
-}
-
-interface AnnotationData {
-  leftCase: string;
-  rightCase: string;
-  leftItem: string;
-  rightItem: string;
-  caseFontColor: string;
-  classType: 'Bullet' | 'Cartridge Case' | 'Other';
-  customClass?: string;
-  classNote: string;
-  indexType: 'number' | 'color';
-  indexNumber?: string;
-  indexColor?: string;
-  supportLevel: 'ID' | 'Exclusion' | 'Inconclusive';
-  hasSubclass?: boolean;
-  includeConfirmation: boolean;
-  additionalNotes: string;
-  updatedAt?: string;
 }
 
 export const Striae = ({ user }: StriaePage) => {
@@ -63,6 +46,10 @@ export const Striae = ({ user }: StriaePage) => {
   const [activeAnnotations, setActiveAnnotations] = useState<Set<string>>(new Set());
   const [annotationData, setAnnotationData] = useState<AnnotationData | null>(null);
   const [annotationRefreshTrigger, setAnnotationRefreshTrigger] = useState(0);
+
+  // Box annotation states
+  const [isBoxAnnotationMode, setIsBoxAnnotationMode] = useState(false);
+  const [boxAnnotationColor, setBoxAnnotationColor] = useState('#ff0000');
 
   // PDF generation states
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -125,6 +112,11 @@ export const Striae = ({ user }: StriaePage) => {
       }
       return next;
     });
+
+    // Handle box annotation mode
+    if (toolId === 'box') {
+      setIsBoxAnnotationMode(active);
+    }
   };  
 
   // Generate PDF function
@@ -286,6 +278,9 @@ export const Striae = ({ user }: StriaePage) => {
             error={error ?? ''}
             activeAnnotations={activeAnnotations}
             annotationData={annotationData}
+            isBoxAnnotationMode={isBoxAnnotationMode}
+            boxAnnotationColor={boxAnnotationColor}
+            onAnnotationUpdate={(data) => setAnnotationData(data)}
           />
         </div>
       </main>
