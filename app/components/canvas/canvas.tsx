@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { BoxAnnotations, BoxAnnotation } from './box-annotations/box-annotations';
 import styles from './canvas.module.css';
 
 interface AnnotationData {
@@ -17,6 +18,7 @@ interface AnnotationData {
   includeConfirmation?: boolean;
   hasSubclass?: boolean;
   additionalNotes: string;
+  boxAnnotations?: BoxAnnotation[];
 }
 
 interface CanvasProps {
@@ -27,6 +29,9 @@ interface CanvasProps {
   error?: string;
   activeAnnotations?: Set<string>;
   annotationData?: AnnotationData | null;
+  onAnnotationUpdate?: (annotationData: AnnotationData) => void;
+  isBoxAnnotationMode?: boolean;
+  boxAnnotationColor?: string;
 }
 
 type ImageLoadError = {
