@@ -161,7 +161,7 @@ export const BoxAnnotations = ({
           width: `${width}%`,
           height: `${height}%`,
           border: `2px solid ${annotationColor}`,
-          backgroundColor: `${annotationColor}20`
+          backgroundColor: 'transparent'
         }}
       />
     );
@@ -182,7 +182,7 @@ export const BoxAnnotations = ({
           width: `${annotation.width}%`,
           height: `${annotation.height}%`,
           border: `2px solid ${annotation.color}`,
-          backgroundColor: `${annotation.color}20`,
+          backgroundColor: 'transparent',
           pointerEvents: 'auto' // Always allow interactions with saved boxes
         }}
         onDoubleClick={(e) => {
