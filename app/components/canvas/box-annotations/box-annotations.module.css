@@ -1,0 +1,44 @@
+.boxAnnotationsOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+.drawingBox,
+.savedAnnotationBox {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+.drawingBox {
+  opacity: 0.7;
+  transition: opacity 0.1s ease;
+}
+
+.savedAnnotationBox {
+  opacity: 0.6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.savedAnnotationBox:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  transform: scale(1.02);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .savedAnnotationBox {
+    min-width: 20px;
+    min-height: 20px;
+  }
+  
+  .drawingBox {
+    opacity: 0.8;
+  }
+}
