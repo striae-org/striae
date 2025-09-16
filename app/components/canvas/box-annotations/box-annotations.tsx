@@ -169,6 +169,9 @@ export const BoxAnnotations = ({
 
   // Render saved box annotations
   const renderSavedAnnotations = () => {
+    // Only show existing box annotations when in box annotation mode
+    if (!isAnnotationMode) return null;
+    
     return annotations.map((annotation) => (
       <div
         key={annotation.id}
@@ -201,7 +204,7 @@ export const BoxAnnotations = ({
       onMouseLeave={handleMouseUp}
       style={{ 
         cursor: isAnnotationMode ? 'crosshair' : 'default',
-        pointerEvents: 'auto' // Always allow pointer events for box interactions
+        pointerEvents: isAnnotationMode ? 'auto' : 'none' // Only allow interactions in annotation mode
       }}
     >
       {renderSavedAnnotations()}
