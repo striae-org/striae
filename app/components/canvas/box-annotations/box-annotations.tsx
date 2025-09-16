@@ -128,6 +128,13 @@ export const BoxAnnotations = ({
     onAnnotationsChange(annotations.filter(annotation => annotation.id !== annotationId));
   }, [annotations, onAnnotationsChange]);
 
+  // Handle right-click to remove annotation
+  const handleAnnotationRightClick = useCallback((e: React.MouseEvent, annotationId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    removeBoxAnnotation(annotationId);
+  }, [removeBoxAnnotation]);
+
   // Render current drawing box (while dragging)
   const renderCurrentDrawingBox = () => {
     if (!drawingState.isDrawing) return null;
@@ -168,7 +175,8 @@ export const BoxAnnotations = ({
           backgroundColor: `${annotation.color}20`
         }}
         onDoubleClick={() => removeBoxAnnotation(annotation.id)}
-        title="Double-click to remove"
+        onContextMenu={(e) => handleAnnotationRightClick(e, annotation.id)}
+        title="Double-click or right-click to remove"
       />
     ));
   };

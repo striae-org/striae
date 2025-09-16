@@ -23,12 +23,31 @@
   opacity: 0.6;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
 }
 
 .savedAnnotationBox:hover {
   opacity: 0.9;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   transform: scale(1.02);
+}
+
+.savedAnnotationBox:hover::after {
+  content: "×";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 16px;
+  height: 16px;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 1;
 }
 
 /* Responsive adjustments */
