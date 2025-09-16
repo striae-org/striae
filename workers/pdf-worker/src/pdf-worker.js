@@ -1,7 +1,7 @@
 import puppeteer from "@cloudflare/puppeteer";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://dev.striae.org',
+  'Access-Control-Allow-Origin': 'https://www.striae.org',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
