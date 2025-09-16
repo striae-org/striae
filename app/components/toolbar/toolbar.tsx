@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '../button/button';
 import styles from './toolbar.module.css';
 
-type ToolId = 'number' | 'class' | 'index' | 'id' | 'notes' | 'print' | 'visibility';
+type ToolId = 'number' | 'class' | 'index' | 'id' | 'notes' | 'print' | 'visibility' | 'box';
 
 interface ToolbarProps {
   onToolSelect?: (toolId: ToolId, active: boolean) => void;
@@ -90,6 +90,12 @@ export const Toolbar = ({
         isActive={activeTools.has('notes')}
         onClick={() => handleToolClick('notes')}
         ariaLabel="Additional Notes"
+      />
+      <Button
+        iconId="box"
+        isActive={activeTools.has('box')}
+        onClick={() => handleToolClick('box')}
+        ariaLabel="Box Annotations"
       />
       <Button
         iconId="print"
