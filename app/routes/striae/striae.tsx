@@ -111,6 +111,11 @@ export const Striae = ({ user }: StriaePage) => {
     if (toolId === 'box') {
       setIsBoxAnnotationMode(active);
     }
+  };
+
+  // Handler for color change from toolbar color selector
+  const handleColorChange = (color: string) => {
+    setBoxAnnotationColor(color);
   };  
 
   // Generate PDF function
@@ -285,6 +290,8 @@ export const Striae = ({ user }: StriaePage) => {
               onGeneratePDF={handleGeneratePDF}
               canGeneratePDF={!!(selectedImage && selectedImage !== '/clear.jpg')}
               isGeneratingPDF={isGeneratingPDF}
+              onColorChange={handleColorChange}
+              selectedColor={boxAnnotationColor}
             />
           </div>
           <Canvas 
