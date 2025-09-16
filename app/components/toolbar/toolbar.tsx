@@ -109,17 +109,17 @@ export const Toolbar = ({
         ariaLabel="Support Level"
       />
       <Button
-        iconId="notes"
-        isActive={activeTools.has('notes')}
-        onClick={() => handleToolClick('notes')}
-        ariaLabel="Additional Notes"
-      />
-      <Button
         iconId="box"
         isActive={activeTools.has('box')}
         onClick={() => handleToolClick('box')}
         ariaLabel="Box Annotations"
       />
+      <Button
+        iconId="notes"
+        isActive={activeTools.has('notes')}
+        onClick={() => handleToolClick('notes')}
+        ariaLabel="Additional Notes"
+      />      
       <Button
         iconId="print"
         isActive={false}
