@@ -24,7 +24,7 @@
   position: absolute;
   left: var(--spaceL);
   top: var(--spaceL);
-  z-index: var(--zIndex2);
+  z-index: 20;
 }
 
 /* Filename & Confirmation Display */

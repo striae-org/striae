@@ -11,7 +11,7 @@
   border-radius: 5px;
   box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
   height: auto;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .toggleButton {

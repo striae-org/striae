@@ -26,5 +26,5 @@
   position: absolute;
   top: var(--spaceL);
   left: var(--spaceL);
-  z-index: var(--zIndex2);
+  z-index: 30;
 }

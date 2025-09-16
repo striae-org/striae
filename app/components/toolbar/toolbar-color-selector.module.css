@@ -8,7 +8,7 @@
   box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
   padding: var(--spaceS);
   width: 200px;
-  z-index: 1000;
+  z-index: 50;
 }
 
 .header {
