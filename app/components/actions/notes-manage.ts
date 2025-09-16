@@ -1,33 +1,15 @@
 import { User } from 'firebase/auth';
 import paths from '~/config/config.json';
 import { getDataApiKey } from '~/utils/auth';
+import { AnnotationData } from '~/types/annotations';
 
 const DATA_WORKER_URL = paths.data_worker_url;
-
-interface NotesData {
-  leftCase: string;
-  rightCase: string;
-  leftItem: string;
-  rightItem: string;
-  caseFontColor: string;
-  classType: 'Bullet' | 'Cartridge Case' | 'Other';
-  customClass?: string;
-  classNote: string;
-  hasSubclass?: boolean;
-  indexType: 'number' | 'color';
-  indexNumber?: string;
-  indexColor?: string;
-  supportLevel: 'ID' | 'Exclusion' | 'Inconclusive';
-  includeConfirmation: boolean;
-  additionalNotes: string;
-  updatedAt: string;
-}
 
 export const saveNotes = async (
   user: User,
   caseNumber: string,
   imageId: string,
-  notesData: NotesData
+  annotationData: AnnotationData
 ): Promise<void> => {
   try {
     const apiKey = await getDataApiKey();
@@ -35,7 +17,7 @@ export const saveNotes = async (
 
     // Add timestamp
     const dataToSave = {
-      ...notesData,
+      ...annotationData,
       updatedAt: new Date().toISOString()
     };
 
@@ -61,7 +43,7 @@ export const getNotes = async (
   user: User,
   caseNumber: string,
   imageId: string
-): Promise<NotesData | null> => {
+): Promise<AnnotationData | null> => {
   try {
     const apiKey = await getDataApiKey();
     const url = `${DATA_WORKER_URL}/${user.uid}/${caseNumber}/${imageId}/data.json`;

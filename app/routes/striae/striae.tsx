@@ -6,7 +6,7 @@ import { Canvas } from '~/components/canvas/canvas';
 import { BoxAnnotation } from '~/components/canvas/box-annotations/box-annotations';
 import { Toast } from '~/components/toast/toast';
 import { getImageUrl } from '~/components/actions/image-manage';
-import { getNotes } from '~/components/actions/notes-manage';
+import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
 import { getUserApiKey } from '~/utils/auth';
 import { AnnotationData, FileData } from '~/types';
@@ -170,15 +170,16 @@ export const Striae = ({ user }: StriaePage) => {
             caseFontColor: notes.caseFontColor || '#FFDE21',
             classType: notes.classType || 'Other',
             customClass: notes.customClass,
-            classNote: notes.classNote || '',
+            classNote: notes.classNote, // Optional - pass as-is
             indexType: notes.indexType || 'number',
             indexNumber: notes.indexNumber,
             indexColor: notes.indexColor,
             supportLevel: notes.supportLevel || 'Inconclusive',
             hasSubclass: notes.hasSubclass,
-            includeConfirmation: notes.includeConfirmation || false,
-            additionalNotes: notes.additionalNotes || '',
-            updatedAt: notes.updatedAt
+            includeConfirmation: notes.includeConfirmation ?? false, // Required
+            additionalNotes: notes.additionalNotes, // Optional - pass as-is
+            boxAnnotations: notes.boxAnnotations || [],
+            updatedAt: notes.updatedAt || new Date().toISOString()
           });
         } else {
           setAnnotationData(null);
@@ -231,6 +232,29 @@ export const Striae = ({ user }: StriaePage) => {
   }
 };
 
+  // Automatic save handler for annotation updates
+  const handleAnnotationUpdate = async (data: AnnotationData) => {
+    // Update local state immediately
+    setAnnotationData(data);
+    
+    // Auto-save to server if we have required data
+    if (user && currentCase && imageId) {
+      try {
+        // Ensure required fields have default values before saving
+        const dataToSave: AnnotationData = {
+          ...data,
+          includeConfirmation: data.includeConfirmation ?? false, // Required field
+        };
+        
+        await saveNotes(user, currentCase, imageId, dataToSave);
+        console.log('Annotations auto-saved successfully');
+      } catch (saveError) {
+        console.error('Failed to auto-save annotations:', saveError);
+        // Still show the annotations locally even if save fails
+      }
+    }
+  };
+
   return (
     <div className={styles.appContainer}>
      <SidebarContainer 
@@ -274,7 +298,7 @@ export const Striae = ({ user }: StriaePage) => {
             annotationData={annotationData}
             isBoxAnnotationMode={isBoxAnnotationMode}
             boxAnnotationColor={boxAnnotationColor}
-            onAnnotationUpdate={(data) => setAnnotationData(data)}
+            onAnnotationUpdate={handleAnnotationUpdate}
           />
         </div>
       </main>

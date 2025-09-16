@@ -14,7 +14,7 @@ export interface AnnotationData {
   indexColor?: string;
   supportLevel: 'ID' | 'Exclusion' | 'Inconclusive';
   hasSubclass?: boolean;
-  includeConfirmation?: boolean;
+  includeConfirmation: boolean;
   additionalNotes?: string;
   boxAnnotations?: BoxAnnotation[];
   updatedAt: string;
