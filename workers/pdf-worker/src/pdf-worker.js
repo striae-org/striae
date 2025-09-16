@@ -1,7 +1,7 @@
 import puppeteer from "@cloudflare/puppeteer";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://www.striae.org',
+  'Access-Control-Allow-Origin': 'https://dev.striae.org',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
@@ -279,6 +279,15 @@ const generateDocument = (data) => {
         font-weight: 600;
         color: #333;
       }
+      .box-annotation {
+        position: absolute;
+        box-sizing: border-box;
+        pointer-events: none;
+        background: transparent;
+        border-width: 2px;
+        border-style: solid;
+        opacity: 0.8;
+      }
     </style>
   </head>
   <body>
@@ -314,6 +323,20 @@ const generateDocument = (data) => {
               ${annotationData.rightCase}${annotationData.rightItem ? ` ${annotationData.rightItem}` : ''}
             </div>
           </div>
+        </div>
+        ` : ''}
+
+        ${annotationData && annotationsSet?.has('box') && annotationData.boxAnnotations ? `
+        <div class="annotations-overlay">
+          ${annotationData.boxAnnotations.map(box => `
+            <div class="box-annotation" style="
+              left: ${box.x}%;
+              top: ${box.y}%;
+              width: ${box.width}%;
+              height: ${box.height}%;
+              border-color: ${box.color};
+            "></div>
+          `).join('')}
         </div>
         ` : ''}
       </div>
