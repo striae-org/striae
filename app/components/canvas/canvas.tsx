@@ -39,10 +39,34 @@ type ImageLoadError = {
   message: string;
 }
 
-export const Canvas = ({ imageUrl, filename, company, firstName, error, activeAnnotations, annotationData }: CanvasProps) => {
+export const Canvas = ({ 
+  imageUrl, 
+  filename, 
+  company, 
+  firstName, 
+  error, 
+  activeAnnotations, 
+  annotationData,
+  onAnnotationUpdate,
+  isBoxAnnotationMode = false,
+  boxAnnotationColor = '#ff0000'
+}: CanvasProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<ImageLoadError | undefined>();
   const [isFlashing, setIsFlashing] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  // Handle box annotation changes
+  const handleBoxAnnotationsChange = (boxAnnotations: BoxAnnotation[]) => {
+    if (!onAnnotationUpdate || !annotationData) return;
+    
+    const updatedAnnotationData: AnnotationData = {
+      ...annotationData,
+      boxAnnotations
+    };
+    
+    onAnnotationUpdate(updatedAnnotationData);
+  };
 
   useEffect(() => {
     if (!imageUrl) {
