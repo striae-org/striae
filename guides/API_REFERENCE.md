@@ -36,7 +36,11 @@
    - [Standard Error Response Format](#standard-error-response-format)
    - [Common Error Codes](#common-error-codes)
    - [HTTP Status Codes](#http-status-codes)
-10. [SDK Examples](#sdk-examples)
+10. [Type Definitions](#type-definitions)
+    - [AnnotationData Interface](#annotationdata-interface)
+    - [BoxAnnotation Interface](#boxannotation-interface)
+    - [Centralized Type Management](#centralized-type-management)
+11. [SDK Examples](#sdk-examples)
     - [JavaScript/TypeScript Client](#javascripttypescript-client)
     - [Error Handling Example](#error-handling-example)
 
@@ -404,7 +408,17 @@ POST /
     "supportLevel": "ID | Exclusion | Inconclusive",
     "hasSubclass": boolean,
     "includeConfirmation": boolean,
-    "additionalNotes": "string"
+    "additionalNotes": "string",
+    "boxAnnotations": [
+      {
+        "id": "string",
+        "x": "number (percentage 0-100)",
+        "y": "number (percentage 0-100)", 
+        "width": "number (percentage 0-100)",
+        "height": "number (percentage 0-100)",
+        "color": "string (hex color)"
+      }
+    ]
   },
   "activeAnnotations": ["string"],
   "currentDate": "string",
@@ -599,6 +613,284 @@ POST /
 - `404`: Not Found
 - `405`: Method Not Allowed
 - `500`: Internal Server Error
+
+## Type Definitions
+
+### Core Annotation Types
+
+#### AnnotationData Interface
+
+The comprehensive data structure for all annotation information:
+
+```typescript
+interface AnnotationData {
+  leftCase: string;
+  rightCase: string;
+  leftItem: string;
+  rightItem: string;
+  caseFontColor: string;
+  classType: 'Bullet' | 'Cartridge Case' | 'Other';
+  customClass?: string;
+  classNote?: string;
+  indexType: 'number' | 'color';
+  indexNumber?: string;
+  indexColor?: string;
+  supportLevel: 'ID' | 'Exclusion' | 'Inconclusive';
+  hasSubclass?: boolean;
+  includeConfirmation: boolean;
+  additionalNotes?: string;
+  boxAnnotations?: BoxAnnotation[];
+  updatedAt: string;
+}
+```
+
+#### BoxAnnotation Interface
+
+Individual box annotation structure with percentage-based coordinates:
+
+```typescript
+interface BoxAnnotation {
+  id: string;
+  x: number;         // Percentage 0-100
+  y: number;         // Percentage 0-100
+  width: number;     // Percentage 0-100
+  height: number;    // Percentage 0-100
+  color: string;     // Hex color code
+  label?: string;    // Optional annotation label
+  timestamp: number; // Creation timestamp
+}
+```
+
+### User Management Types
+
+#### UserData Interface
+
+Core user profile and permissions structure:
+
+```typescript
+interface UserData {
+  uid: string;
+  email: string | null;
+  firstName: string;
+  lastName: string;
+  company: string;
+  permitted: boolean;
+  cases: Array<{
+    caseNumber: string;
+    createdAt: string;
+  }>;
+  createdAt: string;
+  updatedAt?: string;
+}
+```
+
+#### UserLimits Interface
+
+User account limitations and quotas:
+
+```typescript
+interface UserLimits {
+  maxCases: number;
+  maxFilesPerCase: number;
+}
+```
+
+#### UserPermissions Interface
+
+Feature-specific user permissions:
+
+```typescript
+interface UserPermissions {
+  canCreateCases: boolean;
+  canUploadFiles: boolean;
+  canDeleteCases: boolean;
+  canExportPDF: boolean;
+}
+```
+
+### File Management Types
+
+#### FileData Interface
+
+Core file information structure:
+
+```typescript
+interface FileData {
+  id: string;
+  originalFilename: string;
+  uploadedAt: string;
+}
+```
+
+#### FileMetadata Interface
+
+Extended file metadata and properties:
+
+```typescript
+interface FileMetadata {
+  size?: number;
+  mimeType?: string;
+  dimensions?: {
+    width: number;
+    height: number;
+  };
+}
+```
+
+#### FileUploadResponse Interface
+
+Cloudflare Images API response structure:
+
+```typescript
+interface FileUploadResponse {
+  success: boolean;
+  result: {
+    id: string;
+    filename: string;
+    uploaded: string;
+    requireSignedURLs: boolean;
+    variants: string[];
+  };
+  errors: Array<{
+    code: number;
+    message: string;
+  }>;
+  messages: string[];
+}
+```
+
+### Case Management Types
+
+#### CaseData Interface
+
+Case structure with associated files:
+
+```typescript
+interface CaseData {
+  createdAt: string;
+  caseNumber: string;
+  files: FileData[];
+}
+```
+
+#### CaseMetadata Interface
+
+Extended case information and status:
+
+```typescript
+interface CaseMetadata {
+  caseNumber: string;
+  createdAt: string;
+  updatedAt?: string;
+  description?: string;
+  status?: 'active' | 'archived' | 'completed';
+}
+```
+
+#### CasesToDelete Interface
+
+Bulk case deletion request structure:
+
+```typescript
+interface CasesToDelete {
+  casesToDelete: string[];
+}
+```
+
+### Common Utility Types
+
+#### LoadingState Type
+
+Application-wide loading state enumeration:
+
+```typescript
+type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+```
+
+#### ToastType Type
+
+Toast notification type classification:
+
+```typescript
+type ToastType = 'success' | 'error' | 'warning' | 'info';
+```
+
+#### ApiResponse Interface
+
+Standardized API response wrapper:
+
+```typescript
+interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+```
+
+#### PaginationParams Interface
+
+Query parameters for paginated requests:
+
+```typescript
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+  offset?: number;
+}
+```
+
+#### SortParams Interface
+
+Query parameters for sorted requests:
+
+```typescript
+interface SortParams {
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+```
+
+#### SearchParams Interface
+
+Comprehensive search and filter parameters:
+
+```typescript
+interface SearchParams extends PaginationParams, SortParams, FilterParams {
+  query?: string;
+}
+```
+
+### Centralized Type Management
+
+**Type Definition Location**: All interfaces are centrally defined in `app/types/` with barrel exports from `app/types/index.ts`:
+
+```typescript
+// Barrel export structure
+export * from './annotations';  // AnnotationData, BoxAnnotation
+export * from './user';        // UserData, UserLimits, UserPermissions
+export * from './file';        // FileData, FileMetadata, FileUploadResponse
+export * from './case';        // CaseData, CaseMetadata, CasesToDelete
+export * from './common';      // LoadingState, ToastType, ApiResponse, etc.
+```
+
+**Usage Patterns**:
+
+- **Centralized Imports**: `import { UserData, FileData, AnnotationData } from '~/types';`
+- **Component Props**: All component interfaces extend or use centralized types
+- **Worker APIs**: Type validation based on shared interface definitions
+- **PDF Generation**: Type-safe data flow from frontend through workers
+- **Data Storage**: Structured data persistence with comprehensive type validation
+
+**Benefits**:
+
+- Single source of truth for all data structures
+- Type safety across entire application stack
+- Consistent API contracts between frontend and workers
+- Easier refactoring and maintenance with centralized type management
+- Compile-time error detection for data structure changes
+- Comprehensive coverage of all application domains (user, file, case, annotation)
+- Utility types for common patterns (loading states, API responses, pagination)
 
 ## SDK Examples
 

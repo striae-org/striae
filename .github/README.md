@@ -26,6 +26,14 @@
 
 ## 📋 Changelog
 
+## [2025-09-15] - *[Release v0.9.15.1-beta](https://github.com/striae-org/striae/releases/tag/v0.9.15.1-beta)*
+
+- **Interactive Box Annotation System** - Complete implementation of interactive box drawing tool with real-time annotation capabilities
+- **Box Color Selection Interface** - Dynamic color selector with preset colors and custom color wheel for box annotations
+- **Enhanced PDF Integration** - Box annotations now render accurately in PDF reports with exact positioning and color preservation
+- **Improved UI/UX Components** - Refined toolbar integration, z-index management, and transparent annotation styling
+- **Robust Position Management** - Fixed box annotation positioning with absolute coordinate system for stable multi-box support
+
 ## [2025-09-15] - *[Release v0.9.15-beta](https://github.com/striae-org/striae/releases/tag/v0.9.15-beta)*
 
 - **Security & Authentication Enhancements** - Comprehensive MFA improvements with phone validation, demo number prevention, and enhanced user validation systems

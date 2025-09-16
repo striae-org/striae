@@ -10,6 +10,8 @@
      - [MFAVerification](#mfaverification-appcomponentsauthmfa-verificationtsx)
    - [2. Canvas System](#2-canvas-system)
      - [Canvas](#canvas-appcomponentscanvascanvastsx)
+     - [Box Annotations](#box-annotations-appcomponentscanvasbox-annotationstsx)
+     - [ToolbarColorSelector](#toolbarcolorselector-appcomponentstoolbartoolbar-color-selectortsx)
    - [3. Sidebar System](#3-sidebar-system)
      - [Sidebar Container](#sidebar-container-appcomponentssidebarsidebar-containertsx)
      - [Sidebar](#sidebar-appcomponentssidebarsidebartsx)
@@ -154,6 +156,85 @@ interface CanvasProps {
 - Image load error detection
 - Annotation overlay rendering
 - User interaction handling
+
+#### Box Annotations (`app/components/canvas/box-annotations.tsx`)
+
+**Purpose**: Interactive box annotation drawing and management system
+
+**Features**:
+
+- Mouse-based box drawing with real-time visual feedback
+- Percentage-based coordinate system for device independence
+- Double-click and right-click removal functionality
+- Hover effects with deletion indicators
+- Transparent styling with colored borders
+- Automatic saving integration with existing annotation system
+
+**Key Props**:
+
+```typescript
+interface BoxAnnotationsProps {
+  imageRef: React.RefObject<HTMLImageElement>;
+  activeAnnotations?: Set<string>;
+  annotationData?: AnnotationData | null;
+  onSave: (data: AnnotationData) => void;
+  selectedColor: string;
+  isBoxAnnotationMode: boolean;
+}
+```
+
+**State Management**:
+
+- Drawing state tracking (isDrawing, startPosition, currentBox)
+- Box annotation array management
+- Real-time coordinate calculation and display
+- Integration with toolbar visibility controls
+
+**Key Methods**:
+
+- `handleMouseDown`: Initiates box drawing on mouse press
+- `handleMouseMove`: Updates current box dimensions during drawing
+- `handleMouseUp`: Finalizes box creation and triggers save
+- `handleDoubleClick` / `handleRightClick`: Box removal functionality
+- `calculatePercentageCoordinates`: Converts pixel coordinates to percentages
+
+#### ToolbarColorSelector (`app/components/toolbar/toolbar-color-selector.tsx`)
+
+**Purpose**: Dynamic color selection interface for box annotations
+
+**Features**:
+
+- Preset color grid with common annotation colors
+- Custom color wheel for precise color selection
+- Confirm/cancel workflow with visual preview
+- Automatic appearance when box annotation tool is active
+- Reset functionality to restore previous color selection
+
+**Key Props**:
+
+```typescript
+interface ToolbarColorSelectorProps {
+  isVisible: boolean;
+  selectedColor: string;
+  onColorSelect: (color: string) => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+```
+
+**State Management**:
+
+- Temporary color selection state
+- Preset color array management
+- Visual preview of selected color
+- Confirmation state tracking
+
+**Key Methods**:
+
+- `handleColorSelect`: Updates temporary color selection
+- `handleConfirm`: Applies selected color and closes selector
+- `handleCancel`: Reverts to previous color and closes selector
+- `resetToDefault`: Resets color selection to default value
 
 ### 3. Sidebar System
 

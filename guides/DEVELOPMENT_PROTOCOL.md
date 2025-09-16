@@ -18,13 +18,17 @@
    - [Code Style](#code-style)
    - [Testing Requirements](#testing-requirements)
    - [Documentation](#documentation)
-6. [Security Considerations](#security-considerations)
-7. [Release Management](#release-management)
-8. [Issue Management](#issue-management)
-9. [Communication Guidelines](#communication-guidelines)
-10. [Additional Best Practices](#additional-best-practices)
-11. [Enforcement](#enforcement)
-12. [Questions and Support](#questions-and-support)
+6. [Component Development Patterns](#component-development-patterns)
+   - [Component Architecture](#component-architecture)
+   - [Type Definition Management](#type-definition-management)
+   - [Integration Testing Patterns](#integration-testing-patterns)
+7. [Security Considerations](#security-considerations)
+8. [Release Management](#release-management)
+9. [Issue Management](#issue-management)
+10. [Communication Guidelines](#communication-guidelines)
+11. [Additional Best Practices](#additional-best-practices)
+12. [Enforcement](#enforcement)
+13. [Questions and Support](#questions-and-support)
     - [Internal Developer Program](#internal-developer-program)
 
 ## Overview
@@ -266,6 +270,112 @@ Related to #456
 2. **README Updates**: Update relevant README files for new features
 3. **API Documentation**: Update API documentation for endpoint changes
 4. **Guide Updates**: Update relevant guides in the `/guides` directory
+
+## Component Development Patterns
+
+### Component Architecture
+
+1. **Directory Structure**: Follow established patterns
+   ```
+   app/components/[feature]/
+   ├── component.tsx        # Main component file
+   ├── component.module.css # Component-specific styles
+   └── index.ts            # Export file (if needed)
+   ```
+
+2. **Component Interface Design**:
+   ```typescript
+   // Always define props interface
+   interface ComponentProps {
+     // Required props first
+     data: DataType;
+     onAction: (param: ParamType) => void;
+     
+     // Optional props with clear defaults
+     isVisible?: boolean;
+     className?: string;
+   }
+   
+   export const Component = ({ data, onAction, isVisible = true }: ComponentProps) => {
+     // Component implementation
+   };
+   ```
+
+3. **State Management Patterns**:
+   - Use `useState` for local component state
+   - Use `useContext` for shared state (e.g., AuthContext)
+   - Implement custom hooks for reusable logic
+   - Follow "Props Down, Events Up" pattern
+
+4. **Integration Requirements**:
+   - Canvas components must integrate with existing annotation system
+   - Toolbar components must connect to toolbar state management
+   - PDF workers must receive consistent data structures
+   - All components must support automatic saving workflow
+
+### Type Definition Management
+
+1. **Centralized Types**: Define all interfaces in dedicated type files
+   ```typescript
+   // types/annotations.ts
+   export interface BoxAnnotation {
+     id: string;
+     x: number;      // Percentage 0-100
+     y: number;      // Percentage 0-100
+     width: number;  // Percentage 0-100
+     height: number; // Percentage 0-100
+     color: string;  // Hex color code
+   }
+   
+   export interface AnnotationData {
+     // ... existing fields
+     boxAnnotations?: BoxAnnotation[];
+   }
+   ```
+
+2. **Type Import Patterns**:
+   ```typescript
+   // Import from centralized location
+   import type { BoxAnnotation, AnnotationData } from '~/types/annotations';
+   
+   // Use in component
+   interface ComponentProps {
+     annotations: BoxAnnotation[];
+     data: AnnotationData;
+   }
+   ```
+
+3. **Type Consistency Requirements**:
+   - All annotation-related types must be consistent across frontend and workers
+   - PDF worker must use same type definitions for data processing
+   - API documentation must reflect actual type definitions
+   - Type changes require updates across all consuming components
+
+### Integration Testing Patterns
+
+1. **Component Integration Tests**:
+   ```typescript
+   // Test component interaction with Canvas system
+   describe('BoxAnnotations Integration', () => {
+     it('should integrate with Canvas coordinate system', () => {
+       // Test percentage-based positioning
+     });
+     
+     it('should trigger automatic save on annotation creation', () => {
+       // Test save workflow integration
+     });
+   });
+   ```
+
+2. **API Integration Tests**:
+   - Test worker endpoints with actual component data structures
+   - Verify PDF generation includes box annotations when expected
+   - Test data flow from component through save API to storage
+
+3. **Cross-Component Testing**:
+   - Test toolbar state management with annotation components
+   - Verify color selector integration with box annotation system
+   - Test visibility controls across all annotation types
 
 ## Security Considerations
 

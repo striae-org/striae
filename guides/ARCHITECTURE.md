@@ -97,6 +97,17 @@ Striae follows a modern cloud-native architecture built on Cloudflare's edge com
   - High-resolution image display
   - Dynamic annotation overlay
   - Annotation state management
+  - Interactive box annotation drawing system
+  - Percentage-based coordinate system for device independence
+  - Real-time visual feedback during annotation creation
+- **Components**:
+  - **Canvas**: Main image display and annotation overlay
+  - **BoxAnnotations**: Interactive box drawing and management
+  - **ToolbarColorSelector**: Dynamic color selection interface
+- **Architecture**:
+  - **Data Flow**: Canvas → BoxAnnotations → AnnotationData → Automatic Save
+  - **Type Safety**: Centralized BoxAnnotation and AnnotationData interfaces
+  - **Integration**: Seamless connection with toolbar controls and PDF generation
 
 #### 3. Sidebar Management
 - **Location**: `app/components/sidebar/`
@@ -181,8 +192,11 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 **Key Features**:
 - HTML to PDF conversion
 - Annotation overlay rendering
+- Box annotation rendering with exact positioning and styling
 - Custom branding and headers
 - Date and metadata integration
+- Conditional annotation display based on toolbar state
+- Type-safe data processing with centralized interfaces
 - No authentication required
 
 #### 4. Data Worker (`workers/data-worker/`)
