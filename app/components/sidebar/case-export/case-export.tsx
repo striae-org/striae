@@ -110,34 +110,6 @@ export const CaseExport = ({
         </div>
         
         <div className={styles.content}>
-          <div className={styles.formatSection}>
-            <label className={styles.formatLabel}>Export Format:</label>
-            <div className={styles.formatOptions}>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="exportFormat"
-                  value="json"
-                  checked={selectedFormat === 'json'}
-                  onChange={(e) => setSelectedFormat(e.target.value as ExportFormat)}
-                  disabled={isExporting || isExportingAll}
-                />
-                <span className={styles.radioText}>JSON</span>
-              </label>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="exportFormat"
-                  value="csv"
-                  checked={selectedFormat === 'csv'}
-                  onChange={(e) => setSelectedFormat(e.target.value as ExportFormat)}
-                  disabled={isExporting || isExportingAll}
-                />
-                <span className={styles.radioText}>CSV</span>
-              </label>
-            </div>
-          </div>
-          
           <div className={styles.fieldGroup}>            
             <div className={styles.inputGroup}>
               <input
@@ -202,6 +174,28 @@ export const CaseExport = ({
                 {error}
               </div>
             )}
+            
+            <div className={styles.formatSelector}>
+              <span className={styles.formatLabel}>Format:</span>
+              <div className={styles.formatToggle}>
+                <button
+                  type="button"
+                  className={`${styles.formatOption} ${selectedFormat === 'json' ? styles.formatOptionActive : ''}`}
+                  onClick={() => setSelectedFormat('json')}
+                  disabled={isExporting || isExportingAll}
+                >
+                  JSON
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.formatOption} ${selectedFormat === 'csv' ? styles.formatOptionActive : ''}`}
+                  onClick={() => setSelectedFormat('csv')}
+                  disabled={isExporting || isExportingAll}
+                >
+                  CSV
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

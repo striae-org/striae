@@ -61,46 +61,64 @@
   padding: var(--spaceL);
 }
 
-.formatSection {
-  margin-bottom: var(--spaceM);
+.formatSelector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: var(--spaceM);
   background: var(--backgroundSecondary);
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid var(--border);
+  margin-top: var(--spaceM);
 }
 
 .formatLabel {
-  display: block;
   font-size: var(--fontSizeS);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--foreground);
-  margin-bottom: var(--spaceS);
-}
-
-.formatOptions {
-  display: flex;
-  gap: var(--spaceL);
-}
-
-.radioLabel {
-  display: flex;
-  align-items: center;
-  gap: var(--spaceXS);
-  cursor: pointer;
-  font-size: var(--fontSizeS);
-  color: var(--foreground);
-}
-
-.radioLabel input[type="radio"] {
   margin: 0;
 }
 
-.radioText {
-  font-weight: 500;
+.formatToggle {
+  display: flex;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px color-mix(in lab, var(--black) 10%, transparent);
 }
 
-.radioLabel:hover .radioText {
-  color: var(--primary);
+.formatOption {
+  background: transparent;
+  border: none;
+  padding: var(--spaceS) var(--spaceM);
+  font-size: var(--fontSizeS);
+  font-weight: 500;
+  color: var(--foregroundSecondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-width: 60px;
+}
+
+.formatOption:hover:not(:disabled) {
+  background: var(--backgroundTertiary);
+  color: var(--foreground);
+}
+
+.formatOption:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.formatOptionActive {
+  background: var(--primary) !important;
+  color: var(--white) !important;
+  box-shadow: 0 1px 3px color-mix(in lab, var(--primary) 50%, transparent);
+}
+
+.formatOptionActive:hover:not(:disabled) {
+  background: color-mix(in lab, var(--primary) 90%, var(--black)) !important;
 }
 
 .fieldGroup {
