@@ -17,7 +17,9 @@ import {
 } from '../actions/image-manage';
 import {
   exportCaseData,
+  exportAllCases,
   downloadCaseAsJSON,
+  downloadAllCasesAsJSON,
 } from '../actions/case-export';
 import { 
   canCreateCase, 
@@ -368,6 +370,28 @@ const handleImageSelect = (file: FileData) => {
     }
   };
 
+  const handleExportAll = async () => {
+    try {
+      console.log('Starting export of all cases...');
+      
+      // Export all cases with progress callback
+      const exportData = await exportAllCases(user, {
+        includeAnnotations: true,
+        includeMetadata: true
+      });
+      
+      console.log('All cases export data generated successfully:', exportData);
+      
+      // Download the exported data
+      downloadAllCasesAsJSON(exportData);
+      
+      console.log('All cases export completed');
+    } catch (error) {
+      console.error('Export all failed:', error);
+      throw error; // Re-throw to be handled by the modal
+    }
+  };
+
 return (
     <div className={styles.caseSection}>
      <div className={styles.caseSection}>
@@ -428,6 +452,7 @@ return (
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         onExport={handleExport}
+        onExportAll={handleExportAll}
         currentCaseNumber={currentCase || ''}
       />
         <div className={styles.filesSection}>

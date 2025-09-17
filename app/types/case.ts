@@ -44,5 +44,6 @@ export interface CaseExportData {
     filesWithoutAnnotations: number;
     totalBoxAnnotations: number;
     lastModified?: string;
+    exportError?: string;
   };
 }

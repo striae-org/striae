@@ -412,10 +412,12 @@ interface NotesModalProps {
 **Features**:
 
 - Case number input with auto-population from current case
-- Export case data with validation
+- Export single case data with validation
+- Export all cases functionality with progress tracking
 - Loading states and error handling
 - Keyboard navigation (Escape key)
 - Automatic case number pre-filling when case is loaded
+- Progress visualization for bulk export operations
 
 **Type Definition**: Uses component-specific `CaseExportProps` interface
 
@@ -426,6 +428,7 @@ interface CaseExportProps {
   isOpen: boolean;
   onClose: () => void;
   onExport: (caseNumber: string) => void;
+  onExportAll: () => void;
   currentCaseNumber?: string;
 }
 ```
@@ -467,6 +470,41 @@ export const listCases = async (user: User): Promise<string[]>
 - Case creation and deletion
 - Case renaming functionality
 - User case list management
+
+#### Case Export (`app/components/actions/case-export.ts`)
+
+**Purpose**: Case data export functionality with comprehensive data collection
+
+**Key Functions**:
+
+```typescript
+export const exportCaseData = async (
+  user: User,
+  caseNumber: string,
+  options: ExportOptions
+): Promise<CaseExportData>
+
+export const exportAllCases = async (
+  user: User,
+  options: ExportOptions,
+  onProgress?: (current: number, total: number, caseName: string) => void
+): Promise<AllCasesExportData>
+
+export const downloadCaseAsJSON = (exportData: CaseExportData): void
+export const downloadCaseAsCSV = (exportData: CaseExportData): void
+export const downloadAllCasesAsJSON = (exportData: AllCasesExportData): void
+export const downloadAllCasesAsCSV = (exportData: AllCasesExportData): void
+```
+
+**Features**:
+
+- Single case export with files and annotations
+- Bulk export of all user cases with progress tracking
+- JSON and CSV export formats
+- Comprehensive metadata collection
+- Export validation and error handling
+- Progress callbacks for bulk operations
+- File download utilities
 
 #### Image Management (`app/components/actions/image-manage.ts`)
 

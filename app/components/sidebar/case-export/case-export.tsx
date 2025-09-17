@@ -5,6 +5,7 @@ interface CaseExportProps {
   isOpen: boolean;
   onClose: () => void;
   onExport: (caseNumber: string) => void;
+  onExportAll: () => void;
   currentCaseNumber?: string;
 }
 
@@ -12,11 +13,14 @@ export const CaseExport = ({
   isOpen, 
   onClose, 
   onExport, 
+  onExportAll,
   currentCaseNumber = '' 
 }: CaseExportProps) => {
   const [caseNumber, setCaseNumber] = useState(currentCaseNumber);
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportingAll, setIsExportingAll] = useState(false);
   const [error, setError] = useState<string>('');
+  const [exportProgress, setExportProgress] = useState<{ current: number; total: number; caseName: string } | null>(null);
 
   // Update caseNumber when currentCaseNumber prop changes
   useEffect(() => {
@@ -50,6 +54,7 @@ export const CaseExport = ({
     
     setIsExporting(true);
     setError('');
+    setExportProgress(null);
     
     try {
       await onExport(caseNumber.trim());
@@ -59,6 +64,23 @@ export const CaseExport = ({
       setError(error instanceof Error ? error.message : 'Export failed. Please try again.');
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleExportAll = async () => {
+    setIsExportingAll(true);
+    setError('');
+    setExportProgress({ current: 0, total: 0, caseName: 'Initializing...' });
+    
+    try {
+      await onExportAll();
+      onClose();
+    } catch (error) {
+      console.error('Export all failed:', error);
+      setError(error instanceof Error ? error.message : 'Export all cases failed. Please try again.');
+    } finally {
+      setIsExportingAll(false);
+      setExportProgress(null);
     }
   };
 
@@ -98,16 +120,48 @@ export const CaseExport = ({
                   if (error) setError('');
                 }}
                 placeholder="Enter case number"
-                disabled={isExporting}
+                disabled={isExporting || isExportingAll}
               />
               <button
                 className={styles.exportButton}
                 onClick={handleExport}
-                disabled={!caseNumber.trim() || isExporting}
+                disabled={!caseNumber.trim() || isExporting || isExportingAll}
               >
                 {isExporting ? 'Exporting...' : 'Export Case Data'}
               </button>
             </div>
+            
+            <div className={styles.divider}>
+              <span>OR</span>
+            </div>
+            
+            <div className={styles.exportAllSection}>
+              <button
+                className={styles.exportAllButton}
+                onClick={handleExportAll}
+                disabled={isExporting || isExportingAll}
+              >
+                {isExportingAll ? 'Exporting All Cases...' : 'Export All Cases'}
+              </button>
+              <p className={styles.exportAllDescription}>
+                Export all your cases with their files and annotations in a single download.
+              </p>
+            </div>
+            
+            {exportProgress && (
+              <div className={styles.progressSection}>
+                <div className={styles.progressText}>
+                  Exporting case {exportProgress.current} of {exportProgress.total}: {exportProgress.caseName}
+                </div>
+                <div className={styles.progressBar}>
+                  <div 
+                    className={styles.progressFill}
+                    style={{ width: `${exportProgress.total > 0 ? (exportProgress.current / exportProgress.total) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            
             {error && (
               <div className={styles.error}>
                 {error}
