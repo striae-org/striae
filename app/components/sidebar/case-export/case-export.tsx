@@ -31,6 +31,13 @@ export const CaseExport = ({
     setCaseNumber(currentCaseNumber);
   }, [currentCaseNumber]);
 
+  // Disable images option when exporting all cases
+  useEffect(() => {
+    if (isExportingAll && includeImages) {
+      setIncludeImages(false);
+    }
+  }, [isExportingAll, includeImages]);
+
   // Handle Escape key to close modal
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
@@ -211,7 +218,7 @@ export const CaseExport = ({
                 <div className={styles.checkboxText}>
                   <span>Include Images (ZIP)</span>
                   <p className={styles.checkboxTooltip}>
-                    Downloads a ZIP file containing data and all associated image files
+                    Available for single case exports only. Downloads a ZIP file containing data and all associated image files.
                   </p>
                 </div>
               </label>

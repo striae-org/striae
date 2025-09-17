@@ -175,6 +175,14 @@
   cursor: not-allowed;
 }
 
+.imageOption:has(.checkbox:disabled) {
+  opacity: 0.6;
+}
+
+.imageOption:has(.checkbox:disabled) .checkboxLabel {
+  cursor: not-allowed;
+}
+
 .checkboxText {
   font-size: var(--fontSizeBodyS);
   font-weight: var(--fontWeightMedium);

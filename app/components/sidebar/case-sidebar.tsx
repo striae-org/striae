@@ -356,10 +356,10 @@ const handleImageSelect = (file: FileData) => {
       console.log(`Starting export for case: "${exportCaseNumber}" in ${format.toUpperCase()} format${includeImages ? ' with images (ZIP)' : ''}`);
       
       if (includeImages) {
-        // Use ZIP export when images are included
+        // ZIP export with images - only available for single case exports
         await downloadCaseAsZip(user, exportCaseNumber, format);
       } else {
-        // Use the proper export function with validation
+        // Standard data-only export
         const exportData = await exportCaseData(user, exportCaseNumber, {
           includeAnnotations: true,
           includeMetadata: true
