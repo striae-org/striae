@@ -1,4 +1,5 @@
 import { FileData } from './file';
+import { AnnotationData } from './annotations';
 
 // Case-related types and interfaces
 
@@ -23,4 +24,25 @@ export interface CasesToDelete {
 export interface CaseApiResponse {
   files: FileData[];
   metadata?: CaseMetadata;
+}
+
+export interface CaseExportData {
+  metadata: {
+    caseNumber: string;
+    exportDate: string;
+    exportedBy: string | null;
+    exportVersion: string;
+    totalFiles: number;
+  };
+  files: Array<{
+    fileData: FileData;
+    annotations?: AnnotationData;
+    hasAnnotations: boolean;
+  }>;
+  summary?: {
+    filesWithAnnotations: number;
+    filesWithoutAnnotations: number;
+    totalBoxAnnotations: number;
+    lastModified?: string;
+  };
 }
