@@ -16,6 +16,7 @@ export const CaseExport = ({
 }: CaseExportProps) => {
   const [caseNumber, setCaseNumber] = useState(currentCaseNumber);
   const [isExporting, setIsExporting] = useState(false);
+  const [error, setError] = useState<string>('');
 
   // Handle Escape key to close modal
   useEffect(() => {
@@ -37,14 +38,20 @@ export const CaseExport = ({
   if (!isOpen) return null;
 
   const handleExport = async () => {
-    if (!caseNumber.trim()) return;
+    if (!caseNumber.trim()) {
+      setError('Please enter a case number');
+      return;
+    }
     
     setIsExporting(true);
+    setError('');
+    
     try {
       await onExport(caseNumber.trim());
       onClose();
     } catch (error) {
       console.error('Export failed:', error);
+      setError(error instanceof Error ? error.message : 'Export failed. Please try again.');
     } finally {
       setIsExporting(false);
     }
@@ -81,7 +88,10 @@ export const CaseExport = ({
                 type="text"
                 className={styles.input}
                 value={caseNumber}
-                onChange={(e) => setCaseNumber(e.target.value)}
+                onChange={(e) => {
+                  setCaseNumber(e.target.value);
+                  if (error) setError('');
+                }}
                 placeholder="Enter case number"
                 disabled={isExporting}
               />
@@ -93,6 +103,11 @@ export const CaseExport = ({
                 {isExporting ? 'Exporting...' : 'Export Case Data'}
               </button>
             </div>
+            {error && (
+              <div className={styles.error}>
+                {error}
+              </div>
+            )}
           </div>
         </div>
       </div>

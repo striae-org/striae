@@ -2,6 +2,7 @@ import { User } from 'firebase/auth';
 import { FileData, AnnotationData, CaseExportData } from '~/types';
 import { fetchFiles } from './image-manage';
 import { getNotes } from './notes-manage';
+import { checkExistingCase, validateCaseNumber } from './case-manage';
 
 export interface ExportOptions {
   includeAnnotations?: boolean;
@@ -21,6 +22,17 @@ export async function exportCaseData(
     includeAnnotations = true,
     includeMetadata = true
   } = options;
+
+  // Validate case number format
+  if (!validateCaseNumber(caseNumber)) {
+    throw new Error('Invalid case number format');
+  }
+
+  // Check if case exists
+  const existingCase = await checkExistingCase(user, caseNumber);
+  if (!existingCase) {
+    throw new Error(`Case "${caseNumber}" does not exist`);
+  }
 
   try {
     // Fetch all files for the case
@@ -181,7 +193,7 @@ function formatDateForFilename(date: Date): string {
 }
 
 /**
- * Validate case number format
+ * Validate case number format for export (includes file system checks)
  */
 export function validateCaseNumberForExport(caseNumber: string): { isValid: boolean; error?: string } {
   if (!caseNumber || !caseNumber.trim()) {
@@ -190,18 +202,15 @@ export function validateCaseNumberForExport(caseNumber: string): { isValid: bool
 
   const trimmed = caseNumber.trim();
   
-  if (trimmed.length < 1) {
-    return { isValid: false, error: 'Case number cannot be empty' };
+  // Use the main validation function first
+  if (!validateCaseNumber(trimmed)) {
+    return { isValid: false, error: 'Invalid case number format (only letters, numbers, and hyphens allowed, max 25 characters)' };
   }
 
-  if (trimmed.length > 100) {
-    return { isValid: false, error: 'Case number is too long (max 100 characters)' };
-  }
-
-  // Check for invalid characters that could cause file system issues
+  // Additional file system validation for export
   const invalidChars = /[<>:"/\\|?*]/;
   if (invalidChars.test(trimmed)) {
-    return { isValid: false, error: 'Case number contains invalid characters' };
+    return { isValid: false, error: 'Case number contains invalid characters for file export' };
   }
 
   return { isValid: true };

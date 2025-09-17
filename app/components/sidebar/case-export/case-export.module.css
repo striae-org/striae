@@ -130,3 +130,14 @@
   transform: none;
   box-shadow: none;
 }
+
+.error {
+  margin-top: var(--spaceS);
+  padding: var(--spaceS);
+  background: color-mix(in lab, var(--danger) 10%, transparent);
+  border: 1px solid color-mix(in lab, var(--danger) 30%, transparent);
+  border-radius: 4px;
+  color: var(--danger);
+  font-size: var(--fontSizeS);
+  font-weight: 500;
+}
