@@ -26,6 +26,17 @@
 
 ## 📋 Changelog
 
+## [2025-09-17] - *[Release v0.9.17-beta](https://github.com/striae-org/striae/releases/tag/v0.9.17-beta)*
+
+- **Comprehensive Case Data Export System** - Complete multi-format export functionality with JSON, CSV, and Excel (XLSX) support
+- **Advanced Export Features** - Single case and bulk export capabilities with real-time progress tracking and intelligent error handling
+- **Professional XLSX Integration** - Multi-worksheet Excel files with summary data and detailed case information using SheetJS library
+- **Enhanced User Interface** - Polished export modal with format selection, progress visualization, and responsive design
+- **Complete Documentation Suite** - Comprehensive user guides, FAQ section, and developer documentation for export functionality
+- **Data Completeness Parity** - All 22 annotation fields available across all export formats ensuring comprehensive coverage
+- **Robust Error Recovery** - Export operations continue processing even when individual cases encounter errors
+- **Smart File Organization** - Automatic descriptive filename generation with timestamps and case identifiers
+
 ## [2025-09-15] - *[Release v0.9.15.1-beta](https://github.com/striae-org/striae/releases/tag/v0.9.15.1-beta)*
 
 - **Interactive Box Annotation System** - Complete implementation of interactive box drawing tool with real-time annotation capabilities

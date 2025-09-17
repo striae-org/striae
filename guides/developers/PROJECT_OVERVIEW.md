@@ -97,7 +97,7 @@ For new developers joining the project:
 
 ## Project Status
 
-Striae is currently in **Beta** (v0.9.15.1-beta) with active development. The beta period ends January 1, 2026. The project is actively maintained and welcomes contributions from the forensic technology community.
+Striae is currently in **Beta** (v0.9.17-beta) with active development. The beta period ends January 1, 2026. The project is actively maintained and welcomes contributions from the forensic technology community.
 
 ---
 
