@@ -39,6 +39,10 @@
 10. [Type Definitions](#type-definitions)
     - [AnnotationData Interface](#annotationdata-interface)
     - [BoxAnnotation Interface](#boxannotation-interface)
+    - [Case Export Types](#case-export-types)
+      - [CaseExportData Interface](#caseexportdata-interface)
+      - [AllCasesExportData Interface](#allcasesexportdata-interface)
+      - [ExportOptions Interface](#exportoptions-interface)
     - [Centralized Type Management](#centralized-type-management)
 11. [SDK Examples](#sdk-examples)
     - [JavaScript/TypeScript Client](#javascripttypescript-client)
@@ -861,6 +865,89 @@ interface SearchParams extends PaginationParams, SortParams, FilterParams {
 }
 ```
 
+### Case Export Types
+
+#### CaseExportData Interface
+
+Complete case export data structure for single case exports:
+
+```typescript
+interface CaseExportData {
+  metadata: {
+    caseNumber: string;
+    exportDate: string;
+    exportedBy: string | null;
+    exportVersion: string;
+    totalFiles: number;
+  };
+  files: Array<{
+    fileData: FileData;
+    annotations?: AnnotationData;
+    hasAnnotations: boolean;
+  }>;
+  summary?: {
+    filesWithAnnotations: number;
+    filesWithoutAnnotations: number;
+    totalBoxAnnotations: number;
+    lastModified?: string;
+    exportError?: string;
+  };
+}
+```
+
+#### AllCasesExportData Interface
+
+Comprehensive export data structure for bulk case exports:
+
+```typescript
+interface AllCasesExportData {
+  metadata: {
+    exportDate: string;
+    exportedBy: string | null;
+    exportVersion: string;
+    totalCases: number;
+    totalFiles: number;
+    totalAnnotations: number;
+  };
+  cases: CaseExportData[];
+  summary?: {
+    casesWithFiles: number;
+    casesWithAnnotations: number;
+    casesWithoutFiles: number;
+    lastModified?: string;
+  };
+}
+```
+
+#### ExportOptions Interface
+
+Configuration options for case export operations:
+
+```typescript
+interface ExportOptions {
+  includeAnnotations?: boolean;
+  format?: 'json' | 'csv';
+  includeMetadata?: boolean;
+}
+```
+
+**Export Features**:
+
+- **Format Support**: JSON and CSV/Excel export formats
+- **Comprehensive Data**: All annotation fields including case identifiers, colors, classifications, and box annotations
+- **Bulk Operations**: Export all cases with progress tracking and error handling
+- **Excel Multi-Worksheet**: CSV format creates Excel files with multiple worksheets for bulk exports
+- **Metadata Rich**: Complete export metadata including timestamps, user info, and summary statistics
+- **Error Handling**: Graceful handling of failed case exports with detailed error information
+
+**CSV/Excel Export Details**:
+
+- **Single Case CSV**: Comprehensive CSV with 22 columns including all annotation data
+- **Bulk Export Excel**: Multi-worksheet Excel file with summary sheet and individual case sheets
+- **Complete Data Parity**: CSV/Excel exports contain identical data to JSON exports
+- **Enhanced Box Annotations**: Includes coordinates, colors, timestamps, and labels
+- **Classification Data**: Full support for case identifiers, color schemes, and forensic classifications
+
 ### Centralized Type Management
 
 **Type Definition Location**: All interfaces are centrally defined in `app/types/` with barrel exports from `app/types/index.ts`:
@@ -870,7 +957,7 @@ interface SearchParams extends PaginationParams, SortParams, FilterParams {
 export * from './annotations';  // AnnotationData, BoxAnnotation
 export * from './user';        // UserData, UserLimits, UserPermissions
 export * from './file';        // FileData, FileMetadata, FileUploadResponse
-export * from './case';        // CaseData, CaseMetadata, CasesToDelete
+export * from './case';        // CaseData, CaseMetadata, CasesToDelete, CaseExportData, AllCasesExportData
 export * from './common';      // LoadingState, ToastType, ApiResponse, etc.
 ```
 

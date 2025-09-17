@@ -3,12 +3,13 @@
 
 1. [🔐 Login & Authentication](#-login--authentication)
 2. [📊 Case Management](#-case-management)  
-3. [🎯 Image Annotation](#-image-annotation)
-4. [📄 PDF Generation](#-pdf-generation)
-5. [👤 Account Deletion](#-account-deletion)
-6. [🔧 Troubleshooting](#-troubleshooting)
-7. [🛡️ Security & Best Practices](#️-security--best-practices)
-8. [🚀 Getting Started Quickly](#-getting-started-quickly)
+3. [📤 Case Data Export](#-case-data-export)
+4. [🎯 Image Annotation](#-image-annotation)
+5. [📄 PDF Generation](#-pdf-generation)
+6. [👤 Account Deletion](#-account-deletion)
+7. [🔧 Troubleshooting](#-troubleshooting)
+8. [🛡️ Security & Best Practices](#️-security--best-practices)
+9. [🚀 Getting Started Quickly](#-getting-started-quickly)
 
 ***
 
@@ -42,11 +43,75 @@ A: Striae supports the most common and reliable image formats used in forensic d
 
 ***
 
+## 📤 Case Data Export
+
+**Q: How do I export my case data from Striae?**
+
+A: Striae offers comprehensive case export functionality with multiple format options. To export a single case, enter the case number in the case management panel, select your preferred format (JSON, CSV, or Excel), and click "Export Case Data." For bulk exports, choose your format and click "Export All Cases" to download all your cases at once. The system provides real-time progress tracking and automatically generates properly named files for easy organization.
+
+**Q: What export formats are available and when should I use each?**
+
+A: Striae supports three export formats, each optimized for different use cases:
+
+- **JSON Format**: Choose this for technical analysis, database integration, or when you need structured data with complete hierarchy preservation. JSON provides the most compact file size and maintains all data relationships.
+
+- **CSV Format**: Ideal for single case exports when you need spreadsheet analysis. CSV files include all 22 annotation fields in organized columns, perfect for Excel, Google Sheets, or statistical analysis tools like R.
+
+- **Excel Format**: Best for bulk exports involving multiple cases. Excel files feature organized worksheets with summary statistics and individual case details, plus built-in analysis and formatting capabilities.
+
+**Q: What data is included in exported case files?**
+
+A: All export formats include identical, comprehensive data to ensure complete documentation:
+
+- Complete annotation information (all 22 data fields including case identifiers, visual elements, classifications, and options)
+- Box annotation details with precise coordinates and visual properties
+- Case metadata including file information, upload dates, and case statistics
+- Export tracking information and error handling details
+- Timestamps and user attribution for accountability
+- File IDs, original filenames, and complete annotation data for each file in the case
+
+**Q: Can I export all my cases at once?**
+
+A: Yes! The bulk export feature allows you to export all your cases in a single operation. Choose between JSON format (single comprehensive file) or Excel format (multi-worksheet file with summary data). The system provides real-time progress tracking showing "Exporting case X of Y: [Case Name]" and continues processing even if individual cases encounter errors. Large exports with many cases may take several minutes to complete.
+
+**Q: How does the progress tracking work during bulk exports?**
+
+A: Striae provides comprehensive progress monitoring during bulk exports. You'll see a real-time progress bar showing completion percentage, a case counter displaying which case is currently being processed, and detailed status updates. The system handles errors gracefully—failed cases are noted but don't stop the export process, ensuring you get complete data for all accessible cases.
+
+**Q: What are the file naming conventions for exports?**
+
+A: Striae uses intelligent, descriptive file naming to keep your exports organized:
+
+- **Single Case JSON**: `striae-case-export-[CASE-NUMBER]-[DATE].json`
+- **Single Case CSV**: `striae-case-export-[CASE-NUMBER]-[DATE].csv`
+- **Bulk JSON**: `striae-all-cases-export-[DATE].json`
+- **Bulk Excel**: `striae-all-cases-detailed-[DATE].xlsx`
+
+All files include timestamps to prevent naming conflicts and ensure proper version control.
+
+**Q: My export seems stuck or slow. What should I do?**
+
+A: Export speed depends on several factors. For stuck exports, first check your internet connection and wait for the current case to complete processing. If the export appears frozen, refresh the page and try again. Large bulk exports with many cases naturally take longer. Ensure you have a stable, high-speed internet connection for optimal performance.
+
+**Q: The export download didn't start. How do I fix this?**
+
+A: Download issues are usually browser-related. Check your browser's download settings and permissions, ensuring popup blockers aren't preventing downloads. Try using a different browser if issues persist—Chrome is recommended for best compatibility. Clear your browser cache or try an incognito/private window if problems continue.
+
+**Q: Can I export cases that don't have any annotations?**
+
+A: Yes, Striae will export all cases regardless of whether they contain annotations. Cases without annotations will still include file information, case metadata, and basic case details. The export system distinguishes between cases with and without annotations in the summary data, providing complete documentation of your case portfolio.
+
+**Q: Is there a limit to how many cases I can export at once?**
+
+A: There's no specific limit to the number of cases you can export simultaneously. However, very large exports (hundreds of cases) may take considerable time to process and could be affected by browser timeout limitations.
+
+***
+
 ## 🎯 Image Annotation
 
 **Q: What types of annotations can I add to my images?**
 
-A: Striae offers a rich set of seven annotation tools designed specifically for firearms examination and forensic comparison. You can add case and item numbers to image corners for clear identification. Class characteristics allow you to document technical details like land impressions or primer shear. Index marks let you highlight the specific comparison point shown in the selected image using colorful borders or alphanumeric labels. The support level tool captures your analytical conclusion—whether the evidence supports identification, exclusion, or remains inconclusive. There’s also a confirmation field for adding reviewer signatures and dates in identifications. Finally, the additional notes tool enables you to record detailed observations that provide further context.
+A: Striae offers a rich set of six annotation tools designed specifically for firearms examination and forensic comparison. You can add case and item numbers to image corners for clear identification. Class characteristics allow you to document technical details like land impressions or primer shear. Index marks let you highlight the specific comparison point shown in the selected image using colorful borders or alphanumeric labels. The support level tool captures your analytical conclusion—whether the evidence supports identification, exclusion, or remains inconclusive. There’s also a confirmation field for adding reviewer signatures and dates in identifications. Box annotations allow you to draw colored rectangles around specific areas of interest. Finally, the additional notes tool enables you to record detailed observations that provide further context.
 
 **Q: Can I preview my annotations before creating the PDF report?**
 

@@ -60,6 +60,7 @@ striae/
 
 - **Canvas-based annotation system** for comparison image annotation with box annotations
 - **Case management** with file organization
+- **Comprehensive data export** with JSON, CSV, and multi-worksheet Excel formats
 - **PDF report generation** with annotations
 - **Multi-factor authentication** for security
 - **Real-time image annotation** with various marking features including box tool

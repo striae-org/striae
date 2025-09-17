@@ -22,6 +22,7 @@
      - [Case Export](#case-export-appcomponentssidebarcase-exportcase-exporttsx)
    - [4. Action Components](#4-action-components)
      - [Case Management](#case-management-appcomponentsactionscase-managets)
+     - [Case Export](#case-export-appcomponentsactionscase-exportts)
      - [Image Management](#image-management-appcomponentsactionsimage-managets)
      - [PDF Generation](#pdf-generation-appcomponentsactionsgenerate-pdfts)
      - [Notes Management](#notes-management-appcomponentsactionsnotes-managets)
@@ -407,17 +408,20 @@ interface NotesModalProps {
 
 #### Case Export (`app/components/sidebar/case-export/case-export.tsx`)
 
-**Purpose**: Case data export modal interface
+**Purpose**: Comprehensive case data export modal interface
 
 **Features**:
 
 - Case number input with auto-population from current case
-- Export single case data with validation
-- Export all cases functionality with progress tracking
-- Loading states and error handling
-- Keyboard navigation (Escape key)
+- **Format Selection**: JSON and CSV/Excel export formats with visual toggle
+- **Single Case Export**: Export individual case with complete annotation data
+- **Bulk Export**: Export all cases with real-time progress tracking
+- **Excel Multi-Worksheet**: CSV format creates Excel files with summary and individual case worksheets
+- **Comprehensive Data**: All annotation fields including case identifiers, colors, classifications, and box annotations
+- Loading states and error handling with detailed error messages
+- Keyboard navigation (Escape key) and accessible controls
 - Automatic case number pre-filling when case is loaded
-- Progress visualization for bulk export operations
+- Progress visualization for bulk export operations with case-by-case updates
 
 **Type Definition**: Uses component-specific `CaseExportProps` interface
 
@@ -427,11 +431,21 @@ interface NotesModalProps {
 interface CaseExportProps {
   isOpen: boolean;
   onClose: () => void;
-  onExport: (caseNumber: string) => void;
-  onExportAll: () => void;
+  onExport: (caseNumber: string, format: ExportFormat) => void;
+  onExportAll: (onProgress: (current: number, total: number, caseName: string) => void, format: ExportFormat) => void;
   currentCaseNumber?: string;
 }
+
+export type ExportFormat = 'json' | 'csv';
 ```
+
+**Enhanced Export Features**:
+
+- **Data Parity**: CSV/Excel exports contain identical data to JSON exports (22 columns total)
+- **Format Indicators**: Clear UI showing "CSV/Excel" with tooltip explaining multi-worksheet functionality
+- **Progress Callbacks**: Real-time progress updates during bulk export operations
+- **Error Recovery**: Graceful handling of failed exports with detailed error reporting
+- **Performance Optimization**: Optional annotation inclusion for faster exports when only metadata is needed
 
 ### 4. Action Components
 
@@ -473,7 +487,7 @@ export const listCases = async (user: User): Promise<string[]>
 
 #### Case Export (`app/components/actions/case-export.ts`)
 
-**Purpose**: Case data export functionality with comprehensive data collection
+**Purpose**: Comprehensive case data export functionality with multi-format support
 
 **Key Functions**:
 
@@ -494,17 +508,44 @@ export const downloadCaseAsJSON = (exportData: CaseExportData): void
 export const downloadCaseAsCSV = (exportData: CaseExportData): void
 export const downloadAllCasesAsJSON = (exportData: AllCasesExportData): void
 export const downloadAllCasesAsCSV = (exportData: AllCasesExportData): void
+
+export interface ExportOptions {
+  includeAnnotations?: boolean;
+  format?: 'json' | 'csv';
+  includeMetadata?: boolean;
+}
 ```
 
-**Features**:
+**Enhanced Features**:
 
-- Single case export with files and annotations
-- Bulk export of all user cases with progress tracking
-- JSON and CSV export formats
-- Comprehensive metadata collection
-- Export validation and error handling
-- Progress callbacks for bulk operations
-- File download utilities
+- **Comprehensive Single Case Export**: Complete file and annotation data collection with metadata
+- **Bulk Export with Progress**: Export all user cases with real-time progress callbacks and error handling
+- **Multi-Format Support**: JSON for structured data, CSV for single cases, Excel (.xlsx) for bulk exports
+- **Excel Multi-Worksheet**: Bulk CSV exports create Excel files with summary worksheet and individual case worksheets
+- **Complete Data Parity**: CSV/Excel formats include all 22 annotation fields matching JSON exports
+- **Enhanced Box Annotations**: Includes coordinates, colors, timestamps, and labels in structured format
+- **Forensic Classification Support**: Full case identifiers, color schemes, support levels, and classification data
+- **Performance Options**: Configurable annotation inclusion for faster exports when only metadata needed
+- **Error Recovery**: Graceful handling of failed case exports with detailed error reporting and continuation
+- **File Download Utilities**: Browser-compatible download functions with proper MIME types and cleanup
+- **Export Validation**: Comprehensive case number and data validation before export operations
+
+**CSV/Excel Export Columns (22 total)**:
+
+1. File ID, Original Filename, Upload Date, Has Annotations
+2. **Case Identifiers**: Left Case, Right Case, Left Item, Right Item  
+3. **Visual Elements**: Case Font Color, Index Type, Index Number, Index Color
+4. **Classifications**: Class Type, Custom Class, Class Note, Support Level
+5. **Options**: Has Subclass, Include Confirmation
+6. **Annotations**: Box Annotations Count, Box Annotations Details (with coordinates, colors, timestamps)
+7. **Metadata**: Additional Notes, Last Updated
+
+**XLSX Library Integration**:
+
+- **Multi-Worksheet Excel**: Summary sheet plus individual case sheets for bulk exports
+- **Structured Data Layout**: Professional formatting with headers and metadata sections
+- **Sheet Naming**: Excel-compatible sheet names with case number identifiers
+- **Error Sheets**: Dedicated worksheets for failed case exports with error details
 
 #### Image Management (`app/components/actions/image-manage.ts`)
 
