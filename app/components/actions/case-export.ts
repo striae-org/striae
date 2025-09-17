@@ -338,13 +338,24 @@ export function downloadAllCasesAsCSV(exportData: AllCasesExportData): void {
           'Original Filename', 
           'Upload Date',
           'Has Annotations',
+          'Left Case',
+          'Right Case',
+          'Left Item',
+          'Right Item',
+          'Case Font Color',
           'Class Type',
           'Custom Class',
-          'Support Level',
           'Class Note',
+          'Index Type',
+          'Index Number',
+          'Index Color',
+          'Support Level',
+          'Has Subclass',
+          'Include Confirmation',
           'Box Annotations Count',
           'Box Annotations Details',
-          'Additional Notes'
+          'Additional Notes',
+          'Last Updated'
         ]
       ];
 
@@ -352,7 +363,7 @@ export function downloadAllCasesAsCSV(exportData: AllCasesExportData): void {
       if (caseData.files && caseData.files.length > 0) {
         const fileRows = caseData.files.map(fileEntry => {
           const boxAnnotationsDetails = fileEntry.annotations?.boxAnnotations?.map(box => 
-            `Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} - ${box.label || 'No label'}`
+            `Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} Color:${box.color || 'N/A'} Timestamp:${box.timestamp || 'N/A'} Label:${box.label || 'No label'}`
           ).join('; ') || '';
 
           return [
@@ -360,13 +371,24 @@ export function downloadAllCasesAsCSV(exportData: AllCasesExportData): void {
             fileEntry.fileData.originalFilename,
             fileEntry.fileData.uploadedAt,
             fileEntry.hasAnnotations ? 'Yes' : 'No',
+            fileEntry.annotations?.leftCase || '',
+            fileEntry.annotations?.rightCase || '',
+            fileEntry.annotations?.leftItem || '',
+            fileEntry.annotations?.rightItem || '',
+            fileEntry.annotations?.caseFontColor || '',
             fileEntry.annotations?.classType || '',
             fileEntry.annotations?.customClass || '',
-            fileEntry.annotations?.supportLevel || '',
             fileEntry.annotations?.classNote || '',
+            fileEntry.annotations?.indexType || '',
+            fileEntry.annotations?.indexNumber || '',
+            fileEntry.annotations?.indexColor || '',
+            fileEntry.annotations?.supportLevel || '',
+            fileEntry.annotations?.hasSubclass ? 'Yes' : 'No',
+            fileEntry.annotations?.includeConfirmation ? 'Yes' : 'No',
             fileEntry.annotations?.boxAnnotations?.length || 0,
             boxAnnotationsDetails,
-            fileEntry.annotations?.additionalNotes || ''
+            fileEntry.annotations?.additionalNotes || '',
+            fileEntry.annotations?.updatedAt || ''
           ];
         });
         caseDetailsData.push(...fileRows);
@@ -456,36 +478,56 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
       'File ID',
       'Original Filename',
       'Upload Date',
-      'File Size',
       'Has Annotations',
+      'Left Case',
+      'Right Case',
+      'Left Item',
+      'Right Item',
+      'Case Font Color',
       'Class Type',
       'Custom Class',
-      'Support Level',
       'Class Note',
+      'Index Type',
+      'Index Number',
+      'Index Color',
+      'Support Level',
+      'Has Subclass',
+      'Include Confirmation',
       'Box Annotations Count',
       'Box Annotations Details',
-      'Additional Notes'
+      'Additional Notes',
+      'Last Updated'
     ];
 
     // File data rows
     const fileRows = exportData.files.map(fileEntry => {
       const boxAnnotationsDetails = fileEntry.annotations?.boxAnnotations?.map(box => 
-        `"Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} - ${box.label || 'No label'}"`
+        `"Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} Color:${box.color || 'N/A'} Timestamp:${box.timestamp || 'N/A'} Label:${box.label || 'No label'}"`
       ).join('; ') || '';
 
       return [
         fileEntry.fileData.id,
         fileEntry.fileData.originalFilename,
         fileEntry.fileData.uploadedAt,
-        'N/A', // File size not available in FileData
         fileEntry.hasAnnotations ? 'Yes' : 'No',
+        fileEntry.annotations?.leftCase || '',
+        fileEntry.annotations?.rightCase || '',
+        fileEntry.annotations?.leftItem || '',
+        fileEntry.annotations?.rightItem || '',
+        fileEntry.annotations?.caseFontColor || '',
         fileEntry.annotations?.classType || '',
         fileEntry.annotations?.customClass || '',
-        fileEntry.annotations?.supportLevel || '',
         fileEntry.annotations?.classNote || '',
+        fileEntry.annotations?.indexType || '',
+        fileEntry.annotations?.indexNumber || '',
+        fileEntry.annotations?.indexColor || '',
+        fileEntry.annotations?.supportLevel || '',
+        fileEntry.annotations?.hasSubclass ? 'Yes' : 'No',
+        fileEntry.annotations?.includeConfirmation ? 'Yes' : 'No',
         fileEntry.annotations?.boxAnnotations?.length || 0,
         boxAnnotationsDetails,
-        fileEntry.annotations?.additionalNotes || ''
+        fileEntry.annotations?.additionalNotes || '',
+        fileEntry.annotations?.updatedAt || ''
       ];
     });
 
