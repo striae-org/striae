@@ -31,12 +31,12 @@ export const CaseExport = ({
     setCaseNumber(currentCaseNumber);
   }, [currentCaseNumber]);
 
-  // Disable images option when exporting all cases
+  // Disable images option when exporting all cases or when no case number is entered
   useEffect(() => {
-    if (isExportingAll && includeImages) {
+    if ((isExportingAll || !caseNumber.trim()) && includeImages) {
       setIncludeImages(false);
     }
-  }, [isExportingAll, includeImages]);
+  }, [isExportingAll, caseNumber, includeImages]);
 
   // Handle Escape key to close modal
   useEffect(() => {
@@ -213,7 +213,7 @@ export const CaseExport = ({
                   className={styles.checkbox}
                   checked={includeImages}
                   onChange={(e) => setIncludeImages(e.target.checked)}
-                  disabled={isExporting || isExportingAll}
+                  disabled={!caseNumber.trim() || isExporting || isExportingAll}
                 />
                 <div className={styles.checkboxText}>
                   <span>Include Images (ZIP)</span>
