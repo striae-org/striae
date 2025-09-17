@@ -1,5 +1,5 @@
 import { User } from 'firebase/auth';
-import { FileData, AnnotationData, CaseExportData } from '~/types';
+import { FileData, AnnotationData, CaseExportData, AllCasesExportData } from '~/types';
 import { fetchFiles } from './image-manage';
 import { getNotes } from './notes-manage';
 import { checkExistingCase, validateCaseNumber, listCases } from './case-manage';
@@ -8,24 +8,6 @@ export interface ExportOptions {
   includeAnnotations?: boolean;
   format?: 'json' | 'csv';
   includeMetadata?: boolean;
-}
-
-export interface AllCasesExportData {
-  metadata: {
-    exportDate: string;
-    exportedBy: string | null;
-    exportVersion: string;
-    totalCases: number;
-    totalFiles: number;
-    totalAnnotations: number;
-  };
-  cases: CaseExportData[];
-  summary?: {
-    casesWithFiles: number;
-    casesWithAnnotations: number;
-    casesWithoutFiles: number;
-    lastModified?: string;
-  };
 }
 
 /**

@@ -47,3 +47,21 @@ export interface CaseExportData {
     exportError?: string;
   };
 }
+
+export interface AllCasesExportData {
+  metadata: {
+    exportDate: string;
+    exportedBy: string | null;
+    exportVersion: string;
+    totalCases: number;
+    totalFiles: number;
+    totalAnnotations: number;
+  };
+  cases: CaseExportData[];
+  summary?: {
+    casesWithFiles: number;
+    casesWithAnnotations: number;
+    casesWithoutFiles: number;
+    lastModified?: string;
+  };
+}

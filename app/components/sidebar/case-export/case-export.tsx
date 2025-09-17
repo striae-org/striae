@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import styles from './case-export.module.css';
 
+export type ExportFormat = 'json' | 'csv';
+
 interface CaseExportProps {
   isOpen: boolean;
   onClose: () => void;
-  onExport: (caseNumber: string) => void;
-  onExportAll: (onProgress: (current: number, total: number, caseName: string) => void) => void;
+  onExport: (caseNumber: string, format: ExportFormat) => void;
+  onExportAll: (onProgress: (current: number, total: number, caseName: string) => void, format: ExportFormat) => void;
   currentCaseNumber?: string;
 }
 
@@ -21,6 +23,7 @@ export const CaseExport = ({
   const [isExportingAll, setIsExportingAll] = useState(false);
   const [error, setError] = useState<string>('');
   const [exportProgress, setExportProgress] = useState<{ current: number; total: number; caseName: string } | null>(null);
+  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('json');
 
   // Update caseNumber when currentCaseNumber prop changes
   useEffect(() => {
@@ -57,7 +60,7 @@ export const CaseExport = ({
     setExportProgress(null);
     
     try {
-      await onExport(caseNumber.trim());
+      await onExport(caseNumber.trim(), selectedFormat);
       onClose();
     } catch (error) {
       console.error('Export failed:', error);
@@ -75,7 +78,7 @@ export const CaseExport = ({
     try {
       await onExportAll((current: number, total: number, caseName: string) => {
         setExportProgress({ current, total, caseName });
-      });
+      }, selectedFormat);
       onClose();
     } catch (error) {
       console.error('Export all failed:', error);
@@ -107,6 +110,34 @@ export const CaseExport = ({
         </div>
         
         <div className={styles.content}>
+          <div className={styles.formatSection}>
+            <label className={styles.formatLabel}>Export Format:</label>
+            <div className={styles.formatOptions}>
+              <label className={styles.radioLabel}>
+                <input
+                  type="radio"
+                  name="exportFormat"
+                  value="json"
+                  checked={selectedFormat === 'json'}
+                  onChange={(e) => setSelectedFormat(e.target.value as ExportFormat)}
+                  disabled={isExporting || isExportingAll}
+                />
+                <span className={styles.radioText}>JSON</span>
+              </label>
+              <label className={styles.radioLabel}>
+                <input
+                  type="radio"
+                  name="exportFormat"
+                  value="csv"
+                  checked={selectedFormat === 'csv'}
+                  onChange={(e) => setSelectedFormat(e.target.value as ExportFormat)}
+                  disabled={isExporting || isExportingAll}
+                />
+                <span className={styles.radioText}>CSV</span>
+              </label>
+            </div>
+          </div>
+          
           <div className={styles.fieldGroup}>            
             <div className={styles.inputGroup}>
               <input

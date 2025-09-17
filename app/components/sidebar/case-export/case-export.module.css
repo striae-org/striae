@@ -61,6 +61,48 @@
   padding: var(--spaceL);
 }
 
+.formatSection {
+  margin-bottom: var(--spaceM);
+  padding: var(--spaceM);
+  background: var(--backgroundSecondary);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.formatLabel {
+  display: block;
+  font-size: var(--fontSizeS);
+  font-weight: 500;
+  color: var(--foreground);
+  margin-bottom: var(--spaceS);
+}
+
+.formatOptions {
+  display: flex;
+  gap: var(--spaceL);
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spaceXS);
+  cursor: pointer;
+  font-size: var(--fontSizeS);
+  color: var(--foreground);
+}
+
+.radioLabel input[type="radio"] {
+  margin: 0;
+}
+
+.radioText {
+  font-weight: 500;
+}
+
+.radioLabel:hover .radioText {
+  color: var(--primary);
+}
+
 .fieldGroup {
   display: flex;
   flex-direction: column;

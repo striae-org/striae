@@ -1,8 +1,16 @@
 import { User } from 'firebase/auth';
+import {
+  exportCaseData,
+  exportAllCases,
+  downloadCaseAsJSON,
+  downloadCaseAsCSV,
+  downloadAllCasesAsJSON,
+  downloadAllCasesAsCSV
+} from '../actions/case-export';
 import { useState, useEffect, useRef } from 'react';
 import styles from './cases.module.css';
 import { CasesModal } from './cases-modal';
-import { CaseExport } from './case-export/case-export';
+import { CaseExport, ExportFormat } from './case-export/case-export';
 import {
   validateCaseNumber,
   checkExistingCase,
@@ -15,12 +23,6 @@ import {
   uploadFile,
   deleteFile,
 } from '../actions/image-manage';
-import {
-  exportCaseData,
-  exportAllCases,
-  downloadCaseAsJSON,
-  downloadAllCasesAsJSON,
-} from '../actions/case-export';
 import { 
   canCreateCase, 
   canUploadFile, 
@@ -348,9 +350,9 @@ const handleImageSelect = (file: FileData) => {
     setImageLoaded(true);
   };
 
-  const handleExport = async (exportCaseNumber: string) => {
+  const handleExport = async (exportCaseNumber: string, format: ExportFormat) => {
     try {
-      console.log(`Starting export for case: "${exportCaseNumber}"`);
+      console.log(`Starting export for case: "${exportCaseNumber}" in ${format.toUpperCase()} format`);
       
       // Use the proper export function with validation
       const exportData = await exportCaseData(user, exportCaseNumber, {
@@ -360,19 +362,23 @@ const handleImageSelect = (file: FileData) => {
       
       console.log('Export data generated successfully:', exportData);
       
-      // Download the exported data
-      downloadCaseAsJSON(exportData);
+      // Download the exported data in the selected format
+      if (format === 'json') {
+        downloadCaseAsJSON(exportData);
+      } else {
+        downloadCaseAsCSV(exportData);
+      }
       
-      console.log('Case export completed for:', exportCaseNumber);
+      console.log(`Case export completed for: ${exportCaseNumber} in ${format.toUpperCase()} format`);
     } catch (error) {
       console.error('Export failed:', error);
       throw error; // Re-throw to be handled by the modal
     }
   };
 
-  const handleExportAll = async (onProgress: (current: number, total: number, caseName: string) => void) => {
+  const handleExportAll = async (onProgress: (current: number, total: number, caseName: string) => void, format: ExportFormat) => {
     try {
-      console.log('Starting export of all cases...');
+      console.log(`Starting export of all cases in ${format.toUpperCase()} format...`);
       
       // Export all cases with progress callback
       const exportData = await exportAllCases(user, {
@@ -382,10 +388,14 @@ const handleImageSelect = (file: FileData) => {
       
       console.log('All cases export data generated successfully:', exportData);
       
-      // Download the exported data
-      downloadAllCasesAsJSON(exportData);
+      // Download the exported data in the selected format
+      if (format === 'json') {
+        downloadAllCasesAsJSON(exportData);
+      } else {
+        downloadAllCasesAsCSV(exportData);
+      }
       
-      console.log('All cases export completed');
+      console.log(`All cases export completed in ${format.toUpperCase()} format`);
     } catch (error) {
       console.error('Export all failed:', error);
       throw error; // Re-throw to be handled by the modal
