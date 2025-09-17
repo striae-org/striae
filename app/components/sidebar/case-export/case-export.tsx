@@ -191,8 +191,9 @@ export const CaseExport = ({
                   className={`${styles.formatOption} ${selectedFormat === 'csv' ? styles.formatOptionActive : ''}`}
                   onClick={() => setSelectedFormat('csv')}
                   disabled={isExporting || isExportingAll}
+                  title="CSV for single case, Excel (.xlsx) with multiple worksheets for all cases"
                 >
-                  CSV
+                  CSV/Excel
                 </button>
               </div>
             </div>

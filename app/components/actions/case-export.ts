@@ -3,6 +3,7 @@ import { FileData, AnnotationData, CaseExportData, AllCasesExportData } from '~/
 import { fetchFiles } from './image-manage';
 import { getNotes } from './notes-manage';
 import { checkExistingCase, validateCaseNumber, listCases } from './case-manage';
+import * as XLSX from 'xlsx';
 
 export interface ExportOptions {
   includeAnnotations?: boolean;
@@ -271,49 +272,136 @@ export function downloadAllCasesAsJSON(exportData: AllCasesExportData): void {
 }
 
 /**
- * Download all cases data as CSV file (summary format)
+ * Download all cases data as Excel file with multiple worksheets
  */
 export function downloadAllCasesAsCSV(exportData: AllCasesExportData): void {
   try {
-    const csvHeaders = [
-      'Case Number',
-      'Export Status',
-      'Total Files',
-      'Files with Annotations',
-      'Files without Annotations',
-      'Total Box Annotations',
-      'Last Modified',
-      'Export Error'
+    const workbook = XLSX.utils.book_new();
+
+    // Create summary worksheet
+    const summaryData = [
+      ['Striae - All Cases Export Summary'],
+      [''],
+      ['Export Date', new Date().toISOString()],
+      ['Total Cases', exportData.cases.length],
+      ['Successful Exports', exportData.cases.filter(c => !c.summary?.exportError).length],
+      ['Failed Exports', exportData.cases.filter(c => c.summary?.exportError).length],
+      [''],
+      ['Case Number', 'Export Status', 'Total Files', 'Files with Annotations', 'Files without Annotations', 'Total Box Annotations', 'Last Modified', 'Export Error'],
+      ...exportData.cases.map(caseData => [
+        caseData.metadata.caseNumber,
+        caseData.summary?.exportError ? 'Failed' : 'Success',
+        caseData.metadata.totalFiles,
+        caseData.summary?.filesWithAnnotations || 0,
+        caseData.summary?.filesWithoutAnnotations || 0,
+        caseData.summary?.totalBoxAnnotations || 0,
+        caseData.summary?.lastModified || '',
+        caseData.summary?.exportError || ''
+      ])
     ];
 
-    const csvRows = exportData.cases.map(caseData => [
-      caseData.metadata.caseNumber,
-      caseData.summary?.exportError ? 'Failed' : 'Success',
-      caseData.metadata.totalFiles,
-      caseData.summary?.filesWithAnnotations || 0,
-      caseData.summary?.filesWithoutAnnotations || 0,
-      caseData.summary?.totalBoxAnnotations || 0,
-      caseData.summary?.lastModified || '',
-      caseData.summary?.exportError || ''
-    ]);
+    const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Summary');
 
-    const csvContent = [
-      csvHeaders.join(','),
-      ...csvRows.map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
-    ].join('\n');
+    // Create a worksheet for each case
+    exportData.cases.forEach((caseData, index) => {
+      if (caseData.summary?.exportError) {
+        // For failed cases, create a simple error sheet
+        const errorData = [
+          [`Case ${caseData.metadata.caseNumber} - Export Failed`],
+          [''],
+          ['Error:', caseData.summary.exportError],
+          ['Case Number:', caseData.metadata.caseNumber],
+          ['Total Files:', caseData.metadata.totalFiles]
+        ];
+        const errorWorksheet = XLSX.utils.aoa_to_sheet(errorData);
+        XLSX.utils.book_append_sheet(workbook, errorWorksheet, `Case_${caseData.metadata.caseNumber}_Error`);
+        return;
+      }
 
-    const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
-    const exportFileName = `striae-all-cases-summary-${formatDateForFilename(new Date())}.csv`;
+      // For successful cases, create detailed worksheets
+      const caseDetailsData = [
+        [`Case ${caseData.metadata.caseNumber} - Detailed Export`],
+        [''],
+        ['Case Information'],
+        ['Case Number', caseData.metadata.caseNumber],
+        ['Export Date', caseData.metadata.exportDate],
+        ['Total Files', caseData.metadata.totalFiles],
+        ['Files with Annotations', caseData.summary?.filesWithAnnotations || 0],
+        ['Files without Annotations', caseData.summary?.filesWithoutAnnotations || 0],
+        ['Total Box Annotations', caseData.summary?.totalBoxAnnotations || 0],
+        ['Last Modified', caseData.summary?.lastModified || 'N/A'],
+        [''],
+        ['File Details'],
+        [
+          'File ID',
+          'Original Filename', 
+          'Upload Date',
+          'Has Annotations',
+          'Class Type',
+          'Custom Class',
+          'Support Level',
+          'Class Note',
+          'Box Annotations Count',
+          'Box Annotations Details',
+          'Additional Notes'
+        ]
+      ];
+
+      // Add file data if available
+      if (caseData.files && caseData.files.length > 0) {
+        const fileRows = caseData.files.map(fileEntry => {
+          const boxAnnotationsDetails = fileEntry.annotations?.boxAnnotations?.map(box => 
+            `Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} - ${box.label || 'No label'}`
+          ).join('; ') || '';
+
+          return [
+            fileEntry.fileData.id,
+            fileEntry.fileData.originalFilename,
+            fileEntry.fileData.uploadedAt,
+            fileEntry.hasAnnotations ? 'Yes' : 'No',
+            fileEntry.annotations?.classType || '',
+            fileEntry.annotations?.customClass || '',
+            fileEntry.annotations?.supportLevel || '',
+            fileEntry.annotations?.classNote || '',
+            fileEntry.annotations?.boxAnnotations?.length || 0,
+            boxAnnotationsDetails,
+            fileEntry.annotations?.additionalNotes || ''
+          ];
+        });
+        caseDetailsData.push(...fileRows);
+      } else {
+        caseDetailsData.push(['No detailed file data available for this case']);
+      }
+
+      const caseWorksheet = XLSX.utils.aoa_to_sheet(caseDetailsData);
+      
+      // Clean sheet name for Excel compatibility
+      const sheetName = `Case_${caseData.metadata.caseNumber}`.replace(/[\\\/\?\*\[\]]/g, '_').substring(0, 31);
+      XLSX.utils.book_append_sheet(workbook, caseWorksheet, sheetName);
+    });
+
+    // Generate Excel file
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    
+    // Create blob and download
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    
+    const exportFileName = `striae-all-cases-detailed-${formatDateForFilename(new Date())}.xlsx`;
     
     const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileName);
+    linkElement.href = url;
+    linkElement.download = exportFileName;
     linkElement.click();
     
-    console.log('All cases CSV export download initiated:', exportFileName);
+    // Clean up
+    window.URL.revokeObjectURL(url);
+    
+    console.log('Excel export with multiple worksheets download initiated:', exportFileName);
   } catch (error) {
-    console.error('All cases CSV export failed:', error);
-    throw new Error('Failed to export all cases CSV file');
+    console.error('Excel export failed:', error);
+    throw new Error('Failed to export Excel file');
   }
 }
 
@@ -340,46 +428,87 @@ export function downloadCaseAsJSON(exportData: CaseExportData): void {
 }
 
 /**
- * Download case data as CSV file (simplified format)
+ * Download case data as comprehensive CSV file
  */
 export function downloadCaseAsCSV(exportData: CaseExportData): void {
   try {
-    const csvHeaders = [
+    // Case metadata section
+    const metadataRows = [
+      ['Case Export Report'],
+      [''],
+      ['Case Number', exportData.metadata.caseNumber],
+      ['Export Date', exportData.metadata.exportDate],
+      ['Exported By', exportData.metadata.exportedBy || 'N/A'],
+      ['Export Version', exportData.metadata.exportVersion],
+      ['Total Files', exportData.metadata.totalFiles],
+      [''],
+      ['Summary'],
+      ['Files with Annotations', exportData.summary?.filesWithAnnotations || 0],
+      ['Files without Annotations', exportData.summary?.filesWithoutAnnotations || 0],
+      ['Total Box Annotations', exportData.summary?.totalBoxAnnotations || 0],
+      ['Last Modified', exportData.summary?.lastModified || 'N/A'],
+      [''],
+      ['File Details']
+    ];
+
+    // File details headers
+    const fileHeaders = [
       'File ID',
       'Original Filename',
       'Upload Date',
+      'File Size',
       'Has Annotations',
       'Class Type',
+      'Custom Class',
       'Support Level',
+      'Class Note',
       'Box Annotations Count',
+      'Box Annotations Details',
       'Additional Notes'
     ];
 
-    const csvRows = exportData.files.map(fileEntry => [
-      fileEntry.fileData.id,
-      fileEntry.fileData.originalFilename,
-      fileEntry.fileData.uploadedAt,
-      fileEntry.hasAnnotations ? 'Yes' : 'No',
-      fileEntry.annotations?.classType || '',
-      fileEntry.annotations?.supportLevel || '',
-      fileEntry.annotations?.boxAnnotations?.length || 0,
-      fileEntry.annotations?.additionalNotes ? 'Yes' : 'No'
-    ]);
+    // File data rows
+    const fileRows = exportData.files.map(fileEntry => {
+      const boxAnnotationsDetails = fileEntry.annotations?.boxAnnotations?.map(box => 
+        `"Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} - ${box.label || 'No label'}"`
+      ).join('; ') || '';
 
-    const csvContent = [
-      csvHeaders.join(','),
-      ...csvRows.map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
-    ].join('\n');
+      return [
+        fileEntry.fileData.id,
+        fileEntry.fileData.originalFilename,
+        fileEntry.fileData.uploadedAt,
+        'N/A', // File size not available in FileData
+        fileEntry.hasAnnotations ? 'Yes' : 'No',
+        fileEntry.annotations?.classType || '',
+        fileEntry.annotations?.customClass || '',
+        fileEntry.annotations?.supportLevel || '',
+        fileEntry.annotations?.classNote || '',
+        fileEntry.annotations?.boxAnnotations?.length || 0,
+        boxAnnotationsDetails,
+        fileEntry.annotations?.additionalNotes || ''
+      ];
+    });
+
+    // Combine all data
+    const allRows = [
+      ...metadataRows,
+      fileHeaders,
+      ...fileRows
+    ];
+
+    const csvContent = allRows.map(row => 
+      row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
 
     const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
-    const exportFileName = `striae-case-${exportData.metadata.caseNumber}-summary-${formatDateForFilename(new Date())}.csv`;
+    const exportFileName = `striae-case-${exportData.metadata.caseNumber}-detailed-${formatDateForFilename(new Date())}.csv`;
     
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileName);
     linkElement.click();
     
-    console.log('CSV export download initiated:', exportFileName);
+    console.log('Comprehensive CSV export download initiated:', exportFileName);
   } catch (error) {
     console.error('CSV export failed:', error);
     throw new Error('Failed to export CSV file');
