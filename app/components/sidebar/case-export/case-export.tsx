@@ -6,7 +6,7 @@ export type ExportFormat = 'json' | 'csv';
 interface CaseExportProps {
   isOpen: boolean;
   onClose: () => void;
-  onExport: (caseNumber: string, format: ExportFormat) => void;
+  onExport: (caseNumber: string, format: ExportFormat, includeImages?: boolean) => void;
   onExportAll: (onProgress: (current: number, total: number, caseName: string) => void, format: ExportFormat) => void;
   currentCaseNumber?: string;
 }
@@ -24,6 +24,7 @@ export const CaseExport = ({
   const [error, setError] = useState<string>('');
   const [exportProgress, setExportProgress] = useState<{ current: number; total: number; caseName: string } | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('json');
+  const [includeImages, setIncludeImages] = useState(false);
 
   // Update caseNumber when currentCaseNumber prop changes
   useEffect(() => {
@@ -60,7 +61,7 @@ export const CaseExport = ({
     setExportProgress(null);
     
     try {
-      await onExport(caseNumber.trim(), selectedFormat);
+      await onExport(caseNumber.trim(), selectedFormat, includeImages);
       onClose();
     } catch (error) {
       console.error('Export failed:', error);
@@ -196,6 +197,24 @@ export const CaseExport = ({
                   CSV/Excel
                 </button>
               </div>
+            </div>
+
+            <div className={styles.imageOption}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  className={styles.checkbox}
+                  checked={includeImages}
+                  onChange={(e) => setIncludeImages(e.target.checked)}
+                  disabled={isExporting || isExportingAll}
+                />
+                <div className={styles.checkboxText}>
+                  <span>Include Images (ZIP)</span>
+                  <p className={styles.checkboxTooltip}>
+                    Downloads a ZIP file containing data and all associated image files
+                  </p>
+                </div>
+              </label>
             </div>
           </div>
         </div>
