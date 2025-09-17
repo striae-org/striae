@@ -67,13 +67,6 @@
   gap: var(--spaceS);
 }
 
-.label {
-  font-size: var(--fontSizeS);
-  font-weight: 600;
-  color: var(--foreground);
-  margin-bottom: var(--spaceXS);
-}
-
 .inputGroup {
   display: flex;
   gap: var(--spaceS);

@@ -105,10 +105,7 @@ export const CaseExport = ({
         </div>
         
         <div className={styles.content}>
-          <div className={styles.fieldGroup}>
-            <label htmlFor="caseNumber" className={styles.label}>
-              Case Number:
-            </label>
+          <div className={styles.fieldGroup}>            
             <div className={styles.inputGroup}>
               <input
                 id="caseNumber"
