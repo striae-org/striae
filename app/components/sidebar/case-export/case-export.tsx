@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './case-export.module.css';
 
 interface CaseExportProps {
@@ -16,6 +16,23 @@ export const CaseExport = ({
 }: CaseExportProps) => {
   const [caseNumber, setCaseNumber] = useState(currentCaseNumber);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Handle Escape key to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
