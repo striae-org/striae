@@ -13,7 +13,7 @@
   background: var(--backgroundLight);
   border-radius: var(--spaceXS);
   width: 90%;
-  max-width: var(--maxWidthL);
+  max-width: 480px;
   max-height: 80vh;
   box-shadow: 0 var(--spaceXS) var(--spaceL) color-mix(in lab, var(--black) 10%, transparent);
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
@@ -76,11 +76,11 @@
 
 .formatToggle {
   display: flex;
-  background: var(--backgroundLight);
-  border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+  background: color-mix(in lab, var(--primary) 10%, transparent);
+  border: 1px solid color-mix(in lab, var(--primary) 20%, transparent);
   border-radius: var(--spaceXS);
   overflow: hidden;
-  box-shadow: 0 1px 3px color-mix(in lab, var(--black) 5%, transparent);
+  box-shadow: 0 1px 3px color-mix(in lab, var(--primary) 15%, transparent);
 }
 
 .formatOption {
@@ -89,7 +89,7 @@
   padding: var(--spaceS) var(--spaceM);
   font-size: var(--fontSizeBodyS);
   font-weight: var(--fontWeightMedium);
-  color: var(--textBody);
+  color: var(--primary);
   cursor: pointer;
   transition: all var(--durationS) var(--bezierFastoutSlowin);
   position: relative;
@@ -97,8 +97,8 @@
 }
 
 .formatOption:hover:not(:disabled) {
-  background: color-mix(in lab, var(--background) 95%, transparent);
-  color: var(--text);
+  background: color-mix(in lab, var(--primary) 15%, transparent);
+  color: var(--primary);
 }
 
 .formatOption:disabled {
@@ -107,14 +107,13 @@
 }
 
 .formatOptionActive {
-  background: color-mix(in lab, var(--background) 90%, transparent) !important;
-  color: var(--textTitle) !important;
-  font-weight: var(--fontWeightMedium) !important;
-  box-shadow: 0 1px 3px color-mix(in lab, var(--black) 10%, transparent);
+  background: var(--primary) !important;
+  color: white !important;
+  box-shadow: 0 1px 3px color-mix(in lab, var(--primary) 30%, transparent);
 }
 
 .formatOptionActive:hover:not(:disabled) {
-  background: color-mix(in lab, var(--background) 85%, transparent) !important;
+  background: color-mix(in lab, var(--primary) 85%, var(--black)) !important;
 }
 
 .fieldGroup {
@@ -153,9 +152,9 @@
 }
 
 .exportButton {
-  background: var(--backgroundLight);
-  color: var(--textBody);
-  border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+  background: var(--success);
+  color: white;
+  border: none;
   border-radius: var(--spaceXS);
   padding: var(--spaceM) var(--spaceL);
   font-size: var(--fontSizeBodyS);
@@ -164,17 +163,21 @@
   transition: all var(--durationS) var(--bezierFastoutSlowin);
   white-space: nowrap;
   min-width: 140px;
+  box-shadow: 0 1px 3px color-mix(in lab, var(--success) 30%, transparent);
 }
 
 .exportButton:hover:not(:disabled) {
-  background: color-mix(in lab, var(--background) 95%, transparent);
-  color: var(--text);
+  background: color-mix(in lab, var(--success) 85%, var(--black));
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px color-mix(in lab, var(--success) 40%, transparent);
 }
 
 .exportButton:disabled {
   background: color-mix(in lab, var(--background) 95%, transparent);
   color: var(--textLight);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .divider {
@@ -210,9 +213,9 @@
 }
 
 .exportAllButton {
-  background: var(--backgroundLight);
-  color: var(--textBody);
-  border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+  background: var(--primary);
+  color: white;
+  border: none;
   border-radius: var(--spaceXS);
   padding: var(--spaceM) var(--spaceL);
   font-size: var(--fontSizeBodyS);
@@ -220,17 +223,21 @@
   cursor: pointer;
   transition: all var(--durationS) var(--bezierFastoutSlowin);
   width: 100%;
+  box-shadow: 0 1px 3px color-mix(in lab, var(--primary) 30%, transparent);
 }
 
 .exportAllButton:hover:not(:disabled) {
-  background: color-mix(in lab, var(--background) 95%, transparent);
-  color: var(--text);
+  background: color-mix(in lab, var(--primary) 85%, var(--black));
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px color-mix(in lab, var(--primary) 40%, transparent);
 }
 
 .exportAllButton:disabled {
   background: color-mix(in lab, var(--background) 95%, transparent);
   color: var(--textLight);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .progressSection {
