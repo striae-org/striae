@@ -646,7 +646,7 @@ interface AnnotationData {
 
 #### BoxAnnotation Interface
 
-Individual box annotation structure with percentage-based coordinates:
+Individual box annotation structure with percentage-based coordinates (defined in `app/types/annotations.ts`):
 
 ```typescript
 interface BoxAnnotation {
@@ -657,7 +657,7 @@ interface BoxAnnotation {
   height: number;    // Percentage 0-100
   color: string;     // Hex color code
   label?: string;    // Optional annotation label
-  timestamp: number; // Creation timestamp
+  timestamp: string; // Creation timestamp (ISO 8601 format)
 }
 ```
 

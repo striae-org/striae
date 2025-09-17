@@ -1,4 +1,15 @@
-import { BoxAnnotation } from '~/components/canvas/box-annotations/box-annotations';
+// Annotation-related types and interfaces
+
+export interface BoxAnnotation {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  label?: string;
+  timestamp: string;
+}
 
 export interface AnnotationData {
   leftCase: string;

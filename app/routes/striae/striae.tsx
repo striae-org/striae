@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { SidebarContainer } from '~/components/sidebar/sidebar-container';
 import { Toolbar } from '~/components/toolbar/toolbar';
 import { Canvas } from '~/components/canvas/canvas';
-import { BoxAnnotation } from '~/components/canvas/box-annotations/box-annotations';
+import { BoxAnnotation } from '~/types';
 import { Toast } from '~/components/toast/toast';
 import { getImageUrl } from '~/components/actions/image-manage';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';

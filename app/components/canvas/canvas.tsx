@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { BoxAnnotations, BoxAnnotation } from './box-annotations/box-annotations';
-import { AnnotationData } from '~/types/annotations';
+import { BoxAnnotations } from './box-annotations/box-annotations';
+import { AnnotationData, BoxAnnotation } from '~/types/annotations';
 import styles from './canvas.module.css';
 
 interface CanvasProps {

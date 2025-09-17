@@ -101,6 +101,8 @@ app/components/
 - Firebase MFA integration
 - reCAPTCHA verification
 
+**Type Definition**: Uses Firebase authentication types for MFA setup
+
 **Key Props**:
 
 - `user: User` - Firebase user object
@@ -118,6 +120,8 @@ app/components/
 - SMS code input and validation
 - Error handling and retry logic
 
+**Type Definition**: Uses Firebase `MultiFactorResolver` interface for MFA challenges
+
 ### 2. Canvas System
 
 #### Canvas (`app/components/canvas/canvas.tsx`)
@@ -130,6 +134,8 @@ app/components/
 - Annotation overlay display
 - Loading states and error handling
 - Flash effects for user feedback (subclass characteristics)
+
+**Type Definition**: Uses `AnnotationData` interface from `app/types/annotations.ts`
 
 **Key Props**:
 
@@ -169,6 +175,8 @@ interface CanvasProps {
 - Hover effects with deletion indicators
 - Transparent styling with colored borders
 - Automatic saving integration with existing annotation system
+
+**Type Definition**: Uses `BoxAnnotation` interface from `app/types/annotations.ts`
 
 **Key Props**:
 
@@ -210,6 +218,8 @@ interface BoxAnnotationsProps {
 - Automatic appearance when box annotation tool is active
 - Reset functionality to restore previous color selection
 
+**Type Definition**: Uses component-specific `ToolbarColorSelectorProps` interface
+
 **Key Props**:
 
 ```typescript
@@ -249,6 +259,8 @@ interface ToolbarColorSelectorProps {
 - Keyboard event handling (Escape key)
 - Patreon widget integration
 
+**Type Definition**: Uses `FileData` interface and Firebase `User` type
+
 **Key Props**:
 
 ```typescript
@@ -273,6 +285,8 @@ interface SidebarContainerProps {
 - File upload and selection
 - Image management controls
 
+**Type Definition**: Uses Firebase `User` type and `FileData` interface
+
 #### Case Sidebar (`app/components/sidebar/case-sidebar.tsx`)
 
 **Purpose**: Case-specific sidebar functionality
@@ -283,6 +297,8 @@ interface SidebarContainerProps {
 - File upload interface
 - Image selection and deletion
 - Case validation and error handling
+
+**Type Definition**: Uses component-specific `CaseSidebarProps` interface with `FileData` and Firebase `User` types
 
 **Key Props**:
 
@@ -317,6 +333,8 @@ interface CaseSidebarProps {
 - Subclass characteristics
 - Additional notes handling
 
+**Type Definition**: Uses component-specific interface with custom types for classification options
+
 **Key Props**:
 
 ```typescript
@@ -348,6 +366,8 @@ type SupportLevel = 'ID' | 'Exclusion' | 'Inconclusive';
 - Loading states and error handling
 - Keyboard navigation (Escape key)
 
+**Type Definition**: Uses component-specific `CasesModalProps` interface
+
 **Props**:
 
 ```typescript
@@ -370,6 +390,8 @@ interface CasesModalProps {
 - Save/cancel functionality
 - Keyboard event handling
 - Temporary state management
+
+**Type Definition**: Uses component-specific `NotesModalProps` interface
 
 **Props**:
 
@@ -522,6 +544,8 @@ export const saveNotes = async (
 - Redirect handling
 - Error handling
 
+**Type Definition**: Uses component-specific `SignOutProps` interface
+
 **Props**:
 
 ```typescript
@@ -539,6 +563,8 @@ interface SignOutProps {
 **Components**:
 
 - `Button` - Standard button with variants
+
+**Type Definition**: Uses component-specific `ButtonProps` interface
 
 **Props**:
 
@@ -565,6 +591,8 @@ interface ButtonProps {
 - Color validation
 - Real-time preview
 
+**Type Definition**: Uses component-specific `ColorSelectorProps` interface
+
 **Props**:
 
 ```typescript
@@ -585,6 +613,8 @@ interface ColorSelectorProps {
 - Dynamic year display
 - Terms and privacy links
 
+**Type Definition**: Uses standard React component types without custom interfaces
+
 #### Icon System (`app/components/icon/icon.tsx`)
 
 **Purpose**: Centralized icon management
@@ -595,6 +625,8 @@ interface ColorSelectorProps {
 - Consistent sizing and styling
 - Type-safe icon names
 - Available icons: eye, eye-off, class, ID, index, notes, number, print, other unused/misc icons
+
+**Type Definition**: Uses custom icon type definitions for type-safe icon selection
 
 **Usage**:
 
@@ -614,6 +646,8 @@ interface ColorSelectorProps {
 - User experience guidance
 - Desktop-only enforcement
 
+**Type Definition**: Uses standard React component types without custom interfaces
+
 #### Notice System (`app/components/notice/notice.tsx`)
 
 **Purpose**: Modal notification display
@@ -624,6 +658,8 @@ interface ColorSelectorProps {
 - Keyboard event handling (Escape key)
 - Customizable button text
 - Overlay backdrop
+
+**Type Definition**: Uses component-specific `NoticeProps` interface
 
 **Props**:
 
@@ -649,6 +685,8 @@ interface NoticeProps {
 - Auto-dismiss functionality
 - Customizable styling
 
+**Type Definition**: Uses component-specific `ToastProps` interface
+
 **Props**:
 
 ```typescript
@@ -671,6 +709,8 @@ interface ToastProps {
 - Visibility toggle
 - Active tool state tracking
 - Box annotation mode with color selector integration
+
+**Type Definition**: Uses component-specific `ToolbarProps` interface and `ToolId` type
 
 **Props**:
 
@@ -697,6 +737,8 @@ type ToolId = 'number' | 'class' | 'index' | 'id' | 'notes' | 'print' | 'visibil
 - Widget lifecycle management
 - Callback handling
 
+**Type Definition**: Uses component-specific `TurnstileProps` interface extending HTML div attributes
+
 **Props**:
 
 ```typescript
@@ -719,6 +761,8 @@ interface TurnstileProps extends React.HTMLAttributes<HTMLDivElement> {
 - System theme detection
 - Theme switching functionality
 
+**Type Definition**: Uses custom `Theme` type definition from theme.ts
+
 **Theme Types** (`app/components/theme-provider/theme.ts`):
 
 ```typescript
@@ -740,6 +784,8 @@ type Theme = 'light' | 'dark' | 'system';
 - User reauthentication
 - Firebase integration
 - Error handling with detailed messages
+
+**Type Definition**: Uses component-specific `ManageProfileProps` interface
 
 **Props**:
 
@@ -772,6 +818,8 @@ interface ManageProfileProps {
 - Email notifications on successful deletion
 - Firebase authentication integration
 - Automatic logout after deletion
+
+**Type Definition**: Uses component-specific `DeleteAccountProps` interface with user object type
 
 **Props**:
 
@@ -810,6 +858,8 @@ interface DeleteAccountProps {
 - Inactivity detection
 - Warning countdown display
 - Session extension handling
+
+**Type Definition**: Uses custom hook types from `useInactivityTimeout` hook
 
 ## Component State Management
 

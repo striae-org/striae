@@ -1,16 +1,6 @@
 import { useState, useCallback } from 'react';
+import { BoxAnnotation } from '~/types';
 import styles from './box-annotations.module.css';
-
-export interface BoxAnnotation {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  color: string;
-  label?: string;
-  timestamp: number;
-}
 
 interface BoxAnnotationsProps {
   imageRef: React.RefObject<HTMLImageElement | null>;
@@ -115,7 +105,7 @@ export const BoxAnnotations = ({
         width,
         height,
         color: annotationColor,
-        timestamp: Date.now()
+        timestamp: new Date().toISOString()
       };
       
       onAnnotationsChange([...annotations, newAnnotation]);
