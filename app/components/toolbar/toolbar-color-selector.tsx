@@ -103,15 +103,6 @@ export const ToolbarColorSelector = ({
             ))}
           </div>
         )}
-        
-        <div className={styles.preview}>
-          <span className={styles.previewLabel}>Preview:</span>
-          <div 
-            className={styles.previewSwatch}
-            style={{ backgroundColor: tempSelectedColor }}
-            title={`Selected color: ${tempSelectedColor}`}
-          />
-        </div>
       </div>
     </div>
   );

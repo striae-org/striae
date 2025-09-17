@@ -1,8 +1,7 @@
 .toolbarColorSelector {
   position: absolute;
-  left: 100%;
-  top: 0;
-  margin-left: var(--spaceM);
+  left: calc(100% + var(--spaceM));
+  bottom: 0;
   background: var(--background);
   border-radius: 5px;
   box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
@@ -133,6 +132,21 @@
   border-color: var(--foreground);
   border-width: 3px;
   box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--foreground);
+  transform: scale(1.15);
+  position: relative;
+}
+
+.colorSwatch.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--foreground);
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 0 0 3px var(--background), 0 0 6px var(--background);
+  pointer-events: none;
 }
 
 .preview {

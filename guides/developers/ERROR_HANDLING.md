@@ -44,7 +44,8 @@ export const ERROR_MESSAGES = {
   ACTION_RESTRICTED: 'Operation not allowed',
   PASSWORDS_MISMATCH: 'Passwords do not match',
   WEAK_PASSWORD: 'Password does not meet strength requirements',
-  REQUIRES_RECENT_LOGIN: 'Please sign in again to change your email',
+  REQUIRES_RECENT_LOGIN: 'Please sign in again to complete this action',
+  USER_DISABLED: 'This account has been disabled',
   
   // Reset/Verify Errors
   RESET_EMAIL_SENT: 'Password reset email sent! Check your inbox',
@@ -368,11 +369,13 @@ const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
 ### 1. User-Centric Messages
 
 ❌ **Don't:**
+
 ```typescript
 setErrorMessage('Firebase: Error (auth/invalid-email)');
 ```
 
 ✅ **Do:**
+
 ```typescript
 setErrorMessage(getValidationError('INVALID_EMAIL')); // "Invalid email address"
 ```
@@ -380,11 +383,13 @@ setErrorMessage(getValidationError('INVALID_EMAIL')); // "Invalid email address"
 ### 2. Provide Actionable Guidance
 
 ❌ **Don't:**
+
 ```typescript
 'Code expired'
 ```
 
 ✅ **Do:**
+
 ```typescript
 'Verification code has expired. Please request a new code.'
 ```
@@ -511,6 +516,7 @@ test('handles complete MFA enrollment error flow', async () => {
 ### Manual Testing Checklist
 
 #### Authentication Errors
+
 - [ ] Invalid email format
 - [ ] Wrong password
 - [ ] Non-existent user
@@ -518,6 +524,7 @@ test('handles complete MFA enrollment error flow', async () => {
 - [ ] Firebase service outages
 
 #### MFA Errors
+
 - [ ] Invalid phone numbers
 - [ ] Wrong verification codes
 - [ ] Expired verification codes
@@ -525,12 +532,14 @@ test('handles complete MFA enrollment error flow', async () => {
 - [ ] Network timeouts during code sending
 
 #### Form Validation
+
 - [ ] Required field validation
 - [ ] Format validation (email, phone)
 - [ ] Password strength requirements
 - [ ] Error clearing on input change
 
 #### Edge Cases
+
 - [ ] Rapid successive API calls
 - [ ] Browser back/forward navigation during errors
 - [ ] Page refresh during error states
@@ -625,6 +634,7 @@ const handleApiCall = async () => {
 ### Adding New Error Types
 
 1. **Add to ERROR_MESSAGES constant:**
+
 ```typescript
 export const ERROR_MESSAGES = {
   // ... existing errors
@@ -633,6 +643,7 @@ export const ERROR_MESSAGES = {
 ```
 
 2. **Update handleAuthError function:**
+
 ```typescript
 switch (err.code) {
   // ... existing cases
@@ -642,6 +653,7 @@ switch (err.code) {
 ```
 
 3. **Use in components:**
+
 ```typescript
 const error = getValidationError('NEW_ERROR_TYPE');
 setErrorMessage(error);
@@ -656,6 +668,10 @@ export const handleCanvasError = (error: unknown): string => {
     switch (error.type) {
       case 'INVALID_ANNOTATION':
         return 'Invalid annotation data. Please try again.';
+      case 'INVALID_BOX_ANNOTATION':
+        return 'Invalid box annotation coordinates. Please try drawing again.';
+      case 'BOX_ANNOTATION_TOO_SMALL':
+        return 'Box annotation is too small. Please draw a larger box.';
       case 'CANVAS_LOAD_FAILED':
         return 'Failed to load image. Please refresh and try again.';
       default:

@@ -20,7 +20,7 @@ import {
   getLimitsDescription,
   getUserData
 } from '~/utils/permissions';
-import { FileData } from '~/types';
+import { FileData, CaseActionType } from '~/types';
 
 interface CaseSidebarProps {
   user: User;
@@ -37,8 +37,8 @@ interface CaseSidebarProps {
   setCurrentCase: (caseNumber: string) => void;
   error: string;
   setError: (error: string) => void;
-  successAction: string | null;
-  setSuccessAction: (action: 'loaded' | 'created' | 'deleted' | null) => void;
+  successAction: CaseActionType;
+  setSuccessAction: (action: CaseActionType) => void;
 }
 
 const SUCCESS_MESSAGE_TIMEOUT = 3000;
@@ -77,6 +77,7 @@ export const CaseSidebar = ({
   const [uploadFileError, setUploadFileError] = useState('');
   const [limitsDescription, setLimitsDescription] = useState('');
   const [permissionChecking, setPermissionChecking] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -372,6 +373,14 @@ return (
             className={styles.listButton}
           >
             List All Cases
+          </button>
+    </div>
+    <div className={styles.caseInput}>            
+      <button 
+            onClick={() => setIsExportModalOpen(true)}
+            className={styles.exportButton}
+          >
+            Export Case Data
           </button>
     </div>
     {error && <p className={styles.error}>{error}</p>}

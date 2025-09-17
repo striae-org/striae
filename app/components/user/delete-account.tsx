@@ -217,6 +217,7 @@ export const DeleteAccount = ({ isOpen, onClose, user, company, permitted }: Del
                 type="email"
                 value={emailConfirmation}
                 onChange={(e) => setEmailConfirmation(e.target.value)}
+                onPaste={(e) => e.preventDefault()}
                 className={styles.confirmationInput}
                 placeholder="Enter your email address"
                 autoComplete="off"

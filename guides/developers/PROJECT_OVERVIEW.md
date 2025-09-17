@@ -8,29 +8,38 @@ Striae is a cloud-native forensic annotation application built specifically for 
 
 ```
 striae/
+├── .github/                     # GitHub configuration and workflows
 ├── app/                          # Main Remix application
+│   ├── assets/                  # Application assets (icons, images)
 │   ├── components/              # React components
+│   ├── config/                  # Configuration files
+│   ├── config-example/          # Example configuration templates
+│   ├── contexts/               # React contexts (auth)
+│   ├── hooks/                  # Custom React hooks
 │   ├── routes/                  # Application routes/pages
 │   ├── services/               # Firebase and external services
-│   ├── utils/                  # Utility functions
-│   ├── hooks/                  # Custom React hooks
-│   ├── contexts/               # React contexts (auth)
-│   └── config/                 # Configuration files
-├── workers/                     # Cloudflare Workers
-│   ├── user-worker/            # User data management
-│   ├── image-worker/           # Image upload/management
-│   ├── pdf-worker/             # PDF generation
-│   ├── data-worker/            # Case data management
-│   ├── keys-worker/            # API key management
-│   └── turnstile-worker/       # CAPTCHA verification
-├── public/                     # Static assets
+│   ├── styles/                 # Global styles and CSS utilities
+│   ├── types/                  # TypeScript type definitions
+│   └── utils/                  # Utility functions
+├── build/                       # Production build output
+├── functions/                  # Cloudflare Pages Functions
 ├── guides/                     # Documentation (this directory)
-└── functions/                  # Cloudflare Pages Functions
+├── public/                     # Static assets
+├── release-notes/              # Version release documentation
+├── scripts/                    # Build and deployment scripts
+└── workers/                     # Cloudflare Workers
+    ├── data-worker/            # Case data management
+    ├── image-worker/           # Image upload/management
+    ├── keys-worker/            # API key management
+    ├── pdf-worker/             # PDF generation
+    ├── turnstile-worker/       # CAPTCHA verification
+    └── user-worker/            # User data management
 ```
 
 ## Tech Stack
 
 ### Frontend
+
 - **Framework**: Remix (React-based full-stack framework)
 - **Styling**: CSS Modules + Tailwind CSS
 - **Type Safety**: TypeScript
@@ -38,6 +47,7 @@ striae/
 - **State Management**: React hooks and context
 
 ### Backend/Infrastructure
+
 - **Platform**: Cloudflare Pages + Workers
 - **Database**: Cloudflare KV (Key-Value storage)
 - **Data Storage**: Cloudflare R2 (Object storage)
@@ -47,11 +57,12 @@ striae/
 - **Deployment**: Wrangler (Cloudflare CLI)
 
 ### Key Features
-- **Canvas-based annotation system** for comparison image annotation
+
+- **Canvas-based annotation system** for comparison image annotation with box annotations
 - **Case management** with file organization
 - **PDF report generation** with annotations
 - **Multi-factor authentication** for security
-- **Real-time image annotation** with various marking features
+- **Real-time image annotation** with various marking features including box tool
 - **Cloud-native architecture** for global accessibility and scalability
 
 ## Development Philosophy
@@ -92,6 +103,7 @@ Striae is currently in **Beta** (v0.9.15.1-beta) with active development. The be
 ## Support
 
 For support and questions:
+
 - **Documentation**: [Striae Documentation](https://developers.striae.org/striae-dev/get-started/document-index)
 - **Support Portal**: [Striae Support](https://www.striae.org/support)
 - **Discord**: [Striae on Discord](https://discord.gg/ESUPhTPwHx)

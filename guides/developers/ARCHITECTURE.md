@@ -9,8 +9,9 @@
    - [Key Frontend Components](#key-frontend-components)
      - [1. Authentication System](#1-authentication-system)
      - [2. Canvas System](#2-canvas-system)
-     - [3. Sidebar Management](#3-sidebar-management)
-     - [4. PDF Generation](#4-pdf-generation)
+     - [3. Toolbar System](#3-toolbar-system)
+     - [4. Sidebar Management](#4-sidebar-management)
+     - [5. PDF Generation](#5-pdf-generation)
 4. [Backend Architecture (Cloudflare Workers)](#backend-architecture-cloudflare-workers)
    - [Worker Services Overview](#worker-services-overview)
    - [1. User Worker (`workers/user-worker/`)](#1-user-worker-workersuser-worker)
@@ -56,17 +57,30 @@ Striae follows a modern cloud-native architecture built on Cloudflare's edge com
 ## High-Level Architecture
 
 ```
-    FRONTEND                 BACKEND                EXTERNAL
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Client App    │    │  Cloudflare      │    │   External      │
-│   (Remix/React) │────│  Workers & Pages │────│   Services      │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-    ┌────▼────┐      ┌───────────▼───────────┐      ┌────▼────┐
-    │Firebase │      │   KV   │  R2   │ CF   │      │SendLayer│
-    │  Auth   │      │Storage │Storage│Images│      │  Email  │
-    └─────────┘      └────────┴───────┴──────┘      └─────────┘
+  EXTERNAL      🔐 AUTHENTICATION LAYER            
+┌─────────────┐    ┌─────────────────┐    
+│ SendLayer   │    │  Firebase Auth  │    
+│   Email     │    └─────────────────┘    
+│             │            │             
+└─────────────┘        JWT Tokens        
+       ▲                   │             
+       │                   ▼  📱 APPLICATION LAYER       
+       │               FRONTEND                   BACKEND
+       │ Turnstile  ┌─────────────┐            ┌─────────────┐
+       └─────────── │ React+Remix │  API Keys  │ Cloudflare  │
+                    │ Cloudflare  │◄──────────►│  Workers    │
+                    │   Pages     │            │             │
+                    └─────────────┘            └─────────────┘
+                                                     ▲
+                                                     │ 🗄️ STORAGE LAYER
+                                    ┌────────────────┼────────────────┐
+                                    │                │                │
+                                    ▼                ▼                ▼
+                            ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+                            │ Cloudflare  │   │ Cloudflare  │   │ Cloudflare  │
+                            │     KV      │   │     R2      │   │   Images    │
+                            │  (User DB)  │   │   (Data)    │   │   (Files)   │
+                            └─────────────┘   └─────────────┘   └─────────────┘
 ```
 
 ## Frontend Architecture
@@ -82,15 +96,17 @@ Striae follows a modern cloud-native architecture built on Cloudflare's edge com
 ### Key Frontend Components
 
 #### 1. Authentication System
+
 - **Location**: `app/routes/auth/`
 - **Components**: Login/Registration, MFA
-- **Features**: 
+- **Features**:
   - Firebase Authentication integration
   - Multi-factor authentication support
   - Email verification
   - Password reset functionality
 
 #### 2. Canvas System
+
 - **Location**: `app/components/canvas/`
 - **Purpose**: Forensic image annotation
 - **Features**:
@@ -109,7 +125,26 @@ Striae follows a modern cloud-native architecture built on Cloudflare's edge com
   - **Type Safety**: Centralized BoxAnnotation and AnnotationData interfaces
   - **Integration**: Seamless connection with toolbar controls and PDF generation
 
-#### 3. Sidebar Management
+#### 3. Toolbar System
+
+- **Location**: `app/components/toolbar/`
+- **Purpose**: Central tool selection and application control
+- **Features**:
+  - Tool selection management (number, class, index, id, notes, box, print, visibility)
+  - PDF generation controls
+  - Box annotation mode with color selector
+  - Visibility toggle for all annotation types
+  - Active tool state tracking
+- **Components**:
+  - **Toolbar**: Main toolbar with tool buttons
+  - **ToolbarColorSelector**: Dynamic color picker for box annotations
+- **Architecture**:
+  - **State Management**: Tool selection propagated to canvas and sidebar components
+  - **Event Handling**: Tool activation triggers mode changes in annotation components
+  - **Integration**: Box tool activation automatically displays color selector
+
+#### 4. Sidebar Management
+
 - **Location**: `app/components/sidebar/`
 - **Features**:
   - Case and file management
@@ -117,7 +152,8 @@ Striae follows a modern cloud-native architecture built on Cloudflare's edge com
   - Annotation inputs
   - Visibility controls
 
-#### 4. PDF Generation
+#### 5. PDF Generation
+
 - **Location**: `app/components/actions/`
 - **Purpose**: Report generation
 - **Features**:
@@ -136,11 +172,13 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 **Purpose**: User data management and authentication
 
 **Responsibilities**:
+
 - User profile CRUD operations
 - Case listing management
 - Data synchronization with Firebase Auth
 
 **API Endpoints**:
+
 - `GET /{userUid}` - Retrieve user data
 - `PUT /{userUid}` - Create/update user
 - `DELETE /{userUid}` - Delete user
@@ -148,6 +186,7 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 - `DELETE /{userUid}/cases` - Remove cases from user
 
 **Key Features**:
+
 - CORS protection for striae.org domain
 - Custom authentication via X-Custom-Auth-Key header
 - User data validation and sanitization
@@ -158,17 +197,20 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 **Purpose**: Image upload and management
 
 **Responsibilities**:
+
 - Image upload to Cloudflare Images
 - Signed URL generation for secure access
 - Image metadata management
 - File validation and processing
 
 **API Endpoints**:
+
 - `POST /` - Upload new image
 - `GET /{imageDeliveryPath}` - Generate signed URL for imagedelivery.net path
 - `DELETE /{imageId}` - Delete image
 
 **Key Features**:
+
 - Bearer token authentication
 - Automatic signed URL requirement for security
 - Image format validation
@@ -179,6 +221,7 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 **Purpose**: PDF report generation
 
 **Responsibilities**:
+
 - Dynamic PDF document creation
 - Annotation data integration
 - Custom formatting and styling
@@ -187,9 +230,11 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 **Technology**: Puppeteer for PDF generation
 
 **API Endpoints**:
+
 - `POST /` - Generate PDF report
 
 **Key Features**:
+
 - HTML to PDF conversion
 - Annotation overlay rendering
 - Box annotation rendering with exact positioning and styling
@@ -204,6 +249,7 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 **Purpose**: JSON file data management
 
 **Responsibilities**:
+
 - JSON file storage and retrieval
 - File-based data operations
 - Data validation for JSON format
@@ -212,11 +258,13 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 **Storage**: Cloudflare R2 (STRIAE_DATA bucket)
 
 **API Endpoints**:
+
 - `GET /{filename}.json` - Retrieve JSON file data
 - `PUT /{filename}.json` - Create/update JSON file
 - `DELETE /{filename}.json` - Delete JSON file
 
 **Key Features**:
+
 - JSON file validation
 - R2 bucket storage for file persistence
 - Custom authentication via X-Custom-Auth-Key header
@@ -227,15 +275,18 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 **Purpose**: API key management and authentication
 
 **Responsibilities**:
+
 - API key retrieval and validation
 - Access token management
 - Authentication middleware
 - Security policy enforcement
 
 **API Endpoints**:
+
 - `GET /{keyName}` - Retrieve environment variable value by name
 
 **Key Features**:
+
 - Secure key distribution for other workers
 - Custom authentication via X-Custom-Auth-Key header
 
@@ -244,15 +295,18 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 **Purpose**: CAPTCHA verification
 
 **Responsibilities**:
+
 - Cloudflare Turnstile integration
 - Bot protection
 - Form submission validation
 - Abuse prevention
 
 **API Endpoints**:
+
 - `POST /` - Verify Cloudflare Turnstile token
 
 **Key Features**:
+
 - No authentication required
 - Token validation with Cloudflare Turnstile service
 - IP address logging for verification
@@ -265,6 +319,7 @@ The backend consists of six specialized Cloudflare Workers, each handling specif
 #### 1. Cloudflare KV (User Data Store)
 
 **Namespaces**:
+
 - `USER_DB` - User profiles and metadata
 
 **Data Structure**:
@@ -293,6 +348,7 @@ interface CaseReference {
 #### 2. Cloudflare R2 (Case and Annotation Data Store)
 
 **Buckets**:
+
 - `striae-data` - Case files and annotation data
 
 **Data Structure**:
@@ -339,6 +395,7 @@ interface AnnotationData {
 **Purpose**: High-performance image storage and delivery
 
 **Features**:
+
 - Global CDN distribution
 - Automatic image optimization
 - Signed URL security
@@ -349,6 +406,7 @@ interface AnnotationData {
 **Purpose**: User authentication and identity management
 
 **Features**:
+
 - Email/password authentication
 - Multi-factor authentication
 - Email verification
@@ -366,17 +424,20 @@ interface AnnotationData {
 ### Security Measures
 
 #### 1. Multi-layered Authentication
+
 - Firebase JWT tokens for client authentication
 - Custom API keys for Worker-to-Worker communication
 - CORS policies restricting access to striae.org domain
 
 #### 2. Data Protection
+
 - All data transmission over HTTPS/TLS
 - Signed URLs for image access
 - No plaintext storage of sensitive data
 - AES-256 encryption for stored data
 
 #### 3. Access Controls
+
 - Role-based permissions (not yet implemented)
 - User data segregation
 - Audit logging for data access
@@ -407,12 +468,14 @@ const corsHeaders = {
 ### Optimization Strategies
 
 #### 1. Frontend Optimizations
+
 - Code splitting with Remix
 - Image optimization with Cloudflare Images
 - CSS optimization with Tailwind CSS
 - TypeScript for development efficiency
 
 #### 2. Backend Optimizations
+
 - Lightweight Workers with minimal cold start time
 - Efficient KV/R2 operations with proper key design
 - Request deduplication and caching
@@ -421,11 +484,13 @@ const corsHeaders = {
 ## Scalability Considerations
 
 ### Horizontal Scaling
+
 - Workers automatically scale with demand
 - KV/R2 storage scales independently
 - Edge locations distribute load globally
 
 ### Data Partitioning
+
 - User data partitioned by UID
 - Case data organized by case number
 - Annotations linked to specific cases and image IDs
@@ -433,12 +498,14 @@ const corsHeaders = {
 ## Monitoring and Observability
 
 ### Built-in Monitoring
+
 - Cloudflare Analytics for traffic and performance
 - Worker execution metrics
 - Error tracking and logging
 - Firebase Authentication analytics
 
 ### Custom Logging
+
 - Structured logging in Workers
 - Error aggregation and reporting
 - Performance metric collection
@@ -447,11 +514,13 @@ const corsHeaders = {
 ## Development Architecture
 
 ### Development Environment
+
 - Local development with Wrangler CLI
 - Hot reloading with Vite
 - TypeScript compilation
 
 ### CI/CD Pipeline
+
 - Git-based deployment
 - Automated testing
 - Environment-specific configurations
@@ -460,5 +529,6 @@ const corsHeaders = {
 ## Future Architecture Considerations
 
 ### Custom Features
+
 - Role-based access control and operations
 - Agency-based report formatting

@@ -5,6 +5,7 @@ import { Notice } from '~/components/notice/notice';
 import NoticeText from './NoticeText';
 import { baseMeta } from '~/utils/meta';
 import { Icon } from '~/components/icon/icon';
+import { BlogFeed } from '~/components/blog-feed/blog-feed';
 
 export const meta = () => {
   return baseMeta({
@@ -23,7 +24,7 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState<string>('');
 
   useEffect(() => {
-      const launchDate = new Date('2026-01-01T11:00:00-07:00');
+      const launchDate = new Date('2025-10-01T11:00:00-07:00');
       const updateTimer = () => {
       const now = new Date();
       const diff = launchDate.getTime() - now.getTime();
@@ -75,7 +76,7 @@ export default function Home() {
             </Link>
           </div>
           <div className={styles.subtitle}>
-            <p>Beta Period Ends January 1, 2026 @ 11:00 AM MST</p>
+            <p>Release Candidacy Begins October 1, 2025 @ 11:00 AM MST</p>
             <br />
             <p><a href="https://www.customink.com/fundraising/striae-beta-als-san-diego" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Striae Beta Fundraiser for ALS San Diego in Honor of John Farrell</a></p>
            <div className={styles.youtubeEmbed}>
@@ -89,14 +90,15 @@ export default function Home() {
                 allowFullScreen
               ></iframe>
             </div>
-            Time until full release:
+            Time until candidate release:
              <pre style={{ fontFamily: 'monospace', fontSize: '2.5rem', margin: '0.5em 0', color: '#FFF', background: 'none', border: 'none' }}>{timeLeft}</pre>            
           </div>
           
+          <BlogFeed />
+          
           <div className={styles.aboutSection}>
-            <h2 className={styles.aboutTitle}>About Striae</h2>            
-            <div className={styles.aboutContent}>
-              <h3 className={styles.sectionTitle}>The Origins of Striae</h3>
+            <h2 className={styles.aboutTitle}>The Origins of Striae</h2>            
+            <div className={styles.aboutContent}>              
               <p>
                 Through his experience as a forensic firearms examiner, Stephen encountered a critical bottleneck in the comparison workflow: making detailed, concurrent annotations on comparison images was both cumbersome and inefficient. Existing methods forced examiners to print images separately from the comparison workflow and mark them up by hand, providing no streamlined way to link annotations directly to the digital evidence. This time-consuming process could take up to an hour per casefile, especially in complex investigations.
               </p>
@@ -105,37 +107,7 @@ export default function Home() {
                 </p>
               <p>
                 Striae is one of the first, and potentially the very first, cloud-native forensic annotation applications built specifically for forensic firearms examination—a highly specialized area seldom addressed by existing forensic technology platforms. This innovative solution harnesses global cloud infrastructure (leveraging Cloudflare) to deliver unmatched capabilities in accessibility, security, and operational efficiency for firearms examiners worldwide.
-              </p>
-
-              <h3 className={styles.sectionTitle}>Benefits of Being Cloud-Native (with Cloudflare)</h3>
-              <div className={styles.benefitsList}>
-                <div className={styles.benefit}>
-                  <h4 className={styles.benefitTitle}>Global Deployment</h4>
-                  <p>Striae&apos;s cloud-based architecture allows examiners to securely access their cases and tools from virtually anywhere with an internet connection, facilitating remote collaboration and evidence review regardless of physical lab location.</p>
-                </div>
-                
-                <div className={styles.benefit}>
-                  <h4 className={styles.benefitTitle}>Data Security</h4>
-                  <p>Cloudflare protection means industry-leading safeguards against DDoS attacks, unauthorized access, and application-layer threats. Zero Trust policies, web application firewalls, and global traffic monitoring provide strong defense for sensitive forensic data.</p>
-                </div>
-                
-                <div className={styles.benefit}>
-                  <h4 className={styles.benefitTitle}>Low Overhead</h4>
-                  <p>As a cloud-native platform, Striae eliminates the need for organizations to manage local servers or complex IT infrastructure, reducing both up-front and ongoing operational costs. Cloudflare&apos;s network optimizations also drive down latency and maintenance expenses, ensuring reliable 24/7 service.</p>
-                </div>
-                
-                <div className={styles.benefit}>
-                  <h4 className={styles.benefitTitle}>Scalability</h4>
-                  <p>Cloudflare&apos;s globally distributed network is engineered to seamlessly handle millions of requests per second, automatically scaling to meet demand regardless of workload spikes or geographic location. There is no general upper limit to requests per second for well-intentioned traffic, and Cloudflare&apos;s infrastructure dynamically distributes requests across thousands of servers worldwide, ensuring reliable service even under exceptionally high traffic.</p>
-                  <p>For example, Cloudflare Workers—one of the foundational technologies for cloud-native apps—are designed to process massive traffic bursts and maintain consistent performance at global scale, which enables applications like Striae to serve forensic professionals without service degradation or bottlenecks.</p>
-                  <p>This built-in scalability is a core benefit for Striae, assuring that even sudden surges in usage or the concurrent processing of large forensic data sets will not disrupt performance or availability.</p>
-                </div>
-                
-                <div className={styles.benefit}>
-                  <h4 className={styles.benefitTitle}>Efficient Incident Handling</h4>
-                  <p>Automated evidence preservation, cloud-native traceability, and seamless audit logging accelerate response and minimize disruption if incident review or security triage is needed.</p>
-                </div>
-              </div>
+              </p>             
             </div>
           </div>
 

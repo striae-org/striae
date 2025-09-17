@@ -666,10 +666,11 @@ interface ToastProps {
 
 **Features**:
 
-- Tool selection management
+- Tool selection management (number, class, index, id, notes, box, print, visibility)
 - PDF generation controls
 - Visibility toggle
 - Active tool state tracking
+- Box annotation mode with color selector integration
 
 **Props**:
 
@@ -682,7 +683,7 @@ interface ToolbarProps {
   isGeneratingPDF?: boolean;
 }
 
-type ToolId = 'number' | 'class' | 'index' | 'id' | 'notes' | 'print' | 'visibility';
+type ToolId = 'number' | 'class' | 'index' | 'id' | 'notes' | 'print' | 'visibility' | 'box';
 ```
 
 #### Turnstile CAPTCHA (`app/components/turnstile/turnstile.tsx`)

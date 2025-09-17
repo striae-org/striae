@@ -218,13 +218,13 @@ export const Privacy = () => {
 <p>We may use third-party Service Providers to provide, maintain, and improve Our Service.</p>
 <ul>
 <li>
-<p><strong>Cloudflare</strong></p>
+<p><strong>Cloudflare - Edge Network/Compute, Hosting, Security, and Data Storage</strong></p>
 <p>Their Privacy Policy can be viewed at:
   <br />
   <a href="https://www.cloudflare.com/privacypolicy/" rel="external nofollow noopener" target="_blank">Cloudflare's Privacy Policy</a></p>
 </li>
 <li>
-<p><strong>Infinity</strong></p>
+<p><strong>Infinity - User Support Management</strong></p>
 <p>Their Privacy Policy can be viewed at:
   <br />
   <a href="https://startinfinity.com/privacy-policy" rel="external nofollow noopener" target="_blank">Infinity's Privacy Policy</a></p>

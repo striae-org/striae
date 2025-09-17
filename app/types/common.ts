@@ -4,6 +4,8 @@ export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
+export type CaseActionType = 'loaded' | 'created' | 'deleted' | null;
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;

@@ -76,26 +76,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000" />
         <meta name="color-scheme" content={theme} />
-        <style dangerouslySetInnerHTML={{ __html: themeStyles }} />
-        <style dangerouslySetInnerHTML={{ __html: `
-          html { scroll-behavior: smooth; }
-          body { overflow-x: hidden; }
-        ` }} />
+        <style dangerouslySetInnerHTML={{ __html: themeStyles }} />        
         <Meta />
         <Links />
       </head>
-      <body className="flex flex-col min-h-screen w-screen max-w-full">
+      <body className="flex flex-col min-h-screen w-screen max-w-full overflow-x-hidden">
         <ThemeProvider theme={theme} className="">
         <MobileWarning />
         <main className="flex-grow w-full">
           {children}
         </main>
         <Footer />
-        </ThemeProvider>
+        </ThemeProvider>        
+        <Scripts />
         <ScrollRestoration 
           getKey={(location) => getScrollRestorationKey(location)}
         />
-        <Scripts />
       </body>
     </html>
   );
