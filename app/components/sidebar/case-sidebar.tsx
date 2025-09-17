@@ -2,6 +2,7 @@ import { User } from 'firebase/auth';
 import { useState, useEffect, useRef } from 'react';
 import styles from './cases.module.css';
 import { CasesModal } from './cases-modal';
+import { CaseExport } from './case-export/case-export';
 import {
   validateCaseNumber,
   checkExistingCase,
@@ -341,6 +342,35 @@ const handleImageSelect = (file: FileData) => {
     setImageLoaded(true);
   };
 
+  const handleExport = async (exportCaseNumber: string) => {
+    try {
+      // For now, we'll create a simple export functionality
+      // This can be enhanced later with actual export logic
+      const exportData = {
+        caseNumber: exportCaseNumber,
+        files: files,
+        exportDate: new Date().toISOString(),
+        exportedBy: user.email
+      };
+      
+      // Create a downloadable JSON file
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = `striae-case-${exportCaseNumber}-export.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      
+      console.log('Case export completed for:', exportCaseNumber);
+    } catch (error) {
+      console.error('Export failed:', error);
+      throw error; // Re-throw to be handled by the modal
+    }
+  };
+
 return (
     <div className={styles.caseSection}>
      <div className={styles.caseSection}>
@@ -395,6 +425,13 @@ return (
         onSelectCase={setCaseNumber}
         currentCase={currentCase || ''}
         user={user}
+      />
+      
+      <CaseExport
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onExport={handleExport}
+        currentCaseNumber={currentCase || ''}
       />
         <div className={styles.filesSection}>
       <h4>{currentCase || 'No Case Selected'}</h4>
