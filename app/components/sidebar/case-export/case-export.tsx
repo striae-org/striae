@@ -18,6 +18,11 @@ export const CaseExport = ({
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string>('');
 
+  // Update caseNumber when currentCaseNumber prop changes
+  useEffect(() => {
+    setCaseNumber(currentCaseNumber);
+  }, [currentCaseNumber]);
+
   // Handle Escape key to close modal
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {

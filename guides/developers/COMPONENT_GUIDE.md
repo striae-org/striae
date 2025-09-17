@@ -19,6 +19,7 @@
      - [Notes Sidebar](#notes-sidebar-appcomponentssidebarnotes-sidebartsx)
      - [Cases Modal](#cases-modal-appcomponentssidebarcases-modaltsx)
      - [Notes Modal](#notes-modal-appcomponentssidebarnotes-modaltsx)
+     - [Case Export](#case-export-appcomponentssidebarcase-exportcase-exporttsx)
    - [4. Action Components](#4-action-components)
      - [Case Management](#case-management-appcomponentsactionscase-managets)
      - [Image Management](#image-management-appcomponentsactionsimage-managets)
@@ -401,6 +402,31 @@ interface NotesModalProps {
   onClose: () => void;
   notes: string;
   onSave: (notes: string) => void;
+}
+```
+
+#### Case Export (`app/components/sidebar/case-export/case-export.tsx`)
+
+**Purpose**: Case data export modal interface
+
+**Features**:
+
+- Case number input with auto-population from current case
+- Export case data with validation
+- Loading states and error handling
+- Keyboard navigation (Escape key)
+- Automatic case number pre-filling when case is loaded
+
+**Type Definition**: Uses component-specific `CaseExportProps` interface
+
+**Props**:
+
+```typescript
+interface CaseExportProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onExport: (caseNumber: string) => void;
+  currentCaseNumber?: string;
 }
 ```
 
