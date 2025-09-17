@@ -191,13 +191,6 @@
   box-shadow: none;
 }
 
-.exportAllDescription {
-  margin: 0;
-  font-size: var(--fontSizeXS);
-  color: var(--foregroundSecondary);
-  line-height: 1.4;
-}
-
 .progressSection {
   margin: var(--spaceM) 0;
   padding: var(--spaceS);

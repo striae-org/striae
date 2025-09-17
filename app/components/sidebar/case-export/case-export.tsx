@@ -142,10 +142,7 @@ export const CaseExport = ({
                 disabled={isExporting || isExportingAll}
               >
                 {isExportingAll ? 'Exporting All Cases...' : 'Export All Cases'}
-              </button>
-              <p className={styles.exportAllDescription}>
-                Export all your cases with their files and annotations in a single download.
-              </p>
+              </button>              
             </div>
             
             {exportProgress && (
