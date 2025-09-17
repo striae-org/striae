@@ -370,7 +370,7 @@ const handleImageSelect = (file: FileData) => {
     }
   };
 
-  const handleExportAll = async () => {
+  const handleExportAll = async (onProgress: (current: number, total: number, caseName: string) => void) => {
     try {
       console.log('Starting export of all cases...');
       
@@ -378,7 +378,7 @@ const handleImageSelect = (file: FileData) => {
       const exportData = await exportAllCases(user, {
         includeAnnotations: true,
         includeMetadata: true
-      });
+      }, onProgress);
       
       console.log('All cases export data generated successfully:', exportData);
       

@@ -144,6 +144,12 @@ export async function exportAllCases(
     }
 
     console.log(`All cases export completed. ${exportedCases.length} cases processed.`);
+    
+    // Report completion
+    if (onProgress) {
+      onProgress(caseNumbers.length, caseNumbers.length, 'Export completed!');
+    }
+    
     return allCasesExport;
 
   } catch (error) {

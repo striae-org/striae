@@ -5,7 +5,7 @@ interface CaseExportProps {
   isOpen: boolean;
   onClose: () => void;
   onExport: (caseNumber: string) => void;
-  onExportAll: () => void;
+  onExportAll: (onProgress: (current: number, total: number, caseName: string) => void) => void;
   currentCaseNumber?: string;
 }
 
@@ -70,10 +70,12 @@ export const CaseExport = ({
   const handleExportAll = async () => {
     setIsExportingAll(true);
     setError('');
-    setExportProgress({ current: 0, total: 0, caseName: 'Initializing...' });
+    setExportProgress(null); // Don't show progress until we have real data
     
     try {
-      await onExportAll();
+      await onExportAll((current: number, total: number, caseName: string) => {
+        setExportProgress({ current, total, caseName });
+      });
       onClose();
     } catch (error) {
       console.error('Export all failed:', error);
@@ -142,7 +144,7 @@ export const CaseExport = ({
               </button>              
             </div>
             
-            {exportProgress && (
+            {exportProgress && exportProgress.total > 0 && (
               <div className={styles.progressSection}>
                 <div className={styles.progressText}>
                   Exporting case {exportProgress.current} of {exportProgress.total}: {exportProgress.caseName}
@@ -150,8 +152,16 @@ export const CaseExport = ({
                 <div className={styles.progressBar}>
                   <div 
                     className={styles.progressFill}
-                    style={{ width: `${exportProgress.total > 0 ? (exportProgress.current / exportProgress.total) * 100 : 0}%` }}
+                    style={{ width: `${(exportProgress.current / exportProgress.total) * 100}%` }}
                   />
+                </div>
+              </div>
+            )}
+            
+            {isExportingAll && !exportProgress && (
+              <div className={styles.progressSection}>
+                <div className={styles.progressText}>
+                  Preparing export...
                 </div>
               </div>
             )}
