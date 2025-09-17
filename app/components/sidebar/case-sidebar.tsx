@@ -15,6 +15,10 @@ import {
   uploadFile,
   deleteFile,
 } from '../actions/image-manage';
+import {
+  exportCaseData,
+  downloadCaseAsJSON,
+} from '../actions/case-export';
 import { 
   canCreateCase, 
   canUploadFile, 
@@ -344,25 +348,18 @@ const handleImageSelect = (file: FileData) => {
 
   const handleExport = async (exportCaseNumber: string) => {
     try {
-      // For now, we'll create a simple export functionality
-      // This can be enhanced later with actual export logic
-      const exportData = {
-        caseNumber: exportCaseNumber,
-        files: files,
-        exportDate: new Date().toISOString(),
-        exportedBy: user.email
-      };
+      console.log(`Starting export for case: "${exportCaseNumber}"`);
       
-      // Create a downloadable JSON file
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      // Use the proper export function with validation
+      const exportData = await exportCaseData(user, exportCaseNumber, {
+        includeAnnotations: true,
+        includeMetadata: true
+      });
       
-      const exportFileDefaultName = `striae-case-${exportCaseNumber}-export.json`;
+      console.log('Export data generated successfully:', exportData);
       
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
-      linkElement.click();
+      // Download the exported data
+      downloadCaseAsJSON(exportData);
       
       console.log('Case export completed for:', exportCaseNumber);
     } catch (error) {

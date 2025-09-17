@@ -29,10 +29,12 @@ export async function exportCaseData(
   }
 
   // Check if case exists
+  console.log(`Checking if case "${caseNumber}" exists...`);
   const existingCase = await checkExistingCase(user, caseNumber);
   if (!existingCase) {
     throw new Error(`Case "${caseNumber}" does not exist`);
   }
+  console.log(`Case "${caseNumber}" found, proceeding with export...`);
 
   try {
     // Fetch all files for the case

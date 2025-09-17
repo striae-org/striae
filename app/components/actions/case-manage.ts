@@ -80,7 +80,10 @@ export const validateCaseNumber = (caseNumber: string): boolean => {
 export const checkExistingCase = async (user: User, caseNumber: string): Promise<CaseData | null> => {
   try {
     const apiKey = await getDataApiKey();
-    const response = await fetch(`${DATA_WORKER_URL}/${user.uid}/${caseNumber}/data.json`, {
+    const url = `${DATA_WORKER_URL}/${user.uid}/${caseNumber}/data.json`;
+    console.log(`Checking case existence at: ${url}`);
+    
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -88,11 +91,23 @@ export const checkExistingCase = async (user: User, caseNumber: string): Promise
       }
     });
 
-    if (!response.ok) return null;
+    console.log(`Response status: ${response.status}`);
+    if (!response.ok) {
+      console.log(`Case "${caseNumber}" not found (HTTP ${response.status})`);
+      return null;
+    }
 
-    const data = await response.json();
-    const cases = Array.isArray(data) ? data : [data];
-    return cases.find(c => c.caseNumber === caseNumber) || null;
+    const data = await response.json() as CaseData;
+    console.log(`Case data retrieved:`, data);
+    
+    // Verify the case number matches (extra safety check)
+    if (data.caseNumber === caseNumber) {
+      console.log(`Case "${caseNumber}" validated successfully`);
+      return data;
+    }
+    
+    console.log(`Case number mismatch: expected "${caseNumber}", got "${data.caseNumber}"`);
+    return null;
 
   } catch (error) {
     console.error('Error checking existing case:', error);
