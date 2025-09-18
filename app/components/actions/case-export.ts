@@ -508,12 +508,12 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
       'Last Updated'
     ];
 
-    // File data rows - each box annotation gets its own row
+    // File data rows - file info only on first row, subsequent rows only have box data
     const fileRows: string[][] = [];
     
     exportData.files.forEach(fileEntry => {
-      // Common file data for all rows
-      const baseFileData = [
+      // Full file data for the first row
+      const fullFileData = [
         fileEntry.fileData.id,
         fileEntry.fileData.originalFilename,
         fileEntry.fileData.uploadedAt,
@@ -537,11 +537,15 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
         fileEntry.annotations?.updatedAt || ''
       ];
 
+      // Empty row template for subsequent box annotations (file info columns empty)
+      const emptyFileData = Array(21).fill('');
+
       // If there are box annotations, create a row for each one
       if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
-        fileEntry.annotations.boxAnnotations.forEach(box => {
+        fileEntry.annotations.boxAnnotations.forEach((box, index) => {
+          const rowData = index === 0 ? fullFileData : emptyFileData;
           fileRows.push([
-            ...baseFileData.slice(0, 19), // Up to total box annotations
+            ...rowData,
             box.id,
             box.x.toString(),
             box.y.toString(),
@@ -549,14 +553,13 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
             box.height.toString(),
             box.color || '',
             box.label || '',
-            box.timestamp || '',
-            ...baseFileData.slice(19) // Additional notes and last updated
+            box.timestamp || ''
           ]);
         });
       } else {
         // If no box annotations, still include one row with empty box data
         fileRows.push([
-          ...baseFileData.slice(0, 19), // Up to total box annotations
+          ...fullFileData,
           '', // Box ID
           '', // Box X
           '', // Box Y
@@ -565,7 +568,6 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
           '', // Box Color
           '', // Box Label
           '', // Box Timestamp
-          ...baseFileData.slice(19) // Additional notes and last updated
         ]);
       }
     });
@@ -775,12 +777,12 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
     'Last Updated'
   ];
 
-  // File data rows - each box annotation gets its own row
+  // File data rows - file info only on first row, subsequent rows only have box data
   const fileRows: string[][] = [];
   
   exportData.files.forEach(fileEntry => {
-    // Common file data for all rows
-    const baseFileData = [
+    // Full file data for the first row
+    const fullFileData = [
       fileEntry.fileData.id,
       fileEntry.fileData.originalFilename,
       fileEntry.fileData.uploadedAt,
@@ -804,11 +806,15 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
       fileEntry.annotations?.updatedAt || ''
     ];
 
+    // Empty row template for subsequent box annotations (file info columns empty)
+    const emptyFileData = Array(21).fill('');
+
     // If there are box annotations, create a row for each one
     if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
-      fileEntry.annotations.boxAnnotations.forEach(box => {
+      fileEntry.annotations.boxAnnotations.forEach((box, index) => {
+        const rowData = index === 0 ? fullFileData : emptyFileData;
         fileRows.push([
-          ...baseFileData.slice(0, 19), // Up to total box annotations
+          ...rowData,
           box.id,
           box.x.toString(),
           box.y.toString(),
@@ -816,14 +822,13 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
           box.height.toString(),
           box.color || '',
           box.label || '',
-          box.timestamp || '',
-          ...baseFileData.slice(19) // Additional notes and last updated
+          box.timestamp || ''
         ]);
       });
     } else {
       // If no box annotations, still include one row with empty box data
       fileRows.push([
-        ...baseFileData.slice(0, 19), // Up to total box annotations
+        ...fullFileData,
         '', // Box ID
         '', // Box X
         '', // Box Y
@@ -832,7 +837,6 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
         '', // Box Color
         '', // Box Label
         '', // Box Timestamp
-        ...baseFileData.slice(19) // Additional notes and last updated
       ]);
     }
   });
