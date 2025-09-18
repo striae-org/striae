@@ -96,7 +96,7 @@ export async function exportAllCases(
             caseNumber,
             exportDate: new Date().toISOString(),
             exportedBy: user.email,
-            exportVersion: '1.0',
+            striaeExportSchemaVersion: '1.0',
             totalFiles: 0
           },
           files: [],
@@ -115,7 +115,7 @@ export async function exportAllCases(
       metadata: {
         exportDate: new Date().toISOString(),
         exportedBy: user.email,
-        exportVersion: '1.0',
+        striaeExportSchemaVersion: '1.0',
         totalCases: caseNumbers.length,
         totalFiles,
         totalAnnotations
@@ -233,7 +233,7 @@ export async function exportCaseData(
         caseNumber,
         exportDate: new Date().toISOString(),
         exportedBy: user.email,
-        exportVersion: '1.0',
+        striaeExportSchemaVersion: '1.0',
         totalFiles: files.length
       },
       files: filesWithAnnotations,
@@ -514,7 +514,7 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
       ['Case Number', exportData.metadata.caseNumber],
       ['Export Date', exportData.metadata.exportDate],
       ['Exported By', exportData.metadata.exportedBy || 'N/A'],
-      ['Export Version', exportData.metadata.exportVersion],
+      ['Striae Export Schema Version', exportData.metadata.striaeExportSchemaVersion],
       ['Total Files', exportData.metadata.totalFiles],
       [''],
       ['Summary'],
@@ -789,7 +789,7 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
     ['Case Number', exportData.metadata.caseNumber],
     ['Export Date', exportData.metadata.exportDate],
     ['Exported By', exportData.metadata.exportedBy || 'N/A'],
-    ['Export Version', exportData.metadata.exportVersion],
+    ['Striae Export Schema Version', exportData.metadata.striaeExportSchemaVersion],
     ['Total Files', exportData.metadata.totalFiles],
     [''],
     ['Summary'],
@@ -930,7 +930,7 @@ function generateZipReadme(exportData: CaseExportData): string {
 
 Case Number: ${exportData.metadata.caseNumber}
 Export Date: ${new Date().toISOString()}
-Export Version: ${exportData.metadata.exportVersion}
+Striae Export Schema Version: ${exportData.metadata.striaeExportSchemaVersion}
 
 Summary:
 - Total Files: ${totalFiles}

@@ -30,10 +30,10 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
   const [rightItem, setRightItem] = useState('');
   const [useCurrentCaseLeft, setUseCurrentCaseLeft] = useState(false);
   const [useCurrentCaseRight, setUseCurrentCaseRight] = useState(false);
-  const [caseFontColor, setCaseFontColor] = useState('#FFDE21');
+  const [caseFontColor, setCaseFontColor] = useState('');
 
   // Class characteristics state
-  const [classType, setClassType] = useState<ClassType>('Bullet');
+  const [classType, setClassType] = useState<ClassType | ''>('');
   const [customClass, setCustomClass] = useState('');
   const [classNote, setClassNote] = useState('');
   const [hasSubclass, setHasSubclass] = useState(false);
@@ -41,10 +41,10 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
   // Index state
   const [indexType, setIndexType] = useState<IndexType>('color');
   const [indexNumber, setIndexNumber] = useState('');
-  const [indexColor, setIndexColor] = useState('#000000');
+  const [indexColor, setIndexColor] = useState('');
 
   // Support level and confirmation
-  const [supportLevel, setSupportLevel] = useState<SupportLevel>('ID');
+  const [supportLevel, setSupportLevel] = useState<SupportLevel | ''>('');
   const [includeConfirmation, setIncludeConfirmation] = useState(false);
 
   // Additional Notes Modal
@@ -67,15 +67,15 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
           setRightCase(existingNotes.rightCase);
           setLeftItem(existingNotes.leftItem);
           setRightItem(existingNotes.rightItem);
-          setCaseFontColor(existingNotes.caseFontColor || '#FFDE21');
-          setClassType(existingNotes.classType || 'Bullet');
+          setCaseFontColor(existingNotes.caseFontColor || '');
+          setClassType(existingNotes.classType || '');
           setCustomClass(existingNotes.customClass || '');
           setClassNote(existingNotes.classNote || '');
           setHasSubclass(existingNotes.hasSubclass ?? false);
-          setIndexType(existingNotes.indexType);
+          setIndexType(existingNotes.indexType || 'color');
           setIndexNumber(existingNotes.indexNumber || '');
-          setIndexColor(existingNotes.indexColor || '#000000');
-          setSupportLevel(existingNotes.supportLevel || 'ID');
+          setIndexColor(existingNotes.indexColor || '');
+          setSupportLevel(existingNotes.supportLevel || '');
           setIncludeConfirmation(existingNotes.includeConfirmation);
           setAdditionalNotes(existingNotes.additionalNotes || '');
         }
@@ -99,13 +99,6 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
     }
   }, [useCurrentCaseLeft, useCurrentCaseRight, currentCase]);
 
-  // Automatically set includeConfirmation to true when Identification is selected
-  useEffect(() => {
-    if (supportLevel === 'ID') {
-      setIncludeConfirmation(true);
-    }
-  }, [supportLevel]);
-
   const handleSave = async () => {
 
     if (!imageId) {
@@ -124,21 +117,21 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
         rightCase: rightCase || '',
         leftItem: leftItem || '',
         rightItem: rightItem || '',
-        caseFontColor: caseFontColor || '#FFDE21',
+        caseFontColor: caseFontColor || undefined,
         
         // Class Characteristics
-        classType: classType || 'Bullet',
+        classType: classType as ClassType || undefined,
         customClass: customClass,
-        classNote: classNote || undefined, // Keep as optional
+        classNote: classNote || undefined,
         hasSubclass: hasSubclass,
         
         // Index Information
         indexType: indexType,
         indexNumber: indexNumber,
-        indexColor: indexColor || '#000000',
+        indexColor: indexColor || undefined,
 
         // Support Level & Confirmation
-        supportLevel: supportLevel || 'ID',
+        supportLevel: supportLevel as SupportLevel || undefined,
         includeConfirmation: includeConfirmation,
         
         // Additional Notes
@@ -257,6 +250,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
             onChange={(e) => setClassType(e.target.value as ClassType)}
             className={styles.select}
           >
+            <option value="">Select class type...</option>
             <option value="Bullet">Bullet</option>
             <option value="Cartridge Case">Cartridge Case</option>
             <option value="Other">Other</option>
@@ -318,12 +312,12 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
               onChange={(e) => setIndexNumber(e.target.value)}
               placeholder="Enter index number"              
             />
-          ) : (            
+          ) : indexType === 'color' ? (            
             <ColorSelector
               selectedColor={indexColor}
               onColorSelect={setIndexColor}
             />            
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -334,9 +328,18 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
             id="supportLevel"
             aria-label="Support Level"
             value={supportLevel}
-            onChange={(e) => setSupportLevel(e.target.value as SupportLevel)}
+            onChange={(e) => {
+              const newSupportLevel = e.target.value as SupportLevel;
+              setSupportLevel(newSupportLevel);
+              
+              // Automatically check confirmation field when ID is selected
+              if (newSupportLevel === 'ID') {
+                setIncludeConfirmation(true);
+              }
+            }}
             className={styles.select}
           >
+            <option value="">Select support level...</option>
             <option value="ID">Identification</option>
             <option value="Exclusion">Exclusion</option>
             <option value="Inconclusive">Inconclusive</option>

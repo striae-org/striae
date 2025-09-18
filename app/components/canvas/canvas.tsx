@@ -150,7 +150,7 @@ export const Canvas = ({
         <div className={styles.imageAndNotesContainer}>
           <div className={styles.imageContainer}>
             {/* Class Characteristics - Above Image */}
-            {activeAnnotations?.has('class') && annotationData && (
+            {activeAnnotations?.has('class') && annotationData && (annotationData.customClass || annotationData.classType) && (
               <div className={styles.classCharacteristics}>
                 <div className={styles.classText}>
                   {annotationData.customClass || annotationData.classType}
@@ -193,8 +193,8 @@ export const Canvas = ({
               <div 
                 className={styles.leftAnnotation}
                 style={{ 
-                  color: annotationData.caseFontColor,
-                  backgroundColor: isBlackColor(annotationData.caseFontColor)
+                  color: annotationData.caseFontColor || '#FFDE21',
+                  backgroundColor: isBlackColor(annotationData.caseFontColor || '#FFDE21')
                     ? 'rgba(255, 255, 255, 0.9)' : undefined
                 }}
               >
@@ -208,8 +208,8 @@ export const Canvas = ({
               <div 
                 className={styles.rightAnnotation}
                 style={{ 
-                  color: annotationData.caseFontColor,
-                  backgroundColor: isBlackColor(annotationData.caseFontColor)
+                  color: annotationData.caseFontColor || '#FFDE21',
+                  backgroundColor: isBlackColor(annotationData.caseFontColor || '#FFDE21')
                     ? 'rgba(255, 255, 255, 0.9)' : undefined
                 }}
               >
@@ -227,8 +227,8 @@ export const Canvas = ({
               <div 
                 className={styles.indexAnnotation}
                 style={{ 
-                  color: annotationData.caseFontColor,
-                  backgroundColor: isBlackColor(annotationData.caseFontColor)
+                  color: annotationData.caseFontColor || '#FFDE21',
+                  backgroundColor: isBlackColor(annotationData.caseFontColor || '#FFDE21')
                     ? 'rgba(255, 255, 255, 0.9)' : undefined
                 }}
               >
@@ -261,7 +261,7 @@ export const Canvas = ({
       )}
       
       {/* Support Level - Bottom Left of Canvas */}
-      {activeAnnotations?.has('id') && annotationData && (
+      {activeAnnotations?.has('id') && annotationData && annotationData.supportLevel && (
         <div className={styles.supportLevelAnnotation}>
           <div 
             className={styles.supportLevelText}

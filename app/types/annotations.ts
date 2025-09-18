@@ -15,14 +15,14 @@ export interface AnnotationData {
   rightCase: string;
   leftItem: string;
   rightItem: string;
-  caseFontColor: string;
-  classType: 'Bullet' | 'Cartridge Case' | 'Other';
+  caseFontColor?: string;
+  classType?: 'Bullet' | 'Cartridge Case' | 'Other';
   customClass?: string;
   classNote?: string;
-  indexType: 'number' | 'color';
+  indexType?: 'number' | 'color';
   indexNumber?: string;
   indexColor?: string;
-  supportLevel: 'ID' | 'Exclusion' | 'Inconclusive';
+  supportLevel?: 'ID' | 'Exclusion' | 'Inconclusive';
   hasSubclass?: boolean;
   includeConfirmation: boolean;
   additionalNotes?: string;
