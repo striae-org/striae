@@ -365,7 +365,7 @@ export function downloadAllCasesAsCSV(exportData: AllCasesExportData): void {
       if (caseData.files && caseData.files.length > 0) {
         const fileRows = caseData.files.map(fileEntry => {
           const boxAnnotationsDetails = fileEntry.annotations?.boxAnnotations?.map(box => 
-            `Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} Color:${box.color || 'N/A'} Timestamp:${box.timestamp || 'N/A'} Label:${box.label || 'No label'}`
+            `Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} Color:${box.color || 'N/A'} Timestamp:${box.timestamp || 'N/A'}`
           ).join('; ') || '';
 
           return [
@@ -502,7 +502,6 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
       'Box Width',
       'Box Height',
       'Box Color',
-      'Box Label',
       'Box Timestamp',
       'Additional Notes',
       'Last Updated'
@@ -559,7 +558,6 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
             box.width.toString(),
             box.height.toString(),
             box.color || '',
-            box.label || '',
             box.timestamp || '',
             ...additionalData
           ]);
@@ -574,7 +572,6 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
           '', // Box Width
           '', // Box Height
           '', // Box Color
-          '', // Box Label
           '', // Box Timestamp
           ...additionalFileData
         ]);
@@ -780,7 +777,6 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
     'Box Width',
     'Box Height',
     'Box Color',
-    'Box Label',
     'Box Timestamp',
     'Additional Notes',
     'Last Updated'
@@ -837,7 +833,6 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
           box.width.toString(),
           box.height.toString(),
           box.color || '',
-          box.label || '',
           box.timestamp || '',
           ...additionalData
         ]);
@@ -852,7 +847,6 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
         '', // Box Width
         '', // Box Height
         '', // Box Color
-        '', // Box Label
         '', // Box Timestamp
         ...additionalFileData
       ]);

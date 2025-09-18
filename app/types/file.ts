@@ -6,15 +6,6 @@ export interface FileData {
   uploadedAt: string;
 }
 
-export interface FileMetadata {
-  size?: number;
-  mimeType?: string;
-  dimensions?: {
-    width: number;
-    height: number;
-  };
-}
-
 export interface FileUploadResponse {
   success: boolean;
   result: {

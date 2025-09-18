@@ -11,7 +11,7 @@ import { CaseData, FileData, ImageUploadResponse } from '~/types';
 const WORKER_URL = paths.data_worker_url;
 const IMAGE_URL = paths.image_worker_url;
 
-interface ApiResponse {
+interface FileApiResponse {
   files: FileData[];
 }
 
@@ -20,7 +20,7 @@ export const fetchFiles = async (user: User, caseNumber: string): Promise<FileDa
   const response = await fetch(`${WORKER_URL}/${user.uid}/${caseNumber}/data.json`, {
     headers: { 'X-Custom-Auth-Key': apiKey }
   });
-  const data = (await response.json()) as ApiResponse;
+  const data = (await response.json()) as FileApiResponse;
   return data.files || [];
 };
 
