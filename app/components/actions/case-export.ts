@@ -475,7 +475,7 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
       ['File Details']
     ];
 
-    // File details headers
+    // File details headers (updated for individual box annotations)
     const fileHeaders = [
       'File ID',
       'Original Filename',
@@ -495,19 +495,25 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
       'Support Level',
       'Has Subclass',
       'Include Confirmation',
-      'Box Annotations Count',
-      'Box Annotations Details',
+      'Total Box Annotations',
+      'Box ID',
+      'Box X',
+      'Box Y',
+      'Box Width',
+      'Box Height',
+      'Box Color',
+      'Box Label',
+      'Box Timestamp',
       'Additional Notes',
       'Last Updated'
     ];
 
-    // File data rows
-    const fileRows = exportData.files.map(fileEntry => {
-      const boxAnnotationsDetails = fileEntry.annotations?.boxAnnotations?.map(box => 
-        `"Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} Color:${box.color || 'N/A'} Timestamp:${box.timestamp || 'N/A'} Label:${box.label || 'No label'}"`
-      ).join('; ') || '';
-
-      return [
+    // File data rows - each box annotation gets its own row
+    const fileRows: string[][] = [];
+    
+    exportData.files.forEach(fileEntry => {
+      // Common file data for all rows
+      const baseFileData = [
         fileEntry.fileData.id,
         fileEntry.fileData.originalFilename,
         fileEntry.fileData.uploadedAt,
@@ -526,11 +532,42 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
         fileEntry.annotations?.supportLevel || '',
         fileEntry.annotations?.hasSubclass ? 'Yes' : 'No',
         fileEntry.annotations?.includeConfirmation ? 'Yes' : 'No',
-        fileEntry.annotations?.boxAnnotations?.length || 0,
-        boxAnnotationsDetails,
+        (fileEntry.annotations?.boxAnnotations?.length || 0).toString(),
         fileEntry.annotations?.additionalNotes || '',
         fileEntry.annotations?.updatedAt || ''
       ];
+
+      // If there are box annotations, create a row for each one
+      if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
+        fileEntry.annotations.boxAnnotations.forEach(box => {
+          fileRows.push([
+            ...baseFileData.slice(0, 19), // Up to total box annotations
+            box.id,
+            box.x.toString(),
+            box.y.toString(),
+            box.width.toString(),
+            box.height.toString(),
+            box.color || '',
+            box.label || '',
+            box.timestamp || '',
+            ...baseFileData.slice(19) // Additional notes and last updated
+          ]);
+        });
+      } else {
+        // If no box annotations, still include one row with empty box data
+        fileRows.push([
+          ...baseFileData.slice(0, 19), // Up to total box annotations
+          '', // Box ID
+          '', // Box X
+          '', // Box Y
+          '', // Box Width
+          '', // Box Height
+          '', // Box Color
+          '', // Box Label
+          '', // Box Timestamp
+          ...baseFileData.slice(19) // Additional notes and last updated
+        ]);
+      }
     });
 
     // Combine all data
@@ -705,7 +742,7 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
     ['File Details']
   ];
 
-  // File details headers (same as downloadCaseAsCSV)
+  // File details headers (updated for individual box annotations)
   const fileHeaders = [
     'File ID',
     'Original Filename',
@@ -725,19 +762,25 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
     'Support Level',
     'Has Subclass',
     'Include Confirmation',
-    'Box Annotations Count',
-    'Box Annotations Details',
+    'Total Box Annotations',
+    'Box ID',
+    'Box X',
+    'Box Y',
+    'Box Width',
+    'Box Height',
+    'Box Color',
+    'Box Label',
+    'Box Timestamp',
     'Additional Notes',
     'Last Updated'
   ];
 
-  // File data rows (same as downloadCaseAsCSV)
-  const fileRows = exportData.files.map(fileEntry => {
-    const boxAnnotationsDetails = fileEntry.annotations?.boxAnnotations?.map(box => 
-      `"Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} Color:${box.color || 'N/A'} Timestamp:${box.timestamp || 'N/A'} Label:${box.label || 'No label'}"`
-    ).join('; ') || '';
-
-    return [
+  // File data rows - each box annotation gets its own row
+  const fileRows: string[][] = [];
+  
+  exportData.files.forEach(fileEntry => {
+    // Common file data for all rows
+    const baseFileData = [
       fileEntry.fileData.id,
       fileEntry.fileData.originalFilename,
       fileEntry.fileData.uploadedAt,
@@ -756,11 +799,42 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
       fileEntry.annotations?.supportLevel || '',
       fileEntry.annotations?.hasSubclass ? 'Yes' : 'No',
       fileEntry.annotations?.includeConfirmation ? 'Yes' : 'No',
-      fileEntry.annotations?.boxAnnotations?.length || 0,
-      boxAnnotationsDetails,
+      (fileEntry.annotations?.boxAnnotations?.length || 0).toString(),
       fileEntry.annotations?.additionalNotes || '',
       fileEntry.annotations?.updatedAt || ''
     ];
+
+    // If there are box annotations, create a row for each one
+    if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
+      fileEntry.annotations.boxAnnotations.forEach(box => {
+        fileRows.push([
+          ...baseFileData.slice(0, 19), // Up to total box annotations
+          box.id,
+          box.x.toString(),
+          box.y.toString(),
+          box.width.toString(),
+          box.height.toString(),
+          box.color || '',
+          box.label || '',
+          box.timestamp || '',
+          ...baseFileData.slice(19) // Additional notes and last updated
+        ]);
+      });
+    } else {
+      // If no box annotations, still include one row with empty box data
+      fileRows.push([
+        ...baseFileData.slice(0, 19), // Up to total box annotations
+        '', // Box ID
+        '', // Box X
+        '', // Box Y
+        '', // Box Width
+        '', // Box Height
+        '', // Box Color
+        '', // Box Label
+        '', // Box Timestamp
+        ...baseFileData.slice(19) // Additional notes and last updated
+      ]);
+    }
   });
 
   // Combine all data (same as downloadCaseAsCSV)
