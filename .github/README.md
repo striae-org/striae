@@ -26,6 +26,15 @@
 
 ## 📋 Changelog
 
+## [2025-09-17] - *[Release v0.9.17a-beta](https://github.com/striae-org/striae/releases/tag/v0.9.17a-beta)*
+
+- **ZIP Export System with Images** - Advanced ZIP package generation with automatic image inclusion for complete case archival
+- **Enhanced Export Interface** - Smart "Include Images" checkbox with intelligent UI logic for optimal user experience
+- **Excel Format Optimization** - Box annotations now split into separate rows matching CSV structure for improved data analysis
+- **Type System Cleanup** - Removed unused type definitions and reorganized type architecture for better maintainability
+- **Code Quality Improvements** - Eliminated redundant files, optimized imports, and enhanced TypeScript compliance
+- **Comprehensive Documentation Updates** - Updated all developer and user documentation reflecting new ZIP export capabilities
+
 ## [2025-09-17] - *[Release v0.9.17-beta](https://github.com/striae-org/striae/releases/tag/v0.9.17-beta)*
 
 - **Comprehensive Case Data Export System** - Complete multi-format export functionality with JSON, CSV, and Excel (XLSX) support

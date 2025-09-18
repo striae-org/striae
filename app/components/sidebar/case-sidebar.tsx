@@ -5,7 +5,8 @@ import {
   downloadCaseAsJSON,
   downloadCaseAsCSV,
   downloadAllCasesAsJSON,
-  downloadAllCasesAsCSV
+  downloadAllCasesAsCSV,
+  downloadCaseAsZip
 } from '../actions/case-export';
 import { useState, useEffect, useRef } from 'react';
 import styles from './cases.module.css';
@@ -350,26 +351,31 @@ const handleImageSelect = (file: FileData) => {
     setImageLoaded(true);
   };
 
-  const handleExport = async (exportCaseNumber: string, format: ExportFormat) => {
+  const handleExport = async (exportCaseNumber: string, format: ExportFormat, includeImages?: boolean) => {
     try {
-      console.log(`Starting export for case: "${exportCaseNumber}" in ${format.toUpperCase()} format`);
+      console.log(`Starting export for case: "${exportCaseNumber}" in ${format.toUpperCase()} format${includeImages ? ' with images (ZIP)' : ''}`);
       
-      // Use the proper export function with validation
-      const exportData = await exportCaseData(user, exportCaseNumber, {
-        includeAnnotations: true,
-        includeMetadata: true
-      });
-      
-      console.log('Export data generated successfully:', exportData);
-      
-      // Download the exported data in the selected format
-      if (format === 'json') {
-        downloadCaseAsJSON(exportData);
+      if (includeImages) {
+        // ZIP export with images - only available for single case exports
+        await downloadCaseAsZip(user, exportCaseNumber, format);
       } else {
-        downloadCaseAsCSV(exportData);
+        // Standard data-only export
+        const exportData = await exportCaseData(user, exportCaseNumber, {
+          includeAnnotations: true,
+          includeMetadata: true
+        });
+        
+        console.log('Export data generated successfully:', exportData);
+        
+        // Download the exported data in the selected format
+        if (format === 'json') {
+          downloadCaseAsJSON(exportData);
+        } else {
+          downloadCaseAsCSV(exportData);
+        }
       }
       
-      console.log(`Case export completed for: ${exportCaseNumber} in ${format.toUpperCase()} format`);
+      console.log(`Case export completed for: ${exportCaseNumber} in ${format.toUpperCase()} format${includeImages ? ' with images' : ''}`);
     } catch (error) {
       console.error('Export failed:', error);
       throw error; // Re-throw to be handled by the modal

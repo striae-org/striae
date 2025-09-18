@@ -116,6 +116,87 @@
   background: color-mix(in lab, var(--primary) 85%, var(--black)) !important;
 }
 
+.imageOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spaceM);
+  background: var(--backgroundLight);
+  border-radius: var(--spaceXS);
+  border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+  margin-top: var(--spaceM);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spaceS);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid color-mix(in lab, var(--primary) 40%, transparent);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.checkbox:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox:hover:not(:disabled) {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 20%, transparent);
+}
+
+.checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.imageOption:has(.checkbox:disabled) {
+  opacity: 0.6;
+}
+
+.imageOption:has(.checkbox:disabled) .checkboxLabel {
+  cursor: not-allowed;
+}
+
+.checkboxText {
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  color: var(--textTitle);
+  margin: 0;
+}
+
+.checkboxTooltip {
+  font-size: var(--fontSizeBodyXS);
+  color: var(--textBody);
+  margin: 0;
+  opacity: 0.8;
+}
+
 .fieldGroup {
   display: flex;
   flex-direction: column;

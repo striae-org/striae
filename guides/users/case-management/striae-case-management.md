@@ -195,6 +195,8 @@ Striae allows you to export your case data for backup, statistical analysis, or 
 * **CSV Format:** Spreadsheet-compatible format for individual cases with all annotation details
 * **Excel Format:** Multi-worksheet Excel files for bulk exports with summary and individual case sheets
 
+**Note:** When you choose to include images with any export format, the system automatically packages everything in a ZIP file containing both the data files and all original images.
+
 ### Accessing Export Functions
 
 1. Load any case or stay on the main case management screen
@@ -208,9 +210,10 @@ Striae allows you to export your case data for backup, statistical analysis, or 
 #### How to Export One Case
 
 1. **Enter Case Number:** Type the case number you want to export in the input field
-2. **Choose Format:** Select either JSON or CSV/Excel format using the toggle buttons
-3. **Click Export:** Press the green "Export Case Data" button
-4. **Download:** Your browser will automatically download the export file
+2. **Choose Format:** Select JSON or CSV/Excel format using the toggle buttons
+3. **Include Images (Optional):** Check the "Include Images" box to automatically package all original case images with the data in a ZIP file
+4. **Click Export:** Press the green "Export Case Data" button
+5. **Download:** Your browser will automatically download the export file (single format file or ZIP package with images)
 
 #### What's Included in Single Case Exports
 
@@ -239,6 +242,7 @@ Striae allows you to export your case data for backup, statistical analysis, or 
 
 * **JSON:** `striae-case-[CASE-NUMBER]-export-[DATE].json`
 * **CSV:** `striae-case-[CASE-NUMBER]-detailed-[DATE].csv`
+* **With Images:** `striae-case-[CASE-NUMBER]-complete-[DATE].zip` (when "Include Images" is checked)
 
 ***
 
@@ -316,6 +320,14 @@ Striae allows you to export your case data for backup, statistical analysis, or 
 * Want summary statistics and individual case details
 * Prefer Excel's built-in analysis and formatting tools
 
+**Choose to Include Images When:**
+
+* Need complete case documentation including all original images
+* Sharing comprehensive evidence packages with auditors, colleagues, or legal teams
+* Archiving cases for long-term storage with full documentation
+* Requiring both structured data and visual evidence in a single package
+* Want the most complete and self-contained case export available
+
 #### Data Completeness
 
 All export formats include identical data:
@@ -379,6 +391,20 @@ All export formats include identical data:
 * Bulk exports with many cases take time to process
 * Consider exporting smaller batches if you have hundreds of cases
 * Use a stable, high-speed internet connection
+
+**Export with Images Taking Long:**
+
+* Exports with images may take several minutes depending on image count and size
+* Monitor the progress indicator for download status and ZIP creation progress  
+* Ensure stable internet connection for downloading all case images
+* Large cases with many high-resolution images will naturally take longer
+
+**Some Images Missing from Export:**
+
+* Check the error log included in the ZIP file for details about failed image downloads
+* Network connectivity issues may prevent some images from downloading
+* Retry the export if many images failed to download
+* Contact support if specific images consistently fail to download
 
 #### Export Recovery
 
@@ -491,6 +517,7 @@ All export formats include identical data:
 | Upload File          | Load case → Click **Upload Image** → Choose file               |
 | Delete File          | Click "×" next to filename → Confirm                           |
 | Export Single Case   | Enter case number → Choose format → Click **Export Case Data** |
+| Export with Images | Enter case number → Choose format → Check "Include Images" → Click **Export Case Data** |
 | Export All Cases     | Choose format → Click **Export All Cases** → Monitor progress  |
 | Rename Case          | Expand case actions → Enter new name → Click **Rename**        |
 | Delete Case          | Expand case actions → Click **Delete Case** → Confirm          |

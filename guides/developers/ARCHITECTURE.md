@@ -12,6 +12,7 @@
      - [3. Toolbar System](#3-toolbar-system)
      - [4. Sidebar Management](#4-sidebar-management)
      - [5. PDF Generation](#5-pdf-generation)
+     - [6. Case Export System](#6-case-export-system)
 4. [Backend Architecture (Cloudflare Workers)](#backend-architecture-cloudflare-workers)
    - [Worker Services Overview](#worker-services-overview)
    - [1. User Worker (`workers/user-worker/`)](#1-user-worker-workersuser-worker)
@@ -160,6 +161,36 @@ Striae follows a modern cloud-native architecture built on Cloudflare's edge com
   - Dynamic PDF creation
   - Annotation integration
   - Custom formatting
+
+#### 6. Case Export System
+
+- **Location**: `app/components/sidebar/case-export/` and `app/components/actions/case-export.ts`
+- **Purpose**: Comprehensive data export with multiple format support
+- **Features**:
+  - **Multi-Format Support**: JSON, CSV/Excel, and ZIP file generation
+  - **ZIP Export with Images**: Complete case packaging including all associated images
+  - **JSZip Integration**: Browser-based ZIP file creation with automatic image downloading
+  - **Split Box Annotation Format**: Box annotations split into separate rows for improved data analysis
+  - **Progress Tracking**: Real-time progress updates during export operations
+  - **Error Recovery**: Graceful handling of failed exports with detailed error reporting
+  - **Excel Multi-Worksheet**: Bulk exports create Excel files with summary and individual case worksheets
+
+**Architecture Components**:
+
+- **Export Engine**: Core export functionality with format-specific processors
+- **Download Manager**: Browser-compatible file download system with proper MIME types
+- **Image Fetcher**: Automatic image URL resolution and packaging for ZIP exports
+- **Progress System**: Real-time callback system for export operation updates
+- **Error Handler**: Comprehensive error recovery and reporting system
+
+**Data Flow**:
+
+1. User selects export format and options
+2. Export engine collects case data from R2 storage
+3. Format-specific processor transforms data (JSON/CSV/ZIP)
+4. For ZIP exports: Images downloaded and packaged with data files
+5. Browser download initiated with proper file handling
+6. Progress callbacks update UI throughout operation
 
 ## Backend Architecture (Cloudflare Workers)
 

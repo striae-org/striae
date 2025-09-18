@@ -1,6 +1,6 @@
 {
   "name": "striae",
-  "version": "0.9.17-beta",
+  "version": "0.9.17a-beta",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -32,10 +32,12 @@
     "@remix-run/cloudflare": "^2.15.1",
     "@remix-run/cloudflare-pages": "^2.17.0",
     "@remix-run/react": "^2.15.1",
+    "@types/jszip": "^3.4.0",
     "@types/xlsx": "^0.0.35",
     "firebase": "^12.1.0",
     "free-email-domains": "^1.2.21",
     "isbot": "^5.1.30",
+    "jszip": "^3.10.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "xlsx": "^0.18.5"

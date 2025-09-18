@@ -1,30 +1,11 @@
 import { User } from 'firebase/auth';
+import { UserData, UserLimits } from '~/types';
 import paths from '~/config/config.json';
 import { getUserApiKey } from './auth';
 
 const USER_WORKER_URL = paths.user_worker_url;
 const MAX_CASES_DEMO = paths.max_cases_demo;
 const MAX_FILES_PER_CASE_DEMO = paths.max_files_per_case_demo;
-
-export interface UserData {
-  uid: string;
-  email: string | null;
-  firstName: string;
-  lastName: string;
-  company: string;
-  permitted: boolean;
-  cases: Array<{
-    caseNumber: string;
-    createdAt: string;
-  }>;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-export interface UserLimits {
-  maxCases: number;
-  maxFilesPerCase: number;
-}
 
 export interface UserUsage {
   currentCases: number;

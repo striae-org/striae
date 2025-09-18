@@ -3,27 +3,12 @@ import { AnnotationData } from './annotations';
 
 // Case-related types and interfaces
 
+export type CaseActionType = 'loaded' | 'created' | 'deleted' | null;
+
 export interface CaseData {
   createdAt: string;
   caseNumber: string;
   files: FileData[];
-}
-
-export interface CaseMetadata {
-  caseNumber: string;
-  createdAt: string;
-  updatedAt?: string;
-  description?: string;
-  status?: 'active' | 'archived' | 'completed';
-}
-
-export interface CasesToDelete {
-  casesToDelete: string[];
-}
-
-export interface CaseApiResponse {
-  files: FileData[];
-  metadata?: CaseMetadata;
 }
 
 export interface CaseExportData {

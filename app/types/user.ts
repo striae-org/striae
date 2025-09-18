@@ -19,10 +19,3 @@ export interface UserLimits {
   maxCases: number;
   maxFilesPerCase: number;
 }
-
-export interface UserPermissions {
-  canCreateCases: boolean;
-  canUploadFiles: boolean;
-  canDeleteCases: boolean;
-  canExportPDF: boolean;
-}

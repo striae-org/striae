@@ -1,9 +1,11 @@
 import { User } from 'firebase/auth';
 import { FileData, AnnotationData, CaseExportData, AllCasesExportData } from '~/types';
-import { fetchFiles } from './image-manage';
+import { fetchFiles, getImageUrl } from './image-manage';
 import { getNotes } from './notes-manage';
 import { checkExistingCase, validateCaseNumber, listCases } from './case-manage';
 import * as XLSX from 'xlsx';
+
+export type ExportFormat = 'json' | 'csv';
 
 export interface ExportOptions {
   includeAnnotations?: boolean;
@@ -352,8 +354,14 @@ export function downloadAllCasesAsCSV(exportData: AllCasesExportData): void {
           'Support Level',
           'Has Subclass',
           'Include Confirmation',
-          'Box Annotations Count',
-          'Box Annotations Details',
+          'Total Box Annotations',
+          'Box ID',
+          'Box X',
+          'Box Y',
+          'Box Width',
+          'Box Height',
+          'Box Color',
+          'Box Timestamp',
           'Additional Notes',
           'Last Updated'
         ]
@@ -361,12 +369,12 @@ export function downloadAllCasesAsCSV(exportData: AllCasesExportData): void {
 
       // Add file data if available
       if (caseData.files && caseData.files.length > 0) {
-        const fileRows = caseData.files.map(fileEntry => {
-          const boxAnnotationsDetails = fileEntry.annotations?.boxAnnotations?.map(box => 
-            `Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} Color:${box.color || 'N/A'} Timestamp:${box.timestamp || 'N/A'} Label:${box.label || 'No label'}`
-          ).join('; ') || '';
-
-          return [
+        // File data rows - file info only on first row, subsequent rows only have box data
+        const fileRows: any[][] = [];
+        
+        caseData.files.forEach(fileEntry => {
+          // Full file data for the first row (excluding Additional Notes and Last Updated)
+          const fullFileData = [
             fileEntry.fileData.id,
             fileEntry.fileData.originalFilename,
             fileEntry.fileData.uploadedAt,
@@ -385,12 +393,53 @@ export function downloadAllCasesAsCSV(exportData: AllCasesExportData): void {
             fileEntry.annotations?.supportLevel || '',
             fileEntry.annotations?.hasSubclass ? 'Yes' : 'No',
             fileEntry.annotations?.includeConfirmation ? 'Yes' : 'No',
-            fileEntry.annotations?.boxAnnotations?.length || 0,
-            boxAnnotationsDetails,
+            fileEntry.annotations?.boxAnnotations?.length || 0
+          ];
+
+          // Additional Notes and Last Updated (at the end)
+          const additionalFileData = [
             fileEntry.annotations?.additionalNotes || '',
             fileEntry.annotations?.updatedAt || ''
           ];
+
+          // Empty row template for subsequent box annotations (file info columns empty)
+          const emptyFileData = Array(19).fill('');
+          const emptyAdditionalData = Array(2).fill('');
+
+          // If there are box annotations, create a row for each one
+          if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
+            fileEntry.annotations.boxAnnotations.forEach((box, index) => {
+              const rowData = index === 0 ? fullFileData : emptyFileData;
+              const additionalData = index === 0 ? additionalFileData : emptyAdditionalData;
+              
+              fileRows.push([
+                ...rowData,
+                box.id,
+                box.x,
+                box.y,
+                box.width,
+                box.height,
+                box.color || '',
+                box.timestamp || '',
+                ...additionalData
+              ]);
+            });
+          } else {
+            // If no box annotations, still include one row with empty box data
+            fileRows.push([
+              ...fullFileData,
+              '', // Box ID
+              '', // Box X
+              '', // Box Y
+              '', // Box Width
+              '', // Box Height
+              '', // Box Color
+              '', // Box Timestamp
+              ...additionalFileData
+            ]);
+          }
         });
+        
         caseDetailsData.push(...fileRows);
       } else {
         caseDetailsData.push(['No detailed file data available for this case']);
@@ -473,7 +522,7 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
       ['File Details']
     ];
 
-    // File details headers
+    // File details headers (updated for individual box annotations)
     const fileHeaders = [
       'File ID',
       'Original Filename',
@@ -493,19 +542,24 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
       'Support Level',
       'Has Subclass',
       'Include Confirmation',
-      'Box Annotations Count',
-      'Box Annotations Details',
+      'Total Box Annotations',
+      'Box ID',
+      'Box X',
+      'Box Y',
+      'Box Width',
+      'Box Height',
+      'Box Color',
+      'Box Timestamp',
       'Additional Notes',
       'Last Updated'
     ];
 
-    // File data rows
-    const fileRows = exportData.files.map(fileEntry => {
-      const boxAnnotationsDetails = fileEntry.annotations?.boxAnnotations?.map(box => 
-        `"Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} Color:${box.color || 'N/A'} Timestamp:${box.timestamp || 'N/A'} Label:${box.label || 'No label'}"`
-      ).join('; ') || '';
-
-      return [
+    // File data rows - file info only on first row, subsequent rows only have box data
+    const fileRows: string[][] = [];
+    
+    exportData.files.forEach(fileEntry => {
+      // Full file data for the first row (excluding Additional Notes and Last Updated)
+      const fullFileData = [
         fileEntry.fileData.id,
         fileEntry.fileData.originalFilename,
         fileEntry.fileData.uploadedAt,
@@ -524,11 +578,51 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
         fileEntry.annotations?.supportLevel || '',
         fileEntry.annotations?.hasSubclass ? 'Yes' : 'No',
         fileEntry.annotations?.includeConfirmation ? 'Yes' : 'No',
-        fileEntry.annotations?.boxAnnotations?.length || 0,
-        boxAnnotationsDetails,
+        (fileEntry.annotations?.boxAnnotations?.length || 0).toString()
+      ];
+
+      // Additional Notes and Last Updated (at the end)
+      const additionalFileData = [
         fileEntry.annotations?.additionalNotes || '',
         fileEntry.annotations?.updatedAt || ''
       ];
+
+      // Empty row template for subsequent box annotations (file info columns empty)
+      const emptyFileData = Array(19).fill('');
+      const emptyAdditionalData = Array(2).fill('');
+
+      // If there are box annotations, create a row for each one
+      if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
+        fileEntry.annotations.boxAnnotations.forEach((box, index) => {
+          const rowData = index === 0 ? fullFileData : emptyFileData;
+          const additionalData = index === 0 ? additionalFileData : emptyAdditionalData;
+          
+          fileRows.push([
+            ...rowData,
+            box.id,
+            box.x.toString(),
+            box.y.toString(),
+            box.width.toString(),
+            box.height.toString(),
+            box.color || '',
+            box.timestamp || '',
+            ...additionalData
+          ]);
+        });
+      } else {
+        // If no box annotations, still include one row with empty box data
+        fileRows.push([
+          ...fullFileData,
+          '', // Box ID
+          '', // Box X
+          '', // Box Y
+          '', // Box Width
+          '', // Box Height
+          '', // Box Color
+          '', // Box Timestamp
+          ...additionalFileData
+        ]);
+      }
     });
 
     // Combine all data
@@ -586,4 +680,267 @@ export function validateCaseNumberForExport(caseNumber: string): { isValid: bool
   }
 
   return { isValid: true };
+}
+
+/**
+ * Download case data as ZIP file including images
+ */
+export async function downloadCaseAsZip(
+  user: User,
+  caseNumber: string,
+  format: ExportFormat,
+  onProgress?: (progress: number) => void
+): Promise<void> {
+  try {
+    onProgress?.(10);
+    
+    // Get case data
+    const exportData = await exportCaseData(user, caseNumber);
+    onProgress?.(30);
+    
+    // Create ZIP
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    
+    // Add data file
+    if (format === 'json') {
+      zip.file(`${caseNumber}_data.json`, JSON.stringify(exportData, null, 2));
+    } else {
+      const csvContent = await generateCSVContentFromExportData(exportData);
+      zip.file(`${caseNumber}_data.csv`, csvContent);
+    }
+    onProgress?.(50);
+    
+    // Add images
+    const imageFolder = zip.folder('images');
+    if (imageFolder && exportData.files) {
+      for (let i = 0; i < exportData.files.length; i++) {
+        const file = exportData.files[i];
+        try {
+          const imageBlob = await fetchImageAsBlob(file.fileData);
+          if (imageBlob) {
+            imageFolder.file(file.fileData.originalFilename, imageBlob);
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch image ${file.fileData.originalFilename}:`, error);
+        }
+        onProgress?.(50 + (i / exportData.files.length) * 30);
+      }
+    }
+    
+    // Add README
+    const readme = generateZipReadme(exportData);
+    zip.file('README.txt', readme);
+    onProgress?.(85);
+    
+    // Generate ZIP blob
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    onProgress?.(95);
+    
+    // Download
+    const url = URL.createObjectURL(zipBlob);
+    const exportFileName = `striae-case-${caseNumber}-export-${formatDateForFilename(new Date())}.zip`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.href = url;
+    linkElement.setAttribute('download', exportFileName);
+    linkElement.click();
+    
+    URL.revokeObjectURL(url);
+    onProgress?.(100);
+    
+    console.log('ZIP export download initiated:', exportFileName);
+  } catch (error) {
+    console.error('ZIP export failed:', error);
+    throw new Error('Failed to export ZIP file');
+  }
+}
+
+/**
+ * Helper function to fetch image as blob
+ */
+async function fetchImageAsBlob(fileData: FileData): Promise<Blob | null> {
+  try {
+    const imageUrl = await getImageUrl(fileData);
+    if (!imageUrl) return null;
+    
+    const response = await fetch(imageUrl);
+    if (!response.ok) return null;
+    
+    return await response.blob();
+  } catch (error) {
+    console.error('Failed to fetch image blob:', error);
+    return null;
+  }
+}
+
+/**
+ * Generate CSV content from export data (comprehensive format matching downloadCaseAsCSV)
+ */
+async function generateCSVContentFromExportData(exportData: CaseExportData): Promise<string> {
+  // Case metadata section (same as downloadCaseAsCSV)
+  const metadataRows = [
+    ['Case Export Report'],
+    [''],
+    ['Case Number', exportData.metadata.caseNumber],
+    ['Export Date', exportData.metadata.exportDate],
+    ['Exported By', exportData.metadata.exportedBy || 'N/A'],
+    ['Export Version', exportData.metadata.exportVersion],
+    ['Total Files', exportData.metadata.totalFiles],
+    [''],
+    ['Summary'],
+    ['Files with Annotations', exportData.summary?.filesWithAnnotations || 0],
+    ['Files without Annotations', exportData.summary?.filesWithoutAnnotations || 0],
+    ['Total Box Annotations', exportData.summary?.totalBoxAnnotations || 0],
+    ['Last Modified', exportData.summary?.lastModified || 'N/A'],
+    [''],
+    ['File Details']
+  ];
+
+  // File details headers (updated for individual box annotations)
+  const fileHeaders = [
+    'File ID',
+    'Original Filename',
+    'Upload Date',
+    'Has Annotations',
+    'Left Case',
+    'Right Case',
+    'Left Item',
+    'Right Item',
+    'Case Font Color',
+    'Class Type',
+    'Custom Class',
+    'Class Note',
+    'Index Type',
+    'Index Number',
+    'Index Color',
+    'Support Level',
+    'Has Subclass',
+    'Include Confirmation',
+    'Total Box Annotations',
+    'Box ID',
+    'Box X',
+    'Box Y',
+    'Box Width',
+    'Box Height',
+    'Box Color',
+    'Box Timestamp',
+    'Additional Notes',
+    'Last Updated'
+  ];
+
+  // File data rows - file info only on first row, subsequent rows only have box data
+  const fileRows: string[][] = [];
+  
+  exportData.files.forEach(fileEntry => {
+    // Full file data for the first row (excluding Additional Notes and Last Updated)
+    const fullFileData = [
+      fileEntry.fileData.id,
+      fileEntry.fileData.originalFilename,
+      fileEntry.fileData.uploadedAt,
+      fileEntry.hasAnnotations ? 'Yes' : 'No',
+      fileEntry.annotations?.leftCase || '',
+      fileEntry.annotations?.rightCase || '',
+      fileEntry.annotations?.leftItem || '',
+      fileEntry.annotations?.rightItem || '',
+      fileEntry.annotations?.caseFontColor || '',
+      fileEntry.annotations?.classType || '',
+      fileEntry.annotations?.customClass || '',
+      fileEntry.annotations?.classNote || '',
+      fileEntry.annotations?.indexType || '',
+      fileEntry.annotations?.indexNumber || '',
+      fileEntry.annotations?.indexColor || '',
+      fileEntry.annotations?.supportLevel || '',
+      fileEntry.annotations?.hasSubclass ? 'Yes' : 'No',
+      fileEntry.annotations?.includeConfirmation ? 'Yes' : 'No',
+      (fileEntry.annotations?.boxAnnotations?.length || 0).toString()
+    ];
+
+    // Additional Notes and Last Updated (at the end)
+    const additionalFileData = [
+      fileEntry.annotations?.additionalNotes || '',
+      fileEntry.annotations?.updatedAt || ''
+    ];
+
+    // Empty row template for subsequent box annotations (file info columns empty)
+    const emptyFileData = Array(19).fill('');
+    const emptyAdditionalData = Array(2).fill('');
+
+    // If there are box annotations, create a row for each one
+    if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
+      fileEntry.annotations.boxAnnotations.forEach((box, index) => {
+        const rowData = index === 0 ? fullFileData : emptyFileData;
+        const additionalData = index === 0 ? additionalFileData : emptyAdditionalData;
+        
+        fileRows.push([
+          ...rowData,
+          box.id,
+          box.x.toString(),
+          box.y.toString(),
+          box.width.toString(),
+          box.height.toString(),
+          box.color || '',
+          box.timestamp || '',
+          ...additionalData
+        ]);
+      });
+    } else {
+      // If no box annotations, still include one row with empty box data
+      fileRows.push([
+        ...fullFileData,
+        '', // Box ID
+        '', // Box X
+        '', // Box Y
+        '', // Box Width
+        '', // Box Height
+        '', // Box Color
+        '', // Box Timestamp
+        ...additionalFileData
+      ]);
+    }
+  });
+
+  // Combine all data (same as downloadCaseAsCSV)
+  const allRows = [
+    ...metadataRows,
+    fileHeaders,
+    ...fileRows
+  ];
+
+  return allRows.map(row => 
+    row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
+  ).join('\n');
+}
+
+/**
+ * Generate README content for ZIP export
+ */
+function generateZipReadme(exportData: CaseExportData): string {
+  const totalFiles = exportData.files?.length || 0;
+  const filesWithAnnotations = exportData.files?.filter(f => f.annotations && Array.isArray(f.annotations.boxAnnotations) && f.annotations.boxAnnotations.length > 0).length || 0;
+  const totalBoxAnnotations = exportData.files?.reduce((sum, f) => sum + (Array.isArray(f.annotations?.boxAnnotations) ? f.annotations.boxAnnotations.length : 0), 0) || 0;
+  const totalAnnotations = filesWithAnnotations + totalBoxAnnotations;
+
+  return `Striae Case Export
+==================
+
+Case Number: ${exportData.metadata.caseNumber}
+Export Date: ${new Date().toISOString()}
+Export Version: ${exportData.metadata.exportVersion}
+
+Summary:
+- Total Files: ${totalFiles}
+- Files with Annotations: ${filesWithAnnotations}
+- Files without Annotations: ${totalFiles - filesWithAnnotations}
+- Total Box Annotations: ${totalBoxAnnotations}
+- Total Annotations: ${totalAnnotations}
+
+Contents:
+- ${exportData.metadata.caseNumber}_data.json/.csv: Case data and annotations
+- images/: Original uploaded images
+- README.txt: This file
+
+Generated by Striae - A Firearms Examiner's Comparison Companion
+https://www.striae.org
+`;
 }

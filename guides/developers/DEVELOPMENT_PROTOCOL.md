@@ -21,6 +21,7 @@
 6. [Component Development Patterns](#component-development-patterns)
    - [Component Architecture](#component-architecture)
    - [Type Definition Management](#type-definition-management)
+   - [Export System Development](#export-system-development)
    - [Integration Testing Patterns](#integration-testing-patterns)
 7. [Security Considerations](#security-considerations)
 8. [Release Management](#release-management)
@@ -350,6 +351,54 @@ Related to #456
    - PDF worker must use same type definitions for data processing
    - API documentation must reflect actual type definitions
    - Type changes require updates across all consuming components
+
+4. **Type Cleanup Protocols**:
+   - Remove unused interfaces and properties promptly to maintain code clarity
+   - Update all import statements when reorganizing type definitions
+   - Maintain barrel exports (`index.ts`) for clean import paths
+   - Document type changes in API reference documentation
+
+### Export System Development
+
+1. **Multi-Format Export Architecture**:
+   ```typescript
+   // Export interface consistency
+   export interface ExportOptions {
+     includeAnnotations?: boolean;
+     format?: 'json' | 'csv' | 'zip';
+     includeImages?: boolean;
+     includeMetadata?: boolean;
+   }
+   
+   // Format-specific functions
+   export const downloadCaseAsJSON = (exportData: CaseExportData): void
+   export const downloadCaseAsCSV = (exportData: CaseExportData): void
+   export const downloadCaseAsZip = async (exportData: CaseExportData, includeImages: boolean): Promise<void>
+   ```
+
+2. **ZIP Export Development Requirements**:
+   - Use JSZip library for browser-based ZIP creation
+   - Implement progress tracking for image downloads and ZIP generation
+   - Handle image fetch failures gracefully with error reporting
+   - Structure ZIP contents logically (data files + images/ directory)
+
+3. **CSV/Excel Export Standards**:
+   - Maintain data parity between JSON and CSV/Excel formats
+   - Split box annotations into separate rows for data analysis
+   - Use consistent column ordering across all export formats
+   - Implement multi-worksheet Excel support for bulk exports
+
+4. **Export UI Integration**:
+   - Synchronize UI states (checkboxes, buttons) during export operations
+   - Provide clear format indicators with tooltips
+   - Implement proper loading states and error handling
+   - Ensure keyboard navigation accessibility
+
+5. **Performance Considerations**:
+   - Implement configurable annotation inclusion for faster exports
+   - Use progress callbacks for long-running operations
+   - Handle large image downloads with timeout management
+   - Optimize memory usage during ZIP file creation
 
 ### Integration Testing Patterns
 

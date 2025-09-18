@@ -37,12 +37,21 @@
    - [Common Error Codes](#common-error-codes)
    - [HTTP Status Codes](#http-status-codes)
 10. [Type Definitions](#type-definitions)
-    - [AnnotationData Interface](#annotationdata-interface)
-    - [BoxAnnotation Interface](#boxannotation-interface)
+    - [Core Annotation Types](#core-annotation-types)
+      - [AnnotationData Interface](#annotationdata-interface)
+      - [BoxAnnotation Interface](#boxannotation-interface)
+    - [Case Management Types](#case-management-types)
+      - [CaseData Interface](#casedata-interface)
+      - [CaseActionType](#caseactiontype)
     - [Case Export Types](#case-export-types)
       - [CaseExportData Interface](#caseexportdata-interface)
       - [AllCasesExportData Interface](#allcasesexportdata-interface)
       - [ExportOptions Interface](#exportoptions-interface)
+    - [File Management Types](#file-management-types)
+      - [FileData Interface](#filedata-interface)
+    - [User Management Types](#user-management-types)
+      - [UserData Interface](#userdata-interface)
+      - [UserLimits Interface](#userlimits-interface)
     - [Centralized Type Management](#centralized-type-management)
 11. [SDK Examples](#sdk-examples)
     - [JavaScript/TypeScript Client](#javascripttypescript-client)
@@ -660,7 +669,6 @@ interface BoxAnnotation {
   width: number;     // Percentage 0-100
   height: number;    // Percentage 0-100
   color: string;     // Hex color code
-  label?: string;    // Optional annotation label
   timestamp: string; // Creation timestamp (ISO 8601 format)
 }
 ```
@@ -699,19 +707,6 @@ interface UserLimits {
 }
 ```
 
-#### UserPermissions Interface
-
-Feature-specific user permissions:
-
-```typescript
-interface UserPermissions {
-  canCreateCases: boolean;
-  canUploadFiles: boolean;
-  canDeleteCases: boolean;
-  canExportPDF: boolean;
-}
-```
-
 ### File Management Types
 
 #### FileData Interface
@@ -723,21 +718,6 @@ interface FileData {
   id: string;
   originalFilename: string;
   uploadedAt: string;
-}
-```
-
-#### FileMetadata Interface
-
-Extended file metadata and properties:
-
-```typescript
-interface FileMetadata {
-  size?: number;
-  mimeType?: string;
-  dimensions?: {
-    width: number;
-    height: number;
-  };
 }
 ```
 
@@ -777,92 +757,12 @@ interface CaseData {
 }
 ```
 
-#### CaseMetadata Interface
+#### CaseActionType
 
-Extended case information and status:
-
-```typescript
-interface CaseMetadata {
-  caseNumber: string;
-  createdAt: string;
-  updatedAt?: string;
-  description?: string;
-  status?: 'active' | 'archived' | 'completed';
-}
-```
-
-#### CasesToDelete Interface
-
-Bulk case deletion request structure:
+Case operation type definition for UI state management:
 
 ```typescript
-interface CasesToDelete {
-  casesToDelete: string[];
-}
-```
-
-### Common Utility Types
-
-#### LoadingState Type
-
-Application-wide loading state enumeration:
-
-```typescript
-type LoadingState = 'idle' | 'loading' | 'success' | 'error';
-```
-
-#### ToastType Type
-
-Toast notification type classification:
-
-```typescript
-type ToastType = 'success' | 'error' | 'warning' | 'info';
-```
-
-#### ApiResponse Interface
-
-Standardized API response wrapper:
-
-```typescript
-interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-```
-
-#### PaginationParams Interface
-
-Query parameters for paginated requests:
-
-```typescript
-interface PaginationParams {
-  page?: number;
-  limit?: number;
-  offset?: number;
-}
-```
-
-#### SortParams Interface
-
-Query parameters for sorted requests:
-
-```typescript
-interface SortParams {
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-```
-
-#### SearchParams Interface
-
-Comprehensive search and filter parameters:
-
-```typescript
-interface SearchParams extends PaginationParams, SortParams, FilterParams {
-  query?: string;
-}
+type CaseActionType = 'loaded' | 'created' | 'deleted' | null;
 ```
 
 ### Case Export Types
@@ -933,20 +833,34 @@ interface ExportOptions {
 
 **Export Features**:
 
-- **Format Support**: JSON and CSV/Excel export formats
+- **Format Support**: JSON, CSV/Excel, and ZIP export formats
+- **ZIP Export with Images**: Single case exports can include associated image files packaged in ZIP format
 - **Comprehensive Data**: All annotation fields including case identifiers, colors, classifications, and box annotations
 - **Bulk Operations**: Export all cases with progress tracking and error handling
 - **Excel Multi-Worksheet**: CSV format creates Excel files with multiple worksheets for bulk exports
+- **Split Box Annotations**: Each box annotation gets its own row in CSV/Excel for better data analysis
 - **Metadata Rich**: Complete export metadata including timestamps, user info, and summary statistics
 - **Error Handling**: Graceful handling of failed case exports with detailed error information
+- **Progress Tracking**: Real-time progress updates for ZIP generation and image downloads
 
 **CSV/Excel Export Details**:
 
-- **Single Case CSV**: Comprehensive CSV with 22 columns including all annotation data
+- **Single Case CSV**: Comprehensive CSV with individual rows for each box annotation
 - **Bulk Export Excel**: Multi-worksheet Excel file with summary sheet and individual case sheets
 - **Complete Data Parity**: CSV/Excel exports contain identical data to JSON exports
-- **Enhanced Box Annotations**: Includes coordinates, colors, timestamps, and labels
+- **Enhanced Box Annotations**: Includes coordinates, colors, and timestamps (label removed)
 - **Classification Data**: Full support for case identifiers, color schemes, and forensic classifications
+- **Optimized Layout**: File metadata appears only on first row per file, subsequent rows contain only box data
+
+**ZIP Export Functionality**:
+
+- **Single Case Only**: ZIP exports are restricted to individual cases to manage file size
+- **Image Inclusion**: All associated image files packaged with original filenames preserved
+- **Data File**: Selected format (JSON or CSV) included in ZIP package
+- **README Generation**: Automatic README.txt with case summary and statistics
+- **Progress Feedback**: Real-time progress updates during ZIP creation and image downloads
+- **Error Recovery**: Graceful handling of individual image download failures
+- **JSZip Integration**: Browser-based ZIP generation using JSZip library
 
 ### Centralized Type Management
 
@@ -955,10 +869,9 @@ interface ExportOptions {
 ```typescript
 // Barrel export structure
 export * from './annotations';  // AnnotationData, BoxAnnotation
-export * from './user';        // UserData, UserLimits, UserPermissions
-export * from './file';        // FileData, FileMetadata, FileUploadResponse
-export * from './case';        // CaseData, CaseMetadata, CasesToDelete, CaseExportData, AllCasesExportData
-export * from './common';      // LoadingState, ToastType, ApiResponse, etc.
+export * from './user';        // UserData, UserLimits
+export * from './file';        // FileData, FileUploadResponse, ImageUploadResponse
+export * from './case';        // CaseData, CaseMetadata, CaseActionType, CaseExportData, AllCasesExportData
 ```
 
 **Usage Patterns**:
