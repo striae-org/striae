@@ -141,6 +141,10 @@ A: Absolutely! Exports with images are ideal for audits or legal proceedings bec
 
 A: There's no specific limit to the number of cases you can export simultaneously. However, very large exports (hundreds of cases) may take considerable time to process and could be affected by browser timeout limitations.
 
+**Q: Can I import case data?**
+
+A: No. Data import functionality is not permitted to ensure the integrity and security of forensic data stored with Striae. Imported data could introduce inconsistencies or compromise chain-of-custody, so Striae focuses solely on secure case creation, management, and annotation within the platform only.
+
 ***
 
 ## 🎯 Image Annotation
