@@ -55,6 +55,13 @@ export const DeleteAccount = ({ isOpen, onClose, user, company, permitted }: Del
   const handleDeleteAccount = async () => {
     if (!isConfirmationValid) return;
     
+    // Additional confirmation dialog similar to case-sidebar patterns
+    const confirmed = window.confirm(
+      `Are you sure you want to permanently delete your Striae account? This action cannot be undone and will delete all your data, cases, and files. Your email address will be permanently disabled.`
+    );
+    
+    if (!confirmed) return;
+    
     setIsDeleting(true);
     setError('');
     

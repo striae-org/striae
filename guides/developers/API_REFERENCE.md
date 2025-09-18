@@ -43,12 +43,16 @@
     - [Case Management Types](#case-management-types)
       - [CaseData Interface](#casedata-interface)
       - [CaseActionType](#caseactiontype)
+      - [CasesToDelete Interface](#casestodelete-interface)
     - [Case Export Types](#case-export-types)
       - [CaseExportData Interface](#caseexportdata-interface)
       - [AllCasesExportData Interface](#allcasesexportdata-interface)
+      - [ExportFormat Type](#exportformat-type)
       - [ExportOptions Interface](#exportoptions-interface)
     - [File Management Types](#file-management-types)
       - [FileData Interface](#filedata-interface)
+      - [FileUploadResponse Interface](#fileuploadresponse-interface)
+      - [ImageUploadResponse Interface](#imageuploadresponse-interface)
     - [User Management Types](#user-management-types)
       - [UserData Interface](#userdata-interface)
       - [UserLimits Interface](#userlimits-interface)
@@ -641,14 +645,14 @@ interface AnnotationData {
   rightCase: string;
   leftItem: string;
   rightItem: string;
-  caseFontColor: string;
-  classType: 'Bullet' | 'Cartridge Case' | 'Other';
+  caseFontColor?: string;
+  classType?: 'Bullet' | 'Cartridge Case' | 'Other';
   customClass?: string;
   classNote?: string;
-  indexType: 'number' | 'color';
+  indexType?: 'number' | 'color';
   indexNumber?: string;
   indexColor?: string;
-  supportLevel: 'ID' | 'Exclusion' | 'Inconclusive';
+  supportLevel?: 'ID' | 'Exclusion' | 'Inconclusive';
   hasSubclass?: boolean;
   includeConfirmation: boolean;
   additionalNotes?: string;
@@ -743,6 +747,19 @@ interface FileUploadResponse {
 }
 ```
 
+#### ImageUploadResponse Interface
+
+Image upload response wrapper (extends FileUploadResponse):
+
+```typescript
+interface ImageUploadResponse {
+  success: boolean;
+  result: FileUploadResponse['result'];
+  errors: FileUploadResponse['errors'];
+  messages: FileUploadResponse['messages'];
+}
+```
+
 ### Case Management Types
 
 #### CaseData Interface
@@ -765,6 +782,16 @@ Case operation type definition for UI state management:
 type CaseActionType = 'loaded' | 'created' | 'deleted' | null;
 ```
 
+#### CasesToDelete Interface
+
+Structure for batch case deletion operations:
+
+```typescript
+interface CasesToDelete {
+  casesToDelete: string[];
+}
+```
+
 ### Case Export Types
 
 #### CaseExportData Interface
@@ -777,7 +804,7 @@ interface CaseExportData {
     caseNumber: string;
     exportDate: string;
     exportedBy: string | null;
-    exportVersion: string;
+    striaeExportSchemaVersion: string;
     totalFiles: number;
   };
   files: Array<{
@@ -804,7 +831,7 @@ interface AllCasesExportData {
   metadata: {
     exportDate: string;
     exportedBy: string | null;
-    exportVersion: string;
+    striaeExportSchemaVersion: string;
     totalCases: number;
     totalFiles: number;
     totalAnnotations: number;
@@ -819,6 +846,14 @@ interface AllCasesExportData {
 }
 ```
 
+#### ExportFormat Type
+
+Export format type definition:
+
+```typescript
+export type ExportFormat = 'json' | 'csv';
+```
+
 #### ExportOptions Interface
 
 Configuration options for case export operations:
@@ -826,7 +861,6 @@ Configuration options for case export operations:
 ```typescript
 interface ExportOptions {
   includeAnnotations?: boolean;
-  format?: 'json' | 'csv';
   includeMetadata?: boolean;
 }
 ```

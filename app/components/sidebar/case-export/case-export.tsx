@@ -118,7 +118,8 @@ export const CaseExport = ({
         </div>
         
         <div className={styles.content}>
-          <div className={styles.fieldGroup}>            
+          <div className={styles.fieldGroup}>
+            {/* 1. Case number input */}
             <div className={styles.inputGroup}>
               <input
                 id="caseNumber"
@@ -132,6 +133,53 @@ export const CaseExport = ({
                 placeholder="Enter case number"
                 disabled={isExporting || isExportingAll}
               />
+            </div>
+            
+            {/* 2. Format choice */}
+            <div className={styles.formatSelector}>
+              <span className={styles.formatLabel}>Format:</span>
+              <div className={styles.formatToggle}>
+                <button
+                  type="button"
+                  className={`${styles.formatOption} ${selectedFormat === 'json' ? styles.formatOptionActive : ''}`}
+                  onClick={() => setSelectedFormat('json')}
+                  disabled={isExporting || isExportingAll}
+                >
+                  JSON
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.formatOption} ${selectedFormat === 'csv' ? styles.formatOptionActive : ''}`}
+                  onClick={() => setSelectedFormat('csv')}
+                  disabled={isExporting || isExportingAll}
+                  title="CSV for single case, Excel (.xlsx) with multiple worksheets for all cases"
+                >
+                  CSV/Excel
+                </button>
+              </div>
+            </div>
+
+            {/* 3. Image inclusion option */}
+            <div className={styles.imageOption}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  className={styles.checkbox}
+                  checked={includeImages}
+                  onChange={(e) => setIncludeImages(e.target.checked)}
+                  disabled={!caseNumber.trim() || isExporting || isExportingAll}
+                />
+                <div className={styles.checkboxText}>
+                  <span>Include Images (ZIP)</span>
+                  <p className={styles.checkboxTooltip}>
+                    Available for single case exports only. Downloads a ZIP file containing data and all associated image files.
+                  </p>
+                </div>
+              </label>
+            </div>
+            
+            {/* 4. Export buttons (case OR all cases) */}
+            <div className={styles.inputGroup}>
               <button
                 className={styles.exportButton}
                 onClick={handleExport}
@@ -182,47 +230,6 @@ export const CaseExport = ({
                 {error}
               </div>
             )}
-            
-            <div className={styles.formatSelector}>
-              <span className={styles.formatLabel}>Format:</span>
-              <div className={styles.formatToggle}>
-                <button
-                  type="button"
-                  className={`${styles.formatOption} ${selectedFormat === 'json' ? styles.formatOptionActive : ''}`}
-                  onClick={() => setSelectedFormat('json')}
-                  disabled={isExporting || isExportingAll}
-                >
-                  JSON
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.formatOption} ${selectedFormat === 'csv' ? styles.formatOptionActive : ''}`}
-                  onClick={() => setSelectedFormat('csv')}
-                  disabled={isExporting || isExportingAll}
-                  title="CSV for single case, Excel (.xlsx) with multiple worksheets for all cases"
-                >
-                  CSV/Excel
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.imageOption}>
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  className={styles.checkbox}
-                  checked={includeImages}
-                  onChange={(e) => setIncludeImages(e.target.checked)}
-                  disabled={!caseNumber.trim() || isExporting || isExportingAll}
-                />
-                <div className={styles.checkboxText}>
-                  <span>Include Images (ZIP)</span>
-                  <p className={styles.checkboxTooltip}>
-                    Available for single case exports only. Downloads a ZIP file containing data and all associated image files.
-                  </p>
-                </div>
-              </label>
-            </div>
           </div>
         </div>
       </div>

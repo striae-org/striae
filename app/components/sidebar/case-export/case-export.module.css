@@ -14,7 +14,7 @@
   border-radius: var(--spaceXS);
   width: 90%;
   max-width: 480px;
-  max-height: 80vh;
+  max-height: 90vh;
   box-shadow: 0 var(--spaceXS) var(--spaceL) color-mix(in lab, var(--black) 10%, transparent);
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
 }
@@ -53,7 +53,7 @@
 .content {
   padding: var(--spaceL);
   overflow-y: auto;
-  max-height: calc(80vh - var(--space3XL));
+  max-height: calc(90vh - var(--space3XL));
 }
 
 .formatSelector {

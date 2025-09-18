@@ -439,7 +439,7 @@ interface CaseExportProps {
   currentCaseNumber?: string;
 }
 
-export type ExportFormat = 'json' | 'csv' | 'zip';
+export type ExportFormat = 'json' | 'csv';
 ```
 
 **Enhanced Export Features**:

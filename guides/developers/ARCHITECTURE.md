@@ -63,7 +63,7 @@ Striae follows a modern cloud-native architecture built on Cloudflare's edge com
 │ SendLayer   │    │  Firebase Auth  │    
 │   Email     │    └─────────────────┘    
 │             │            │             
-└─────────────┘        JWT Tokens        
+└─────────────┘     JSON Web Tokens        
        ▲                   │             
        │                   ▼  📱 APPLICATION LAYER       
        │               FRONTEND                   BACKEND
@@ -364,7 +364,10 @@ interface UserData {
   lastName: string;
   company: string;
   permitted: boolean;
-  cases: CaseReference[];
+  cases: Array<{
+    caseNumber: string;
+    createdAt: string;
+  }>;
   createdAt: string;
   updatedAt?: string;
 }
@@ -406,18 +409,30 @@ interface AnnotationData {
   rightCase: string;
   leftItem: string;
   rightItem: string;
-  caseFontColor: string;
-  classType: 'Bullet' | 'Cartridge Case' | 'Other';
+  caseFontColor?: string;
+  classType?: 'Bullet' | 'Cartridge Case' | 'Other';
   customClass?: string;
-  classNote: string;
-  indexType: 'number' | 'color';
+  classNote?: string;
+  indexType?: 'number' | 'color';
   indexNumber?: string;
   indexColor?: string;
-  supportLevel: 'ID' | 'Exclusion' | 'Inconclusive';
+  supportLevel?: 'ID' | 'Exclusion' | 'Inconclusive';
   hasSubclass?: boolean;
   includeConfirmation: boolean;
-  additionalNotes: string;
-  updatedAt?: string;
+  additionalNotes?: string;
+  boxAnnotations?: BoxAnnotation[];
+  updatedAt: string;
+}
+
+// Box Annotation (nested in AnnotationData)
+interface BoxAnnotation {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  timestamp: string;
 }
 ```
 
