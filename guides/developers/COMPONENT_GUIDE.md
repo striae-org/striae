@@ -408,20 +408,23 @@ interface NotesModalProps {
 
 #### Case Export (`app/components/sidebar/case-export/case-export.tsx`)
 
-**Purpose**: Comprehensive case data export modal interface
+**Purpose**: Comprehensive case data export modal interface with ZIP file support
 
 **Features**:
 
 - Case number input with auto-population from current case
-- **Format Selection**: JSON and CSV/Excel export formats with visual toggle
+- **Format Selection**: JSON, CSV/Excel, and ZIP export formats with visual toggle
+- **ZIP Export with Images**: Single case export with complete data files and associated images
+- **Image Inclusion Options**: Checkbox to include/exclude images in ZIP exports
 - **Single Case Export**: Export individual case with complete annotation data
 - **Bulk Export**: Export all cases with real-time progress tracking
 - **Excel Multi-Worksheet**: CSV format creates Excel files with summary and individual case worksheets
-- **Comprehensive Data**: All annotation fields including case identifiers, colors, classifications, and box annotations
+- **Comprehensive Data**: All annotation fields including case identifiers, colors, classifications, and split box annotations
 - Loading states and error handling with detailed error messages
 - Keyboard navigation (Escape key) and accessible controls
 - Automatic case number pre-filling when case is loaded
 - Progress visualization for bulk export operations with case-by-case updates
+- **Synchronized UI States**: Export button and checkboxes disabled appropriately during operations
 
 **Type Definition**: Uses component-specific `CaseExportProps` interface
 
@@ -431,21 +434,26 @@ interface NotesModalProps {
 interface CaseExportProps {
   isOpen: boolean;
   onClose: () => void;
-  onExport: (caseNumber: string, format: ExportFormat) => void;
+  onExport: (caseNumber: string, format: ExportFormat, includeImages?: boolean) => void;
   onExportAll: (onProgress: (current: number, total: number, caseName: string) => void, format: ExportFormat) => void;
   currentCaseNumber?: string;
 }
 
-export type ExportFormat = 'json' | 'csv';
+export type ExportFormat = 'json' | 'csv' | 'zip';
 ```
 
 **Enhanced Export Features**:
 
-- **Data Parity**: CSV/Excel exports contain identical data to JSON exports (22 columns total)
-- **Format Indicators**: Clear UI showing "CSV/Excel" with tooltip explaining multi-worksheet functionality
+- **ZIP Package Creation**: Complete case export with data files and images in structured ZIP archive
+- **JSZip Integration**: Browser-based ZIP file generation with progress tracking
+- **Image Download System**: Automatic image fetching and packaging for ZIP exports
+- **Data Parity**: CSV/Excel exports contain identical data to JSON exports (22+ columns total)
+- **Split Box Annotations**: Box annotations split into separate rows for improved data analysis
+- **Format Indicators**: Clear UI showing format types with tooltips explaining functionality
 - **Progress Callbacks**: Real-time progress updates during bulk export operations
 - **Error Recovery**: Graceful handling of failed exports with detailed error reporting
 - **Performance Optimization**: Optional annotation inclusion for faster exports when only metadata is needed
+- **Disabled State Management**: UI components properly synchronized during export operations
 
 ### 4. Action Components
 
@@ -487,7 +495,7 @@ export const listCases = async (user: User): Promise<string[]>
 
 #### Case Export (`app/components/actions/case-export.ts`)
 
-**Purpose**: Comprehensive case data export functionality with multi-format support
+**Purpose**: Comprehensive case data export functionality with multi-format support including ZIP packages
 
 **Key Functions**:
 
@@ -506,39 +514,52 @@ export const exportAllCases = async (
 
 export const downloadCaseAsJSON = (exportData: CaseExportData): void
 export const downloadCaseAsCSV = (exportData: CaseExportData): void
+export const downloadCaseAsZip = async (exportData: CaseExportData, includeImages: boolean): Promise<void>
 export const downloadAllCasesAsJSON = (exportData: AllCasesExportData): void
 export const downloadAllCasesAsCSV = (exportData: AllCasesExportData): void
 
 export interface ExportOptions {
   includeAnnotations?: boolean;
-  format?: 'json' | 'csv';
+  format?: 'json' | 'csv' | 'zip';
   includeMetadata?: boolean;
+  includeImages?: boolean;
 }
 ```
 
 **Enhanced Features**:
 
+- **ZIP Export Functionality**: Complete case packaging with data files and images
+- **JSZip Integration**: Browser-based ZIP file creation with automatic image downloading
 - **Comprehensive Single Case Export**: Complete file and annotation data collection with metadata
 - **Bulk Export with Progress**: Export all user cases with real-time progress callbacks and error handling
-- **Multi-Format Support**: JSON for structured data, CSV for single cases, Excel (.xlsx) for bulk exports
+- **Multi-Format Support**: JSON for structured data, CSV for single cases, Excel (.xlsx) for bulk exports, ZIP for complete packages
 - **Excel Multi-Worksheet**: Bulk CSV exports create Excel files with summary worksheet and individual case worksheets
-- **Complete Data Parity**: CSV/Excel formats include all 22 annotation fields matching JSON exports
-- **Enhanced Box Annotations**: Includes coordinates, colors, timestamps, and labels in structured format
+- **Complete Data Parity**: CSV/Excel formats include all annotation fields matching JSON exports
+- **Split Box Annotation Format**: Box annotations split into separate rows for improved data analysis
+- **Enhanced Box Annotations**: Includes coordinates, colors, timestamps in structured format (label property removed)
 - **Forensic Classification Support**: Full case identifiers, color schemes, support levels, and classification data
 - **Performance Options**: Configurable annotation inclusion for faster exports when only metadata needed
 - **Error Recovery**: Graceful handling of failed case exports with detailed error reporting and continuation
 - **File Download Utilities**: Browser-compatible download functions with proper MIME types and cleanup
 - **Export Validation**: Comprehensive case number and data validation before export operations
+- **Image Management**: Automatic image URL fetching and packaging for ZIP exports
 
-**CSV/Excel Export Columns (22 total)**:
+**CSV/Excel Export Columns (22+ total with split format)**:
 
 1. File ID, Original Filename, Upload Date, Has Annotations
 2. **Case Identifiers**: Left Case, Right Case, Left Item, Right Item  
 3. **Visual Elements**: Case Font Color, Index Type, Index Number, Index Color
 4. **Classifications**: Class Type, Custom Class, Class Note, Support Level
 5. **Options**: Has Subclass, Include Confirmation
-6. **Annotations**: Box Annotations Count, Box Annotations Details (with coordinates, colors, timestamps)
+6. **Annotations**: Box Annotations Count, Individual Box Annotation Details (split rows with coordinates, colors, timestamps)
 7. **Metadata**: Additional Notes, Last Updated
+
+**ZIP Export Structure**:
+
+- **Data Files**: JSON and CSV formats included in ZIP package
+- **Image Directory**: All case images organized in `images/` folder within ZIP
+- **Structured Layout**: Professional organization with clear file naming conventions
+- **Progress Tracking**: Real-time download progress for images and ZIP creation
 
 **XLSX Library Integration**:
 
@@ -546,6 +567,7 @@ export interface ExportOptions {
 - **Structured Data Layout**: Professional formatting with headers and metadata sections
 - **Sheet Naming**: Excel-compatible sheet names with case number identifiers
 - **Error Sheets**: Dedicated worksheets for failed case exports with error details
+- **Split Annotation Format**: Box annotations displayed in separate rows for better analysis
 
 #### Image Management (`app/components/actions/image-manage.ts`)
 

@@ -59,6 +59,8 @@ A: Striae supports three export formats, each optimized for different use cases:
 
 - **Excel Format**: Best for bulk exports involving multiple cases. Excel files feature organized worksheets with summary statistics and individual case details, plus built-in analysis and formatting capabilities.
 
+**Note**: When you choose to include images with your export, the system automatically packages everything in a ZIP file containing both the data files and all original images, regardless of which format you select.
+
 **Q: What data is included in exported case files?**
 
 A: All export formats include identical, comprehensive data to ensure complete documentation:
@@ -84,6 +86,7 @@ A: Striae uses intelligent, descriptive file naming to keep your exports organiz
 
 - **Single Case JSON**: `striae-case-export-[CASE-NUMBER]-[DATE].json`
 - **Single Case CSV**: `striae-case-export-[CASE-NUMBER]-[DATE].csv`
+- **Single Case with Images**: `striae-case-export-[CASE-NUMBER]-[DATE].zip` (contains data files + images)
 - **Bulk JSON**: `striae-all-cases-export-[DATE].json`
 - **Bulk Excel**: `striae-all-cases-detailed-[DATE].xlsx`
 
@@ -100,6 +103,39 @@ A: Download issues are usually browser-related. Check your browser's download se
 **Q: Can I export cases that don't have any annotations?**
 
 A: Yes, Striae will export all cases regardless of whether they contain annotations. Cases without annotations will still include file information, case metadata, and basic case details. The export system distinguishes between cases with and without annotations in the summary data, providing complete documentation of your case portfolio.
+
+**Q: How do ZIP exports work and what's included?**
+
+A: ZIP exports are created automatically when you choose to include images with your case export. Regardless of whether you select JSON or CSV format, checking the "Include Images" option will package your selected data format along with all original case images into a comprehensive ZIP archive file.
+
+**Q: What's the structure of a ZIP export file?**
+
+A: When you include images in your export, the ZIP file is organized for easy navigation:
+
+- **Data Files**: Your selected format (JSON or CSV) is included in the root directory
+- **Images Folder**: All original case images are organized in a dedicated `images/` directory within the ZIP
+- **README File**: A helpful text file explaining the contents and structure of the export
+- **Organized Layout**: Files are clearly named and structured for immediate use and archiving
+
+**Q: Can I choose whether to include images in my export?**
+
+A: Yes! For single case exports, you'll see a checkbox option labeled "Include Images." When unchecked, you'll receive your data in the selected format (JSON or CSV) as a single file. When checked, the system automatically creates a ZIP package containing both your data file and all case images in an organized structure.
+
+**Q: How long do exports with images take?**
+
+A: Export time depends on the number and size of images in your case. Cases with just a few small images may complete in seconds, while cases with many images may take several minutes. The system provides real-time progress updates showing download progress for images and ZIP file creation. Ensure you have a stable internet connection for the best experience.
+
+**Q: What happens if some images fail to download during export with images?**
+
+A: Striae handles image download failures gracefully. If some images can't be downloaded (due to network issues or file problems), the export will still complete with the available images and data files. A detailed error log in the ZIP file will indicate which images couldn't be included, so you can identify and potentially retry downloading specific files if needed.
+
+**Q: Are there any file size limits for exports with images?**
+
+A: While individual images are limited to 10MB during upload, the total export file size depends on how many images are in your case. Cases with many large images will create correspondingly large ZIP files. Most browsers can handle ZIP files up to several hundred megabytes, but very large cases may take longer to download. Consider your internet connection speed when exporting cases with many large images.
+
+**Q: Can I use exports with images for audits, legal proceedings, or evidence sharing?**
+
+A: Absolutely! Exports with images are ideal for audits or legal proceedings because they provide complete case documentation in a single, organized package. The structured format with original images and comprehensive data makes it easy to share complete evidence packages with auditors, attorneys, or other forensic examiners. The inclusion of both data formats ensures compatibility with various analysis tools and documentation requirements.
 
 **Q: Is there a limit to how many cases I can export at once?**
 

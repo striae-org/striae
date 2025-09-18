@@ -11,12 +11,6 @@ export interface CaseData {
   files: FileData[];
 }
 
-export interface CaseMetadata {
-  caseNumber: string;
-  createdAt: string;
-  updatedAt?: string;
-}
-
 export interface CaseExportData {
   metadata: {
     caseNumber: string;
