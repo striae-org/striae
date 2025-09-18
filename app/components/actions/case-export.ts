@@ -683,64 +683,95 @@ async function fetchImageAsBlob(fileData: FileData): Promise<Blob | null> {
 }
 
 /**
- * Generate CSV content from export data
+ * Generate CSV content from export data (comprehensive format matching downloadCaseAsCSV)
  */
 async function generateCSVContentFromExportData(exportData: CaseExportData): Promise<string> {
-  const headers = [
-    'File ID',
-    'Original Filename', 
-    'Upload Date',
-    'Box ID',
-    'Box Label',
-    'Box X',
-    'Box Y', 
-    'Box Width',
-    'Box Height',
-    'Box Notes'
+  // Case metadata section (same as downloadCaseAsCSV)
+  const metadataRows = [
+    ['Case Export Report'],
+    [''],
+    ['Case Number', exportData.metadata.caseNumber],
+    ['Export Date', exportData.metadata.exportDate],
+    ['Exported By', exportData.metadata.exportedBy || 'N/A'],
+    ['Export Version', exportData.metadata.exportVersion],
+    ['Total Files', exportData.metadata.totalFiles],
+    [''],
+    ['Summary'],
+    ['Files with Annotations', exportData.summary?.filesWithAnnotations || 0],
+    ['Files without Annotations', exportData.summary?.filesWithoutAnnotations || 0],
+    ['Total Box Annotations', exportData.summary?.totalBoxAnnotations || 0],
+    ['Last Modified', exportData.summary?.lastModified || 'N/A'],
+    [''],
+    ['File Details']
   ];
 
-  const rows: string[][] = [headers];
+  // File details headers (same as downloadCaseAsCSV)
+  const fileHeaders = [
+    'File ID',
+    'Original Filename',
+    'Upload Date',
+    'Has Annotations',
+    'Left Case',
+    'Right Case',
+    'Left Item',
+    'Right Item',
+    'Case Font Color',
+    'Class Type',
+    'Custom Class',
+    'Class Note',
+    'Index Type',
+    'Index Number',
+    'Index Color',
+    'Support Level',
+    'Has Subclass',
+    'Include Confirmation',
+    'Box Annotations Count',
+    'Box Annotations Details',
+    'Additional Notes',
+    'Last Updated'
+  ];
 
-  if (exportData.files) {
-    for (const file of exportData.files) {
-      if (file.annotations && Array.isArray(file.annotations.boxAnnotations)) {
-        for (const annotation of file.annotations.boxAnnotations) {
-          rows.push([
-            file.fileData.id,
-            file.fileData.originalFilename,
-            file.fileData.uploadedAt,
-            annotation.id,
-            annotation.label || '',
-            annotation.x.toString(),
-            annotation.y.toString(),
-            annotation.width.toString(),
-            annotation.height.toString(),
-            '' // BoxAnnotation doesn't have notes field, using empty string
-          ]);
-        }
-      } else {
-        rows.push([
-          file.fileData.id,
-          file.fileData.originalFilename,
-          file.fileData.uploadedAt,
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          ''
-        ]);
-      }
-    }
-  }
+  // File data rows (same as downloadCaseAsCSV)
+  const fileRows = exportData.files.map(fileEntry => {
+    const boxAnnotationsDetails = fileEntry.annotations?.boxAnnotations?.map(box => 
+      `"Box ${box.id}: (${box.x},${box.y}) ${box.width}x${box.height} Color:${box.color || 'N/A'} Timestamp:${box.timestamp || 'N/A'} Label:${box.label || 'No label'}"`
+    ).join('; ') || '';
 
-  return rows.map(row => 
-    row.map(cell => 
-      typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell.includes('\n'))
-        ? `"${cell.replace(/"/g, '""')}"` 
-        : cell
-    ).join(',')
+    return [
+      fileEntry.fileData.id,
+      fileEntry.fileData.originalFilename,
+      fileEntry.fileData.uploadedAt,
+      fileEntry.hasAnnotations ? 'Yes' : 'No',
+      fileEntry.annotations?.leftCase || '',
+      fileEntry.annotations?.rightCase || '',
+      fileEntry.annotations?.leftItem || '',
+      fileEntry.annotations?.rightItem || '',
+      fileEntry.annotations?.caseFontColor || '',
+      fileEntry.annotations?.classType || '',
+      fileEntry.annotations?.customClass || '',
+      fileEntry.annotations?.classNote || '',
+      fileEntry.annotations?.indexType || '',
+      fileEntry.annotations?.indexNumber || '',
+      fileEntry.annotations?.indexColor || '',
+      fileEntry.annotations?.supportLevel || '',
+      fileEntry.annotations?.hasSubclass ? 'Yes' : 'No',
+      fileEntry.annotations?.includeConfirmation ? 'Yes' : 'No',
+      fileEntry.annotations?.boxAnnotations?.length || 0,
+      boxAnnotationsDetails,
+      fileEntry.annotations?.additionalNotes || '',
+      fileEntry.annotations?.updatedAt || ''
+    ];
+  });
+
+  // Combine all data (same as downloadCaseAsCSV)
+  const allRows = [
+    ...metadataRows,
+    fileHeaders,
+    ...fileRows
+  ];
+
+  return allRows.map(row => 
+    row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
   ).join('\n');
 }
 
