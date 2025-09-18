@@ -186,10 +186,3 @@
 #recaptcha-container {
   margin-top: var(--spaceM);
 }
-
-@media (max-width: 768px) {
-  .modal {
-    margin: var(--spaceL);
-    max-width: none;
-  }
-}

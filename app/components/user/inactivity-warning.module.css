@@ -94,7 +94,6 @@
 
 .extendButton:hover {
   background: #0056b3;
-  transform: translateY(-1px);
 }
 
 .signOutButton {

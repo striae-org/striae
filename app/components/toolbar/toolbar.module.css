@@ -11,7 +11,8 @@
   border-radius: 5px;
   box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
   height: auto;
-  overflow: visible;
+  overflow: hidden;
+  transition: opacity var(--durationM) var(--bezierFastoutSlowin);
 }
 
 .toggleButton {
@@ -25,10 +26,11 @@
   flex-direction: column;
   gap: var(--spaceS);
   height: auto;
+  transition: opacity var(--durationM) var(--bezierFastoutSlowin);
 }
 
 .hidden {
-  height: calc(40px + (var(--spaceM) * 2));
+  height: calc(50px + (var(--spaceS) * 2));
   opacity: 0.3;
 }
 
@@ -36,4 +38,5 @@
   opacity: 0;
   pointer-events: none;
   height: 0;
+  overflow: hidden;
 }

@@ -220,31 +220,3 @@
   color: var(--textLight);
   cursor: not-allowed;
 }
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .modal {
-    width: 95%;
-    max-height: 95vh;
-  }
-  
-  .modalContent {
-    padding: var(--spaceM);
-  }
-  
-  .modalHeader {
-    padding: var(--spaceM);
-  }
-  
-  .dangerTitle {
-    font-size: var(--fontSizeBodyM);
-  }
-  
-  .infoRow {
-    gap: var(--spaceXS);
-  }
-  
-  .value {
-    font-size: var(--fontSizeBodyXS);
-  }
-}

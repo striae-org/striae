@@ -189,13 +189,3 @@
   margin-top: var(--spaceS);
   white-space: pre-line;
 }
-
-@media (max-width: 768px) {
-  .logo {
-    display: none;
-  }
-
-  .formWrapper {
-    padding: var(--spaceL);
-  }
-}

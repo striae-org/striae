@@ -215,7 +215,6 @@ textarea:focus {
 
 .returnButton:hover {
   background-color: #5c636a;
-  transform: translateY(-1px);
 }
 
 .notesButton {
@@ -234,7 +233,6 @@ textarea:focus {
 
 .notesButton:hover {
   background-color: color-mix(in lab, var(--primary) 95%, transparent);  
-  transform: translateY(-1px);
 }
 
 .modalOverlay {
@@ -318,12 +316,11 @@ textarea:focus {
 
 .saveButton:hover {
   background-color: color-mix(in lab, var(--accent) 95%, transparent);
-  transform: translateY(-1px);
 }
 
 .saveButton:hover,
 .cancelButton:hover {
-  transform: translateY(-1px);
+  /* Transform handled by global styles */
 }
 
 .successMessage {

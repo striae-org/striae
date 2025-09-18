@@ -56,15 +56,3 @@
   border: 2px solid white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .savedAnnotationBox {
-    min-width: 20px;
-    min-height: 20px;
-  }
-  
-  .drawingBox {
-    opacity: 0.8;
-  }
-}

@@ -58,6 +58,43 @@ export const Toolbar = ({ onToolSelect }: ToolbarProps) => {
 };
 ```
 
+### Mobile Responsiveness Policy
+- **Desktop-First Application**: Striae is designed exclusively for desktop environments
+- **Limited Mobile Support**: Only the home route (`app/routes/home/`) and marketing pages should include mobile responsive CSS classes
+- **No Mobile Classes in App Components**: Components in `app/components/` should NOT include mobile responsive styles or media queries
+- **Rationale**: The forensic annotation workflow requires precise cursor control, large screens, and desktop-specific interactions that are not suitable for mobile devices
+- **Media Query Usage**: 
+  - ✅ **Allowed**: `app/routes/home/`, `app/routes/auth/`, public-facing pages
+  - ❌ **Forbidden**: All components in `app/components/`, application workflow pages
+  - ❌ **Never Use**: Mobile-first responsive patterns in core application features
+
+### Global CSS & Component Styling
+- **Global Button Effects**: Enhanced hover effects are globally applied via `app/styles/root.module.css`
+  - All buttons automatically get `transform: translateY(-1px)` on hover
+  - Enhanced shadows using `box-shadow: 0 2px 6px color-mix(...)`
+  - Opt-out available with `data-no-enhance` attribute
+  - **Never duplicate**: Avoid adding `translateY(-1px)` in individual component CSS
+- **CSS Modules Pattern**: Use `color-mix(in lab, var(--color) 85%, var(--black))` for hover darkening effects
+- **Transitions**: Always use design system timing: `var(--durationS)` with `var(--bezierFastoutSlowin)`
+
+### Text Truncation Standards
+- **Character-based truncation**: Use 150 characters as standard limit for descriptions
+- **Word boundary preservation**: Always find last space within limit to avoid cutting words
+- **Ellipsis character**: Use `…` (Unicode U+2026) instead of `...` for better rendering
+- **Implementation pattern**:
+  ```typescript
+  const truncated = text.substring(0, 150);
+  const lastSpace = truncated.lastIndexOf(' ');
+  if (lastSpace > 100) truncated = truncated.substring(0, lastSpace);
+  return truncated + '…';
+  ```
+
+### Mobile Detection & Device Targeting
+- **Desktop-only enforcement**: Mobile warning triggers at `max-width: 1024px` to include tablets
+- **Multi-method detection**: Combine screen size + user agent detection for comprehensive coverage
+- **Target devices**: Discourage phones (0-768px) AND tablets (768px-1024px)
+- **User agent patterns**: Check for `/mobile|android|iphone|ipad|ipod|blackberry|iemobile|opera mini|tablet/i`
+
 ### Route Organization
 - **Pattern**: Feature-based routing in `app/routes/[feature]/`
 - **Index routes**: Use `_index.tsx` for route entry points
@@ -80,6 +117,20 @@ export default function App() {
 - **CORS**: All workers have strict CORS to `https://www.striae.org`
 - **Auth**: Workers use key-based auth + Firebase token validation
 - **Error Handling**: Structured error responses with types
+
+### Development Best Practices
+- **CSS Redundancy**: When adding global styles, remove redundant component-level styles to avoid duplication
+- **Button Hover Effects**: Never add `transform: translateY(-1px)` to individual components - handled globally
+- **Mobile Query Cleanup**: When removing mobile responsiveness, check for leftover disabled button states
+- **Type Centralization**: Import types from `~/types` barrel exports, not direct file paths
+- **Component Export Pattern**: Use named exports, not default exports for components
+
+### CSS Architecture
+- **Design System First**: Always use CSS custom properties from design system
+- **Color Mixing**: Use `color-mix(in lab, ...)` for dynamic color variations
+- **Hover States**: Global button effects + component-specific color/background changes only
+- **Responsive Patterns**: `@media (max-width: 1024px)` for mobile/tablet detection
+- **Shadow Conventions**: Use `color-mix(in lab, var(--color) 30%, transparent)` for shadows
 
 ## Critical Integration Patterns
 

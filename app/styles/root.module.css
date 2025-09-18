@@ -83,6 +83,23 @@
     color: color-mix(in lab, var(--primary) 85%, var(--black));
   }
 
+  /* Global enhanced button hover effects */
+  :global(button:not([data-no-enhance]):hover:not(:disabled)) {
+    transform: translateY(-1px);
+    transition: all var(--durationS) var(--bezierFastoutSlowin);
+  }
+
+  :global(button[class*="Button"]:hover:not(:disabled)) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px color-mix(in lab, currentColor 20%, transparent);
+    transition: all var(--durationS) var(--bezierFastoutSlowin);
+  }
+
+  /* Ensure disabled buttons don't get transforms */
+  :global(button:disabled) {
+    transform: none !important;
+  }
+
   @media (max-width: 768px) {
     .errorTitle {
       font-size: var(--fontSizeH1);

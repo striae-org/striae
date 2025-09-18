@@ -71,6 +71,7 @@
 .actionButton:hover {
   background-color: color-mix(in lab, var(--primary) 85%, var(--black));
   text-decoration: none;
+  transform: translateY(-1px);
 }
 
 .signInButton {
@@ -89,6 +90,7 @@
 .signInButton:hover {
   background-color: #155724;
   text-decoration: none;
+  transform: translateY(-1px);
 }
 
 .youtubeEmbed {
@@ -135,49 +137,6 @@
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: var(--spaceM);
   line-height: 1.6;
-}
-
-.sectionTitle {
-  font-size: var(--fontSizeH4);
-  font-weight: var(--fontWeightMedium);
-  color: var(--primary);
-  margin: var(--spaceXL) 0 var(--spaceM) 0;
-  padding-left: var(--spaceS);
-  border-left: 3px solid var(--primary);
-}
-
-.benefitsList {
-  display: grid;
-  gap: var(--spaceL);
-  margin: var(--spaceL) 0;
-}
-
-.benefit {
-  padding: var(--spaceM);
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: var(--spaceS);
-  border-left: 3px solid var(--accent);
-  transition: all var(--durationM) var(--bezierFastoutSlowin);
-}
-
-.benefit:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-2px);
-}
-
-.benefitTitle {
-  font-size: var(--fontSizeBodyL);
-  font-weight: var(--fontWeightMedium);
-  color: var(--accent);
-  margin-bottom: var(--spaceS);
-}
-
-.benefit p {
-  margin-bottom: var(--spaceS);
-}
-
-.benefit p:last-child {
-  margin-bottom: 0;
 }
 
 .developerProfile {
@@ -284,19 +243,6 @@
 
   .aboutContent p {
     font-size: var(--fontSizeBodyS);
-  }
-
-  .sectionTitle {
-    font-size: var(--fontSizeBodyL);
-    margin: var(--spaceL) 0 var(--spaceS) 0;
-  }
-
-  .benefitTitle {
-    font-size: var(--fontSizeBodyM);
-  }
-
-  .benefit {
-    padding: var(--spaceS);
   }
 
   .developerProfile {

@@ -9,28 +9,38 @@
   background: var(--backgroundLight);
   cursor: pointer;
   transition: all var(--durationS) var(--bezierFastoutSlowin);
+  box-shadow: 0 1px 3px color-mix(in lab, var(--backgroundLight) 30%, transparent);
 }
 
 .button:hover {
   background: color-mix(in lab, var(--backgroundLight) 85%, var(--black));
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px color-mix(in lab, var(--backgroundLight) 40%, transparent);
 }
 
 .button.active {
   background: var(--success);
+  box-shadow: 0 1px 3px color-mix(in lab, var(--success) 30%, transparent);
 }
 
 .button.active:hover {
-  background: color-mix(in lab, var(--errorLight) 85%, var(--black));
+  background: color-mix(in lab, var(--success) 85%, var(--black));
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px color-mix(in lab, var(--success) 40%, transparent);
 }
 
 .button.disabled {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
+  transform: none;
+  box-shadow: none;
 }
 
 .button.disabled:hover {
   background: var(--backgroundLight);
+  transform: none;
+  box-shadow: none;
 }
 
 .icon {  
