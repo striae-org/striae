@@ -7,6 +7,10 @@ import * as XLSX from 'xlsx';
 
 export type ExportFormat = 'json' | 'csv';
 
+// Constants for export data structure
+const FILE_DATA_COLUMN_COUNT = 19; // Number of columns in the main file data before box annotations
+const ADDITIONAL_DATA_COLUMN_COUNT = 2; // Number of additional columns (Additional Notes, Last Updated)
+
 export interface ExportOptions {
   includeAnnotations?: boolean;
   format?: 'json' | 'csv';
@@ -403,8 +407,8 @@ export function downloadAllCasesAsCSV(exportData: AllCasesExportData): void {
           ];
 
           // Empty row template for subsequent box annotations (file info columns empty)
-          const emptyFileData = Array(19).fill('');
-          const emptyAdditionalData = Array(2).fill('');
+          const emptyFileData = Array(FILE_DATA_COLUMN_COUNT).fill('');
+          const emptyAdditionalData = Array(ADDITIONAL_DATA_COLUMN_COUNT).fill('');
 
           // If there are box annotations, create a row for each one
           if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
@@ -588,8 +592,8 @@ export function downloadCaseAsCSV(exportData: CaseExportData): void {
       ];
 
       // Empty row template for subsequent box annotations (file info columns empty)
-      const emptyFileData = Array(19).fill('');
-      const emptyAdditionalData = Array(2).fill('');
+      const emptyFileData = Array(FILE_DATA_COLUMN_COUNT).fill('');
+      const emptyAdditionalData = Array(ADDITIONAL_DATA_COLUMN_COUNT).fill('');
 
       // If there are box annotations, create a row for each one
       if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
@@ -863,8 +867,8 @@ async function generateCSVContentFromExportData(exportData: CaseExportData): Pro
     ];
 
     // Empty row template for subsequent box annotations (file info columns empty)
-    const emptyFileData = Array(19).fill('');
-    const emptyAdditionalData = Array(2).fill('');
+    const emptyFileData = Array(FILE_DATA_COLUMN_COUNT).fill('');
+    const emptyAdditionalData = Array(ADDITIONAL_DATA_COLUMN_COUNT).fill('');
 
     // If there are box annotations, create a row for each one
     if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
