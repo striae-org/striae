@@ -287,18 +287,113 @@ if not "%PAGES_PROJECT_NAME%"=="" (
 )
 
 echo [94mPAGES_CUSTOM_DOMAIN[0m
-echo [93mYour custom domain (e.g., striae.org)[0m
+echo [93mYour custom domain (e.g., striae.org) - DO NOT include https://[0m
 set /p "PAGES_CUSTOM_DOMAIN=Enter value: "
 if not "%PAGES_CUSTOM_DOMAIN%"=="" (
     powershell -Command "(Get-Content '.env') -replace '^PAGES_CUSTOM_DOMAIN=.*', 'PAGES_CUSTOM_DOMAIN=%PAGES_CUSTOM_DOMAIN%' | Set-Content '.env'"
     echo [92m✅ PAGES_CUSTOM_DOMAIN updated[0m
 )
 
-REM Continue with worker names and domains (shortened for brevity)
+REM Worker names and domains
 echo.
 echo [94m🔑 WORKER NAMES ^& DOMAINS[0m
 echo =========================
-REM (Similar pattern for all worker variables...)
+
+echo [94mKEYS_WORKER_NAME[0m
+echo [93mKeys worker name[0m
+set /p "KEYS_WORKER_NAME=Enter value: "
+if not "%KEYS_WORKER_NAME%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^KEYS_WORKER_NAME=.*', 'KEYS_WORKER_NAME=%KEYS_WORKER_NAME%' | Set-Content '.env'"
+    echo [92m✅ KEYS_WORKER_NAME updated[0m
+)
+
+echo [94mKEYS_WORKER_DOMAIN[0m
+echo [93mKeys worker domain (e.g., keys.striae.org) - DO NOT include https://[0m
+set /p "KEYS_WORKER_DOMAIN=Enter value: "
+if not "%KEYS_WORKER_DOMAIN%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^KEYS_WORKER_DOMAIN=.*', 'KEYS_WORKER_DOMAIN=%KEYS_WORKER_DOMAIN%' | Set-Content '.env'"
+    echo [92m✅ KEYS_WORKER_DOMAIN updated[0m
+)
+
+echo [94mUSER_WORKER_NAME[0m
+echo [93mUser worker name[0m
+set /p "USER_WORKER_NAME=Enter value: "
+if not "%USER_WORKER_NAME%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^USER_WORKER_NAME=.*', 'USER_WORKER_NAME=%USER_WORKER_NAME%' | Set-Content '.env'"
+    echo [92m✅ USER_WORKER_NAME updated[0m
+)
+
+echo [94mUSER_WORKER_DOMAIN[0m
+echo [93mUser worker domain (e.g., users.striae.org) - DO NOT include https://[0m
+set /p "USER_WORKER_DOMAIN=Enter value: "
+if not "%USER_WORKER_DOMAIN%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^USER_WORKER_DOMAIN=.*', 'USER_WORKER_DOMAIN=%USER_WORKER_DOMAIN%' | Set-Content '.env'"
+    echo [92m✅ USER_WORKER_DOMAIN updated[0m
+)
+
+echo [94mDATA_WORKER_NAME[0m
+echo [93mData worker name[0m
+set /p "DATA_WORKER_NAME=Enter value: "
+if not "%DATA_WORKER_NAME%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^DATA_WORKER_NAME=.*', 'DATA_WORKER_NAME=%DATA_WORKER_NAME%' | Set-Content '.env'"
+    echo [92m✅ DATA_WORKER_NAME updated[0m
+)
+
+echo [94mDATA_WORKER_DOMAIN[0m
+echo [93mData worker domain (e.g., data.striae.org) - DO NOT include https://[0m
+set /p "DATA_WORKER_DOMAIN=Enter value: "
+if not "%DATA_WORKER_DOMAIN%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^DATA_WORKER_DOMAIN=.*', 'DATA_WORKER_DOMAIN=%DATA_WORKER_DOMAIN%' | Set-Content '.env'"
+    echo [92m✅ DATA_WORKER_DOMAIN updated[0m
+)
+
+echo [94mIMAGES_WORKER_NAME[0m
+echo [93mImages worker name[0m
+set /p "IMAGES_WORKER_NAME=Enter value: "
+if not "%IMAGES_WORKER_NAME%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^IMAGES_WORKER_NAME=.*', 'IMAGES_WORKER_NAME=%IMAGES_WORKER_NAME%' | Set-Content '.env'"
+    echo [92m✅ IMAGES_WORKER_NAME updated[0m
+)
+
+echo [94mIMAGES_WORKER_DOMAIN[0m
+echo [93mImages worker domain (e.g., images.striae.org) - DO NOT include https://[0m
+set /p "IMAGES_WORKER_DOMAIN=Enter value: "
+if not "%IMAGES_WORKER_DOMAIN%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^IMAGES_WORKER_DOMAIN=.*', 'IMAGES_WORKER_DOMAIN=%IMAGES_WORKER_DOMAIN%' | Set-Content '.env'"
+    echo [92m✅ IMAGES_WORKER_DOMAIN updated[0m
+)
+
+echo [94mTURNSTILE_WORKER_NAME[0m
+echo [93mTurnstile worker name[0m
+set /p "TURNSTILE_WORKER_NAME=Enter value: "
+if not "%TURNSTILE_WORKER_NAME%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^TURNSTILE_WORKER_NAME=.*', 'TURNSTILE_WORKER_NAME=%TURNSTILE_WORKER_NAME%' | Set-Content '.env'"
+    echo [92m✅ TURNSTILE_WORKER_NAME updated[0m
+)
+
+echo [94mTURNSTILE_WORKER_DOMAIN[0m
+echo [93mTurnstile worker domain (e.g., turnstile.striae.org) - DO NOT include https://[0m
+set /p "TURNSTILE_WORKER_DOMAIN=Enter value: "
+if not "%TURNSTILE_WORKER_DOMAIN%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^TURNSTILE_WORKER_DOMAIN=.*', 'TURNSTILE_WORKER_DOMAIN=%TURNSTILE_WORKER_DOMAIN%' | Set-Content '.env'"
+    echo [92m✅ TURNSTILE_WORKER_DOMAIN updated[0m
+)
+
+echo [94mPDF_WORKER_NAME[0m
+echo [93mPDF worker name[0m
+set /p "PDF_WORKER_NAME=Enter value: "
+if not "%PDF_WORKER_NAME%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^PDF_WORKER_NAME=.*', 'PDF_WORKER_NAME=%PDF_WORKER_NAME%' | Set-Content '.env'"
+    echo [92m✅ PDF_WORKER_NAME updated[0m
+)
+
+echo [94mPDF_WORKER_DOMAIN[0m
+echo [93mPDF worker domain (e.g., pdf.striae.org) - DO NOT include https://[0m
+set /p "PDF_WORKER_DOMAIN=Enter value: "
+if not "%PDF_WORKER_DOMAIN%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^PDF_WORKER_DOMAIN=.*', 'PDF_WORKER_DOMAIN=%PDF_WORKER_DOMAIN%' | Set-Content '.env'"
+    echo [92m✅ PDF_WORKER_DOMAIN updated[0m
+)
 
 echo.
 echo [94m🗄️ STORAGE CONFIGURATION[0m
