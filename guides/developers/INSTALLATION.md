@@ -18,11 +18,12 @@ This guide provides step-by-step instructions for deploying Striae, a Firearms E
   - [2.3 Cloudflare KV Setup](#23-cloudflare-kv-setup)
   - [2.4 Cloudflare R2 Setup](#24-cloudflare-r2-setup)
 - [Step 3: Environment Variables Setup](#step-3-environment-variables-setup)
-  - [3.1 Generate Security Tokens](#31-generate-security-tokens)
-  - [3.2 Initialize Environment Configuration](#32-initialize-environment-configuration)
-  - [3.3 Required Environment Variables](#33-required-environment-variables)
+  - [3.1 Understanding the Automated Configuration](#31-understanding-the-automated-configuration)
+  - [3.2 What You'll Be Prompted For](#32-what-youll-be-prompted-for)
+  - [3.3 Token Generation Helper](#33-token-generation-helper)
+  - [3.4 Required Information to Collect](#34-required-information-to-collect)
 - [Step 4: Complete Deployment](#step-4-complete-deployment)
-  - [4.1 Unified Complete Deployment](#41-unified-complete-deployment)
+  - [4.1 Automated Configuration and Deployment](#41-automated-configuration-and-deployment)
 - [Step 5: Testing and Verification](#step-5-testing-and-verification)
   - [5.1 Test Authentication Flow](#51-test-authentication-flow)
   - [5.2 Test Core Features](#52-test-core-features)
@@ -30,7 +31,7 @@ This guide provides step-by-step instructions for deploying Striae, a Firearms E
   - [5.4 Verify CORS Configuration](#54-verify-cors-configuration)
 - [Step 6: Security Checklist](#step-6-security-checklist)
 - [Important Notes & Updates](#important-notes--updates)
-  - [✨ New Environment Setup System](#-new-environment-setup-system)
+  - [✨ New Interactive Environment Setup System](#-new-interactive-environment-setup-system)
   - [Key Improvements Made](#key-improvements-made)
   - [Required Binding Names](#required-binding-names)  
   - [Quick Start Summary](#quick-start-summary)
@@ -246,13 +247,59 @@ npm run build
 
 **🎯 Internal Developers**: If you are an internal developer, **skip this entire step**. You will receive a complete, pre-configured `.env` file with all required variables. Simply use the provided file and proceed to Step 4.
 
-**📋 External Developers**: This section is for external developers who need to set up their own environment variables and external service accounts.
+**📋 External Developers**: This section explains the interactive environment setup system that will automatically run during deployment. You don't need to configure environment variables manually - the deployment script will guide you through the process.
 
-Striae uses a centralized environment variables system that organizes all secrets by their usage across different workers and the Pages application.
+Striae uses an automated interactive environment setup system that guides you through configuring all required variables during the deployment process.
 
-### 3.1 Generate Security Tokens
+### 3.1 Understanding the Automated Configuration
 
-**First, generate secure random tokens** for the custom authentication variables that you'll need in your `.env` file:
+**The configuration happens automatically during deployment:**
+
+When you run `npm run deploy:all`, the deployment script will automatically:
+
+1. **Copy Configuration Templates** - Automatically copy all example configuration files
+2. **Interactive Variable Prompting** - Guide you through each required environment variable with descriptions
+3. **Smart Validation** - Verify all required variables are provided
+4. **Automatic File Updates** - Update all configuration files with your values
+5. **CORS Configuration** - Automatically configure worker CORS headers with your domain
+
+**You don't need to run any separate configuration commands** - everything is handled as part of the unified deployment process.
+
+### 3.2 What You'll Be Prompted For
+
+During the deployment process, the interactive setup will prompt you for values organized by category:
+
+**🔧 Cloudflare Core Configuration:**
+
+- Account ID and shared credentials
+
+**🔐 Shared Authentication & Storage:**
+
+- Cross-worker authentication tokens (with generation hints)
+
+**🔥 Firebase Auth Configuration:**
+
+- Complete Firebase project settings
+
+**📄 Pages Configuration:**
+
+- Project name and custom domain
+
+**🔑 Worker Names & Domains:**
+
+- All 6 worker names and custom domains
+
+**🗄️ Storage Configuration:**
+
+- R2 bucket name and KV namespace ID
+
+**🔐 Service-Specific Secrets:**
+
+- Unique credentials for each Cloudflare service
+
+### 3.3 Token Generation Helper
+
+When prompted for security tokens, the script provides generation hints. You can also generate them manually:
 
 ```bash
 # Session secret (64 characters recommended)
@@ -265,94 +312,46 @@ openssl rand -hex 16
 openssl rand -base64 24
 ```
 
-**Save these tokens** - you'll need them when filling out your `.env` file in the next step.
+### 3.4 Required Information to Collect
 
-### 3.2 Initialize Environment Configuration
+Before running the configuration script, gather the following information from Step 2 (Cloudflare services):
 
-**For Standard Installation:**
+**From Step 2.1 (Turnstile):**
 
-**Copy the environment template:**
+- Turnstile Site Key (`CFT_PUBLIC_KEY`)
+- Turnstile Secret Key (`CFT_SECRET_KEY`)
 
-```bash
-cp .env.example .env
-```
+**From Step 2.2 (Images):**
 
-**Fill in your actual values in the `.env` file**
+- Account ID (`ACCOUNT_ID`)
+- Account Hash (`ACCOUNT_HASH`)
+- Images API Token (`IMAGES_API_TOKEN` and `API_TOKEN`)
+- HMAC Key (`HMAC_KEY`)
 
-The `.env` file is organized by service and includes:
+**From Step 2.3 (KV):**
 
-- **Cloudflare Core Configuration**: Account ID and shared credentials
-- **Shared Authentication & Storage**: Cross-worker authentication tokens
-- **Firebase Auth Configuration**: Complete Firebase project settings
-- **Pages Worker Environment Variables**: Project name and custom domain
-- **Individual Worker Variables**: Worker names and domains for all 6 workers
-- **Service-Specific Secrets**: Unique credentials for each Cloudflare service
+- KV Namespace ID (`KV_STORE_ID`) - UUID format from dashboard
 
-### 3.3 Required Environment Variables
+**From Step 2.4 (R2):**
 
-All required variables are documented in the `.env` file. Here's what you need to collect:
+- R2 Bucket Name (`BUCKET_NAME`)
 
-**Cloudflare Core Services:**
+**Additional Services:**
 
-- `ACCOUNT_ID` - Your Cloudflare Account ID
-- `SL_API_KEY` - SendLayer API key for email services
-- `USER_DB_AUTH` - Custom user database authentication token
-- `R2_KEY_SECRET` - Custom R2 storage authentication token
-- `IMAGES_API_TOKEN` - Cloudflare Images API token (shared)
+- **Firebase Project Settings** - Complete configuration from your Firebase project
+- **SendLayer API Key** - For email services (`SL_API_KEY`)
+- **Custom Domain Names** - Your domain and worker subdomains
+- **Worker Names** - Names for all 6 workers in your Cloudflare account
 
-**Firebase Configuration (Complete Project Settings):**
+**Security Tokens** (generated during setup):
 
-- `API_KEY` - Firebase API key
-- `AUTH_DOMAIN` - Firebase auth domain
-- `PROJECT_ID` - Firebase project ID
-- `STORAGE_BUCKET` - Firebase storage bucket
-- `MESSAGING_SENDER_ID` - Firebase messaging sender ID
-- `APP_ID` - Firebase app ID
-- `MEASUREMENT_ID` - Firebase measurement ID (optional)
+The script will prompt you to generate secure tokens for:
 
-**Pages Configuration:**
+- User database authentication
+- R2 storage authentication  
+- Worker authentication
 
-- `PAGES_PROJECT_NAME` - Your Cloudflare Pages project name
-- `PAGES_CUSTOM_DOMAIN` - Your custom domain
-
-**Worker Configuration (Names and Domains):**
-
-- `KEYS_WORKER_NAME` - Keys worker name
-- `KEYS_WORKER_DOMAIN` - Keys worker domain
-- `USER_WORKER_NAME` - User worker name  
-- `USER_WORKER_DOMAIN` - User worker domain
-- `DATA_WORKER_NAME` - Data worker name
-- `DATA_WORKER_DOMAIN` - Data worker domain
-- `IMAGES_WORKER_NAME` - Images worker name
-- `IMAGES_WORKER_DOMAIN` - Images worker domain
-- `TURNSTILE_WORKER_NAME` - Turnstile worker name
-- `TURNSTILE_WORKER_DOMAIN` - Turnstile worker domain
-- `PDF_WORKER_NAME` - PDF worker name
-- `PDF_WORKER_DOMAIN` - PDF worker domain
-
-**Service-Specific Credentials:**
-
-- `KEYS_AUTH` - Keys worker authentication token
-- `ACCOUNT_HASH` - Cloudflare Images Account Hash
-- `KV_STORE_ID` - Your KV namespace ID from Step 2.3
-- `BUCKET_NAME` - Your R2 bucket name from Step 2.4
-- `API_TOKEN` - Cloudflare Images API token (for Images Worker)
-- `HMAC_KEY` - Cloudflare Images HMAC signing key
-- `CFT_PUBLIC_KEY` - Cloudflare Turnstile public key
-- `CFT_SECRET_KEY` - Cloudflare Turnstile secret key
-
-**Custom Security Tokens** (generate your own):
-
-- `R2_KEY_SECRET` - R2 authentication token
-- `USER_DB_AUTH` - KV authentication token
-- `KEYS_AUTH` - Key handler authentication token
-
-**Environment Variable Dependencies:**
-
-- **Account Deletion**: Requires `SL_API_KEY` for email notifications
-- **Case Management**: Requires `R2_KEY_SECRET` for data worker communication
-- **Image Management**: Requires `IMAGES_API_TOKEN` for image worker communication
-- **User Storage**: Requires `USER_DB_AUTH` for KV database access
+**💡 Tip:** The interactive script provides helpful descriptions and generation hints for each variable, making the setup process straightforward even for complex configurations.
 
 ---
 
@@ -360,34 +359,39 @@ All required variables are documented in the `.env` file. Here's what you need t
 
 **🎯 Internal Developers**: **Skip this entire step**. All services are already deployed and maintained by the infrastructure team.
 
-**📋 External Developers**: Now that all configuration is complete, deploy your entire Striae application with a single unified command.
+**📋 External Developers**: Now that all Cloudflare services are set up, deploy your entire Striae application with a single command that handles configuration and deployment automatically.
 
-**✅ Prerequisites**: Before running the complete deployment, ensure you have completed:
+**✅ Prerequisites**: Before running the deployment, ensure you have completed:
 
-1. ✅ Set up Cloudflare services in Step 2
-2. ✅ Set up environment variables and run configuration setup in Step 3
+1. ✅ Set up Cloudflare services in Step 2  
+2. ✅ Have the required information ready from Step 3 (you'll be prompted during deployment)
 
-### 4.1 Unified Complete Deployment
+### 4.1 Automated Configuration and Deployment
 
-Deploy everything with a single unified script:
+Deploy everything with a single unified script that includes interactive configuration:
 
 ```bash
 # Deploy entire Striae application (configuration, workers, secrets, and pages)
 npm run deploy:all
 ```
 
-This unified script will execute the complete deployment process in the correct order:
+**What happens during deployment:**
 
-1. **Configuration Setup** - Validate environment and configure all files
-2. **Install Worker Dependencies** - Install dependencies for all workers
+The unified script will execute the complete deployment process in the correct order:
+
+1. **Interactive Configuration Setup** - Prompts for all environment variables and configures files
+2. **Install Worker Dependencies** - Install dependencies for all workers  
 3. **Deploy Workers** - All 6 Cloudflare Workers
 4. **Deploy Worker Secrets** - Environment variables for workers
 5. **Deploy Pages** - Frontend application (includes build)
 6. **Deploy Pages Secrets** - Environment variables for Pages
 
+**💡 Note:** The configuration setup is fully integrated into the deployment process. The script will automatically prompt you for all required environment variables when you run `npm run deploy:all`.
+
 The unified deployment script provides:
 
 - ✅ **Complete deployment automation** - Deploy everything with one command
+- ✅ **Interactive configuration setup** - Guided prompts for all required variables
 - ✅ **Correct sequencing** - Ensures dependencies are deployed in the right order
 - ✅ **Step-by-step progress tracking** - Clear feedback on each deployment phase
 - ✅ **Comprehensive error handling** - Stops if any step fails, preventing partial deployments
@@ -467,22 +471,25 @@ Expected response should include:
 
 ## Important Notes & Updates
 
-### ✨ New Environment Setup System
+### ✨ New Interactive Environment Setup System
 
-**Striae now includes an automated environment variables management system:**
+**Striae now includes an automated interactive environment configuration system:**
 
-1. **Centralized Configuration**: All environment variables organized in `.env` file by service
-2. **Automated Environment Setup**: Scripts for Linux, macOS, Windows, and PowerShell
-3. **Template System**: Safe `.env.example` file for version control
-4. **Comprehensive Documentation**: See [Environment Variables Setup](https://developers.striae.org/striae-dev/get-started/installation-guide/environment-variables-setup) for detailed instructions
+1. **Interactive Configuration Prompts**: Guided setup for all environment variables with descriptions
+2. **Automatic File Generation**: Creates and updates all configuration files automatically
+3. **Smart Validation**: Verifies all required variables are provided before proceeding
+4. **Cross-Platform Support**: Identical functionality on Linux, macOS, Windows (bash/PowerShell/batch)
+5. **Template System**: Safe `.env.example` file for version control
+6. **CORS Auto-Configuration**: Automatically configures worker CORS headers with your domain
 
 ### Key Improvements Made
 
-1. **Streamlined Environment Setup**: Single `.env` file replaces manual variable collection
-2. **Automated Secret Management**: One command configures all worker secrets
-3. **Cross-Platform Support**: Scripts for all operating systems
-4. **Better Organization**: Variables grouped by worker/service usage
-5. **Enhanced Security**: Template system prevents accidental credential commits
+1. **Streamlined Setup Process**: Interactive prompts replace manual `.env` file editing
+2. **Automated Configuration Management**: Single command configures all worker and app files
+3. **Enhanced User Experience**: Helpful descriptions and generation hints for each variable
+4. **Reduced Errors**: Smart validation prevents common configuration mistakes
+5. **Better Organization**: Variables grouped logically by service and function
+6. **Complete Automation**: From environment setup to deployment in a single workflow
 
 ### Required Binding Names
 
@@ -504,9 +511,8 @@ Expected response should include:
 1. **Fork & Clone**: Fork `striae-org/striae` to your account → Clone your fork
 2. **Install Dependencies**: Run `npm install` to install all required packages
 3. **Configure Services**: Set up Cloudflare (Turnstile, Images, KV, R2), Firebase, SendLayer
-4. **Setup Environment**: `cp .env.example .env` → Fill with your credentials
-5. **Complete Deployment**: `npm run deploy:all` (unified deployment)
-6. **Test & Verify**: Verify all functionality and run security checklist
+4. **Deploy Everything**: `npm run deploy:all` (includes automated interactive configuration)
+5. **Test & Verify**: Verify all functionality and run security checklist
 
 ---
 
