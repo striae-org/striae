@@ -18,6 +18,7 @@
     "cf-typegen": "wrangler types",
     "update-versions": "node ./scripts/update-markdown-versions.cjs",
     "deploy-config": "bash ./scripts/deploy-config.sh",
+    "update-env": "bash ./scripts/deploy-config.sh --update-env",
     "install-workers": "bash ./scripts/install-workers.sh",
     "deploy-workers": "npm run deploy-workers:data && npm run deploy-workers:image && npm run deploy-workers:keys && npm run deploy-workers:pdf && npm run deploy-workers:turnstile && npm run deploy-workers:user",
     "deploy-workers:secrets": "bash ./scripts/deploy-worker-secrets.sh",    
