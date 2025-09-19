@@ -98,7 +98,7 @@ For new developers joining the project:
 
 ## Project Status
 
-Striae is currently in **Beta** (v0.9.18-betaa-beta) with active development featuring enhanced export capabilities including ZIP file packaging with images. The beta period ends January 1, 2026. The project is actively maintained and welcomes contributions from the forensic technology community.
+Striae is currently in **Beta** (v0.9.18-beta) with active development featuring enhanced export capabilities including ZIP file packaging with images. The release candidate is expected to deploy on October 1, 2025. The project is actively maintained and welcomes contributions from the forensic technology community.
 
 ---
 
