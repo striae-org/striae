@@ -209,6 +209,16 @@ function Update-WranglerConfigs {
         Write-Host "    ✅ data-worker configuration updated" -ForegroundColor Green
     }
     
+    # Update data-worker source file CORS headers only
+    $dataWorkerSource = "workers\data-worker\src\data-worker.js"
+    if (Test-Path $dataWorkerSource) {
+        Write-Host "  Updating data-worker CORS headers..." -ForegroundColor Yellow
+        $content = Get-Content $dataWorkerSource -Raw
+        $content = $content -replace "'PAGES_CUSTOM_DOMAIN'", "'$($envVars['PAGES_CUSTOM_DOMAIN'])'"
+        Set-Content $dataWorkerSource -Value $content -Encoding UTF8
+        Write-Host "    ✅ data-worker CORS headers updated" -ForegroundColor Green
+    }
+    
     # Image Worker
     $imageWorkerConfig = "workers\image-worker\wrangler.jsonc"
     if (Test-Path $imageWorkerConfig) {
@@ -219,6 +229,16 @@ function Update-WranglerConfigs {
         $content = $content -replace '"IMAGES_WORKER_DOMAIN"', "`"$($envVars['IMAGES_WORKER_DOMAIN'])`""
         Set-Content $imageWorkerConfig -Value $content -Encoding UTF8
         Write-Host "    ✅ image-worker configuration updated" -ForegroundColor Green
+    }
+    
+    # Update image-worker source file CORS headers only
+    $imageWorkerSource = "workers\image-worker\src\image-worker.js"
+    if (Test-Path $imageWorkerSource) {
+        Write-Host "  Updating image-worker CORS headers..." -ForegroundColor Yellow
+        $content = Get-Content $imageWorkerSource -Raw
+        $content = $content -replace "'PAGES_CUSTOM_DOMAIN'", "'$($envVars['PAGES_CUSTOM_DOMAIN'])'"
+        Set-Content $imageWorkerSource -Value $content -Encoding UTF8
+        Write-Host "    ✅ image-worker CORS headers updated" -ForegroundColor Green
     }
     
     # Keys Worker
@@ -233,6 +253,16 @@ function Update-WranglerConfigs {
         Write-Host "    ✅ keys-worker configuration updated" -ForegroundColor Green
     }
     
+    # Update keys-worker source file CORS headers only
+    $keysWorkerSource = "workers\keys-worker\src\keys.js"
+    if (Test-Path $keysWorkerSource) {
+        Write-Host "  Updating keys-worker CORS headers..." -ForegroundColor Yellow
+        $content = Get-Content $keysWorkerSource -Raw
+        $content = $content -replace "'PAGES_CUSTOM_DOMAIN'", "'$($envVars['PAGES_CUSTOM_DOMAIN'])'"
+        Set-Content $keysWorkerSource -Value $content -Encoding UTF8
+        Write-Host "    ✅ keys-worker CORS headers updated" -ForegroundColor Green
+    }
+    
     # PDF Worker
     $pdfWorkerConfig = "workers\pdf-worker\wrangler.jsonc"
     if (Test-Path $pdfWorkerConfig) {
@@ -243,6 +273,16 @@ function Update-WranglerConfigs {
         $content = $content -replace '"PDF_WORKER_DOMAIN"', "`"$($envVars['PDF_WORKER_DOMAIN'])`""
         Set-Content $pdfWorkerConfig -Value $content -Encoding UTF8
         Write-Host "    ✅ pdf-worker configuration updated" -ForegroundColor Green
+    }
+    
+    # Update pdf-worker source file CORS headers only
+    $pdfWorkerSource = "workers\pdf-worker\src\pdf-worker.js"
+    if (Test-Path $pdfWorkerSource) {
+        Write-Host "  Updating pdf-worker CORS headers..." -ForegroundColor Yellow
+        $content = Get-Content $pdfWorkerSource -Raw
+        $content = $content -replace "'PAGES_CUSTOM_DOMAIN'", "'$($envVars['PAGES_CUSTOM_DOMAIN'])'"
+        Set-Content $pdfWorkerSource -Value $content -Encoding UTF8
+        Write-Host "    ✅ pdf-worker CORS headers updated" -ForegroundColor Green
     }
     
     # Turnstile Worker
@@ -257,6 +297,16 @@ function Update-WranglerConfigs {
         Write-Host "    ✅ turnstile-worker configuration updated" -ForegroundColor Green
     }
     
+    # Update turnstile-worker source file CORS headers only
+    $turnstileWorkerSource = "workers\turnstile-worker\src\turnstile.js"
+    if (Test-Path $turnstileWorkerSource) {
+        Write-Host "  Updating turnstile-worker CORS headers..." -ForegroundColor Yellow
+        $content = Get-Content $turnstileWorkerSource -Raw
+        $content = $content -replace "'PAGES_CUSTOM_DOMAIN'", "'$($envVars['PAGES_CUSTOM_DOMAIN'])'"
+        Set-Content $turnstileWorkerSource -Value $content -Encoding UTF8
+        Write-Host "    ✅ turnstile-worker CORS headers updated" -ForegroundColor Green
+    }
+    
     # User Worker
     $userWorkerConfig = "workers\user-worker\wrangler.jsonc"
     if (Test-Path $userWorkerConfig) {
@@ -268,6 +318,18 @@ function Update-WranglerConfigs {
         $content = $content -replace '"KV_STORE_ID"', "`"$($envVars['KV_STORE_ID'])`""
         Set-Content $userWorkerConfig -Value $content -Encoding UTF8
         Write-Host "    ✅ user-worker configuration updated" -ForegroundColor Green
+    }
+    
+    # Update user-worker source file CORS headers and worker URLs only
+    $userWorkerSource = "workers\user-worker\src\user-worker.js"
+    if (Test-Path $userWorkerSource) {
+        Write-Host "  Updating user-worker CORS headers and worker URLs..." -ForegroundColor Yellow
+        $content = Get-Content $userWorkerSource -Raw
+        $content = $content -replace "'PAGES_CUSTOM_DOMAIN'", "'$($envVars['PAGES_CUSTOM_DOMAIN'])'"
+        $content = $content -replace "'DATA_WORKER_DOMAIN'", "'https://$($envVars['DATA_WORKER_DOMAIN'])'"
+        $content = $content -replace "'IMAGES_WORKER_DOMAIN'", "'https://$($envVars['IMAGES_WORKER_DOMAIN'])'"
+        Set-Content $userWorkerSource -Value $content -Encoding UTF8
+        Write-Host "    ✅ user-worker CORS headers and worker URLs updated" -ForegroundColor Green
     }
     
     # Main wrangler.toml

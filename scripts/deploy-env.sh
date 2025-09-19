@@ -176,6 +176,13 @@ update_wrangler_configs() {
         echo -e "${GREEN}    ✅ data-worker configuration updated${NC}"
     fi
     
+    # Update data-worker source file CORS headers only
+    if [ -f "workers/data-worker/src/data-worker.js" ]; then
+        echo -e "${YELLOW}  Updating data-worker CORS headers...${NC}"
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/data-worker/src/data-worker.js
+        echo -e "${GREEN}    ✅ data-worker CORS headers updated${NC}"
+    fi
+    
     # Image Worker
     if [ -f "workers/image-worker/wrangler.jsonc" ]; then
         echo -e "${YELLOW}  Updating image-worker/wrangler.jsonc...${NC}"
@@ -183,6 +190,13 @@ update_wrangler_configs() {
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/image-worker/wrangler.jsonc
         sed -i "s/\"IMAGES_WORKER_DOMAIN\"/\"$IMAGES_WORKER_DOMAIN\"/g" workers/image-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ image-worker configuration updated${NC}"
+    fi
+    
+    # Update image-worker source file CORS headers only
+    if [ -f "workers/image-worker/src/image-worker.js" ]; then
+        echo -e "${YELLOW}  Updating image-worker CORS headers...${NC}"
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/image-worker/src/image-worker.js
+        echo -e "${GREEN}    ✅ image-worker CORS headers updated${NC}"
     fi
     
     # Keys Worker
@@ -194,6 +208,13 @@ update_wrangler_configs() {
         echo -e "${GREEN}    ✅ keys-worker configuration updated${NC}"
     fi
     
+    # Update keys-worker source file CORS headers only
+    if [ -f "workers/keys-worker/src/keys.js" ]; then
+        echo -e "${YELLOW}  Updating keys-worker CORS headers...${NC}"
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/keys-worker/src/keys.js
+        echo -e "${GREEN}    ✅ keys-worker CORS headers updated${NC}"
+    fi
+    
     # PDF Worker
     if [ -f "workers/pdf-worker/wrangler.jsonc" ]; then
         echo -e "${YELLOW}  Updating pdf-worker/wrangler.jsonc...${NC}"
@@ -201,6 +222,13 @@ update_wrangler_configs() {
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/pdf-worker/wrangler.jsonc
         sed -i "s/\"PDF_WORKER_DOMAIN\"/\"$PDF_WORKER_DOMAIN\"/g" workers/pdf-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ pdf-worker configuration updated${NC}"
+    fi
+    
+    # Update pdf-worker source file CORS headers only
+    if [ -f "workers/pdf-worker/src/pdf-worker.js" ]; then
+        echo -e "${YELLOW}  Updating pdf-worker CORS headers...${NC}"
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/pdf-worker/src/pdf-worker.js
+        echo -e "${GREEN}    ✅ pdf-worker CORS headers updated${NC}"
     fi
     
     # Turnstile Worker
@@ -212,6 +240,13 @@ update_wrangler_configs() {
         echo -e "${GREEN}    ✅ turnstile-worker configuration updated${NC}"
     fi
     
+    # Update turnstile-worker source file CORS headers only
+    if [ -f "workers/turnstile-worker/src/turnstile.js" ]; then
+        echo -e "${YELLOW}  Updating turnstile-worker CORS headers...${NC}"
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/turnstile-worker/src/turnstile.js
+        echo -e "${GREEN}    ✅ turnstile-worker CORS headers updated${NC}"
+    fi
+    
     # User Worker
     if [ -f "workers/user-worker/wrangler.jsonc" ]; then
         echo -e "${YELLOW}  Updating user-worker/wrangler.jsonc...${NC}"
@@ -220,6 +255,15 @@ update_wrangler_configs() {
         sed -i "s/\"USER_WORKER_DOMAIN\"/\"$USER_WORKER_DOMAIN\"/g" workers/user-worker/wrangler.jsonc
         sed -i "s/\"KV_STORE_ID\"/\"$KV_STORE_ID\"/g" workers/user-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ user-worker configuration updated${NC}"
+    fi
+    
+    # Update user-worker source file CORS headers and worker URLs only
+    if [ -f "workers/user-worker/src/user-worker.js" ]; then
+        echo -e "${YELLOW}  Updating user-worker CORS headers and worker URLs...${NC}"
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/user-worker/src/user-worker.js
+        sed -i "s|'DATA_WORKER_DOMAIN'|'https://$DATA_WORKER_DOMAIN'|g" workers/user-worker/src/user-worker.js
+        sed -i "s|'IMAGES_WORKER_DOMAIN'|'https://$IMAGES_WORKER_DOMAIN'|g" workers/user-worker/src/user-worker.js
+        echo -e "${GREEN}    ✅ user-worker CORS headers and worker URLs updated${NC}"
     fi
     
     # Main wrangler.toml

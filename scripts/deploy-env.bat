@@ -109,14 +109,53 @@ echo       - Replace "insert-your-*" placeholders with actual values
 echo       - Replace "YOUR_ACCOUNT_ID" with your Cloudflare account ID  
 echo       - Replace domain placeholders with your custom domains
 echo       - Replace bucket/KV placeholders with your resource IDs
-echo    4. Use the correct worker name from your configuration (not the hardcoded names below)
+echo    4. STEP 2: Update source files with your domains (CORS headers and worker URLs)
+echo    5. Use the correct worker name from your configuration (not the hardcoded names below)
 echo.
 
-echo 🔧 AUTOMATED CONFIGURATION REPLACEMENT:
+echo � STEP 2: Update worker source file configurations
+echo Replace hardcoded placeholders in source files with your actual domains:
+echo.
+echo === Update CORS Headers in All Workers ===
+echo In each worker's src/*.js file, replace 'PAGES_CUSTOM_DOMAIN' with your domain:
+echo.
+echo workers\data-worker\src\data-worker.js:
+echo   Replace: 'PAGES_CUSTOM_DOMAIN'
+echo   With:    'https://dev.striae.org' (or your custom domain)
+echo.
+echo workers\image-worker\src\image-worker.js:
+echo   Replace: 'PAGES_CUSTOM_DOMAIN'
+echo   With:    'https://dev.striae.org' (or your custom domain)
+echo.
+echo workers\keys-worker\src\keys.js:
+echo   Replace: 'PAGES_CUSTOM_DOMAIN'
+echo   With:    'https://dev.striae.org' (or your custom domain)
+echo.
+echo workers\pdf-worker\src\pdf-worker.js:
+echo   Replace: 'PAGES_CUSTOM_DOMAIN'
+echo   With:    'https://dev.striae.org' (or your custom domain)
+echo.
+echo workers\turnstile-worker\src\turnstile.js:
+echo   Replace: 'PAGES_CUSTOM_DOMAIN'
+echo   With:    'https://dev.striae.org' (or your custom domain)
+echo.
+echo === Update Worker URLs in User Worker ===
+echo workers\user-worker\src\user-worker.js:
+echo   Replace: 'DATA_WORKER_DOMAIN'
+echo   With:    'https://data.dev.striae.org' (or your data worker domain)
+echo.
+echo   Replace: 'IMAGES_WORKER_DOMAIN'
+echo   With:    'https://images.dev.striae.org' (or your images worker domain)
+echo.
+echo   AND Replace: 'PAGES_CUSTOM_DOMAIN'
+echo   With:        'https://dev.striae.org' (or your custom domain)
+echo.
+
+echo �🔧 AUTOMATED CONFIGURATION REPLACEMENT:
 echo For automated configuration updates, use:
 echo    PowerShell: .\deploy-env.ps1
 echo    Bash/WSL:   ./deploy-env.sh
-echo These scripts will automatically replace variables in wrangler.jsonc files.
+echo These scripts will automatically replace variables in both wrangler.jsonc AND source files.
 echo.
 
 echo 🔐 Manual commands to deploy secrets to workers:
