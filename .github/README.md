@@ -26,6 +26,13 @@
 
 ## 📋 Changelog
 
+## [2025-09-18] - *[Release v0.9.18-beta](https://github.com/striae-org/striae/releases/tag/v0.9.18-beta)*
+
+- **Automated Deployment System** - Streamlined deployment scripts with unified `deploy:all` command and enhanced cross-platform support
+- **CSS Architecture Improvements** - Global button hover effects system and mobile responsiveness cleanup for desktop-first focus
+- **Developer Documentation Updates** - Restructured installation guide, enhanced environment setup documentation, and improved developer workflow
+- **Infrastructure Enhancements** - Improved build system, dependency management, and deployment script organization
+
 ## [2025-09-17] - *[Release v0.9.17a-beta](https://github.com/striae-org/striae/releases/tag/v0.9.17a-beta)*
 
 - **ZIP Export System with Images** - Advanced ZIP package generation with automatic image inclusion for complete case archival
