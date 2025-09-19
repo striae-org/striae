@@ -28,10 +28,66 @@ for /f "usebackq tokens=1,2 delims==" %%a in (".env") do (
     )
 )
 
-REM Validate key required variables (basic check)
+REM Validate required variables (complete check)
 echo [93m🔍 Validating required environment variables...[0m
+
+REM Core Cloudflare Configuration
 if "%ACCOUNT_ID%"=="" (
     echo [91m❌ Error: ACCOUNT_ID is not set in .env file[0m
+    exit /b 1
+)
+
+REM Shared Authentication & Storage
+if "%SL_API_KEY%"=="" (
+    echo [91m❌ Error: SL_API_KEY is not set in .env file[0m
+    exit /b 1
+)
+if "%USER_DB_AUTH%"=="" (
+    echo [91m❌ Error: USER_DB_AUTH is not set in .env file[0m
+    exit /b 1
+)
+if "%R2_KEY_SECRET%"=="" (
+    echo [91m❌ Error: R2_KEY_SECRET is not set in .env file[0m
+    exit /b 1
+)
+if "%IMAGES_API_TOKEN%"=="" (
+    echo [91m❌ Error: IMAGES_API_TOKEN is not set in .env file[0m
+    exit /b 1
+)
+
+REM Firebase Auth Configuration
+if "%API_KEY%"=="" (
+    echo [91m❌ Error: API_KEY is not set in .env file[0m
+    exit /b 1
+)
+if "%AUTH_DOMAIN%"=="" (
+    echo [91m❌ Error: AUTH_DOMAIN is not set in .env file[0m
+    exit /b 1
+)
+if "%PROJECT_ID%"=="" (
+    echo [91m❌ Error: PROJECT_ID is not set in .env file[0m
+    exit /b 1
+)
+if "%STORAGE_BUCKET%"=="" (
+    echo [91m❌ Error: STORAGE_BUCKET is not set in .env file[0m
+    exit /b 1
+)
+if "%MESSAGING_SENDER_ID%"=="" (
+    echo [91m❌ Error: MESSAGING_SENDER_ID is not set in .env file[0m
+    exit /b 1
+)
+if "%APP_ID%"=="" (
+    echo [91m❌ Error: APP_ID is not set in .env file[0m
+    exit /b 1
+)
+if "%MEASUREMENT_ID%"=="" (
+    echo [91m❌ Error: MEASUREMENT_ID is not set in .env file[0m
+    exit /b 1
+)
+
+REM Pages Configuration
+if "%PAGES_PROJECT_NAME%"=="" (
+    echo [91m❌ Error: PAGES_PROJECT_NAME is not set in .env file[0m
     exit /b 1
 )
 if "%PAGES_CUSTOM_DOMAIN%"=="" (
@@ -39,7 +95,95 @@ if "%PAGES_CUSTOM_DOMAIN%"=="" (
     exit /b 1
 )
 
-echo [92m✅ Environment variables validated[0m
+REM Worker Names
+if "%KEYS_WORKER_NAME%"=="" (
+    echo [91m❌ Error: KEYS_WORKER_NAME is not set in .env file[0m
+    exit /b 1
+)
+if "%USER_WORKER_NAME%"=="" (
+    echo [91m❌ Error: USER_WORKER_NAME is not set in .env file[0m
+    exit /b 1
+)
+if "%DATA_WORKER_NAME%"=="" (
+    echo [91m❌ Error: DATA_WORKER_NAME is not set in .env file[0m
+    exit /b 1
+)
+if "%IMAGES_WORKER_NAME%"=="" (
+    echo [91m❌ Error: IMAGES_WORKER_NAME is not set in .env file[0m
+    exit /b 1
+)
+if "%TURNSTILE_WORKER_NAME%"=="" (
+    echo [91m❌ Error: TURNSTILE_WORKER_NAME is not set in .env file[0m
+    exit /b 1
+)
+if "%PDF_WORKER_NAME%"=="" (
+    echo [91m❌ Error: PDF_WORKER_NAME is not set in .env file[0m
+    exit /b 1
+)
+
+REM Worker Domains
+if "%KEYS_WORKER_DOMAIN%"=="" (
+    echo [91m❌ Error: KEYS_WORKER_DOMAIN is not set in .env file[0m
+    exit /b 1
+)
+if "%USER_WORKER_DOMAIN%"=="" (
+    echo [91m❌ Error: USER_WORKER_DOMAIN is not set in .env file[0m
+    exit /b 1
+)
+if "%DATA_WORKER_DOMAIN%"=="" (
+    echo [91m❌ Error: DATA_WORKER_DOMAIN is not set in .env file[0m
+    exit /b 1
+)
+if "%IMAGES_WORKER_DOMAIN%"=="" (
+    echo [91m❌ Error: IMAGES_WORKER_DOMAIN is not set in .env file[0m
+    exit /b 1
+)
+if "%TURNSTILE_WORKER_DOMAIN%"=="" (
+    echo [91m❌ Error: TURNSTILE_WORKER_DOMAIN is not set in .env file[0m
+    exit /b 1
+)
+if "%PDF_WORKER_DOMAIN%"=="" (
+    echo [91m❌ Error: PDF_WORKER_DOMAIN is not set in .env file[0m
+    exit /b 1
+)
+
+REM Storage Configuration
+if "%BUCKET_NAME%"=="" (
+    echo [91m❌ Error: BUCKET_NAME is not set in .env file[0m
+    exit /b 1
+)
+if "%KV_STORE_ID%"=="" (
+    echo [91m❌ Error: KV_STORE_ID is not set in .env file[0m
+    exit /b 1
+)
+
+REM Worker-Specific Secrets
+if "%KEYS_AUTH%"=="" (
+    echo [91m❌ Error: KEYS_AUTH is not set in .env file[0m
+    exit /b 1
+)
+if "%ACCOUNT_HASH%"=="" (
+    echo [91m❌ Error: ACCOUNT_HASH is not set in .env file[0m
+    exit /b 1
+)
+if "%API_TOKEN%"=="" (
+    echo [91m❌ Error: API_TOKEN is not set in .env file[0m
+    exit /b 1
+)
+if "%HMAC_KEY%"=="" (
+    echo [91m❌ Error: HMAC_KEY is not set in .env file[0m
+    exit /b 1
+)
+if "%CFT_PUBLIC_KEY%"=="" (
+    echo [91m❌ Error: CFT_PUBLIC_KEY is not set in .env file[0m
+    exit /b 1
+)
+if "%CFT_SECRET_KEY%"=="" (
+    echo [91m❌ Error: CFT_SECRET_KEY is not set in .env file[0m
+    exit /b 1
+)
+
+echo [92m✅ All required environment variables validated[0m
 
 REM Function to copy example configuration files
 echo.
@@ -412,6 +556,57 @@ set /p "KV_STORE_ID=Enter value: "
 if not "%KV_STORE_ID%"=="" (
     powershell -Command "(Get-Content '.env') -replace '^KV_STORE_ID=.*', 'KV_STORE_ID=%KV_STORE_ID%' | Set-Content '.env'"
     echo [92m✅ KV_STORE_ID updated[0m
+)
+
+echo.
+echo [94m🔐 SERVICE-SPECIFIC SECRETS[0m
+echo ============================
+echo [94mKEYS_AUTH[0m
+echo [93mKeys worker authentication token (generate with: openssl rand -hex 16)[0m
+set /p "KEYS_AUTH=Enter value: "
+if not "%KEYS_AUTH%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^KEYS_AUTH=.*', 'KEYS_AUTH=%KEYS_AUTH%' | Set-Content '.env'"
+    echo [92m✅ KEYS_AUTH updated[0m
+)
+
+echo [94mACCOUNT_HASH[0m
+echo [93mCloudflare Images Account Hash[0m
+set /p "ACCOUNT_HASH=Enter value: "
+if not "%ACCOUNT_HASH%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^ACCOUNT_HASH=.*', 'ACCOUNT_HASH=%ACCOUNT_HASH%' | Set-Content '.env'"
+    echo [92m✅ ACCOUNT_HASH updated[0m
+)
+
+echo [94mAPI_TOKEN[0m
+echo [93mCloudflare Images API token (for Images Worker)[0m
+set /p "API_TOKEN=Enter value: "
+if not "%API_TOKEN%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^API_TOKEN=.*', 'API_TOKEN=%API_TOKEN%' | Set-Content '.env'"
+    echo [92m✅ API_TOKEN updated[0m
+)
+
+echo [94mHMAC_KEY[0m
+echo [93mCloudflare Images HMAC signing key[0m
+set /p "HMAC_KEY=Enter value: "
+if not "%HMAC_KEY%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^HMAC_KEY=.*', 'HMAC_KEY=%HMAC_KEY%' | Set-Content '.env'"
+    echo [92m✅ HMAC_KEY updated[0m
+)
+
+echo [94mCFT_PUBLIC_KEY[0m
+echo [93mCloudflare Turnstile public key[0m
+set /p "CFT_PUBLIC_KEY=Enter value: "
+if not "%CFT_PUBLIC_KEY%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^CFT_PUBLIC_KEY=.*', 'CFT_PUBLIC_KEY=%CFT_PUBLIC_KEY%' | Set-Content '.env'"
+    echo [92m✅ CFT_PUBLIC_KEY updated[0m
+)
+
+echo [94mCFT_SECRET_KEY[0m
+echo [93mCloudflare Turnstile secret key[0m
+set /p "CFT_SECRET_KEY=Enter value: "
+if not "%CFT_SECRET_KEY%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^CFT_SECRET_KEY=.*', 'CFT_SECRET_KEY=%CFT_SECRET_KEY%' | Set-Content '.env'"
+    echo [92m✅ CFT_SECRET_KEY updated[0m
 )
 
 echo.
