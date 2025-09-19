@@ -78,6 +78,101 @@ if ($missingVars.Count -gt 0) {
 
 Write-Host "✅ All required variables found" -ForegroundColor Green
 
+# Function to update wrangler configuration files
+function Update-WranglerConfigs {
+    Write-Host ""
+    Write-Host "🔧 Updating wrangler configuration files..." -ForegroundColor Blue
+    
+    # Data Worker
+    $dataWorkerConfig = "workers\data-worker\wrangler.jsonc"
+    if (Test-Path $dataWorkerConfig) {
+        Write-Host "  Updating data-worker/wrangler.jsonc..." -ForegroundColor Yellow
+        $content = Get-Content $dataWorkerConfig -Raw
+        $content = $content -replace '"DATA_WORKER_NAME"', "`"$($envVars['DATA_WORKER_NAME'])`""
+        $content = $content -replace '"ACCOUNT_ID"', "`"$($envVars['ACCOUNT_ID'])`""
+        $content = $content -replace '"DATA_WORKER_DOMAIN"', "`"$($envVars['DATA_WORKER_DOMAIN'])`""
+        $content = $content -replace '"BUCKET_NAME"', "`"$($envVars['BUCKET_NAME'])`""
+        Set-Content $dataWorkerConfig -Value $content -Encoding UTF8
+        Write-Host "    ✅ data-worker configuration updated" -ForegroundColor Green
+    }
+    
+    # Image Worker
+    $imageWorkerConfig = "workers\image-worker\wrangler.jsonc"
+    if (Test-Path $imageWorkerConfig) {
+        Write-Host "  Updating image-worker/wrangler.jsonc..." -ForegroundColor Yellow
+        $content = Get-Content $imageWorkerConfig -Raw
+        $content = $content -replace '"IMAGES_WORKER_NAME"', "`"$($envVars['IMAGES_WORKER_NAME'])`""
+        $content = $content -replace '"ACCOUNT_ID"', "`"$($envVars['ACCOUNT_ID'])`""
+        $content = $content -replace '"IMAGES_WORKER_DOMAIN"', "`"$($envVars['IMAGES_WORKER_DOMAIN'])`""
+        Set-Content $imageWorkerConfig -Value $content -Encoding UTF8
+        Write-Host "    ✅ image-worker configuration updated" -ForegroundColor Green
+    }
+    
+    # Keys Worker
+    $keysWorkerConfig = "workers\keys-worker\wrangler.jsonc"
+    if (Test-Path $keysWorkerConfig) {
+        Write-Host "  Updating keys-worker/wrangler.jsonc..." -ForegroundColor Yellow
+        $content = Get-Content $keysWorkerConfig -Raw
+        $content = $content -replace '"KEYS_WORKER_NAME"', "`"$($envVars['KEYS_WORKER_NAME'])`""
+        $content = $content -replace '"ACCOUNT_ID"', "`"$($envVars['ACCOUNT_ID'])`""
+        $content = $content -replace '"KEYS_WORKER_DOMAIN"', "`"$($envVars['KEYS_WORKER_DOMAIN'])`""
+        Set-Content $keysWorkerConfig -Value $content -Encoding UTF8
+        Write-Host "    ✅ keys-worker configuration updated" -ForegroundColor Green
+    }
+    
+    # PDF Worker
+    $pdfWorkerConfig = "workers\pdf-worker\wrangler.jsonc"
+    if (Test-Path $pdfWorkerConfig) {
+        Write-Host "  Updating pdf-worker/wrangler.jsonc..." -ForegroundColor Yellow
+        $content = Get-Content $pdfWorkerConfig -Raw
+        $content = $content -replace '"PDF_WORKER_NAME"', "`"$($envVars['PDF_WORKER_NAME'])`""
+        $content = $content -replace '"ACCOUNT_ID"', "`"$($envVars['ACCOUNT_ID'])`""
+        $content = $content -replace '"PDF_WORKER_DOMAIN"', "`"$($envVars['PDF_WORKER_DOMAIN'])`""
+        Set-Content $pdfWorkerConfig -Value $content -Encoding UTF8
+        Write-Host "    ✅ pdf-worker configuration updated" -ForegroundColor Green
+    }
+    
+    # Turnstile Worker
+    $turnstileWorkerConfig = "workers\turnstile-worker\wrangler.jsonc"
+    if (Test-Path $turnstileWorkerConfig) {
+        Write-Host "  Updating turnstile-worker/wrangler.jsonc..." -ForegroundColor Yellow
+        $content = Get-Content $turnstileWorkerConfig -Raw
+        $content = $content -replace '"TURNSTILE_WORKER_NAME"', "`"$($envVars['TURNSTILE_WORKER_NAME'])`""
+        $content = $content -replace '"ACCOUNT_ID"', "`"$($envVars['ACCOUNT_ID'])`""
+        $content = $content -replace '"TURNSTILE_WORKER_DOMAIN"', "`"$($envVars['TURNSTILE_WORKER_DOMAIN'])`""
+        Set-Content $turnstileWorkerConfig -Value $content -Encoding UTF8
+        Write-Host "    ✅ turnstile-worker configuration updated" -ForegroundColor Green
+    }
+    
+    # User Worker
+    $userWorkerConfig = "workers\user-worker\wrangler.jsonc"
+    if (Test-Path $userWorkerConfig) {
+        Write-Host "  Updating user-worker/wrangler.jsonc..." -ForegroundColor Yellow
+        $content = Get-Content $userWorkerConfig -Raw
+        $content = $content -replace '"USER_WORKER_NAME"', "`"$($envVars['USER_WORKER_NAME'])`""
+        $content = $content -replace '"ACCOUNT_ID"', "`"$($envVars['ACCOUNT_ID'])`""
+        $content = $content -replace '"USER_WORKER_DOMAIN"', "`"$($envVars['USER_WORKER_DOMAIN'])`""
+        $content = $content -replace '"KV_STORE_ID"', "`"$($envVars['KV_STORE_ID'])`""
+        Set-Content $userWorkerConfig -Value $content -Encoding UTF8
+        Write-Host "    ✅ user-worker configuration updated" -ForegroundColor Green
+    }
+    
+    # Main wrangler.toml
+    $mainWranglerConfig = "wrangler.toml"
+    if (Test-Path $mainWranglerConfig) {
+        Write-Host "  Updating wrangler.toml..." -ForegroundColor Yellow
+        $content = Get-Content $mainWranglerConfig -Raw
+        $content = $content -replace '"PAGES_PROJECT_NAME"', "`"$($envVars['PAGES_PROJECT_NAME'])`""
+        Set-Content $mainWranglerConfig -Value $content -Encoding UTF8
+        Write-Host "    ✅ main wrangler.toml configuration updated" -ForegroundColor Green
+    }
+    
+    Write-Host "✅ All wrangler configuration files updated" -ForegroundColor Green
+}
+
+# Update wrangler configurations
+Update-WranglerConfigs
+
 # Function to set worker secrets
 function Set-WorkerSecrets {
     param(

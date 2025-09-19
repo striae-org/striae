@@ -1,6 +1,6 @@
 {
-  "name": "insert-your-pdf-worker-name",
-  "account_id": "YOUR_ACCOUNT_ID",
+  "name": "PDF_WORKER_NAME",
+  "account_id": "ACCOUNT_ID",
   "main": "src/pdf-worker.js",
   "compatibility_date": "2023-03-14",
   "compatibility_flags": [
@@ -15,7 +15,7 @@
 
   "routes": [
     {
-      "pattern": "PDF_WORKER_CUSTOM_DOMAIN",
+      "pattern": "PDF_WORKER_DOMAIN",
       "custom_domain": true
     }
   ],

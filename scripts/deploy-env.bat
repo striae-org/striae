@@ -28,8 +28,21 @@ echo.
 echo.
 echo ⚠️  IMPORTANT: Before running these commands:
 echo    1. Copy wrangler.jsonc.example to wrangler.jsonc in each worker directory
-echo    2. Configure the worker names and settings in each wrangler.jsonc file
-echo    3. Use the correct worker name from your configuration (not the hardcoded names below)
+echo    2. Use PowerShell script (deploy-env.ps1) for automated configuration updates
+echo    3. Manually replace variables in wrangler.jsonc files with values from .env:
+echo       - Replace "DATA_WORKER_NAME" with your actual worker name
+echo       - Replace "ACCOUNT_ID" with your Cloudflare account ID  
+echo       - Replace "DATA_WORKER_DOMAIN" with your custom domain
+echo       - Replace "BUCKET_NAME" with your R2 bucket name
+echo       - Replace "KV_STORE_ID" with your KV namespace ID (user-worker only)
+echo    4. Use the correct worker name from your configuration (not the hardcoded names below)
+echo.
+
+echo 🔧 AUTOMATED CONFIGURATION REPLACEMENT:
+echo For automated configuration updates, use:
+echo    PowerShell: .\deploy-env.ps1
+echo    Bash/WSL:   ./deploy-env.sh
+echo These scripts will automatically replace variables in wrangler.jsonc files.
 echo.
 
 echo 🔐 Manual commands to deploy secrets to workers:

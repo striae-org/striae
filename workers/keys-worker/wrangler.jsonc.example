@@ -1,6 +1,6 @@
 {
-  "name": "insert-your-keys-worker-name",
-  "account_id": "YOUR_ACCOUNT_ID",
+  "name": "KEYS_WORKER_NAME",
+  "account_id": "ACCOUNT_ID",
   "main": "src/keys.js",
   "compatibility_date": "2023-03-14",
   "compatibility_flags": [
@@ -13,7 +13,7 @@
 
   "routes": [
     {
-      "pattern": "KEYS_WORKER_CUSTOM_DOMAIN",
+      "pattern": "KEYS_WORKER_DOMAIN",
       "custom_domain": true
     }
   ],

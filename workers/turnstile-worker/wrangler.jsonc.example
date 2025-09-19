@@ -1,6 +1,6 @@
 {
-  "name": "insert-your-turnstile-worker-name",
-  "account_id": "YOUR_ACCOUNT_ID",
+  "name": "TURNSTILE_WORKER_NAME",
+  "account_id": "ACCOUNT_ID",
   "main": "src/turnstile.js",
   "compatibility_date": "2023-03-14",
   "compatibility_flags": [
@@ -11,7 +11,7 @@
   },
   "routes": [
     {
-      "pattern": "TURNSTILE_WORKER_CUSTOM_DOMAIN",
+      "pattern": "TURNSTILE_WORKER_DOMAIN",
       "custom_domain": true
     }
   ],

@@ -1,6 +1,6 @@
 {
-  "name": "insert-your-users-worker-name",
-  "account_id": "YOUR_ACCOUNT_ID",
+  "name": "USER_WORKER_NAME",
+  "account_id": "ACCOUNT_ID",
   "main": "src/user-worker.js",
   "compatibility_date": "2023-03-14",
   "compatibility_flags": [
@@ -14,13 +14,13 @@
    "kv_namespaces": [
     {
       "binding": "USER_DB",
-      "id": "YOUR_KV_NAMESPACE_ID_UUID_HERE"
+      "id": "KV_STORE_ID"
     }
   ],
 
   "routes": [
     {
-      "pattern": "USER_WORKER_CUSTOM_DOMAIN",
+      "pattern": "USER_WORKER_DOMAIN",
       "custom_domain": true
     }
   ],

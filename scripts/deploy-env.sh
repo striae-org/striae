@@ -53,6 +53,79 @@ done
 
 echo -e "${GREEN}✅ All required variables found${NC}"
 
+# Function to replace variables in wrangler configuration files
+update_wrangler_configs() {
+    echo -e "\n${BLUE}🔧 Updating wrangler configuration files...${NC}"
+    
+    # Data Worker
+    if [ -f "workers/data-worker/wrangler.jsonc" ]; then
+        echo -e "${YELLOW}  Updating data-worker/wrangler.jsonc...${NC}"
+        sed -i "s/\"DATA_WORKER_NAME\"/\"$DATA_WORKER_NAME\"/g" workers/data-worker/wrangler.jsonc
+        sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/data-worker/wrangler.jsonc
+        sed -i "s/\"DATA_WORKER_DOMAIN\"/\"$DATA_WORKER_DOMAIN\"/g" workers/data-worker/wrangler.jsonc
+        sed -i "s/\"BUCKET_NAME\"/\"$BUCKET_NAME\"/g" workers/data-worker/wrangler.jsonc
+        echo -e "${GREEN}    ✅ data-worker configuration updated${NC}"
+    fi
+    
+    # Image Worker
+    if [ -f "workers/image-worker/wrangler.jsonc" ]; then
+        echo -e "${YELLOW}  Updating image-worker/wrangler.jsonc...${NC}"
+        sed -i "s/\"IMAGES_WORKER_NAME\"/\"$IMAGES_WORKER_NAME\"/g" workers/image-worker/wrangler.jsonc
+        sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/image-worker/wrangler.jsonc
+        sed -i "s/\"IMAGES_WORKER_DOMAIN\"/\"$IMAGES_WORKER_DOMAIN\"/g" workers/image-worker/wrangler.jsonc
+        echo -e "${GREEN}    ✅ image-worker configuration updated${NC}"
+    fi
+    
+    # Keys Worker
+    if [ -f "workers/keys-worker/wrangler.jsonc" ]; then
+        echo -e "${YELLOW}  Updating keys-worker/wrangler.jsonc...${NC}"
+        sed -i "s/\"KEYS_WORKER_NAME\"/\"$KEYS_WORKER_NAME\"/g" workers/keys-worker/wrangler.jsonc
+        sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/keys-worker/wrangler.jsonc
+        sed -i "s/\"KEYS_WORKER_DOMAIN\"/\"$KEYS_WORKER_DOMAIN\"/g" workers/keys-worker/wrangler.jsonc
+        echo -e "${GREEN}    ✅ keys-worker configuration updated${NC}"
+    fi
+    
+    # PDF Worker
+    if [ -f "workers/pdf-worker/wrangler.jsonc" ]; then
+        echo -e "${YELLOW}  Updating pdf-worker/wrangler.jsonc...${NC}"
+        sed -i "s/\"PDF_WORKER_NAME\"/\"$PDF_WORKER_NAME\"/g" workers/pdf-worker/wrangler.jsonc
+        sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/pdf-worker/wrangler.jsonc
+        sed -i "s/\"PDF_WORKER_DOMAIN\"/\"$PDF_WORKER_DOMAIN\"/g" workers/pdf-worker/wrangler.jsonc
+        echo -e "${GREEN}    ✅ pdf-worker configuration updated${NC}"
+    fi
+    
+    # Turnstile Worker
+    if [ -f "workers/turnstile-worker/wrangler.jsonc" ]; then
+        echo -e "${YELLOW}  Updating turnstile-worker/wrangler.jsonc...${NC}"
+        sed -i "s/\"TURNSTILE_WORKER_NAME\"/\"$TURNSTILE_WORKER_NAME\"/g" workers/turnstile-worker/wrangler.jsonc
+        sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/turnstile-worker/wrangler.jsonc
+        sed -i "s/\"TURNSTILE_WORKER_DOMAIN\"/\"$TURNSTILE_WORKER_DOMAIN\"/g" workers/turnstile-worker/wrangler.jsonc
+        echo -e "${GREEN}    ✅ turnstile-worker configuration updated${NC}"
+    fi
+    
+    # User Worker
+    if [ -f "workers/user-worker/wrangler.jsonc" ]; then
+        echo -e "${YELLOW}  Updating user-worker/wrangler.jsonc...${NC}"
+        sed -i "s/\"USER_WORKER_NAME\"/\"$USER_WORKER_NAME\"/g" workers/user-worker/wrangler.jsonc
+        sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/user-worker/wrangler.jsonc
+        sed -i "s/\"USER_WORKER_DOMAIN\"/\"$USER_WORKER_DOMAIN\"/g" workers/user-worker/wrangler.jsonc
+        sed -i "s/\"KV_STORE_ID\"/\"$KV_STORE_ID\"/g" workers/user-worker/wrangler.jsonc
+        echo -e "${GREEN}    ✅ user-worker configuration updated${NC}"
+    fi
+    
+    # Main wrangler.toml
+    if [ -f "wrangler.toml" ]; then
+        echo -e "${YELLOW}  Updating wrangler.toml...${NC}"
+        sed -i "s/\"PAGES_PROJECT_NAME\"/\"$PAGES_PROJECT_NAME\"/g" wrangler.toml
+        echo -e "${GREEN}    ✅ main wrangler.toml configuration updated${NC}"
+    fi
+    
+    echo -e "${GREEN}✅ All wrangler configuration files updated${NC}"
+}
+
+# Update wrangler configurations
+update_wrangler_configs
+
 # Function to set worker secrets
 set_worker_secrets() {
     local worker_name=$1

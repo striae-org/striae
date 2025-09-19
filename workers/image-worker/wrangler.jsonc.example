@@ -1,6 +1,6 @@
 {
-  "name": "insert-your-images-worker-name",
-  "account_id": "YOUR_ACCOUNT_ID",
+  "name": "IMAGES_WORKER_NAME",
+  "account_id": "ACCOUNT_ID",
   "main": "src/image-worker.js",
   "compatibility_date": "2023-03-14",
   "compatibility_flags": [
@@ -13,7 +13,7 @@
   
   "routes": [
     {
-      "pattern": "IMAGE_WORKER_CUSTOM_DOMAIN",
+      "pattern": "IMAGES_WORKER_DOMAIN",
       "custom_domain": true
     }
   ],
