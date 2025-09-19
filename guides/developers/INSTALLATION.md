@@ -6,48 +6,38 @@ This guide provides step-by-step instructions for deploying Striae, a Firearms E
 
 ## Table of Contents
 
-1. [Prerequisites](#prerequisites)
-   - [External Developers - Required Accounts & Services](#external-developers---required-accounts--services)
-   - [Cloudflare Services Required](#cloudflare-services-required)
-   - [Internal Developer Quick Start](#internal-developer-quick-start)
-2. [Step 1: Clone and Prepare the Project](#step-1-clone-and-prepare-the-project)
-   - [1.1: Install Dependencies](#11-install-dependencies)
-3. [Step 2: Cloudflare Service Configuration](#step-2-cloudflare-service-configuration)
-   - [2.1 Cloudflare Turnstile Setup](#21-cloudflare-turnstile-setup)
-   - [2.2 Cloudflare Images Setup](#22-cloudflare-images-setup)
-   - [2.3 Cloudflare KV Setup](#23-cloudflare-kv-setup)
-   - [2.4 Cloudflare R2 Setup](#24-cloudflare-r2-setup)
-4. [Step 3: Configure Worker Files](#step-3-configure-worker-files)
-   - [3.1 Copy Configuration Files](#31-copy-configuration-files)
-   - [3.2 Update Worker Configurations](#32-update-worker-configurations)
-5. [Step 4: Configure CORS for All Workers](#step-4-configure-cors-for-all-workers)
-   - [4.1 Update CORS Headers in Worker Source Files](#41-update-cors-headers-in-worker-source-files)
-   - [4.2 CORS Security Notes](#42-cors-security-notes)
-   - [4.3 Verify CORS Configuration](#43-verify-cors-configuration)
-6. [Step 5: Environment Variables Setup](#step-5-environment-variables-setup)
-   - [5.1 Initialize Environment Configuration](#51-initialize-environment-configuration)
-   - [5.2 Required Environment Variables](#52-required-environment-variables)
-   - [5.3 Generate Security Tokens](#53-generate-security-tokens)
-7. [Step 6: Configuration Files](#step-6-configuration-files)
-   - [6.1 Update Configuration Files](#61-update-configuration-files)
-8. [Step 7: Complete Deployment](#step-7-complete-deployment)
-   - [7.1 Unified Complete Deployment](#71-unified-complete-deployment)
-9. [Step 8: Testing and Verification](#step-8-testing-and-verification)
-   - [8.1 Test Authentication Flow](#81-test-authentication-flow)
-   - [8.2 Test Core Features](#82-test-core-features)
-   - [8.3 Test Worker Endpoints](#83-test-worker-endpoints)
-   - [8.4 Verify CORS Configuration](#84-verify-cors-configuration)
-10. [Step 9: Security Checklist](#step-9-security-checklist)
-11. [Important Notes & Updates](#important-notes--updates)
-    - [✨ New Environment Setup System](#-new-environment-setup-system)
-    - [Key Improvements Made](#key-improvements-made)
-    - [Required Binding Names](#required-binding-names)
-    - [Custom Domain Setup (Optional)](#custom-domain-setup-optional)
-    - [Quick Start Summary](#quick-start-summary)
-12. [Troubleshooting](#troubleshooting)
-    - [Common Issues](#common-issues)
-    - [KV Namespace Configuration Issues](#kv-namespace-configuration-issues)
-    - [Useful Commands](#useful-commands)
+- [Prerequisites](#prerequisites)
+  - [External Developers - Required Accounts & Services](#external-developers---required-accounts--services)
+  - [Cloudflare Services Required](#cloudflare-services-required)
+  - [Internal Developer Quick Start](#internal-developer-quick-start)
+- [Step 1: Clone and Prepare the Project](#step-1-clone-and-prepare-the-project)
+  - [1.1: Install Dependencies](#11-install-dependencies)
+- [Step 2: Cloudflare Service Configuration](#step-2-cloudflare-service-configuration)
+  - [2.1 Cloudflare Turnstile Setup](#21-cloudflare-turnstile-setup)
+  - [2.2 Cloudflare Images Setup](#22-cloudflare-images-setup)
+  - [2.3 Cloudflare KV Setup](#23-cloudflare-kv-setup)
+  - [2.4 Cloudflare R2 Setup](#24-cloudflare-r2-setup)
+- [Step 3: Environment Variables Setup](#step-3-environment-variables-setup)
+  - [3.1 Generate Security Tokens](#31-generate-security-tokens)
+  - [3.2 Initialize Environment Configuration](#32-initialize-environment-configuration)
+  - [3.3 Required Environment Variables](#33-required-environment-variables)
+- [Step 4: Complete Deployment](#step-4-complete-deployment)
+  - [4.1 Unified Complete Deployment](#41-unified-complete-deployment)
+- [Step 5: Testing and Verification](#step-5-testing-and-verification)
+  - [5.1 Test Authentication Flow](#51-test-authentication-flow)
+  - [5.2 Test Core Features](#52-test-core-features)
+  - [5.3 Test Worker Endpoints](#53-test-worker-endpoints)
+  - [5.4 Verify CORS Configuration](#54-verify-cors-configuration)
+- [Step 6: Security Checklist](#step-6-security-checklist)
+- [Important Notes & Updates](#important-notes--updates)
+  - [✨ New Environment Setup System](#-new-environment-setup-system)
+  - [Key Improvements Made](#key-improvements-made)
+  - [Required Binding Names](#required-binding-names)  
+  - [Quick Start Summary](#quick-start-summary)
+- [Troubleshooting](#troubleshooting)
+  - [Common Issues](#common-issues)
+  - [KV Namespace Configuration Issues](#kv-namespace-configuration-issues)
+  - [Useful Commands](#useful-commands)
 
 ## Prerequisites
 
@@ -76,7 +66,8 @@ Before starting the installation, choose your setup path based on your developer
 
 **If you are an internal developer with the striae-org team**, you have a much simpler setup process:
 
-#### ✅ Already Set Up for You:
+#### ✅ Already Set Up for You
+
 - **Cloudflare Account & Services** - Access provided through shared developer account (Pages, Workers, KV, R2, Images, Turnstile)
 - **Frontend Deployment** - Fully deployed and maintained at [https://dev.striae.org](https://dev.striae.org)
 - **Worker Deployment** - All backend workers deployed and maintained by infrastructure team
@@ -85,20 +76,24 @@ Before starting the installation, choose your setup path based on your developer
 - **Environment Variables** - Complete `.env` file provided
 - **Configuration Files** - All `config.json`, `firebase.ts`, and worker configs ready
 
-#### 📋 Your Requirements:
+#### 📋 Your Requirements
+
 1. **Node.js** version 20.0.0 or higher
 2. **Git** access to contribute to `striae-org/striae-dev` fork
 3. **Development on separate branches only** - All contributions must be on dev branches, never directly to main/master
 
-#### 🚀 Quick Setup Process:
+#### 🚀 Quick Setup Process
+
 1. **Clone the dev fork**: `git clone https://github.com/striae-org/striae-dev.git`
 2. **Create your dev branch**: `git checkout -b your-feature-branch`
 3. **Use provided files**: Copy the complete `.env` and config files you receive
 4. **Install dependencies**: Run `npm install` to install all required packages
 5. **Start developing**: Frontend and all workers are deployed and maintained - you can begin contributing immediately!
 
-#### 📞 Getting Internal Developer Access:
+#### 📞 Getting Internal Developer Access
+
 Contact Stephen at [dev@striae.org](mailto:dev@striae.org) to:
+
 - Receive your pre-configured environment files
 - Get access to the shared Cloudflare developer account
 - Get access to the development fork
@@ -111,16 +106,20 @@ Contact Stephen at [dev@striae.org](mailto:dev@striae.org) to:
 ## Step 1: Clone and Prepare the Project
 
 **For External Developers:**
+
 1. **Fork the repository** to your GitHub account:
+
    - Go to [https://github.com/striae-org/striae](https://github.com/striae-org/striae)
    - Click the "Fork" button to create your own copy
 2. **Clone your fork**:
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/striae.git
 cd striae
 ```
 
 **For Internal Developers:**
+
 ```bash
 # Clone the development fork directly (you have push access)
 git clone https://github.com/striae-org/striae-dev.git
@@ -131,7 +130,6 @@ git checkout -b your-feature-branch-name
 ```
 
 > **🔒 External Developer Note**: After forking and making changes, you'll submit pull requests from your fork back to the main `striae-org/striae` repository.
-
 > **🔒 Internal Developer Note**: All development must be done on separate dev branches within the `striae-org/striae-dev` fork. Never commit directly to main/master branches.
 
 ### 1.1: Install Dependencies
@@ -144,12 +142,14 @@ npm install
 ```
 
 This will install all the required Node.js packages including:
+
 - Remix framework dependencies
 - Cloudflare Workers compatibility packages
 - Build tools and utilities
 - Development dependencies
 
 **Verification:**
+
 ```bash
 # Verify the installation was successful
 ls -la
@@ -242,276 +242,17 @@ npm run build
 
 ---
 
-## Step 3: Configure Worker Files
+## Step 3: Environment Variables Setup
 
-**🎯 Internal Developers**: **Skip this entire step**. You will receive pre-configured `wrangler.jsonc` files for all workers with the correct account IDs, namespace IDs, and bucket names already set up.
-
-**📋 External Developers**: Before deploying workers, you need to configure each worker's `wrangler.jsonc` file with your own Cloudflare account details.
-
-Before deploying workers, you need to configure each worker's `wrangler.jsonc` file:
-
-### 3.1 Copy Configuration Files
-
-For each worker, copy the example configuration:
-
-```bash
-# Navigate to each worker directory and copy the example file
-cd workers/keys-worker
-cp wrangler.jsonc.example wrangler.jsonc
-
-cd ../user-worker  
-cp wrangler.jsonc.example wrangler.jsonc
-
-cd ../data-worker
-cp wrangler.jsonc.example wrangler.jsonc
-
-cd ../image-worker
-cp wrangler.jsonc.example wrangler.jsonc
-
-cd ../turnstile-worker
-cp wrangler.jsonc.example wrangler.jsonc
-
-cd ../pdf-worker
-cp wrangler.jsonc.example wrangler.jsonc
-```
-
-### 3.2 Update Worker Configurations
-
-In each `wrangler.jsonc` file, update the following:
-
-1. **Replace `YOUR_ACCOUNT_ID`** with your actual Cloudflare Account ID
-2. **Replace custom domain patterns** with your actual domains (optional but recommended)
-3. **🔑 Update KV namespace ID** in user-worker:
-   - Open `workers/user-worker/wrangler.jsonc`
-   - Find the `kv_namespaces` section
-   - Replace `insert-your-kv-namespace-id` with the **Namespace ID** you saved from Step 2.3
-   - Example: `"id": "680e629649f957baa393b83d11ca17c6"`
-4. **Update R2 bucket name** in data-worker (replace `insert-your-r2-bucket-name` with your bucket name)
-
-> **KV Namespace Configuration Example:**
-> ```json
-> "kv_namespaces": [
->   {
->     "binding": "USER_DB",
->     "id": "680e629649f957baa393b83d11ca17c6"
->   }
-> ]
-> ```
-> ⚠️ Use the UUID-format **Namespace ID**, not the namespace name!
-
-**Example for user-worker/wrangler.jsonc:**
-```json
-{
-  "name": "striae-users",
-  "account_id": "your-actual-account-id",
-  "main": "src/user-worker.js",
-  "compatibility_date": "2024-12-30",
-  "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true },
-  "kv_namespaces": [
-    {
-      "binding": "USER_DB",
-      "id": "your-actual-kv-namespace-id"
-    }
-  ],
-  "routes": [
-    {
-      "pattern": "users.yourdomain.com",
-      "custom_domain": true
-    }
-  ],
-  "placement": { "mode": "smart" }
-}
-```
-
-**Example for data-worker/wrangler.jsonc:**
-```json
-{
-  "name": "striae-data",
-  "account_id": "your-actual-account-id",
-  "main": "src/data-worker.js",
-  "compatibility_date": "2024-12-30",
-  "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true },
-  "r2_buckets": [
-    {
-      "binding": "STRIAE_DATA",
-      "bucket_name": "your-actual-r2-bucket-name"
-    }
-  ],
-  "routes": [
-    {
-      "pattern": "data.yourdomain.com",
-      "custom_domain": true
-    }
-  ],
-  "placement": { "mode": "smart" }
-}
-```
-
----
-
-## Step 4: Configure CORS for All Workers
-
-**🎯 Internal Developers**: **Skip this entire step**. CORS headers are already configured for the development environment (`https://dev.striae.org`) in the provided worker files.
-
-**📋 External Developers**: All workers have CORS (Cross-Origin Resource Sharing) headers that must be updated to match your domain.
-
-**Important**: All workers have CORS (Cross-Origin Resource Sharing) headers that must be updated to match your domain. By default, they're configured for `https://www.striae.org`.
-
-### 4.1 Update CORS Headers in Worker Source Files
-
-Each worker needs its CORS headers updated to allow requests from your domain:
-
-**1. User Worker** (`workers/user-worker/src/user-worker.js`):
-```javascript
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://your-domain.com', // Update this
-  'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Custom-Auth-Key',
-  'Content-Type': 'application/json'
-};
-
-// Also update worker URLs for cross-worker communication
-const DATA_WORKER_URL = 'https://data.your-domain.com';
-const IMAGE_WORKER_URL = 'https://images.your-domain.com';
-```
-
-**2. Data Worker** (`workers/data-worker/src/data-worker.js`):
-```javascript
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://your-domain.com', // Update this
-  'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Custom-Auth-Key',
-  'Content-Type': 'application/json'
-};
-```
-
-**3. Images Worker** (`workers/image-worker/src/image-worker.js`):
-```javascript
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://your-domain.com', // Update this
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Custom-Auth-Key',
-  'Content-Type': 'application/json'
-};
-```
-
-**4. Keys Worker** (`workers/keys-worker/src/keys.js`):
-```javascript
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://your-domain.com', // Update this
-  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Custom-Auth-Key',
-  'Content-Type': 'text/plain'
-};
-```
-
-**5. Turnstile Worker** (`workers/turnstile-worker/src/turnstile.js`):
-```javascript
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': 'https://your-domain.com', // Update this
-  'Access-Control-Allow-Methods': 'POST',
-  'Access-Control-Allow-Headers': 'Content-Type'
-};
-```
-
-**6. PDF Worker** (`workers/pdf-worker/src/pdf-worker.js`):
-```javascript
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://your-domain.com', // Update this
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Content-Type': 'application/json'
-};
-```
-
-### 4.2 CORS Security Notes
-
-- **Use HTTPS**: Always use `https://` in CORS origins
-- **Exact Match**: CORS requires exact domain matching (including subdomains)
-- **No Wildcards**: Avoid using `*` for Access-Control-Allow-Origin in production
-- **Multiple Domains**: If you need multiple domains, implement dynamic CORS checking
-- **Testing**: Use browser developer tools to verify CORS headers are correct
-
-### 4.3 Verify CORS Configuration
-
-Test CORS headers using curl or browser developer tools:
-
-```bash
-# Test CORS preflight request
-curl -X OPTIONS \
-  -H "Origin: https://your-domain.com" \
-  -H "Access-Control-Request-Method: POST" \
-  -H "Access-Control-Request-Headers: Content-Type" \
-  https://your-worker.your-subdomain.workers.dev
-
-# Should return Access-Control-Allow-Origin header
-```
-
-**Common CORS Issues:**
-- ❌ **Mixed HTTP/HTTPS**: Ensure both frontend and workers use HTTPS
-- ❌ **Subdomain Mismatch**: `www.domain.com` ≠ `domain.com`
-- ❌ **Port Differences**: Development vs production port differences
-- ❌ **Missing Preflight**: Some requests require OPTIONS preflight handling
-
----
-
-## Step 5: Environment Variables Setup
-
-**🎯 Internal Developers**: If you are an internal developer, **skip this entire step**. You will receive a complete, pre-configured `.env` file with all required variables. Simply use the provided file and proceed to Step 8.
+**🎯 Internal Developers**: If you are an internal developer, **skip this entire step**. You will receive a complete, pre-configured `.env` file with all required variables. Simply use the provided file and proceed to Step 4.
 
 **📋 External Developers**: This section is for external developers who need to set up their own environment variables and external service accounts.
 
 Striae uses a centralized environment variables system that organizes all secrets by their usage across different workers and the Pages application.
 
-### 5.1 Initialize Environment Configuration
+### 3.1 Generate Security Tokens
 
-**For Standard Installation:**
-
-1. **Copy the environment template:**
-
-```bash
-cp .env.example .env
-```
-
-2. **Fill in your actual values in the `.env` file**
-
-The `.env` file is organized by service and includes:
-- **Pages Worker Variables**: Session management and email service
-- **Keys Worker Variables**: Authentication and key management  
-- **Individual Worker Variables**: Service-specific secrets
-- **Cloudflare Service Keys**: Images, Turnstile, R2, KV credentials
-
-### 5.2 Required Environment Variables
-
-All required variables are documented in the `.env` file. Here's what you need to collect:
-
-**Cloudflare Services:**
-- `ACCOUNT_ID` - Your Cloudflare Account ID
-- `IMAGES_API_TOKEN` or `API_TOKEN` (for Image Worker) - Cloudflare Images API token
-- `ACCOUNT_HASH` - Cloudflare Images Account Hash
-- `HMAC_KEY` - Cloudflare Images HMAC signing key
-- `CFT_SECRET_KEY` - Cloudflare Turnstile secret key
-
-**External Services:**
-- `SL_API_KEY` - SendLayer API token
-
-**Custom Security Tokens** (generate your own):
-- `R2_KEY_SECRET` - R2 authentication token
-- `USER_DB_AUTH` - KV authentication token
-- `KEYS_AUTH` - Key handler authentication token
-
-**Environment Variable Dependencies:**
-- **Account Deletion**: Requires `SL_API_KEY` for email notifications
-- **Case Management**: Requires `R2_KEY_SECRET` for data worker communication
-- **Image Management**: Requires `IMAGES_API_TOKEN` for image worker communication
-- **User Storage**: Requires `USER_DB_AUTH` for KV database access
-
-### 5.3 Generate Security Tokens
-
-Generate secure random tokens for the custom authentication variables:
+**First, generate secure random tokens** for the custom authentication variables that you'll need in your `.env` file:
 
 ```bash
 # Session secret (64 characters recommended)
@@ -524,105 +265,125 @@ openssl rand -hex 16
 openssl rand -base64 24
 ```
 
----
+**Save these tokens** - you'll need them when filling out your `.env` file in the next step.
 
-## Step 6: Configuration Files
+### 3.2 Initialize Environment Configuration
 
-**🎯 Internal Developers**: If you are an internal developer, **skip this entire step**. You will receive pre-configured config files including `config.json`, `firebase.ts`, `inactivity.ts`, `keys.json`, and `wrangler.toml`. Use the provided files and proceed directly to Step 8.
+**For Standard Installation:**
 
-**📋 External Developers**: This section is for external developers who need to manually configure their application settings and Firebase integration.
+**Copy the environment template:**
 
-### 6.1 Update Configuration Files
-
-1. **Copy example configurations**:
 ```bash
-cp app/config-example/config.json app/config/config.json
-cp app/config-example/firebase.ts app/config/firebase.ts
-cp app/config-example/inactivity.ts app/config/inactivity.ts
-cp app/components/turnstile/keys.json.example app/components/turnstile/keys.json
-cp wrangler.toml.example wrangler.toml
+cp .env.example .env
 ```
 
-2. **Update `app/config/config.json`**:
-Replace all worker URLs with your deployed worker URLs:
-```json
-{
-  "name": "Striae",
-  "author": "Stephen J. Lu",
-  "title": "A Firearms Examiner's Comparison Companion",  
-  "url": "https://your-domain.com",    
-  "data_worker_url": "https://your-data-worker.your-subdomain.workers.dev",
-  "keys_url": "https://your-keys-worker.your-subdomain.workers.dev",
-  "image_worker_url": "https://your-image-worker.your-subdomain.workers.dev",
-  "user_worker_url": "https://your-user-worker.your-subdomain.workers.dev",
-  "pdf_worker_url": "https://your-pdf-worker.your-subdomain.workers.dev",
-  "keys_auth": "YOUR_KEYS_AUTH_TOKEN"
-}
-```
+**Fill in your actual values in the `.env` file**
 
-3. **Update `app/components/turnstile/keys.json`**:
-```json
-{
-  "CFT_PUBLIC_KEY": "YOUR_CLOUDFLARE_TURNSTILE_PUBLIC_KEY",
-  "worker_url": "https://your-turnstile-worker.your-subdomain.workers.dev"
-}
-```
+The `.env` file is organized by service and includes:
 
-4. **Update `app/config/firebase.ts`**:
-Insert your Firebase configuration parameters:
-```typescript
-// Replace with your Firebase config
-export const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "your-app-id"
-};
-```
+- **Cloudflare Core Configuration**: Account ID and shared credentials
+- **Shared Authentication & Storage**: Cross-worker authentication tokens
+- **Firebase Auth Configuration**: Complete Firebase project settings
+- **Pages Worker Environment Variables**: Project name and custom domain
+- **Individual Worker Variables**: Worker names and domains for all 6 workers
+- **Service-Specific Secrets**: Unique credentials for each Cloudflare service
 
-5. **Update `wrangler.toml` (root directory)**:
-```toml
-name = "your-striae-app-name"
-compatibility_date = "2024-12-30"
-pages_build_output_dir = "./build/client"
+### 3.3 Required Environment Variables
 
-[placement]
-mode = "smart"
-```
+All required variables are documented in the `.env` file. Here's what you need to collect:
 
-> **Note**: The root `wrangler.toml` file configures the Cloudflare Pages deployment (frontend), while the `wrangler.jsonc` files in the `workers/` directories configure individual worker services.
+**Cloudflare Core Services:**
+
+- `ACCOUNT_ID` - Your Cloudflare Account ID
+- `SL_API_KEY` - SendLayer API key for email services
+- `USER_DB_AUTH` - Custom user database authentication token
+- `R2_KEY_SECRET` - Custom R2 storage authentication token
+- `IMAGES_API_TOKEN` - Cloudflare Images API token (shared)
+
+**Firebase Configuration (Complete Project Settings):**
+
+- `API_KEY` - Firebase API key
+- `AUTH_DOMAIN` - Firebase auth domain (project-id.firebaseapp.com)
+- `PROJECT_ID` - Firebase project ID
+- `STORAGE_BUCKET` - Firebase storage bucket
+- `MESSAGING_SENDER_ID` - Firebase messaging sender ID
+- `APP_ID` - Firebase app ID
+- `MEASUREMENT_ID` - Firebase measurement ID (optional)
+
+**Pages Configuration:**
+
+- `PAGES_PROJECT_NAME` - Your Cloudflare Pages project name
+- `PAGES_CUSTOM_DOMAIN` - Your custom domain (e.g., striae.org)
+
+**Worker Configuration (Names and Domains):**
+
+- `KEYS_WORKER_NAME` - Keys worker name
+- `KEYS_WORKER_DOMAIN` - Keys worker domain
+- `USER_WORKER_NAME` - User worker name  
+- `USER_WORKER_DOMAIN` - User worker domain
+- `DATA_WORKER_NAME` - Data worker name
+- `DATA_WORKER_DOMAIN` - Data worker domain
+- `IMAGES_WORKER_NAME` - Images worker name
+- `IMAGES_WORKER_DOMAIN` - Images worker domain
+- `TURNSTILE_WORKER_NAME` - Turnstile worker name
+- `TURNSTILE_WORKER_DOMAIN` - Turnstile worker domain
+- `PDF_WORKER_NAME` - PDF worker name
+- `PDF_WORKER_DOMAIN` - PDF worker domain
+
+**Service-Specific Credentials:**
+
+- `KEYS_AUTH` - Keys worker authentication token
+- `ACCOUNT_HASH` - Cloudflare Images Account Hash
+- `KV_STORE_ID` - Your KV namespace ID from Step 2.3
+- `BUCKET_NAME` - Your R2 bucket name from Step 2.4
+- `API_TOKEN` - Cloudflare Images API token (for Images Worker)
+- `HMAC_KEY` - Cloudflare Images HMAC signing key
+- `CFT_PUBLIC_KEY` - Cloudflare Turnstile public key
+- `CFT_SECRET_KEY` - Cloudflare Turnstile secret key
+
+**Custom Security Tokens** (generate your own):
+
+- `R2_KEY_SECRET` - R2 authentication token
+- `USER_DB_AUTH` - KV authentication token
+- `KEYS_AUTH` - Key handler authentication token
+
+**Environment Variable Dependencies:**
+
+- **Account Deletion**: Requires `SL_API_KEY` for email notifications
+- **Case Management**: Requires `R2_KEY_SECRET` for data worker communication
+- **Image Management**: Requires `IMAGES_API_TOKEN` for image worker communication
+- **User Storage**: Requires `USER_DB_AUTH` for KV database access
 
 ---
 
-## Step 7: Complete Deployment
+## Step 4: Complete Deployment
 
 **🎯 Internal Developers**: **Skip this entire step**. All services are already deployed and maintained by the infrastructure team.
 
 **📋 External Developers**: Now that all configuration is complete, deploy your entire Striae application with a single unified command.
 
 **✅ Prerequisites**: Before running the complete deployment, ensure you have completed:
-1. ✅ Configured all worker files (`wrangler.jsonc`) in Step 3
-2. ✅ Updated CORS settings in worker source files in Step 4
-3. ✅ Set up environment variables (`.env` file) in Step 5
-4. ✅ Updated configuration files (`config.json`, `firebase.ts`, `keys.json`, `wrangler.toml`) in Step 6
 
-### 7.1 Unified Complete Deployment
+1. ✅ Set up Cloudflare services in Step 2
+2. ✅ Set up environment variables and run configuration setup in Step 3
+
+### 4.1 Unified Complete Deployment
 
 Deploy everything with a single unified script:
 
 ```bash
-# Deploy entire Striae application (workers, secrets, pages, and page secrets)
+# Deploy entire Striae application (configuration, workers, secrets, and pages)
 npm run deploy:all
 ```
 
 This unified script will execute the complete deployment process in the correct order:
 
-1. **Deploy Workers** - All 6 Cloudflare Workers
-2. **Deploy Worker Secrets** - Environment variables for workers
-3. **Deploy Pages** - Frontend application (includes build)
-4. **Deploy Pages Secrets** - Environment variables for Pages
+1. **Configuration Setup** - Validate environment and configure all files
+2. **Install Worker Dependencies** - Install dependencies for all workers
+3. **Deploy Workers** - All 6 Cloudflare Workers
+4. **Deploy Worker Secrets** - Environment variables for workers
+5. **Deploy Pages** - Frontend application (includes build)
+6. **Deploy Pages Secrets** - Environment variables for Pages
 
 The unified deployment script provides:
 
@@ -635,13 +396,13 @@ The unified deployment script provides:
 
 ---
 
-## Step 8: Testing and Verification
+## Step 5: Testing and Verification
 
 **🎯 Internal Developers**: You can test your changes on the pre-configured development environment at [https://dev.striae.org](https://dev.striae.org). Firebase authentication, MFA, and all external services are already configured and functional.
 
 **📋 External Developers**: Follow the complete testing steps below to verify your installation.
 
-### 8.1 Test Authentication Flow
+### 5.1 Test Authentication Flow
 
 1. Navigate to your deployed application
 2. Test user authentication (login/registration)
@@ -649,16 +410,17 @@ The unified deployment script provides:
 4. Test multi-factor authentication (MFA)
 5. Test password reset functionality
 
-### 8.2 Test Core Features
+### 5.2 Test Core Features
 
 1. **Image Upload**: Test image upload functionality
 2. **Data Storage**: Test data saving and retrieval
 3. **PDF Generation**: Test PDF export features
 4. **Turnstile**: Verify bot protection is working
 
-### 8.3 Test Worker Endpoints
+### 5.3 Test Worker Endpoints
 
 Verify each worker is responding correctly:
+
 - Keys worker: Authentication and key management
 - User worker: User data operations
 - Data worker: Data storage operations
@@ -666,7 +428,7 @@ Verify each worker is responding correctly:
 - Turnstile worker: Bot protection
 - PDF worker: PDF generation
 
-### 8.4 Verify CORS Configuration
+### 5.4 Verify CORS Configuration
 
 Test that CORS is working correctly by:
 
@@ -683,13 +445,14 @@ curl -X OPTIONS \
 ```
 
 Expected response should include:
+
 - `Access-Control-Allow-Origin: https://your-domain.com`
 - Appropriate `Access-Control-Allow-Methods`
 - Appropriate `Access-Control-Allow-Headers`
 
 ---
 
-## Step 9: Security Checklist
+## Step 6: Security Checklist
 
 - [ ] All environment variables are set correctly
 - [ ] CORS is properly configured for all workers with your domain
@@ -722,21 +485,14 @@ Expected response should include:
 5. **Enhanced Security**: Template system prevents accidental credential commits
 
 ### Required Binding Names
+
 - **User Worker KV Binding**: `USER_DB`
 - **Data Worker R2 Binding**: `STRIAE_DATA`
-
-### Custom Domain Setup (Optional)
-Each worker can optionally use custom domains. Update the `routes` section in each worker's `wrangler.jsonc` file with your preferred subdomain pattern:
-- Keys: `keys.yourdomain.com`
-- Users: `users.yourdomain.com`  
-- Data: `data.yourdomain.com`
-- Images: `images.yourdomain.com`
-- Turnstile: `turnstile.yourdomain.com`
-- PDF: `pdf.yourdomain.com`
 
 ### Quick Start Summary
 
 **For Internal Developers:**
+
 1. **Clone dev fork**: `git clone https://github.com/striae-org/striae-dev.git`
 2. **Create dev branch**: `git checkout -b your-feature-branch`
 3. **Use provided files**: Place received `.env`, config files, `wrangler.toml`, and `wrangler.jsonc` files in correct project directories
@@ -748,11 +504,9 @@ Each worker can optionally use custom domains. Update the `routes` section in ea
 1. **Fork & Clone**: Fork `striae-org/striae` to your account → Clone your fork
 2. **Install Dependencies**: Run `npm install` to install all required packages
 3. **Configure Services**: Set up Cloudflare (Turnstile, Images, KV, R2), Firebase, SendLayer
-4. **Configure Workers**: Copy `wrangler.jsonc.example` files → Update with your account details
-5. **Setup Environment**: `cp .env.example .env` → Fill with your credentials
-6. **Configure Application**: Update `config.json`, `firebase.ts`, `keys.json`, `wrangler.toml` files
-7. **Complete Deployment**: `npm run deploy:all` (unified deployment)
-8. **Test & Verify**: Verify all functionality and run security checklist
+4. **Setup Environment**: `cp .env.example .env` → Fill with your credentials
+5. **Complete Deployment**: `npm run deploy:all` (unified deployment)
+6. **Test & Verify**: Verify all functionality and run security checklist
 
 ---
 
@@ -773,11 +527,13 @@ This error occurs when the KV namespace configuration uses a name instead of the
 
 1. **Check Your Configuration**: Open `workers/user-worker/wrangler.jsonc`
 2. **Verify the ID Format**: The `id` field should be a UUID (e.g., `680e629649f957baa393b83d11ca17c6`), not a name like `USER_DB`
-3. **Get the Correct ID**: 
+3. **Get the Correct ID**:
+
    - Go to Cloudflare Dashboard → Storage & Databases → KV
    - Find your `USER_DB` namespace
    - Copy the "Namespace ID" (UUID format)
 4. **Update the Configuration**:
+
    ```json
    "kv_namespaces": [
      {
@@ -786,11 +542,13 @@ This error occurs when the KV namespace configuration uses a name instead of the
      }
    ]
    ```
+
 5. **Redeploy**: Run `wrangler deploy` in the user-worker directory
 
 **Error: `A request to the Cloudflare API (/accounts/.../storage/kv/namespaces/...) failed`**
 
 This usually indicates:
+
 - The namespace ID doesn't exist
 - Wrong account ID in `wrangler.jsonc`
 - Authentication issues with Cloudflare
