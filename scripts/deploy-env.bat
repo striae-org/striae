@@ -26,15 +26,36 @@ echo For automated deployment, use PowerShell or WSL with the bash script.
 echo.
 
 echo.
+echo 📋 STEP 1: Copy example configuration files
+echo Run these commands first (or use PowerShell script for automation):
+echo.
+echo cd workers\keys-worker
+echo copy wrangler.jsonc.example wrangler.jsonc
+echo cd ..\user-worker
+echo copy wrangler.jsonc.example wrangler.jsonc
+echo cd ..\data-worker
+echo copy wrangler.jsonc.example wrangler.jsonc
+echo cd ..\image-worker
+echo copy wrangler.jsonc.example wrangler.jsonc
+echo cd ..\turnstile-worker
+echo copy wrangler.jsonc.example wrangler.jsonc
+echo cd ..\pdf-worker
+echo copy wrangler.jsonc.example wrangler.jsonc
+echo cd ..\..
+echo.
+echo REM Copy main wrangler.toml
+echo copy wrangler.toml.example wrangler.toml
+echo.
+
+echo.
 echo ⚠️  IMPORTANT: Before running these commands:
-echo    1. Copy wrangler.jsonc.example to wrangler.jsonc in each worker directory
+echo    1. Run STEP 1 commands above to copy example files
 echo    2. Use PowerShell script (deploy-env.ps1) for automated configuration updates
 echo    3. Manually replace variables in wrangler.jsonc files with values from .env:
-echo       - Replace "DATA_WORKER_NAME" with your actual worker name
-echo       - Replace "ACCOUNT_ID" with your Cloudflare account ID  
-echo       - Replace "DATA_WORKER_DOMAIN" with your custom domain
-echo       - Replace "BUCKET_NAME" with your R2 bucket name
-echo       - Replace "KV_STORE_ID" with your KV namespace ID (user-worker only)
+echo       - Replace "insert-your-*" placeholders with actual values
+echo       - Replace "YOUR_ACCOUNT_ID" with your Cloudflare account ID  
+echo       - Replace domain placeholders with your custom domains
+echo       - Replace bucket/KV placeholders with your resource IDs
 echo    4. Use the correct worker name from your configuration (not the hardcoded names below)
 echo.
 

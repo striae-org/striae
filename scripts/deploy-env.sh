@@ -31,7 +31,31 @@ source .env
 
 # Validate required variables
 required_vars=(
+    # Core Cloudflare Configuration
     "ACCOUNT_ID"
+    
+    # Worker Names (required for config replacement)
+    "KEYS_WORKER_NAME"
+    "USER_WORKER_NAME"
+    "DATA_WORKER_NAME"
+    "IMAGES_WORKER_NAME"
+    "TURNSTILE_WORKER_NAME" 
+    "PDF_WORKER_NAME"
+    "PAGES_PROJECT_NAME"
+    
+    # Worker Domains (required for config replacement)
+    "KEYS_WORKER_DOMAIN"
+    "USER_WORKER_DOMAIN"
+    "DATA_WORKER_DOMAIN"
+    "IMAGES_WORKER_DOMAIN"
+    "TURNSTILE_WORKER_DOMAIN"
+    "PDF_WORKER_DOMAIN"
+    
+    # Storage Configuration (required for config replacement)
+    "BUCKET_NAME"
+    "KV_STORE_ID"
+    
+    # Worker Secrets (required for deployment)
     "SL_API_KEY"
     "KEYS_AUTH"
     "USER_DB_AUTH"
@@ -52,6 +76,76 @@ for var in "${required_vars[@]}"; do
 done
 
 echo -e "${GREEN}✅ All required variables found${NC}"
+
+# Function to copy example configuration files
+copy_example_configs() {
+    echo -e "\n${BLUE}📋 Copying example configuration files...${NC}"
+    
+    # Navigate to each worker directory and copy the example file
+    cd workers/keys-worker
+    if [ -f "wrangler.jsonc.example" ] && [ ! -f "wrangler.jsonc" ]; then
+        cp wrangler.jsonc.example wrangler.jsonc
+        echo -e "${GREEN}    ✅ keys-worker: wrangler.jsonc created from example${NC}"
+    elif [ -f "wrangler.jsonc" ]; then
+        echo -e "${YELLOW}    ⚠️  keys-worker: wrangler.jsonc already exists, skipping copy${NC}"
+    fi
+
+    cd ../user-worker
+    if [ -f "wrangler.jsonc.example" ] && [ ! -f "wrangler.jsonc" ]; then
+        cp wrangler.jsonc.example wrangler.jsonc
+        echo -e "${GREEN}    ✅ user-worker: wrangler.jsonc created from example${NC}"
+    elif [ -f "wrangler.jsonc" ]; then
+        echo -e "${YELLOW}    ⚠️  user-worker: wrangler.jsonc already exists, skipping copy${NC}"
+    fi
+
+    cd ../data-worker
+    if [ -f "wrangler.jsonc.example" ] && [ ! -f "wrangler.jsonc" ]; then
+        cp wrangler.jsonc.example wrangler.jsonc
+        echo -e "${GREEN}    ✅ data-worker: wrangler.jsonc created from example${NC}"
+    elif [ -f "wrangler.jsonc" ]; then
+        echo -e "${YELLOW}    ⚠️  data-worker: wrangler.jsonc already exists, skipping copy${NC}"
+    fi
+
+    cd ../image-worker
+    if [ -f "wrangler.jsonc.example" ] && [ ! -f "wrangler.jsonc" ]; then
+        cp wrangler.jsonc.example wrangler.jsonc
+        echo -e "${GREEN}    ✅ image-worker: wrangler.jsonc created from example${NC}"
+    elif [ -f "wrangler.jsonc" ]; then
+        echo -e "${YELLOW}    ⚠️  image-worker: wrangler.jsonc already exists, skipping copy${NC}"
+    fi
+
+    cd ../turnstile-worker
+    if [ -f "wrangler.jsonc.example" ] && [ ! -f "wrangler.jsonc" ]; then
+        cp wrangler.jsonc.example wrangler.jsonc
+        echo -e "${GREEN}    ✅ turnstile-worker: wrangler.jsonc created from example${NC}"
+    elif [ -f "wrangler.jsonc" ]; then
+        echo -e "${YELLOW}    ⚠️  turnstile-worker: wrangler.jsonc already exists, skipping copy${NC}"
+    fi
+
+    cd ../pdf-worker
+    if [ -f "wrangler.jsonc.example" ] && [ ! -f "wrangler.jsonc" ]; then
+        cp wrangler.jsonc.example wrangler.jsonc
+        echo -e "${GREEN}    ✅ pdf-worker: wrangler.jsonc created from example${NC}"
+    elif [ -f "wrangler.jsonc" ]; then
+        echo -e "${YELLOW}    ⚠️  pdf-worker: wrangler.jsonc already exists, skipping copy${NC}"
+    fi
+
+    # Return to project root
+    cd ../..
+    
+    # Copy main wrangler.toml from example
+    if [ -f "wrangler.toml.example" ] && [ ! -f "wrangler.toml" ]; then
+        cp wrangler.toml.example wrangler.toml
+        echo -e "${GREEN}    ✅ root: wrangler.toml created from example${NC}"
+    elif [ -f "wrangler.toml" ]; then
+        echo -e "${YELLOW}    ⚠️  root: wrangler.toml already exists, skipping copy${NC}"
+    fi
+    
+    echo -e "${GREEN}✅ Configuration file copying completed${NC}"
+}
+
+# Copy example configuration files
+copy_example_configs
 
 # Function to replace variables in wrangler configuration files
 update_wrangler_configs() {

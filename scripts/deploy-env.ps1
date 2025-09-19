@@ -50,7 +50,31 @@ Get-Content ".env" | ForEach-Object {
 
 # Validate required variables
 $requiredVars = @(
+    # Core Cloudflare Configuration
     "ACCOUNT_ID",
+    
+    # Worker Names (required for config replacement)
+    "KEYS_WORKER_NAME",
+    "USER_WORKER_NAME",
+    "DATA_WORKER_NAME",
+    "IMAGES_WORKER_NAME",
+    "TURNSTILE_WORKER_NAME",
+    "PDF_WORKER_NAME",
+    "PAGES_PROJECT_NAME",
+    
+    # Worker Domains (required for config replacement)
+    "KEYS_WORKER_DOMAIN",
+    "USER_WORKER_DOMAIN",
+    "DATA_WORKER_DOMAIN",
+    "IMAGES_WORKER_DOMAIN",
+    "TURNSTILE_WORKER_DOMAIN",
+    "PDF_WORKER_DOMAIN",
+    
+    # Storage Configuration (required for config replacement)
+    "BUCKET_NAME",
+    "KV_STORE_ID",
+    
+    # Worker Secrets (required for deployment)
     "SL_API_KEY",
     "KEYS_AUTH",
     "USER_DB_AUTH",
@@ -77,6 +101,80 @@ if ($missingVars.Count -gt 0) {
 }
 
 Write-Host "✅ All required variables found" -ForegroundColor Green
+
+# Function to copy example configuration files
+function Copy-ExampleConfigs {
+    Write-Host ""
+    Write-Host "📋 Copying example configuration files..." -ForegroundColor Blue
+    
+    # Navigate to each worker directory and copy the example file
+    Push-Location "workers\keys-worker"
+    if ((Test-Path "wrangler.jsonc.example") -and (-not (Test-Path "wrangler.jsonc"))) {
+        Copy-Item "wrangler.jsonc.example" "wrangler.jsonc"
+        Write-Host "    ✅ keys-worker: wrangler.jsonc created from example" -ForegroundColor Green
+    } elseif (Test-Path "wrangler.jsonc") {
+        Write-Host "    ⚠️  keys-worker: wrangler.jsonc already exists, skipping copy" -ForegroundColor Yellow
+    }
+    Pop-Location
+
+    Push-Location "workers\user-worker"
+    if ((Test-Path "wrangler.jsonc.example") -and (-not (Test-Path "wrangler.jsonc"))) {
+        Copy-Item "wrangler.jsonc.example" "wrangler.jsonc"
+        Write-Host "    ✅ user-worker: wrangler.jsonc created from example" -ForegroundColor Green
+    } elseif (Test-Path "wrangler.jsonc") {
+        Write-Host "    ⚠️  user-worker: wrangler.jsonc already exists, skipping copy" -ForegroundColor Yellow
+    }
+    Pop-Location
+
+    Push-Location "workers\data-worker"
+    if ((Test-Path "wrangler.jsonc.example") -and (-not (Test-Path "wrangler.jsonc"))) {
+        Copy-Item "wrangler.jsonc.example" "wrangler.jsonc"
+        Write-Host "    ✅ data-worker: wrangler.jsonc created from example" -ForegroundColor Green
+    } elseif (Test-Path "wrangler.jsonc") {
+        Write-Host "    ⚠️  data-worker: wrangler.jsonc already exists, skipping copy" -ForegroundColor Yellow
+    }
+    Pop-Location
+
+    Push-Location "workers\image-worker"
+    if ((Test-Path "wrangler.jsonc.example") -and (-not (Test-Path "wrangler.jsonc"))) {
+        Copy-Item "wrangler.jsonc.example" "wrangler.jsonc"
+        Write-Host "    ✅ image-worker: wrangler.jsonc created from example" -ForegroundColor Green
+    } elseif (Test-Path "wrangler.jsonc") {
+        Write-Host "    ⚠️  image-worker: wrangler.jsonc already exists, skipping copy" -ForegroundColor Yellow
+    }
+    Pop-Location
+
+    Push-Location "workers\turnstile-worker"
+    if ((Test-Path "wrangler.jsonc.example") -and (-not (Test-Path "wrangler.jsonc"))) {
+        Copy-Item "wrangler.jsonc.example" "wrangler.jsonc"
+        Write-Host "    ✅ turnstile-worker: wrangler.jsonc created from example" -ForegroundColor Green
+    } elseif (Test-Path "wrangler.jsonc") {
+        Write-Host "    ⚠️  turnstile-worker: wrangler.jsonc already exists, skipping copy" -ForegroundColor Yellow
+    }
+    Pop-Location
+
+    Push-Location "workers\pdf-worker"
+    if ((Test-Path "wrangler.jsonc.example") -and (-not (Test-Path "wrangler.jsonc"))) {
+        Copy-Item "wrangler.jsonc.example" "wrangler.jsonc"
+        Write-Host "    ✅ pdf-worker: wrangler.jsonc created from example" -ForegroundColor Green
+    } elseif (Test-Path "wrangler.jsonc") {
+        Write-Host "    ⚠️  pdf-worker: wrangler.jsonc already exists, skipping copy" -ForegroundColor Yellow
+    }
+    Pop-Location
+    
+    # Copy main wrangler.toml from example
+    if ((Test-Path "wrangler.toml.example") -and (-not (Test-Path "wrangler.toml"))) {
+        Copy-Item "wrangler.toml.example" "wrangler.toml"
+        Write-Host "    ✅ root: wrangler.toml created from example" -ForegroundColor Green
+    } elseif (Test-Path "wrangler.toml") {
+        Write-Host "    ⚠️  root: wrangler.toml already exists, skipping copy" -ForegroundColor Yellow
+    }
+    
+    Write-Host "✅ Configuration file copying completed" -ForegroundColor Green
+}
+
+# Copy example configuration files
+Copy-ExampleConfigs
 
 # Function to update wrangler configuration files
 function Update-WranglerConfigs {
