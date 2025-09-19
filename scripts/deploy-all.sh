@@ -4,7 +4,7 @@
 # STRIAE COMPLETE DEPLOYMENT SCRIPT
 # ======================================
 # This script deploys the entire Striae application:
-# 1. Environment setup and configuration
+# 1. Configuration setup (copy configs, replace placeholders)
 # 2. Worker dependencies installation
 # 3. Workers (all 6 workers)
 # 4. Worker secrets/environment variables
@@ -26,16 +26,16 @@ echo ""
 # Get the script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Step 1: Environment Setup and Configuration
-echo -e "${PURPLE}Step 1/6: Environment Setup and Configuration${NC}"
-echo "---------------------------------------------"
-echo -e "${YELLOW}⚙️  Setting up environment variables and configuration files...${NC}"
-if ! bash "$SCRIPT_DIR/deploy-env.sh"; then
-    echo -e "${RED}❌ Environment setup failed!${NC}"
+# Step 1: Configuration Setup
+echo -e "${PURPLE}Step 1/6: Configuration Setup${NC}"
+echo "------------------------------"
+echo -e "${YELLOW}⚙️  Setting up configuration files and replacing placeholders...${NC}"
+if ! bash "$SCRIPT_DIR/deploy-config.sh"; then
+    echo -e "${RED}❌ Configuration setup failed!${NC}"
     echo -e "${YELLOW}Please check your .env file and configuration before proceeding.${NC}"
     exit 1
 fi
-echo -e "${GREEN}✅ Environment setup completed successfully${NC}"
+echo -e "${GREEN}✅ Configuration setup completed successfully${NC}"
 echo ""
 
 # Step 2: Install Worker Dependencies
@@ -60,11 +60,11 @@ fi
 echo -e "${GREEN}✅ All workers deployed successfully${NC}"
 echo ""
 
-# Step 4: Deploy Workers Secrets
+# Step 4: Deploy Worker Secrets
 echo -e "${PURPLE}Step 4/6: Deploying Worker Secrets${NC}"
 echo "-----------------------------------"
 echo -e "${YELLOW}🔐 Deploying worker environment variables...${NC}"
-if ! npm run deploy-workers:secrets; then
+if ! bash "$SCRIPT_DIR/deploy-worker-secrets.sh"; then
     echo -e "${RED}❌ Worker secrets deployment failed!${NC}"
     exit 1
 fi

@@ -1,12 +1,9 @@
 @echo off
-REM =============================REM Step 3: Deploy Workers
-echo [95mStep 3/6: Deploying Workers[0m
-echo ----------------------------
-echo [93m🔧 Deploying all 6 Cloudflare Workers...[0m=====
+REM ======================================
 REM STRIAE COMPLETE DEPLOYMENT SCRIPT
 REM ======================================
 REM This script deploys the entire Striae application:
-REM 1. Environment setup and configuration
+REM 1. Configuration setup (copy configs, replace placeholders)
 REM 2. Worker dependencies installation
 REM 3. Workers (all 6 workers)
 REM 4. Worker secrets/environment variables
@@ -20,17 +17,17 @@ echo.
 REM Get the script directory
 set SCRIPT_DIR=%~dp0
 
-REM Step 1: Environment Setup and Configuration
-echo [95mStep 1/6: Environment Setup and Configuration[0m
-echo ---------------------------------------------
-echo [93m⚙️  Setting up environment variables and configuration files...[0m
-call "%SCRIPT_DIR%deploy-env.bat"
+REM Step 1: Configuration Setup
+echo [95mStep 1/6: Configuration Setup[0m
+echo ------------------------------
+echo [93m⚙️  Setting up configuration files and replacing placeholders...[0m
+call "%SCRIPT_DIR%deploy-config.bat"
 if %ERRORLEVEL% neq 0 (
-    echo [91m❌ Environment setup failed![0m
+    echo [91m❌ Configuration setup failed![0m
     echo [93mPlease check your .env file and configuration before proceeding.[0m
     exit /b 1
 )
-echo [92m✅ Environment setup completed successfully[0m
+echo [92m✅ Configuration setup completed successfully[0m
 echo.
 
 REM Step 2: Install Worker Dependencies
@@ -45,10 +42,10 @@ if %ERRORLEVEL% neq 0 (
 echo [92m✅ All worker dependencies installed successfully[0m
 echo.
 
-REM Step 2: Deploy Workers
-echo [95mStep 2/5: Deploying Workers[0m
+REM Step 3: Deploy Workers
+echo [95mStep 3/6: Deploying Workers[0m
 echo ----------------------------
-echo [93m� Deploying all 6 Cloudflare Workers...[0m
+echo [93m🔧 Deploying all 6 Cloudflare Workers...[0m
 call npm run deploy-workers
 if %ERRORLEVEL% neq 0 (
     echo [91m❌ Worker deployment failed![0m
@@ -61,7 +58,7 @@ REM Step 4: Deploy Worker Secrets
 echo [95mStep 4/6: Deploying Worker Secrets[0m
 echo -----------------------------------
 echo [93m🔐 Deploying worker environment variables...[0m
-call npm run deploy-workers:secrets
+call "%SCRIPT_DIR%deploy-worker-secrets.bat"
 if %ERRORLEVEL% neq 0 (
     echo [91m❌ Worker secrets deployment failed![0m
     exit /b 1
@@ -99,6 +96,7 @@ echo [92m🎉 COMPLETE DEPLOYMENT SUCCESSFUL! 🎉[0m
 echo ==========================================
 echo.
 echo [94mDeployed Components:[0m
+echo   ✅ Configuration setup and placeholder replacement
 echo   ✅ Worker dependencies (npm install)
 echo   ✅ 6 Cloudflare Workers
 echo   ✅ Worker environment variables
