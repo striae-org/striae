@@ -8,7 +8,7 @@
  */
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'PAGES_CUSTOM_DOMAIN',
+  'Access-Control-Allow-Origin': 'https://dev.striae.org',
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, X-Custom-Auth-Key',
   'Content-Type': 'text/plain'

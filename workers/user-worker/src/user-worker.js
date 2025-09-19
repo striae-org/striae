@@ -1,13 +1,13 @@
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'PAGES_CUSTOM_DOMAIN',
+  'Access-Control-Allow-Origin': 'https://dev.striae.org',
   'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, X-Custom-Auth-Key',
   'Content-Type': 'application/json'
 };
 
 // Worker URLs - configure these for deployment
-const DATA_WORKER_URL = 'DATA_WORKER_DOMAIN';
-const IMAGE_WORKER_URL = 'IMAGES_WORKER_DOMAIN';
+const DATA_WORKER_URL = 'https://data.dev.striae.org';
+const IMAGE_WORKER_URL = 'https://images.dev.striae.org';
 
 async function authenticate(request, env) {
   const authKey = request.headers.get('X-Custom-Auth-Key');

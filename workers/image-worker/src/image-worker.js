@@ -4,7 +4,7 @@ const API_BASE = "https://api.cloudflare.com/client/v4/accounts";
  * CORS headers to allow requests from the Striae app
  */
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'PAGES_CUSTOM_DOMAIN',
+  'Access-Control-Allow-Origin': 'https://dev.striae.org',
   'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Custom-Auth-Key',
   'Content-Type': 'application/json'
