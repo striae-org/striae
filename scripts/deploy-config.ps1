@@ -139,6 +139,141 @@ function Copy-ExampleConfigs {
 # Copy example configuration files
 Copy-ExampleConfigs
 
+# Function to prompt for environment variables and update .env file
+function Prompt-ForSecrets {
+    Write-Host ""
+    Write-Host "${Blue}🔐 Environment Variables Setup${Reset}"
+    Write-Host "=============================="
+    Write-Host "${Yellow}Please provide values for the following environment variables.${Reset}"
+    Write-Host "${Yellow}Press Enter to keep existing values (if any).${Reset}"
+    Write-Host ""
+    
+    # Create or backup existing .env
+    if (Test-Path ".env") {
+        Copy-Item ".env" ".env.backup"
+        Write-Host "${Green}📄 Existing .env backed up to .env.backup${Reset}"
+    }
+    
+    # Copy .env.example to .env if it doesn't exist
+    if (-not (Test-Path ".env")) {
+        Copy-Item ".env.example" ".env"
+        Write-Host "${Green}📄 Created .env from .env.example${Reset}"
+    }
+    
+    # Function to prompt for a variable
+    function Prompt-ForVar {
+        param(
+            [string]$VarName,
+            [string]$Description
+        )
+        
+        $currentValue = [Environment]::GetEnvironmentVariable($VarName, "Process")
+        
+        Write-Host "${Blue}$VarName${Reset}"
+        Write-Host "${Yellow}$Description${Reset}"
+        
+        if ($currentValue -and $currentValue -ne "your_$($VarName.ToLower())_here") {
+            Write-Host "${Green}Current value: $currentValue${Reset}"
+            $newValue = Read-Host "New value (or press Enter to keep current)"
+        } else {
+            $newValue = Read-Host "Enter value"
+        }
+        
+        if ($newValue) {
+            # Update the .env file
+            $content = Get-Content ".env" -Raw
+            if ($content -match "^$VarName=.*") {
+                $content = $content -replace "^$VarName=.*", "$VarName=$newValue"
+            } else {
+                $content += "`n$VarName=$newValue"
+            }
+            Set-Content -Path ".env" -Value $content.TrimEnd() -NoNewline
+            [Environment]::SetEnvironmentVariable($VarName, $newValue, "Process")
+            Write-Host "${Green}✅ $VarName updated${Reset}"
+        } elseif ($currentValue) {
+            Write-Host "${Green}✅ Keeping current value for $VarName${Reset}"
+        }
+        Write-Host ""
+    }
+    
+    Write-Host "${Blue}📊 CLOUDFLARE CORE CONFIGURATION${Reset}"
+    Write-Host "=================================="
+    Prompt-ForVar "ACCOUNT_ID" "Your Cloudflare Account ID"
+    
+    Write-Host "${Blue}🔐 SHARED AUTHENTICATION & STORAGE${Reset}"
+    Write-Host "==================================="
+    Prompt-ForVar "SL_API_KEY" "SendLayer API key for email services"
+    Prompt-ForVar "USER_DB_AUTH" "Custom user database authentication token (generate with: openssl rand -hex 16)"
+    Prompt-ForVar "R2_KEY_SECRET" "Custom R2 storage authentication token (generate with: openssl rand -hex 16)"
+    Prompt-ForVar "IMAGES_API_TOKEN" "Cloudflare Images API token (shared between workers)"
+    
+    Write-Host "${Blue}🔥 FIREBASE AUTH CONFIGURATION${Reset}"
+    Write-Host "==============================="
+    Prompt-ForVar "API_KEY" "Firebase API key"
+    Prompt-ForVar "AUTH_DOMAIN" "Firebase auth domain (project-id.firebaseapp.com)"
+    Prompt-ForVar "PROJECT_ID" "Firebase project ID"
+    Prompt-ForVar "STORAGE_BUCKET" "Firebase storage bucket"
+    Prompt-ForVar "MESSAGING_SENDER_ID" "Firebase messaging sender ID"
+    Prompt-ForVar "APP_ID" "Firebase app ID"
+    Prompt-ForVar "MEASUREMENT_ID" "Firebase measurement ID (optional)"
+    
+    Write-Host "${Blue}📄 PAGES CONFIGURATION${Reset}"
+    Write-Host "======================"
+    Prompt-ForVar "PAGES_PROJECT_NAME" "Your Cloudflare Pages project name"
+    Prompt-ForVar "PAGES_CUSTOM_DOMAIN" "Your custom domain (e.g., striae.org)"
+    
+    Write-Host "${Blue}🔑 WORKER NAMES & DOMAINS${Reset}"
+    Write-Host "========================="
+    Prompt-ForVar "KEYS_WORKER_NAME" "Keys worker name"
+    Prompt-ForVar "KEYS_WORKER_DOMAIN" "Keys worker domain"
+    Prompt-ForVar "USER_WORKER_NAME" "User worker name"
+    Prompt-ForVar "USER_WORKER_DOMAIN" "User worker domain"
+    Prompt-ForVar "DATA_WORKER_NAME" "Data worker name"
+    Prompt-ForVar "DATA_WORKER_DOMAIN" "Data worker domain"
+    Prompt-ForVar "IMAGES_WORKER_NAME" "Images worker name"
+    Prompt-ForVar "IMAGES_WORKER_DOMAIN" "Images worker domain"
+    Prompt-ForVar "TURNSTILE_WORKER_NAME" "Turnstile worker name"
+    Prompt-ForVar "TURNSTILE_WORKER_DOMAIN" "Turnstile worker domain"
+    Prompt-ForVar "PDF_WORKER_NAME" "PDF worker name"
+    Prompt-ForVar "PDF_WORKER_DOMAIN" "PDF worker domain"
+    
+    Write-Host "${Blue}🗄️ STORAGE CONFIGURATION${Reset}"
+    Write-Host "========================="
+    Prompt-ForVar "BUCKET_NAME" "Your R2 bucket name"
+    Prompt-ForVar "KV_STORE_ID" "Your KV namespace ID (UUID format)"
+    
+    Write-Host "${Blue}🔐 SERVICE-SPECIFIC SECRETS${Reset}"
+    Write-Host "============================"
+    Prompt-ForVar "KEYS_AUTH" "Keys worker authentication token (generate with: openssl rand -hex 16)"
+    Prompt-ForVar "ACCOUNT_HASH" "Cloudflare Images Account Hash"
+    Prompt-ForVar "API_TOKEN" "Cloudflare Images API token (for Images Worker)"
+    Prompt-ForVar "HMAC_KEY" "Cloudflare Images HMAC signing key"
+    Prompt-ForVar "CFT_PUBLIC_KEY" "Cloudflare Turnstile public key"
+    Prompt-ForVar "CFT_SECRET_KEY" "Cloudflare Turnstile secret key"
+    
+    # Reload the updated .env file
+    Get-Content ".env" | ForEach-Object {
+        if ($_ -match "^([^#][^=]*)\s*=\s*(.*)$") {
+            $name = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            if ($value -match "^[`"'](.*)[`"']$") {
+                $value = $matches[1]
+            }
+            [Environment]::SetEnvironmentVariable($name, $value, "Process")
+        }
+    }
+    
+    Write-Host "${Green}🎉 Environment variables setup completed!${Reset}"
+    Write-Host "${Blue}📄 All values saved to .env file${Reset}"
+}
+
+# Prompt for secrets if .env doesn't exist or user wants to update
+if ((-not (Test-Path ".env")) -or ($args -contains "--update-env")) {
+    Prompt-ForSecrets
+} else {
+    Write-Host "${Yellow}📝 .env file exists. Use --update-env flag to update environment variables.${Reset}"
+}
+
 # Function to replace variables in configuration files
 function Update-WranglerConfigs {
     Write-Host ""

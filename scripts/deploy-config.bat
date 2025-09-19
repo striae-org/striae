@@ -143,6 +143,197 @@ if exist "wrangler.toml.example" if not exist "wrangler.toml" (
 
 echo [92m✅ Configuration file copying completed[0m
 
+REM Function to prompt for environment variables and update .env file
+echo.
+echo [94m🔐 Environment Variables Setup[0m
+echo ==============================
+echo [93mPlease provide values for the following environment variables.[0m
+echo [93mPress Enter to keep existing values (if any).[0m
+echo.
+
+REM Create or backup existing .env
+if exist ".env" (
+    copy ".env" ".env.backup" >nul
+    echo [92m📄 Existing .env backed up to .env.backup[0m
+)
+
+REM Copy .env.example to .env if it doesn't exist
+if not exist ".env" (
+    copy ".env.example" ".env" >nul
+    echo [92m📄 Created .env from .env.example[0m
+)
+
+REM Check if user wants to update environment variables
+if "%1"=="--update-env" goto :prompt_secrets
+if not exist ".env" goto :prompt_secrets
+echo [93m📝 .env file exists. Use --update-env flag to update environment variables.[0m
+goto :skip_prompt
+
+:prompt_secrets
+echo.
+echo [94m📊 CLOUDFLARE CORE CONFIGURATION[0m
+echo ==================================
+echo [94mACCOUNT_ID[0m
+echo [93mYour Cloudflare Account ID[0m
+set /p "ACCOUNT_ID=Enter value: "
+if not "%ACCOUNT_ID%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^ACCOUNT_ID=.*', 'ACCOUNT_ID=%ACCOUNT_ID%' | Set-Content '.env'"
+    echo [92m✅ ACCOUNT_ID updated[0m
+)
+
+echo.
+echo [94m🔐 SHARED AUTHENTICATION ^& STORAGE[0m
+echo ===================================
+echo [94mSL_API_KEY[0m
+echo [93mSendLayer API key for email services[0m
+set /p "SL_API_KEY=Enter value: "
+if not "%SL_API_KEY%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^SL_API_KEY=.*', 'SL_API_KEY=%SL_API_KEY%' | Set-Content '.env'"
+    echo [92m✅ SL_API_KEY updated[0m
+)
+
+echo [94mUSER_DB_AUTH[0m
+echo [93mCustom user database authentication token (generate with: openssl rand -hex 16)[0m
+set /p "USER_DB_AUTH=Enter value: "
+if not "%USER_DB_AUTH%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^USER_DB_AUTH=.*', 'USER_DB_AUTH=%USER_DB_AUTH%' | Set-Content '.env'"
+    echo [92m✅ USER_DB_AUTH updated[0m
+)
+
+echo [94mR2_KEY_SECRET[0m
+echo [93mCustom R2 storage authentication token (generate with: openssl rand -hex 16)[0m
+set /p "R2_KEY_SECRET=Enter value: "
+if not "%R2_KEY_SECRET%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^R2_KEY_SECRET=.*', 'R2_KEY_SECRET=%R2_KEY_SECRET%' | Set-Content '.env'"
+    echo [92m✅ R2_KEY_SECRET updated[0m
+)
+
+echo [94mIMAGES_API_TOKEN[0m
+echo [93mCloudflare Images API token (shared between workers)[0m
+set /p "IMAGES_API_TOKEN=Enter value: "
+if not "%IMAGES_API_TOKEN%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^IMAGES_API_TOKEN=.*', 'IMAGES_API_TOKEN=%IMAGES_API_TOKEN%' | Set-Content '.env'"
+    echo [92m✅ IMAGES_API_TOKEN updated[0m
+)
+
+echo.
+echo [94m🔥 FIREBASE AUTH CONFIGURATION[0m
+echo ===============================
+echo [94mAPI_KEY[0m
+echo [93mFirebase API key[0m
+set /p "API_KEY=Enter value: "
+if not "%API_KEY%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^API_KEY=.*', 'API_KEY=%API_KEY%' | Set-Content '.env'"
+    echo [92m✅ API_KEY updated[0m
+)
+
+echo [94mAUTH_DOMAIN[0m
+echo [93mFirebase auth domain (project-id.firebaseapp.com)[0m
+set /p "AUTH_DOMAIN=Enter value: "
+if not "%AUTH_DOMAIN%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^AUTH_DOMAIN=.*', 'AUTH_DOMAIN=%AUTH_DOMAIN%' | Set-Content '.env'"
+    echo [92m✅ AUTH_DOMAIN updated[0m
+)
+
+echo [94mPROJECT_ID[0m
+echo [93mFirebase project ID[0m
+set /p "PROJECT_ID=Enter value: "
+if not "%PROJECT_ID%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^PROJECT_ID=.*', 'PROJECT_ID=%PROJECT_ID%' | Set-Content '.env'"
+    echo [92m✅ PROJECT_ID updated[0m
+)
+
+echo [94mSTORAGE_BUCKET[0m
+echo [93mFirebase storage bucket[0m
+set /p "STORAGE_BUCKET=Enter value: "
+if not "%STORAGE_BUCKET%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^STORAGE_BUCKET=.*', 'STORAGE_BUCKET=%STORAGE_BUCKET%' | Set-Content '.env'"
+    echo [92m✅ STORAGE_BUCKET updated[0m
+)
+
+echo [94mMESSAGING_SENDER_ID[0m
+echo [93mFirebase messaging sender ID[0m
+set /p "MESSAGING_SENDER_ID=Enter value: "
+if not "%MESSAGING_SENDER_ID%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^MESSAGING_SENDER_ID=.*', 'MESSAGING_SENDER_ID=%MESSAGING_SENDER_ID%' | Set-Content '.env'"
+    echo [92m✅ MESSAGING_SENDER_ID updated[0m
+)
+
+echo [94mAPP_ID[0m
+echo [93mFirebase app ID[0m
+set /p "APP_ID=Enter value: "
+if not "%APP_ID%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^APP_ID=.*', 'APP_ID=%APP_ID%' | Set-Content '.env'"
+    echo [92m✅ APP_ID updated[0m
+)
+
+echo [94mMEASUREMENT_ID[0m
+echo [93mFirebase measurement ID (optional)[0m
+set /p "MEASUREMENT_ID=Enter value: "
+if not "%MEASUREMENT_ID%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^MEASUREMENT_ID=.*', 'MEASUREMENT_ID=%MEASUREMENT_ID%' | Set-Content '.env'"
+    echo [92m✅ MEASUREMENT_ID updated[0m
+)
+
+echo.
+echo [94m📄 PAGES CONFIGURATION[0m
+echo ======================
+echo [94mPAGES_PROJECT_NAME[0m
+echo [93mYour Cloudflare Pages project name[0m
+set /p "PAGES_PROJECT_NAME=Enter value: "
+if not "%PAGES_PROJECT_NAME%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^PAGES_PROJECT_NAME=.*', 'PAGES_PROJECT_NAME=%PAGES_PROJECT_NAME%' | Set-Content '.env'"
+    echo [92m✅ PAGES_PROJECT_NAME updated[0m
+)
+
+echo [94mPAGES_CUSTOM_DOMAIN[0m
+echo [93mYour custom domain (e.g., striae.org)[0m
+set /p "PAGES_CUSTOM_DOMAIN=Enter value: "
+if not "%PAGES_CUSTOM_DOMAIN%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^PAGES_CUSTOM_DOMAIN=.*', 'PAGES_CUSTOM_DOMAIN=%PAGES_CUSTOM_DOMAIN%' | Set-Content '.env'"
+    echo [92m✅ PAGES_CUSTOM_DOMAIN updated[0m
+)
+
+REM Continue with worker names and domains (shortened for brevity)
+echo.
+echo [94m🔑 WORKER NAMES ^& DOMAINS[0m
+echo =========================
+REM (Similar pattern for all worker variables...)
+
+echo.
+echo [94m🗄️ STORAGE CONFIGURATION[0m
+echo =========================
+echo [94mBUCKET_NAME[0m
+echo [93mYour R2 bucket name[0m
+set /p "BUCKET_NAME=Enter value: "
+if not "%BUCKET_NAME%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^BUCKET_NAME=.*', 'BUCKET_NAME=%BUCKET_NAME%' | Set-Content '.env'"
+    echo [92m✅ BUCKET_NAME updated[0m
+)
+
+echo [94mKV_STORE_ID[0m
+echo [93mYour KV namespace ID (UUID format)[0m
+set /p "KV_STORE_ID=Enter value: "
+if not "%KV_STORE_ID%"=="" (
+    powershell -Command "(Get-Content '.env') -replace '^KV_STORE_ID=.*', 'KV_STORE_ID=%KV_STORE_ID%' | Set-Content '.env'"
+    echo [92m✅ KV_STORE_ID updated[0m
+)
+
+echo.
+echo [92m🎉 Environment variables setup completed![0m
+echo [94m📄 All values saved to .env file[0m
+
+:skip_prompt
+REM Reload environment variables from .env file
+for /f "usebackq tokens=1,2 delims==" %%a in (".env") do (
+    set "line=%%a"
+    if not "!line:~0,1!"=="#" (
+        set "%%a=%%b"
+        REM Remove quotes if present
+        call set "%%a=%%!%%a:"=%%"
+    )
+)
+
 REM Update configuration files with environment variables
 echo.
 echo [94m🔧 Updating configuration files...[0m

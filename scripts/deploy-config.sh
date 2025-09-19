@@ -183,6 +183,125 @@ copy_example_configs() {
 # Copy example configuration files
 copy_example_configs
 
+# Function to prompt for environment variables and update .env file
+prompt_for_secrets() {
+    echo -e "\n${BLUE}🔐 Environment Variables Setup${NC}"
+    echo "=============================="
+    echo -e "${YELLOW}Please provide values for the following environment variables.${NC}"
+    echo -e "${YELLOW}Press Enter to keep existing values (if any).${NC}"
+    echo ""
+    
+    # Create or backup existing .env
+    if [ -f ".env" ]; then
+        cp .env .env.backup
+        echo -e "${GREEN}📄 Existing .env backed up to .env.backup${NC}"
+    fi
+    
+    # Copy .env.example to .env if it doesn't exist
+    if [ ! -f ".env" ]; then
+        cp .env.example .env
+        echo -e "${GREEN}📄 Created .env from .env.example${NC}"
+    fi
+    
+    # Function to prompt for a variable
+    prompt_for_var() {
+        local var_name=$1
+        local description=$2
+        local current_value="${!var_name}"
+        
+        echo -e "${BLUE}$var_name${NC}"
+        echo -e "${YELLOW}$description${NC}"
+        if [ -n "$current_value" ] && [ "$current_value" != "your_${var_name,,}_here" ]; then
+            echo -e "${GREEN}Current value: $current_value${NC}"
+            read -p "New value (or press Enter to keep current): " new_value
+        else
+            read -p "Enter value: " new_value
+        fi
+        
+        if [ -n "$new_value" ]; then
+            # Update the .env file
+            if grep -q "^$var_name=" .env; then
+                sed -i "s|^$var_name=.*|$var_name=$new_value|" .env
+            else
+                echo "$var_name=$new_value" >> .env
+            fi
+            export "$var_name=$new_value"
+            echo -e "${GREEN}✅ $var_name updated${NC}"
+        elif [ -n "$current_value" ]; then
+            echo -e "${GREEN}✅ Keeping current value for $var_name${NC}"
+        fi
+        echo ""
+    }
+    
+    echo -e "${BLUE}📊 CLOUDFLARE CORE CONFIGURATION${NC}"
+    echo "=================================="
+    prompt_for_var "ACCOUNT_ID" "Your Cloudflare Account ID"
+    
+    echo -e "${BLUE}🔐 SHARED AUTHENTICATION & STORAGE${NC}"
+    echo "==================================="
+    prompt_for_var "SL_API_KEY" "SendLayer API key for email services"
+    prompt_for_var "USER_DB_AUTH" "Custom user database authentication token (generate with: openssl rand -hex 16)"
+    prompt_for_var "R2_KEY_SECRET" "Custom R2 storage authentication token (generate with: openssl rand -hex 16)"
+    prompt_for_var "IMAGES_API_TOKEN" "Cloudflare Images API token (shared between workers)"
+    
+    echo -e "${BLUE}🔥 FIREBASE AUTH CONFIGURATION${NC}"
+    echo "==============================="
+    prompt_for_var "API_KEY" "Firebase API key"
+    prompt_for_var "AUTH_DOMAIN" "Firebase auth domain (project-id.firebaseapp.com)"
+    prompt_for_var "PROJECT_ID" "Firebase project ID"
+    prompt_for_var "STORAGE_BUCKET" "Firebase storage bucket"
+    prompt_for_var "MESSAGING_SENDER_ID" "Firebase messaging sender ID"
+    prompt_for_var "APP_ID" "Firebase app ID"
+    prompt_for_var "MEASUREMENT_ID" "Firebase measurement ID (optional)"
+    
+    echo -e "${BLUE}📄 PAGES CONFIGURATION${NC}"
+    echo "======================"
+    prompt_for_var "PAGES_PROJECT_NAME" "Your Cloudflare Pages project name"
+    prompt_for_var "PAGES_CUSTOM_DOMAIN" "Your custom domain (e.g., striae.org)"
+    
+    echo -e "${BLUE}🔑 WORKER NAMES & DOMAINS${NC}"
+    echo "========================="
+    prompt_for_var "KEYS_WORKER_NAME" "Keys worker name"
+    prompt_for_var "KEYS_WORKER_DOMAIN" "Keys worker domain"
+    prompt_for_var "USER_WORKER_NAME" "User worker name"
+    prompt_for_var "USER_WORKER_DOMAIN" "User worker domain"
+    prompt_for_var "DATA_WORKER_NAME" "Data worker name"
+    prompt_for_var "DATA_WORKER_DOMAIN" "Data worker domain"
+    prompt_for_var "IMAGES_WORKER_NAME" "Images worker name"
+    prompt_for_var "IMAGES_WORKER_DOMAIN" "Images worker domain"
+    prompt_for_var "TURNSTILE_WORKER_NAME" "Turnstile worker name"
+    prompt_for_var "TURNSTILE_WORKER_DOMAIN" "Turnstile worker domain"
+    prompt_for_var "PDF_WORKER_NAME" "PDF worker name"
+    prompt_for_var "PDF_WORKER_DOMAIN" "PDF worker domain"
+    
+    echo -e "${BLUE}🗄️ STORAGE CONFIGURATION${NC}"
+    echo "========================="
+    prompt_for_var "BUCKET_NAME" "Your R2 bucket name"
+    prompt_for_var "KV_STORE_ID" "Your KV namespace ID (UUID format)"
+    
+    echo -e "${BLUE}🔐 SERVICE-SPECIFIC SECRETS${NC}"
+    echo "============================"
+    prompt_for_var "KEYS_AUTH" "Keys worker authentication token (generate with: openssl rand -hex 16)"
+    prompt_for_var "ACCOUNT_HASH" "Cloudflare Images Account Hash"
+    prompt_for_var "API_TOKEN" "Cloudflare Images API token (for Images Worker)"
+    prompt_for_var "HMAC_KEY" "Cloudflare Images HMAC signing key"
+    prompt_for_var "CFT_PUBLIC_KEY" "Cloudflare Turnstile public key"
+    prompt_for_var "CFT_SECRET_KEY" "Cloudflare Turnstile secret key"
+    
+    # Reload the updated .env file
+    source .env
+    
+    echo -e "${GREEN}🎉 Environment variables setup completed!${NC}"
+    echo -e "${BLUE}📄 All values saved to .env file${NC}"
+}
+
+# Prompt for secrets if .env doesn't exist or user wants to update
+if [ ! -f ".env" ] || [ "$1" = "--update-env" ]; then
+    prompt_for_secrets
+else
+    echo -e "${YELLOW}📝 .env file exists. Use --update-env flag to update environment variables.${NC}"
+fi
+
 # Function to replace variables in wrangler configuration files
 update_wrangler_configs() {
     echo -e "\n${BLUE}🔧 Updating wrangler configuration files...${NC}"
