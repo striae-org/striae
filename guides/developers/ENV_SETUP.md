@@ -16,6 +16,7 @@ This directory (/scripts) contains scripts and configuration files for managing 
 ## Quick Setup
 
 1. **Copy the example file:**
+
    ```bash
    cp .env.example .env
    ```
@@ -23,13 +24,15 @@ This directory (/scripts) contains scripts and configuration files for managing 
 2. **Fill in your actual values in `.env`**
 
 3. **Deploy configuration and everything:**
-   
+
    **Linux/macOS/WSL:**
+
    ```bash
    npm run deploy:all
    ```
-   
+
    **Windows PowerShell:**
+
    ```powershell
    npm run deploy:all
    ```
@@ -37,15 +40,18 @@ This directory (/scripts) contains scripts and configuration files for managing 
 ## Environment Variables by Service
 
 ### Cloudflare Core Configuration
+
 - `ACCOUNT_ID` - Your Cloudflare Account ID
 
 ### Shared Authentication & Storage
+
 - `SL_API_KEY` - SendLayer email service API key
 - `USER_DB_AUTH` - Custom user database authentication token
 - `R2_KEY_SECRET` - Custom R2 storage authentication token
 - `IMAGES_API_TOKEN` - Cloudflare Images API token (shared)
 
 ### Firebase Auth Configuration
+
 - `API_KEY` - Firebase API key
 - `AUTH_DOMAIN` - Firebase auth domain
 - `PROJECT_ID` - Firebase project ID
@@ -55,38 +61,45 @@ This directory (/scripts) contains scripts and configuration files for managing 
 - `MEASUREMENT_ID` - Firebase measurement ID (optional)
 
 ### Pages Worker Environment Variables
+
 - `PAGES_PROJECT_NAME` - Your Cloudflare Pages project name
 - `PAGES_CUSTOM_DOMAIN` - Your custom domain
 
 ### Keys Worker Environment Variables
+
 - `KEYS_WORKER_NAME` - Keys worker name
 - `KEYS_WORKER_DOMAIN` - Keys worker domain
 - `KEYS_AUTH` - Custom keys authentication token
 - `ACCOUNT_HASH` - Cloudflare Images Account Hash
 
-### User Worker Environment Variables  
+### User Worker Environment Variables
+
 - `USER_WORKER_NAME` - User worker name
 - `USER_WORKER_DOMAIN` - User worker domain
 - `KV_STORE_ID` - Your KV namespace ID
 
 ### Data Worker Environment Variables
+
 - `DATA_WORKER_NAME` - Data worker name
 - `DATA_WORKER_DOMAIN` - Data worker domain
 - `BUCKET_NAME` - Your R2 bucket name
 
 ### Images Worker Environment Variables
+
 - `IMAGES_WORKER_NAME` - Images worker name
 - `IMAGES_WORKER_DOMAIN` - Images worker domain
 - `API_TOKEN` - Cloudflare Images API token (for Images Worker)
 - `HMAC_KEY` - Cloudflare Images HMAC signing key
 
 ### Turnstile Worker Environment Variables
+
 - `TURNSTILE_WORKER_NAME` - Turnstile worker name
 - `TURNSTILE_WORKER_DOMAIN` - Turnstile worker domain
 - `CFT_PUBLIC_KEY` - Cloudflare Turnstile public key
 - `CFT_SECRET_KEY` - Cloudflare Turnstile secret key
 
 ### PDF Worker Environment Variables
+
 - `PDF_WORKER_NAME` - PDF worker name
 - `PDF_WORKER_DOMAIN` - PDF worker domain
 - No environment secrets needed (uses browser binding)
@@ -103,11 +116,13 @@ The new deployment system provides a streamlined 6-step automated process:
 6. **Deploy Pages Secrets** - Sets Pages environment variables
 
 **Complete Automation:**
+
 ```bash
 npm run deploy:all  # Runs all 6 steps automatically
 ```
 
 **Individual Commands:**
+
 ```bash
 npm run deploy-config          # Step 1: Configuration setup only
 npm run deploy-workers:secrets  # Step 4: Worker secrets only
