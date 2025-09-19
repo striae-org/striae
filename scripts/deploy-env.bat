@@ -82,6 +82,11 @@ echo.
 echo 📋 STEP 1: Copy example configuration files
 echo Run these commands first (or use PowerShell script for automation):
 echo.
+echo REM Copy app configuration files
+echo xcopy app\config-example app\config /E /I
+echo copy app\components\turnstile\keys.json.example app\components\turnstile\keys.json
+echo.
+echo REM Copy worker configuration files
 echo cd workers\keys-worker
 echo copy wrangler.jsonc.example wrangler.jsonc
 echo cd ..\user-worker
@@ -121,34 +126,89 @@ echo In each worker's src/*.js file, replace 'PAGES_CUSTOM_DOMAIN' with your dom
 echo.
 echo workers\data-worker\src\data-worker.js:
 echo   Replace: 'PAGES_CUSTOM_DOMAIN'
-echo   With:    'https://dev.striae.org' (or your custom domain)
+echo   With:    'https://your.custom-domain.com'
 echo.
 echo workers\image-worker\src\image-worker.js:
 echo   Replace: 'PAGES_CUSTOM_DOMAIN'
-echo   With:    'https://dev.striae.org' (or your custom domain)
+echo   With:    'https://your.custom-domain.com'
 echo.
 echo workers\keys-worker\src\keys.js:
 echo   Replace: 'PAGES_CUSTOM_DOMAIN'
-echo   With:    'https://dev.striae.org' (or your custom domain)
+echo   With:    'https://your.custom-domain.com'
 echo.
 echo workers\pdf-worker\src\pdf-worker.js:
 echo   Replace: 'PAGES_CUSTOM_DOMAIN'
-echo   With:    'https://dev.striae.org' (or your custom domain)
+echo   With:    'https://your.custom-domain.com'
 echo.
 echo workers\turnstile-worker\src\turnstile.js:
 echo   Replace: 'PAGES_CUSTOM_DOMAIN'
-echo   With:    'https://dev.striae.org' (or your custom domain)
+echo   With:    'https://your.custom-domain.com'
 echo.
 echo === Update Worker URLs in User Worker ===
 echo workers\user-worker\src\user-worker.js:
 echo   Replace: 'DATA_WORKER_DOMAIN'
-echo   With:    'https://data.dev.striae.org' (or your data worker domain)
+echo   With:    'https://your.data-worker-domain.com'
 echo.
 echo   Replace: 'IMAGES_WORKER_DOMAIN'
-echo   With:    'https://images.dev.striae.org' (or your images worker domain)
+echo   With:    'https://your.images-worker-domain.com'
 echo.
 echo   AND Replace: 'PAGES_CUSTOM_DOMAIN'
-echo   With:        'https://dev.striae.org' (or your custom domain)
+echo   With:        'https://your.custom-domain.com'
+echo.
+
+echo 📋 STEP 3: Update app configuration files
+echo Replace placeholders in app configuration files with your actual values:
+echo.
+echo === Update app/config/config.json ===
+echo   Replace: "PAGES_CUSTOM_DOMAIN"
+echo   With:    "https://your.custom-domain.com"
+echo.
+echo   Replace: "DATA_WORKER_DOMAIN"
+echo   With:    "https://your.data-worker-domain.com"
+echo.
+echo   Replace: "KEYS_WORKER_DOMAIN"
+echo   With:    "https://your.keys-worker-domain.com"
+echo.
+echo   Replace: "IMAGES_WORKER_DOMAIN"
+echo   With:    "https://your.images-worker-domain.com"
+echo.
+echo   Replace: "USER_WORKER_DOMAIN"
+echo   With:    "https://your.user-worker-domain.com"
+echo.
+echo   Replace: "PDF_WORKER_DOMAIN"
+echo   With:    "https://your.pdf-worker-domain.com"
+echo.
+echo   Replace: "KEYS_AUTH"
+echo   With:    "your_keys_auth_token" (from your .env file)
+echo.
+echo === Update app/config/firebase.ts ===
+echo   Replace: "API_KEY"
+echo   With:    "your_firebase_api_key" (from your .env file)
+echo.
+echo   Replace: "AUTH_DOMAIN"
+echo   With:    "your_firebase_auth_domain" (from your .env file)
+echo.
+echo   Replace: "PROJECT_ID"
+echo   With:    "your_firebase_project_id" (from your .env file)
+echo.
+echo   Replace: "STORAGE_BUCKET"
+echo   With:    "your_firebase_storage_bucket" (from your .env file)
+echo.
+echo   Replace: "MESSAGING_SENDER_ID"
+echo   With:    "your_firebase_messaging_sender_id" (from your .env file)
+echo.
+echo   Replace: "APP_ID"
+echo   With:    "your_firebase_app_id" (from your .env file)
+echo.
+echo   Replace: "MEASUREMENT_ID"
+echo   With:    "your_firebase_measurement_id" (from your .env file)
+echo.
+echo === Update app/components/turnstile/keys.json ===
+echo   Replace: "CFT_PUBLIC_KEY"
+echo   With:    "your_turnstile_public_key" (from your .env file)
+echo.
+echo   Replace: "TURNSTILE_WORKER_DOMAIN"
+echo   With:    "https://your.turnstile-worker-domain.com"
 echo.
 
 echo �🔧 AUTOMATED CONFIGURATION REPLACEMENT:

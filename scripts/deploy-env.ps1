@@ -122,7 +122,28 @@ function Copy-ExampleConfigs {
     Write-Host ""
     Write-Host "📋 Copying example configuration files..." -ForegroundColor Blue
     
+    # Copy app configuration files
+    Write-Host "  Copying app configuration files..." -ForegroundColor Yellow
+    
+    # Copy app config-example directory to config
+    if ((Test-Path "app\config-example") -and (-not (Test-Path "app\config"))) {
+        Copy-Item "app\config-example" "app\config" -Recurse
+        Write-Host "    ✅ app: config directory created from config-example" -ForegroundColor Green
+    } elseif (Test-Path "app\config") {
+        Write-Host "    ⚠️  app: config directory already exists, skipping copy" -ForegroundColor Yellow
+    }
+    
+    # Copy turnstile keys.json.example to keys.json
+    if ((Test-Path "app\components\turnstile\keys.json.example") -and (-not (Test-Path "app\components\turnstile\keys.json"))) {
+        Copy-Item "app\components\turnstile\keys.json.example" "app\components\turnstile\keys.json"
+        Write-Host "    ✅ turnstile: keys.json created from example" -ForegroundColor Green
+    } elseif (Test-Path "app\components\turnstile\keys.json") {
+        Write-Host "    ⚠️  turnstile: keys.json already exists, skipping copy" -ForegroundColor Yellow
+    }
+    
     # Navigate to each worker directory and copy the example file
+    Write-Host "  Copying worker configuration files..." -ForegroundColor Yellow
+    
     Push-Location "workers\keys-worker"
     if ((Test-Path "wrangler.jsonc.example") -and (-not (Test-Path "wrangler.jsonc"))) {
         Copy-Item "wrangler.jsonc.example" "wrangler.jsonc"
@@ -340,6 +361,52 @@ function Update-WranglerConfigs {
         $content = $content -replace '"PAGES_PROJECT_NAME"', "`"$($envVars['PAGES_PROJECT_NAME'])`""
         Set-Content $mainWranglerConfig -Value $content -Encoding UTF8
         Write-Host "    ✅ main wrangler.toml configuration updated" -ForegroundColor Green
+    }
+    
+    # Update app configuration files
+    Write-Host "  Updating app configuration files..." -ForegroundColor Yellow
+    
+    # Update app/config/config.json
+    $appConfigJson = "app\config\config.json"
+    if (Test-Path $appConfigJson) {
+        Write-Host "    Updating app/config/config.json..." -ForegroundColor Yellow
+        $content = Get-Content $appConfigJson -Raw
+        $content = $content -replace '"PAGES_CUSTOM_DOMAIN"', "`"$($envVars['PAGES_CUSTOM_DOMAIN'])`""
+        $content = $content -replace '"DATA_WORKER_DOMAIN"', "`"https://$($envVars['DATA_WORKER_DOMAIN'])`""
+        $content = $content -replace '"KEYS_WORKER_DOMAIN"', "`"https://$($envVars['KEYS_WORKER_DOMAIN'])`""
+        $content = $content -replace '"IMAGES_WORKER_DOMAIN"', "`"https://$($envVars['IMAGES_WORKER_DOMAIN'])`""
+        $content = $content -replace '"USER_WORKER_DOMAIN"', "`"https://$($envVars['USER_WORKER_DOMAIN'])`""
+        $content = $content -replace '"PDF_WORKER_DOMAIN"', "`"https://$($envVars['PDF_WORKER_DOMAIN'])`""
+        $content = $content -replace '"KEYS_AUTH"', "`"$($envVars['KEYS_AUTH'])`""
+        Set-Content $appConfigJson -Value $content -Encoding UTF8
+        Write-Host "      ✅ app config.json updated" -ForegroundColor Green
+    }
+    
+    # Update app/config/firebase.ts
+    $appFirebaseTs = "app\config\firebase.ts"
+    if (Test-Path $appFirebaseTs) {
+        Write-Host "    Updating app/config/firebase.ts..." -ForegroundColor Yellow
+        $content = Get-Content $appFirebaseTs -Raw
+        $content = $content -replace '"API_KEY"', "`"$($envVars['API_KEY'])`""
+        $content = $content -replace '"AUTH_DOMAIN"', "`"$($envVars['AUTH_DOMAIN'])`""
+        $content = $content -replace '"PROJECT_ID"', "`"$($envVars['PROJECT_ID'])`""
+        $content = $content -replace '"STORAGE_BUCKET"', "`"$($envVars['STORAGE_BUCKET'])`""
+        $content = $content -replace '"MESSAGING_SENDER_ID"', "`"$($envVars['MESSAGING_SENDER_ID'])`""
+        $content = $content -replace '"APP_ID"', "`"$($envVars['APP_ID'])`""
+        $content = $content -replace '"MEASUREMENT_ID"', "`"$($envVars['MEASUREMENT_ID'])`""
+        Set-Content $appFirebaseTs -Value $content -Encoding UTF8
+        Write-Host "      ✅ app firebase.ts updated" -ForegroundColor Green
+    }
+    
+    # Update app/components/turnstile/keys.json
+    $turnstileKeysJson = "app\components\turnstile\keys.json"
+    if (Test-Path $turnstileKeysJson) {
+        Write-Host "    Updating app/components/turnstile/keys.json..." -ForegroundColor Yellow
+        $content = Get-Content $turnstileKeysJson -Raw
+        $content = $content -replace '"CFT_PUBLIC_KEY"', "`"$($envVars['CFT_PUBLIC_KEY'])`""
+        $content = $content -replace '"TURNSTILE_WORKER_DOMAIN"', "`"https://$($envVars['TURNSTILE_WORKER_DOMAIN'])`""
+        Set-Content $turnstileKeysJson -Value $content -Encoding UTF8
+        Write-Host "      ✅ turnstile keys.json updated" -ForegroundColor Green
     }
     
     Write-Host "✅ All wrangler configuration files updated" -ForegroundColor Green

@@ -96,7 +96,28 @@ echo -e "${GREEN}✅ All required variables found${NC}"
 copy_example_configs() {
     echo -e "\n${BLUE}📋 Copying example configuration files...${NC}"
     
+    # Copy app configuration files
+    echo -e "${YELLOW}  Copying app configuration files...${NC}"
+    
+    # Copy app config-example directory to config
+    if [ -d "app/config-example" ] && [ ! -d "app/config" ]; then
+        cp -r app/config-example app/config
+        echo -e "${GREEN}    ✅ app: config directory created from config-example${NC}"
+    elif [ -d "app/config" ]; then
+        echo -e "${YELLOW}    ⚠️  app: config directory already exists, skipping copy${NC}"
+    fi
+    
+    # Copy turnstile keys.json.example to keys.json
+    if [ -f "app/components/turnstile/keys.json.example" ] && [ ! -f "app/components/turnstile/keys.json" ]; then
+        cp app/components/turnstile/keys.json.example app/components/turnstile/keys.json
+        echo -e "${GREEN}    ✅ turnstile: keys.json created from example${NC}"
+    elif [ -f "app/components/turnstile/keys.json" ]; then
+        echo -e "${YELLOW}    ⚠️  turnstile: keys.json already exists, skipping copy${NC}"
+    fi
+    
     # Navigate to each worker directory and copy the example file
+    echo -e "${YELLOW}  Copying worker configuration files...${NC}"
+    
     cd workers/keys-worker
     if [ -f "wrangler.jsonc.example" ] && [ ! -f "wrangler.jsonc" ]; then
         cp wrangler.jsonc.example wrangler.jsonc
@@ -271,6 +292,43 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating wrangler.toml...${NC}"
         sed -i "s/\"PAGES_PROJECT_NAME\"/\"$PAGES_PROJECT_NAME\"/g" wrangler.toml
         echo -e "${GREEN}    ✅ main wrangler.toml configuration updated${NC}"
+    fi
+    
+    # Update app configuration files
+    echo -e "${YELLOW}  Updating app configuration files...${NC}"
+    
+    # Update app/config/config.json
+    if [ -f "app/config/config.json" ]; then
+        echo -e "${YELLOW}    Updating app/config/config.json...${NC}"
+        sed -i "s|\"PAGES_CUSTOM_DOMAIN\"|\"$PAGES_CUSTOM_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"DATA_WORKER_DOMAIN\"|\"https://$DATA_WORKER_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"KEYS_WORKER_DOMAIN\"|\"https://$KEYS_WORKER_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"IMAGES_WORKER_DOMAIN\"|\"https://$IMAGES_WORKER_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"USER_WORKER_DOMAIN\"|\"https://$USER_WORKER_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"PDF_WORKER_DOMAIN\"|\"https://$PDF_WORKER_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"KEYS_AUTH\"|\"$KEYS_AUTH\"|g" app/config/config.json
+        echo -e "${GREEN}      ✅ app config.json updated${NC}"
+    fi
+    
+    # Update app/config/firebase.ts
+    if [ -f "app/config/firebase.ts" ]; then
+        echo -e "${YELLOW}    Updating app/config/firebase.ts...${NC}"
+        sed -i "s|\"API_KEY\"|\"$API_KEY\"|g" app/config/firebase.ts
+        sed -i "s|\"AUTH_DOMAIN\"|\"$AUTH_DOMAIN\"|g" app/config/firebase.ts
+        sed -i "s|\"PROJECT_ID\"|\"$PROJECT_ID\"|g" app/config/firebase.ts
+        sed -i "s|\"STORAGE_BUCKET\"|\"$STORAGE_BUCKET\"|g" app/config/firebase.ts
+        sed -i "s|\"MESSAGING_SENDER_ID\"|\"$MESSAGING_SENDER_ID\"|g" app/config/firebase.ts
+        sed -i "s|\"APP_ID\"|\"$APP_ID\"|g" app/config/firebase.ts
+        sed -i "s|\"MEASUREMENT_ID\"|\"$MEASUREMENT_ID\"|g" app/config/firebase.ts
+        echo -e "${GREEN}      ✅ app firebase.ts updated${NC}"
+    fi
+    
+    # Update app/components/turnstile/keys.json
+    if [ -f "app/components/turnstile/keys.json" ]; then
+        echo -e "${YELLOW}    Updating app/components/turnstile/keys.json...${NC}"
+        sed -i "s|\"CFT_PUBLIC_KEY\"|\"$CFT_PUBLIC_KEY\"|g" app/components/turnstile/keys.json
+        sed -i "s|\"TURNSTILE_WORKER_DOMAIN\"|\"https://$TURNSTILE_WORKER_DOMAIN\"|g" app/components/turnstile/keys.json
+        echo -e "${GREEN}      ✅ turnstile keys.json updated${NC}"
     fi
     
     echo -e "${GREEN}✅ All wrangler configuration files updated${NC}"
