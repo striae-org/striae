@@ -326,8 +326,8 @@ update_wrangler_configs() {
     # Update app/components/turnstile/keys.json
     if [ -f "app/components/turnstile/keys.json" ]; then
         echo -e "${YELLOW}    Updating app/components/turnstile/keys.json...${NC}"
-        sed -i "s|\"CFT_PUBLIC_KEY\"|\"$CFT_PUBLIC_KEY\"|g" app/components/turnstile/keys.json
-        sed -i "s|\"TURNSTILE_WORKER_DOMAIN\"|\"https://$TURNSTILE_WORKER_DOMAIN\"|g" app/components/turnstile/keys.json
+        sed -i "s|\"insert-your-turnstile-site-key-here\"|\"$CFT_PUBLIC_KEY\"|g" app/components/turnstile/keys.json
+        sed -i "s|\"https://turnstile.your-domain.com\"|\"https://$TURNSTILE_WORKER_DOMAIN\"|g" app/components/turnstile/keys.json
         echo -e "${GREEN}      ✅ turnstile keys.json updated${NC}"
     fi
     

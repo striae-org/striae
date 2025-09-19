@@ -403,8 +403,8 @@ function Update-WranglerConfigs {
     if (Test-Path $turnstileKeysJson) {
         Write-Host "    Updating app/components/turnstile/keys.json..." -ForegroundColor Yellow
         $content = Get-Content $turnstileKeysJson -Raw
-        $content = $content -replace '"CFT_PUBLIC_KEY"', "`"$($envVars['CFT_PUBLIC_KEY'])`""
-        $content = $content -replace '"TURNSTILE_WORKER_DOMAIN"', "`"https://$($envVars['TURNSTILE_WORKER_DOMAIN'])`""
+        $content = $content -replace '"insert-your-turnstile-site-key-here"', "`"$($envVars['CFT_PUBLIC_KEY'])`""
+        $content = $content -replace '"https://turnstile.your-domain.com"', "`"https://$($envVars['TURNSTILE_WORKER_DOMAIN'])`""
         Set-Content $turnstileKeysJson -Value $content -Encoding UTF8
         Write-Host "      ✅ turnstile keys.json updated" -ForegroundColor Green
     }

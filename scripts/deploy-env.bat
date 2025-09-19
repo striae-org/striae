@@ -204,10 +204,10 @@ echo   Replace: "MEASUREMENT_ID"
 echo   With:    "your_firebase_measurement_id" (from your .env file)
 echo.
 echo === Update app/components/turnstile/keys.json ===
-echo   Replace: "CFT_PUBLIC_KEY"
+echo   Replace: "insert-your-turnstile-site-key-here"
 echo   With:    "your_turnstile_public_key" (from your .env file)
 echo.
-echo   Replace: "TURNSTILE_WORKER_DOMAIN"
+echo   Replace: "https://turnstile.your-domain.com"
 echo   With:    "https://your.turnstile-worker-domain.com"
 echo.
 
