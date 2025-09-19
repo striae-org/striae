@@ -3,7 +3,7 @@
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': 'https://www.striae.org', // CHANGE THIS TO YOUR DOMAIN
+  'Access-Control-Allow-Origin': 'PAGES_CUSTOM_DOMAIN', // CHANGE THIS TO YOUR DOMAIN
   'Access-Control-Allow-Methods': 'POST',
   'Access-Control-Allow-Headers': 'Content-Type'
 };
