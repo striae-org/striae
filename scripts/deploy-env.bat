@@ -25,6 +25,59 @@ echo ⚠️  IMPORTANT: This batch file provides the commands to run manually.
 echo For automated deployment, use PowerShell or WSL with the bash script.
 echo.
 
+echo 🔍 Required Environment Variables (must be set in .env):
+echo.
+echo === Core Cloudflare Configuration ===
+echo    ACCOUNT_ID
+echo.
+echo === Shared Authentication ^& Storage ===
+echo    SL_API_KEY
+echo    USER_DB_AUTH
+echo    R2_KEY_SECRET
+echo    IMAGES_API_TOKEN
+echo.
+echo === Firebase Auth Configuration ===
+echo    API_KEY
+echo    AUTH_DOMAIN
+echo    PROJECT_ID
+echo    STORAGE_BUCKET
+echo    MESSAGING_SENDER_ID
+echo    APP_ID
+echo    MEASUREMENT_ID
+echo.
+echo === Pages Configuration ===
+echo    PAGES_PROJECT_NAME
+echo    PAGES_CUSTOM_DOMAIN
+echo.
+echo === Worker Names ===
+echo    KEYS_WORKER_NAME
+echo    USER_WORKER_NAME
+echo    DATA_WORKER_NAME
+echo    IMAGES_WORKER_NAME
+echo    TURNSTILE_WORKER_NAME
+echo    PDF_WORKER_NAME
+echo.
+echo === Worker Domains ===
+echo    KEYS_WORKER_DOMAIN
+echo    USER_WORKER_DOMAIN
+echo    DATA_WORKER_DOMAIN
+echo    IMAGES_WORKER_DOMAIN
+echo    TURNSTILE_WORKER_DOMAIN
+echo    PDF_WORKER_DOMAIN
+echo.
+echo === Storage Configuration ===
+echo    BUCKET_NAME
+echo    KV_STORE_ID
+echo.
+echo === Worker-Specific Secrets ===
+echo    KEYS_AUTH
+echo    ACCOUNT_HASH
+echo    API_TOKEN
+echo    HMAC_KEY
+echo    CFT_PUBLIC_KEY
+echo    CFT_SECRET_KEY
+echo.
+
 echo.
 echo 📋 STEP 1: Copy example configuration files
 echo Run these commands first (or use PowerShell script for automation):

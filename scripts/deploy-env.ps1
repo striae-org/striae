@@ -53,6 +53,25 @@ $requiredVars = @(
     # Core Cloudflare Configuration
     "ACCOUNT_ID",
     
+    # Shared Authentication & Storage
+    "SL_API_KEY",
+    "USER_DB_AUTH",
+    "R2_KEY_SECRET",
+    "IMAGES_API_TOKEN",
+    
+    # Firebase Auth Configuration
+    "API_KEY",
+    "AUTH_DOMAIN",
+    "PROJECT_ID",
+    "STORAGE_BUCKET",
+    "MESSAGING_SENDER_ID",
+    "APP_ID",
+    "MEASUREMENT_ID",
+    
+    # Pages Configuration
+    "PAGES_PROJECT_NAME",
+    "PAGES_CUSTOM_DOMAIN",
+    
     # Worker Names (required for config replacement)
     "KEYS_WORKER_NAME",
     "USER_WORKER_NAME",
@@ -60,7 +79,6 @@ $requiredVars = @(
     "IMAGES_WORKER_NAME",
     "TURNSTILE_WORKER_NAME",
     "PDF_WORKER_NAME",
-    "PAGES_PROJECT_NAME",
     
     # Worker Domains (required for config replacement)
     "KEYS_WORKER_DOMAIN",
@@ -74,16 +92,13 @@ $requiredVars = @(
     "BUCKET_NAME",
     "KV_STORE_ID",
     
-    # Worker Secrets (required for deployment)
-    "SL_API_KEY",
+    # Worker-Specific Secrets (required for deployment)
     "KEYS_AUTH",
-    "USER_DB_AUTH",
-    "R2_KEY_SECRET",
     "ACCOUNT_HASH",
-    "IMAGES_API_TOKEN",
     "API_TOKEN",
-    "CFT_SECRET_KEY",
-    "HMAC_KEY"
+    "HMAC_KEY",
+    "CFT_PUBLIC_KEY",
+    "CFT_SECRET_KEY"
 )
 
 Write-Host "🔍 Validating required environment variables..." -ForegroundColor Yellow
