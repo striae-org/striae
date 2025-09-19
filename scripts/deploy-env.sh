@@ -301,25 +301,25 @@ update_wrangler_configs() {
     if [ -f "app/config/config.json" ]; then
         echo -e "${YELLOW}    Updating app/config/config.json...${NC}"
         sed -i "s|\"PAGES_CUSTOM_DOMAIN\"|\"$PAGES_CUSTOM_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"DATA_WORKER_DOMAIN\"|\"https://$DATA_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"KEYS_WORKER_DOMAIN\"|\"https://$KEYS_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"IMAGES_WORKER_DOMAIN\"|\"https://$IMAGES_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"USER_WORKER_DOMAIN\"|\"https://$USER_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"PDF_WORKER_DOMAIN\"|\"https://$PDF_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"KEYS_AUTH\"|\"$KEYS_AUTH\"|g" app/config/config.json
+        sed -i "s|\"DATA_WORKER_CUSTOM_DOMAIN\"|\"https://$DATA_WORKER_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"KEYS_WORKER_CUSTOM_DOMAIN\"|\"https://$KEYS_WORKER_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"IMAGE_WORKER_CUSTOM_DOMAIN\"|\"https://$IMAGES_WORKER_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"USER_WORKER_CUSTOM_DOMAIN\"|\"https://$USER_WORKER_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"PDF_WORKER_CUSTOM_DOMAIN\"|\"https://$PDF_WORKER_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"YOUR_KEYS_AUTH_TOKEN\"|\"$KEYS_AUTH\"|g" app/config/config.json
         echo -e "${GREEN}      ✅ app config.json updated${NC}"
     fi
     
     # Update app/config/firebase.ts
     if [ -f "app/config/firebase.ts" ]; then
         echo -e "${YELLOW}    Updating app/config/firebase.ts...${NC}"
-        sed -i "s|\"API_KEY\"|\"$API_KEY\"|g" app/config/firebase.ts
-        sed -i "s|\"AUTH_DOMAIN\"|\"$AUTH_DOMAIN\"|g" app/config/firebase.ts
-        sed -i "s|\"PROJECT_ID\"|\"$PROJECT_ID\"|g" app/config/firebase.ts
-        sed -i "s|\"STORAGE_BUCKET\"|\"$STORAGE_BUCKET\"|g" app/config/firebase.ts
-        sed -i "s|\"MESSAGING_SENDER_ID\"|\"$MESSAGING_SENDER_ID\"|g" app/config/firebase.ts
-        sed -i "s|\"APP_ID\"|\"$APP_ID\"|g" app/config/firebase.ts
-        sed -i "s|\"MEASUREMENT_ID\"|\"$MEASUREMENT_ID\"|g" app/config/firebase.ts
+        sed -i "s|\"YOUR_FIREBASE_API_KEY\"|\"$API_KEY\"|g" app/config/firebase.ts
+        sed -i "s|\"YOUR_FIREBASE_AUTH_DOMAIN\"|\"$AUTH_DOMAIN\"|g" app/config/firebase.ts
+        sed -i "s|\"YOUR_FIREBASE_PROJECT_ID\"|\"$PROJECT_ID\"|g" app/config/firebase.ts
+        sed -i "s|\"YOUR_FIREBASE_STORAGE_BUCKET\"|\"$STORAGE_BUCKET\"|g" app/config/firebase.ts
+        sed -i "s|\"YOUR_FIREBASE_MESSAGING_SENDER_ID\"|\"$MESSAGING_SENDER_ID\"|g" app/config/firebase.ts
+        sed -i "s|\"YOUR_FIREBASE_APP_ID\"|\"$APP_ID\"|g" app/config/firebase.ts
+        sed -i "s|\"YOUR_FIREBASE_MEASUREMENT_ID\"|\"$MEASUREMENT_ID\"|g" app/config/firebase.ts
         echo -e "${GREEN}      ✅ app firebase.ts updated${NC}"
     fi
     

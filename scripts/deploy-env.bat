@@ -163,44 +163,44 @@ echo === Update app/config/config.json ===
 echo   Replace: "PAGES_CUSTOM_DOMAIN"
 echo   With:    "https://your.custom-domain.com"
 echo.
-echo   Replace: "DATA_WORKER_DOMAIN"
+echo   Replace: "DATA_WORKER_CUSTOM_DOMAIN"
 echo   With:    "https://your.data-worker-domain.com"
 echo.
-echo   Replace: "KEYS_WORKER_DOMAIN"
+echo   Replace: "KEYS_WORKER_CUSTOM_DOMAIN"
 echo   With:    "https://your.keys-worker-domain.com"
 echo.
-echo   Replace: "IMAGES_WORKER_DOMAIN"
+echo   Replace: "IMAGE_WORKER_CUSTOM_DOMAIN"
 echo   With:    "https://your.images-worker-domain.com"
 echo.
-echo   Replace: "USER_WORKER_DOMAIN"
+echo   Replace: "USER_WORKER_CUSTOM_DOMAIN"
 echo   With:    "https://your.user-worker-domain.com"
 echo.
-echo   Replace: "PDF_WORKER_DOMAIN"
+echo   Replace: "PDF_WORKER_CUSTOM_DOMAIN"
 echo   With:    "https://your.pdf-worker-domain.com"
 echo.
-echo   Replace: "KEYS_AUTH"
+echo   Replace: "YOUR_KEYS_AUTH_TOKEN"
 echo   With:    "your_keys_auth_token" (from your .env file)
 echo.
 echo === Update app/config/firebase.ts ===
-echo   Replace: "API_KEY"
+echo   Replace: "YOUR_FIREBASE_API_KEY"
 echo   With:    "your_firebase_api_key" (from your .env file)
 echo.
-echo   Replace: "AUTH_DOMAIN"
+echo   Replace: "YOUR_FIREBASE_AUTH_DOMAIN"
 echo   With:    "your_firebase_auth_domain" (from your .env file)
 echo.
-echo   Replace: "PROJECT_ID"
+echo   Replace: "YOUR_FIREBASE_PROJECT_ID"
 echo   With:    "your_firebase_project_id" (from your .env file)
 echo.
-echo   Replace: "STORAGE_BUCKET"
+echo   Replace: "YOUR_FIREBASE_STORAGE_BUCKET"
 echo   With:    "your_firebase_storage_bucket" (from your .env file)
 echo.
-echo   Replace: "MESSAGING_SENDER_ID"
+echo   Replace: "YOUR_FIREBASE_MESSAGING_SENDER_ID"
 echo   With:    "your_firebase_messaging_sender_id" (from your .env file)
 echo.
-echo   Replace: "APP_ID"
+echo   Replace: "YOUR_FIREBASE_APP_ID"
 echo   With:    "your_firebase_app_id" (from your .env file)
 echo.
-echo   Replace: "MEASUREMENT_ID"
+echo   Replace: "YOUR_FIREBASE_MEASUREMENT_ID"
 echo   With:    "your_firebase_measurement_id" (from your .env file)
 echo.
 echo === Update app/components/turnstile/keys.json ===
