@@ -24,6 +24,65 @@
 
 ---
 
+## 🚀 Quick Start Install
+
+Ready to deploy Striae? Follow these steps to get your own instance running:
+
+### Prerequisites
+
+- **Cloudflare Account** with a registered domain
+- **Firebase Project** with Authentication enabled and MFA configured
+- **SendLayer Account** for email services
+- **Node.js** v20+ and Git
+
+### Cloudflare Services Setup
+
+Set up these Cloudflare services first:
+
+- **Turnstile** (bot protection) - Note site/secret keys
+- **Images** (file storage) - Note account ID, hash, API token, HMAC key
+- **KV** (user database) - Create namespace, note UUID
+- **R2** (data storage) - Create bucket, configure CORS (see [installation guide](https://developers.striae.org/striae-dev/get-started/installation-guide#24-cloudflare-r2-setup))
+
+### Deployment Steps
+
+1. **Fork & Clone**: Fork the repository to your account and clone it locally
+
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/striae.git
+   cd striae
+   ```
+
+2. **Install Dependencies**: Install all required packages
+
+   ```bash
+   npm install
+   ```
+
+3. **Deploy Everything**: Run the unified deployment command
+
+   ```bash
+   npm run deploy:all
+   ```
+
+   The script will interactively prompt you for all configuration values including Firebase settings, Cloudflare credentials, and custom domains (for Workers).
+
+4. **Test & Verify**: Test authentication, file uploads, and core features
+
+### What Gets Deployed
+
+- ✅ 6 Cloudflare Workers (backend microservices)
+- ✅ Cloudflare Pages frontend
+- ✅ All environment variables and secrets
+- ✅ CORS configuration
+- ✅ Worker-to-worker communication
+
+**Total setup time**: ~30-45 minutes
+
+For detailed instructions and troubleshooting, see the **[Complete Installation Guide](https://developers.striae.org/striae-dev/get-started/installation-guide)**
+
+---
+
 ## 📋 Changelog
 
 ## [2025-09-18] - *[Release v0.9.18-beta](https://github.com/striae-org/striae/releases/tag/v0.9.18-beta)*
