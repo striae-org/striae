@@ -303,7 +303,7 @@ All required variables are documented in the `.env` file. Here's what you need t
 **Firebase Configuration (Complete Project Settings):**
 
 - `API_KEY` - Firebase API key
-- `AUTH_DOMAIN` - Firebase auth domain (project-id.firebaseapp.com)
+- `AUTH_DOMAIN` - Firebase auth domain
 - `PROJECT_ID` - Firebase project ID
 - `STORAGE_BUCKET` - Firebase storage bucket
 - `MESSAGING_SENDER_ID` - Firebase messaging sender ID
@@ -313,7 +313,7 @@ All required variables are documented in the `.env` file. Here's what you need t
 **Pages Configuration:**
 
 - `PAGES_PROJECT_NAME` - Your Cloudflare Pages project name
-- `PAGES_CUSTOM_DOMAIN` - Your custom domain (e.g., striae.org)
+- `PAGES_CUSTOM_DOMAIN` - Your custom domain
 
 **Worker Configuration (Names and Domains):**
 
