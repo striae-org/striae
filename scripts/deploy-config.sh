@@ -200,7 +200,7 @@ update_wrangler_configs() {
     # Update data-worker source file CORS headers only
     if [ -f "workers/data-worker/src/data-worker.js" ]; then
         echo -e "${YELLOW}  Updating data-worker CORS headers...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/data-worker/src/data-worker.js
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/data-worker/src/data-worker.js
         echo -e "${GREEN}    ✅ data-worker CORS headers updated${NC}"
     fi
     
@@ -216,7 +216,7 @@ update_wrangler_configs() {
     # Update image-worker source file CORS headers only
     if [ -f "workers/image-worker/src/image-worker.js" ]; then
         echo -e "${YELLOW}  Updating image-worker CORS headers...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/image-worker/src/image-worker.js
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/image-worker/src/image-worker.js
         echo -e "${GREEN}    ✅ image-worker CORS headers updated${NC}"
     fi
     
@@ -232,7 +232,7 @@ update_wrangler_configs() {
     # Update keys-worker source file CORS headers only
     if [ -f "workers/keys-worker/src/keys.js" ]; then
         echo -e "${YELLOW}  Updating keys-worker CORS headers...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/keys-worker/src/keys.js
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/keys-worker/src/keys.js
         echo -e "${GREEN}    ✅ keys-worker CORS headers updated${NC}"
     fi
     
@@ -248,7 +248,7 @@ update_wrangler_configs() {
     # Update pdf-worker source file CORS headers only
     if [ -f "workers/pdf-worker/src/pdf-worker.js" ]; then
         echo -e "${YELLOW}  Updating pdf-worker CORS headers...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/pdf-worker/src/pdf-worker.js
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/pdf-worker/src/pdf-worker.js
         echo -e "${GREEN}    ✅ pdf-worker CORS headers updated${NC}"
     fi
     
@@ -264,7 +264,7 @@ update_wrangler_configs() {
     # Update turnstile-worker source file CORS headers only
     if [ -f "workers/turnstile-worker/src/turnstile.js" ]; then
         echo -e "${YELLOW}  Updating turnstile-worker CORS headers...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/turnstile-worker/src/turnstile.js
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/turnstile-worker/src/turnstile.js
         echo -e "${GREEN}    ✅ turnstile-worker CORS headers updated${NC}"
     fi
     
@@ -281,7 +281,7 @@ update_wrangler_configs() {
     # Update user-worker source file CORS headers and worker URLs only
     if [ -f "workers/user-worker/src/user-worker.js" ]; then
         echo -e "${YELLOW}  Updating user-worker CORS headers and worker URLs...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'$PAGES_CUSTOM_DOMAIN'|g" workers/user-worker/src/user-worker.js
+        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/user-worker/src/user-worker.js
         sed -i "s|'DATA_WORKER_DOMAIN'|'https://$DATA_WORKER_DOMAIN'|g" workers/user-worker/src/user-worker.js
         sed -i "s|'IMAGES_WORKER_DOMAIN'|'https://$IMAGES_WORKER_DOMAIN'|g" workers/user-worker/src/user-worker.js
         echo -e "${GREEN}    ✅ user-worker CORS headers and worker URLs updated${NC}"
@@ -300,7 +300,7 @@ update_wrangler_configs() {
     # Update app/config/config.json
     if [ -f "app/config/config.json" ]; then
         echo -e "${YELLOW}    Updating app/config/config.json...${NC}"
-        sed -i "s|\"PAGES_CUSTOM_DOMAIN\"|\"$PAGES_CUSTOM_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"PAGES_CUSTOM_DOMAIN\"|\"https://$PAGES_CUSTOM_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"DATA_WORKER_CUSTOM_DOMAIN\"|\"https://$DATA_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"KEYS_WORKER_CUSTOM_DOMAIN\"|\"https://$KEYS_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"IMAGE_WORKER_CUSTOM_DOMAIN\"|\"https://$IMAGES_WORKER_DOMAIN\"|g" app/config/config.json

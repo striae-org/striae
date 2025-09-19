@@ -259,7 +259,7 @@ function Update-WranglerConfigs {
             $workerName = Split-Path (Split-Path $sourcePath) -Leaf
             Write-Host "${Yellow}  Updating $workerName CORS headers...${Reset}"
             $content = Get-Content $sourcePath -Raw
-            $content = $content -replace "'PAGES_CUSTOM_DOMAIN'", "'$PAGES_CUSTOM_DOMAIN'"
+            $content = $content -replace "'PAGES_CUSTOM_DOMAIN'", "'https://$PAGES_CUSTOM_DOMAIN'"
             
             # Special handling for user-worker with additional URLs
             if ($sourcePath -like "*user-worker*") {
@@ -288,7 +288,7 @@ function Update-WranglerConfigs {
     if (Test-Path "app/config/config.json") {
         Write-Host "${Yellow}    Updating app/config/config.json...${Reset}"
         $content = Get-Content "app/config/config.json" -Raw
-        $content = $content -replace '"PAGES_CUSTOM_DOMAIN"', "`"$PAGES_CUSTOM_DOMAIN`""
+        $content = $content -replace '"PAGES_CUSTOM_DOMAIN"', "`"https://$PAGES_CUSTOM_DOMAIN`""
         $content = $content -replace '"DATA_WORKER_CUSTOM_DOMAIN"', "`"https://$DATA_WORKER_DOMAIN`""
         $content = $content -replace '"KEYS_WORKER_CUSTOM_DOMAIN"', "`"https://$KEYS_WORKER_DOMAIN`""
         $content = $content -replace '"IMAGE_WORKER_CUSTOM_DOMAIN"', "`"https://$IMAGES_WORKER_DOMAIN`""
