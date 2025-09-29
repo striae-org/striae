@@ -48,7 +48,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250926.0",
+    "@cloudflare/workers-types": "^4.20250927.0",
     "@remix-run/dev": "^2.17.1",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
