@@ -8,6 +8,8 @@ scripts/
 tests/
 archive/
 
+app/routes/home/home.tsx
+
 .vscode
 .cache
 .dns
