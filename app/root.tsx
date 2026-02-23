@@ -124,7 +124,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="flex flex-col min-h-screen w-screen max-w-full overflow-x-hidden">
+      <body className="flex flex-col min-h-svh w-screen max-w-full overflow-x-hidden">
         <div id="__page-top" />
         <ThemeProvider theme={theme} className="">
         <main className="flex-grow w-full">
@@ -178,7 +178,7 @@ export function ErrorBoundary() {
         <head>
           <title>{`${error.status} ${error.statusText}`}</title>          
         </head>
-        <body className="flex flex-col min-h-screen">
+        <body className="flex flex-col min-h-svh">
           <ThemeProvider theme="light" className="">          
           <main className="flex-grow">
             <div className={styles.errorContainer}>
@@ -208,7 +208,7 @@ export function ErrorBoundary() {
       <head>
         <title>Oops! Something went wrong</title>       
       </head>
-      <body className="flex flex-col min-h-screen">
+      <body className="flex flex-col min-h-svh">
         <ThemeProvider theme="light" className="">        
         <main className="flex-grow">
           <div className={styles.errorContainer}>
