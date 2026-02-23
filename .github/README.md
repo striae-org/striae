@@ -22,6 +22,14 @@
 
 ## 📋 Changelog
 
+## [2026-02-23] - *[Patch Release v1.1.4](https://github.com/striae-org/striae/releases/tag/v1.1.4)*
+
+- **📱 Mobile Detection Route Refinements** - Rerouted and refined device detection behavior for cleaner route handling on mobile/tablet access paths
+- **🧭 Public Route Consistency Fixes** - Cleaned up route CSS, fixed root conditional behavior, and corrected logo link positioning on support/bugs and related public routes
+- **🔗 Navigation Cleanup** - Iterated and stabilized sidebar blog-link behavior with final cleanup of transient navigation states
+- **📄 Policy & Docs Maintenance** - Updated policy date references and performed documentation cleanup/removal passes
+- **🧹 Repository Hygiene** - Consolidated `.gitignore`/config tracking updates (including worker directory and TOML/public handling) for cleaner project maintenance
+
 ## [2026-02-20] - *[Patch Release v1.1.3](https://github.com/striae-org/striae/releases/tag/v1.1.3)*
 
 - **📊 Account Deletion Progress Tracking** - Added real-time per-case deletion progress with streaming updates and a red progress bar in the delete-account modal
