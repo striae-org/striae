@@ -9,6 +9,7 @@ tests/
 archive/
 
 app/routes/home/home.tsx
+app/routes/home/home.module.css
 
 .vscode
 .cache
