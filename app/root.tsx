@@ -67,6 +67,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme={theme}>
       <head>
+        <script
+          id="Cookiebot"
+          src="https://consent.cookiebot.com/uc.js"
+          data-cbid="3f0f9bb0-ff09-44b9-a911-7bd88876f7e0"
+          data-blockingmode="auto"
+          type="text/javascript"
+        />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000" />
@@ -124,6 +131,13 @@ export function ErrorBoundary() {
     return (
       <html lang="en">
         <head>
+          <script
+            id="Cookiebot"
+            src="https://consent.cookiebot.com/uc.js"
+            data-cbid="3f0f9bb0-ff09-44b9-a911-7bd88876f7e0"
+            data-blockingmode="auto"
+            type="text/javascript"
+          />
           <title>{`${error.status} ${error.statusText}`}</title>          
         </head>
         <body className="flex flex-col h-screen">
@@ -152,6 +166,13 @@ export function ErrorBoundary() {
   return (
     <html lang="en">
       <head>
+        <script
+          id="Cookiebot"
+          src="https://consent.cookiebot.com/uc.js"
+          data-cbid="3f0f9bb0-ff09-44b9-a911-7bd88876f7e0"
+          data-blockingmode="auto"
+          type="text/javascript"
+        />
         <title>Oops! Something went wrong</title>       
       </head>
       <body className="flex flex-col h-screen">
