@@ -43,9 +43,9 @@ interface ActionData {
 
 export const meta = () => {
   return baseMeta({
-    title: 'Apply for Striae Deployment',
+    title: 'Striae Interest Form',
     description:
-      'Complete the form to apply for Striae deployment.',
+      'Complete the interest form for Striae.',
   });
 };
 
@@ -101,7 +101,7 @@ export async function action({ request, context }: { request: Request, context: 
       },
       body: JSON.stringify({
         "from": {
-          "name": "Striae Deployment Application",
+          "name": "Striae Interest Form",
           "email": "info@striae.org"
         },
         "to": [          
@@ -116,10 +116,10 @@ export async function action({ request, context }: { request: Request, context: 
             "email": "info@striae.org"
           }
         ],
-        "subject": "Striae Deployment Application Request",
+        "subject": "Striae Interest Form Submission",
         "ContentType": "HTML",
         "HTMLContent": `<html><body>
-          <h2>New Striae Deployment Application</h2>
+          <h2>New Striae Interest Form Submission</h2>
           <p><strong>Representative Name:</strong> ${escapeHtml(firstName)} ${escapeHtml(lastName)}</p>
           <p><strong>Email:</strong> ${escapeHtml(email)}</p>
           <p><strong>Agency Name:</strong> ${escapeHtml(company)}</p>
@@ -127,12 +127,12 @@ export async function action({ request, context }: { request: Request, context: 
           
           <hr style="margin: 20px 0; border: 1px solid #ccc;">
           
-          <h3>Deployment Application Received</h3>
-          <p>Your deployment application has been received and is being processed. The Striae team will follow up with next steps.</p>
+          <h3>Interest Form Received</h3>
+          <p>Your interest form has been received. The Striae team will follow up with next steps when plans become available.</p>
           
-          <p>Thank you for your interest in deploying Striae!</p>
+          <p>Thank you for your interest in Striae!</p>
         </body></html>`,
-        "PlainContent": `Striae Deployment Application Request:
+        "PlainContent": `Striae Interest Form Submission:
 
         Representative Name: ${firstName} ${lastName}
         Email: ${email}
@@ -141,13 +141,13 @@ export async function action({ request, context }: { request: Request, context: 
         
         ==========================================
         
-        Deployment Application Received
+        Interest Form Received
 
-        Your deployment application has been received and is being processed. The Striae team will follow up with next steps.
+        Your interest form has been received. The Striae team will follow up with next steps when plans become available.
         
-        Thank you for your interest in deploying Striae!`,
+        Thank you for your interest in Striae!`,
         "Tags": [
-          "deployment-application"
+          "interest-form"
         ],
         "Headers": {
           "X-Mailer": "striae.org"
@@ -161,7 +161,7 @@ export async function action({ request, context }: { request: Request, context: 
 
     return json<ActionData>({
       success: true,
-      message: 'Your deployment application has been submitted successfully! Please look for a confirmation email from the Striae team.'
+      message: 'Your interest form has been submitted successfully! Please look for a confirmation email from the Striae team.'
     });
   } catch (error) {
     console.error('Error:', error);
@@ -183,7 +183,7 @@ export const Signup = () => {
   };
 
   const signupNotice = {
-    title: 'Before You Apply',
+    title: 'Before You Submit',
     content: <NoticeText />,
     buttonText: 'I Have Read and Understand'
   };
@@ -205,13 +205,13 @@ export const Signup = () => {
           aria-label="Return to Striae"
         />
         <div className={`route-form-wrapper ${styles.formWrapper}`}>
-          <h1 className="route-form-title">Apply for Striae Deployment</h1>
+          <h1 className="route-form-title">Striae Interest Form</h1>
            <button 
             type="button"
             onClick={() => setIsNoticeOpen(true)}
             className={styles.noticeButton}
           >
-            Read before applying
+            Read before submitting
           </button>
           <Notice 
           isOpen={isNoticeOpen} 
@@ -221,8 +221,8 @@ export const Signup = () => {
         {actionData?.success ? (
           <FormMessage
             type="success"
-            title="Application Submitted!"
-            message={actionData.message || 'Your deployment application has been submitted successfully!'}
+            title="Interest Form Submitted!"
+            message={actionData.message || 'Your interest form has been submitted successfully!'}
           />
         ) : (
           <BaseForm>
@@ -269,7 +269,7 @@ export const Signup = () => {
             <FormField
               component="textarea"
               name="comments"            
-              placeholder="Tell us about your deployment needs, questions, or any custom requirements."
+              placeholder="Tell us about your interest, questions, or any custom requirements."
               maxLength={MAX_COMMENTS_LENGTH}
               error={actionData?.errors?.comments}
               disabled={sending}
@@ -291,7 +291,7 @@ export const Signup = () => {
               disabled={!hasReadNotice}
               title={!hasReadNotice ? 'Please read the notice first' : undefined}
             >
-              {!hasReadNotice ? 'Please read the notice first' : 'Submit Application'}
+              {!hasReadNotice ? 'Please read the notice first' : 'Submit Interest Form'}
             </FormButton>
           </BaseForm>
         )}
