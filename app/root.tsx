@@ -17,6 +17,8 @@ import {
 } from '~/components/theme-provider/theme-provider';
 import { AuthProvider } from '~/components/auth/auth-provider';
 import { Icon } from '~/components/icon/icon';
+import { useHashlessScrollNavigation } from '~/hooks/useHashlessScrollNavigation';
+import { useReturnToTop } from '~/hooks/useReturnToTop';
 import styles from '~/styles/root.module.css';
 import './tailwind.css';
 
@@ -61,25 +63,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const isAuthPath = location.pathname.startsWith('/auth');
   const showReturnToTop = !isAuthPath;
 
-  const handleReturnToTop = () => {
-    const topAnchor = document.getElementById('__page-top');
-    if (topAnchor) {
-      topAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    const scrollOptions: ScrollToOptions = { top: 0, behavior: 'smooth' };
-    window.scrollTo(scrollOptions);
-    document.documentElement.scrollTo(scrollOptions);
-    document.body.scrollTo(scrollOptions);
-    (document.scrollingElement as HTMLElement | null)?.scrollTo(scrollOptions);
-
-    const scrollableElements = document.querySelectorAll<HTMLElement>('main, [data-scroll-container], [class*="scroll"]');
-    scrollableElements.forEach((element) => {
-      if (element.scrollHeight > element.clientHeight) {
-        element.scrollTo(scrollOptions);
-      }
-    });
-  };
+  useHashlessScrollNavigation();
+  const handleReturnToTop = useReturnToTop();
 
   return (
     <html lang="en" data-theme={theme}>
