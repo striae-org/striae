@@ -15,7 +15,7 @@ export default function NoticeText() {
   <li><strong>Striae Subdomain Required:</strong> Striae instances will be hosted on a dedicated subdomain for each agency.
   <br />
   Ex: https://<strong>ouragency</strong>.striae.org</li>
-  <li><strong>Agency Customization:</strong> Agencies can request customizations to better fit their workflow and requirements.This applies to any UI modifications, report formatting, and other specific needs. You can request customizations by contacting support.</li>
+  <li><strong>Agency Customization:</strong> Agencies can request customizations to better fit their workflow and requirements. This applies to any UI modifications, report formatting, and other specific needs. You can request customizations by contacting support.</li>
 </ul>
 
 <h2>Register a Demo Account</h2>

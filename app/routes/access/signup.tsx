@@ -219,8 +219,8 @@ export const Signup = () => {
       {actionData?.success ? (
         <FormMessage
           type="success"
-          title="Registration Submitted!"
-          message={actionData.message || 'Your agency registration has been submitted successfully!'}
+          title="Application Submitted!"
+          message={actionData.message || 'Your deployment application has been submitted successfully!'}
         />
       ) : (
         <BaseForm>
