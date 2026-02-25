@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { baseMeta } from '~/utils/meta';
 import { Link } from '@remix-run/react';
+import Footer from '~/components/footer/footer';
 import styles from './policy.module.css';
 
 export const meta = () => {
@@ -12,22 +13,23 @@ export const meta = () => {
 
 export const Policy = () => {
   return (
-    <div id="top" className={`route-legal-container ${styles.container}`}>
-      <Link 
-        viewTransition
-        prefetch="intent"
-        to="/#top" 
-        className="route-brand-logo-link">
-        <div className={`route-brand-logo ${styles.logo}`} />
-      </Link>
-      <Link
-        viewTransition
-        prefetch="intent"
-        to="/#top"
-        className={`route-brand-return-link ${styles.returnLink}`}
-        aria-label="Return to Striae"
-      />
-      <div className={styles.content}>
+    <>
+      <div id="top" className={`route-legal-container ${styles.container}`}>
+        <Link 
+          viewTransition
+          prefetch="intent"
+          to="/" 
+          className="route-brand-logo-link">
+          <div className={`route-brand-logo ${styles.logo}`} />
+        </Link>
+        <Link
+          viewTransition
+          prefetch="intent"
+          to="/"
+          className={`route-brand-return-link ${styles.returnLink}`}
+          aria-label="Return to Striae"
+        />
+        <div className={styles.content}>
         <h1>Security Policy</h1>
         
         <section>
@@ -96,7 +98,9 @@ export const Policy = () => {
         <section>
           <div className={styles.lastUpdated}>Last updated: February 20, 2026</div>
         </section>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }

@@ -15,10 +15,8 @@ import {
   ThemeProvider,
   themeStyles 
 } from '~/components/theme-provider/theme-provider';
-import Footer from '~/components/footer/footer';
 import { AuthProvider } from '~/components/auth/auth-provider';
 import { Icon } from '~/components/icon/icon';
-import { useEffect } from 'react';
 import styles from '~/styles/root.module.css';
 import './tailwind.css';
 
@@ -40,21 +38,11 @@ export const links: LinksFunction = () => [
   { rel: 'apple-touch-icon', href: '/icon-256.png', sizes: '256x256' },
 ];
 
-export function getScrollRestorationKey({ pathname, search, hash }: { pathname: string; search: string; hash: string }) {
-  
-  if (hash === '#top') {
-    return null; 
-  }
-  
-  return pathname + search;
-}
-
 export function Layout({ children }: { children: React.ReactNode }) {
   const theme = 'light';
   const location = useLocation();
   const isAuthPath = location.pathname.startsWith('/auth');
   const showReturnToTop = !isAuthPath;
-  const showFooter = !isAuthPath;
 
   const handleReturnToTop = () => {
     const topAnchor = document.getElementById('__page-top');
@@ -75,17 +63,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       }
     });
   };
-
-  useEffect(() => {
-    if (location.hash) {
-      const element = document.querySelector(location.hash);
-      if (element) {        
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      }
-    }
-  }, [location.hash]);
 
   return (
     <html lang="en" data-theme={theme}>
@@ -114,12 +91,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Icon icon="chevron-right" className={styles.returnToTopIcon} size={20} />
           </button>
         )}
-        {showFooter && <Footer />}
         </ThemeProvider>        
         <Scripts />
-        <ScrollRestoration 
-          getKey={(location) => getScrollRestorationKey(location)}
-        />
+        <ScrollRestoration />
       </body>
     </html>
   );
@@ -161,16 +135,14 @@ export function ErrorBoundary() {
               <Link 
                 viewTransition
                 prefetch="intent"
-                to="/#top" 
+                to="/" 
                 className={styles.errorLink}>
                 Return Home
               </Link>
             </div>
           </main>
           </ThemeProvider>
-          <ScrollRestoration 
-            getKey={(location) => getScrollRestorationKey(location)}
-          />
+          <ScrollRestoration />
           <Scripts />          
         </body>
       </html>
@@ -191,16 +163,14 @@ export function ErrorBoundary() {
             <Link 
               viewTransition
               prefetch="intent"
-              to="/#top" 
+              to="/" 
               className={styles.errorLink}>
               Return Home
             </Link>
           </div>
         </main>
         </ThemeProvider>
-        <ScrollRestoration 
-          getKey={(location) => getScrollRestorationKey(location)}
-        />
+        <ScrollRestoration />
         <Scripts />        
       </body>
     </html>

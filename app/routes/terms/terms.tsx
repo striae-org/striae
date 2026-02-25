@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { baseMeta } from '~/utils/meta';
 import { Link } from '@remix-run/react';
+import Footer from '~/components/footer/footer';
 import styles from './terms.module.css';
 
 export const meta = () => {
@@ -12,18 +13,19 @@ export const meta = () => {
 
 export const Terms = () => {
   return (    
-    <div id="top" className={`route-legal-container ${styles.container}`}>
+    <>
+      <div id="top" className={`route-legal-container ${styles.container}`}>
       <Link 
         viewTransition
         prefetch="intent"
-        to="/#top" 
+        to="/" 
         className="route-brand-logo-link">
         <div className={`route-brand-logo ${styles.logo}`} />
       </Link>
       <Link
         viewTransition
         prefetch="intent"
-        to="/#top"
+        to="/"
         className={`route-brand-return-link ${styles.returnLink}`}
         aria-label="Return to Striae"
       />
@@ -365,6 +367,7 @@ You agree that the original English text shall prevail in the case of a dispute.
         </section>
       </div>      
     </div>
-    
+    <Footer />
+    </>
   );
 }
