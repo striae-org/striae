@@ -18,35 +18,35 @@ export default function Footer() {
           <Link 
             viewTransition
             prefetch="intent"
-            to="/privacy#top" 
+            to="/privacy" 
             className={styles.link}>
             Privacy Policy
           </Link>
           <Link 
             viewTransition
             prefetch="intent"
-            to="/terms#top" 
+            to="/terms" 
             className={styles.link}>
             Terms & Conditions
           </Link>          
           <Link 
             viewTransition
             prefetch="intent"
-            to="/security#top" 
+            to="/security" 
             className={styles.link}>
             Security Policy
           </Link>
           <Link 
             viewTransition
             prefetch="intent"
-            to="/support#top" 
+            to="/support" 
             className={styles.link}>
             Need Help?
           </Link>
           <Link 
             viewTransition
             prefetch="intent"
-            to="/bugs#top" 
+            to="/bugs" 
             className={styles.link}>
             Submit a Bug Report
           </Link>

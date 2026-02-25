@@ -6,6 +6,7 @@ import { json } from '@remix-run/cloudflare';
 import { BaseForm, FormField, FormMessage, FormButton } from '~/components/form';
 import freeEmailDomains from 'free-email-domains';
 import { escapeHtml } from '~/utils/html-sanitizer';
+import Footer from '~/components/footer/footer';
 import styles from './bugs.module.css';
 
 const MAX_NAME_LENGTH = 128;
@@ -151,100 +152,103 @@ export const Bugs = () => {
   const sending = state === 'submitting';    
 
   return (
-    <div id="top" className={`route-centered-container ${styles.container}`}>
-      <Link 
-        viewTransition
-        prefetch="intent"
-        to="/#top" 
-        className="route-brand-logo-link">
-        <div className={`route-brand-logo ${styles.logo}`} />
-      </Link>
-      <Link
-        viewTransition
-        prefetch="intent"
-        to="/#top"
-        className={`route-brand-return-link ${styles.returnLink}`}
-        aria-label="Return to Striae"
-      />
-      <div className={`route-form-wrapper ${styles.formWrapper}`}>
-        <h1 className="route-form-title">Report a Bug</h1>
-        <p className="route-form-subtitle">Help us improve Striae by reporting issues you encounter
-          <br />
-          To avoid redundancy, please check the <a href="https://github.com/striae-org/striae/issues" target="_blank" rel="noopener noreferrer">current list of issues</a> first
-        </p>
+    <>
+      <div id="top" className={`route-centered-container ${styles.container}`}>
+        <Link 
+          viewTransition
+          prefetch="intent"
+          to="/" 
+          className="route-brand-logo-link">
+          <div className={`route-brand-logo ${styles.logo}`} />
+        </Link>
+        <Link
+          viewTransition
+          prefetch="intent"
+          to="/"
+          className={`route-brand-return-link ${styles.returnLink}`}
+          aria-label="Return to Striae"
+        />
+        <div className={`route-form-wrapper ${styles.formWrapper}`}>
+          <h1 className="route-form-title">Report a Bug</h1>
+          <p className="route-form-subtitle">Help us improve Striae by reporting issues you encounter
+            <br />
+            To avoid redundancy, please check the <a href="https://github.com/striae-org/striae/issues" target="_blank" rel="noopener noreferrer">current list of issues</a> first
+          </p>
 
-        {actionData?.success ? (
-          <FormMessage 
-            type="success"
-            title="Bug Report Submitted!"
-            message="Thank you for your report! We'll investigate and get back to you if we need more information."
-          />
-        ) : (
-        <BaseForm>
-          <FormField
-            component="input"
-            type="text"
-            name="name"
-            placeholder="Your Name"
-            autoComplete="name"
-            error={actionData?.errors?.name}
-            disabled={sending}
-          />
-          
-          <FormField
-            component="input"
-            type="email"
-            name="email"
-            placeholder="Your Email"
-            autoComplete="email"
-            error={actionData?.errors?.email}
-            disabled={sending}
-          />
-          
-          <FormField
-            component="textarea"
-            name="description"
-            placeholder="Describe the bug in detail"
-            error={actionData?.errors?.description}
-            disabled={sending}
-          />
-          
-          <FormField
-            component="textarea"
-            name="steps"
-            placeholder="Steps to reproduce the bug"
-            error={actionData?.errors?.steps}
-            disabled={sending}
-          />
-          
-          <FormField
-            component="textarea"
-            name="expected"
-            placeholder="What did you expect to happen?"
-            error={actionData?.errors?.expected}
-            disabled={sending}
-          />
-          
-          <FormField
-            component="textarea"
-            name="actual"
-            placeholder="What actually happened?"
-            error={actionData?.errors?.actual}
-            disabled={sending}
-          />
-          
-          <Turnstile className="route-turnstile" />
-          
-          <FormButton 
-            type="submit"
-            isLoading={sending}
-            loadingText="Submitting..."
-          >
-            Submit Bug Report
-          </FormButton>
-        </BaseForm>
-        )}
+          {actionData?.success ? (
+            <FormMessage 
+              type="success"
+              title="Bug Report Submitted!"
+              message="Thank you for your report! We'll investigate and get back to you if we need more information."
+            />
+          ) : (
+          <BaseForm>
+            <FormField
+              component="input"
+              type="text"
+              name="name"
+              placeholder="Your Name"
+              autoComplete="name"
+              error={actionData?.errors?.name}
+              disabled={sending}
+            />
+            
+            <FormField
+              component="input"
+              type="email"
+              name="email"
+              placeholder="Your Email"
+              autoComplete="email"
+              error={actionData?.errors?.email}
+              disabled={sending}
+            />
+            
+            <FormField
+              component="textarea"
+              name="description"
+              placeholder="Describe the bug in detail"
+              error={actionData?.errors?.description}
+              disabled={sending}
+            />
+            
+            <FormField
+              component="textarea"
+              name="steps"
+              placeholder="Steps to reproduce the bug"
+              error={actionData?.errors?.steps}
+              disabled={sending}
+            />
+            
+            <FormField
+              component="textarea"
+              name="expected"
+              placeholder="What did you expect to happen?"
+              error={actionData?.errors?.expected}
+              disabled={sending}
+            />
+            
+            <FormField
+              component="textarea"
+              name="actual"
+              placeholder="What actually happened?"
+              error={actionData?.errors?.actual}
+              disabled={sending}
+            />
+            
+            <Turnstile className="route-turnstile" />
+            
+            <FormButton 
+              type="submit"
+              isLoading={sending}
+              loadingText="Submitting..."
+            >
+              Submit Bug Report
+            </FormButton>
+          </BaseForm>
+          )}
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }
