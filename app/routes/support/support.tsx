@@ -5,6 +5,7 @@ import { useActionData, useNavigation, Link } from '@remix-run/react';
 import { json } from '@remix-run/cloudflare';
 import { BaseForm, FormField, FormButton, FormMessage } from '~/components/form';
 import freeEmailDomains from 'free-email-domains';import { escapeHtml } from '~/utils/html-sanitizer';import styles from './support.module.css';
+import Footer from '~/components/footer/footer';
 
 const MAX_NAME_LENGTH = 128;
 
@@ -142,106 +143,109 @@ export const Support = () => {
   const sending = state === 'submitting';    
 
   return (
-    <div id="top" className={`route-centered-container ${styles.container}`}>
-      <Link 
-        viewTransition
-        prefetch="intent"
-        to="/#top" 
-        className="route-brand-logo-link">
-        <div className={`route-brand-logo ${styles.logo}`} />
-      </Link>
-      <Link
-        viewTransition
-        prefetch="intent"
-        to="/#top"
-        className={`route-brand-return-link ${styles.returnLink}`}
-        aria-label="Return to Striae"
-      />
-      <div className={`route-form-wrapper ${styles.formWrapper}`}>
-        <h1 className="route-form-title">Contact Striae Support</h1>
-        <p className="route-form-subtitle">Need help with Striae? Submit a ticket and we&apos;ll assist you.</p>
-        
-        {actionData?.success ? (
-          <FormMessage
-            type="success"
-            title="Support Ticket Submitted!"
-            message="Thank you for contacting support! We'll review your ticket and respond as soon as possible."
-          />
-        ) : (
-          <BaseForm>
-            <FormField
-              component="input"
-              type="text"
-              name="name"
-              placeholder="Your Name"
-              autoComplete="name"
-              error={actionData?.errors?.name}
-              disabled={sending}
+    <>
+      <div id="top" className={`route-centered-container ${styles.container}`}>
+        <Link 
+          viewTransition
+          prefetch="intent"
+          to="/" 
+          className="route-brand-logo-link">
+          <div className={`route-brand-logo ${styles.logo}`} />
+        </Link>
+        <Link
+          viewTransition
+          prefetch="intent"
+          to="/"
+          className={`route-brand-return-link ${styles.returnLink}`}
+          aria-label="Return to Striae"
+        />
+        <div className={`route-form-wrapper ${styles.formWrapper}`}>
+          <h1 className="route-form-title">Contact Striae Support</h1>
+          <p className="route-form-subtitle">Need help with Striae? Submit a ticket and we&apos;ll assist you.</p>
+          
+          {actionData?.success ? (
+            <FormMessage
+              type="success"
+              title="Support Ticket Submitted!"
+              message="Thank you for contacting support! We'll review your ticket and respond as soon as possible."
             />
-            
-            <FormField
-              component="input"
-              type="email"
-              name="email"
-              placeholder="Your Email"
-              autoComplete="email"
-              error={actionData?.errors?.email && !actionData.errors.email.includes('CAPTCHA') ? actionData.errors.email : undefined}
-              disabled={sending}
-            />
-            
-            <FormField
-              component="select"
-              name="category"
-              error={actionData?.errors?.category}
-              disabled={sending}
-            >
-              <option value="">Select Issue Category</option>
-              <option value="technical">Technical Issue</option>
-              <option value="account">Account Issue</option>
-              <option value="feature">Feature Request</option>
-              <option value="other">Other</option>
-            </FormField>
-            
-            <FormField
-              component="textarea"
-              name="description"
-              placeholder="Describe what you need help with or a feature request"
-              error={actionData?.errors?.description}
-              disabled={sending}
-            />
-            
-            <FormField
-              component="textarea"
-              name="steps"
-              placeholder="What have you tried so far? (Optional)"
-              disabled={sending}
-            />
-            
-            <FormField
-              component="textarea"
-              name="expected"
-              placeholder="What are you trying to accomplish? (Optional)"
-              disabled={sending}
-            />
-            
-            <Turnstile
-              className="route-turnstile"
-            />
-            
-            {actionData?.errors?.email && actionData.errors.email.includes('CAPTCHA') && (
-              <p className="route-captcha-error">{actionData.errors.email}</p>
-            )}
-            
-            <FormButton
-              type="submit"
-              isLoading={sending}
-              loadingText="Submitting..."
-            >
-              Submit Support Ticket
-            </FormButton>
-          </BaseForm>
-        )}
+          ) : (
+            <BaseForm>
+              <FormField
+                component="input"
+                type="text"
+                name="name"
+                placeholder="Your Name"
+                autoComplete="name"
+                error={actionData?.errors?.name}
+                disabled={sending}
+              />
+              
+              <FormField
+                component="input"
+                type="email"
+                name="email"
+                placeholder="Your Email"
+                autoComplete="email"
+                error={actionData?.errors?.email && !actionData.errors.email.includes('CAPTCHA') ? actionData.errors.email : undefined}
+                disabled={sending}
+              />
+              
+              <FormField
+                component="select"
+                name="category"
+                error={actionData?.errors?.category}
+                disabled={sending}
+              >
+                <option value="">Select Issue Category</option>
+                <option value="technical">Technical Issue</option>
+                <option value="account">Account Issue</option>
+                <option value="feature">Feature Request</option>
+                <option value="other">Other</option>
+              </FormField>
+              
+              <FormField
+                component="textarea"
+                name="description"
+                placeholder="Describe what you need help with or a feature request"
+                error={actionData?.errors?.description}
+                disabled={sending}
+              />
+              
+              <FormField
+                component="textarea"
+                name="steps"
+                placeholder="What have you tried so far? (Optional)"
+                disabled={sending}
+              />
+              
+              <FormField
+                component="textarea"
+                name="expected"
+                placeholder="What are you trying to accomplish? (Optional)"
+                disabled={sending}
+              />
+              
+              <Turnstile
+                className="route-turnstile"
+              />
+              
+              {actionData?.errors?.email && actionData.errors.email.includes('CAPTCHA') && (
+                <p className="route-captcha-error">{actionData.errors.email}</p>
+              )}
+              
+              <FormButton
+                type="submit"
+                isLoading={sending}
+                loadingText="Submitting..."
+              >
+                Submit Support Ticket
+              </FormButton>
+            </BaseForm>
+          )}
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }

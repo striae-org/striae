@@ -9,6 +9,7 @@ import { useActionData, useNavigation, Link } from '@remix-run/react';
 import { json } from '@remix-run/cloudflare';
 import { BaseForm, FormField, FormButton, FormMessage } from '~/components/form';
 import { escapeHtml } from '~/utils/html-sanitizer';
+import Footer from '~/components/footer/footer';
 import styles from './signup.module.css';
 
 const MAX_NAME_LENGTH = 128;
@@ -188,112 +189,115 @@ export const Signup = () => {
   };
 
   return (
-    <div id="top" className={`route-centered-container ${styles.container}`}>
-      <Link 
-        to="/#top"
-        viewTransition
-        className="route-brand-logo-link">
-          <div className={`route-brand-logo ${styles.logo}`} />
-      </Link>
-      <Link
-        viewTransition
-        prefetch="intent"
-        to="/#top"
-        className={`route-brand-return-link ${styles.returnLink}`}
-        aria-label="Return to Striae"
-      />
-      <div className={`route-form-wrapper ${styles.formWrapper}`}>
-        <h1 className="route-form-title">Apply for Striae Deployment</h1>
-         <button 
-          type="button"
-          onClick={() => setIsNoticeOpen(true)}
-          className={styles.noticeButton}
-        >
-          Read before applying
-        </button>
-        <Notice 
-        isOpen={isNoticeOpen} 
-        onClose={handleNoticeClose}
-        notice={signupNotice}
-      />
-      {actionData?.success ? (
-        <FormMessage
-          type="success"
-          title="Application Submitted!"
-          message={actionData.message || 'Your deployment application has been submitted successfully!'}
+    <>
+      <div id="top" className={`route-centered-container ${styles.container}`}>
+        <Link 
+          to="/"
+          viewTransition
+          className="route-brand-logo-link">
+            <div className={`route-brand-logo ${styles.logo}`} />
+        </Link>
+        <Link
+          viewTransition
+          prefetch="intent"
+          to="/"
+          className={`route-brand-return-link ${styles.returnLink}`}
+          aria-label="Return to Striae"
         />
-      ) : (
-        <BaseForm>
-          <FormField
-            component="input"
-            type="text"
-            name="firstName"
-            placeholder="First Name"
-            autoComplete="given-name"
-            error={actionData?.errors?.firstName}
-            disabled={sending}
-          />
-          
-          <FormField
-            component="input"
-            type="text"
-            name="lastName"
-            placeholder="Last Name"
-            autoComplete="family-name"
-            error={actionData?.errors?.lastName}
-            disabled={sending}
-          />
-          
-          <FormField
-            component="input"
-            type="email"
-            name="email"
-            placeholder="Work Email Address"
-            autoComplete="email"
-            error={actionData?.errors?.email && !actionData.errors.email.includes('CAPTCHA') ? actionData.errors.email : undefined}
-            disabled={sending}
-          />
-          
-          <FormField
-            component="input"
-            type="text"
-            name="company"
-            placeholder="Agency Name"
-            autoComplete="organization"
-            error={actionData?.errors?.company}
-            disabled={sending}
-          />
-          
-          <FormField
-            component="textarea"
-            name="comments"            
-            placeholder="Tell us about your deployment needs, questions, or any custom requirements."
-            maxLength={MAX_COMMENTS_LENGTH}
-            error={actionData?.errors?.comments}
-            disabled={sending}
-          />
-
-          <Turnstile
-            className="route-turnstile"
-            theme="light"
-          />
-          
-          {actionData?.errors?.email && actionData.errors.email.includes('CAPTCHA') && (
-            <p className="route-captcha-error">{actionData.errors.email}</p>
-          )}
-          
-          <FormButton
-            type="submit"
-            isLoading={sending}
-            loadingText="Submitting..."
-            disabled={!hasReadNotice}
-            title={!hasReadNotice ? 'Please read the notice first' : undefined}
+        <div className={`route-form-wrapper ${styles.formWrapper}`}>
+          <h1 className="route-form-title">Apply for Striae Deployment</h1>
+           <button 
+            type="button"
+            onClick={() => setIsNoticeOpen(true)}
+            className={styles.noticeButton}
           >
-            {!hasReadNotice ? 'Please read the notice first' : 'Submit Application'}
-          </FormButton>
-        </BaseForm>
-      )}
+            Read before applying
+          </button>
+          <Notice 
+          isOpen={isNoticeOpen} 
+          onClose={handleNoticeClose}
+          notice={signupNotice}
+        />
+        {actionData?.success ? (
+          <FormMessage
+            type="success"
+            title="Application Submitted!"
+            message={actionData.message || 'Your deployment application has been submitted successfully!'}
+          />
+        ) : (
+          <BaseForm>
+            <FormField
+              component="input"
+              type="text"
+              name="firstName"
+              placeholder="First Name"
+              autoComplete="given-name"
+              error={actionData?.errors?.firstName}
+              disabled={sending}
+            />
+            
+            <FormField
+              component="input"
+              type="text"
+              name="lastName"
+              placeholder="Last Name"
+              autoComplete="family-name"
+              error={actionData?.errors?.lastName}
+              disabled={sending}
+            />
+            
+            <FormField
+              component="input"
+              type="email"
+              name="email"
+              placeholder="Work Email Address"
+              autoComplete="email"
+              error={actionData?.errors?.email && !actionData.errors.email.includes('CAPTCHA') ? actionData.errors.email : undefined}
+              disabled={sending}
+            />
+            
+            <FormField
+              component="input"
+              type="text"
+              name="company"
+              placeholder="Agency Name"
+              autoComplete="organization"
+              error={actionData?.errors?.company}
+              disabled={sending}
+            />
+            
+            <FormField
+              component="textarea"
+              name="comments"            
+              placeholder="Tell us about your deployment needs, questions, or any custom requirements."
+              maxLength={MAX_COMMENTS_LENGTH}
+              error={actionData?.errors?.comments}
+              disabled={sending}
+            />
+
+            <Turnstile
+              className="route-turnstile"
+              theme="light"
+            />
+            
+            {actionData?.errors?.email && actionData.errors.email.includes('CAPTCHA') && (
+              <p className="route-captcha-error">{actionData.errors.email}</p>
+            )}
+            
+            <FormButton
+              type="submit"
+              isLoading={sending}
+              loadingText="Submitting..."
+              disabled={!hasReadNotice}
+              title={!hasReadNotice ? 'Please read the notice first' : undefined}
+            >
+              {!hasReadNotice ? 'Please read the notice first' : 'Submit Application'}
+            </FormButton>
+          </BaseForm>
+        )}
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }

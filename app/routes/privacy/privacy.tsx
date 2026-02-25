@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { baseMeta } from '~/utils/meta';
 import { Link } from '@remix-run/react';
+import Footer from '~/components/footer/footer';
 import styles from './privacy.module.css';
 
 export const meta = () => {
@@ -12,22 +13,23 @@ export const meta = () => {
 
 export const Privacy = () => {
   return (
-    <div id="top" className={`route-legal-container ${styles.container}`}>
-      <Link 
-        viewTransition
-        prefetch="intent"
-        to="/#top" 
-        className="route-brand-logo-link">
-        <div className={`route-brand-logo ${styles.logo}`} />
-      </Link>
-      <Link
-        viewTransition
-        prefetch="intent"
-        to="/#top"
-        className={`route-brand-return-link ${styles.returnLink}`}
-        aria-label="Return to Striae"
-      />
-      <div className={styles.content}>
+    <>
+      <div id="top" className={`route-legal-container ${styles.container}`}>
+        <Link 
+          viewTransition
+          prefetch="intent"
+          to="/" 
+          className="route-brand-logo-link">
+          <div className={`route-brand-logo ${styles.logo}`} />
+        </Link>
+        <Link
+          viewTransition
+          prefetch="intent"
+          to="/"
+          className={`route-brand-return-link ${styles.returnLink}`}
+          aria-label="Return to Striae"
+        />
+        <div className={styles.content}>
         <h1>Privacy Policy</h1>
         <p className={styles.lastUpdated}>Last updated: February 20, 2026</p>        
         <p>This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>
@@ -518,7 +520,9 @@ export const Privacy = () => {
 </li>
 </ul>
         </section>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }
