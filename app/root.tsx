@@ -78,7 +78,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body className="flex flex-col h-screen w-full overflow-x-hidden">
         <div id="__page-top" />
         <ThemeProvider theme={theme} className="">
-        <main className={styles.pageBackground}>
+        <main>
           {children}
         </main>
         {showReturnToTop && (
