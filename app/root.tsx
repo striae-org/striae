@@ -124,10 +124,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="flex flex-col min-h-svh w-screen max-w-full overflow-x-hidden">
+      <body className="flex flex-col h-screen w-full overflow-x-hidden">
         <div id="__page-top" />
         <ThemeProvider theme={theme} className="">
-        <main className="flex-grow w-full">
+        <main>
           {children}
         </main>
         {showReturnToTop && hasScrolledPastThreshold && (
@@ -178,9 +178,9 @@ export function ErrorBoundary() {
         <head>
           <title>{`${error.status} ${error.statusText}`}</title>          
         </head>
-        <body className="flex flex-col min-h-svh">
+        <body className="flex flex-col h-screen">
           <ThemeProvider theme="light" className="">          
-          <main className="flex-grow">
+          <main>
             <div className={styles.errorContainer}>
               <div className={styles.errorTitle}>{error.status}</div>
               <p className={styles.errorMessage}>{error.statusText}</p>
@@ -208,9 +208,9 @@ export function ErrorBoundary() {
       <head>
         <title>Oops! Something went wrong</title>       
       </head>
-      <body className="flex flex-col min-h-svh">
+      <body className="flex flex-col h-screen">
         <ThemeProvider theme="light" className="">        
-        <main className="flex-grow">
+        <main>
           <div className={styles.errorContainer}>
             <div className={styles.errorTitle}>500</div>
             <p className={styles.errorMessage}>Something went wrong. Please try again later.</p>
