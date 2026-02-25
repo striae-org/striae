@@ -47,7 +47,7 @@ export const useHashlessScrollNavigation = () => {
         hash: targetHash,
       }));
 
-      navigate(cleanPath);
+      navigate(cleanPath, { viewTransition: true });
     };
 
     document.addEventListener('click', handleHashLinkClick, true);
