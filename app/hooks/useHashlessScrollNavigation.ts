@@ -28,7 +28,9 @@ export const useHashlessScrollNavigation = () => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
       const url = new URL(anchor.href, window.location.origin);
-      if (url.origin !== window.location.origin || !url.hash) return;
+      if (url.origin !== window.location.origin) return;
+
+      const targetHash = url.hash && url.hash !== '#' ? url.hash : '#top';
 
       event.preventDefault();
 
@@ -36,13 +38,13 @@ export const useHashlessScrollNavigation = () => {
       const currentPath = `${location.pathname}${location.search}`;
 
       if (cleanPath === currentPath) {
-        scrollToHashTarget(url.hash);
+        scrollToHashTarget(targetHash);
         return;
       }
 
       sessionStorage.setItem(PENDING_HASH_SCROLL_KEY, JSON.stringify({
         path: cleanPath,
-        hash: url.hash,
+        hash: targetHash,
       }));
 
       navigate(cleanPath);
