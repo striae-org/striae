@@ -7,12 +7,11 @@ import freeEmailDomains from 'free-email-domains';
 import { verifyTurnstileToken } from '~/utils/turnstile';
 import { useActionData, useNavigation, Link } from '@remix-run/react';
 import { json } from '@remix-run/cloudflare';
-import { BaseForm, FormField, FormButton, FormMessage } from '~/components/form';
+import { BaseForm, FormField, FormButton, FormMessage, FormToggle } from '~/components/form';
 import { escapeHtml } from '~/utils/html-sanitizer';
 import styles from './signup.module.css';
 
 const MAX_NAME_LENGTH = 128;
-const MAX_COMMENTS_LENGTH = 5000;
 
 interface ActionData {
     success?: boolean;
@@ -22,7 +21,9 @@ interface ActionData {
       lastName?: string;
       email?: string;
       company?: string;
-      comments?: string;
+      agencyDomain?: string;
+      emailConsent?: string;
+      agencyConsent?: string;
     };
 }
 
@@ -40,11 +41,25 @@ interface ActionData {
     return !!emailDomain && !freeEmailDomains.includes(emailDomain);
   };
 
+  // Agency domain validation
+  const validateAgencyDomain = (domain: string): boolean => {
+    // Domain should start with @ and have valid format
+    const domainRegex = /^@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return domainRegex.test(domain);
+  };
+
+  // Check if email matches agency domain
+  const emailMatchesDomain = (email: string, agencyDomain: string): boolean => {
+    const emailDomain = email.toLowerCase().split('@')[1];
+    const expectedDomain = agencyDomain.toLowerCase().substring(1); // Remove @ prefix
+    return emailDomain === expectedDomain;
+  };
+
 export const meta = () => {
   return baseMeta({
-    title: 'Apply for Striae Deployment',
+    title: 'Register Agency for Striae Access',
     description:
-      'Complete the form to apply for Striae deployment.',
+      'Complete the form to register your agency for Striae access.',
   });
 };
 
@@ -54,8 +69,10 @@ export async function action({ request, context }: { request: Request, context: 
   const lastName = formData.get('lastName') as string;
   const email = formData.get('email') as string;
   const company = formData.get('company') as string;
-  const comments = (formData.get('comments') as string | null)?.trim() || '';
-  const errors: { firstName?: string; lastName?: string; email?: string; company?: string; comments?: string; } = {};
+  const agencyDomain = formData.get('agencyDomain') as string;
+  const emailConsent = formData.get('emailConsent') === 'on';
+  const agencyConsent = formData.get('agencyConsent') === 'on';
+  const errors: { firstName?: string; lastName?: string; email?: string; company?: string; agencyDomain?: string; emailConsent?: string; agencyConsent?: string; } = {};
 
   if (!firstName || firstName.length > MAX_NAME_LENGTH) {
     errors.firstName = 'Please enter your first name';
@@ -73,8 +90,20 @@ export async function action({ request, context }: { request: Request, context: 
     errors.company = 'Please enter your agency name';
   }
 
-  if (comments.length > MAX_COMMENTS_LENGTH) {
-    errors.comments = `Please keep comments under ${MAX_COMMENTS_LENGTH} characters`;
+  if (!agencyDomain || !validateAgencyDomain(agencyDomain)) {
+    errors.agencyDomain = 'Please enter a valid agency domain (e.g., @agency.gov)';
+  }
+
+  if (email && agencyDomain && !errors.email && !errors.agencyDomain && !emailMatchesDomain(email, agencyDomain)) {
+    errors.email = 'Email address must match the agency domain';
+  }
+
+  if (!emailConsent) {
+    errors.emailConsent = 'You must agree to receive email communications';
+  }
+
+  if (!agencyConsent) {
+    errors.agencyConsent = 'You must confirm that you represent this agency';
   }
 
   if (Object.keys(errors).length > 0) {
@@ -100,7 +129,7 @@ export async function action({ request, context }: { request: Request, context: 
       },
       body: JSON.stringify({
         "from": {
-          "name": "Striae Deployment Application",
+          "name": "Striae Agency Registration",
           "email": "info@striae.org"
         },
         "to": [          
@@ -115,38 +144,46 @@ export async function action({ request, context }: { request: Request, context: 
             "email": "info@striae.org"
           }
         ],
-        "subject": "Striae Deployment Application Request",
+        "subject": "Striae Agency Registration Request",
         "ContentType": "HTML",
         "HTMLContent": `<html><body>
-          <h2>New Striae Deployment Application</h2>
+          <h2>New Striae Agency Registration Request</h2>
           <p><strong>Representative Name:</strong> ${escapeHtml(firstName)} ${escapeHtml(lastName)}</p>
           <p><strong>Email:</strong> ${escapeHtml(email)}</p>
           <p><strong>Agency Name:</strong> ${escapeHtml(company)}</p>
-          <p><strong>Comments / Questions / Customization Requests:</strong><br />${escapeHtml(comments) || 'None provided'}</p>
+          <p><strong>Agency Domain:</strong> ${escapeHtml(agencyDomain)}</p>
+          <p><strong>Email Consent:</strong> ${emailConsent}</p>
+          <p><strong>Agency Representation Confirmed:</strong> ${agencyConsent}</p>
           
           <hr style="margin: 20px 0; border: 1px solid #ccc;">
           
-          <h3>Deployment Application Received</h3>
-          <p>Your deployment application has been received and is being processed. The Striae team will follow up with next steps.</p>
+          <h3>Agency Registration Request Received</h3>
+          <p>Your agency registration request has been received and is being processed. Once approved, all users with email addresses from the ${escapeHtml(agencyDomain)} domain will be able to access Striae. You will receive an email notification once your agency domain has been added to the access list.</p>
+                             
+          <p><strong>Important:</strong> After approval, users from your agency will require a one-time access code that will be emailed to them to access the login screen. This code will be valid for one month from the date of issuance.</p>
           
-          <p>Thank you for your interest in deploying Striae!</p>
+          <p>Thank you for your interest in registering your agency with Striae!</p>
         </body></html>`,
-        "PlainContent": `Striae Deployment Application Request:
+        "PlainContent": `Striae Agency Registration Request:
 
         Representative Name: ${firstName} ${lastName}
         Email: ${email}
         Agency Name: ${company}
-        Comments / Questions / Customization Requests: ${comments || 'None provided'}
+        Agency Domain: ${agencyDomain}
+        Email Consent: ${emailConsent}
+        Agency Representation Confirmed: ${agencyConsent}
         
         ==========================================
         
-        Deployment Application Received
+        Agency Registration Request Received
 
-        Your deployment application has been received and is being processed. The Striae team will follow up with next steps.
+        Your agency registration request has been received and is being processed. Once approved, all users with email addresses from the ${agencyDomain} domain will be able to access Striae. You will receive an email notification once your agency domain has been added to the access list.
+       
+        Important: After approval, users from your agency will require a one-time access code that will be emailed to them to access the login screen. This code will be valid for one month from the date of issuance.
         
-        Thank you for your interest in deploying Striae!`,
+        Thank you for your interest in registering your agency with Striae!`,
         "Tags": [
-          "deployment-application"
+          "agency-registration"
         ],
         "Headers": {
           "X-Mailer": "striae.org"
@@ -160,7 +197,7 @@ export async function action({ request, context }: { request: Request, context: 
 
     return json<ActionData>({
       success: true,
-      message: 'Your deployment application has been submitted successfully! Please look for a confirmation email from the Striae team.'
+      message: 'Your agency registration has been submitted successfully! Please look for a confirmation email once your agency has been registered for access.'
     });
   } catch (error) {
     console.error('Error:', error);
@@ -182,7 +219,7 @@ export const Signup = () => {
   };
 
   const signupNotice = {
-    title: 'Before You Apply',
+    title: 'Before You Register',
     content: <NoticeText />,
     buttonText: 'I Have Read and Understand'
   };
@@ -203,13 +240,13 @@ export const Signup = () => {
         aria-label="Return to Striae"
       />
       <div className={`route-form-wrapper ${styles.formWrapper}`}>
-        <h1 className="route-form-title">Apply for Striae Deployment</h1>
+        <h1 className="route-form-title">Register Agency for Striae Access</h1>
          <button 
           type="button"
           onClick={() => setIsNoticeOpen(true)}
           className={styles.noticeButton}
         >
-          Read before applying
+          Read before registering
         </button>
         <Notice 
         isOpen={isNoticeOpen} 
@@ -248,7 +285,7 @@ export const Signup = () => {
             component="input"
             type="email"
             name="email"
-            placeholder="Work Email Address"
+            placeholder="Email Address (must match agency domain)"
             autoComplete="email"
             error={actionData?.errors?.email && !actionData.errors.email.includes('CAPTCHA') ? actionData.errors.email : undefined}
             disabled={sending}
@@ -265,12 +302,27 @@ export const Signup = () => {
           />
           
           <FormField
-            component="textarea"
-            name="comments"            
-            placeholder="Tell us about your deployment needs, questions, or any custom requirements."
-            maxLength={MAX_COMMENTS_LENGTH}
-            error={actionData?.errors?.comments}
+            component="input"
+            type="text"
+            name="agencyDomain"
+            placeholder="Agency Domain (e.g., @agency.gov)"
+            error={actionData?.errors?.agencyDomain}
             disabled={sending}
+          />
+          
+          <FormToggle
+            name="emailConsent"
+            label="I agree to receive emails from striae.org"
+            required
+            disabled={sending}
+          />
+
+          <FormToggle
+            name="agencyConsent"
+            label="I warrant that I represent this agency and want to register my agency's domain for Striae access"
+            required
+            disabled={sending}
+            error={actionData?.errors?.agencyConsent}
           />
 
           <Turnstile
@@ -289,7 +341,7 @@ export const Signup = () => {
             disabled={!hasReadNotice}
             title={!hasReadNotice ? 'Please read the notice first' : undefined}
           >
-            {!hasReadNotice ? 'Please read the notice first' : 'Submit Application'}
+            {!hasReadNotice ? 'Please read the notice first' : 'Register Agency'}
           </FormButton>
         </BaseForm>
       )}
