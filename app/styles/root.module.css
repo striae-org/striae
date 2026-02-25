@@ -12,19 +12,8 @@
 
   .pageBackground {
     min-height: 100vh;
-    background-color: var(--black);
-    background-image:
-      linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.15) 0%,
-        rgba(0, 0, 0, 0.78) 45%,
-        rgba(0, 0, 0, 0.95) 70%,
-        rgba(0, 0, 0, 1) 100%
-      ),
-      url('/assets/striae.jpg');
-    background-repeat: no-repeat, no-repeat;
-    background-position: top center, top center;
-    background-size: 100% 100%, 100% auto;
+    background: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.95)),
+      url('/assets/striae.jpg') center/cover no-repeat;
     background-blend-mode: normal;
   }
 
