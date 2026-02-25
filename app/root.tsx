@@ -25,6 +25,7 @@ import styles from '~/styles/root.module.css';
 import './tailwind.css';
 
 const GTM_ID = 'GTM-NHFG8CWL';
+const ENABLE_GTM = import.meta.env.PROD;
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -73,7 +74,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme={theme}>
       <head>
-        <GoogleTagManagerHead id={GTM_ID} />
+        {ENABLE_GTM && <GoogleTagManagerHead id={GTM_ID} />}
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000" />
@@ -83,7 +84,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="flex flex-col h-screen w-full overflow-x-hidden">
-        <GoogleTagManagerNoScript id={GTM_ID} />
+        {ENABLE_GTM && <GoogleTagManagerNoScript id={GTM_ID} />}
         <div id="__page-top" />
         <ThemeProvider theme={theme} className="">
         <main>
@@ -132,11 +133,11 @@ export function ErrorBoundary() {
     return (
       <html lang="en">
         <head>
-          <GoogleTagManagerHead id={GTM_ID} />
+          {ENABLE_GTM && <GoogleTagManagerHead id={GTM_ID} />}
           <title>{`${error.status} ${error.statusText}`}</title>          
         </head>
         <body className="flex flex-col h-screen">
-          <GoogleTagManagerNoScript id={GTM_ID} />
+          {ENABLE_GTM && <GoogleTagManagerNoScript id={GTM_ID} />}
           <ThemeProvider theme="light" className="">          
           <main>
             <div className={styles.errorContainer}>
@@ -162,11 +163,11 @@ export function ErrorBoundary() {
   return (
     <html lang="en">
       <head>
-        <GoogleTagManagerHead id={GTM_ID} />
+        {ENABLE_GTM && <GoogleTagManagerHead id={GTM_ID} />}
         <title>Oops! Something went wrong</title>       
       </head>
       <body className="flex flex-col h-screen">
-        <GoogleTagManagerNoScript id={GTM_ID} />
+        {ENABLE_GTM && <GoogleTagManagerNoScript id={GTM_ID} />}
         <ThemeProvider theme="light" className="">        
         <main>
           <div className={styles.errorContainer}>
