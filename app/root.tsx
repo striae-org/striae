@@ -9,16 +9,16 @@ import {
   useRouteError,
   Link,
   useLocation,
-  useMatches,
-  useNavigate
+  useMatches
 } from "@remix-run/react";
-import { useEffect } from 'react';
 import { 
   ThemeProvider,
   themeStyles 
 } from '~/components/theme-provider/theme-provider';
 import { AuthProvider } from '~/components/auth/auth-provider';
 import { Icon } from '~/components/icon/icon';
+import { useHashlessScrollNavigation } from '~/hooks/useHashlessScrollNavigation';
+import { useReturnToTop } from '~/hooks/useReturnToTop';
 import styles from '~/styles/root.module.css';
 import './tailwind.css';
 
@@ -60,102 +60,11 @@ export const links: LinksFunction = () => [
 export function Layout({ children }: { children: React.ReactNode }) {
   const theme = 'light';
   const location = useLocation();
-  const navigate = useNavigate();
   const isAuthPath = location.pathname.startsWith('/auth');
   const showReturnToTop = !isAuthPath;
 
-  const scrollToHashTarget = (hash: string) => {
-    const targetId = hash.startsWith('#') ? hash.slice(1) : hash;
-    if (!targetId) return;
-
-    const targetElement = document.getElementById(targetId);
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  useEffect(() => {
-    const handleHashLinkClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      const anchor = target?.closest('a[href]') as HTMLAnchorElement | null;
-
-      if (!anchor) return;
-      if (anchor.target === '_blank' || anchor.hasAttribute('download')) return;
-      if (event.defaultPrevented || event.button !== 0) return;
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-
-      const url = new URL(anchor.href, window.location.origin);
-      if (url.origin !== window.location.origin || !url.hash) return;
-
-      event.preventDefault();
-
-      const cleanPath = `${url.pathname}${url.search}`;
-      const currentPath = `${location.pathname}${location.search}`;
-
-      if (cleanPath === currentPath) {
-        scrollToHashTarget(url.hash);
-        return;
-      }
-
-      sessionStorage.setItem('pendingHashScroll', JSON.stringify({
-        path: cleanPath,
-        hash: url.hash,
-      }));
-
-      navigate(cleanPath);
-    };
-
-    document.addEventListener('click', handleHashLinkClick, true);
-
-    return () => {
-      document.removeEventListener('click', handleHashLinkClick, true);
-    };
-  }, [location.pathname, location.search, navigate]);
-
-  useEffect(() => {
-    const pending = sessionStorage.getItem('pendingHashScroll');
-    if (!pending) return;
-
-    try {
-      const parsed = JSON.parse(pending) as { path?: string; hash?: string };
-      const currentPath = `${location.pathname}${location.search}`;
-      if (parsed.path !== currentPath || !parsed.hash) return;
-
-      scrollToHashTarget(parsed.hash);
-      sessionStorage.removeItem('pendingHashScroll');
-    } catch {
-      sessionStorage.removeItem('pendingHashScroll');
-    }
-  }, [location.pathname, location.search]);
-
-  useEffect(() => {
-    if (!location.hash) return;
-
-    scrollToHashTarget(location.hash);
-
-    const cleanUrl = `${location.pathname}${location.search}`;
-    window.history.replaceState(window.history.state, '', cleanUrl);
-  }, [location.hash, location.pathname, location.search]);
-
-  const handleReturnToTop = () => {
-    const topAnchor = document.getElementById('__page-top');
-    if (topAnchor) {
-      topAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    const scrollOptions: ScrollToOptions = { top: 0, behavior: 'smooth' };
-    window.scrollTo(scrollOptions);
-    document.documentElement.scrollTo(scrollOptions);
-    document.body.scrollTo(scrollOptions);
-    (document.scrollingElement as HTMLElement | null)?.scrollTo(scrollOptions);
-
-    const scrollableElements = document.querySelectorAll<HTMLElement>('main, [data-scroll-container], [class*="scroll"]');
-    scrollableElements.forEach((element) => {
-      if (element.scrollHeight > element.clientHeight) {
-        element.scrollTo(scrollOptions);
-      }
-    });
-  };
+  useHashlessScrollNavigation();
+  const handleReturnToTop = useReturnToTop();
 
   return (
     <html lang="en" data-theme={theme}>
