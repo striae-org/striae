@@ -18,7 +18,7 @@ import {
 import Footer from '~/components/footer/footer';
 import { AuthProvider } from '~/components/auth/auth-provider';
 import { Icon } from '~/components/icon/icon';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import styles from '~/styles/root.module.css';
 import './tailwind.css';
 
@@ -55,18 +55,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const isAuthPath = location.pathname.startsWith('/auth');
   const showReturnToTop = !isAuthPath;
   const showFooter = !isAuthPath;
-  const [hasScrolledPastThreshold, setHasScrolledPastThreshold] = useState(false);
 
   const handleReturnToTop = () => {
     const topAnchor = document.getElementById('__page-top');
     if (topAnchor) {
       topAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    const scrollOptions: ScrollToOptions = { top: 0, behavior: 'smooth' };
+    window.scrollTo(scrollOptions);
+    document.documentElement.scrollTo(scrollOptions);
+    document.body.scrollTo(scrollOptions);
+    (document.scrollingElement as HTMLElement | null)?.scrollTo(scrollOptions);
+
+    const scrollableElements = document.querySelectorAll<HTMLElement>('main, [data-scroll-container], [class*="scroll"]');
+    scrollableElements.forEach((element) => {
+      if (element.scrollHeight > element.clientHeight) {
+        element.scrollTo(scrollOptions);
+      }
+    });
   };
 
   useEffect(() => {
@@ -79,39 +86,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       }
     }
   }, [location.hash]);
-
-  useEffect(() => {
-    if (!showReturnToTop) {
-      setHasScrolledPastThreshold(false);
-      return;
-    }
-
-    const updateVisibility = () => {
-      const threshold = window.innerHeight * 0.2;
-      const documentScrollTop =
-        window.pageYOffset ||
-        document.documentElement.scrollTop ||
-        document.body.scrollTop ||
-        0;
-
-      const activeElement = document.scrollingElement as HTMLElement | null;
-      const elementScrollTop = activeElement?.scrollTop ?? 0;
-      const scrollTop = Math.max(documentScrollTop, elementScrollTop);
-
-      setHasScrolledPastThreshold(scrollTop >= threshold);
-    };
-
-    requestAnimationFrame(updateVisibility);
-    window.addEventListener('scroll', updateVisibility, { passive: true });
-    document.addEventListener('scroll', updateVisibility, { passive: true, capture: true });
-    window.addEventListener('resize', updateVisibility);
-
-    return () => {
-      window.removeEventListener('scroll', updateVisibility);
-      document.removeEventListener('scroll', updateVisibility, true);
-      window.removeEventListener('resize', updateVisibility);
-    };
-  }, [showReturnToTop, location.pathname]);
 
   return (
     <html lang="en" data-theme={theme}>
@@ -130,7 +104,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <main>
           {children}
         </main>
-        {showReturnToTop && hasScrolledPastThreshold && (
+        {showReturnToTop && (
           <button
             type="button"
             className={styles.returnToTop}
