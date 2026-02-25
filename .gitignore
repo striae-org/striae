@@ -8,6 +8,7 @@ scripts/
 tests/
 archive/
 
+app/routes/auth
 app/routes/home/home.tsx
 app/routes/home/home.module.css
 
