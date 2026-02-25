@@ -23,9 +23,8 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background: url('/assets/striae.jpg') top center / cover no-repeat;
-
     z-index: 0;
     pointer-events: none;
   }
@@ -37,9 +36,9 @@
     background: linear-gradient(
       to bottom,
       rgba(0, 0, 0, 0.15) 0%,
-      rgba(0, 0, 0, 0.65) 60%,
-      rgba(0, 0, 0, 0.75) 70%,
-      rgba(0, 0, 0, 0.8) 100%
+      rgba(0, 0, 0, 0.78) 45%,
+      rgba(0, 0, 0, 0.95) 70%,
+      rgba(0, 0, 0, 1) 100%
     );
     z-index: 1;
     pointer-events: none;
