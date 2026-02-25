@@ -10,6 +10,13 @@
     }
   }
 
+  .pageBackground {
+    min-height: 100vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.95)),
+      url('/assets/striae.jpg') center/cover no-repeat;
+    background-blend-mode: normal;
+  }
+
   .skip {
     isolation: isolate;
     color: var(--background);
