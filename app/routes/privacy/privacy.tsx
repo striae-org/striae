@@ -250,82 +250,12 @@ export const Privacy = () => {
         </section>
         <section className={styles.section}>
           <h2 id="cookie-declaration">Cookie Declaration</h2>
-          <p className={styles.cookieDeclarationDialogText}>
-            This section lists cookies used to support essential site operation, consent management, and security.
-          </p>
-          <p className={styles.cookieDeclarationIntro}>
-            The cookie list below is maintained manually and may be updated when providers, services, or technical controls change.
-          </p>
-          <p>Consent domains: striae.org, www.striae.org</p>
-          <p className={styles.cookieDeclarationLastUpdated}>Last updated: February 25, 2026</p>
-
-          <div className={styles.cookieDeclarationType}>
-            <p className={styles.cookieDeclarationTypeHeader}>Necessary (3)</p>
-            <p className={styles.cookieDeclarationTypeDescription}>
-              Necessary cookies help make the site usable by enabling basic functions like consent tracking and security. The site cannot function properly without these cookies.
-            </p>
-            <table className={styles.cookieDeclarationTable}>
-              <colgroup>
-                <col className={styles.cookieColName} />
-                <col className={styles.cookieColProvider} />
-                <col className={styles.cookieColPurpose} />
-                <col className={styles.cookieColExpiry} />
-                <col className={styles.cookieColType} />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th scope="col" className={styles.cookieDeclarationTableHeader}>Name</th>
-                  <th scope="col" className={styles.cookieDeclarationTableHeader}>Provider</th>
-                  <th scope="col" className={styles.cookieDeclarationTableHeader}>Purpose</th>
-                  <th scope="col" className={styles.cookieDeclarationTableHeader}>Expiry</th>
-                  <th scope="col" className={styles.cookieDeclarationTableHeader}>Type</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className={styles.cookieDeclarationTableCell}>CookieConsent</td>
-                  <td className={styles.cookieDeclarationTableCell}>striae.org</td>
-                  <td className={styles.cookieDeclarationTableCell}>Stores the user's cookie consent state for the current domain.</td>
-                  <td className={styles.cookieDeclarationTableCell}>1 year</td>
-                  <td className={styles.cookieDeclarationTableCell}>HTTP Cookie</td>
-                </tr>
-                <tr>
-                  <td className={styles.cookieDeclarationTableCell}>__cf_bm</td>
-                  <td className={styles.cookieDeclarationTableCell}>.striae.org (Cloudflare)</td>
-                  <td className={styles.cookieDeclarationTableCell}>Supports bot management and protects the service against malicious traffic.</td>
-                  <td className={styles.cookieDeclarationTableCell}>30 minutes</td>
-                  <td className={styles.cookieDeclarationTableCell}>HTTP Cookie</td>
-                </tr>
-                <tr>
-                  <td className={styles.cookieDeclarationTableCell}>cf_clearance</td>
-                  <td className={styles.cookieDeclarationTableCell}>.striae.org (Cloudflare)</td>
-                  <td className={styles.cookieDeclarationTableCell}>Stores proof of challenge passage to enable trusted requests and maintain security controls.</td>
-                  <td className={styles.cookieDeclarationTableCell}>Up to 1 year</td>
-                  <td className={styles.cookieDeclarationTableCell}>HTTP Cookie</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className={styles.cookieDeclarationType}>
-            <p className={styles.cookieDeclarationTypeHeader}>Preference (0)</p>
-            <p className={styles.cookieDeclarationTypeDescription}>No preference cookies are currently declared.</p>
-          </div>
-
-          <div className={styles.cookieDeclarationType}>
-            <p className={styles.cookieDeclarationTypeHeader}>Statistic (0)</p>
-            <p className={styles.cookieDeclarationTypeDescription}>No statistic cookies are currently declared.</p>
-          </div>
-
-          <div className={styles.cookieDeclarationType}>
-            <p className={styles.cookieDeclarationTypeHeader}>Marketing (0)</p>
-            <p className={styles.cookieDeclarationTypeDescription}>No marketing cookies are currently declared.</p>
-          </div>
-
-          <div className={styles.cookieDeclarationType}>
-            <p className={styles.cookieDeclarationTypeHeader}>Unclassified (0)</p>
-            <p className={styles.cookieDeclarationTypeDescription}>No unclassified cookies are currently declared.</p>
-          </div>
+          <script
+            id="CookieDeclaration"
+            src="https://consent.cookiebot.com/3f0f9bb0-ff09-44b9-a911-7bd88876f7e0/cd.js"
+            type="text/javascript"
+            async
+          />
         </section>
         <section className={styles.section}>          
           <h2>CCPA/CPRA Privacy Notice</h2>
