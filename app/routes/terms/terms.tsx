@@ -2,7 +2,7 @@
 import { baseMeta } from '~/utils/meta';
 import { Link } from '@remix-run/react';
 import Footer from '~/components/footer/footer';
-import styles from './terms.module.css';
+import styles from '~/styles/legal-pages.module.css';
 
 export const meta = () => {
   return baseMeta({

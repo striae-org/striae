@@ -3,7 +3,7 @@ import { baseMeta } from '~/utils/meta';
 import { Link } from '@remix-run/react';
 import { useEffect, useRef } from 'react';
 import Footer from '~/components/footer/footer';
-import styles from './privacy.module.css';
+import styles from '~/styles/legal-pages.module.css';
 
 export const meta = () => {
   return baseMeta({

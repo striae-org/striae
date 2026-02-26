@@ -17,12 +17,14 @@
   color: var(--textBody);
 }
 
+.content h2 {
+  font-size: var(--fontSizeH5);
+}
+
 .section {
   margin-bottom: var(--space2XL);
 }
 
-.section h2, 
-.section h3,
 .section h4 {
   color: var(--textTitle);
   margin-bottom: var(--spaceM);
@@ -30,6 +32,11 @@
 
 .section h2 {
   font-size: var(--fontSizeH5);
+  margin-top: var(--spaceXL);
+}
+
+.section h2:first-child {
+  margin-top: 0;
 }
 
 .section h3 {
@@ -41,7 +48,7 @@
   font-size: var(--fontSizeBodyL);
 }
 
-.section p, 
+.section p,
 .section ul {
   margin-bottom: var(--spaceM);
   color: var(--textBody);
@@ -50,6 +57,13 @@
 .section ul {
   padding-left: var(--spaceXL);
   list-style-type: disc;
+}
+
+.section ol {
+  padding-left: var(--spaceXL);
+  list-style-type: decimal;
+  margin-bottom: var(--spaceM);
+  color: var(--textBody);
 }
 
 .section li {
@@ -92,7 +106,7 @@
   .container {
     padding: var(--spaceM);
   }
-  
+
   .content {
     padding: var(--spaceXL);
   }
