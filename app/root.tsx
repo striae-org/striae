@@ -22,23 +22,6 @@ import { useReturnToTop } from '~/hooks/useReturnToTop';
 import styles from '~/styles/root.module.css';
 import './tailwind.css';
 
-const gcmScript = `window.dataLayer = window.dataLayer || [];
-function gtag() {
-  dataLayer.push(arguments);
-}
-gtag("consent", "default", {
-  ad_personalization: "denied",
-  ad_storage: "denied",
-  ad_user_data: "denied",
-  analytics_storage: "denied",
-  functionality_storage: "denied",
-  personalization_storage: "denied",
-  security_storage: "granted",
-  wait_for_update: 500,
-});
-gtag("set", "ads_data_redaction", true);
-gtag("set", "url_passthrough", false);`;
-
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -76,7 +59,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           data-blockingmode="auto"
           type="text/javascript"
         />
-        <script data-cookieconsent="ignore" dangerouslySetInnerHTML={{ __html: gcmScript }} />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000" />
@@ -134,14 +116,6 @@ export function ErrorBoundary() {
     return (
       <html lang="en">
         <head>
-          <script
-            id="Cookiebot"
-            src="https://consent.cookiebot.com/uc.js"
-            data-cbid="3f0f9bb0-ff09-44b9-a911-7bd88876f7e0"
-            data-blockingmode="auto"
-            type="text/javascript"
-          />
-          <script data-cookieconsent="ignore" dangerouslySetInnerHTML={{ __html: gcmScript }} />
           <title>{`${error.status} ${error.statusText}`}</title>          
         </head>
         <body className="flex flex-col h-screen">
@@ -170,14 +144,6 @@ export function ErrorBoundary() {
   return (
     <html lang="en">
       <head>
-        <script
-          id="Cookiebot"
-          src="https://consent.cookiebot.com/uc.js"
-          data-cbid="3f0f9bb0-ff09-44b9-a911-7bd88876f7e0"
-          data-blockingmode="auto"
-          type="text/javascript"
-        />
-        <script data-cookieconsent="ignore" dangerouslySetInnerHTML={{ __html: gcmScript }} />
         <title>Oops! Something went wrong</title>       
       </head>
       <body className="flex flex-col h-screen">
