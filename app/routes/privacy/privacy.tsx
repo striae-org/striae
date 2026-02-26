@@ -249,7 +249,7 @@ export const Privacy = () => {
 <p>The Service is only available to individuals 18 years and older who are employed at a forensic laboratory or related company. We do not knowingly collect data from minors.</p>
         </section>
         <section className={styles.section}>
-          <h2>Cookie Declaration</h2>
+          <h2 id="cookie-declaration">Cookie Declaration</h2>
           <p className={styles.cookieDeclarationDialogText}>
             This section lists cookies used to support essential site operation, consent management, and security.
           </p>
