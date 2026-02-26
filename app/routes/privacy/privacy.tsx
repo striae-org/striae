@@ -1,8 +1,9 @@
 /* eslint-disable react/no-unescaped-entities */
 import { baseMeta } from '~/utils/meta';
 import { Link } from '@remix-run/react';
+import { useEffect, useRef } from 'react';
 import Footer from '~/components/footer/footer';
-import styles from './privacy.module.css';
+import styles from '~/styles/legal-pages.module.css';
 
 export const meta = () => {
   return baseMeta({
@@ -12,6 +13,27 @@ export const meta = () => {
 };
 
 export const Privacy = () => {
+  const cookieDeclarationContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const container = cookieDeclarationContainerRef.current;
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const script = document.createElement('script');
+    script.id = 'CookieDeclaration';
+    script.src = 'https://consent.cookiebot.com/3f0f9bb0-ff09-44b9-a911-7bd88876f7e0/cd.js';
+    script.type = 'text/javascript';
+    script.async = true;
+
+    container.appendChild(script);
+
+    return () => {
+      container.innerHTML = '';
+    };
+  }, []);
+
   return (
     <>
       <div id="top" className={`route-legal-container ${styles.container}`}>
@@ -250,12 +272,7 @@ export const Privacy = () => {
         </section>
         <section className={styles.section}>
           <h2 id="cookie-declaration">Cookie Declaration</h2>
-          <script
-            id="CookieDeclaration"
-            src="https://consent.cookiebot.com/3f0f9bb0-ff09-44b9-a911-7bd88876f7e0/cd.js"
-            type="text/javascript"
-            async
-          />
+          <div ref={cookieDeclarationContainerRef} />
         </section>
         <section className={styles.section}>          
           <h2>CCPA/CPRA Privacy Notice</h2>

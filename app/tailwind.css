@@ -80,6 +80,14 @@
     }
   }
 
+  h2 {
+    color: var(--textTitle);
+    font-size: var(--fontSizeH4);
+    font-weight: var(--fontWeightBold);
+    line-height: var(--lineHeightHeading);
+    margin: var(--spaceXL) 0 var(--spaceM);
+  }
+
   h3 {
     color: var(--textTitle);
     font-size: var(--fontSizeH5);

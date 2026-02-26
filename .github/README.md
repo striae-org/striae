@@ -16,10 +16,6 @@
 
 ---
 
-**🛠 Custom Deployment Assistance**: If your organization requires a custom deployment of Striae, we offer deployment assistance to meet your specific needs. Please [click here](https://support.striae.org/form/WA12nQGh9pS) to submit a request.
-
----
-
 ## 📋 Changelog
 
 ## [2026-02-23] - *[Patch Release v1.1.4](https://github.com/striae-org/striae/releases/tag/v1.1.4)*

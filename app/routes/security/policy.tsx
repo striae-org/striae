@@ -2,7 +2,7 @@
 import { baseMeta } from '~/utils/meta';
 import { Link } from '@remix-run/react';
 import Footer from '~/components/footer/footer';
-import styles from './policy.module.css';
+import styles from '~/styles/legal-pages.module.css';
 
 export const meta = () => {
   return baseMeta({
@@ -32,7 +32,7 @@ export const Policy = () => {
         <div className={styles.content}>
         <h1>Security Policy</h1>
         
-        <section>
+        <section className={styles.section}>
           <h2>Reporting Security Issues</h2>
           <p>We take the security of Striae seriously. If you believe you have found a security vulnerability, please report it to us responsibly.</p>
           <p>You may:
@@ -44,7 +44,7 @@ export const Policy = () => {
           </p>
         </section>
 
-        <section>
+        <section className={styles.section}>
           <h2>Disclosure Process</h2>
           <ul>
             <li>After we receive your report, we will:
@@ -58,7 +58,7 @@ export const Policy = () => {
           </ul>
         </section>
 
-        <section>
+        <section className={styles.section}>
           <h2>Researcher Responsibilities</h2>
           <ul>
             <li>Guidelines:
@@ -77,7 +77,7 @@ export const Policy = () => {
           </ul>
         </section>
 
-        <section>
+        <section className={styles.section}>
           <h2>Scope</h2>
           <p>This policy applies to all Striae properties including:</p>
           <ul>
@@ -87,7 +87,7 @@ export const Policy = () => {
           </ul>
         </section>
 
-        <section>
+        <section className={styles.section}>
           <h2>Out of Scope</h2>
           <ul>
             <li>DoS/DDoS attacks</li>
@@ -95,7 +95,7 @@ export const Policy = () => {
             <li>Physical security attacks</li>
           </ul>
         </section>
-        <section>
+        <section className={styles.section}>
           <div className={styles.lastUpdated}>Last updated: February 20, 2026</div>
         </section>
         </div>
