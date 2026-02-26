@@ -249,6 +249,17 @@ export const Privacy = () => {
   <a href="https://sendlayer.com/privacy-policy/" rel="noopener noreferrer" target="_blank">SendLayer's Privacy Policy</a></p>
 </li>
 </ul>
+<h3>Payments</h3>
+<p>We may provide paid products and/or services within the Service. In that case, we may use third-party services for payment processing (e.g. payment processors).</p>
+<p>We will not store or collect Your payment card details. That information is provided directly to Our third-party payment processors whose use of Your personal information is governed by their Privacy Policy. These payment processors adhere to the standards set by PCI-DSS as managed by the PCI Security Standards Council, which is a joint effort of brands like Visa, Mastercard, American Express and Discover. PCI-DSS requirements help ensure the secure handling of payment information.</p>
+<ul>
+<li>
+<p><strong>Stripe</strong></p>
+<p>Their Privacy Policy can be viewed at:
+  <br />
+  <a href="https://stripe.com/privacy" rel="noopener noreferrer" target="_blank">Stripe's Privacy Policy</a></p>
+</li>
+</ul>
 <h3>Usage, Performance and Miscellaneous</h3>
 <p>We may use third-party Service Providers to provide, maintain, and improve Our Service.</p>
 <ul>
