@@ -4,7 +4,7 @@ export default function NoticeText() {
 
 <h2>Important Details</h2>
 <ul>
-  <li><strong>Free Base Access:</strong> Individual users can register and use the base version of Striae at no cost, no customization, and with basic customer support.</li>
+  <li><strong>Free Base Access Forever:</strong> Individual users can always register and use the base version of Striae at no cost, no customization, and with basic customer support.</li>
   <li><strong>Agency/Company Plans:</strong> Paid annual plans for agencies and companies include deep customization, unlimited users, and priority customer support channels.</li>
   <li><strong>Plan Availability:</strong> Individual and Agency plans are not yet available and are estimated to launch in mid-March 2026.</li>
   <li><strong>Striae Subdomain:</strong> Agency instances will be hosted on a dedicated Striae subdomain.
