@@ -53,7 +53,7 @@ export const Privacy = () => {
         />
         <div className={styles.content}>
         <h1>Privacy Policy</h1>
-        <p className={styles.lastUpdated}>Last updated: February 25, 2026</p>        
+        <p className={styles.lastUpdated}>Last updated: February 26, 2026</p>        
         <p>This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>
         <p>We use Your Personal data to provide and improve the Service. By using the Service, You agree to the collection and use of information in accordance with this Privacy Policy.</p>
         <hr />
@@ -464,6 +464,9 @@ export const Privacy = () => {
 <li>
 <p>By email: info@striae.org</p>
 </li>
+<li>
+<p>Contact page: <a href="https://stephenjlu.com/contact" target="_blank" rel="noopener noreferrer">https://stephenjlu.com/contact</a></p>
+</li>
 </ul>
 <p>Only You, or a person registered with the California Secretary of State that You authorize to act on Your behalf, may make a verifiable request related to Your personal information.</p>
 <p>Your request to Us must:</p>
@@ -542,7 +545,10 @@ export const Privacy = () => {
 <p>By email: info@striae.org</p>
 </li>
 <li>
-<p>Legal Entity: The Stephenson Jack Lu Living Trust</p>
+<p>Contact page: <a href="https://stephenjlu.com/contact" target="_blank" rel="noopener noreferrer">https://stephenjlu.com/contact</a></p>
+</li>
+<li>
+<p>Legal entity: The Stephenson Jack Lu Living Trust</p>
 </li>
 </ul>
         </section>

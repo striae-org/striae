@@ -31,7 +31,7 @@ export const Terms = () => {
       />
       <div className={styles.content}>
         <h1>Terms and Conditions</h1>
-        <p className={styles.lastUpdated}>Last updated: February 20, 2026</p>
+        <p className={styles.lastUpdated}>Last updated: February 26, 2026</p>
         <p>Please read these terms and conditions carefully before using Our Service.</p>
         <hr />
           <br />
@@ -318,7 +318,10 @@ You agree that the original English text shall prevail in the case of a dispute.
 <p>By email: info@striae.org</p>
 </li>
 <li>
-<p>Legal Entity: The Stephenson Jack Lu Living Trust</p>
+<p>Contact page: <a href="https://stephenjlu.com/contact" target="_blank" rel="noopener noreferrer">https://stephenjlu.com/contact</a></p>
+</li>
+<li>
+<p>Legal entity: The Stephenson Jack Lu Living Trust</p>
 </li>
 </ul>
         </section>
