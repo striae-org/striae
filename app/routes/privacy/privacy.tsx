@@ -96,7 +96,7 @@ export const Privacy = () => {
 <p><strong>CCPA</strong> and/or <strong>CPRA</strong> refers to the California Consumer Privacy Act (the &quot;CCPA&quot;) as amended by the California Privacy Rights Act of 2020 (the &quot;CPRA&quot;).</p>
 </li>
 <li>
-<p><strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to Striae, owned and operated by The Stephenson Jack Lu Living Trust, <a href="https://www.striae.org" target="_blank" rel="noopener noreferrer">https://www.striae.org</a>.</p>
+<p><strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to Striae, owned and operated by The Stephenson Jack Lu Living Trust, <a href="https://striae.org" target="_blank" rel="noopener noreferrer">https://striae.org</a>.</p>
 </li>
 <li>
 <p><strong>Consumer</strong>, for the purpose of the CCPA/CPRA, means a natural person who is a California resident. A resident, as defined in the law, includes (1) every individual who is in the USA for other than a temporary or transitory purpose, and (2) every individual who is domiciled in the USA who is outside the USA for a temporary or transitory purpose.</p>
