@@ -11,9 +11,12 @@ interface NoticeProps {
   isOpen: boolean;
   onClose: () => void;
   notice: NoticeContent;
+  modalClassName?: string;
+  expanded?: boolean;
+  hideConfirmButton?: boolean;
 }
 
-export function Notice({ isOpen, onClose, notice }: NoticeProps) {
+export function Notice({ isOpen, onClose, notice, modalClassName, expanded = false, hideConfirmButton = false }: NoticeProps) {
 
   useEffect(() => {
       const handleEscape = (e: KeyboardEvent) => {
@@ -39,7 +42,7 @@ export function Notice({ isOpen, onClose, notice }: NoticeProps) {
       tabIndex={-1}
     >
       <div 
-        className={styles.modal}
+        className={`${styles.modal} ${expanded ? styles.expandedModal : ''} ${modalClassName || ''}`.trim()}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -58,9 +61,11 @@ export function Notice({ isOpen, onClose, notice }: NoticeProps) {
         <div className={styles.content}>
           {notice.content}
         </div>
-        <button className={styles.confirmButton} onClick={onClose}>
-          {notice.buttonText || 'Got it!'}
-        </button>
+        {!hideConfirmButton && (
+          <button className={styles.confirmButton} onClick={onClose}>
+            {notice.buttonText || 'Got it!'}
+          </button>
+        )}
       </div>    
     </div>
   );

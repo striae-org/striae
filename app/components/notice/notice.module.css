@@ -25,6 +25,10 @@
   animation: slideIn var(--durationM) var(--bezierFastoutSlowin);
 }
 
+.expandedModal {
+  max-height: 95vh;
+}
+
 .header {
   position: relative;
   padding-right: var(--space2XL);

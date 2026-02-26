@@ -6,11 +6,11 @@ export default function NoticeText() {
 <ul>
   <li><strong>Free Base Access Forever:</strong> Individual users can always register and use the base version of Striae at no cost, no customization, and with basic customer support.</li>
   <li><strong>Agency/Company Plans:</strong> Paid annual plans for agencies and companies include deep customization, unlimited users, and priority customer support channels.</li>
-  <li><strong>Plan Availability:</strong> Individual and Agency plans are not yet available and are estimated to launch in mid-March 2026.</li>
+  <li><strong>Plan Availability:</strong> Agency plans are not yet available and are estimated to launch in mid-March 2026.</li>
   <li><strong>Striae Subdomain:</strong> Agency instances will be hosted on a dedicated Striae subdomain.
   <br />
   Ex: https://<strong>ouragency</strong>.striae.org</li>
-  <li><strong>Pre-Application/Interest Form:</strong> The previous screen&apos;s form is an interest form only. Final fees and terms will be shared when plans become available.</li>
+  <li><strong>Agency Interest Form:</strong> This form is an interest form only. Final fees and terms will be shared when plans become available.</li>
 </ul>
 
 <h2>Register a Demo Account</h2>
