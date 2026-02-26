@@ -63,6 +63,75 @@
   margin-bottom: var(--space2XL);
 }
 
+.cookieDeclarationDialogText,
+.cookieDeclarationIntro,
+.cookieDeclarationLastUpdated {
+  margin: 0 0 var(--spaceM) 0;
+}
+
+.cookieDeclarationType {
+  display: block;
+  margin: var(--spaceM) 0;
+  padding: var(--spaceM) var(--spaceM) 0 var(--spaceM);
+  border: 1px solid color-mix(in lab, var(--textLight) 60%, transparent);
+  border-radius: var(--space2XS);
+  vertical-align: top;
+}
+
+.cookieDeclarationTypeHeader {
+  font-weight: var(--fontWeightBold);
+}
+
+.cookieDeclarationTypeDescription {
+  margin: var(--space2XS) 0 var(--spaceL) 0;
+}
+
+.cookieDeclarationTable {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0 0 var(--spaceL) 0;
+}
+
+.cookieColName {
+  width: 20%;
+}
+
+.cookieColProvider {
+  width: 20%;
+}
+
+.cookieColPurpose {
+  width: 35%;
+}
+
+.cookieColExpiry {
+  width: 15%;
+}
+
+.cookieColType {
+  width: 10%;
+}
+
+.cookieDeclarationTableHeader {
+  font-weight: var(--fontWeightBold);
+  border-bottom: 1px solid color-mix(in lab, var(--textLight) 70%, transparent);
+  text-align: left;
+  padding: var(--space2XS);
+  overflow: hidden;
+  color: var(--textTitle);
+}
+
+.cookieDeclarationTableCell {
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  border-bottom: 1px solid color-mix(in lab, var(--textLight) 70%, transparent);
+  vertical-align: top;
+  padding: var(--space2XS);
+  color: var(--textBody);
+}
+
 @media (max-width: 1296px) {
   .logo {
     display: none;
@@ -80,5 +149,13 @@
   
   .content {
     padding: var(--spaceXL);
+  }
+}
+
+@media (max-width: 600px) {
+  .cookieDeclarationTable tr td:nth-child(n + 5),
+  .cookieDeclarationTable tr th:nth-child(n + 5),
+  .cookieDeclarationTable colgroup col:nth-child(n + 5) {
+    display: none;
   }
 }

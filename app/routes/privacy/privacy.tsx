@@ -31,7 +31,7 @@ export const Privacy = () => {
         />
         <div className={styles.content}>
         <h1>Privacy Policy</h1>
-        <p className={styles.lastUpdated}>Last updated: February 20, 2026</p>        
+        <p className={styles.lastUpdated}>Last updated: February 25, 2026</p>        
         <p>This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>
         <p>We use Your Personal data to provide and improve the Service. By using the Service, You agree to the collection and use of information in accordance with this Privacy Policy.</p>
         <hr />
@@ -247,6 +247,85 @@ export const Privacy = () => {
 <p>Striae does not collect, process, or disclose sensitive forensic case data for external use. All Data remains encrypted and under User control.</p>
 <h3>Children's Privacy</h3>
 <p>The Service is only available to individuals 18 years and older who are employed at a forensic laboratory or related company. We do not knowingly collect data from minors.</p>
+        </section>
+        <section className={styles.section}>
+          <h2>Cookie Declaration</h2>
+          <p className={styles.cookieDeclarationDialogText}>
+            This section lists cookies used to support essential site operation, consent management, and security.
+          </p>
+          <p className={styles.cookieDeclarationIntro}>
+            The cookie list below is maintained manually and may be updated when providers, services, or technical controls change.
+          </p>
+          <p>Consent domains: striae.org, www.striae.org</p>
+          <p className={styles.cookieDeclarationLastUpdated}>Last updated: February 25, 2026</p>
+
+          <div className={styles.cookieDeclarationType}>
+            <p className={styles.cookieDeclarationTypeHeader}>Necessary (3)</p>
+            <p className={styles.cookieDeclarationTypeDescription}>
+              Necessary cookies help make the site usable by enabling basic functions like consent tracking and security. The site cannot function properly without these cookies.
+            </p>
+            <table className={styles.cookieDeclarationTable}>
+              <colgroup>
+                <col className={styles.cookieColName} />
+                <col className={styles.cookieColProvider} />
+                <col className={styles.cookieColPurpose} />
+                <col className={styles.cookieColExpiry} />
+                <col className={styles.cookieColType} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th scope="col" className={styles.cookieDeclarationTableHeader}>Name</th>
+                  <th scope="col" className={styles.cookieDeclarationTableHeader}>Provider</th>
+                  <th scope="col" className={styles.cookieDeclarationTableHeader}>Purpose</th>
+                  <th scope="col" className={styles.cookieDeclarationTableHeader}>Expiry</th>
+                  <th scope="col" className={styles.cookieDeclarationTableHeader}>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className={styles.cookieDeclarationTableCell}>CookieConsent</td>
+                  <td className={styles.cookieDeclarationTableCell}>striae.org</td>
+                  <td className={styles.cookieDeclarationTableCell}>Stores the user's cookie consent state for the current domain.</td>
+                  <td className={styles.cookieDeclarationTableCell}>1 year</td>
+                  <td className={styles.cookieDeclarationTableCell}>HTTP Cookie</td>
+                </tr>
+                <tr>
+                  <td className={styles.cookieDeclarationTableCell}>__cf_bm</td>
+                  <td className={styles.cookieDeclarationTableCell}>.striae.org (Cloudflare)</td>
+                  <td className={styles.cookieDeclarationTableCell}>Supports bot management and protects the service against malicious traffic.</td>
+                  <td className={styles.cookieDeclarationTableCell}>30 minutes</td>
+                  <td className={styles.cookieDeclarationTableCell}>HTTP Cookie</td>
+                </tr>
+                <tr>
+                  <td className={styles.cookieDeclarationTableCell}>cf_clearance</td>
+                  <td className={styles.cookieDeclarationTableCell}>.striae.org (Cloudflare)</td>
+                  <td className={styles.cookieDeclarationTableCell}>Stores proof of challenge passage to enable trusted requests and maintain security controls.</td>
+                  <td className={styles.cookieDeclarationTableCell}>Up to 1 year</td>
+                  <td className={styles.cookieDeclarationTableCell}>HTTP Cookie</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className={styles.cookieDeclarationType}>
+            <p className={styles.cookieDeclarationTypeHeader}>Preference (0)</p>
+            <p className={styles.cookieDeclarationTypeDescription}>No preference cookies are currently declared.</p>
+          </div>
+
+          <div className={styles.cookieDeclarationType}>
+            <p className={styles.cookieDeclarationTypeHeader}>Statistic (0)</p>
+            <p className={styles.cookieDeclarationTypeDescription}>No statistic cookies are currently declared.</p>
+          </div>
+
+          <div className={styles.cookieDeclarationType}>
+            <p className={styles.cookieDeclarationTypeHeader}>Marketing (0)</p>
+            <p className={styles.cookieDeclarationTypeDescription}>No marketing cookies are currently declared.</p>
+          </div>
+
+          <div className={styles.cookieDeclarationType}>
+            <p className={styles.cookieDeclarationTypeHeader}>Unclassified (0)</p>
+            <p className={styles.cookieDeclarationTypeDescription}>No unclassified cookies are currently declared.</p>
+          </div>
         </section>
         <section className={styles.section}>          
           <h2>CCPA/CPRA Privacy Notice</h2>
