@@ -1,7 +1,7 @@
 import type { LoaderFunction } from "@remix-run/cloudflare";
 
 export const loader: LoaderFunction = async ({ context }) => {
-  const baseUrl = "https://www.striae.org";
+  const baseUrl = "https://striae.org";
   
   // Dynamic routes
   const dynamicRoutes = [

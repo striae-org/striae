@@ -81,7 +81,7 @@ export const Policy = () => {
           <h2>Scope</h2>
           <p>This policy applies to all Striae properties including:</p>
           <ul>
-            <li>https://www.striae.org</li>
+            <li>https://striae.org</li>
             <li>All Striae subdomains</li>
             <li>Striae web application (current version only)</li>
           </ul>
@@ -96,7 +96,7 @@ export const Policy = () => {
           </ul>
         </section>
         <section className={styles.section}>
-          <div className={styles.lastUpdated}>Last updated: February 20, 2026</div>
+          <div className={styles.lastUpdated}>Last updated: February 26, 2026</div>
         </section>
         </div>
       </div>
