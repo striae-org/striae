@@ -53,7 +53,7 @@ export const Privacy = () => {
         />
         <div className={styles.content}>
         <h1>Privacy Policy</h1>
-        <p className={styles.lastUpdated}>Last updated: February 25, 2026</p>        
+        <p className={styles.lastUpdated}>Last updated: February 26, 2026</p>        
         <p>This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>
         <p>We use Your Personal data to provide and improve the Service. By using the Service, You agree to the collection and use of information in accordance with this Privacy Policy.</p>
         <hr />
@@ -96,7 +96,7 @@ export const Privacy = () => {
 <p><strong>CCPA</strong> and/or <strong>CPRA</strong> refers to the California Consumer Privacy Act (the &quot;CCPA&quot;) as amended by the California Privacy Rights Act of 2020 (the &quot;CPRA&quot;).</p>
 </li>
 <li>
-<p><strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to Striae, owned and operated by The Stephenson Jack Lu Living Trust, <a href="https://www.striae.org" target="_blank" rel="noopener noreferrer">https://www.striae.org</a>.</p>
+<p><strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to Striae, owned and operated by The Stephenson Jack Lu Living Trust, <a href="https://striae.org" target="_blank" rel="noopener noreferrer">https://striae.org</a>.</p>
 </li>
 <li>
 <p><strong>Consumer</strong>, for the purpose of the CCPA/CPRA, means a natural person who is a California resident. A resident, as defined in the law, includes (1) every individual who is in the USA for other than a temporary or transitory purpose, and (2) every individual who is domiciled in the USA who is outside the USA for a temporary or transitory purpose.</p>
@@ -464,6 +464,9 @@ export const Privacy = () => {
 <li>
 <p>By email: info@striae.org</p>
 </li>
+<li>
+<p>Contact page: <a href="https://stephenjlu.com/contact" target="_blank" rel="noopener noreferrer">https://stephenjlu.com/contact</a></p>
+</li>
 </ul>
 <p>Only You, or a person registered with the California Secretary of State that You authorize to act on Your behalf, may make a verifiable request related to Your personal information.</p>
 <p>Your request to Us must:</p>
@@ -542,7 +545,10 @@ export const Privacy = () => {
 <p>By email: info@striae.org</p>
 </li>
 <li>
-<p>Legal Entity: The Stephenson Jack Lu Living Trust</p>
+<p>Contact page: <a href="https://stephenjlu.com/contact" target="_blank" rel="noopener noreferrer">https://stephenjlu.com/contact</a></p>
+</li>
+<li>
+<p>Legal entity: The Stephenson Jack Lu Living Trust</p>
 </li>
 </ul>
         </section>
