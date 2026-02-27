@@ -85,7 +85,7 @@
     font-size: var(--fontSizeH4);
     font-weight: var(--fontWeightBold);
     line-height: var(--lineHeightHeading);
-    margin: var(--spaceXL) 0 var(--spaceM);
+    margin: var(--spaceM) 0 var(--spaceM);
   }
 
   h3 {
