@@ -3,7 +3,6 @@ import { baseMeta } from '~/utils/meta';
 import { Turnstile } from '~/components/turnstile/turnstile';
 import { Notice } from '~/components/notice/notice';
 import NoticeText from './NoticeText';
-import freeEmailDomains from 'free-email-domains';
 import { verifyTurnstileToken } from '~/utils/turnstile';
 import { useActionData, useNavigation, Link } from '@remix-run/react';
 import { json } from '@remix-run/cloudflare';
@@ -27,7 +26,7 @@ interface ActionData {
     };
 }
 
-// Email validation with regex and domain checking
+// Email validation with regex
   const validateEmailDomain = (email: string): boolean => {
     // Email regex pattern for basic validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -37,8 +36,7 @@ interface ActionData {
       return false;
     }
     
-    const emailDomain = email.toLowerCase().split('@')[1];
-    return !!emailDomain && !freeEmailDomains.includes(emailDomain);
+    return true;
   };
 
 export const meta = () => {
@@ -67,7 +65,7 @@ export async function action({ request, context }: { request: Request, context: 
   }
 
   if (!email || !validateEmailDomain(email)) {
-    errors.email = 'Please use a work email address. Personal email providers (Gmail, Yahoo, etc.) are not allowed';
+    errors.email = 'Please enter a valid email address';
   }
 
   if (!company || company.length > MAX_NAME_LENGTH) {
