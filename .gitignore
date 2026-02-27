@@ -8,6 +8,7 @@ release-notes/
 scripts/
 tests/
 archive/
+wiki/
 
 app/routes/auth
 app/routes/home/home.tsx
