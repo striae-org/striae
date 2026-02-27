@@ -18,6 +18,14 @@
 
 ## 📋 Changelog
 
+## [2026-02-27] - *[Patch Release v1.1.5](https://github.com/striae-org/striae/releases/tag/v1.1.5)*
+
+- **⚖️ Legal & Compliance Hardening** - Expanded Terms and policy language across account types, fees, maintenance, confidentiality, dispute resolution, and forensic responsibility allocation
+- **🔐 Consent and Data-Handling Clarifications** - Refined cookie/consent integration and aligned user-facing data control/retention messaging with current security and audit posture
+- **🧭 Public Route & UI Refinements** - Iterated root/public route behavior, viewport handling, and layout/styling cleanup for more consistent legal/public page presentation
+- **💳 Billing & Support Surface Updates** - Added/updated Stripe-related customer pathways and support/contact wording for clearer account-service expectations
+- **🧹 Dependency and Repository Maintenance** - Included `vite-tsconfig-paths` update plus npm/yarn maintenance and ongoing `.gitignore`/deployment-config hygiene work
+
 ## [2026-02-23] - *[Patch Release v1.1.4](https://github.com/striae-org/striae/releases/tag/v1.1.4)*
 
 - **📱 Mobile Detection Route Refinements** - Rerouted and refined device detection behavior for cleaner route handling on mobile/tablet access paths
