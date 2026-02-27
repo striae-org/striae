@@ -99,6 +99,9 @@ export const Terms = () => {
 <p><strong>Account</strong> means a unique account created for You to access Our Service or parts of Our Service.</p>
 </li>
 <li>
+<p><strong>Agency Accounts</strong> means paid annual Service plans purchased by agencies, laboratories, or companies, which may include dedicated hosting, customization options, unlimited user seats, and priority support as described in these Terms.</p>
+</li>
+<li>
 <p><strong>Country</strong> refers to: United States</p>
 </li>
 <li>
@@ -141,6 +144,70 @@ export const Terms = () => {
 <p>You are responsible for safeguarding the password that You use to access the Service and for any activities or actions under Your password.</p>
 <p>You agree not to disclose Your password to any third party. You must notify Us immediately upon becoming aware of any breach of security or unauthorized use of Your account.</p>
 <p>You may not use as a username the name of another person or entity or that is not lawfully available for use, a name or trademark that is subject to any rights of another person or entity other than You without appropriate authorization, or a name that is otherwise offensive, vulgar or obscene.</p>
+        </section>
+        <section className={styles.section}>
+          <h2>Account Types</h2>
+          <h3>Free Base Access Forever</h3>
+          <ul>
+            <li>Individuals may register for a free Striae account at no cost.</li>
+            <li>Free accounts include core platform functionality, standard file storage limits, and basic customer support through email or in-app contact forms.</li>
+            <li>Customizations, priority support, and administrative controls are not available on free accounts.</li>
+          </ul>
+          <h3>Agency/Company Plans</h3>
+          <ul>
+            <li>Agencies, laboratories, or companies may purchase paid annual plans.</li>
+            <li>Agency Accounts include dedicated hosting on a custom Striae subdomain (for example, https://agencyname.striae.org), deep customization options, unlimited user seats, and access to priority support.</li>
+            <li>Customization options include report formatting, UI branding elements, file upload limit changes, or similar low-impact feature requests. Requests that significantly alter or disrupt platform functionality may be declined at Striae&apos;s sole discretion.</li>
+          </ul>
+
+          <h2>Fees and Payment</h2>
+          <ul>
+            <li>All Agency plan fees are non-refundable unless otherwise required by law.</li>
+            <li>A 10% non-refundable deposit is required to initiate Agency setup and customization.</li>
+            <li>The remaining balance is due upon completion of customization and must be paid in full before access is granted to the hosted instance.</li>
+            <li>Invoices will be sent for both the deposit and final payment; payments must be received according to invoice terms before deployment.</li>
+            <li>Access or services may be withheld if invoices remain unpaid.</li>
+          </ul>
+
+          <h2>Development and Customization Process</h2>
+          <ul>
+            <li>Striae developers will schedule progress meetings with agency representatives to review interface previews, customization progress, and feedback.</li>
+            <li>Agencies must provide timely feedback and approval to avoid delays.</li>
+            <li>Delays caused by lack of communication or late payments may extend the delivery timeline.</li>
+          </ul>
+
+          <h2>Data and Content Ownership for Agency Accounts</h2>
+          <ul>
+            <li>Agencies and users retain ownership of the data, files, and annotations uploaded to their respective Striae environments.</li>
+            <li>Striae may process and store data solely for the purpose of operating and improving the Service.</li>
+            <li>Striae will not disclose or share customer data with third parties except as required by law.</li>
+          </ul>
+          <p>For general Data handling, prohibited content, and data restrictions, see the <strong>Data</strong> section below.</p>
+          <p>For account termination and suspension terms, see the <strong>Termination</strong> section below.</p>
+          <p>For warranty disclaimers and limitation of liability, see the <strong>&quot;AS IS&quot; and &quot;AS AVAILABLE&quot; Disclaimer</strong> and <strong>Limitation of Liability</strong> sections below.</p>
+          <p>For updates to these Terms, see the <strong>Changes to These Terms and Conditions</strong> section below.</p>
+        </section>
+        <section className={styles.section}>
+          <h2>Service Level and Maintenance</h2>
+          <p>Striae will use commercially reasonable efforts to maintain availability of the Service, excluding periods of Scheduled Maintenance or Emergency Maintenance.</p>
+          <h3>Scheduled Maintenance</h3>
+          <p>Striae may perform routine maintenance from time to time. When Scheduled Maintenance is expected to materially impact access or functionality, Striae will post a prominent notice on the Striae front page and/or login screen indicating the maintenance window and the expected impact on availability. Striae will typically provide at least 24 hours&apos; notice for Scheduled Maintenance that is expected to result in downtime, but may provide shorter notice where the impact is minimal.</p>
+          <h3>Emergency Maintenance</h3>
+          <p>If Striae must perform Emergency Maintenance (for example, to address security, stability, or performance issues), Striae may do so immediately and without prior notice. In such cases, Striae will post a front-page notice as soon as reasonably practicable describing the nature of the disruption and an estimated timeline for restoration of service.</p>
+          <h3>Duration and Communication</h3>
+          <p>For both Scheduled and Emergency Maintenance, Striae will use commercially reasonable efforts to: (a) clearly indicate the anticipated start time and duration of the maintenance window in the front-page notice; and (b) update the notice if timelines change significantly or when the Service has been fully restored.</p>
+          <p>Nothing in this section guarantees uninterrupted or error-free operation, and any uptime or performance descriptions are targets only unless expressly stated otherwise in a separate written SLA signed by Striae.</p>
+        </section>
+        <section className={styles.section}>
+          <h2>Confidentiality</h2>
+          <h3>Confidential Information</h3>
+          <p>&quot;Confidential Information&quot; means any non-public information disclosed by either party to the other that is identified as confidential or that should reasonably be understood to be confidential under the circumstances, including, for agencies and organizations, any case-related forensic data, investigative materials, annotations, internal reports, or workflow configurations stored or processed within Striae.</p>
+          <h3>Obligations</h3>
+          <p>Each party agrees to: (a) use the other party&apos;s Confidential Information solely for purposes of performing these Terms and using or providing the Service; and (b) protect the Confidential Information using at least the same degree of care it uses to protect its own similar information, but no less than a reasonable degree of care.</p>
+          <h3>Exceptions</h3>
+          <p>Confidential Information does not include information that: (a) is or becomes publicly available through no fault of the receiving party; (b) was lawfully known to the receiving party before disclosure; (c) is independently developed by the receiving party without use of or reference to the disclosing party&apos;s Confidential Information; or (d) is rightfully received from a third party without confidentiality obligations.</p>
+          <h3>Required Disclosure</h3>
+          <p>A party may disclose Confidential Information to the extent required by law, regulation, or valid court order, provided it (where legally permitted) gives reasonable prior notice to the other party and cooperates, at the other party&apos;s expense, in any effort to limit or challenge such disclosure.</p>
         </section>
         <section className={styles.section}>
           <h2>Data</h2>
@@ -212,12 +279,23 @@ Upon receipt of a notification, the Company will take whatever action, in its so
 <p>The Service is provided to You &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; and with all faults and defects without warranty of any kind. To the maximum extent permitted under applicable law, the Company, on its own behalf and on behalf of its Affiliates and its and their respective licensors and service providers, expressly disclaims all warranties, whether express, implied, statutory or otherwise, with respect to the Service, including all implied warranties of merchantability, fitness for a particular purpose, title and non-infringement, and warranties that may arise out of course of dealing, course of performance, usage or trade practice. Without limitation to the foregoing, the Company provides no warranty or undertaking, and makes no representation of any kind that the Service will meet Your requirements, achieve any intended results, be compatible or work with any other software, applications, systems or services, operate without interruption, meet any performance or reliability standards or be error free or that any errors or defects can or will be corrected.</p>
 <p>Without limiting the foregoing, neither the Company nor any of the company's provider makes any representation or warranty of any kind, express or implied: (i) as to the operation or availability of the Service, or the information, content, and materials or products included thereon; (ii) that the Service will be uninterrupted or error-free; (iii) as to the accuracy, reliability, or currency of any information or content provided through the Service; or (iv) that the Service, its servers, the content, or e-mails sent from or on behalf of the Company are free of viruses, scripts, trojan horses, worms, malware, timebombs or other harmful components.</p>
 <p>Some jurisdictions do not allow the exclusion of certain types of warranties or limitations on applicable statutory rights of a consumer, so some or all of the above exclusions and limitations may not apply to You. But in such a case the exclusions and limitations set forth in this section shall be applied to the greatest extent enforceable under applicable law.</p>
-<h2>Governing Law</h2>
-<p>The laws of the Country, excluding its conflicts of law rules, shall govern this Terms and Your use of the Service. Your use of the Application may also be subject to other local, state, national, or international laws.</p>
+<h2>Governing Law and Jurisdiction</h2>
+<p>These Terms, and any dispute arising out of or relating to them or the Service, are governed by and construed in accordance with the laws of the State of Arizona, without regard to its conflict of laws principles.</p>
+<p>Because all disputes are subject to the Dispute Resolution and Arbitration provisions below, the parties agree that any court proceedings permitted under those provisions shall be brought exclusively in the state or federal courts located in Arizona, and each party consents to the personal jurisdiction of those courts for such purposes.</p>
         </section>
         <section className={styles.section}>
-          <h2>Disputes Resolution</h2>
-<p>If You have any concern or dispute about the Service, You agree to first try to resolve the dispute informally by contacting the Company.</p>
+    <h2>Dispute Resolution and Arbitration</h2>
+<h3>Informal Resolution First</h3>
+<p>Before initiating arbitration, You agree to first contact Striae at the contact address provided on the Striae website and attempt to resolve the dispute informally in good faith. Striae will likewise attempt to resolve disputes informally. If a dispute is not resolved within 30 days of the initial notice, either party may proceed to arbitration as described below.</p>
+<h3>Binding Arbitration Only</h3>
+<p>To the fullest extent permitted by law, any dispute, claim, or controversy arising out of or relating to these Terms or the use of the Service that cannot be resolved informally shall be finally resolved by binding arbitration, not in court, and not by a jury.</p>
+<p>The arbitration shall be administered by a recognized arbitration provider (such as the American Arbitration Association) under its applicable rules for commercial disputes, and the arbitration will take place in Arizona, unless the parties mutually agree to a different location or to remote proceedings.</p>
+<p>The arbitrator shall have the authority to award all remedies available under applicable law, subject to the limitations of liability set out in these Terms.</p>
+<p>Judgment on the arbitration award may be entered in any court having jurisdiction.</p>
+<h3>No Class Actions</h3>
+<p>To the maximum extent permitted by law, You and Striae agree that each may bring claims against the other only in Your or its individual capacity, and not as a plaintiff or class member in any purported class, collective, or representative proceeding. The arbitrator may not consolidate more than one person&apos;s claims or otherwise preside over any form of a representative or class proceeding.</p>
+<h3>Equitable Relief</h3>
+<p>Notwithstanding the foregoing, either party may seek temporary or preliminary injunctive or other equitable relief in a court of competent jurisdiction in Arizona to protect its Confidential Information or intellectual property rights, without waiving the obligation to arbitrate all other disputes.</p>
         </section>
         <section className={styles.section}>
           <h2>For European Union (EU) Users</h2>
