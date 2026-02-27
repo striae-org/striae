@@ -3,6 +3,7 @@ build/
 dist/
 public/
 release-notes/
+*.webp
 
 scripts/
 tests/
