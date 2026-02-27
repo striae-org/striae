@@ -556,6 +556,9 @@ export const Privacy = () => {
 <p>By email: info@striae.org</p>
 </li>
 <li>
+<p>By mail: Contact Us for a physical address</p>
+</li>
+<li>
 <p>Contact page: <a href="https://stephenjlu.com/contact" target="_blank" rel="noopener noreferrer">https://stephenjlu.com/contact</a></p>
 </li>
 <li>
