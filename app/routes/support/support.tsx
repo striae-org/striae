@@ -4,12 +4,13 @@ import { verifyTurnstileToken } from '~/utils/turnstile';
 import { useActionData, useNavigation, Link } from '@remix-run/react';
 import { json } from '@remix-run/cloudflare';
 import { BaseForm, FormField, FormButton, FormMessage } from '~/components/form';
-import freeEmailDomains from 'free-email-domains';import { escapeHtml } from '~/utils/html-sanitizer';import styles from './support.module.css';
+import { escapeHtml } from '~/utils/html-sanitizer';
+import styles from './support.module.css';
 import Footer from '~/components/footer/footer';
 
 const MAX_NAME_LENGTH = 128;
 
-// Email validation with regex and domain checking
+// Email validation with regex
 const validateEmailDomain = (email: string): boolean => {
   // Email regex pattern for basic validation
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -19,8 +20,7 @@ const validateEmailDomain = (email: string): boolean => {
     return false;
   }
   
-  const emailDomain = email.toLowerCase().split('@')[1];
-  return !!emailDomain && !freeEmailDomains.includes(emailDomain);
+  return true;
 };
 
 interface ActionData {
@@ -57,7 +57,7 @@ export async function action({ request, context }: { request: Request, context: 
     errors.name = 'Please enter a valid name';
   }
   if (!email || !validateEmailDomain(email)) {
-    errors.email = 'Please use a work email address. Personal email providers (Gmail, Yahoo, etc.) are not allowed';
+    errors.email = 'Please enter a valid email address';
   }
   if (!category || category.length < 3) {
     errors.category = 'Please provide a valid category';
