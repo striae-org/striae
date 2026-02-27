@@ -48,7 +48,7 @@ const NoticeText = () => {
             <strong>Data Transit:</strong> All data transfers are encrypted via TLS, and access is controlled through the use of signed URLs.
         </li>
         <li>
-            <strong>Comprehensive Audit Trail:</strong> Striae maintains a detailed audit trail of all user and case-related activities, providing transparency and accountability. This includes logging user actions, data modifications, and system events to ensure a secure and traceable environment.
+          <strong>Comprehensive Audit Trail:</strong> Striae maintains a detailed audit trail of all user and case-related activities, providing transparency and accountability. This includes logging user actions, data modifications, and system events to ensure a secure and traceable environment. Audit trail records are retained indefinitely for security, forensic integrity, and compliance purposes.
         </li>
         <li>
             <strong>Controlled Access and Monitoring:</strong> Access requests are logged for auditing and security. Data access is limited to you or authorized troubleshooting only. CORS support restricts data requests to Striae&apos;s domain exclusively.
@@ -57,7 +57,7 @@ const NoticeText = () => {
             <strong>Transparency and Accountability:</strong> We maintain an open security policy, which encourages reporting of vulnerabilities and issues. We are committed to addressing any security concerns promptly and transparently. Striae does not share sensitive data with third parties, nor is any data stored with Striae subject to scraping, analysis, or processing for any purpose other than the intended use of the app. 
         </li>
         <li>
-            <strong>Control Over Your Data:</strong> Striae will never edit or modify the contents of your data. The only edits made to your data will be resizing and compression for optimal display, storage, and performance. When you delete your data, it is permanently removed from our systems.
+          <strong>Control Over Your Data:</strong> Except for automated processing that is technically necessary for storage, transmission, resizing, compression, or display, Striae does not edit the substantive contents of your data. When you delete your data, it is removed from active systems and no longer accessible through the Service. Residual copies may remain for a limited period in logs, temporary caches, or provider-level replicated storage until overwritten or deleted in the ordinary course of business. Audit trail records are retained indefinitely and are not deleted as part of account or data deletion.
         </li>        
       </ul>
       <p>If you have any questions or concerns regarding our security protocols, please refer to the <Link 
