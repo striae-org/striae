@@ -188,12 +188,17 @@ export const CaseSidebar = ({
     }
   }, [user, currentCase, setFiles]);
 
-  // Fetch confirmation status for files when they load or change
+  // Fetch confirmation status for files when they load, change,
+  // or when the currently selected image confirmation state changes
   useEffect(() => {
+    let isCancelled = false;
+
     const fetchConfirmationStatuses = async () => {
       if (!currentCase || !user || files.length === 0) {
-        setFileConfirmationStatus({});
-        setCaseConfirmationStatus({ includeConfirmation: false, isConfirmed: false });
+        if (!isCancelled) {
+          setFileConfirmationStatus({});
+          setCaseConfirmationStatus({ includeConfirmation: false, isConfirmed: false });
+        }
         return;
       }
 
@@ -228,6 +233,10 @@ export const CaseSidebar = ({
         };
       });
 
+      if (isCancelled) {
+        return;
+      }
+
       setFileConfirmationStatus(statuses);
 
       // Calculate case confirmation status
@@ -241,7 +250,11 @@ export const CaseSidebar = ({
     };
 
     fetchConfirmationStatuses();
-  }, [currentCase, files, user]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentCase, files, user, selectedFileId, isConfirmed]);
   
   const handleCase = async () => {
     setIsLoading(true);
