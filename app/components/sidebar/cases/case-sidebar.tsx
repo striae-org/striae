@@ -8,7 +8,7 @@ import {
   downloadAllCasesAsCSV,
   downloadCaseAsZip
 } from '../../actions/case-export';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './cases.module.css';
 import { CasesModal } from './cases-modal';
 import { FilesModal } from '../files/files-modal';
@@ -117,6 +117,26 @@ export const CaseSidebar = ({
     isConfirmed: boolean;
   }>({ includeConfirmation: false, isConfirmed: false });
 
+  const fileIdsKey = useMemo(
+    () => files.map((file) => file.id).sort().join('|'),
+    [files]
+  );
+
+  const calculateCaseConfirmationStatus = useCallback((
+    statuses: { [fileId: string]: { includeConfirmation: boolean; isConfirmed: boolean } }
+  ) => {
+    const filesRequiringConfirmation = files
+      .map((file) => statuses[file.id] || { includeConfirmation: false, isConfirmed: false })
+      .filter((status) => status.includeConfirmation);
+
+    const allConfirmedFiles = filesRequiringConfirmation.every((status) => status.isConfirmed);
+
+    return {
+      includeConfirmation: filesRequiringConfirmation.length > 0,
+      isConfirmed: filesRequiringConfirmation.length > 0 ? allConfirmedFiles : false,
+    };
+  }, [files]);
+
   // Check user permissions on mount and when user changes
   useEffect(() => {
     checkUserPermissions();
@@ -190,8 +210,7 @@ export const CaseSidebar = ({
     }
   }, [user, currentCase, setFiles]);
 
-  // Fetch confirmation status for files when case/files change,
-  // or after confirmation-related annotation data is persisted
+  // Fetch confirmation status for all files when case/files change
   useEffect(() => {
     let isCancelled = false;
 
@@ -240,15 +259,7 @@ export const CaseSidebar = ({
       }
 
       setFileConfirmationStatus(statuses);
-
-      // Calculate case confirmation status
-      const filesRequiringConfirmation = Object.values(statuses).filter(s => s.includeConfirmation);
-      const allConfirmedFiles = filesRequiringConfirmation.every(s => s.isConfirmed);
-      
-      setCaseConfirmationStatus({
-        includeConfirmation: filesRequiringConfirmation.length > 0,
-        isConfirmed: filesRequiringConfirmation.length > 0 ? allConfirmedFiles : false,
-      });
+      setCaseConfirmationStatus(calculateCaseConfirmationStatus(statuses));
     };
 
     fetchConfirmationStatuses();
@@ -256,7 +267,48 @@ export const CaseSidebar = ({
     return () => {
       isCancelled = true;
     };
-  }, [currentCase, files, user, confirmationSaveVersion]);
+  }, [currentCase, fileIdsKey, user, calculateCaseConfirmationStatus]);
+
+  // Refresh only selected file confirmation status after confirmation-related data is persisted
+  useEffect(() => {
+    let isCancelled = false;
+
+    const refreshSelectedFileConfirmationStatus = async () => {
+      if (!currentCase || !user || !selectedFileId || files.length === 0) {
+        return;
+      }
+
+      try {
+        const annotations = await getFileAnnotations(user, currentCase, selectedFileId);
+        const selectedStatus = {
+          includeConfirmation: annotations?.includeConfirmation ?? false,
+          isConfirmed: !!(annotations?.includeConfirmation && annotations?.confirmationData),
+        };
+
+        if (isCancelled) {
+          return;
+        }
+
+        setFileConfirmationStatus((previous) => {
+          const next = {
+            ...previous,
+            [selectedFileId]: selectedStatus,
+          };
+
+          setCaseConfirmationStatus(calculateCaseConfirmationStatus(next));
+          return next;
+        });
+      } catch (err) {
+        console.error(`Error refreshing confirmation status for file ${selectedFileId}:`, err);
+      }
+    };
+
+    refreshSelectedFileConfirmationStatus();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentCase, fileIdsKey, user, selectedFileId, confirmationSaveVersion, calculateCaseConfirmationStatus]);
   
   const handleCase = async () => {
     setIsLoading(true);
