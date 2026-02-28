@@ -6,6 +6,7 @@ scripts/
 tests/
 test-results/
 archive/
+wiki/
 
 # Files
 app/routes/auth/login.tsx
