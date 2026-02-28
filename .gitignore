@@ -1,20 +1,26 @@
-node_modules
+# Directories
+node_modules/
 build/
 dist/
-public/
-release-notes/
-*.webp
-
 scripts/
 tests/
 test-results/
 archive/
-wiki/
 
-app/routes/auth
+# Files
+app/routes/auth/login.tsx
 app/routes/home/home.tsx
-app/routes/home/home.module.css
 
+# Workers
+workers/audit-worker/src/audit-worker.ts
+workers/data-worker/src/data-worker.ts
+workers/image-worker/src/image-worker.ts
+workers/keys-worker/src/keys.ts
+workers/pdf-worker/src/pdf-worker.ts
+workers/turnstile-worker/src/turnstile.ts
+workers/user-worker/src/user-worker.ts
+
+# Logs and Miscellaneous
 .vscode
 .cache
 .dns
@@ -23,11 +29,11 @@ app/routes/home/home.module.css
 .firebaserc
 firebase-debug.log
 
-*.env*
+# Secrets and Configuration
+*.env
+*.env.backup
 *.dev.vars
-*.toml*
-*.jsonc*
+*.toml
+*.jsonc
 app/config
-app/config-example
 app/components/turnstile/keys.json
-app/components/turnstile/keys.json.example
