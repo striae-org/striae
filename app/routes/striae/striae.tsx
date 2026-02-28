@@ -8,6 +8,7 @@ import { getImageUrl } from '~/components/actions/image-manage';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
 import { getUserApiKey } from '~/utils/auth';
+import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
 import { AnnotationData, FileData } from '~/types';
 import { checkCaseIsReadOnly } from '~/components/actions/case-manage';
 import paths from '~/config/config.json';
@@ -289,7 +290,11 @@ export const Striae = ({ user }: StriaePage) => {
     const now = new Date().toISOString();
     const dataWithEarliestTimestamp: AnnotationData = {
       ...data,
-      earliestAnnotationTimestamp: data.earliestAnnotationTimestamp || annotationData?.earliestAnnotationTimestamp || now,
+      earliestAnnotationTimestamp: resolveEarliestAnnotationTimestamp(
+        data.earliestAnnotationTimestamp,
+        annotationData?.earliestAnnotationTimestamp,
+        now
+      ),
     };
 
     const confirmationChanged =
