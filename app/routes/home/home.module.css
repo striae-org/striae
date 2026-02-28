@@ -50,6 +50,13 @@
   line-height: var(--lineHeightTitle);
 }
 
+.subtitle {
+  font-size: var(--fontSizeBodyXL);
+  font-weight: var(--fontWeightMedium);
+  color: var(--background);
+  letter-spacing: 0.04em;
+}
+
 .buttonGroup {
   display: flex;
   gap: var(--spaceM);
@@ -172,6 +179,24 @@
 .aboutContent {
   text-align: left;
   line-height: var(--lineHeightBody);
+}
+
+.aboutContent ul {
+  margin: 0;
+  padding-left: var(--spaceL);
+  list-style-type: disc;
+  list-style-position: outside;
+}
+
+.aboutContent li {
+  font-size: var(--fontSizeBodyM);
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: var(--spaceM);
+  line-height: 1.6;
+}
+
+.aboutContent li p {
+  margin: 0;
 }
 
 .aboutContent p {
