@@ -2,16 +2,13 @@
   "name": "DATA_WORKER_NAME",
   "account_id": "ACCOUNT_ID",
   "main": "src/data-worker.ts",
-  "compatibility_date": "2023-03-14",
+  "compatibility_date": "2026-02-28",
   "compatibility_flags": [
     "nodejs_compat"
   ], 
   
   "observability": { 
-	"enabled": true,
-  "traces": {
-      "enabled": true
-    }
+	"enabled": true
   },
 
   "r2_buckets": [
