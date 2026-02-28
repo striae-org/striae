@@ -1,0 +1,7 @@
+Contact: mailto:info@striae.org
+Contact: https://github.com/striae-org/striae/security/advisories/new
+Expires: 2035-08-15T00:00:00.000Z
+Encryption: https://www.striae.org/.well-known/publickey.info@striae.org.asc
+Preferred-Languages: en
+Canonical: https://www.striae.org/.well-known/security.txt
+Policy: https://www.striae.org/security

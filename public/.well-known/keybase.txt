@@ -1,0 +1,56 @@
+==================================================================
+https://keybase.io/stephenjlu
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://striae.org
+  * I am stephenjlu (https://keybase.io/stephenjlu) on keybase.
+  * I have a public key ASAKWYuLxhqhdePAuDulLzWWUusZk7mQi-1lMyjF8lsSbgo
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "01200a598b8bc61aa175e3c0b83ba52f359652eb1993b9908bed653328c5f25b126e0a",
+      "host": "keybase.io",
+      "kid": "01200a598b8bc61aa175e3c0b83ba52f359652eb1993b9908bed653328c5f25b126e0a",
+      "uid": "ef43479353eb3b8be30c76fd0919c219",
+      "username": "stephenjlu"
+    },
+    "merkle_root": {
+      "ctime": 1770770344,
+      "hash": "cdb39ce5d5de7b86d1024edea90a95835adcba2a64ea1dcef46b9bd68e2cab611a3a332b0b0e668fc0e905bfeae8d3c7be860f8f852197bcaeb73f28f5c2e5f5",
+      "hash_meta": "ddd9e0138c408d8540892b1d534953758a5baaffe701eeed46287571d31933a6",
+      "seqno": 27400783
+    },
+    "service": {
+      "entropy": "grTRTWFH9QwBcg8LMRZzB0Zc",
+      "hostname": "striae.org",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 2
+  },
+  "client": {
+    "name": "keybase.io go client",
+    "version": "6.5.5"
+  },
+  "ctime": 1770770375,
+  "expire_in": 504576000,
+  "prev": "e9cfea0bcf19e9a9dd488b79365fd65c09d0f2667f687971b14fa517d32347b1",
+  "seqno": 24,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+hKRib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgClmLi8YaoXXjwLg7pS81llLrGZO5kIvtZTMoxfJbEm4Kp3BheWxvYWTESpcCGMQg6c/qC88Z6andSIt5Nl/WXAnQ8mZ/aHlxsU+lF9MjR7HEIDqFxeAns81NxBO8+T0/LIUjh6lkP7QVBvOd3HwtxEuCAgHCo3NpZ8RA6PhLE3r3sgWhRTEstinyHj+qNJSFfS1g/Sg2gsW0uaUthbCnAYNIRnPUdH0KB78QZqmYZQIBsoXGvetOyxQ0CahzaWdfdHlwZSCkaGFzaIKkdHlwZQildmFsdWXEIAqgSBMZRPqmwRSAah/dJmq9Ww6g/cNP+xTYziA7sVyco3RhZ80CAqd2ZXJzaW9uAQ==
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/stephenjlu
+
+==================================================================
