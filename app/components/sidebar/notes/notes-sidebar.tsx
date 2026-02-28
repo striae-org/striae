@@ -4,6 +4,7 @@ import { ColorSelector } from '~/components/colors/colors';
 import { NotesModal } from './notes-modal';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { AnnotationData } from '~/types/annotations';
+import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
 import { auditService } from '~/services/audit.service';
 import styles from './notes.module.css';
 
@@ -149,7 +150,11 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
         // Metadata
         updatedAt: now,
         // Set earliest annotation timestamp on first save (don't overwrite if already exists)
-        earliestAnnotationTimestamp: existingData?.earliestAnnotationTimestamp || now
+        earliestAnnotationTimestamp: resolveEarliestAnnotationTimestamp(
+          undefined,
+          existingData?.earliestAnnotationTimestamp,
+          now
+        )
       };
 
       await saveNotes(user, currentCase, imageId, annotationData);

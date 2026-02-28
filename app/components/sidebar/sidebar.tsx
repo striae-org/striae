@@ -33,6 +33,7 @@ interface SidebarProps {
   onAnnotationRefresh?: () => void;
   isReadOnly?: boolean;
   isConfirmed?: boolean;
+  confirmationSaveVersion?: number;
   isUploading?: boolean;
 }
 
@@ -58,6 +59,7 @@ export const Sidebar = ({
   onAnnotationRefresh,
   isReadOnly = false,
   isConfirmed = false,
+  confirmationSaveVersion = 0,
   isUploading: initialIsUploading = false,  
 }: SidebarProps) => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -176,6 +178,7 @@ export const Sidebar = ({
             onNotesClick={() => setShowNotes(true)}
             isReadOnly={isReadOnly}
             isConfirmed={isConfirmed}
+            confirmationSaveVersion={confirmationSaveVersion}
             selectedFileId={imageId}
             isUploading={isUploading}
             onUploadStatusChange={setIsUploading}

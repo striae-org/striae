@@ -8,6 +8,7 @@ import { getImageUrl } from '~/components/actions/image-manage';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
 import { getUserApiKey } from '~/utils/auth';
+import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
 import { AnnotationData, FileData } from '~/types';
 import { checkCaseIsReadOnly } from '~/components/actions/case-manage';
 import paths from '~/config/config.json';
@@ -41,6 +42,7 @@ export const Striae = ({ user }: StriaePage) => {
   const [activeAnnotations, setActiveAnnotations] = useState<Set<string>>(new Set());
   const [annotationData, setAnnotationData] = useState<AnnotationData | null>(null);
   const [annotationRefreshTrigger, setAnnotationRefreshTrigger] = useState(0);
+  const [confirmationSaveVersion, setConfirmationSaveVersion] = useState(0);
 
   // Box annotation states
   const [isBoxAnnotationMode, setIsBoxAnnotationMode] = useState(false);
@@ -229,6 +231,7 @@ export const Striae = ({ user }: StriaePage) => {
             confirmationData: notes.confirmationData, // Add imported confirmation data
             additionalNotes: notes.additionalNotes, // Optional - pass as-is
             boxAnnotations: notes.boxAnnotations || [],
+            earliestAnnotationTimestamp: notes.earliestAnnotationTimestamp,
             updatedAt: notes.updatedAt || new Date().toISOString()
           });
         } else {
@@ -284,15 +287,32 @@ export const Striae = ({ user }: StriaePage) => {
 
   // Automatic save handler for annotation updates
   const handleAnnotationUpdate = async (data: AnnotationData) => {
+    const now = new Date().toISOString();
+    const dataWithEarliestTimestamp: AnnotationData = {
+      ...data,
+      earliestAnnotationTimestamp: resolveEarliestAnnotationTimestamp(
+        data.earliestAnnotationTimestamp,
+        annotationData?.earliestAnnotationTimestamp,
+        now
+      ),
+    };
+
+    const confirmationChanged =
+      !!annotationData?.confirmationData !== !!data.confirmationData ||
+      !!annotationData?.includeConfirmation !== !!data.includeConfirmation;
+
     // Update local state immediately
-    setAnnotationData(data);
+    setAnnotationData(dataWithEarliestTimestamp);
     
     // For read-only cases, only save if it's confirmation data
     if (isReadOnlyCase) {
       // Save confirmation data to server even in read-only cases
       if (data.confirmationData && user && currentCase && imageId) {
         try {
-          await saveNotes(user, currentCase, imageId, data);
+          await saveNotes(user, currentCase, imageId, dataWithEarliestTimestamp);
+          if (confirmationChanged) {
+            setConfirmationSaveVersion(prev => prev + 1);
+          }
           console.log('Confirmation data saved to server in read-only case');
         } catch (saveError) {
           console.error('Failed to save confirmation data:', saveError);
@@ -308,11 +328,14 @@ export const Striae = ({ user }: StriaePage) => {
       try {
         // Ensure required fields have default values before saving
         const dataToSave: AnnotationData = {
-          ...data,
+          ...dataWithEarliestTimestamp,
           includeConfirmation: data.includeConfirmation ?? false, // Required field
         };
         
         await saveNotes(user, currentCase, imageId, dataToSave);
+        if (confirmationChanged) {
+          setConfirmationSaveVersion(prev => prev + 1);
+        }
       } catch (saveError) {
         console.error('Failed to auto-save annotations:', saveError);
         // Still show the annotations locally even if save fails
@@ -344,6 +367,7 @@ export const Striae = ({ user }: StriaePage) => {
         onAnnotationRefresh={refreshAnnotationData}
         isReadOnly={isReadOnlyCase}
         isConfirmed={!!annotationData?.confirmationData}
+        confirmationSaveVersion={confirmationSaveVersion}
       />
       <main className={styles.mainContent}>
         <div className={styles.canvasArea}>

@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useRef, useEffect, useContext } from 'r
 import { BoxAnnotation } from '~/types';
 import { AuthContext } from '~/contexts/auth.context';
 import { auditService } from '~/services/audit.service';
+import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
 import styles from './box-annotations.module.css';
 
 // Constants
@@ -234,7 +235,11 @@ export const BoxAnnotations = ({
           onAnnotationDataChange({
             ...annotationData,
             boxAnnotations: updatedAnnotations,
-            earliestAnnotationTimestamp: annotationData.earliestAnnotationTimestamp || now
+            earliestAnnotationTimestamp: resolveEarliestAnnotationTimestamp(
+              annotationData.earliestAnnotationTimestamp,
+              undefined,
+              now
+            )
           });
         }
         
