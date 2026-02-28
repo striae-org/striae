@@ -230,6 +230,7 @@ export const Striae = ({ user }: StriaePage) => {
             confirmationData: notes.confirmationData, // Add imported confirmation data
             additionalNotes: notes.additionalNotes, // Optional - pass as-is
             boxAnnotations: notes.boxAnnotations || [],
+            earliestAnnotationTimestamp: notes.earliestAnnotationTimestamp,
             updatedAt: notes.updatedAt || new Date().toISOString()
           });
         } else {
@@ -285,19 +286,25 @@ export const Striae = ({ user }: StriaePage) => {
 
   // Automatic save handler for annotation updates
   const handleAnnotationUpdate = async (data: AnnotationData) => {
+    const now = new Date().toISOString();
+    const dataWithEarliestTimestamp: AnnotationData = {
+      ...data,
+      earliestAnnotationTimestamp: data.earliestAnnotationTimestamp || annotationData?.earliestAnnotationTimestamp || now,
+    };
+
     const confirmationChanged =
       !!annotationData?.confirmationData !== !!data.confirmationData ||
       !!annotationData?.includeConfirmation !== !!data.includeConfirmation;
 
     // Update local state immediately
-    setAnnotationData(data);
+    setAnnotationData(dataWithEarliestTimestamp);
     
     // For read-only cases, only save if it's confirmation data
     if (isReadOnlyCase) {
       // Save confirmation data to server even in read-only cases
       if (data.confirmationData && user && currentCase && imageId) {
         try {
-          await saveNotes(user, currentCase, imageId, data);
+          await saveNotes(user, currentCase, imageId, dataWithEarliestTimestamp);
           if (confirmationChanged) {
             setConfirmationSaveVersion(prev => prev + 1);
           }
@@ -316,7 +323,7 @@ export const Striae = ({ user }: StriaePage) => {
       try {
         // Ensure required fields have default values before saving
         const dataToSave: AnnotationData = {
-          ...data,
+          ...dataWithEarliestTimestamp,
           includeConfirmation: data.includeConfirmation ?? false, // Required field
         };
         
