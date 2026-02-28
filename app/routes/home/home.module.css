@@ -33,21 +33,21 @@
   transform: scale(1.05);
 }
 
+.heroImage {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 0 var(--spaceL) 0;
+  border-radius: var(--spaceM);
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .title {
   font-size: var(--fontSizeH2);
   font-weight: var(--fontWeightMedium);
   color: var(--background);
   max-width: 1000px;
   line-height: var(--lineHeightTitle);
-}
-
-.subtitle {
-  margin: 0;
-  font-size: var(--fontSizeBodyL);
-  font-weight: var(--fontWeightMedium);
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .buttonGroup {
@@ -95,6 +95,15 @@
   margin: 0;
 }
 
+.pricingTableContainer {
+  width: 100%;
+}
+
+.registrationModalNarrow {
+  width: 65%;
+  max-width: 760px;
+}
+
 .actionButton {
   padding: var(--spaceM) var(--spaceL);
   border-radius: var(--spaceXS);
@@ -133,6 +142,12 @@
   transform: translateY(-1px);
 }
 
+@media (max-width: 1024px) {
+  .signInButton {
+    display: none;
+  }
+}
+
 .aboutSection {
   width: 100%;
   max-width: 900px;
@@ -160,20 +175,6 @@
 }
 
 .aboutContent p {
-  font-size: var(--fontSizeBodyM);
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: var(--spaceM);
-  line-height: 1.6;
-}
-
-.demoConditions {
-  margin: 0;
-  padding-left: var(--spaceL);
-  list-style-type: disc;
-  list-style-position: outside;
-}
-
-.demoConditions li {
   font-size: var(--fontSizeBodyM);
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: var(--spaceM);
@@ -251,12 +252,6 @@
   transform: translateY(-2px);
 }
 
-@media (max-width: 1024px) {
-  .signInButton {
-    display: none;
-  }
-}
-
 @media (max-width: 696px) {
   .container {
     padding: 0 var(--spaceM);
@@ -271,12 +266,6 @@
 
   .title {
     font-size: var(--fontSizeH4);
-  }
-
-  .subtitle {
-    font-size: var(--fontSizeBodyS);
-    line-height: var(--lineHeightBody);
-    word-break: break-word;
   }
 
   .buttonGroup {
@@ -296,6 +285,14 @@
   .signInButton {
     width: 100%;
     text-align: center;
+  }
+
+  .noticeButtonGroup {
+    flex-direction: column;
+  }
+
+  .registrationModalNarrow {
+    width: 90%;
   }
 
   .aboutSection {
