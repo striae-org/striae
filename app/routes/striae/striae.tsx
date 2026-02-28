@@ -41,6 +41,7 @@ export const Striae = ({ user }: StriaePage) => {
   const [activeAnnotations, setActiveAnnotations] = useState<Set<string>>(new Set());
   const [annotationData, setAnnotationData] = useState<AnnotationData | null>(null);
   const [annotationRefreshTrigger, setAnnotationRefreshTrigger] = useState(0);
+  const [confirmationSaveVersion, setConfirmationSaveVersion] = useState(0);
 
   // Box annotation states
   const [isBoxAnnotationMode, setIsBoxAnnotationMode] = useState(false);
@@ -284,6 +285,10 @@ export const Striae = ({ user }: StriaePage) => {
 
   // Automatic save handler for annotation updates
   const handleAnnotationUpdate = async (data: AnnotationData) => {
+    const confirmationChanged =
+      !!annotationData?.confirmationData !== !!data.confirmationData ||
+      !!annotationData?.includeConfirmation !== !!data.includeConfirmation;
+
     // Update local state immediately
     setAnnotationData(data);
     
@@ -293,6 +298,9 @@ export const Striae = ({ user }: StriaePage) => {
       if (data.confirmationData && user && currentCase && imageId) {
         try {
           await saveNotes(user, currentCase, imageId, data);
+          if (confirmationChanged) {
+            setConfirmationSaveVersion(prev => prev + 1);
+          }
           console.log('Confirmation data saved to server in read-only case');
         } catch (saveError) {
           console.error('Failed to save confirmation data:', saveError);
@@ -313,6 +321,9 @@ export const Striae = ({ user }: StriaePage) => {
         };
         
         await saveNotes(user, currentCase, imageId, dataToSave);
+        if (confirmationChanged) {
+          setConfirmationSaveVersion(prev => prev + 1);
+        }
       } catch (saveError) {
         console.error('Failed to auto-save annotations:', saveError);
         // Still show the annotations locally even if save fails
@@ -344,6 +355,7 @@ export const Striae = ({ user }: StriaePage) => {
         onAnnotationRefresh={refreshAnnotationData}
         isReadOnly={isReadOnlyCase}
         isConfirmed={!!annotationData?.confirmationData}
+        confirmationSaveVersion={confirmationSaveVersion}
       />
       <main className={styles.mainContent}>
         <div className={styles.canvasArea}>

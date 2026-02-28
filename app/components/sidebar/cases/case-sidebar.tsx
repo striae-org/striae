@@ -57,6 +57,7 @@ interface CaseSidebarProps {
   setSuccessAction: (action: CaseActionType) => void;
   isReadOnly?: boolean;
   isConfirmed?: boolean;
+  confirmationSaveVersion?: number;
   selectedFileId?: string;
   isUploading?: boolean;
   onUploadStatusChange?: (isUploading: boolean) => void;
@@ -84,6 +85,7 @@ export const CaseSidebar = ({
   setSuccessAction,
   isReadOnly = false,
   isConfirmed = false,
+  confirmationSaveVersion = 0,
   selectedFileId,
   isUploading = false,
   onUploadStatusChange,
@@ -188,8 +190,8 @@ export const CaseSidebar = ({
     }
   }, [user, currentCase, setFiles]);
 
-  // Fetch confirmation status for files when they load, change,
-  // or when the currently selected image confirmation state changes
+  // Fetch confirmation status for files when case/files change,
+  // or after confirmation-related annotation data is persisted
   useEffect(() => {
     let isCancelled = false;
 
@@ -254,7 +256,7 @@ export const CaseSidebar = ({
     return () => {
       isCancelled = true;
     };
-  }, [currentCase, files, user, selectedFileId, isConfirmed]);
+  }, [currentCase, files, user, confirmationSaveVersion]);
   
   const handleCase = async () => {
     setIsLoading(true);
