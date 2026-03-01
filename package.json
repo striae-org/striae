@@ -19,6 +19,7 @@
     "preview": "npm run build && wrangler pages dev",
     "cf-typegen": "wrangler types",
     "update-versions": "node ./scripts/update-markdown-versions.cjs",
+    "update-compatibility-dates": "node ./scripts/update-compatibility-dates.cjs",
     "deploy-config": "bash ./scripts/deploy-config.sh",
     "update-env": "bash ./scripts/deploy-config.sh --update-env",
     "install-workers": "bash ./scripts/install-workers.sh",
