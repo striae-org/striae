@@ -2,7 +2,7 @@
   "name": "striae",
   "version": "1.2.0",
   "private": true,
-  "sideEffects": false,
+  "sideEffects": ["**/*.css"],
   "type": "module",
   "scripts": {
     "deploy:all": "bash ./scripts/deploy-all.sh",
