@@ -27,6 +27,7 @@ import { Striae } from '~/routes/striae/striae';
 import { getUserData, createUser } from '~/utils/permissions';
 import { auditService } from '~/services/audit.service';
 import { generateUniqueId } from '~/utils/id-generator';
+import { AUTH_REGISTRATION_CONFIG } from '~/config/auth-registration';
 
 export const meta = () => {
   return baseMeta({
@@ -50,11 +51,10 @@ export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [firstName, setFirstName] = useState('Demo');
-  const [lastName, setLastName] = useState('User');
-  const [company, setCompany] = useState('Striae DEMO');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [company, setCompany] = useState('');
   const [confirmPasswordValue, setConfirmPasswordValue] = useState('');
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaWidgetId, setCaptchaWidgetId] = useState<string | null>(null);
   const [isCaptchaCoolingDown, setIsCaptchaCoolingDown] = useState(false);
   const [captchaCooldownSeconds, setCaptchaCooldownSeconds] = useState(0);
@@ -71,13 +71,30 @@ export const Login = () => {
     setIsClient(true);
   }, []);
 
-  // Email validation with regex
+  // Email validation with regex and domain allowlist
   const validateEmailDomain = (email: string): boolean => {
     // Email regex pattern for basic validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     
     // First check if email format is valid
     if (!emailRegex.test(email)) {
+      return false;
+    }
+
+    const normalizedEmail = email.toLowerCase();
+    const normalizedAllowedDomains = AUTH_REGISTRATION_CONFIG.allowedDomainEmails
+      .map((allowedDomainEmail) => allowedDomainEmail.trim().toLowerCase())
+      .filter((allowedDomainEmail) => allowedDomainEmail.length > 0);
+
+    if (normalizedAllowedDomains.length === 0) {
+      return true;
+    }
+
+    const allowedDomainEmail = normalizedAllowedDomains.some(
+      (allowedDomainEmail) => normalizedEmail.endsWith(allowedDomainEmail)
+    );
+
+    if (!allowedDomainEmail) {
       return false;
     }
 
@@ -202,6 +219,7 @@ export const Login = () => {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const confirmPassword = formData.get('confirmPassword') as string;
+  const captchaToken = formData.get('cf-turnstile-response') as string | null;
   // Use state values for these fields instead of FormData
   const formFirstName = firstName;
   const formLastName = lastName;
@@ -247,7 +265,6 @@ export const Login = () => {
       if (captchaWidgetId && window.turnstile) {
         window.turnstile.reset(captchaWidgetId);
       }
-      setCaptchaToken(null);
       setIsLoading(false);
       return;
     }
@@ -255,7 +272,7 @@ export const Login = () => {
     if (!isLogin) {
       // Registration validation
       if (!validateEmailDomain(email)) {
-        setError('Please enter a valid email address');
+        setError('Registration is restricted to authorized users only');
         setIsLoading(false);
         return;
       }
@@ -278,12 +295,16 @@ export const Login = () => {
         displayName: `${formFirstName} ${formLastName}`
       });
 
+      const companyName = (AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration
+        ? AUTH_REGISTRATION_CONFIG.defaultLabCompanyName
+        : formCompany).trim();
+
       // Create user data using centralized function
       await createUser(
         createCredential.user,
         formFirstName,
         formLastName,
-        formCompany || '', // Use company from form, fallback to empty string
+        companyName || '',
         true
       );
 
@@ -293,7 +314,7 @@ export const Login = () => {
           createCredential.user,
           formFirstName,
           formLastName,
-          formCompany || '',
+          companyName || '',
           'email-password',
           navigator.userAgent
         );
@@ -386,7 +407,6 @@ export const Login = () => {
     if (captchaWidgetId && window.turnstile) {
       window.turnstile.reset(captchaWidgetId);
     }
-    setCaptchaToken(null);
     setIsLoading(false);
   }
 };
@@ -479,12 +499,15 @@ export const Login = () => {
               <input
                 type="email"
                 name="email"
-                placeholder={isLogin ? "Email" : "Email Address"}
+                placeholder={isLogin ? "Email" : "Work Email Address"}
                 autoComplete="email"
                 className={styles.input}
                 required
                 disabled={isLoading}
               />
+              {!isLogin && (
+                <p className={styles.hint}>Registration is restricted to authorized users only</p>
+              )}
               <div className={styles.passwordField}>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -543,9 +566,9 @@ export const Login = () => {
                     placeholder="First Name (required)"
                     autoComplete="given-name"
                     className={styles.input}
-                    disabled
-                    readOnly
+                    disabled={isLoading}
                     value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                   />
                   <input
                     type="text"
@@ -554,20 +577,20 @@ export const Login = () => {
                     placeholder="Last Name (required)"
                     autoComplete="family-name"
                     className={styles.input}
-                    disabled
-                    readOnly
+                    disabled={isLoading}
                     value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
                   />
                   <input
                     type="text"
                     name="company"
-                    required
-                    placeholder="Lab/Company Name (required)"
+                    required={!AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration}
+                    placeholder={`${AUTH_REGISTRATION_CONFIG.defaultLabCompanyName} (required)`}
                     autoComplete="organization"
                     className={styles.input}
-                    disabled
-                    readOnly
-                    value={company}
+                    disabled={isLoading || AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration}
+                    value={AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration ? AUTH_REGISTRATION_CONFIG.defaultLabCompanyName : company}
+                    onChange={(e) => setCompany(e.target.value)}
                   />                      
                   {passwordStrength && (
                     <div className={styles.passwordStrength}>
@@ -593,7 +616,6 @@ export const Login = () => {
               <Turnstile
                 className="route-turnstile"
                 onWidgetId={(id) => setCaptchaWidgetId(id)}
-                onTokenChange={(token) => setCaptchaToken(token)}
               />
               
               <button 
@@ -622,9 +644,9 @@ export const Login = () => {
                   setShowConfirmPassword(false);
                   setPasswordStrength('');
                   setError('');
-                  setFirstName('Demo');
-                  setLastName('User');
-                  setCompany('Striae DEMO');
+                  setFirstName('');
+                  setLastName('');
+                  setCompany('');
                   setConfirmPasswordValue('');
                 }}
                 className={styles.toggleButton}
@@ -654,7 +676,6 @@ export const Login = () => {
           mandatory={true}
         />
       )}
-      
     </>
   );
 };

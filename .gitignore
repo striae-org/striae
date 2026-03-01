@@ -8,7 +8,6 @@ archive/
 wiki/
 
 # Files
-app/routes/auth/login.tsx
 app/routes/home/home.tsx
 
 # Workers
