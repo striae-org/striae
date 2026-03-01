@@ -694,6 +694,10 @@ it('creates case and logs audit event', async () => {
 
 ## Version Update Protocol
 
+### Co-Pilot Command
+
+Please bump to version v{VERSION}. Create release notes and update README changelog. Use the commits done since the previous release (non-merge).
+
 ### Release Notes Creation
 - **File Location**: `public/release-notes/RELEASE_NOTES_v{VERSION}.md`
 - **Naming Convention**: RELEASE_NOTES_v1.0.5.md (note: hyphen in filename)
