@@ -18,6 +18,15 @@
 
 ## 📋 Changelog
 
+## [2026-03-01] - *[Minor Release v1.2.0](https://github.com/striae-org/striae/releases/tag/v1.2.0)*
+
+- **🔐 Authentication & Registration Iteration** - Continued login/registration flow development with new auth-registration config alignment and route-level integration updates
+- **✅ Confirmation & Timestamp Reliability Fixes** - Corrected earliest annotation timestamp handling and refined confirmation-state saves with improved reviewer file refresh behavior
+- **🛡️ Turnstile Refinement** - Iterated turnstile login implementation and validation/testing paths to strengthen access-guard behavior
+- **🎨 Public Route/UI & Asset Cleanup** - Applied targeted home/public CSS fixes and synchronized supporting public assets/screenshots for cleaner presentation
+- **⚙️ Config/Worker/Deploy Synchronization** - Updated worker compat/config examples, cross-platform deploy scripts, and repository hygiene to reduce config drift
+- **📦 Dependency Maintenance** - Updated Firebase to `12.10.0` and `@typescript-eslint/parser` to `8.56.1` with associated package alignment
+
 ## [2026-02-27] - *[Patch Release v1.1.5](https://github.com/striae-org/striae/releases/tag/v1.1.5)*
 
 - **⚖️ Legal & Compliance Hardening** - Expanded Terms and policy language across account types, fees, maintenance, confidentiality, dispute resolution, and forensic responsibility allocation
