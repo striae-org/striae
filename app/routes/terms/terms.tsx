@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { baseMeta } from '~/utils/meta';
 import { Link } from '@remix-run/react';
+import { useEffect, useState } from 'react';
 import Footer from '~/components/footer/footer';
 import styles from '~/styles/legal-pages.module.css';
 
@@ -12,6 +13,23 @@ export const meta = () => {
 };
 
 export const Terms = () => {
+  const [emailAddress, setEmailAddress] = useState('');
+  const [phoneDisplay, setPhoneDisplay] = useState('');
+  const [phoneHref, setPhoneHref] = useState('');
+
+  useEffect(() => {
+    const emailParts = ['info', 'striae.org'];
+    const phoneParts = ['520', '580', '3758'];
+
+    const builtEmail = `${emailParts[0]}@${emailParts[1]}`;
+    const builtPhoneDisplay = `(${phoneParts[0]}) ${phoneParts[1]}-${phoneParts[2]}`;
+    const builtPhoneHref = `+1${phoneParts.join('')}`;
+
+    setEmailAddress(builtEmail);
+    setPhoneDisplay(builtPhoneDisplay);
+    setPhoneHref(builtPhoneHref);
+  }, []);
+
   return (    
     <>
       <div id="top" className={`route-legal-container ${styles.container}`}>
@@ -245,7 +263,7 @@ export const Terms = () => {
 <h2>Copyright Policy</h2>
 <h3>Intellectual Property Infringement</h3>
 <p>We respect the intellectual property rights of others. It is Our policy to respond to any claim that Data posted on the Service infringes a copyright or other intellectual property infringement of any person.</p>
-<p>If You are a copyright owner, or authorized on behalf of one, and You believe that the copyrighted work has been copied in a way that constitutes copyright infringement that is taking place through the Service, You must submit Your notice in writing to the attention of Our copyright agent via email at info@striae.org and include in Your notice a detailed description of the alleged infringement.</p>
+        <p>If You are a copyright owner, or authorized on behalf of one, and You believe that the copyrighted work has been copied in a way that constitutes copyright infringement that is taking place through the Service, You must submit Your notice in writing to the attention of Our copyright agent via email at {emailAddress ? <a href={`mailto:${emailAddress}`}>{emailAddress}</a> : 'Loading contact email...'} and include in Your notice a detailed description of the alleged infringement.</p>
 <p>You may be held accountable for damages (including costs and attorneys' fees) for misrepresenting that any Data is infringing Your copyright.</p>
 <h3>DMCA Notice and DMCA Procedure for Copyright Infringement Claims</h3>
 <p>You may submit a notification pursuant to the Digital Millennium Copyright Act (DMCA) by providing Our Copyright Agent with the following information in writing (see 17 U.S.C 512(c)(3) for further detail):</p>
@@ -257,7 +275,7 @@ export const Terms = () => {
 <li>A statement by You that You have a good faith belief that the disputed use is not authorized by the copyright owner, its agent, or the law.</li>
 <li>A statement by You, made under penalty of perjury, that the above information in Your notice is accurate and that You are the copyright owner or authorized to act on the copyright owner's behalf.</li>
 </ul>
-<p>You can contact Our copyright agent via email at info@striae.org.
+<p>You can contact Our copyright agent via email at {emailAddress ? <a href={`mailto:${emailAddress}`}>{emailAddress}</a> : 'Loading contact email...'}.
 Upon receipt of a notification, the Company will take whatever action, in its sole discretion, it deems appropriate, including removal of the challenged content from the Service.</p>          
         </section>
 <section className={styles.section}>
@@ -434,7 +452,10 @@ You agree that the original English text shall prevail in the case of a dispute.
 <p>If You have any questions about these Terms and Conditions, You can contact Us:</p>
 <ul>
 <li>
-<p>By email: info@striae.org</p>
+<p>By email: {emailAddress ? <a href={`mailto:${emailAddress}`}>{emailAddress}</a> : 'Loading contact email...'}</p>
+</li>
+<li>
+<p>By phone: {phoneDisplay ? <a href={`tel:${phoneHref}`}>{phoneDisplay}</a> : 'Loading contact phone...'}</p>
 </li>
 <li>
 <p>By mail: Contact Us for a physical address</p>
