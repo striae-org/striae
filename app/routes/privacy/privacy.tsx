@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { baseMeta } from '~/utils/meta';
 import { Link } from '@remix-run/react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Footer from '~/components/footer/footer';
 import styles from '~/styles/legal-pages.module.css';
 
@@ -14,8 +14,22 @@ export const meta = () => {
 
 export const Privacy = () => {
   const cookieDeclarationContainerRef = useRef<HTMLDivElement | null>(null);
+  const [emailAddress, setEmailAddress] = useState('');
+  const [phoneDisplay, setPhoneDisplay] = useState('');
+  const [phoneHref, setPhoneHref] = useState('');
 
   useEffect(() => {
+    const emailParts = ['info', 'striae.org'];
+    const phoneParts = ['520', '580', '3758'];
+
+    const builtEmail = `${emailParts[0]}@${emailParts[1]}`;
+    const builtPhoneDisplay = `(${phoneParts[0]}) ${phoneParts[1]}-${phoneParts[2]}`;
+    const builtPhoneHref = `+1${phoneParts.join('')}`;
+
+    setEmailAddress(builtEmail);
+    setPhoneDisplay(builtPhoneDisplay);
+    setPhoneHref(builtPhoneHref);
+
     const container = cookieDeclarationContainerRef.current;
     if (!container) return;
 
@@ -473,7 +487,10 @@ export const Privacy = () => {
 <p>Additionally, in order to exercise any of Your rights under the CCPA/CPRA, and if You are a California resident, You can contact Us:</p>
 <ul>
 <li>
-<p>By email: info@striae.org</p>
+<p>By email: {emailAddress ? <a href={`mailto:${emailAddress}`}>{emailAddress}</a> : 'Loading contact email...'}</p>
+</li>
+<li>
+<p>By phone: {phoneDisplay ? <a href={`tel:${phoneHref}`}>{phoneDisplay}</a> : 'Loading contact phone...'}</p>
 </li>
 <li>
 <p>Contact page: <a href="https://stephenjlu.com/contact" target="_blank" rel="noopener noreferrer">https://stephenjlu.com/contact</a></p>
@@ -553,7 +570,10 @@ export const Privacy = () => {
 <p>If You have any questions about this Privacy Policy, You can contact Us:</p>
 <ul>
 <li>
-<p>By email: info@striae.org</p>
+<p>By email: {emailAddress ? <a href={`mailto:${emailAddress}`}>{emailAddress}</a> : 'Loading contact email...'}</p>
+</li>
+<li>
+<p>By phone: {phoneDisplay ? <a href={`tel:${phoneHref}`}>{phoneDisplay}</a> : 'Loading contact phone...'}</p>
 </li>
 <li>
 <p>By mail: Contact Us for a physical address</p>
