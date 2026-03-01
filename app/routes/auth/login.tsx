@@ -53,8 +53,13 @@ export const Login = () => {
   const [isClient, setIsClient] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [company, setCompany] = useState('');
+  const [company, setCompany] = useState(
+    AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration
+      ? AUTH_REGISTRATION_CONFIG.defaultLabCompanyName
+      : ''
+  );
   const [confirmPasswordValue, setConfirmPasswordValue] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaWidgetId, setCaptchaWidgetId] = useState<string | null>(null);
   const [isCaptchaCoolingDown, setIsCaptchaCoolingDown] = useState(false);
   const [captchaCooldownSeconds, setCaptchaCooldownSeconds] = useState(0);
@@ -71,14 +76,14 @@ export const Login = () => {
     setIsClient(true);
   }, []);
 
-  // Email validation with regex and domain allowlist
-  const validateEmailDomain = (email: string): boolean => {
+  // Email validation with regex and optional domain allowlist
+  const validateEmailDomain = (email: string): { valid: boolean; reason?: 'invalid-format' | 'domain-not-allowed' } => {
     // Email regex pattern for basic validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     
     // First check if email format is valid
     if (!emailRegex.test(email)) {
-      return false;
+      return { valid: false, reason: 'invalid-format' };
     }
 
     const normalizedEmail = email.toLowerCase();
@@ -87,7 +92,7 @@ export const Login = () => {
       .filter((allowedDomainEmail) => allowedDomainEmail.length > 0);
 
     if (normalizedAllowedDomains.length === 0) {
-      return true;
+      return { valid: true };
     }
 
     const allowedDomainEmail = normalizedAllowedDomains.some(
@@ -95,10 +100,10 @@ export const Login = () => {
     );
 
     if (!allowedDomainEmail) {
-      return false;
+      return { valid: false, reason: 'domain-not-allowed' };
     }
 
-    return true;
+    return { valid: true };
   };
 
   const checkPasswordStrength = (password: string, confirmPassword?: string): boolean => {
@@ -219,7 +224,6 @@ export const Login = () => {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const confirmPassword = formData.get('confirmPassword') as string;
-  const captchaToken = formData.get('cf-turnstile-response') as string | null;
   // Use state values for these fields instead of FormData
   const formFirstName = firstName;
   const formLastName = lastName;
@@ -265,14 +269,20 @@ export const Login = () => {
       if (captchaWidgetId && window.turnstile) {
         window.turnstile.reset(captchaWidgetId);
       }
+      setCaptchaToken(null);
       setIsLoading(false);
       return;
     }
 
     if (!isLogin) {
       // Registration validation
-      if (!validateEmailDomain(email)) {
-        setError('Registration is restricted to authorized users only');
+      const emailValidation = validateEmailDomain(email);
+      if (!emailValidation.valid) {
+        setError(
+          emailValidation.reason === 'domain-not-allowed'
+            ? 'Registration is restricted to authorized email domains only'
+            : 'Please enter a valid email address'
+        );
         setIsLoading(false);
         return;
       }
@@ -407,6 +417,7 @@ export const Login = () => {
     if (captchaWidgetId && window.turnstile) {
       window.turnstile.reset(captchaWidgetId);
     }
+    setCaptchaToken(null);
     setIsLoading(false);
   }
 };
@@ -499,15 +510,12 @@ export const Login = () => {
               <input
                 type="email"
                 name="email"
-                placeholder={isLogin ? "Email" : "Work Email Address"}
+                placeholder={isLogin ? "Email" : "Email Address"}
                 autoComplete="email"
                 className={styles.input}
                 required
                 disabled={isLoading}
               />
-              {!isLogin && (
-                <p className={styles.hint}>Registration is restricted to authorized users only</p>
-              )}
               <div className={styles.passwordField}>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -616,6 +624,7 @@ export const Login = () => {
               <Turnstile
                 className="route-turnstile"
                 onWidgetId={(id) => setCaptchaWidgetId(id)}
+                onTokenChange={(token) => setCaptchaToken(token)}
               />
               
               <button 
@@ -646,7 +655,7 @@ export const Login = () => {
                   setError('');
                   setFirstName('');
                   setLastName('');
-                  setCompany('');
+                  setCompany(AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration ? AUTH_REGISTRATION_CONFIG.defaultLabCompanyName : '');
                   setConfirmPasswordValue('');
                 }}
                 className={styles.toggleButton}
@@ -676,6 +685,7 @@ export const Login = () => {
           mandatory={true}
         />
       )}
+      
     </>
   );
 };
