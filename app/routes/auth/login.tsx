@@ -107,6 +107,12 @@ export const Login = () => {
   };
 
   const checkPasswordStrength = (password: string, confirmPassword?: string): boolean => {
+    const normalizedConfirmPassword = confirmPassword ?? '';
+    if (password.length === 0 && normalizedConfirmPassword.length === 0) {
+      setPasswordStrength('');
+      return false;
+    }
+
     const hasMinLength = password.length >= 10;
     const hasUpperCase = /[A-Z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
@@ -230,6 +236,31 @@ export const Login = () => {
   const formCompany = company;
 
   try {
+    if (!isLogin) {
+      const emailValidation = validateEmailDomain(email);
+      if (!emailValidation.valid) {
+        setError(
+          emailValidation.reason === 'domain-not-allowed'
+            ? 'Registration is restricted to authorized email domains only'
+            : 'Please enter a valid email address'
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (!checkPasswordStrength(password)) {
+        setError('Password does not meet requirements');
+        setIsLoading(false);
+        return;
+      }
+    }
+
     if (!captchaToken) {
       setError('Please complete CAPTCHA verification before continuing.');
       setIsLoading(false);
@@ -275,30 +306,6 @@ export const Login = () => {
     }
 
     if (!isLogin) {
-      // Registration validation
-      const emailValidation = validateEmailDomain(email);
-      if (!emailValidation.valid) {
-        setError(
-          emailValidation.reason === 'domain-not-allowed'
-            ? 'Registration is restricted to authorized email domains only'
-            : 'Please enter a valid email address'
-        );
-        setIsLoading(false);
-        return;
-      }
-      
-      if (password !== confirmPassword) {
-        setError('Passwords do not match');
-        setIsLoading(false);
-        return;
-      }
-      
-      if (!checkPasswordStrength(password)) {
-        setError('Password does not meet requirements');
-        setIsLoading(false);
-        return;
-      }
-
       // Registration
       const createCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(createCredential.user, {
