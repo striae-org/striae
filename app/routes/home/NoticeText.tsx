@@ -12,7 +12,22 @@ const NoticeText = () => {
       <p>
         We are excited to announce Striae, an innovative web app designed to assist firearms examiners in creating detailed annotations for your comparison images. Striae aims to streamline the processes of labeling, note-taking, and printing, making the review process a little bit easier.
       </p>
-      <p><strong>Features of Striae</strong></p>
+      <h2>Important Details</h2>
+      <ul>
+        <li><strong>Free Base Access Forever:</strong> Individual users can always register and use the base version of Striae at no cost, no customization, and with basic customer support.</li>
+        <li><strong>Agency/Company Plans:</strong> Paid annual plans for agencies and companies include deep customization, unlimited users, and priority customer support channels.</li>
+        <li><strong>Plan Availability:</strong> Agency plans are not yet available and are estimated to launch in mid-March 2026.</li>
+        <li><strong>Striae Subdomain:</strong> Agency instances will be hosted on a dedicated Striae subdomain.
+          <br />
+          Ex: https://<strong>ouragency</strong>.striae.org
+        </li>
+        <li><strong>Agency Interest Form:</strong> This form is an interest form only. Final fees and terms will be shared when plans become available.</li>
+      </ul>
+
+      <h2>Register a Demo Account</h2>
+      <p>You can demo the features of Striae for free at <a href="https://dev.striae.org/" target="_blank" rel="noopener noreferrer">https://dev.striae.org/</a>.</p>
+      <p>Demo accounts are created in the development instance of Striae and provide full access to all features for evaluation purposes only. Actual casework images and data, research data, or training materials should <em>NOT</em> be uploaded or entered using a demo account. <em>Demo account files and data may be subject to regular purging without notification.</em></p>
+      <h3>Features of Striae</h3>
       <ul>
         <li>
             <strong>Annotation Tools:</strong> Simplify the process of marking and labeling comparison images with ease. Add case and item number labels, labels for class characteristics, a potential subclass warning/indicator, an indexing color/number indicator, support indicator for ID, inconclusive, or exclusion, and more.
@@ -30,7 +45,7 @@ const NoticeText = () => {
             <strong>Convert to PDF to Save or Print: </strong> Generate professional-quality PDF outputs for documentation and reporting. Include authenticated digital confirmation records or traditional confirmation remarks in your final reports for comprehensive case documentation.
         </li>
       </ul>
-      <p><strong>Security Features of Striae</strong></p>
+      <h3>Security Features of Striae</h3>
       <p>
         Coming from a forensics background ourselves, we understand the necessity for strong security measures in order to protect your data and files. From day one, Striae was designed with data security as a top priority.
         <p>
@@ -71,9 +86,9 @@ const NoticeText = () => {
         <small>¹ For detailed encryption specifications, see: <a href="https://developers.cloudflare.com/r2/reference/data-security/" target="_blank" rel="noopener noreferrer">Cloudflare R2 Security</a> and <a href="https://developers.cloudflare.com/kv/reference/data-security/" target="_blank" rel="noopener noreferrer">Cloudflare KV Security</a></small>
       </p>
       
-      <p>
-        <strong>Community, Collaboration & Open Innovation</strong>
-      </p>
+      <h3>
+        Community, Collaboration & Open Innovation
+      </h3>
       <p>
         Striae is built on the principles of open collaboration, community-driven development, and shared innovation. Our commitment to openness extends beyond just making our code available—we actively participate in initiatives that protect and promote the free exchange of ideas and technology for the benefit of the entire forensic science community.
       </p>

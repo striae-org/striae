@@ -39,14 +39,18 @@ export default function Footer() {
           <Link 
             viewTransition
             prefetch="intent"
-            to="/support" 
+            to="https://striae.org/support" 
+            target="_blank"
+            rel="noopener noreferrer" 
             className={styles.link}>
             Need Help?
           </Link>
           <Link 
             viewTransition
             prefetch="intent"
-            to="/bugs" 
+            to="https://striae.org/bugs" 
+            target="_blank"
+            rel="noopener noreferrer"
             className={styles.link}>
             Submit a Bug Report
           </Link>
