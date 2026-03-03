@@ -115,7 +115,7 @@ fi
 
 # User Worker  
 if ! set_worker_secrets "User Worker" "workers/user-worker" \
-    "USER_DB_AUTH" "SL_API_KEY" "R2_KEY_SECRET" "IMAGES_API_TOKEN"; then
+    "USER_DB_AUTH" "R2_KEY_SECRET" "IMAGES_API_TOKEN"; then
     echo -e "${YELLOW}⚠️  Skipping User Worker (not configured)${NC}"
 fi
 
@@ -141,10 +141,6 @@ fi
 echo -e "\n${BLUE}📄 PDF Worker: No environment variables needed${NC}"
 
 echo -e "\n${GREEN}🎉 Worker secrets deployment completed!${NC}"
-
-# Remind about Pages environment variables
-echo -e "\n${YELLOW}⚠️  IMPORTANT: Don't forget to set these variables in Cloudflare Pages Dashboard:${NC}"
-echo "   - SL_API_KEY"
 
 echo -e "\n${YELLOW}⚠️  WORKER CONFIGURATION REMINDERS:${NC}"
 echo "   - Copy wrangler.jsonc.example to wrangler.jsonc in each worker directory"
