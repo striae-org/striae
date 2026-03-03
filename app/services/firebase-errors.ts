@@ -23,8 +23,8 @@ export const ERROR_MESSAGES = {
   MFA_TOO_MANY_REQUESTS: 'Too many requests. Please try again later',
   MFA_INVALID_PHONE: 'Please enter a valid phone number',
   MFA_NO_VERIFICATION_ID: 'No verification ID found. Please request a new code.',
-  MFA_RECAPTCHA_EXPIRED: 'reCAPTCHA expired. Please try again.',
-  MFA_RECAPTCHA_ERROR: 'reCAPTCHA not initialized. Please refresh and try again.',
+  MFA_RECAPTCHA_EXPIRED: 'reCAPTCHA expired. Please send another code.',
+  MFA_RECAPTCHA_ERROR: 'reCAPTCHA needs to be reset. Please send another code.',
   MFA_CODE_REQUIRED: 'Please enter the verification code',
   
   // General

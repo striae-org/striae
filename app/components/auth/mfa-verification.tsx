@@ -79,7 +79,16 @@ export const MFAVerification = ({ resolver, onSuccess, onError, onCancel }: MFAV
       setCodeSent(true);
     } catch (error: unknown) {
       const authError = error as { code?: string; message?: string };
-      const errorMsg = handleAuthError(authError).message;
+      let errorMsg = handleAuthError(authError).message;
+      const isRecaptchaResetError =
+        authError.code === 'auth/captcha-check-failed' ||
+        authError.code === 'auth/invalid-app-credential' ||
+        authError.code === 'auth/missing-app-credential' ||
+        (authError.message?.toLowerCase().includes('recaptcha') ?? false);
+
+      if (isRecaptchaResetError) {
+        errorMsg = getValidationError('MFA_RECAPTCHA_ERROR');
+      }
       setErrorMessage(errorMsg);
       onError(errorMsg);
       if (recaptchaVerifier) {
