@@ -14,7 +14,7 @@ export default function Footer() {
     <>
       <footer className={styles.footer}>
         <div className={styles.container}>
-          <nav className={styles.nav}>                            
+          <nav className={styles.nav}>                                      
           <Link 
             viewTransition
             prefetch="intent"
@@ -50,6 +50,13 @@ export default function Footer() {
             className={styles.link}>
             Submit a Bug Report
           </Link>
+          <a
+            href="/docs/striae-white-paper.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.link}>
+            White Paper
+          </a>
           </nav>
           <div className={styles.badgeContainer}>
             <div className={styles.oinBadge}>
