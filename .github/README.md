@@ -18,6 +18,14 @@
 
 ## 📋 Changelog
 
+## [2026-03-03] - *[Patch Release v1.2.1](https://github.com/striae-org/striae/releases/tag/v1.2.1)*
+
+- **🔗 Public Link and Navigation Cleanup** - Updated white paper link handling on public surfaces and consolidated access/support route pathways
+- **🧭 Route Surface Simplification** - Removed legacy access/support/bugs route fragments and integrated relevant notice content into active home messaging
+- **🔐 MFA/Auth and Privacy Refinements** - Improved MFA verification/error feedback, privacy wording, and public obfuscation behavior
+- **⚙️ Worker/Config Hygiene** - Performed worker package cleanup, compatibility-date/type updates, and stale key/script cleanup
+- **📦 Dependency Maintenance** - Applied package baseline updates including `autoprefixer` `10.4.24` → `10.4.27` and related repository/tooling alignment
+
 ## [2026-03-01] - *[Minor Release v1.2.0](https://github.com/striae-org/striae/releases/tag/v1.2.0)*
 
 - **🔐 Authentication & Registration Iteration** - Continued login/registration flow development with new auth-registration config alignment and route-level integration updates
@@ -300,7 +308,7 @@
 ## 🎯 Key Highlights
 
 | Feature | Impact | Status |
-|---------|--------|--------|
+| --------- | -------- | -------- |
 | **MFA Implementation** | 🔒 Major security enhancement | ✅ Complete |
 | **PDF Generation** | 📄 New core functionality | ✅ Complete |
 | **UI Modernization** | 🎨 Better user experience | ✅ Complete |
