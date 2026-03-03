@@ -30,19 +30,10 @@ echo -e "${YELLOW}📖 Loading environment variables from .env...${NC}"
 source .env
 
 # Pages-specific environment variables
-pages_vars=(
-    "SL_API_KEY"
-)
+pages_vars=()
 
 echo -e "${YELLOW}🔍 Validating Pages environment variables...${NC}"
-for var in "${pages_vars[@]}"; do
-    if [ -z "${!var}" ]; then
-        echo -e "${RED}❌ Error: $var is not set in .env file${NC}"
-        exit 1
-    fi
-done
-
-echo -e "${GREEN}✅ All Pages variables found${NC}"
+echo -e "${GREEN}✅ No Pages secrets configured for deployment${NC}"
 
 # Function to get the project name from wrangler.toml
 get_pages_project_name() {
@@ -83,20 +74,28 @@ set_pages_env() {
     fi
 }
 
-# Set each Pages environment variable
-for var in "${pages_vars[@]}"; do
-    if ! set_pages_env "$var"; then
-        echo -e "${RED}❌ Failed to deploy Pages secrets${NC}"
-        exit 1
-    fi
-done
+if [ ${#pages_vars[@]} -gt 0 ]; then
+    # Set each Pages environment variable
+    for var in "${pages_vars[@]}"; do
+        if ! set_pages_env "$var"; then
+            echo -e "${RED}❌ Failed to deploy Pages secrets${NC}"
+            exit 1
+        fi
+    done
+else
+    echo -e "${YELLOW}ℹ️  No Pages secrets to deploy${NC}"
+fi
 
 echo -e "\n${GREEN}🎉 Pages secrets deployment completed!${NC}"
 
 echo -e "\n${YELLOW}📝 Variables deployed to Pages project '$PROJECT_NAME':${NC}"
-for var in "${pages_vars[@]}"; do
-    echo "   ✅ $var"
-done
+if [ ${#pages_vars[@]} -gt 0 ]; then
+    for var in "${pages_vars[@]}"; do
+        echo "   ✅ $var"
+    done
+else
+    echo "   (none)"
+fi
 
 echo -e "\n${BLUE}💡 Additional Notes:${NC}"
 echo "   - These variables are now available in your Remix application"

@@ -94,7 +94,6 @@ required_vars=(
     "ACCOUNT_ID"
     
     # Shared Authentication & Storage
-    "SL_API_KEY"
     "USER_DB_AUTH"
     "R2_KEY_SECRET"
     "IMAGES_API_TOKEN"
@@ -450,7 +449,6 @@ prompt_for_secrets() {
     
     echo -e "${BLUE}🔐 SHARED AUTHENTICATION & STORAGE${NC}"
     echo "==================================="
-    prompt_for_var "SL_API_KEY" "SendLayer API key for email services"
     prompt_for_var "USER_DB_AUTH" "Custom user database authentication token (generate with: openssl rand -hex 16)"
     prompt_for_var "R2_KEY_SECRET" "Custom R2 storage authentication token (generate with: openssl rand -hex 16)"
     prompt_for_var "IMAGES_API_TOKEN" "Cloudflare Images API token (shared between workers)"
