@@ -98,18 +98,14 @@ export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
             </div>
             <div className={styles.footerModalContent}>
               <div className={styles.footerModalLinks}>                                
-                <Link 
-                  viewTransition
-                  prefetch="intent"
+                <Link                   
                   to="https://striae.org/support" 
                   target="_blank"
                   rel="noopener noreferrer" 
                   className={styles.footerModalLink}>
                   Need Help?
                 </Link>
-                <Link 
-                  viewTransition
-                  prefetch="intent"
+                <Link                   
                   to="https://striae.org/bugs" 
                   target="_blank"
                   rel="noopener noreferrer"
@@ -143,9 +139,7 @@ export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
                   className={styles.footerModalLink}>
                   Security Policy
                 </Link>
-                <Link 
-                  viewTransition
-                  prefetch="intent"
+                <Link                   
                   to="https://payments.striae.org/p/login/28E28k1I7dczdMrgNmdAk00" 
                   target="_blank" 
                   rel="noopener noreferrer" 

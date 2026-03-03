@@ -36,18 +36,14 @@ export default function Footer() {
             className={styles.link}>
             Security Policy
           </Link>
-          <Link 
-            viewTransition
-            prefetch="intent"
+          <Link             
             to="https://striae.org/support" 
             target="_blank"
             rel="noopener noreferrer" 
             className={styles.link}>
             Need Help?
           </Link>
-          <Link 
-            viewTransition
-            prefetch="intent"
+          <Link             
             to="https://striae.org/bugs" 
             target="_blank"
             rel="noopener noreferrer"
