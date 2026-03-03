@@ -20,6 +20,15 @@ interface MFAVerificationProps {
   onCancel: () => void;
 }
 
+const isRecaptchaResetError = (authError: { code?: string; message?: string }): boolean => {
+  return (
+    authError.code === 'auth/captcha-check-failed' ||
+    authError.code === 'auth/invalid-app-credential' ||
+    authError.code === 'auth/missing-app-credential' ||
+    (authError.message?.toLowerCase().includes('recaptcha') ?? false)
+  );
+};
+
 export const MFAVerification = ({ resolver, onSuccess, onError, onCancel }: MFAVerificationProps) => {
   const [selectedHintIndex, setSelectedHintIndex] = useState(0);
   const [verificationCode, setVerificationCode] = useState('');
@@ -80,13 +89,8 @@ export const MFAVerification = ({ resolver, onSuccess, onError, onCancel }: MFAV
     } catch (error: unknown) {
       const authError = error as { code?: string; message?: string };
       let errorMsg = handleAuthError(authError).message;
-      const isRecaptchaResetError =
-        authError.code === 'auth/captcha-check-failed' ||
-        authError.code === 'auth/invalid-app-credential' ||
-        authError.code === 'auth/missing-app-credential' ||
-        (authError.message?.toLowerCase().includes('recaptcha') ?? false);
 
-      if (isRecaptchaResetError) {
+      if (isRecaptchaResetError(authError)) {
         errorMsg = getValidationError('MFA_RECAPTCHA_ERROR');
       }
       setErrorMessage(errorMsg);
@@ -142,23 +146,16 @@ export const MFAVerification = ({ resolver, onSuccess, onError, onCancel }: MFAV
     } catch (error: unknown) {
       const authError = error as { code?: string; message?: string };
       let errorMsg = '';
-      const isRecaptchaResetError =
-        authError.code === 'auth/captcha-check-failed' ||
-        authError.code === 'auth/invalid-app-credential' ||
-        authError.code === 'auth/missing-app-credential' ||
-        (authError.message?.toLowerCase().includes('recaptcha') ?? false);
 
       if (authError.code === 'auth/invalid-verification-code') {
         errorMsg = getValidationError('MFA_INVALID_CODE');
       } else if (authError.code === 'auth/code-expired') {
         errorMsg = getValidationError('MFA_CODE_EXPIRED');
-      } else if (isRecaptchaResetError) {
+      } else if (isRecaptchaResetError(authError)) {
         errorMsg = getValidationError('MFA_RECAPTCHA_ERROR');
       } else {
         const fallbackMessage = handleAuthError(authError).message;
-        errorMsg = fallbackMessage === getValidationError('GENERAL_ERROR')
-          ? getValidationError('MFA_RECAPTCHA_ERROR')
-          : fallbackMessage;
+        errorMsg = fallbackMessage;
       }
       setErrorMessage(errorMsg);
       onError(errorMsg);

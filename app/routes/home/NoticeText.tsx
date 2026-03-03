@@ -48,10 +48,10 @@ const NoticeText = () => {
       <h3>Security Features of Striae</h3>
       <p>
         Coming from a forensics background ourselves, we understand the necessity for strong security measures in order to protect your data and files. From day one, Striae was designed with data security as a top priority.
-        <p>
-            We have implemented the following security features in Striae:
-        </p>
       </p>
+        <p>
+            We have implemented the following security features in Striae:        
+        </p>
       <ul>
         <li>
             <strong>Authentication and Password Security:</strong> Striae relies on Firebase Authentication, a secure platform by Google, to manage user authentication. Features of Firebase include hashed passwords, secure token generation, and multi-factor authentication options.
