@@ -217,13 +217,13 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
         undefined, // casesCount - to be filled after deletion
         undefined, // filesCount - to be filled after deletion
         undefined, // dataRetentionPeriod
-        false // emailNotificationSent - initially false
+        false // emailNotificationSent - deletion emails disabled
       );
 
       // Get API key for user-worker authentication
       const apiKey = await getUserApiKey();
       
-      // Delete the user account via user-worker (includes email sending)
+      // Delete the user account via user-worker
       const deleteResponse = await fetch(`${paths.user_worker_url}/${user.uid}?stream=true`, {
         method: 'DELETE',
         headers: {
@@ -252,7 +252,7 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
           undefined, // casesCount - not available from response
           undefined, // filesCount - not available from response
           undefined, // dataRetentionPeriod
-          true // emailNotificationSent - assuming true on success
+          false // emailNotificationSent - deletion emails disabled
         );
 
         setSuccess(true);
@@ -271,7 +271,7 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
             undefined,
             undefined,
             undefined,
-            true
+            false
           );
 
           setSuccess(true);
@@ -415,7 +415,7 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
           
           {success && (
             <div className={styles.successMessage}>
-              <p>✓ Account deletion successful! Confirmation emails have been sent.</p>
+              <p>✓ Account deletion successful!</p>
               <p>You will be logged out automatically in 3 seconds...</p>
             </div>
           )}
