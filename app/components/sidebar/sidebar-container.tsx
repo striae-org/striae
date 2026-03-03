@@ -101,8 +101,8 @@ export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
                 <Link 
                   viewTransition
                   prefetch="intent"
-                  to="/support" 
-                  target="_blank" 
+                  to="https://striae.org/support" 
+                  target="_blank"
                   rel="noopener noreferrer" 
                   className={styles.footerModalLink}>
                   Need Help?
@@ -110,9 +110,9 @@ export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
                 <Link 
                   viewTransition
                   prefetch="intent"
-                  to="/bugs" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                  to="https://striae.org/bugs" 
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={styles.footerModalLink}>
                   Report a Bug
                 </Link>
