@@ -149,12 +149,6 @@
   transform: translateY(-1px);
 }
 
-@media (max-width: 1024px) {
-  .signInButton {
-    display: none;
-  }
-}
-
 .aboutSection {
   width: 100%;
   max-width: 900px;
