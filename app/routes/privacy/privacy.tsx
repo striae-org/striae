@@ -67,7 +67,7 @@ export const Privacy = () => {
         />
         <div className={styles.content}>
         <h1>Privacy Policy</h1>
-        <p className={styles.lastUpdated}>Last updated: February 26, 2026</p>        
+        <p className={styles.lastUpdated}>Last updated: March 2, 2026</p>        
         <p>This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>
         <p>We use Your Personal data to provide and improve the Service. By using the Service, You agree to the collection and use of information in accordance with this Privacy Policy.</p>
         <hr />
@@ -253,16 +253,6 @@ export const Privacy = () => {
   <a href="https://policies.google.com/technologies/partner-sites" rel="noopener noreferrer" target="_blank">Google Technologies Terms</a></p>
 </li>
 </ul>
-<h3>Email Service</h3>
-<p>We may use Email Service Providers to manage and send emails to You about the Service, Your Account, or other important updates and notices.</p>
-<ul>
-<li>
-<p><strong>SendLayer</strong></p>
-<p>Their Privacy Policy can be viewed at:
-  <br />
-  <a href="https://sendlayer.com/privacy-policy/" rel="noopener noreferrer" target="_blank">SendLayer's Privacy Policy</a></p>
-</li>
-</ul>
 <h3>Payments</h3>
 <p>We may provide paid products and/or services within the Service. In that case, we may use third-party services for payment processing (e.g. payment processors).</p>
 <p>We will not store or collect Your payment card details. That information is provided directly to Our third-party payment processors whose use of Your personal information is governed by their Privacy Policy. These payment processors adhere to the standards set by PCI-DSS as managed by the PCI Security Standards Council, which is a joint effort of brands like Visa, Mastercard, American Express and Discover. PCI-DSS requirements help ensure the secure handling of payment information.</p>
@@ -282,12 +272,6 @@ export const Privacy = () => {
 <p>Their Privacy Policy can be viewed at:
   <br />
   <a href="https://www.cloudflare.com/privacypolicy/" rel="external nofollow noopener" target="_blank">Cloudflare's Privacy Policy</a></p>
-</li>
-<li>
-<p><strong>Infinity - User Support Management</strong></p>
-<p>Their Privacy Policy can be viewed at:
-  <br />
-  <a href="https://startinfinity.com/privacy-policy" rel="external nofollow noopener" target="_blank">Infinity's Privacy Policy</a></p>
 </li>
 </ul>                
 <h3>Sensitive Data</h3>
