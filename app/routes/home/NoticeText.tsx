@@ -12,6 +12,7 @@ const NoticeText = () => {
       <p>
         We are excited to announce Striae, an innovative web app designed to assist firearms examiners in creating detailed annotations for your comparison images. Striae aims to streamline the processes of labeling, note-taking, and printing, making the review process a little bit easier.
       </p>
+      <p>If you are interested in learning more about how Striae addresses current shortfalls and advances the use of cloud-native technology applied to the forensics industry, read our white paper here: <a target="_blank" rel="noopener noreferrer" href="/docs/striae-white-paper.pdf">Striae White Paper</a>.</p>
       <h2>Important Details</h2>
       <ul>
         <li><strong>Free Base Access Forever:</strong> Individual users can always register and use the base version of Striae at no cost, no customization, and with basic customer support.</li>
@@ -102,7 +103,7 @@ const NoticeText = () => {
         <strong>Patent Protection & Innovation Freedom</strong>
       </p>
       <p>
-        Striae is proud to be a member of the <a href="https://openinventionnetwork.com/" target="_blank" rel="noopener noreferrer">Open Invention Network (OIN)</a>, the world's largest patent non-aggression community. The OIN is a collaborative defense platform that enables freedom of action in Linux and other open source technologies by creating a patent-free zone for innovation.
+        Striae is proud to be a member of the <a href="https://openinventionnetwork.com/" target="_blank" rel="noopener noreferrer">Open Invention Network (OIN)</a>, the world's largest patent non-aggression community. The OIN is a collaborative defense platform that enables freedom of action in Linux and other open source technologies by creating a patent defense zone for innovation.
       </p>
       <div className={styles.oinBadgeContainer}>
         <a
