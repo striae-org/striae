@@ -4,7 +4,6 @@ import {
 } from "@remix-run/dev";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-//import { visualizer } from "rollup-plugin-visualizer";
 
 declare module "@remix-run/cloudflare" {
   interface Future {
@@ -31,7 +30,6 @@ export default defineConfig({
         v3_lazyRouteDiscovery: true,
       },
     }),
-    tsconfigPaths(),
-    //visualizer({ open: true, filename: 'dist/states.html' })
+    tsconfigPaths()    
   ],
 });

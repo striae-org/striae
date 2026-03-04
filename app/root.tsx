@@ -11,6 +11,7 @@ import {
   useLocation,
   useMatches
 } from "@remix-run/react";
+import { useEffect } from 'react';
 import { 
   ThemeProvider,
   themeStyles 
@@ -40,11 +41,31 @@ export const links: LinksFunction = () => [
   { rel: 'apple-touch-icon', href: '/icon-256.png', sizes: '256x256' },
 ];
 
+const COOKIEBOT_SCRIPT_ID = 'Cookiebot';
+const COOKIEBOT_SCRIPT_SRC = 'https://consent.cookiebot.com/uc.js';
+const COOKIEBOT_CBID = '3f0f9bb0-ff09-44b9-a911-7bd88876f7e0';
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const theme = 'light';
   const location = useLocation();
   const isAuthPath = location.pathname.startsWith('/auth');
   const showReturnToTop = !isAuthPath;
+
+  useEffect(() => {
+    if (document.getElementById(COOKIEBOT_SCRIPT_ID)) {
+      return;
+    }
+
+    // Load Cookiebot after hydration to avoid pre-hydration DOM mutations.
+    const script = document.createElement('script');
+    script.id = COOKIEBOT_SCRIPT_ID;
+    script.src = COOKIEBOT_SCRIPT_SRC;
+    script.type = 'text/javascript';
+    script.async = true;
+    script.setAttribute('data-cbid', COOKIEBOT_CBID);
+    script.setAttribute('data-blockingmode', 'auto');
+    document.head.appendChild(script);
+  }, []);
 
   useHashlessScrollNavigation();
   const handleReturnToTop = useReturnToTop();
@@ -52,13 +73,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme={theme}>
       <head>
-        <script
-          id="Cookiebot"
-          src="https://consent.cookiebot.com/uc.js"
-          data-cbid="3f0f9bb0-ff09-44b9-a911-7bd88876f7e0"
-          data-blockingmode="auto"
-          type="text/javascript"
-        />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000" />

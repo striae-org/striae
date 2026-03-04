@@ -323,6 +323,26 @@ textarea:focus {
   /* Transform handled by global styles */
 }
 
+.immutableNotice {
+  color: #0f5132;
+  background-color: #d1e7dd;
+  border: 1px solid #badbcc;
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.errorMessage {
+  color: var(--error);
+  background-color: var(--errorLight);
+  border: 1px solid color-mix(in lab, var(--error) 25%, var(--errorLight));
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
 .successMessage {
   color: var(--success);
   background-color: #d1e7dd;
