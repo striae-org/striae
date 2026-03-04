@@ -18,6 +18,14 @@
 
 ## 📋 Changelog
 
+## [2026-03-04] - *[Patch Release v1.2.2](https://github.com/striae-org/striae/releases/tag/v1.2.2)*
+
+- **✅ Confirmed Annotation Immutability Fixes** - Hardened confirmed-image editing safeguards across route autosave, data operations, and notes/case sidebars to block post-confirmation mutation paths
+- **🔐 Registration Allowlist Expansion** - Added support for exact-email allowlisting alongside domain allowlists to improve registration access control flexibility
+- **🍪 Cookie Consent Hydration Stability** - Moved Cookiebot `uc.js` injection to client-side hydration flow to reduce pre-hydration DOM mutation issues
+- **🎨 Demo Surface and Config Example Updates** - Added reusable demo-section styling and refreshed worker/pages `compatibility_date` values in example configs
+- **🧹 Tooling Cleanup** - Removed `rollup-plugin-visualizer` from dependencies and Vite plugin configuration to simplify build tooling
+
 ## [2026-03-03] - *[Patch Release v1.2.1](https://github.com/striae-org/striae/releases/tag/v1.2.1)*
 
 - **🔗 Public Link and Navigation Cleanup** - Updated white paper link handling on public surfaces and consolidated access/support route pathways
