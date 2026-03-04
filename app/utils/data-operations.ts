@@ -309,6 +309,23 @@ export const saveFileAnnotations = async (
     const apiKey = await getDataApiKey();
     const url = `${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(fileId)}/data.json`;
 
+    // Enforce immutability once confirmation data exists on an image.
+    const existingResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-Custom-Auth-Key': apiKey
+      }
+    });
+
+    if (existingResponse.ok) {
+      const existingAnnotations = await existingResponse.json() as AnnotationData;
+      if (existingAnnotations?.confirmationData) {
+        throw new Error('Cannot modify annotations for a confirmed image');
+      }
+    } else if (existingResponse.status !== 404) {
+      throw new Error(`Failed to verify existing annotations: ${existingResponse.status} ${existingResponse.statusText}`);
+    }
+
     // Add timestamp to annotation data
     const dataToSave = {
       ...annotationData,

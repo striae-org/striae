@@ -287,6 +287,11 @@ export const Striae = ({ user }: StriaePage) => {
 
   // Automatic save handler for annotation updates
   const handleAnnotationUpdate = async (data: AnnotationData) => {
+    if (annotationData?.confirmationData) {
+      console.warn('Blocked annotation update for confirmed image');
+      return;
+    }
+
     const now = new Date().toISOString();
     const dataWithEarliestTimestamp: AnnotationData = {
       ...data,

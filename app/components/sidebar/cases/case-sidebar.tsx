@@ -230,7 +230,7 @@ export const CaseSidebar = ({
           return {
             fileId: file.id,
             includeConfirmation: annotations?.includeConfirmation ?? false,
-            isConfirmed: !!(annotations?.includeConfirmation && annotations?.confirmationData),
+            isConfirmed: !!annotations?.confirmationData,
           };
         } catch (err) {
           console.error(`Error fetching annotations for file ${file.id}:`, err);
@@ -282,7 +282,7 @@ export const CaseSidebar = ({
         const annotations = await getFileAnnotations(user, currentCase, selectedFileId);
         const selectedStatus = {
           includeConfirmation: annotations?.includeConfirmation ?? false,
-          isConfirmed: !!(annotations?.includeConfirmation && annotations?.confirmationData),
+          isConfirmed: !!annotations?.confirmationData,
         };
 
         if (isCancelled) {
@@ -476,8 +476,39 @@ export const CaseSidebar = ({
 
 const handleImageSelect = (file: FileData) => {
     onImageSelect(file);
-    setImageLoaded(true);
+    // Prevent notes from opening against stale image state while selection loads.
+    setImageLoaded(false);
   };
+
+  const selectedFileConfirmationState = selectedFileId
+    ? fileConfirmationStatus[selectedFileId]
+    : undefined;
+
+  const isCheckingSelectedFileConfirmation = Boolean(
+    selectedFileId && !selectedFileConfirmationState
+  );
+
+  const isSelectedFileConfirmed =
+    isConfirmed || !!selectedFileConfirmationState?.isConfirmed;
+
+  const isImageNotesDisabled =
+    !imageLoaded ||
+    isReadOnly ||
+    isSelectedFileConfirmed ||
+    isUploading ||
+    isCheckingSelectedFileConfirmation;
+
+  const imageNotesTitle = isUploading
+    ? 'Cannot edit notes while uploading'
+    : isCheckingSelectedFileConfirmation
+    ? 'Checking confirmation status...'
+    : isSelectedFileConfirmed
+    ? 'Cannot edit notes for confirmed images'
+    : isReadOnly
+    ? 'Cannot edit notes for read-only cases'
+    : !imageLoaded
+    ? 'Select an image first'
+    : undefined;
 
   const handleExport = async (exportCaseNumber: string, format: ExportFormat, includeImages?: boolean) => {
     try {
@@ -702,8 +733,8 @@ return (
     <div className={`${styles.sidebarToggle} mb-4`}>
     <button
           onClick={onNotesClick}
-          disabled={!imageLoaded || isReadOnly || isConfirmed || isUploading}
-          title={isUploading ? "Cannot edit notes while uploading" : isConfirmed ? "Cannot edit notes for confirmed images" : isReadOnly ? "Cannot edit notes for read-only cases" : !imageLoaded ? "Select an image first" : undefined}
+          disabled={isImageNotesDisabled}
+          title={imageNotesTitle}
         >
           Image Notes
         </button>
