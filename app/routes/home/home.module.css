@@ -149,7 +149,8 @@
   transform: translateY(-1px);
 }
 
-.aboutSection {
+.aboutSection,
+.demoSection {
   width: 100%;
   max-width: 900px;
   margin-top: var(--space2XL);
@@ -177,7 +178,8 @@
   border: 0;
 }
 
-.aboutTitle {
+.aboutTitle,
+.demoTitle {
   font-size: var(--fontSizeH2);
   font-weight: var(--fontWeightMedium);
   color: var(--background);
@@ -187,34 +189,46 @@
   padding-bottom: var(--spaceM);
 }
 
-.aboutContent {
+.aboutContent,
+.demoContent {
   text-align: left;
   line-height: var(--lineHeightBody);
 }
 
-.aboutContent ul {
+.aboutContent ul,
+.demoContent ul {
   margin: 0;
   padding-left: var(--spaceL);
   list-style-type: disc;
   list-style-position: outside;
 }
 
-.aboutContent li {
+.aboutContent li,
+.demoContent li {
   font-size: var(--fontSizeBodyM);
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: var(--spaceM);
   line-height: 1.6;
 }
 
-.aboutContent li p {
+.aboutContent li p,
+.demoContent li p {
   margin: 0;
 }
 
-.aboutContent p {
+.aboutContent p,
+.demoContent p {
   font-size: var(--fontSizeBodyM);
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: var(--spaceM);
   line-height: 1.6;
+}
+
+.aboutContent a,
+.aboutContent a:visited,
+.demoContent a,
+.demoContent a:visited {
+  color: #FFDE21;
 }
 
 .developerProfile {
@@ -331,7 +345,8 @@
     width: 90%;
   }
 
-  .aboutSection {
+  .aboutSection,
+  .demoSection {
     width: 90vw;
     max-width: 90vw;
     margin-top: var(--spaceXL);
@@ -349,11 +364,13 @@
     padding: var(--spaceL);
   }
 
-  .aboutTitle {
+  .aboutTitle,
+  .demoTitle {
     font-size: var(--fontSizeH4);
   }
 
-  .aboutContent p {
+  .aboutContent p,
+  .demoContent p {
     font-size: var(--fontSizeBodyS);
   }
 
