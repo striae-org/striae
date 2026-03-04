@@ -76,8 +76,8 @@ export const Login = () => {
     setIsClient(true);
   }, []);
 
-  // Email validation with regex and optional domain allowlist
-  const validateEmailDomain = (email: string): { valid: boolean; reason?: 'invalid-format' | 'domain-not-allowed' } => {
+  // Email validation with regex and optional domain/email allowlists
+  const validateRegistrationEmail = (email: string): { valid: boolean; reason?: 'invalid-format' | 'not-allowlisted' } => {
     // Email regex pattern for basic validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     
@@ -91,7 +91,11 @@ export const Login = () => {
       .map((allowedDomainEmail) => allowedDomainEmail.trim().toLowerCase())
       .filter((allowedDomainEmail) => allowedDomainEmail.length > 0);
 
-    if (normalizedAllowedDomains.length === 0) {
+    const normalizedAllowedEmails = AUTH_REGISTRATION_CONFIG.allowedIndividualEmails
+      .map((allowedEmail) => allowedEmail.trim().toLowerCase())
+      .filter((allowedEmail) => allowedEmail.length > 0);
+
+    if (normalizedAllowedDomains.length === 0 && normalizedAllowedEmails.length === 0) {
       return { valid: true };
     }
 
@@ -99,8 +103,10 @@ export const Login = () => {
       (allowedDomainEmail) => normalizedEmail.endsWith(allowedDomainEmail)
     );
 
-    if (!allowedDomainEmail) {
-      return { valid: false, reason: 'domain-not-allowed' };
+    const allowedIndividualEmail = normalizedAllowedEmails.includes(normalizedEmail);
+
+    if (!allowedDomainEmail && !allowedIndividualEmail) {
+      return { valid: false, reason: 'not-allowlisted' };
     }
 
     return { valid: true };
@@ -237,12 +243,12 @@ export const Login = () => {
 
   try {
     if (!isLogin) {
-      const emailValidation = validateEmailDomain(email);
+      const emailValidation = validateRegistrationEmail(email);
       if (!emailValidation.valid) {
         setError(
-          emailValidation.reason === 'domain-not-allowed'
-            ? 'Registration is restricted to authorized email domains only'
-            : 'Please enter a valid email address'
+          emailValidation.reason === 'invalid-format'
+            ? 'Please enter a valid email address'
+            : 'Registration is restricted to authorized email addresses and domains only'
         );
         setIsLoading(false);
         return;
