@@ -106,6 +106,8 @@ required_vars=(
     "MESSAGING_SENDER_ID"
     "APP_ID"
     "MEASUREMENT_ID"
+    "FIREBASE_SERVICE_ACCOUNT_EMAIL"
+    "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY"
     
     # Pages Configuration
     "PAGES_PROJECT_NAME"
@@ -401,7 +403,11 @@ prompt_for_secrets() {
             echo -e "${YELLOW}$description${NC}"
             if [ "$update_env" != "true" ] && [ -n "$current_value" ] && ! is_placeholder "$current_value"; then
                 allow_keep="true"
-                echo -e "${GREEN}Current value: $current_value${NC}"
+                if [ "$var_name" = "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" ]; then
+                    echo -e "${GREEN}Current value: [HIDDEN]${NC}"
+                else
+                    echo -e "${GREEN}Current value: $current_value${NC}"
+                fi
             fi
 
             while true; do
@@ -462,6 +468,8 @@ prompt_for_secrets() {
     prompt_for_var "MESSAGING_SENDER_ID" "Firebase messaging sender ID"
     prompt_for_var "APP_ID" "Firebase app ID"
     prompt_for_var "MEASUREMENT_ID" "Firebase measurement ID (optional)"
+    prompt_for_var "FIREBASE_SERVICE_ACCOUNT_EMAIL" "Firebase service account email (for User Worker account deletion)"
+    prompt_for_var "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" "Firebase service account private key (escape newlines as \\n)"
     
     echo -e "${BLUE}📄 PAGES CONFIGURATION${NC}"
     echo "======================"

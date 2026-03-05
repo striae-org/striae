@@ -115,7 +115,7 @@ fi
 
 # User Worker  
 if ! set_worker_secrets "User Worker" "workers/user-worker" \
-    "USER_DB_AUTH" "R2_KEY_SECRET" "IMAGES_API_TOKEN"; then
+    "USER_DB_AUTH" "R2_KEY_SECRET" "IMAGES_API_TOKEN" "PROJECT_ID" "FIREBASE_SERVICE_ACCOUNT_EMAIL" "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY"; then
     echo -e "${YELLOW}⚠️  Skipping User Worker (not configured)${NC}"
 fi
 
