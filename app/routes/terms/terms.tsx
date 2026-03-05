@@ -49,7 +49,7 @@ export const Terms = () => {
       />
       <div className={styles.content}>
         <h1>Terms and Conditions</h1>
-        <p className={styles.lastUpdated}>Last updated: March 4, 2026</p>
+        <p className={styles.lastUpdated}>Last updated: February 26, 2026</p>
         <p>Please read these terms and conditions carefully before using Our Service.</p>
         <hr />
           <br />
@@ -434,7 +434,7 @@ You agree that the original English text shall prevail in the case of a dispute.
 </li>
 <li>
 <p><strong>No Sharing of Sensitive Information</strong></p>
-<p>Striae does not collect or share sensitive information, such as images, case numbers, item numbers, or any other personally identifiable information with unauthorized third parties. Additionally, Your Data is not subject to analysis, scraping, or processing by third-party analytics tools, AI systems, or any other automated processes outside the scope of the app’s intended use. The integrity and confidentiality of Your Data are paramount to Us.</p>
+<p>Striae does not collect or share sensitive information, such as images, case numbers, item numbers, or any other personally identifiable information with third parties. Additionally, Your Data is not subject to analysis, scraping, or processing by third-party analytics tools, AI systems, or any other automated processes outside the scope of the app’s intended use. The integrity and confidentiality of Your Data are paramount to Us.</p>
 </li>
 <li>
   <p><strong>Data Control</strong></p>
@@ -447,21 +447,6 @@ You agree that the original English text shall prevail in the case of a dispute.
 </ul>
 <p>Striae’s security measures are designed to keep Your Data secure, private, and under Your control. Should You have any questions, concerns, or feedback about these security protocols, We encourage You to reach out to Us. </p>
 </section>
-        <section className={styles.section}>
-          <h2 id="compliance">Trust & Compliance</h2>
-          <p>
-            Striae may provide third-party compliance resources to support customer due diligence and
-            transparency. These resources describe provider controls and attestations and do not, by
-            themselves, constitute a separate certification of Striae.
-          </p>
-          <p>
-            For the full resource list, reporting periods, and provider document links, visit the{' '}
-            <Link viewTransition prefetch="intent" to="/trust-compliance">
-              Trust & Compliance page
-            </Link>
-            . Cloudflare Trust & Compliance resources are also available on that page.
-          </p>
-        </section>
         <section className={styles.section}>
           <h2>Contact Us</h2>
 <p>If You have any questions about these Terms and Conditions, You can contact Us:</p>
@@ -498,7 +483,6 @@ You agree that the original English text shall prevail in the case of a dispute.
               <ul>
                 <li><a href="https://developers.cloudflare.com/r2/reference/data-security/" target="_blank" rel="noopener noreferrer">Cloudflare R2 Data Security</a> - Details on AES-256 encryption with GCM mode for object storage</li>
                 <li><a href="https://developers.cloudflare.com/kv/reference/data-security/" target="_blank" rel="noopener noreferrer">Cloudflare KV Data Security</a> - Details on AES-256 encryption with GCM mode for key-value storage</li>
-                <li><a href="https://www.cloudflare.com/learning/ssl/what-is-encryption/" target="_blank" rel="noopener noreferrer">Cloudflare Learning: What is Encryption?</a> - Educational resource on encryption fundamentals</li>              
               </ul>
             </li>
             <li>
@@ -516,7 +500,15 @@ You agree that the original English text shall prevail in the case of a dispute.
                 <li><a href="https://www.schneier.com/academic/aes/" target="_blank" rel="noopener noreferrer">Schneier on Cryptography</a> - Expert analysis of AES security and brute force resistance</li>
                 <li><a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.140-2.pdf" target="_blank" rel="noopener noreferrer">NIST FIPS 140-2</a> - Cryptographic module validation standards</li>
               </ul>
-            </li>            
+            </li>
+            <li>
+              <p><strong>Industry Adoption and Trust:</strong></p>
+              <ul>
+                <li><a href="https://www.cloudflare.com/trust-hub/" target="_blank" rel="noopener noreferrer">Cloudflare Trust Hub</a> - Comprehensive security and compliance information</li>
+                <li><a href="https://www.cloudflare.com/trust-hub/compliance-resources/" target="_blank" rel="noopener noreferrer">Cloudflare Compliance Resources</a> - Industry certifications and compliance documentation</li>
+                <li><a href="https://www.cloudflare.com/learning/ssl/what-is-encryption/" target="_blank" rel="noopener noreferrer">Cloudflare Learning: What is Encryption?</a> - Educational resource on encryption fundamentals</li>
+              </ul>
+            </li>
           </ul>
         </section>
       </div>      

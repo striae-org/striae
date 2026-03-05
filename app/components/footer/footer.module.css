@@ -19,8 +19,6 @@
 .nav {
   display: flex;
   gap: var(--spaceL);
-  flex-wrap: wrap;
-  justify-content: center;
 }
 
 .link {
@@ -110,7 +108,7 @@
     gap: var(--spaceM);
     text-align: center;
   }
-
+  
   .badgeContainer {
     flex-direction: column;
     gap: var(--spaceS);
