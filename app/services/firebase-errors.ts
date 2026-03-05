@@ -15,6 +15,9 @@ export const ERROR_MESSAGES = {
   
   // Reset/Verify Errors
   RESET_EMAIL_SENT: 'Password reset email sent! Check your inbox',
+  INVALID_ACTION_CODE: 'This email action link is invalid or has already been used.',
+  EXPIRED_ACTION_CODE: 'This email action link has expired. Please request a new one.',
+  INVALID_CONTINUE_URL: 'This email action link has an invalid redirect URL.',
   
   // MFA Errors
   MFA_REQUIRED: 'Multi-factor authentication required',
@@ -63,6 +66,14 @@ export const handleAuthError = (err: unknown): { message: string; data?: AuthErr
         return { message: ERROR_MESSAGES.REQUIRES_RECENT_LOGIN, data: errorData };
       case 'auth/user-disabled':
         return { message: ERROR_MESSAGES.USER_DISABLED, data: errorData };
+      case 'auth/invalid-action-code':
+        return { message: ERROR_MESSAGES.INVALID_ACTION_CODE, data: errorData };
+      case 'auth/expired-action-code':
+        return { message: ERROR_MESSAGES.EXPIRED_ACTION_CODE, data: errorData };
+      case 'auth/invalid-continue-uri':
+      case 'auth/missing-continue-uri':
+      case 'auth/unauthorized-continue-uri':
+        return { message: ERROR_MESSAGES.INVALID_CONTINUE_URL, data: errorData };
       
       // MFA Errors
       case 'auth/multi-factor-auth-required':

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from '@remix-run/react';
+import { Link, useSearchParams } from '@remix-run/react';
 import { auth } from '~/services/firebase';
 import {
     signInWithEmailAndPassword, 
@@ -15,6 +15,7 @@ import {
 } from 'firebase/auth';
 import { PasswordReset } from '~/routes/auth/passwordReset';
 import { EmailVerification } from '~/routes/auth/emailVerification';
+import { EmailActionHandler } from '~/routes/auth/emailActionHandler';
 import { handleAuthError } from '~/services/firebase-errors';
 import { MFAVerification } from '~/components/auth/mfa-verification';
 import { MFAEnrollment } from '~/components/auth/mfa-enrollment';
@@ -28,6 +29,8 @@ import { getUserData, createUser } from '~/utils/permissions';
 import { auditService } from '~/services/audit.service';
 import { generateUniqueId } from '~/utils/id-generator';
 import { AUTH_REGISTRATION_CONFIG } from '~/config/auth-registration';
+import { evaluatePasswordPolicy } from '~/utils/password-policy';
+import { buildActionCodeSettings } from '~/utils/auth-action-settings';
 
 export const meta = () => {
   return baseMeta({
@@ -38,8 +41,11 @@ export const meta = () => {
 
 const CAPTCHA_RETRY_DELAY_MS = 3000;
 const CAPTCHA_RETRY_DELAY_SECONDS = Math.ceil(CAPTCHA_RETRY_DELAY_MS / 1000);
+const SUPPORTED_EMAIL_ACTION_MODES = new Set(['resetPassword', 'verifyEmail', 'recoverEmail']);
 
 export const Login = () => {
+  const [searchParams] = useSearchParams();
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLogin, setIsLogin] = useState(true);
@@ -70,6 +76,17 @@ export const Login = () => {
   const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
   const [showMfaVerification, setShowMfaVerification] = useState(false);
   const [showMfaEnrollment, setShowMfaEnrollment] = useState(false);
+
+  const actionMode = searchParams.get('mode');
+  const actionCode = searchParams.get('oobCode');
+  const continueUrl = searchParams.get('continueUrl');
+  const actionLang = searchParams.get('lang');
+
+  const shouldHandleEmailAction = Boolean(
+    actionMode &&
+    actionCode &&
+    SUPPORTED_EMAIL_ACTION_MODES.has(actionMode)
+  );
 
   // Check if we're on the client side
   useEffect(() => {
@@ -119,23 +136,18 @@ export const Login = () => {
       return false;
     }
 
-    const hasMinLength = password.length >= 10;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    const passwordsMatch = confirmPassword !== undefined ? password === confirmPassword : true;
-    
-    const isStrong = hasMinLength && hasUpperCase && hasNumber && hasSpecialChar && passwordsMatch;
+    const policy = evaluatePasswordPolicy(password, confirmPassword);
+
     setPasswordStrength(
       `Password must contain:
-      ${!hasMinLength ? '❌' : '✅'} At least 10 characters
-      ${!hasUpperCase ? '❌' : '✅'} Capital letters
-      ${!hasNumber ? '❌' : '✅'} Numbers
-      ${!hasSpecialChar ? '❌' : '✅'} Special characters${confirmPassword !== undefined ? `
-      ${!passwordsMatch ? '❌' : '✅'} Passwords must match` : ''}`
+      ${!policy.hasMinLength ? '❌' : '✅'} At least 10 characters
+      ${!policy.hasUpperCase ? '❌' : '✅'} Capital letters
+      ${!policy.hasNumber ? '❌' : '✅'} Numbers
+      ${!policy.hasSpecialChar ? '❌' : '✅'} Special characters${confirmPassword !== undefined ? `
+      ${!policy.passwordsMatch ? '❌' : '✅'} Passwords must match` : ''}`
     );
     
-    return isStrong;
+    return policy.isStrong;
   };  
 
   // Check if user exists in the USER_DB using centralized function
@@ -346,7 +358,7 @@ export const Login = () => {
         // Continue with registration flow even if audit logging fails
       }
 
-      await sendEmailVerification(createCredential.user);
+      await sendEmailVerification(createCredential.user, buildActionCodeSettings());
       
       // Log email verification sent audit event
       try {
@@ -492,7 +504,14 @@ export const Login = () => {
 
   return (
     <>
-      {user ? (
+      {shouldHandleEmailAction ? (
+        <EmailActionHandler
+          mode={actionMode}
+          oobCode={actionCode}
+          continueUrl={continueUrl}
+          lang={actionLang}
+        />
+      ) : user ? (
         user.emailVerified ? (
           <Striae user={user} />
         ) : (
@@ -681,7 +700,7 @@ export const Login = () => {
         </div>
       )}
       
-      {isClient && showMfaVerification && mfaResolver && (
+      {!shouldHandleEmailAction && isClient && showMfaVerification && mfaResolver && (
         <MFAVerification 
           resolver={mfaResolver}
           onSuccess={handleMfaSuccess}
@@ -690,7 +709,7 @@ export const Login = () => {
         />
       )}
       
-      {isClient && showMfaEnrollment && user && (
+      {!shouldHandleEmailAction && isClient && showMfaEnrollment && user && (
         <MFAEnrollment 
           user={user}
           onSuccess={handleMfaEnrollmentSuccess}

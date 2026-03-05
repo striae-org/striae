@@ -4,6 +4,7 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '~/services/firebase';
 import { handleAuthError, ERROR_MESSAGES } from '~/services/firebase-errors';
 import { auditService } from '~/services/audit.service';
+import { buildActionCodeSettings } from '~/utils/auth-action-settings';
 import styles from './passwordReset.module.css';
 
 interface PasswordResetProps {
@@ -27,7 +28,7 @@ export const PasswordReset = ({ isModal, onBack }: PasswordResetProps) => {
     setSuccess('');
     
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(auth, email, buildActionCodeSettings());
       
       // Log successful password reset request
       await auditService.logPasswordReset(
