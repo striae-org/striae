@@ -29,6 +29,72 @@ fi
 echo -e "${YELLOW}📖 Loading environment variables from .env...${NC}"
 source .env
 
+is_admin_service_placeholder() {
+    local value="$1"
+    local normalized=$(echo "$value" | tr '[:upper:]' '[:lower:]')
+
+    [[ -z "$normalized" || "$normalized" == your-* || "$normalized" == *"your_private_key"* ]]
+}
+
+load_required_admin_service_credentials() {
+    local admin_service_path="app/config/admin-service.json"
+
+    if [ ! -f "$admin_service_path" ]; then
+        echo -e "${RED}❌ Error: Required Firebase admin service file not found: $admin_service_path${NC}"
+        echo -e "${YELLOW}   Create app/config/admin-service.json before deploying worker secrets.${NC}"
+        exit 1
+    fi
+
+    local service_project_id
+    local service_client_email
+    local service_private_key
+
+    if ! service_project_id=$(node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(data.project_id || '');" "$admin_service_path"); then
+        echo -e "${RED}❌ Error: Could not parse project_id from $admin_service_path${NC}"
+        exit 1
+    fi
+
+    if ! service_client_email=$(node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(data.client_email || '');" "$admin_service_path"); then
+        echo -e "${RED}❌ Error: Could not parse client_email from $admin_service_path${NC}"
+        exit 1
+    fi
+
+    if ! service_private_key=$(node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(data.private_key || '');" "$admin_service_path"); then
+        echo -e "${RED}❌ Error: Could not parse private_key from $admin_service_path${NC}"
+        exit 1
+    fi
+
+    local normalized_private_key="${service_private_key//$'\r'/}"
+    normalized_private_key="${normalized_private_key//$'\n'/\\n}"
+
+    if is_admin_service_placeholder "$service_project_id"; then
+        echo -e "${RED}❌ Error: project_id in $admin_service_path is missing or placeholder${NC}"
+        exit 1
+    fi
+
+    if is_admin_service_placeholder "$service_client_email" || [[ "$service_client_email" != *".gserviceaccount.com"* ]]; then
+        echo -e "${RED}❌ Error: client_email in $admin_service_path is invalid${NC}"
+        exit 1
+    fi
+
+    if is_admin_service_placeholder "$normalized_private_key" || [[ "$normalized_private_key" != *"-----BEGIN PRIVATE KEY-----"* ]] || [[ "$normalized_private_key" != *"-----END PRIVATE KEY-----"* ]]; then
+        echo -e "${RED}❌ Error: private_key in $admin_service_path is invalid${NC}"
+        exit 1
+    fi
+
+    PROJECT_ID="$service_project_id"
+    FIREBASE_SERVICE_ACCOUNT_EMAIL="$service_client_email"
+    FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY="$normalized_private_key"
+
+    export PROJECT_ID
+    export FIREBASE_SERVICE_ACCOUNT_EMAIL
+    export FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY
+
+    echo -e "${GREEN}✅ Loaded Firebase service account credentials from $admin_service_path${NC}"
+}
+
+load_required_admin_service_credentials
+
 # Function to set worker secrets
 set_worker_secrets() {
     local worker_name=$1

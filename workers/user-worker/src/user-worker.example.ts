@@ -115,8 +115,9 @@ function base64UrlEncode(value: string | Uint8Array): string {
 function parsePkcs8PrivateKey(privateKey: string): ArrayBuffer {
   const normalizedKey = privateKey
     .trim()
-    .replace(/^"|"$/g, '')
+    .replace(/^['"]|['"]$/g, '')
     .replace(/\\n/g, '\n');
+
   const pemBody = normalizedKey
     .replace('-----BEGIN PRIVATE KEY-----', '')
     .replace('-----END PRIVATE KEY-----', '')
@@ -151,16 +152,22 @@ async function buildServiceAccountAssertion(env: Env): Promise<string> {
   };
   const unsignedToken = `${base64UrlEncode(JSON.stringify(header))}.${base64UrlEncode(JSON.stringify(payload))}`;
 
-  const signingKey = await crypto.subtle.importKey(
-    'pkcs8',
-    parsePkcs8PrivateKey(env.FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY),
-    {
-      name: 'RSASSA-PKCS1-v1_5',
-      hash: 'SHA-256'
-    },
-    false,
-    ['sign']
-  );
+  let signingKey: CryptoKey;
+
+  try {
+    signingKey = await crypto.subtle.importKey(
+      'pkcs8',
+      parsePkcs8PrivateKey(env.FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY),
+      {
+        name: 'RSASSA-PKCS1-v1_5',
+        hash: 'SHA-256'
+      },
+      false,
+      ['sign']
+    );
+  } catch {
+    throw new Error('Invalid Firebase service account private key format. Use the service account JSON private_key value (PKCS8) and keep newline markers as \\n.');
+  }
 
   const signature = await crypto.subtle.sign(
     { name: 'RSASSA-PKCS1-v1_5' },
