@@ -563,12 +563,11 @@ prompt_for_secrets() {
     echo "==============================="
     prompt_for_var "API_KEY" "Firebase API key"
     prompt_for_var "AUTH_DOMAIN" "Firebase auth domain (project-id.firebaseapp.com)"
-    prompt_for_var "PROJECT_ID" "Firebase project ID"
     prompt_for_var "STORAGE_BUCKET" "Firebase storage bucket"
     prompt_for_var "MESSAGING_SENDER_ID" "Firebase messaging sender ID"
     prompt_for_var "APP_ID" "Firebase app ID"
     prompt_for_var "MEASUREMENT_ID" "Firebase measurement ID (optional)"
-    echo -e "${GREEN}Using service account values from app/config/admin-service.json${NC}"
+    echo -e "${GREEN}Using PROJECT_ID and service account values from app/config/admin-service.json${NC}"
     
     echo -e "${BLUE}📄 PAGES CONFIGURATION${NC}"
     echo "======================"
