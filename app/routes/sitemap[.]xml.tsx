@@ -8,6 +8,7 @@ export const loader: LoaderFunction = async ({ context }) => {
     { path: "/", changefreq: "weekly", priority: 1.0 },    
     { path: "/privacy", changefreq: "yearly", priority: 0.5 },
     { path: "/terms", changefreq: "yearly", priority: 0.5 },
+    { path: "/trust-compliance", changefreq: "monthly", priority: 0.6 },
     { path: "/security", changefreq: "weekly", priority: 1.0 },
     { path: "/support", changefreq: "monthly", priority: 0.6 },
     { path: "/bugs", changefreq: "monthly", priority: 0.6 },
