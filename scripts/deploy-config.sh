@@ -88,6 +88,92 @@ fi
 echo -e "${YELLOW}📖 Loading environment variables from .env...${NC}"
 source .env
 
+write_env_var() {
+    local var_name=$1
+    local var_value=$2
+    local env_file_value="$var_value"
+
+    if [ "$var_name" = "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" ]; then
+        # Store as a quoted string so sourced .env preserves escaped newline markers (\n)
+        env_file_value=${env_file_value//\"/\\\"}
+        env_file_value="\"$env_file_value\""
+    fi
+
+    if grep -q "^$var_name=" .env; then
+        grep -v "^$var_name=" .env > .env.tmp && mv .env.tmp .env
+    fi
+
+    echo "$var_name=$env_file_value" >> .env
+}
+
+is_admin_service_placeholder() {
+    local value="$1"
+    local normalized=$(echo "$value" | tr '[:upper:]' '[:lower:]')
+
+    [[ -z "$normalized" || "$normalized" == your-* || "$normalized" == *"your_private_key"* ]]
+}
+
+load_admin_service_credentials() {
+    local admin_service_path="app/config/admin-service.json"
+
+    if [ ! -f "$admin_service_path" ]; then
+        echo -e "${RED}❌ Error: Required Firebase admin service file not found: $admin_service_path${NC}"
+        echo -e "${YELLOW}   Create app/config/admin-service.json with service account credentials.${NC}"
+        exit 1
+    fi
+
+    local service_project_id
+    local service_client_email
+    local service_private_key
+
+    if ! service_project_id=$(node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(data.project_id || '');" "$admin_service_path"); then
+        echo -e "${RED}❌ Error: Could not parse project_id from $admin_service_path${NC}"
+        exit 1
+    fi
+
+    if ! service_client_email=$(node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(data.client_email || '');" "$admin_service_path"); then
+        echo -e "${RED}❌ Error: Could not parse client_email from $admin_service_path${NC}"
+        exit 1
+    fi
+
+    if ! service_private_key=$(node -e "const fs=require('fs'); const data=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(data.private_key || '');" "$admin_service_path"); then
+        echo -e "${RED}❌ Error: Could not parse private_key from $admin_service_path${NC}"
+        exit 1
+    fi
+
+    local normalized_private_key="${service_private_key//$'\r'/}"
+    normalized_private_key="${normalized_private_key//$'\n'/\\n}"
+
+    if is_admin_service_placeholder "$service_project_id"; then
+        echo -e "${RED}❌ Error: project_id in $admin_service_path is missing or placeholder${NC}"
+        exit 1
+    fi
+
+    if is_admin_service_placeholder "$service_client_email" || [[ "$service_client_email" != *".gserviceaccount.com"* ]]; then
+        echo -e "${RED}❌ Error: client_email in $admin_service_path is invalid${NC}"
+        exit 1
+    fi
+
+    if is_admin_service_placeholder "$normalized_private_key" || [[ "$normalized_private_key" != *"-----BEGIN PRIVATE KEY-----"* ]] || [[ "$normalized_private_key" != *"-----END PRIVATE KEY-----"* ]]; then
+        echo -e "${RED}❌ Error: private_key in $admin_service_path is invalid${NC}"
+        exit 1
+    fi
+
+    PROJECT_ID="$service_project_id"
+    export PROJECT_ID
+    write_env_var "PROJECT_ID" "$PROJECT_ID"
+
+    FIREBASE_SERVICE_ACCOUNT_EMAIL="$service_client_email"
+    export FIREBASE_SERVICE_ACCOUNT_EMAIL
+    write_env_var "FIREBASE_SERVICE_ACCOUNT_EMAIL" "$FIREBASE_SERVICE_ACCOUNT_EMAIL"
+
+    FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY="$normalized_private_key"
+    export FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY
+    write_env_var "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" "$FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY"
+
+    echo -e "${GREEN}✅ Imported Firebase service account credentials from $admin_service_path${NC}"
+}
+
 # Validate required variables
 required_vars=(
     # Core Cloudflare Configuration
@@ -106,6 +192,8 @@ required_vars=(
     "MESSAGING_SENDER_ID"
     "APP_ID"
     "MEASUREMENT_ID"
+    "FIREBASE_SERVICE_ACCOUNT_EMAIL"
+    "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY"
     
     # Pages Configuration
     "PAGES_PROJECT_NAME"
@@ -164,8 +252,22 @@ copy_example_configs() {
     # Copy app config-example directory to config
     if [ -d "app/config-example" ]; then
         if [ "$update_env" = "true" ] || [ ! -d "app/config" ]; then
+            local admin_service_backup=""
+
+            if [ -f "app/config/admin-service.json" ]; then
+                admin_service_backup=$(mktemp)
+                cp "app/config/admin-service.json" "$admin_service_backup"
+            fi
+
             rm -rf app/config
             cp -r app/config-example app/config
+
+            if [ -n "$admin_service_backup" ] && [ -f "$admin_service_backup" ]; then
+                cp "$admin_service_backup" "app/config/admin-service.json"
+                rm -f "$admin_service_backup"
+                echo -e "${GREEN}    ✅ app: preserved existing admin-service.json${NC}"
+            fi
+
             echo -e "${GREEN}    ✅ app: config directory created from config-example${NC}"
         else
             echo -e "${YELLOW}    ⚠️  app: config directory already exists, skipping copy${NC}"
@@ -310,6 +412,9 @@ copy_example_configs() {
 # Copy example configuration files
 copy_example_configs
 
+# Load required Firebase admin service credentials from app/config/admin-service.json
+load_admin_service_credentials
+
 # Function to prompt for environment variables and update .env file
 prompt_for_secrets() {
     echo -e "\n${BLUE}🔐 Environment Variables Setup${NC}"
@@ -401,7 +506,11 @@ prompt_for_secrets() {
             echo -e "${YELLOW}$description${NC}"
             if [ "$update_env" != "true" ] && [ -n "$current_value" ] && ! is_placeholder "$current_value"; then
                 allow_keep="true"
-                echo -e "${GREEN}Current value: $current_value${NC}"
+                if [ "$var_name" = "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" ]; then
+                    echo -e "${GREEN}Current value: [HIDDEN]${NC}"
+                else
+                    echo -e "${GREEN}Current value: $current_value${NC}"
+                fi
             fi
 
             while true; do
@@ -430,11 +539,8 @@ prompt_for_secrets() {
         
         if [ -n "$new_value" ]; then
             # Update the .env file
-            if grep -q "^$var_name=" .env; then
-                sed -i "s|^$var_name=.*|$var_name=$new_value|" .env
-            else
-                echo "$var_name=$new_value" >> .env
-            fi
+            write_env_var "$var_name" "$new_value"
+
             export "$var_name=$new_value"
             echo -e "${GREEN}✅ $var_name updated${NC}"
         elif [ -n "$current_value" ]; then
@@ -462,6 +568,7 @@ prompt_for_secrets() {
     prompt_for_var "MESSAGING_SENDER_ID" "Firebase messaging sender ID"
     prompt_for_var "APP_ID" "Firebase app ID"
     prompt_for_var "MEASUREMENT_ID" "Firebase measurement ID (optional)"
+    echo -e "${GREEN}Using service account values from app/config/admin-service.json${NC}"
     
     echo -e "${BLUE}📄 PAGES CONFIGURATION${NC}"
     echo "======================"
