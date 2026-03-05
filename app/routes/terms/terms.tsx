@@ -49,7 +49,7 @@ export const Terms = () => {
       />
       <div className={styles.content}>
         <h1>Terms and Conditions</h1>
-        <p className={styles.lastUpdated}>Last updated: February 26, 2026</p>
+        <p className={styles.lastUpdated}>Last updated: March 5, 2026</p>
         <p>Please read these terms and conditions carefully before using Our Service.</p>
         <hr />
           <br />
@@ -303,8 +303,22 @@ Upon receipt of a notification, the Company will take whatever action, in its so
       <h3>By You</h3>
       <p>You may terminate Your Account at any time by discontinuing use of the Service or deleting Your Account; for paid Agency Accounts, by cancelling Your subscription through the provided Account Portal or written notice.</p>
       <h3>Effect of Termination</h3>
-      <p>Upon termination, Your right to access or use the Service ceases immediately. All account data associated with a free account may be deleted upon termination. Data associated with paid Agency Accounts may be retained for a limited period in accordance with Our Data Retention Policy to allow export or retrieval upon request.</p>
+      <p>Upon termination, Your right to access or use the Service ceases immediately. All account data associated with a free Account may be deleted upon termination. Data associated with paid Agency Accounts may be retained for a limited period in accordance with Our <a href="#retention">Data Retention Policy</a> to allow export or retrieval upon request.</p>
       <p>Subscription fees already paid are non-refundable, except as required by law or expressly stated in a written agreement with Striae.</p>
+        </section>
+        <section className={styles.section}>
+          <h2 id="retention">Data Retention Policy</h2>
+          <h3>Retention Overview</h3>
+          <p>We retain Data only for as long as reasonably necessary to provide and support the Service, comply with legal and compliance obligations, resolve disputes, and enforce these Terms.</p>
+          <ul>
+            <li><strong>Active Accounts:</strong> While Your account is active, We retain account and case Data needed to operate the Service.</li>
+            <li><strong>Free Accounts:</strong> After account termination, if not deleted by the user, Data associated with free Accounts may be scheduled for deletion from active systems, typically within 30 days. Retrieval is not guaranteed once deletion processing begins.</li>
+            <li><strong>Paid Agency Accounts:</strong> Following termination or expiration, We may retain Data in active systems for up to 90 days to allow export or retrieval upon written request and subject to any outstanding payment obligations. After that period, Data is deleted from active systems or irreversibly de-identified where appropriate.</li>
+            <li><strong>Security, Operations, and Audit Records:</strong> We may retain operational and security logs for fraud prevention, incident response, and compliance. Audit trail records may be retained indefinitely as described in these Terms.</li>
+            <li><strong>Legal Hold and Required Retention:</strong> We may retain specific Data longer where required by applicable law, court order, accreditation requirements, or a valid litigation hold.</li>
+            <li><strong>Residual and Provider-Level Copies:</strong> After deletion from active systems, residual copies may remain temporarily in logs, caches, or provider-level replicated storage until overwritten or deleted in the ordinary course of business and are not generally available through the Service.</li>
+          </ul>
+          <p>You are responsible for maintaining any independent copies of Data You need for legal, evidentiary, or operational purposes. If You need Data export support after cancellation, contact Us as soon as possible within the applicable retention window.</p>
         </section>
         <section className={styles.section}>
           <h2>Limitation of Liability</h2>
