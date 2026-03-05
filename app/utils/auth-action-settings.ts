@@ -1,7 +1,7 @@
 import type { ActionCodeSettings } from 'firebase/auth';
 import paths from '~/config/config.json';
 
-const AUTH_ROUTE_PATH = '/auth';
+const AUTH_ROUTE_PATH = '/auth-action';
 const DEFAULT_CONTINUE_PATH = '/auth';
 
 const normalizedBaseUrl = paths.url.replace(/\/$/, '');

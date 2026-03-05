@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useSearchParams } from '@remix-run/react';
+import { Link } from '@remix-run/react';
 import { auth } from '~/services/firebase';
 import {
     signInWithEmailAndPassword, 
@@ -15,7 +15,6 @@ import {
 } from 'firebase/auth';
 import { PasswordReset } from '~/routes/auth/passwordReset';
 import { EmailVerification } from '~/routes/auth/emailVerification';
-import { EmailActionHandler } from '~/routes/auth/emailActionHandler';
 import { handleAuthError } from '~/services/firebase-errors';
 import { MFAVerification } from '~/components/auth/mfa-verification';
 import { MFAEnrollment } from '~/components/auth/mfa-enrollment';
@@ -41,11 +40,8 @@ export const meta = () => {
 
 const CAPTCHA_RETRY_DELAY_MS = 3000;
 const CAPTCHA_RETRY_DELAY_SECONDS = Math.ceil(CAPTCHA_RETRY_DELAY_MS / 1000);
-const SUPPORTED_EMAIL_ACTION_MODES = new Set(['resetPassword', 'verifyEmail', 'recoverEmail']);
 
 export const Login = () => {
-  const [searchParams] = useSearchParams();
-
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLogin, setIsLogin] = useState(true);
@@ -76,17 +72,6 @@ export const Login = () => {
   const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
   const [showMfaVerification, setShowMfaVerification] = useState(false);
   const [showMfaEnrollment, setShowMfaEnrollment] = useState(false);
-
-  const actionMode = searchParams.get('mode');
-  const actionCode = searchParams.get('oobCode');
-  const continueUrl = searchParams.get('continueUrl');
-  const actionLang = searchParams.get('lang');
-
-  const shouldHandleEmailAction = Boolean(
-    actionMode &&
-    actionCode &&
-    SUPPORTED_EMAIL_ACTION_MODES.has(actionMode)
-  );
 
   // Check if we're on the client side
   useEffect(() => {
@@ -504,14 +489,7 @@ export const Login = () => {
 
   return (
     <>
-      {shouldHandleEmailAction ? (
-        <EmailActionHandler
-          mode={actionMode}
-          oobCode={actionCode}
-          continueUrl={continueUrl}
-          lang={actionLang}
-        />
-      ) : user ? (
+      {user ? (
         user.emailVerified ? (
           <Striae user={user} />
         ) : (
@@ -700,7 +678,7 @@ export const Login = () => {
         </div>
       )}
       
-      {!shouldHandleEmailAction && isClient && showMfaVerification && mfaResolver && (
+      {isClient && showMfaVerification && mfaResolver && (
         <MFAVerification 
           resolver={mfaResolver}
           onSuccess={handleMfaSuccess}
@@ -709,7 +687,7 @@ export const Login = () => {
         />
       )}
       
-      {!shouldHandleEmailAction && isClient && showMfaEnrollment && user && (
+      {isClient && showMfaEnrollment && user && (
         <MFAEnrollment 
           user={user}
           onSuccess={handleMfaEnrollmentSuccess}
