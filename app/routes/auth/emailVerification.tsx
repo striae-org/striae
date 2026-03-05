@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from '@remix-run/react';
 import { sendEmailVerification, User } from 'firebase/auth';
 import { auditService } from '~/services/audit.service';
+import { buildActionCodeSettings } from '~/utils/auth-action-settings';
 import styles from './login.module.css';
 
 interface EmailVerificationProps {
@@ -32,7 +33,7 @@ export const EmailVerification = ({
     onSuccess('');
     
     try {
-      await sendEmailVerification(user);
+      await sendEmailVerification(user, buildActionCodeSettings());
       
       // Log email verification resend audit event
       try {

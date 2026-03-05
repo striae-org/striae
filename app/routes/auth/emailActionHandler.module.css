@@ -1,0 +1,171 @@
+.container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: var(--spaceL);
+  z-index: var(--zIndex0);
+}
+
+.logoLink {
+  display: block;
+}
+
+.logo {
+  position: fixed;
+  top: var(--spaceL);
+  left: var(--spaceL);
+  width: 150px;
+  height: 150px;
+  background-image: url("/logo-dark.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: var(--zIndex2);
+  transition: transform var(--durationM) var(--bezierFastoutSlowin);
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.formWrapper {
+  background-color: color-mix(in lab, var(--backgroundLight) 95%, transparent);
+  padding: var(--space2XL);
+  border-radius: var(--spaceXS);
+  box-shadow: 0 var(--spaceXS) var(--spaceM)
+    color-mix(in lab, var(--black) 10%, transparent);
+  width: 100%;
+  max-width: var(--maxWidthS);
+}
+
+.title {
+  text-align: center;
+  color: var(--textTitle);
+  margin-bottom: var(--spaceL);
+  font-size: var(--fontSizeH4);
+}
+
+.description {
+  color: var(--textBody);
+  text-align: center;
+  margin-bottom: var(--spaceM);
+  font-size: var(--fontSizeBodyS);
+}
+
+.hint {
+  color: var(--textLight);
+  text-align: center;
+  margin-bottom: var(--spaceM);
+  font-size: var(--fontSizeBodyXS);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceM);
+}
+
+.input {
+  width: 100%;
+  padding: var(--spaceL);
+  border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
+  border-radius: var(--spaceXS);
+  font-size: var(--fontSizeBodyM);
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 25%, transparent);
+}
+
+.passwordFeedback {
+  color: var(--textLight);
+  font-size: var(--fontSizeBodyXS);
+  white-space: pre-line;
+  margin-top: var(--spaceXS);
+}
+
+.button {
+  width: 100%;
+  padding: var(--spaceL);
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--spaceXS);
+  font-weight: var(--fontWeightMedium);
+  font-size: var(--fontSizeBodyM);
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+  box-sizing: border-box;
+}
+
+.button:hover:not(:disabled) {
+  background-color: color-mix(in lab, var(--primary) 85%, var(--black));
+}
+
+.button:disabled {
+  background-color: color-mix(in lab, var(--background) 95%, transparent);
+  color: var(--textLight);
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  width: 100%;
+  padding: var(--spaceL);
+  background-color: transparent;
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+  border-radius: var(--spaceXS);
+  font-weight: var(--fontWeightMedium);
+  font-size: var(--fontSizeBodyM);
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+  box-sizing: border-box;
+}
+
+.secondaryButton:hover {
+  background-color: color-mix(in lab, var(--primary) 10%, transparent);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceM);
+}
+
+.error {
+  color: color-mix(in lab, var(--error) 90%, var(--black));
+  text-align: left;
+  margin: var(--spaceXS) 0 var(--spaceS) 0;
+  font-size: var(--fontSizeBodyXS);
+  padding: var(--spaceS) var(--spaceM);
+  background: linear-gradient(
+    135deg,
+    color-mix(in lab, var(--error) 12%, transparent),
+    color-mix(in lab, var(--error) 8%, transparent)
+  );
+  border-radius: var(--spaceXS);
+  border: 1px solid color-mix(in lab, var(--error) 30%, transparent);
+  border-left: 3px solid var(--error);
+}
+
+.success {
+  color: color-mix(in lab, var(--success) 90%, var(--black));
+  text-align: left;
+  margin: var(--spaceXS) 0 var(--spaceS) 0;
+  font-size: var(--fontSizeBodyXS);
+  padding: var(--spaceS) var(--spaceM);
+  background: linear-gradient(
+    135deg,
+    color-mix(in lab, var(--success) 12%, transparent),
+    color-mix(in lab, var(--success) 8%, transparent)
+  );
+  border-radius: var(--spaceXS);
+  border: 1px solid color-mix(in lab, var(--success) 30%, transparent);
+  border-left: 3px solid var(--success);
+}
