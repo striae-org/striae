@@ -1,1 +1,0 @@
-export { TrustCompliance as default, meta } from './trust-compliance';
