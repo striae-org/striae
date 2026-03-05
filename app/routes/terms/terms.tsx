@@ -291,8 +291,20 @@ Upon receipt of a notification, the Company will take whatever action, in its so
 </section>
         <section className={styles.section}>
           <h2>Termination</h2>
-<p>We may terminate or suspend Your Account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if You breach these Terms and Conditions.</p>
-<p>Upon termination, Your right to use the Service will cease immediately. If You wish to terminate Your Account, You may simply discontinue using the Service.</p>
+      <h3>By Striae</h3>
+      <p>We may suspend or terminate Your Account at any time, with or without notice, if:</p>
+      <ul>
+      <li>You breach these Terms or any applicable law.</li>
+      <li>You engage in conduct that may harm Striae, Our users, or the integrity of the Service.</li>
+      <li>We discontinue or materially modify the Service.</li>
+      </ul>
+      <p>For free accounts, termination may occur at Our discretion without prior notice.</p>
+      <p>For paid Agency Accounts, We will make reasonable efforts to provide at least 30 days' notice unless termination is due to a breach or unlawful activity.</p>
+      <h3>By You</h3>
+      <p>You may terminate Your Account at any time by discontinuing use of the Service or deleting Your Account; for paid Agency Accounts, by cancelling Your subscription through the provided Account Portal or written notice.</p>
+      <h3>Effect of Termination</h3>
+      <p>Upon termination, Your right to access or use the Service ceases immediately. All account data associated with a free account may be deleted upon termination. Data associated with paid Agency Accounts may be retained for a limited period in accordance with Our Data Retention Policy to allow export or retrieval upon request.</p>
+      <p>Subscription fees already paid are non-refundable, except as required by law or expressly stated in a written agreement with Striae.</p>
         </section>
         <section className={styles.section}>
           <h2>Limitation of Liability</h2>
