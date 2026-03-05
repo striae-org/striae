@@ -6,5 +6,18 @@ import { createPagesFunctionHandler } from "@remix-run/cloudflare-pages";
 import * as build from "../build/server";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - temporary workaround for server build type incompatibility
+const remixHandler = createPagesFunctionHandler({ build });
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - temporary workaround for crossOrigin type issue
-export const onRequest = createPagesFunctionHandler({ build });
+export const onRequest = async (context: Parameters<typeof remixHandler>[0]) => {
+	const requestUrl = new URL(context.request.url);
+	if (requestUrl.pathname === '/__/auth/action' || requestUrl.pathname === '/__/auth/action/') {
+		const redirectUrl = new URL('/auth-action', requestUrl.origin);
+		redirectUrl.search = requestUrl.search;
+		return Response.redirect(redirectUrl.toString(), 302);
+	}
+
+	return remixHandler(context);
+};
