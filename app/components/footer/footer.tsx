@@ -36,6 +36,13 @@ export default function Footer() {
             className={styles.link}>
             Security Policy
           </Link>
+          <Link
+            viewTransition
+            prefetch="intent"
+            to="/trust-compliance"
+            className={styles.link}>
+            Trust & Compliance
+          </Link>
           <Link             
             to="https://striae.org/support" 
             target="_blank"
