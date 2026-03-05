@@ -1,5 +1,11 @@
 # Striae - AI Coding Agent Instructions
 
+## Version Update Protocol
+
+### Co-Pilot Command
+
+Please bump to version v{VERSION}. Create release notes and update README changelog. Use the commits done since the previous release (non-merge). Reference package.json, README.md, and the previous release notes for context.
+
 ## Project Overview
 Striae is a cloud-native forensic annotation application for firearms examination, built on Remix + Cloudflare infrastructure with a microservices architecture using Cloudflare Workers.
 

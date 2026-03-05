@@ -18,6 +18,14 @@
 
 ## 📋 Changelog
 
+## [2026-03-05] - *[Major Release v2.0.0](https://github.com/striae-org/striae/releases/tag/v2.0.0)*
+
+- **🔐 Backend Firebase Auth Account Deletion** - User Worker account-deletion flow now calls Firebase Auth admin APIs so deleted accounts are removed from authentication storage, not just app data stores
+- **🧭 Required Admin Service Credential Source** - Configuration and worker-secret scripts now require `app/config/admin-service.json` and ingest `project_id`/`client_email`/`private_key` directly from it
+- **⚙️ Deploy Script Hardening** - Removed interactive service-account prompt paths and added strict credential validation to fail early on malformed or placeholder admin-service values
+- **🧩 Config Example Synchronization** - Added `app/config-example/admin-service.json`, refreshed `.env.example` service-account placeholders, and aligned compatibility-date examples across worker/page config templates
+- **🔄 Route Experiment Rollback Handling** - Captured trust/compliance route add/revert cycle in the release window with no net long-term public route-surface change
+
 ## [2026-03-04] - *[Patch Release v1.2.2](https://github.com/striae-org/striae/releases/tag/v1.2.2)*
 
 - **✅ Confirmed Annotation Immutability Fixes** - Hardened confirmed-image editing safeguards across route autosave, data operations, and notes/case sidebars to block post-confirmation mutation paths
