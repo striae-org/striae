@@ -560,7 +560,7 @@ export const Privacy = () => {
 <p>By phone: {phoneDisplay ? <a href={`tel:${phoneHref}`}>{phoneDisplay}</a> : 'Loading contact phone...'}</p>
 </li>
 <li>
-<p>By mail: Contact Us for a physical address</p>
+<p>By mail: Marana, AZ (Contact Us for a physical address)</p>
 </li>
 <li>
 <p>Contact page: <a href="https://striae.org/support" target="_blank" rel="noopener noreferrer">https://striae.org/support</a></p>
