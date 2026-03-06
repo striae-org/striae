@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail, signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';
 import { handleAuthError, ERROR_MESSAGES } from '~/services/firebase-errors';
 import { auditService } from '~/services/audit.service';
@@ -29,32 +29,49 @@ export const PasswordReset = ({ isModal, onBack }: PasswordResetProps) => {
     
     try {
       await sendPasswordResetEmail(auth, email, buildActionCodeSettings());
+
+      // Sign out immediately after issuing the reset email to reduce session risk.
+      try {
+        await signOut(auth);
+      } catch (signOutError) {
+        console.error('Automatic sign-out after password reset request failed:', signOutError);
+        setError('Password reset email sent, but automatic sign-out failed. Please sign out manually.');
+        return;
+      }
       
       // Log successful password reset request
-      await auditService.logPasswordReset(
-        email,
-        'email',
-        'success'
-      );
+      try {
+        await auditService.logPasswordReset(
+          email,
+          'email',
+          'success'
+        );
+      } catch (auditError) {
+        console.error('Failed to log successful password reset request audit:', auditError);
+      }
       
-      setSuccess(ERROR_MESSAGES.RESET_EMAIL_SENT);
+      setSuccess(`${ERROR_MESSAGES.RESET_EMAIL_SENT} You have been signed out.`);
       setTimeout(onBack, 2000);
     } catch (err) {
       const { message } = handleAuthError(err);
       
       // Log failed password reset attempt
-      await auditService.logPasswordReset(
-        email,
-        'email',
-        'failure',
-        undefined, // no reset token on failure
-        'email-link',
-        1, // first attempt
-        undefined, // password complexity not relevant here
-        undefined, // previous password reuse not relevant here
-        undefined, // no session ID
-        [message] // error details
-      );
+      try {
+        await auditService.logPasswordReset(
+          email,
+          'email',
+          'failure',
+          undefined, // no reset token on failure
+          'email-link',
+          1, // first attempt
+          undefined, // password complexity not relevant here
+          undefined, // previous password reuse not relevant here
+          undefined, // no session ID
+          [message] // error details
+        );
+      } catch (auditError) {
+        console.error('Failed to log failed password reset request audit:', auditError);
+      }
       
       setError(message);
     } finally {
