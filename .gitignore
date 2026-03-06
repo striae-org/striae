@@ -16,7 +16,6 @@ workers/data-worker/src/data-worker.ts
 workers/image-worker/src/image-worker.ts
 workers/keys-worker/src/keys.ts
 workers/pdf-worker/src/pdf-worker.ts
-workers/turnstile-worker/src/turnstile.ts
 workers/user-worker/src/user-worker.ts
 
 # Logs and Miscellaneous
@@ -35,4 +34,3 @@ firebase-debug.log
 *.toml
 *.jsonc
 app/config
-app/components/turnstile/keys.json

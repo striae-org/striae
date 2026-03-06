@@ -205,7 +205,6 @@ required_vars=(
     "DATA_WORKER_NAME"
     "AUDIT_WORKER_NAME"
     "IMAGES_WORKER_NAME"
-    "TURNSTILE_WORKER_NAME" 
     "PDF_WORKER_NAME"
     
     # Worker Domains (required for config replacement)
@@ -214,7 +213,6 @@ required_vars=(
     "DATA_WORKER_DOMAIN"
     "AUDIT_WORKER_DOMAIN"
     "IMAGES_WORKER_DOMAIN"
-    "TURNSTILE_WORKER_DOMAIN"
     "PDF_WORKER_DOMAIN"
     
     # Storage Configuration (required for config replacement)
@@ -227,8 +225,6 @@ required_vars=(
     "ACCOUNT_HASH"
     "API_TOKEN"
     "HMAC_KEY"
-    "CFT_PUBLIC_KEY"
-    "CFT_SECRET_KEY"
 )
 
 validate_required_vars() {
@@ -274,16 +270,6 @@ copy_example_configs() {
         fi
     fi
     
-    # Copy turnstile keys.json.example to keys.json
-    if [ -f "app/components/turnstile/keys.json.example" ]; then
-        if [ "$update_env" = "true" ] || [ ! -f "app/components/turnstile/keys.json" ]; then
-            cp app/components/turnstile/keys.json.example app/components/turnstile/keys.json
-            echo -e "${GREEN}    ✅ turnstile: keys.json created from example${NC}"
-        elif [ -f "app/components/turnstile/keys.json" ]; then
-            echo -e "${YELLOW}    ⚠️  turnstile: keys.json already exists, skipping copy${NC}"
-        fi
-    fi
-    
     # Navigate to each worker directory and copy the example file
     echo -e "${YELLOW}  Copying worker configuration files...${NC}"
     
@@ -325,14 +311,6 @@ copy_example_configs() {
         echo -e "${GREEN}    ✅ image-worker: wrangler.jsonc created from example${NC}"
     elif [ -f "wrangler.jsonc" ]; then
         echo -e "${YELLOW}    ⚠️  image-worker: wrangler.jsonc already exists, skipping copy${NC}"
-    fi
-
-    cd ../turnstile-worker
-    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
-        cp wrangler.jsonc.example wrangler.jsonc
-        echo -e "${GREEN}    ✅ turnstile-worker: wrangler.jsonc created from example${NC}"
-    elif [ -f "wrangler.jsonc" ]; then
-        echo -e "${YELLOW}    ⚠️  turnstile-worker: wrangler.jsonc already exists, skipping copy${NC}"
     fi
 
     cd ../pdf-worker
@@ -382,13 +360,6 @@ copy_example_configs() {
         echo -e "${GREEN}    ✅ image-worker: image-worker.ts created from example${NC}"
     elif [ -f "workers/image-worker/src/image-worker.ts" ]; then
         echo -e "${YELLOW}    ⚠️  image-worker: image-worker.ts already exists, skipping copy${NC}"
-    fi
-
-    if [ -f "workers/turnstile-worker/src/turnstile.example.ts" ] && { [ "$update_env" = "true" ] || [ ! -f "workers/turnstile-worker/src/turnstile.ts" ]; }; then
-        cp workers/turnstile-worker/src/turnstile.example.ts workers/turnstile-worker/src/turnstile.ts
-        echo -e "${GREEN}    ✅ turnstile-worker: turnstile.ts created from example${NC}"
-    elif [ -f "workers/turnstile-worker/src/turnstile.ts" ]; then
-        echo -e "${YELLOW}    ⚠️  turnstile-worker: turnstile.ts already exists, skipping copy${NC}"
     fi
 
     if [ -f "workers/pdf-worker/src/pdf-worker.example.ts" ] && { [ "$update_env" = "true" ] || [ ! -f "workers/pdf-worker/src/pdf-worker.ts" ]; }; then
@@ -586,8 +557,6 @@ prompt_for_secrets() {
     prompt_for_var "AUDIT_WORKER_DOMAIN" "Audit worker domain (e.g., audit.striae.org) - DO NOT include https://"
     prompt_for_var "IMAGES_WORKER_NAME" "Images worker name"
     prompt_for_var "IMAGES_WORKER_DOMAIN" "Images worker domain (e.g., images.striae.org) - DO NOT include https://"
-    prompt_for_var "TURNSTILE_WORKER_NAME" "Turnstile worker name"
-    prompt_for_var "TURNSTILE_WORKER_DOMAIN" "Turnstile worker domain (e.g., turnstile.striae.org) - DO NOT include https://"
     prompt_for_var "PDF_WORKER_NAME" "PDF worker name"
     prompt_for_var "PDF_WORKER_DOMAIN" "PDF worker domain (e.g., pdf.striae.org) - DO NOT include https://"
     
@@ -603,8 +572,6 @@ prompt_for_secrets() {
     prompt_for_var "ACCOUNT_HASH" "Cloudflare Images Account Hash"
     prompt_for_var "API_TOKEN" "Cloudflare Images API token (for Images Worker)"
     prompt_for_var "HMAC_KEY" "Cloudflare Images HMAC signing key"
-    prompt_for_var "CFT_PUBLIC_KEY" "Cloudflare Turnstile public key"
-    prompt_for_var "CFT_SECRET_KEY" "Cloudflare Turnstile secret key"
     
     # Reload the updated .env file
     source .env
@@ -705,22 +672,6 @@ update_wrangler_configs() {
         echo -e "${GREEN}    ✅ pdf-worker source placeholders updated${NC}"
     fi
     
-    # Turnstile Worker
-    if [ -f "workers/turnstile-worker/wrangler.jsonc" ]; then
-        echo -e "${YELLOW}  Updating turnstile-worker/wrangler.jsonc...${NC}"
-        sed -i "s/\"TURNSTILE_WORKER_NAME\"/\"$TURNSTILE_WORKER_NAME\"/g" workers/turnstile-worker/wrangler.jsonc
-        sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/turnstile-worker/wrangler.jsonc
-        sed -i "s/\"TURNSTILE_WORKER_DOMAIN\"/\"$TURNSTILE_WORKER_DOMAIN\"/g" workers/turnstile-worker/wrangler.jsonc
-        echo -e "${GREEN}    ✅ turnstile-worker configuration updated${NC}"
-    fi
-    
-    # Update turnstile-worker source file domain placeholders
-    if [ -f "workers/turnstile-worker/src/turnstile.ts" ]; then
-        echo -e "${YELLOW}  Updating turnstile-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/turnstile-worker/src/turnstile.ts
-        echo -e "${GREEN}    ✅ turnstile-worker source placeholders updated${NC}"
-    fi
-    
     # User Worker
     if [ -f "workers/user-worker/wrangler.jsonc" ]; then
         echo -e "${YELLOW}  Updating user-worker/wrangler.jsonc...${NC}"
@@ -782,14 +733,6 @@ update_wrangler_configs() {
         sed -i "s|\"YOUR_FIREBASE_APP_ID\"|\"$APP_ID\"|g" app/config/firebase.ts
         sed -i "s|\"YOUR_FIREBASE_MEASUREMENT_ID\"|\"$MEASUREMENT_ID\"|g" app/config/firebase.ts
         echo -e "${GREEN}      ✅ app firebase.ts updated${NC}"
-    fi
-    
-    # Update app/components/turnstile/keys.json
-    if [ -f "app/components/turnstile/keys.json" ]; then
-        echo -e "${YELLOW}    Updating app/components/turnstile/keys.json...${NC}"
-        sed -i -E "s|\"CFT_PUBLIC_KEY\"[[:space:]]*:[[:space:]]*\"[^\"]*\"|\"CFT_PUBLIC_KEY\": \"$CFT_PUBLIC_KEY\"|g" app/components/turnstile/keys.json
-        sed -i -E "s|\"worker_url\"[[:space:]]*:[[:space:]]*\"[^\"]*\"|\"worker_url\": \"https://$TURNSTILE_WORKER_DOMAIN\"|g" app/components/turnstile/keys.json
-        echo -e "${GREEN}      ✅ turnstile keys.json updated${NC}"
     fi
     
     echo -e "${GREEN}✅ All configuration files updated${NC}"
