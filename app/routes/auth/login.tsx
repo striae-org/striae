@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from '@remix-run/react';
 import { auth } from '~/services/firebase';
 import {
@@ -19,8 +19,6 @@ import { EmailActionHandler } from '~/routes/auth/emailActionHandler';
 import { handleAuthError } from '~/services/firebase-errors';
 import { MFAVerification } from '~/components/auth/mfa-verification';
 import { MFAEnrollment } from '~/components/auth/mfa-enrollment';
-import { Turnstile } from '~/components/turnstile/turnstile';
-import { verifyTurnstileToken } from '~/utils/turnstile';
 import { Icon } from '~/components/icon/icon';
 import styles from './login.module.css';
 import { baseMeta } from '~/utils/meta';
@@ -39,8 +37,6 @@ export const meta = () => {
   });
 };
 
-const CAPTCHA_RETRY_DELAY_MS = 3000;
-const CAPTCHA_RETRY_DELAY_SECONDS = Math.ceil(CAPTCHA_RETRY_DELAY_MS / 1000);
 const SUPPORTED_EMAIL_ACTION_MODES = new Set(['resetPassword', 'verifyEmail', 'recoverEmail']);
 
 export const Login = () => {
@@ -65,12 +61,6 @@ export const Login = () => {
       : ''
   );
   const [confirmPasswordValue, setConfirmPasswordValue] = useState('');
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaWidgetId, setCaptchaWidgetId] = useState<string | null>(null);
-  const [isCaptchaCoolingDown, setIsCaptchaCoolingDown] = useState(false);
-  const [captchaCooldownSeconds, setCaptchaCooldownSeconds] = useState(0);
-  const captchaCooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const captchaCooldownInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   
   // MFA state
   const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
@@ -238,12 +228,6 @@ export const Login = () => {
   setError('');
   setSuccess('');
 
-  if (isCaptchaCoolingDown) {
-    setError('Please wait a few seconds before trying again.');
-    setIsLoading(false);
-    return;
-  }
-
   const formData = new FormData(e.currentTarget as HTMLFormElement);
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
@@ -277,50 +261,6 @@ export const Login = () => {
         setIsLoading(false);
         return;
       }
-    }
-
-    if (!captchaToken) {
-      setError('Please complete CAPTCHA verification before continuing.');
-      setIsLoading(false);
-      return;
-    }
-
-    const verificationResult = await verifyTurnstileToken(captchaToken);
-    if (!('success' in verificationResult) || !verificationResult.success) {
-      setError('CAPTCHA verification failed. Please try again.');
-      setIsCaptchaCoolingDown(true);
-      setCaptchaCooldownSeconds(CAPTCHA_RETRY_DELAY_SECONDS);
-
-      if (captchaCooldownTimer.current) {
-        clearTimeout(captchaCooldownTimer.current);
-      }
-
-      if (captchaCooldownInterval.current) {
-        clearInterval(captchaCooldownInterval.current);
-      }
-
-      captchaCooldownInterval.current = setInterval(() => {
-        setCaptchaCooldownSeconds((prev) => (prev > 1 ? prev - 1 : 0));
-      }, 1000);
-
-      captchaCooldownTimer.current = setTimeout(() => {
-        setIsCaptchaCoolingDown(false);
-        setCaptchaCooldownSeconds(0);
-
-        if (captchaCooldownInterval.current) {
-          clearInterval(captchaCooldownInterval.current);
-          captchaCooldownInterval.current = null;
-        }
-
-        captchaCooldownTimer.current = null;
-      }, CAPTCHA_RETRY_DELAY_MS);
-
-      if (captchaWidgetId && window.turnstile) {
-        window.turnstile.reset(captchaWidgetId);
-      }
-      setCaptchaToken(null);
-      setIsLoading(false);
-      return;
     }
 
     if (!isLogin) {
@@ -439,10 +379,6 @@ export const Login = () => {
       // Continue with error flow even if audit logging fails
     }
   } finally {
-    if (captchaWidgetId && window.turnstile) {
-      window.turnstile.reset(captchaWidgetId);
-    }
-    setCaptchaToken(null);
     setIsLoading(false);
   }
 };
@@ -488,19 +424,6 @@ export const Login = () => {
   const handleMfaEnrollmentError = (errorMessage: string) => {
     setError(errorMessage);
   };
-
-  useEffect(() => {
-    return () => {
-      if (captchaCooldownTimer.current) {
-        clearTimeout(captchaCooldownTimer.current);
-      }
-      if (captchaCooldownInterval.current) {
-        clearInterval(captchaCooldownInterval.current);
-      }
-    };
-  }, []);
-
-  
 
   return (
     <>
@@ -652,27 +575,19 @@ export const Login = () => {
               
               {error && <p className={styles.error}>{error}</p>}
               {success && <p className={styles.success}>{success}</p>}
-
-              <Turnstile
-                className="route-turnstile"
-                onWidgetId={(id) => setCaptchaWidgetId(id)}
-                onTokenChange={(token) => setCaptchaToken(token)}
-              />
               
               <button 
                 type="submit" 
                 className={styles.button}
-                disabled={isLoading || isCheckingUser || isCaptchaCoolingDown}
+                disabled={isLoading || isCheckingUser}
               >
-                {isCaptchaCoolingDown
-                  ? `Try again in ${captchaCooldownSeconds || 1}s`
-                  : isCheckingUser
-                    ? 'Verifying account...'
-                    : isLoading
-                      ? 'Loading...'
-                      : isLogin
-                        ? 'Login'
-                        : 'Register'}
+                {isCheckingUser
+                  ? 'Verifying account...'
+                  : isLoading
+                    ? 'Loading...'
+                    : isLogin
+                      ? 'Login'
+                      : 'Register'}
               </button>
             </form>
             
