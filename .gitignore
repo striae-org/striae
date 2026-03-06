@@ -2,8 +2,6 @@
 node_modules/
 build/
 dist/
-tests/
-test-results/
 archive/
 wiki/
 
