@@ -11,13 +11,12 @@ Striae is a cloud-native forensic annotation application for firearms examinatio
 
 ## Architecture & Service Boundaries
 - **Frontend**: Remix app (`app/`) deployed to Cloudflare Pages
-- **Backend**: 7 specialized Cloudflare Workers in `workers/` directory:
+- **Backend**: 6 specialized Cloudflare Workers in `workers/` directory:
   - `user-worker`: User management and authentication validation
   - `image-worker`: Image upload/processing via Cloudflare Images
   - `pdf-worker`: PDF generation using Puppeteer
   - `data-worker`: Case and annotation data management (R2 storage)
   - `keys-worker`: API key management and authentication
-  - `turnstile-worker`: CAPTCHA and bot protection
   - `audit-worker`: Forensic audit trail logging and compliance tracking
 - **Data Layer**: Cloudflare KV (user data), R2 (case data and audit logs), Images (file storage), Firebase Auth (identity)
 
