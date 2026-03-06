@@ -83,11 +83,54 @@
   box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 25%, transparent);
 }
 
+.passwordField {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.passwordField .input {
+  padding-right: var(--space2XL);
+}
+
+.passwordToggle {
+  position: absolute;
+  right: var(--spaceM);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: var(--spaceXS);
+  border-radius: var(--spaceXS);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--durationS) var(--bezierFastoutSlowin);
+  z-index: 1;
+  height: auto;
+  min-width: 24px;
+}
+
+.passwordToggle:hover {
+  background-color: color-mix(in lab, var(--text) 10%, transparent);
+}
+
+.passwordToggle:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .passwordFeedback {
   color: var(--textLight);
   font-size: var(--fontSizeBodyXS);
+  margin-top: var(--spaceS);
+}
+
+.passwordFeedback pre {
+  margin: 0;
+  font-family: inherit;
   white-space: pre-line;
-  margin-top: var(--spaceXS);
 }
 
 .button {

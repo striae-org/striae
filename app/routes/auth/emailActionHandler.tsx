@@ -11,6 +11,7 @@ import { handleAuthError } from '~/services/firebase-errors';
 import { evaluatePasswordPolicy } from '~/utils/password-policy';
 import { getSafeContinuePath } from '~/utils/auth-action-settings';
 import { auditService } from '~/services/audit.service';
+import { Icon } from '~/components/icon/icon';
 import styles from './emailActionHandler.module.css';
 
 interface EmailActionHandlerProps {
@@ -33,7 +34,12 @@ const getUserAgent = (): string | undefined => {
 const getPolicyFeedback = (password: string, confirmPassword: string): string => {
   const policy = evaluatePasswordPolicy(password, confirmPassword);
 
-  return `Password must contain:\n${policy.hasMinLength ? '[OK]' : '[ ]'} At least 10 characters\n${policy.hasUpperCase ? '[OK]' : '[ ]'} Capital letters\n${policy.hasNumber ? '[OK]' : '[ ]'} Numbers\n${policy.hasSpecialChar ? '[OK]' : '[ ]'} Special characters\n${policy.passwordsMatch ? '[OK]' : '[ ]'} Passwords must match`;
+  return `Password must contain:
+      ${!policy.hasMinLength ? '❌' : '✅'} At least 10 characters
+      ${!policy.hasUpperCase ? '❌' : '✅'} Capital letters
+      ${!policy.hasNumber ? '❌' : '✅'} Numbers
+      ${!policy.hasSpecialChar ? '❌' : '✅'} Special characters
+      ${!policy.passwordsMatch ? '❌' : '✅'} Passwords must match`;
 };
 
 export const EmailActionHandler = ({ mode, oobCode, continueUrl, lang }: EmailActionHandlerProps) => {
@@ -46,6 +52,8 @@ export const EmailActionHandler = ({ mode, oobCode, continueUrl, lang }: EmailAc
   const [resolvedEmail, setResolvedEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordFeedback, setPasswordFeedback] = useState('');
   const [isSubmittingReset, setIsSubmittingReset] = useState(false);
 
@@ -301,36 +309,58 @@ export const EmailActionHandler = ({ mode, oobCode, continueUrl, lang }: EmailAc
 
         {state === 'ready-reset' && (
           <form className={styles.form} onSubmit={handlePasswordResetSubmit}>
-            <input
-              type="password"
-              name="newPassword"
-              placeholder="New Password"
-              autoComplete="new-password"
-              className={styles.input}
-              required
-              value={newPassword}
-              onChange={(event) => {
-                const nextValue = event.target.value;
-                setNewPassword(nextValue);
-                setPasswordFeedback(getPolicyFeedback(nextValue, confirmPassword));
-              }}
-            />
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm New Password"
-              autoComplete="new-password"
-              className={styles.input}
-              required
-              value={confirmPassword}
-              onChange={(event) => {
-                const nextValue = event.target.value;
-                setConfirmPassword(nextValue);
-                setPasswordFeedback(getPolicyFeedback(newPassword, nextValue));
-              }}
-            />
+            <div className={styles.passwordField}>
+              <input
+                type={showNewPassword ? 'text' : 'password'}
+                name="newPassword"
+                placeholder="New Password"
+                autoComplete="new-password"
+                className={styles.input}
+                required
+                value={newPassword}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setNewPassword(nextValue);
+                  setPasswordFeedback(getPolicyFeedback(nextValue, confirmPassword));
+                }}
+              />
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+              >
+                <Icon icon={showNewPassword ? 'eye-off' : 'eye'} />
+              </button>
+            </div>
+            <div className={styles.passwordField}>
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                placeholder="Confirm New Password"
+                autoComplete="new-password"
+                className={styles.input}
+                required
+                value={confirmPassword}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setConfirmPassword(nextValue);
+                  setPasswordFeedback(getPolicyFeedback(newPassword, nextValue));
+                }}
+              />
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+              >
+                <Icon icon={showConfirmPassword ? 'eye-off' : 'eye'} />
+              </button>
+            </div>
             {passwordFeedback && (
-              <div className={styles.passwordFeedback}>{passwordFeedback}</div>
+              <div className={styles.passwordFeedback}>
+                <pre>{passwordFeedback}</pre>
+              </div>
             )}
             <button
               type="submit"
