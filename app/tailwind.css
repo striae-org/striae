@@ -59,9 +59,10 @@
     font-weight: var(--fontWeightRegular);
     color: var(--textBody);
     background: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.95)),
-      url("/assets/striae.jpg") center/cover no-repeat fixed;
+                url('/assets/striae.jpg') center/cover no-repeat fixed;
     background-blend-mode: normal;
-    transition: background var(--durationM) ease, opacity var(--durationM) ease;
+    transition: background var(--durationM) ease,
+                opacity var(--durationM) ease;
     opacity: 1;
   }
 
@@ -116,12 +117,8 @@
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes reveal {
@@ -166,7 +163,7 @@
     left: var(--spaceL);
     width: 150px;
     height: 150px;
-    background-image: url("/logo-dark.png");
+    background-image: url('/logo-dark.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -185,7 +182,7 @@
     display: none;
     width: 150px;
     height: 150px;
-    background-image: url("/logo-dark.png");
+    background-image: url('/logo-dark.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -202,8 +199,7 @@
     background: color-mix(in lab, var(--backgroundLight) 95%, transparent);
     padding: var(--space2XL);
     border-radius: var(--spaceXS);
-    box-shadow: 0 var(--spaceXS) var(--spaceM)
-      color-mix(in lab, var(--black) 10%, transparent);
+    box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
     width: 100%;
     margin: var(--spaceL) auto;
   }
@@ -221,5 +217,23 @@
     margin-bottom: var(--space2XL);
     font-size: var(--fontSizeBodyM);
     line-height: var(--lineHeightBody);
+  }
+
+  .route-turnstile {
+    justify-self: flex-start;
+    margin: var(--spaceM) 0;
+  }
+
+  .route-captcha-error {
+    color: var(--error);
+    text-align: center;
+    margin: var(--spaceS) 0;
+    font-size: var(--fontSizeBodyXS);
+  }
+
+  @media (max-width: 1024px) {
+    .route-turnstile {
+      justify-self: center;
+    }
   }
 }

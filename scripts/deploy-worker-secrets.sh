@@ -149,7 +149,7 @@ echo -e "\n${BLUE}🔐 Deploying secrets to workers...${NC}"
 # Check if workers are configured
 echo -e "${YELLOW}🔍 Checking worker configurations...${NC}"
 workers_configured=0
-total_workers=6
+total_workers=7
 
 for worker_dir in workers/*/; do
     if [ -f "$worker_dir/wrangler.jsonc" ] || [ -f "$worker_dir/wrangler.toml" ]; then
@@ -195,6 +195,12 @@ fi
 if ! set_worker_secrets "Images Worker" "workers/image-worker" \
     "ACCOUNT_ID" "API_TOKEN" "HMAC_KEY"; then
     echo -e "${YELLOW}⚠️  Skipping Images Worker (not configured)${NC}"
+fi
+
+# Turnstile Worker
+if ! set_worker_secrets "Turnstile Worker" "workers/turnstile-worker" \
+    "CFT_SECRET_KEY"; then
+    echo -e "${YELLOW}⚠️  Skipping Turnstile Worker (not configured)${NC}"
 fi
 
 # PDF Worker (no secrets needed)

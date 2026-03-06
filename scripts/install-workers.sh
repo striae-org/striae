@@ -9,7 +9,8 @@
 # 3. image-worker
 # 4. keys-worker
 # 5. pdf-worker
-# 6. user-worker
+# 6. turnstile-worker
+# 7. user-worker
 
 # Colors for output
 RED='\033[0;31m'
@@ -35,7 +36,7 @@ if [ ! -d "$WORKERS_DIR" ]; then
 fi
 
 # List of workers
-WORKERS=("audit-worker" "data-worker" "image-worker" "keys-worker" "pdf-worker" "user-worker")
+WORKERS=("audit-worker" "data-worker" "image-worker" "keys-worker" "pdf-worker" "turnstile-worker" "user-worker")
 
 echo -e "${PURPLE}Installing npm dependencies for all workers...${NC}"
 echo ""

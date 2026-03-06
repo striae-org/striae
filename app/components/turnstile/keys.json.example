@@ -1,0 +1,4 @@
+{
+  "CFT_PUBLIC_KEY": "insert-your-turnstile-site-key-here",
+  "worker_url": "https://turnstile.your-domain.com"
+}

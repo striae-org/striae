@@ -25,7 +25,7 @@
     "deploy-config": "bash ./scripts/deploy-config.sh",
     "update-env": "bash ./scripts/deploy-config.sh --update-env",
     "install-workers": "bash ./scripts/install-workers.sh",
-    "deploy-workers": "npm run deploy-workers:audit && npm run deploy-workers:data && npm run deploy-workers:image && npm run deploy-workers:keys && npm run deploy-workers:pdf && npm run deploy-workers:user",
+    "deploy-workers": "npm run deploy-workers:audit && npm run deploy-workers:data && npm run deploy-workers:image && npm run deploy-workers:keys && npm run deploy-workers:pdf && npm run deploy-workers:turnstile && npm run deploy-workers:user",
     "deploy-workers:secrets": "bash ./scripts/deploy-worker-secrets.sh",
     "deploy-pages": "bash ./scripts/deploy-pages.sh",
     "deploy-workers:audit": "cd workers/audit-worker && npm run deploy",
@@ -33,7 +33,9 @@
     "deploy-workers:image": "cd workers/image-worker && npm run deploy",
     "deploy-workers:keys": "cd workers/keys-worker && npm run deploy",
     "deploy-workers:pdf": "cd workers/pdf-worker && npm run deploy",
-    "deploy-workers:user": "cd workers/user-worker && npm run deploy"
+    "deploy-workers:turnstile": "cd workers/turnstile-worker && npm run deploy",
+    "deploy-workers:user": "cd workers/user-worker && npm run deploy",
+    "test:turnstile": "playwright test tests/turnstile.spec.ts"
   },
   "dependencies": {
     "@playwright/test": "^1.58.2",
