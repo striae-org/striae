@@ -21,8 +21,7 @@ const NoticeText = () => {
         <li><strong>Striae Subdomain:</strong> Agency instances will be hosted on a dedicated Striae subdomain.
           <br />
           Ex: https://<strong>ouragency</strong>.striae.org
-        </li>
-        <li><strong>Agency Interest Form:</strong> This form is an interest form only. Final fees and terms will be shared when plans become available.</li>
+        </li>        
       </ul>
 
       <h2>Register a Demo Account</h2>
