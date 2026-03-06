@@ -992,6 +992,41 @@ export class AuditService {
   }
 
   /**
+   * Log email verification event when no authenticated User object is available.
+   */
+  public async logEmailVerificationByEmail(
+    userEmail: string,
+    result: AuditResult,
+    verificationMethod: 'email-link' | 'admin-verification',
+    verificationAttempts?: number,
+    sessionId?: string,
+    userAgent?: string,
+    errors: string[] = [],
+    userId: string = ''
+  ): Promise<void> {
+    await this.logEvent({
+      userId,
+      userEmail,
+      action: 'email-verification',
+      result,
+      fileName: `email-verification-${userId || Date.now()}.log`,
+      fileType: 'log-file',
+      validationErrors: errors,
+      workflowPhase: 'user-management',
+      sessionDetails: sessionId ? {
+        sessionId,
+        userAgent
+      } : { userAgent },
+      userProfileDetails: {
+        verificationMethod,
+        verificationAttempts,
+        verificationDate: new Date().toISOString(),
+        emailVerified: result === 'success'
+      }
+    });
+  }
+
+  /**
    * Mark pending email verification as successful (retroactive)
    * Called when user completes MFA enrollment, which implies email verification was successful
    */

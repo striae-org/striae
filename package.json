@@ -14,7 +14,7 @@
     "clean": "rm -rf build node_modules/.cache .cache",
     "clean:build": "npm run clean && npm run build",
     "deploy": "npm run build && wrangler pages deploy",
-    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "lint": "node ./scripts/run-eslint.cjs",
     "start": "node ./scripts/dev.cjs && wrangler pages dev ./build/client",
     "typecheck": "tsc",
     "typegen": "wrangler types",
