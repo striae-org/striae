@@ -477,7 +477,7 @@ export const Privacy = () => {
 <p>By phone: {phoneDisplay ? <a href={`tel:${phoneHref}`}>{phoneDisplay}</a> : 'Loading contact phone...'}</p>
 </li>
 <li>
-<p>Contact page: <a href="https://stephenjlu.com/contact" target="_blank" rel="noopener noreferrer">https://stephenjlu.com/contact</a></p>
+<p>Contact page: <a href="https://striae.org/support" target="_blank" rel="noopener noreferrer">https://striae.org/support</a></p>
 </li>
 </ul>
 <p>Only You, or a person registered with the California Secretary of State that You authorize to act on Your behalf, may make a verifiable request related to Your personal information.</p>
@@ -563,7 +563,7 @@ export const Privacy = () => {
 <p>By mail: Contact Us for a physical address</p>
 </li>
 <li>
-<p>Contact page: <a href="https://stephenjlu.com/contact" target="_blank" rel="noopener noreferrer">https://stephenjlu.com/contact</a></p>
+<p>Contact page: <a href="https://striae.org/support" target="_blank" rel="noopener noreferrer">https://striae.org/support</a></p>
 </li>
 <li>
 <p>Legal entity: The Stephenson Jack Lu Living Trust</p>
