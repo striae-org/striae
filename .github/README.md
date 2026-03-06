@@ -18,6 +18,14 @@
 
 ## 📋 Changelog
 
+## [2026-03-06] - *[Minor Release v2.1.0](https://github.com/striae-org/striae/releases/tag/v2.1.0)*
+
+- **🔐 Auth Lifecycle and Credential Hardening** - Integrated backend Firebase Auth account deletion support with admin-service credential sourcing and deploy/config alignment updates
+- **🔁 Email Action and MFA Flow Stability** - Iterated auth action route handling and ensured MFA setup checks run after verification/login state transitions
+- **🧹 Turnstile/Auth UX Cleanup** - Removed stale Turnstile references and refined login/password UX with button styling and password visibility improvements
+- **📬 Contact and Public Surface Refinements** - Updated contact route/link behavior, added Google SVG support, and expanded contact capture fields with city/state
+- **⚙️ Tooling and Config Maintenance** - Refreshed compatibility/types outputs, corrected env example/deploy-config behavior, and pruned Playwright-related setup
+
 ## [2026-03-05] - *[Major Release v2.0.0](https://github.com/striae-org/striae/releases/tag/v2.0.0)*
 
 - **🔐 Backend Firebase Auth Account Deletion** - User Worker account-deletion flow now calls Firebase Auth admin APIs so deleted accounts are removed from authentication storage, not just app data stores
