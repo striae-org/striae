@@ -487,7 +487,7 @@ You agree that the original English text shall prevail in the case of a dispute.
 <p>By mail: Contact Us for a physical address</p>
 </li>
 <li>
-<p>Contact page: <a href="https://stephenjlu.com/contact" target="_blank" rel="noopener noreferrer">https://stephenjlu.com/contact</a></p>
+<p>Contact page: <a href="https://striae.org/support" target="_blank" rel="noopener noreferrer">https://striae.org/support</a></p>
 </li>
 <li>
 <p>Legal entity: The Stephenson Jack Lu Living Trust</p>
