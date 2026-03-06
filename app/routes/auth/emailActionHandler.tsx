@@ -392,7 +392,7 @@ export const EmailActionHandler = ({ mode, oobCode, continueUrl, lang }: EmailAc
             )}
             <button
               type="button"
-              className={styles.secondaryButton}
+              className={styles.loginToStriaeButton}
               onClick={() => navigate('/auth')}
             >
               Login to Striae

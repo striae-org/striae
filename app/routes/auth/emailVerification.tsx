@@ -100,7 +100,7 @@ export const EmailVerification = ({
           </button>
           <button 
             onClick={onSignOut}
-            className={styles.secondaryButton}
+            className={styles.loginToStriaeButton}
           >
             Login to Striae
           </button>

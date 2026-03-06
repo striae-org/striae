@@ -175,6 +175,24 @@
   background-color: color-mix(in lab, var(--primary) 10%, transparent);
 }
 
+.loginToStriaeButton {
+  width: 100%;
+  padding: var(--spaceL);
+  background-color: #1e7e34;
+  color: var(--white);
+  border: none;
+  border-radius: var(--spaceXS);
+  font-weight: var(--fontWeightMedium);
+  font-size: var(--fontSizeBodyM);
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+  box-sizing: border-box;
+}
+
+.loginToStriaeButton:hover {
+  background-color: #155724;
+}
+
 .actions {
   display: flex;
   flex-direction: column;

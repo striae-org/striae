@@ -14,7 +14,7 @@
   left: var(--spaceL);
   width: 150px;
   height: 150px;
-  background-image: url('/logo-dark.png');
+  background-image: url("/logo-dark.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -30,7 +30,8 @@
   background-color: color-mix(in lab, var(--backgroundLight) 95%, transparent);
   padding: var(--space2XL);
   border-radius: var(--spaceXS);
-  box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
+  box-shadow: 0 var(--spaceXS) var(--spaceM)
+    color-mix(in lab, var(--black) 10%, transparent);
   width: 100%;
   max-width: var(--maxWidthS);
 }
@@ -133,7 +134,8 @@
   margin: var(--spaceXS) 0 var(--spaceS) 0;
   font-size: var(--fontSizeBodyXS);
   padding: var(--spaceS) var(--spaceM);
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     color-mix(in lab, var(--error) 12%, transparent),
     color-mix(in lab, var(--error) 8%, transparent)
   );
@@ -147,7 +149,7 @@
 }
 
 .error::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -163,7 +165,8 @@
   margin: var(--spaceXS) 0 var(--spaceS) 0;
   font-size: var(--fontSizeBodyXS);
   padding: var(--spaceS) var(--spaceM);
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     color-mix(in lab, var(--success) 12%, transparent),
     color-mix(in lab, var(--success) 8%, transparent)
   );
@@ -177,7 +180,7 @@
 }
 
 .success::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -338,7 +341,8 @@
 }
 
 @keyframes errorPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     box-shadow: 0 0 0 0 color-mix(in lab, var(--error) 40%, transparent);
   }
@@ -370,7 +374,8 @@
 }
 
 @keyframes successPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     box-shadow: 0 0 0 0 color-mix(in lab, var(--success) 40%, transparent);
   }
@@ -382,11 +387,13 @@
 
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .error, .success {
+  .error,
+  .success {
     animation: none;
   }
-  
-  .error::before, .success::before {
+
+  .error::before,
+  .success::before {
     animation: none;
   }
 }
@@ -462,6 +469,30 @@
   border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
 }
 
+.loginToStriaeButton {
+  width: 100%;
+  padding: var(--spaceL);
+  background-color: #1e7e34;
+  color: var(--white);
+  border: none;
+  border-radius: var(--spaceXS);
+  font-weight: var(--fontWeightMedium);
+  font-size: var(--fontSizeBodyM);
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+  box-sizing: border-box;
+}
+
+.loginToStriaeButton:hover:not(:disabled) {
+  background-color: #155724;
+}
+
+.loginToStriaeButton:disabled {
+  background-color: color-mix(in lab, var(--background) 95%, transparent);
+  color: var(--textLight);
+  cursor: not-allowed;
+}
+
 .verificationHints .hint {
   font-size: var(--fontSizeBodyS);
   color: var(--textTitle);
@@ -484,7 +515,7 @@
 }
 
 .hintList li::before {
-  content: '•';
+  content: "•";
   color: var(--primary);
   position: absolute;
   left: 0;
