@@ -158,10 +158,21 @@ export const Login = () => {
    useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, async (user) => {
    if (user) {
-      // Set user state first so verification prompt can show for unverified users
-      setUser(user);
+      let currentUser = user;
+
+      // Refresh auth profile so emailVerified is accurate right after email verification.
+      try {
+        await currentUser.reload();
+        if (auth.currentUser) {
+          currentUser = auth.currentUser;
+        }
+      } catch (reloadError) {
+        console.error('Failed to refresh user verification status:', reloadError);
+      }
+
+      setUser(currentUser);
       
-      if (!user.emailVerified) {
+      if (!currentUser.emailVerified) {
         // Don't sign out immediately - let them see the verification prompt
         setError('');
         setSuccess('Please verify your email before continuing. Check your inbox for the verification link.');
@@ -173,7 +184,7 @@ export const Login = () => {
       // Check if user exists in the USER_DB
       setIsCheckingUser(true);
       try {
-        const userExists = await checkUserExists(user.uid);
+        const userExists = await checkUserExists(currentUser.uid);
         setIsCheckingUser(false);
         
         if (!userExists) {
@@ -189,21 +200,21 @@ export const Login = () => {
       }
       
       // Check if user has MFA enrolled
-      const mfaFactors = multiFactor(user).enrolledFactors;
+      const mfaFactors = multiFactor(currentUser).enrolledFactors;
       if (mfaFactors.length === 0) {
         // User has no MFA factors enrolled - require enrollment
         setShowMfaEnrollment(true);
         return;
       }
       
-      console.log("User signed in:", user.email);
+      console.log("User signed in:", currentUser.email);
       setShowMfaEnrollment(false);
       
       // Log successful login audit
       try {
-        const sessionId = `session_${user.uid}_${Date.now()}_${generateUniqueId(8)}`;
+        const sessionId = `session_${currentUser.uid}_${Date.now()}_${generateUniqueId(8)}`;
         await auditService.logUserLogin(
-          user,
+          currentUser,
           sessionId,
           'firebase',
           navigator.userAgent
@@ -221,6 +232,47 @@ export const Login = () => {
 
    return () => unsubscribe();
 }, []);
+
+  useEffect(() => {
+    if (shouldHandleEmailAction) {
+      return;
+    }
+
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      return;
+    }
+
+    let isMounted = true;
+
+    const syncMfaAfterEmailAction = async () => {
+      try {
+        await currentUser.reload();
+        const refreshedUser = auth.currentUser ?? currentUser;
+
+        if (!isMounted) {
+          return;
+        }
+
+        setUser(refreshedUser);
+
+        if (!refreshedUser.emailVerified) {
+          return;
+        }
+
+        const mfaFactors = multiFactor(refreshedUser).enrolledFactors;
+        setShowMfaEnrollment(mfaFactors.length === 0);
+      } catch (refreshError) {
+        console.error('Failed to sync MFA state after email action:', refreshError);
+      }
+    };
+
+    void syncMfaAfterEmailAction();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [shouldHandleEmailAction]);
   
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
