@@ -35,8 +35,7 @@
     "deploy-workers:pdf": "cd workers/pdf-worker && npm run deploy",
     "deploy-workers:user": "cd workers/user-worker && npm run deploy"
   },
-  "dependencies": {
-    "@playwright/test": "^1.58.2",
+  "dependencies": {    
     "@remix-run/cloudflare": "^2.17.4",
     "@remix-run/cloudflare-pages": "^2.17.4",
     "@remix-run/react": "^2.17.4",
