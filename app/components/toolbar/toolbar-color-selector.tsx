@@ -68,22 +68,6 @@ export const ToolbarColorSelector = ({
     <div className={styles.toolbarColorSelector}>
       <div className={styles.header}>
         <span className={styles.title}>Select Box Color</span>
-        <div className={styles.actions}>
-          <button 
-            onClick={handleConfirm}
-            className={styles.confirmButton}
-            title="Apply selected color"
-          >
-            ✓
-          </button>
-          <button 
-            onClick={handleCancel}
-            className={styles.cancelButton}
-            title="Cancel color selection"
-          >
-            ✕
-          </button>
-        </div>
       </div>
       
       <div className={styles.content}>
@@ -120,6 +104,25 @@ export const ToolbarColorSelector = ({
             ))}
           </div>
         )}
+      </div>
+
+      <div className={styles.actions}>
+        <button
+          type="button"
+          onClick={handleConfirm}
+          className={`${styles.actionButton} ${styles.confirmButton}`}
+          title="Apply selected color"
+        >
+          ✓ Apply Color
+        </button>
+        <button
+          type="button"
+          onClick={handleCancel}
+          className={`${styles.actionButton} ${styles.cancelButton}`}
+          title="Cancel color selection"
+        >
+          ✕ Cancel
+        </button>
       </div>
     </div>
   );

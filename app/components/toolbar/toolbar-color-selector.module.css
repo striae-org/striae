@@ -4,7 +4,8 @@
   bottom: 0;
   background: var(--background);
   border-radius: 5px;
-  box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
+  box-shadow: 0 var(--spaceXS) var(--spaceM)
+    color-mix(in lab, var(--black) 10%, transparent);
   padding: var(--spaceS);
   width: 200px;
   z-index: 50;
@@ -12,7 +13,7 @@
 
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   margin-bottom: var(--spaceS);
   padding-bottom: var(--spaceXS);
@@ -27,22 +28,30 @@
 
 .actions {
   display: flex;
+  flex-direction: column;
   gap: var(--spaceXS);
+  margin-top: var(--spaceS);
+  padding-top: var(--spaceS);
+  border-top: 1px solid var(--border);
 }
 
-.confirmButton {
-  background: var(--success);
-  color: white;
+.actionButton {
+  width: 100%;
+  min-height: 38px;
   border: none;
-  border-radius: 3px;
-  width: 24px;
-  height: 24px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: bold;
+  font-size: var(--fontSizeS);
+  font-weight: 600;
+  color: white;
+  transition: background-color var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.confirmButton {
+  background: var(--success);
 }
 
 .confirmButton:hover {
@@ -51,17 +60,6 @@
 
 .cancelButton {
   background: var(--error);
-  color: white;
-  border: none;
-  border-radius: 3px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: bold;
 }
 
 .cancelButton:hover {
@@ -137,7 +135,7 @@
 }
 
 .colorSwatch.selected::after {
-  content: '✓';
+  content: "✓";
   position: absolute;
   top: 50%;
   left: 50%;
