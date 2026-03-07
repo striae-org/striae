@@ -15,7 +15,8 @@
   border-radius: var(--spaceXS);
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 var(--spaceXS) var(--spaceL) color-mix(in lab, var(--black) 10%, transparent);
+  box-shadow: 0 var(--spaceXS) var(--spaceL)
+    color-mix(in lab, var(--black) 10%, transparent);
   padding-bottom: var(--spaceL);
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
   overflow: hidden;
@@ -105,6 +106,30 @@
   display: flex;
   gap: var(--spaceS);
   margin-top: var(--spaceL);
+}
+
+.mfaVerificationSection {
+  margin-top: var(--spaceM);
+}
+
+.mfaButtonGroup {
+  display: flex;
+  gap: var(--spaceS);
+  flex-wrap: wrap;
+  margin-top: var(--spaceS);
+}
+
+.resendTimer {
+  margin: 0;
+  font-size: var(--fontSizeBodyXS);
+  color: var(--textLight);
+  display: inline-flex;
+  align-items: center;
+}
+
+.recaptchaContainer {
+  height: 0;
+  overflow: hidden;
 }
 
 /* Delete Button (error variant) */
