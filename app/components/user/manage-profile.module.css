@@ -117,6 +117,17 @@
   margin-top: var(--spaceM);
 }
 
+.mfaReauthSection {
+  margin-top: var(--spaceM);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceS);
+}
+
+.mfaReauthSection label {
+  color: var(--textBody);
+}
+
 .mfaButtonGroup {
   display: flex;
   gap: var(--spaceS);
