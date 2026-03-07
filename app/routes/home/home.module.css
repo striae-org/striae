@@ -129,15 +129,6 @@
   margin: 0;
 }
 
-.pricingTableContainer {
-  width: 100%;
-}
-
-.registrationModalNarrow {
-  width: 65%;
-  max-width: 760px;
-}
-
 .actionButton {
   padding: var(--spaceM) var(--spaceL);
   border-radius: var(--spaceXS);
@@ -366,10 +357,6 @@
 
   .noticeButtonGroup {
     flex-direction: column;
-  }
-
-  .registrationModalNarrow {
-    width: 90%;
   }
 
   .aboutSection,
