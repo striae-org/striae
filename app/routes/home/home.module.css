@@ -116,9 +116,51 @@
   margin: 0;
 }
 
+.sponsorButtons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spaceM);
+  flex-wrap: wrap;
+}
+
 .sponsorButton {
   border: 0;
   border-radius: 6px;
+}
+
+.patreonWidgetContainer {
+  display: inline-flex;
+  min-height: 32px;
+  border-radius: 6px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.patreonWidgetContainer :global(iframe) {
+  border: 0;
+  display: block;
+}
+
+.patreonButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 var(--spaceM);
+  border-radius: inherit;
+  background: #ff424d;
+  color: var(--white);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: var(--fontWeightMedium);
+  line-height: 1;
+  transition: background-color var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.patreonButton:hover {
+  background: color-mix(in lab, #ff424d 88%, var(--black));
+  text-decoration: none;
 }
 
 .noticeText {
