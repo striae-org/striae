@@ -289,6 +289,7 @@
   font-size: var(--fontSizeBodyS);
   line-height: var(--lineHeightBody);
   margin: 0;
+  padding-bottom: var(--spaceXS);
   opacity: 0.9;
   white-space: normal;
   overflow-wrap: anywhere;

@@ -258,7 +258,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         if (supportsPasswordReauth && user.email) {
           resetMfaReauthFlow();
           setShowMfaReauthPrompt(true);
-          setMfaSuccess('For security, confirm your password to continue.');
+          setMfaSuccess('');
           return;
         }
 
@@ -328,7 +328,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         setMfaReauthVerificationId('');
         setMfaReauthVerificationCode('');
         setIsMfaReauthCodeSent(false);
-        setMfaSuccess('Password accepted. Complete MFA verification to continue.');
+        setMfaSuccess('');
         return;
       }
 
@@ -367,7 +367,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
       setMfaReauthVerificationId(verificationId);
       setMfaReauthVerificationCode('');
       setIsMfaReauthCodeSent(true);
-      setMfaSuccess('MFA verification code sent. Enter it to continue.');
+      setMfaSuccess('');
     } catch (err) {
       const { message } = handleAuthError(err);
       setMfaSuccess('');
