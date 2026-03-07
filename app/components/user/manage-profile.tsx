@@ -206,6 +206,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   const handleCancelMfaReauth = () => {
     resetMfaReauthFlow();
     setMfaError('');
+    setMfaSuccess('');
   };
 
   const handleSendMfaVerificationCode = async () => {
@@ -257,14 +258,16 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         if (supportsPasswordReauth && user.email) {
           resetMfaReauthFlow();
           setShowMfaReauthPrompt(true);
-          setMfaError('For security, confirm your password to continue.');
+          setMfaSuccess('For security, confirm your password to continue.');
           return;
         }
 
+        setMfaSuccess('');
         setMfaError('For security, please sign out and sign in again, then try this action again.');
         return;
       }
 
+      setMfaSuccess('');
       setMfaError(message);
     } finally {
       setIsMfaLoading(false);
@@ -289,6 +292,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
 
     setIsMfaReauthLoading(true);
     setMfaError('');
+    setMfaSuccess('');
 
     try {
       const credential = EmailAuthProvider.credential(user.email, mfaReauthPassword);
@@ -302,6 +306,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
 
       if (data?.code === 'auth/multi-factor-auth-required') {
         if (!recaptchaVerifier) {
+          setMfaSuccess('');
           setMfaError(getValidationError('MFA_RECAPTCHA_ERROR'));
           return;
         }
@@ -312,6 +317,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         );
 
         if (!phoneHint) {
+          setMfaSuccess('');
           setMfaError('This account requires a non-phone MFA method. Please sign out and sign in again.');
           return;
         }
@@ -322,10 +328,11 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         setMfaReauthVerificationId('');
         setMfaReauthVerificationCode('');
         setIsMfaReauthCodeSent(false);
-        setMfaError('Password accepted. Complete MFA verification to continue.');
+        setMfaSuccess('Password accepted. Complete MFA verification to continue.');
         return;
       }
 
+      setMfaSuccess('');
       setMfaError(message);
     } finally {
       setIsMfaReauthLoading(false);
@@ -334,17 +341,20 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
 
   const handleSendMfaReauthVerificationCode = async () => {
     if (!mfaReauthResolver || !mfaReauthHint) {
+      setMfaSuccess('');
       setMfaError('Please confirm your password again to continue.');
       return;
     }
 
     if (!recaptchaVerifier) {
+      setMfaSuccess('');
       setMfaError(getValidationError('MFA_RECAPTCHA_ERROR'));
       return;
     }
 
     setIsMfaReauthLoading(true);
     setMfaError('');
+    setMfaSuccess('');
 
     try {
       const phoneAuthProvider = new PhoneAuthProvider(auth);
@@ -357,8 +367,10 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
       setMfaReauthVerificationId(verificationId);
       setMfaReauthVerificationCode('');
       setIsMfaReauthCodeSent(true);
+      setMfaSuccess('MFA verification code sent. Enter it to continue.');
     } catch (err) {
       const { message } = handleAuthError(err);
+      setMfaSuccess('');
       setMfaError(message);
     } finally {
       setIsMfaReauthLoading(false);
@@ -367,22 +379,26 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
 
   const handleVerifyMfaReauthCode = async () => {
     if (!mfaReauthResolver) {
+      setMfaSuccess('');
       setMfaError('Please confirm your password again to continue.');
       return;
     }
 
     if (!mfaReauthVerificationId) {
+      setMfaSuccess('');
       setMfaError(getValidationError('MFA_NO_VERIFICATION_ID'));
       return;
     }
 
     if (!mfaReauthVerificationCode.trim()) {
+      setMfaSuccess('');
       setMfaError(getValidationError('MFA_CODE_REQUIRED'));
       return;
     }
 
     setIsMfaReauthLoading(true);
     setMfaError('');
+    setMfaSuccess('');
 
     try {
       const credential = PhoneAuthProvider.credential(
@@ -407,6 +423,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         setMfaReauthVerificationCode('');
       }
 
+      setMfaSuccess('');
       setMfaError(errorMessage);
     } finally {
       setIsMfaReauthLoading(false);
@@ -797,7 +814,11 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
                       id="mfaReauthPassword"
                       type="password"
                       value={mfaReauthPassword}
-                      onChange={(e) => setMfaReauthPassword(e.target.value)}
+                      onChange={(e) => {
+                        setMfaReauthPassword(e.target.value);
+                        if (mfaError) setMfaError('');
+                        if (mfaSuccess) setMfaSuccess('');
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -873,6 +894,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
                       onChange={(e) => {
                         setMfaReauthVerificationCode(e.target.value.replace(/\D/g, ''));
                         if (mfaError) setMfaError('');
+                        if (mfaSuccess) setMfaSuccess('');
                       }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
@@ -990,7 +1012,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
           {error && <FormMessage type="error" message={error} />}
           {success && <FormMessage type="success" message={success} />}
           {mfaError && <FormMessage type="error" message={mfaError} />}
-          {mfaSuccess && <FormMessage type="success" message={mfaSuccess} />}
+          {!mfaError && mfaSuccess && <FormMessage type="success" message={mfaSuccess} />}
 
           <div className={styles.buttonGroup}>
                 <FormButton 
