@@ -46,7 +46,7 @@ const COOKIEBOT_SCRIPT_SRC = 'https://consent.cookiebot.com/uc.js';
 const COOKIEBOT_CBID = '3f0f9bb0-ff09-44b9-a911-7bd88876f7e0';
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const theme = 'light';
+  const theme = 'dark';
   const location = useLocation();
   const isAuthPath = location.pathname.startsWith('/auth');
   const showReturnToTop = !isAuthPath;

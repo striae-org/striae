@@ -112,18 +112,19 @@ const tokensMobileSmall = {
 
 // Tokens that change based on theme
 const dark = {
-  background: 'oklch(0% 0 0)',
-  backgroundLight: 'oklch(20% 0 0)',
-  primary: 'oklch(95% 0 0)',
-  accent: 'oklch(89.7% 0.14 83.6)',
+  background: 'oklch(96.12% 0 0)',
+  backgroundLight: 'var(--white)',
+  primary: 'oklch(57.06% 0.162 252.34)',
+  accent: 'oklch(48.88% 0.131 146.01)',
   success: 'oklch(70% 0.131 146.01)',
-  error: 'oklch(65.91% 0.249 13.76)',
-  warning: 'oklch(70% 0.15 55)',
-  text: 'var(--white)',
-  textTitle: 'var(--text)',
+  error: 'oklch(63.17% 0.259 25.41)',
+  errorLight: 'oklch(90% 0.259 25.41)',
+  warning: 'oklch(55% 0.15 55)',
+  text: 'var(--black)',  
+  textTitle: 'rgba(0, 0, 0, 0.9)', // Fallback for Firefox
   linkColor: 'var(--accent)',
-  textBody: 'rgba(255, 255, 255, 0.8)', // Fallback for Firefox
-  textLight: 'rgba(255, 255, 255, 0.6)', // Fallback for Firefox
+  textBody: 'rgba(0, 0, 0, 0.75)', // Fallback for Firefox
+  textLight: 'rgba(0, 0, 0, 0.55)', // Fallback for Firefox
 };
 
 const light = {
