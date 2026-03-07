@@ -21,7 +21,8 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
+  box-shadow: 0 var(--spaceXS) var(--spaceM)
+    color-mix(in lab, var(--black) 10%, transparent);
   animation: slideIn var(--durationM) var(--bezierFastoutSlowin);
 }
 
@@ -64,6 +65,51 @@
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.contentScrolling,
+.content:hover,
+.content:focus-within {
+  scrollbar-color: #a8a8a8 #f3f3f3;
+}
+
+.content::-webkit-scrollbar {
+  width: 12px;
+}
+
+.content::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 999px;
+  transition: background-color var(--durationM) var(--bezierFastoutSlowin);
+}
+
+.content::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  transition: background-color var(--durationM) var(--bezierFastoutSlowin),
+    border-color var(--durationM) var(--bezierFastoutSlowin);
+}
+
+.contentScrolling::-webkit-scrollbar-track,
+.content:hover::-webkit-scrollbar-track,
+.content:focus-within::-webkit-scrollbar-track {
+  background-color: #f3f3f3;
+}
+
+.contentScrolling::-webkit-scrollbar-thumb,
+.content:hover::-webkit-scrollbar-thumb,
+.content:focus-within::-webkit-scrollbar-thumb {
+  background-color: #a8a8a8;
+  border-color: #f3f3f3;
+}
+
+.contentScrolling::-webkit-scrollbar-thumb:hover,
+.content:hover::-webkit-scrollbar-thumb:hover,
+.content:focus-within::-webkit-scrollbar-thumb:hover {
+  background: #8e8e8e;
 }
 
 .content h1 {

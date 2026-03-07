@@ -45,11 +45,37 @@ const COOKIEBOT_SCRIPT_ID = 'Cookiebot';
 const COOKIEBOT_SCRIPT_SRC = 'https://consent.cookiebot.com/uc.js';
 const COOKIEBOT_CBID = '3f0f9bb0-ff09-44b9-a911-7bd88876f7e0';
 
+type AppTheme = 'dark' | 'light';
+
+interface ThemeHandle {
+  theme?: AppTheme;
+}
+
+const DEFAULT_THEME: AppTheme = 'light';
+
+const isAppTheme = (value: unknown): value is AppTheme => {
+  return value === 'dark' || value === 'light';
+};
+
+const resolveRouteTheme = (matches: ReturnType<typeof useMatches>): AppTheme => {
+  for (let index = matches.length - 1; index >= 0; index -= 1) {
+    const routeHandle = matches[index].handle as ThemeHandle | undefined;
+
+    if (isAppTheme(routeHandle?.theme)) {
+      return routeHandle.theme;
+    }
+  }
+
+  return DEFAULT_THEME;
+};
+
 export function Layout({ children }: { children: React.ReactNode }) {
-  const theme = 'dark';
+  const matches = useMatches();
+  const theme = resolveRouteTheme(matches);
   const location = useLocation();
   const isAuthPath = location.pathname.startsWith('/auth');
   const showReturnToTop = !isAuthPath;
+  const themeColor = theme === 'dark' ? '#000000' : '#f5f5f5';
 
   useEffect(() => {
     if (document.getElementById(COOKIEBOT_SCRIPT_ID)) {
@@ -75,7 +101,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000" />
+        <meta name="theme-color" content={themeColor} />
         <meta name="color-scheme" content={theme} />
         <style dangerouslySetInnerHTML={{ __html: themeStyles }} />        
         <Meta />

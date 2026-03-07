@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './notice.module.css';
 
 interface NoticeContent {
@@ -17,6 +17,8 @@ interface NoticeProps {
 }
 
 export function Notice({ isOpen, onClose, notice, modalClassName, expanded = false, hideConfirmButton = false }: NoticeProps) {
+  const [isContentScrolling, setIsContentScrolling] = useState(false);
+  const scrollEndTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
       const handleEscape = (e: KeyboardEvent) => {
@@ -30,6 +32,27 @@ export function Notice({ isOpen, onClose, notice, modalClassName, expanded = fal
         return () => document.removeEventListener('keydown', handleEscape);
       }
     }, [isOpen, onClose]);
+
+  useEffect(() => {
+    return () => {
+      if (scrollEndTimeoutRef.current !== null) {
+        window.clearTimeout(scrollEndTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleContentScroll = () => {
+    setIsContentScrolling(true);
+
+    if (scrollEndTimeoutRef.current !== null) {
+      window.clearTimeout(scrollEndTimeoutRef.current);
+    }
+
+    scrollEndTimeoutRef.current = window.setTimeout(() => {
+      setIsContentScrolling(false);
+      scrollEndTimeoutRef.current = null;
+    }, 700);
+  };
 
   if (!isOpen) return null;
 
@@ -58,7 +81,10 @@ export function Notice({ isOpen, onClose, notice, modalClassName, expanded = fal
             &times;
           </button>
         </div>
-        <div className={styles.content}>
+        <div
+          className={`${styles.content} ${isContentScrolling ? styles.contentScrolling : ''}`.trim()}
+          onScroll={handleContentScroll}
+        >
           {notice.content}
         </div>
         {!hideConfirmButton && (
