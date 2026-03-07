@@ -138,14 +138,7 @@ export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
                   rel="noopener noreferrer" 
                   className={styles.footerModalLink}>
                   Security Policy
-                </Link>
-                <Link                   
-                  to="https://payments.striae.org/p/login/28E28k1I7dczdMrgNmdAk00" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className={styles.footerModalLink}>
-                  Customer Portal
-                </Link>
+                </Link>                
               </div>
               <div className={styles.badgeContainer}>                
                 <div className={styles.oinBadge}>
