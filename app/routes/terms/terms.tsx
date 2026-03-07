@@ -49,14 +49,14 @@ export const Terms = () => {
       />
       <div className={styles.content}>
         <h1>Terms and Conditions</h1>
-        <p className={styles.lastUpdated}>Last updated: March 5, 2026</p>
+        <p className={styles.lastUpdated}>Last updated: March 7, 2026</p>
         <p>Please read these terms and conditions carefully before using Our Service.</p>
         <hr />
           <br />
         <section className={styles.section}>          
           <h2>Here&apos;s the short version</h2>
           <ul>
-            <li>Striae is for eligible forensic professionals and users must be 18 or older.</li>
+            <li>Striae is for users 18 or older.</li>
             <li>You are responsible for your account security and all activity under your account.</li>
             <li>You keep control of your uploaded Data, and you should maintain your own backups.</li>
             <li>Striae is a technical tool only and does not provide legal, investigative, or expert opinions or conclusions. All interpretive, evidentiary, and reporting decisions are solely Your responsibility.</li>
@@ -72,7 +72,7 @@ export const Terms = () => {
           <h2>Code of Responsible Use</h2>
           <h3>Use With Integrity and Professionalism</h3>
           <ul>
-            <li>Use Striae solely for legitimate forensic purposes in casework, research, or training supported by your organization.</li>
+            <li>Use Striae solely for legitimate forensic purposes in casework, research, or training.</li>
             <li>Ensure annotations and findings reflect honest and unbiased evaluation, aligned with accepted professional standards and practices in forensic firearms examination.</li>
           </ul>
           <h3>Respect Confidentiality and Privacy</h3>
@@ -119,9 +119,6 @@ export const Terms = () => {
 <p><strong>Account</strong> means a unique account created for You to access Our Service or parts of Our Service.</p>
 </li>
 <li>
-<p><strong>Agency Accounts</strong> means paid annual Service plans purchased by agencies, laboratories, or companies, which may include dedicated hosting, customization options, unlimited user seats, and priority support as described in these Terms.</p>
-</li>
-<li>
 <p><strong>Country</strong> refers to: United States</p>
 </li>
 <li>
@@ -143,7 +140,7 @@ export const Terms = () => {
 <p><strong>Terms and Conditions</strong> (also referred as &quot;Terms&quot;) mean these Terms and Conditions that form the entire agreement between You and the Company regarding the use of the Service.</p>
 </li>
 <li>
-<p><strong>You</strong> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.</p>
+<p><strong>You</strong> means the individual accessing or using the Service.</p>
 </li>
 </ul>
         </section>
@@ -154,8 +151,7 @@ export const Terms = () => {
 <p>By accessing or using the Service You agree to be bound by these Terms and Conditions. If You disagree with any part of these Terms and Conditions then You may not access the Service.</p>
 <p>You represent that You are over the age of 18. The Company does not permit those under 18 to use the Service.</p>
 <p>Your access to and use of the Service is also conditioned on Your acceptance of and compliance with the Privacy Policy of the Company. Our Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your personal information when You use the Application or the Website and tells You about Your privacy rights and how the law protects You. Please read Our Privacy Policy carefully before using Our Service.</p>
-<p><strong>Eligibility:</strong> Access to Striae is limited to individuals currently employed by a forensic laboratory, forensic-related company, or through a pre-arranged agreement. By creating an Account, You confirm that You meet this requirement and may be asked to verify Your employment.</p>
-<p>If You access the Service on behalf of an employer or agency, You represent and warrant that You are authorized to bind that organization to these Terms, and &quot;You&quot; will refer to both You and that organization.</p>
+<p><strong>Eligibility:</strong> Access to Striae is limited to individuals who are 18 years of age or older.</p>
 <p><strong>Account Creation:</strong> In order to use the Service, You must create an account. You agree to provide accurate, current and complete information during the registration process and to update such information to keep it accurate, current and complete.</p>
 <p><strong>No Social Media Connection:</strong> Striae does not connect to, integrate with, or otherwise interact with any external social media platforms.</p>
         </section>        
@@ -167,42 +163,17 @@ export const Terms = () => {
 <p>You may not use as a username the name of another person or entity or that is not lawfully available for use, a name or trademark that is subject to any rights of another person or entity other than You without appropriate authorization, or a name that is otherwise offensive, vulgar or obscene.</p>
         </section>
         <section className={styles.section}>
-          <h2>Account Types</h2>
-          <h3>Free Base Access Forever</h3>
+          <h2>Account Access</h2>
+          <h3>Free Access for All Eligible Users</h3>
           <ul>
-            <li>Individuals may register for a free Striae account at no cost.</li>
-            <li>Free accounts include core platform functionality, standard file storage limits, and basic customer support through email or in-app contact forms.</li>
-            <li>Free accounts do not include, and have no entitlement to, any Agency Account features, customizations, or service levels, even if such features are visible or described in Striae documentation.</li>
-            <li>Customizations, priority support, and administrative controls are not available on free accounts.</li>
-          </ul>
-          <h3>Agency/Company Plans</h3>
-          <ul>
-            <li>Agencies, laboratories, or companies may purchase paid annual plans.</li>
-            <li>Agency Accounts are intended for organizational use. Agencies are responsible for managing access and permissions for their personnel and for all activity under their Agency Account.</li>
-            <li>Agency Accounts include dedicated hosting on a custom Striae subdomain (for example, https://agencyname.striae.org), deep customization options, unlimited user seats, and access to priority support.</li>
-            <li>Customization options include report formatting, UI branding elements, file upload limit changes, or similar low-impact feature requests. Requests that significantly alter or disrupt platform functionality may be declined at Striae&apos;s sole discretion.</li>
+            <li>Striae is offered at no monetary cost to eligible individual users.</li>
+            <li>All accounts receive access to the core Service features made available by Striae.</li>
+            <li>There are no subscription charges, annual plan fees, deposits, or invoices required to create or maintain an account.</li>
           </ul>
 
-          <h2>Fees and Payment</h2>
+          <h2>Data and Content Ownership</h2>
           <ul>
-            <li>All Agency plan fees are non-refundable unless otherwise required by law.</li>
-            <li>Paid fees are non-cancellable and non-refundable, including in the event of early termination by You, except where a refund is required by applicable law.</li>
-            <li>A 10% non-refundable deposit is required to initiate Agency setup and customization.</li>
-            <li>The remaining balance is due upon completion of customization and must be paid in full before access is granted to the hosted instance.</li>
-            <li>Invoices will be sent for both the deposit and final payment; payments must be received according to invoice terms before deployment.</li>
-            <li>Access or services may be withheld if invoices remain unpaid.</li>
-          </ul>
-
-          <h2>Development and Customization Process</h2>
-          <ul>
-            <li>Striae developers will schedule progress meetings with agency representatives to review interface previews, customization progress, and feedback.</li>
-            <li>Agencies must provide timely feedback and approval to avoid delays.</li>
-            <li>Delays caused by lack of communication or late payments may extend the delivery timeline.</li>
-          </ul>
-
-          <h2>Data and Content Ownership for Agency Accounts</h2>
-          <ul>
-            <li>Agencies and users retain ownership of the data, files, and annotations uploaded to their respective Striae environments.</li>
+            <li>Users retain ownership of the data, files, and annotations uploaded to their Striae environments.</li>
             <li>Striae may process and store data solely for the purpose of operating and improving the Service.</li>
             <li>Striae will not disclose or share customer data with third parties except as required by law.</li>
           </ul>
@@ -225,7 +196,7 @@ export const Terms = () => {
         <section className={styles.section}>
           <h2>Confidentiality</h2>
           <h3>Confidential Information</h3>
-          <p>&quot;Confidential Information&quot; means any non-public information disclosed by either party to the other that is identified as confidential or that should reasonably be understood to be confidential under the circumstances, including, for agencies and organizations, any case-related forensic data, investigative materials, annotations, internal reports, or workflow configurations stored or processed within Striae.</p>
+          <p>&quot;Confidential Information&quot; means any non-public information disclosed by either party to the other that is identified as confidential or that should reasonably be understood to be confidential under the circumstances, including any case-related forensic data, investigative materials, annotations, internal reports, or workflow configurations stored or processed within Striae.</p>
           <h3>Obligations</h3>
           <p>Each party agrees to: (a) use the other party&apos;s Confidential Information solely for purposes of performing these Terms and using or providing the Service; and (b) protect the Confidential Information using at least the same degree of care it uses to protect its own similar information, but no less than a reasonable degree of care.</p>
           <p>You acknowledge that Striae may use third-party hosting and service providers (such as cloud infrastructure and authentication providers) to process Confidential Information and Data solely as necessary to provide and support the Service, subject to appropriate contractual and technical safeguards.</p>
@@ -298,13 +269,12 @@ Upon receipt of a notification, the Company will take whatever action, in its so
       <li>You engage in conduct that may harm Striae, Our users, or the integrity of the Service.</li>
       <li>We discontinue or materially modify the Service.</li>
       </ul>
-      <p>For free accounts, termination may occur at Our discretion without prior notice.</p>
-      <p>For paid Agency Accounts, We will make reasonable efforts to provide at least 30 days' notice unless termination is due to a breach or unlawful activity.</p>
+      <p>We may terminate accounts at Our discretion as described above and, when reasonably practicable, provide advance notice unless termination is due to a breach or unlawful activity.</p>
       <h3>By You</h3>
-      <p>You may terminate Your Account at any time by discontinuing use of the Service or deleting Your Account; for paid Agency Accounts, by cancelling Your subscription through the provided Account Portal or written notice.</p>
+      <p>You may terminate Your Account at any time by discontinuing use of the Service or deleting Your Account.</p>
       <h3>Effect of Termination</h3>
-      <p>Upon termination, Your right to access or use the Service ceases immediately. All account data associated with a free Account may be deleted upon termination. Data associated with paid Agency Accounts may be retained for a limited period in accordance with Our <a href="#retention">Data Retention Policy</a> to allow export or retrieval upon request.</p>
-      <p>Subscription fees already paid are non-refundable, except as required by law or expressly stated in a written agreement with Striae.</p>
+      <p>Upon termination, Your right to access or use the Service ceases immediately. Account data may be retained for a limited period in accordance with Our <a href="#retention">Data Retention Policy</a> to allow export or retrieval where applicable.</p>
+      <p>Because the Service is offered at no monetary cost, there are no subscription fees, plan charges, or refunds associated with account termination.</p>
         </section>
         <section className={styles.section}>
           <h2 id="retention">Data Retention Policy</h2>
@@ -312,8 +282,7 @@ Upon receipt of a notification, the Company will take whatever action, in its so
           <p>We retain Data only for as long as reasonably necessary to provide and support the Service, comply with legal and compliance obligations, resolve disputes, and enforce these Terms.</p>
           <ul>
             <li><strong>Active Accounts:</strong> While Your account is active, We retain account and case Data needed to operate the Service.</li>
-            <li><strong>Free Accounts:</strong> After account termination, if not deleted by the user, Data associated with free Accounts may be scheduled for deletion from active systems, typically within 30 days. Retrieval is not guaranteed once deletion processing begins.</li>
-            <li><strong>Paid Agency Accounts:</strong> Following termination or expiration, We may retain Data in active systems for up to 90 days to allow export or retrieval upon written request and subject to any outstanding payment obligations. After that period, Data is deleted from active systems or irreversibly de-identified where appropriate.</li>
+            <li><strong>All Accounts:</strong> After account termination, if not deleted by the user, Data may be scheduled for deletion from active systems, typically within 30 days. Retrieval is not guaranteed once deletion processing begins. In limited cases, We may retain Data for up to 90 days to support export, legal, or operational needs before deletion or irreversible de-identification.</li>
             <li><strong>Security, Operations, and Audit Records:</strong> We may retain operational and security logs for fraud prevention, incident response, and compliance. Audit trail records may be retained indefinitely as described in these Terms.</li>
             <li><strong>Legal Hold and Required Retention:</strong> We may retain specific Data longer where required by applicable law, court order, accreditation requirements, or a valid litigation hold.</li>
             <li><strong>Residual and Provider-Level Copies:</strong> After deletion from active systems, residual copies may remain temporarily in logs, caches, or provider-level replicated storage until overwritten or deleted in the ordinary course of business and are not generally available through the Service.</li>
@@ -322,7 +291,7 @@ Upon receipt of a notification, the Company will take whatever action, in its so
         </section>
         <section className={styles.section}>
           <h2>Limitation of Liability</h2>
-          <p>In no event will the aggregate liability of the Company and its suppliers arising out of or related to these Terms or the Service exceed the greater of (i) the total amounts paid by You to the Company for the Service in the twelve (12) months preceding the event giving rise to the claim, or (ii) 100 USD, if You have not purchased anything through the Service.</p>
+          <p>In no event will the aggregate liability of the Company and its suppliers arising out of or related to these Terms or the Service exceed 100 USD to the maximum extent permitted by law.</p>
 <p>To the maximum extent permitted by applicable law, in no event shall the Company or its suppliers be liable for any special, incidental, indirect, or consequential damages whatsoever (including, but not limited to, damages for loss of profits, loss of Data or other information, for business interruption, for personal injury, loss of privacy arising out of or in any way related to the use of or inability to use the Service, third-party software and/or third-party hardware used with the Service, or otherwise in connection with any provision of this Terms), even if the Company or any supplier has been advised of the possibility of such damages and even if the remedy fails of its essential purpose.</p>
 <p>Some states do not allow the exclusion of implied warranties or limitation of liability for incidental or consequential damages, which means that some of the above limitations may not apply. In these states, each party's liability will be limited to the greatest extent permitted by law.</p>
         </section>
