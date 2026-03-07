@@ -15,9 +15,11 @@
   border-radius: var(--spaceXS);
   width: 90%;
   max-width: 500px;
+  max-height: min(90vh, 90vw);
   box-shadow: 0 var(--spaceXS) var(--spaceL)
     color-mix(in lab, var(--black) 10%, transparent);
-  padding-bottom: var(--spaceL);
+  display: flex;
+  flex-direction: column;
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
   overflow: hidden;
 }
@@ -58,12 +60,15 @@
 .form {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   gap: var(--spaceL);
   width: 100%;
   max-width: 100%;
   padding: var(--spaceL);
   margin: 0 auto;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .formGroup {
