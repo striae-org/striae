@@ -1,12 +1,15 @@
 import { useState, useContext, useEffect, useCallback } from 'react';
 import {
   EmailAuthProvider,
+  getMultiFactorResolver,
   PhoneAuthProvider,
   PhoneMultiFactorGenerator,
   RecaptchaVerifier,
   multiFactor,
   reauthenticateWithCredential,
+  type MultiFactorError,
   type MultiFactorInfo,
+  type MultiFactorResolver,
   type User,
   updateProfile,
 } from 'firebase/auth';
@@ -53,6 +56,19 @@ const getPhoneDisplayValue = (factor: MultiFactorInfo): string => {
   }
 
   return displayName;
+};
+
+const getMaskedFactorDisplay = (factor: MultiFactorInfo | null): string => {
+  if (!factor) {
+    return 'your enrolled phone';
+  }
+
+  const phoneDisplayValue = getPhoneDisplayValue(factor);
+  if (!phoneDisplayValue) {
+    return 'your enrolled phone';
+  }
+
+  return maskPhoneNumber(phoneDisplayValue);
 };
 
 const validatePhoneNumber = (phone: string): { isValid: boolean; errorMessage?: string } => {
@@ -125,12 +141,27 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   const [mfaSuccess, setMfaSuccess] = useState('');
   const [showMfaReauthPrompt, setShowMfaReauthPrompt] = useState(false);
   const [mfaReauthPassword, setMfaReauthPassword] = useState('');
+  const [mfaReauthResolver, setMfaReauthResolver] = useState<MultiFactorResolver | null>(null);
+  const [mfaReauthHint, setMfaReauthHint] = useState<MultiFactorInfo | null>(null);
+  const [mfaReauthVerificationId, setMfaReauthVerificationId] = useState('');
+  const [mfaReauthVerificationCode, setMfaReauthVerificationCode] = useState('');
+  const [isMfaReauthCodeSent, setIsMfaReauthCodeSent] = useState(false);
   const [isMfaReauthLoading, setIsMfaReauthLoading] = useState(false);
   const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
   const [showResetForm, setShowResetForm] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAuditViewer, setShowAuditViewer] = useState(false);
   const isCloseBlocked = isMfaLoading || isLoading || isMfaReauthLoading;
+
+  const resetMfaReauthFlow = useCallback(() => {
+    setShowMfaReauthPrompt(false);
+    setMfaReauthPassword('');
+    setMfaReauthResolver(null);
+    setMfaReauthHint(null);
+    setMfaReauthVerificationId('');
+    setMfaReauthVerificationCode('');
+    setIsMfaReauthCodeSent(false);
+  }, []);
 
   const handleCloseRequest = () => {
     if (isCloseBlocked) {
@@ -169,13 +200,11 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
     setMfaError('');
     setMfaSuccess('');
     setMfaResendTimer(0);
-    setShowMfaReauthPrompt(false);
-    setMfaReauthPassword('');
+    resetMfaReauthFlow();
   };
 
   const handleCancelMfaReauth = () => {
-    setShowMfaReauthPrompt(false);
-    setMfaReauthPassword('');
+    resetMfaReauthFlow();
     setMfaError('');
   };
 
@@ -216,8 +245,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
       setMfaVerificationId(verificationId);
       setIsMfaCodeSent(true);
       setMfaResendTimer(60);
-      setShowMfaReauthPrompt(false);
-      setMfaReauthPassword('');
+      resetMfaReauthFlow();
     } catch (err) {
       const { message, data } = handleAuthError(err);
 
@@ -227,6 +255,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         );
 
         if (supportsPasswordReauth && user.email) {
+          resetMfaReauthFlow();
           setShowMfaReauthPrompt(true);
           setMfaError('For security, confirm your password to continue.');
           return;
@@ -265,13 +294,120 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
       const credential = EmailAuthProvider.credential(user.email, mfaReauthPassword);
       await reauthenticateWithCredential(user, credential);
 
-      setShowMfaReauthPrompt(false);
-      setMfaReauthPassword('');
+      resetMfaReauthFlow();
 
       await handleSendMfaVerificationCode();
     } catch (err) {
+      const { message, data } = handleAuthError(err);
+
+      if (data?.code === 'auth/multi-factor-auth-required') {
+        if (!recaptchaVerifier) {
+          setMfaError(getValidationError('MFA_RECAPTCHA_ERROR'));
+          return;
+        }
+
+        const resolver = getMultiFactorResolver(auth, err as MultiFactorError);
+        const phoneHint = resolver.hints.find(
+          (hint) => hint.factorId === PhoneMultiFactorGenerator.FACTOR_ID
+        );
+
+        if (!phoneHint) {
+          setMfaError('This account requires a non-phone MFA method. Please sign out and sign in again.');
+          return;
+        }
+
+        setShowMfaReauthPrompt(true);
+        setMfaReauthResolver(resolver);
+        setMfaReauthHint(phoneHint);
+        setMfaReauthVerificationId('');
+        setMfaReauthVerificationCode('');
+        setIsMfaReauthCodeSent(false);
+        setMfaError('Password accepted. Complete MFA verification to continue.');
+        return;
+      }
+
+      setMfaError(message);
+    } finally {
+      setIsMfaReauthLoading(false);
+    }
+  };
+
+  const handleSendMfaReauthVerificationCode = async () => {
+    if (!mfaReauthResolver || !mfaReauthHint) {
+      setMfaError('Please confirm your password again to continue.');
+      return;
+    }
+
+    if (!recaptchaVerifier) {
+      setMfaError(getValidationError('MFA_RECAPTCHA_ERROR'));
+      return;
+    }
+
+    setIsMfaReauthLoading(true);
+    setMfaError('');
+
+    try {
+      const phoneAuthProvider = new PhoneAuthProvider(auth);
+      const phoneInfoOptions = {
+        multiFactorHint: mfaReauthHint,
+        session: mfaReauthResolver.session,
+      };
+
+      const verificationId = await phoneAuthProvider.verifyPhoneNumber(phoneInfoOptions, recaptchaVerifier);
+      setMfaReauthVerificationId(verificationId);
+      setMfaReauthVerificationCode('');
+      setIsMfaReauthCodeSent(true);
+    } catch (err) {
       const { message } = handleAuthError(err);
       setMfaError(message);
+    } finally {
+      setIsMfaReauthLoading(false);
+    }
+  };
+
+  const handleVerifyMfaReauthCode = async () => {
+    if (!mfaReauthResolver) {
+      setMfaError('Please confirm your password again to continue.');
+      return;
+    }
+
+    if (!mfaReauthVerificationId) {
+      setMfaError(getValidationError('MFA_NO_VERIFICATION_ID'));
+      return;
+    }
+
+    if (!mfaReauthVerificationCode.trim()) {
+      setMfaError(getValidationError('MFA_CODE_REQUIRED'));
+      return;
+    }
+
+    setIsMfaReauthLoading(true);
+    setMfaError('');
+
+    try {
+      const credential = PhoneAuthProvider.credential(
+        mfaReauthVerificationId,
+        mfaReauthVerificationCode.trim()
+      );
+      const assertion = PhoneMultiFactorGenerator.assertion(credential);
+      await mfaReauthResolver.resolveSignIn(assertion);
+
+      resetMfaReauthFlow();
+      await handleSendMfaVerificationCode();
+    } catch (err) {
+      const { message, data } = handleAuthError(err);
+      let errorMessage = message;
+
+      if (data?.code === 'auth/invalid-verification-code') {
+        errorMessage = getValidationError('MFA_INVALID_CODE');
+      } else if (data?.code === 'auth/code-expired') {
+        errorMessage = getValidationError('MFA_CODE_EXPIRED');
+        setIsMfaReauthCodeSent(false);
+        setMfaReauthVerificationId('');
+        setMfaReauthVerificationCode('');
+      }
+
+      setMfaError(errorMessage);
     } finally {
       setIsMfaReauthLoading(false);
     }
@@ -358,6 +494,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         setMfaVerificationId('');
 
         if (supportsPasswordReauth && user.email) {
+          resetMfaReauthFlow();
           setShowMfaReauthPrompt(true);
           errorMessage = 'For security, confirm your password to continue.';
         } else {
@@ -396,8 +533,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
           setMfaVerificationCode('');
           setMfaVerificationId('');
           setMfaResendTimer(0);
-          setShowMfaReauthPrompt(false);
-          setMfaReauthPassword('');
+          resetMfaReauthFlow();
 
           // Use the same getUserData function as case-sidebar
           const userData = await getUserData(user);
@@ -418,7 +554,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
       
       void loadUserData();
     }
-  }, [isOpen, user, refreshCurrentMfaPhone]);
+  }, [isOpen, user, refreshCurrentMfaPhone, resetMfaReauthFlow]);
 
   useEffect(() => {
     if (mfaResendTimer <= 0) {
@@ -651,48 +787,138 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
 
             {showMfaReauthPrompt ? (
               <div className={styles.mfaReauthSection}>
-                <label htmlFor="mfaReauthPassword">Confirm Password</label>
-                <p className={styles.helpText}>
-                  Your session expired. Confirm your password and we will send a new verification code.
-                </p>
-                <input
-                  id="mfaReauthPassword"
-                  type="password"
-                  value={mfaReauthPassword}
-                  onChange={(e) => setMfaReauthPassword(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      void handleMfaReauthenticate();
-                    }
-                  }}
-                  className={styles.input}
-                  autoComplete="current-password"
-                  placeholder="Confirm current password"
-                  disabled={isMfaReauthLoading || isMfaLoading}
-                />
+                {!mfaReauthResolver ? (
+                  <>
+                    <label htmlFor="mfaReauthPassword">Confirm Password</label>
+                    <p className={styles.helpText}>
+                      Your session expired. Enter your password to refresh your sign-in.
+                    </p>
+                    <input
+                      id="mfaReauthPassword"
+                      type="password"
+                      value={mfaReauthPassword}
+                      onChange={(e) => setMfaReauthPassword(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          void handleMfaReauthenticate();
+                        }
+                      }}
+                      className={styles.input}
+                      autoComplete="current-password"
+                      placeholder="Confirm current password"
+                      disabled={isMfaReauthLoading || isMfaLoading}
+                    />
 
-                <div className={styles.mfaButtonGroup}>
-                  <FormButton
-                    variant="primary"
-                    type="button"
-                    onClick={handleMfaReauthenticate}
-                    isLoading={isMfaReauthLoading}
-                    loadingText="Confirming..."
-                    disabled={!mfaReauthPassword.trim()}
-                  >
-                    Confirm Password
-                  </FormButton>
+                    <div className={styles.mfaButtonGroup}>
+                      <FormButton
+                        variant="primary"
+                        type="button"
+                        onClick={handleMfaReauthenticate}
+                        isLoading={isMfaReauthLoading}
+                        loadingText="Confirming..."
+                        disabled={!mfaReauthPassword.trim()}
+                      >
+                        Confirm Password
+                      </FormButton>
 
-                  <FormButton
-                    variant="secondary"
-                    type="button"
-                    onClick={handleCancelMfaReauth}
-                    disabled={isMfaReauthLoading}
-                  >
-                    Cancel
-                  </FormButton>
-                </div>
+                      <FormButton
+                        variant="secondary"
+                        type="button"
+                        onClick={handleCancelMfaReauth}
+                        disabled={isMfaReauthLoading}
+                      >
+                        Cancel
+                      </FormButton>
+                    </div>
+                  </>
+                ) : !isMfaReauthCodeSent ? (
+                  <>
+                    <p className={styles.helpText}>
+                      Password accepted. Send a code to {getMaskedFactorDisplay(mfaReauthHint)} to finish
+                      re-authentication.
+                    </p>
+
+                    <div className={styles.mfaButtonGroup}>
+                      <FormButton
+                        variant="primary"
+                        type="button"
+                        onClick={handleSendMfaReauthVerificationCode}
+                        isLoading={isMfaReauthLoading}
+                        loadingText="Sending..."
+                      >
+                        Send MFA Code
+                      </FormButton>
+
+                      <FormButton
+                        variant="secondary"
+                        type="button"
+                        onClick={handleCancelMfaReauth}
+                        disabled={isMfaReauthLoading}
+                      >
+                        Cancel
+                      </FormButton>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <label htmlFor="mfaReauthVerificationCode">MFA Verification Code</label>
+                    <p className={styles.helpText}>
+                      Enter the 6-digit code sent to {getMaskedFactorDisplay(mfaReauthHint)}.
+                    </p>
+                    <input
+                      id="mfaReauthVerificationCode"
+                      type="text"
+                      value={mfaReauthVerificationCode}
+                      onChange={(e) => {
+                        setMfaReauthVerificationCode(e.target.value.replace(/\D/g, ''));
+                        if (mfaError) setMfaError('');
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          void handleVerifyMfaReauthCode();
+                        }
+                      }}
+                      className={styles.input}
+                      autoComplete="one-time-code"
+                      placeholder="Enter 6-digit code"
+                      maxLength={6}
+                      disabled={isMfaReauthLoading || isMfaLoading}
+                    />
+
+                    <div className={styles.mfaButtonGroup}>
+                      <FormButton
+                        variant="primary"
+                        type="button"
+                        onClick={handleVerifyMfaReauthCode}
+                        isLoading={isMfaReauthLoading}
+                        loadingText="Verifying..."
+                        disabled={mfaReauthVerificationCode.trim().length !== 6}
+                      >
+                        Verify and Continue
+                      </FormButton>
+
+                      <FormButton
+                        variant="secondary"
+                        type="button"
+                        onClick={handleSendMfaReauthVerificationCode}
+                        disabled={isMfaReauthLoading}
+                      >
+                        Send New Code
+                      </FormButton>
+
+                      <FormButton
+                        variant="secondary"
+                        type="button"
+                        onClick={handleCancelMfaReauth}
+                        disabled={isMfaReauthLoading}
+                      >
+                        Cancel
+                      </FormButton>
+                    </div>
+                  </>
+                )}
               </div>
             ) : !isMfaCodeSent ? (
               <div className={styles.mfaButtonGroup}>
@@ -720,7 +946,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
                   className={styles.input}
                   placeholder="Enter 6-digit code"
                   maxLength={6}
-                  disabled={isMfaLoading}
+                  disabled={isMfaLoading || isMfaReauthLoading}
                 />
 
                 <div className={styles.mfaButtonGroup}>
@@ -730,7 +956,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
                     onClick={handleUpdateMfaPhoneNumber}
                     isLoading={isMfaLoading}
                     loadingText="Updating..."
-                    disabled={mfaVerificationCode.trim().length !== 6}
+                    disabled={isMfaReauthLoading || mfaVerificationCode.trim().length !== 6}
                   >
                     Update Phone Number
                   </FormButton>
@@ -739,7 +965,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
                     variant="secondary"
                     type="button"
                     onClick={handleResetMfaChange}
-                    disabled={isMfaLoading}
+                    disabled={isMfaLoading || isMfaReauthLoading}
                   >
                     Change Phone Number
                   </FormButton>
@@ -749,7 +975,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
                       variant="secondary"
                       type="button"
                       onClick={handleSendMfaVerificationCode}
-                      disabled={isMfaLoading}
+                      disabled={isMfaLoading || isMfaReauthLoading}
                     >
                       Resend Code
                     </FormButton>
