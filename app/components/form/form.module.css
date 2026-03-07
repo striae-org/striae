@@ -197,7 +197,7 @@
 .errorMessage,
 .successMessage {
   text-align: left;
-  padding: var(--spaceL) var(--spaceL);
+  padding: var(--spaceL) var(--spaceL) calc(var(--spaceL) + var(--spaceS));
   border-radius: var(--spaceS);
   margin: var(--spaceM) 0;
   position: relative;
@@ -207,6 +207,9 @@
   animation: slideIn var(--durationM) var(--bezierFastoutSlowin);
   transform-origin: top;
   border-left: 4px solid;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceS);
 }
 
 .errorMessage {
@@ -266,7 +269,7 @@
 .successMessage h2 {
   font-size: var(--fontSizeH4);
   font-weight: var(--fontWeightSemibold);
-  margin: 0 0 var(--spaceM) 0;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: var(--spaceS);
@@ -289,7 +292,6 @@
   font-size: var(--fontSizeBodyS);
   line-height: var(--lineHeightBody);
   margin: 0;
-  padding-bottom: var(--spaceXS);
   opacity: 0.9;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -342,7 +344,7 @@
     transform: translateY(0) scaleY(1);
     max-height: 200px;
     padding-top: var(--spaceL);
-    padding-bottom: var(--spaceL);
+    padding-bottom: calc(var(--spaceL) + var(--spaceS));
     margin-top: var(--spaceM);
     margin-bottom: var(--spaceM);
   }
