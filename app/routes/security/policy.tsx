@@ -38,8 +38,7 @@ export const Policy = () => {
           <p>You may:
             <ol>
               <li>Email security findings to: <a href="mailto:info@striae.org">info@striae.org</a>. You are encouraged to use <a href="/.well-known/publickey.info@striae.org.asc" target="_blank" rel="noopener noreferrer">our PGP key</a>.</li>
-              <li>Submit a security issue on <a href="https://github.com/striae-org/striae/security/advisories/new" target="_blank" rel="noopener noreferrer">GitHub</a>.</li>
-              <li>Send Stephen an encrypted message on Keybase using <a href="https://keybase.io/stephenjlu/pgp_keys.asc" target="_blank" rel="noopener noreferrer">his PGP key</a>.</li>
+              <li>Submit a security issue on <a href="https://github.com/striae-org/striae/security/advisories/new" target="_blank" rel="noopener noreferrer">GitHub</a>.</li>              
             </ol>            
           </p>
         </section>
@@ -96,7 +95,7 @@ export const Policy = () => {
           </ul>
         </section>
         <section className={styles.section}>
-          <div className={styles.lastUpdated}>Last updated: February 26, 2026</div>
+          <div className={styles.lastUpdated}>Last updated: March 7, 2026</div>
         </section>
         </div>
       </div>

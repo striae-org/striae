@@ -102,6 +102,18 @@
   line-height: 1.5;
 }
 
+.message a,
+.message a:visited {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.message a:hover {
+  color: color-mix(in lab, var(--primary) 85%, var(--black));
+}
+
 .closeButton {
   background: none;
   border: none;
