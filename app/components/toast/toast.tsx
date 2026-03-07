@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import styles from './toast.module.css';
 
 interface ToastProps {
-  message: string;
+  message: ReactNode;
   type: 'success' | 'error' | 'warning';
   isVisible: boolean;
   onClose: () => void;
