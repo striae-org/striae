@@ -5,6 +5,7 @@ import { Notice } from '~/components/notice/notice';
 import NoticeText from './NoticeText';
 import { baseMeta } from '~/utils/meta';
 import Footer from '~/components/footer/footer';
+export const handle = { theme: 'dark' as const };
 
 export const meta = () => {
   return baseMeta({
