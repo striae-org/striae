@@ -98,28 +98,22 @@ export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
                   className={styles.footerModalLink}>
                   Report a Bug
                 </Link>
-                <Link 
-                  viewTransition
-                  prefetch="intent"
-                  to="/privacy" 
+                <Link
+                  to="https://striae.org/privacy"
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className={styles.footerModalLink}>
                   Privacy Policy
                 </Link>
-                <Link 
-                  viewTransition
-                  prefetch="intent"
-                  to="/terms" 
+                <Link
+                  to="https://striae.org/terms"
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className={styles.footerModalLink}>
                   Terms of Service
                 </Link>
-                <Link 
-                  viewTransition
-                  prefetch="intent"
-                  to="/security" 
+                <Link
+                  to="https://striae.org/security"
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className={styles.footerModalLink}>
