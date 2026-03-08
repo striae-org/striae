@@ -6,8 +6,13 @@ Striae © 2025. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the “License”); you may not use this file except in compliance with the License. You may obtain a copy of the License in the repository’s LICENSE file.
 
+This product includes software developed by Stephen J. Lu.
+
 Attributions for bundled components:
 
 Portions of this product may include open-source software licensed under their respective licenses, including but not limited to: Remix, Cloudflare Workers, Firebase, Tailwind CSS, Vite, and other npm packages. License texts for third-party components are provided in their respective source files or in node_modules as applicable.
 
 No trademark rights are granted for “Striae” or any associated names or logos.
+
+The background image used in the application landing page and marketing materials is sourced from:
+Mattijssen, Erwin & Kerkhoff, Wim & Berger, Charles & Dror, Itiel & Stoel, Reinoud. (2016). Implementing context information management in forensic casework: Minimizing contextual bias in firearms examination. Science & Justice. 56. 113-122. <https://www.researchgate.net/publication/288700798_Implementing_context_information_management_in_forensic_casework_Minimizing_contextual_bias_in_firearms_examination>.
