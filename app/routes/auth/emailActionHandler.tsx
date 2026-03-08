@@ -275,7 +275,7 @@ export const EmailActionHandler = ({ mode, oobCode, continueUrl, lang }: EmailAc
       ? 'Verify Email Address'
       : 'Email Action';
 
-  const showContinueButton = state === 'success' && safeContinuePath !== '/auth';
+  const showContinueButton = state === 'success' && safeContinuePath !== '/';
   const showLanguageHint = !!lang && lang.toLowerCase() !== 'en';
 
   return (
@@ -372,7 +372,7 @@ export const EmailActionHandler = ({ mode, oobCode, continueUrl, lang }: EmailAc
             <button
               type="button"
               className={styles.secondaryButton}
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/')}
             >
               Back to Login
             </button>
@@ -393,7 +393,7 @@ export const EmailActionHandler = ({ mode, oobCode, continueUrl, lang }: EmailAc
             <button
               type="button"
               className={styles.loginToStriaeButton}
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/')}
             >
               Login to Striae
             </button>
