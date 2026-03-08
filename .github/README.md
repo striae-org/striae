@@ -18,6 +18,14 @@
 
 ## 📋 Changelog
 
+## [2026-03-07] - *[Minor Release v2.2.0](https://github.com/striae-org/striae/releases/tag/v2.2.0)*
+
+- **🔐 MFA Management and Re-Authentication Improvements** - Added and iterated MFA phone-update support in profile management with re-auth flow hardening, messaging refinements, and utility-based MFA cleanup
+- **🧭 Auth and Access Flow Simplification** - Simplified registration configuration paths, refined auth/email-action routing behavior, and stabilized mobile-prevention redirect handling
+- **🎨 UI/Theming and Navigation Cleanup** - Introduced toolbar color selector/theming updates, removed legacy footer/portal surfaces, and applied link/modal/style corrections
+- **📜 Policy, Support, and Community Surface Updates** - Refined registration/terms/privacy UX content, updated toast/legal messaging, and added Patreon/sponsor support pathways
+- **🧹 Repository and Public Surface Hygiene** - Cleaned unused public assets/components/hooks, removed Cookiebot/Stripe leftovers, and refreshed compatibility/config metadata
+
 ## [2026-03-06] - *[Minor Release v2.1.0](https://github.com/striae-org/striae/releases/tag/v2.1.0)*
 
 - **🔐 Auth Lifecycle and Credential Hardening** - Integrated backend Firebase Auth account deletion support with admin-service credential sourcing and deploy/config alignment updates
