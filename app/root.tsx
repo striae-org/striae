@@ -17,9 +17,6 @@ import {
   themeStyles 
 } from '~/components/theme-provider/theme-provider';
 import { AuthProvider } from '~/components/auth/auth-provider';
-import { Icon } from '~/components/icon/icon';
-import { useHashlessScrollNavigation } from '~/hooks/useHashlessScrollNavigation';
-import { useReturnToTop } from '~/hooks/useReturnToTop';
 import styles from '~/styles/root.module.css';
 import './tailwind.css';
 
@@ -72,9 +69,6 @@ const resolveRouteTheme = (matches: ReturnType<typeof useMatches>): AppTheme => 
 export function Layout({ children }: { children: React.ReactNode }) {
   const matches = useMatches();
   const theme = resolveRouteTheme(matches);
-  const location = useLocation();
-  const isAuthPath = location.pathname.startsWith('/auth');
-  const showReturnToTop = !isAuthPath;
   const themeColor = theme === 'dark' ? '#000000' : '#f5f5f5';
 
   useEffect(() => {
@@ -93,9 +87,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     document.head.appendChild(script);
   }, []);
 
-  useHashlessScrollNavigation();
-  const handleReturnToTop = useReturnToTop();
-
   return (
     <html lang="en" data-theme={theme}>
       <head>
@@ -108,21 +99,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="flex flex-col h-screen w-full overflow-x-hidden">
-        <div id="__page-top" />
         <ThemeProvider theme={theme} className="">
         <main>
           {children}
         </main>
-        {showReturnToTop && (
-          <button
-            type="button"
-            className={styles.returnToTop}
-            onClick={handleReturnToTop}
-            aria-label="Return to top"
-          >
-            <Icon icon="chevron-right" className={styles.returnToTopIcon} size={20} />
-          </button>
-        )}
         </ThemeProvider>        
         <Scripts />
         <ScrollRestoration />
