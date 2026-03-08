@@ -11,7 +11,6 @@ import {
   useLocation,
   useMatches
 } from "@remix-run/react";
-import { useEffect } from 'react';
 import { 
   ThemeProvider,
   themeStyles 
@@ -37,10 +36,6 @@ export const links: LinksFunction = () => [
   { rel: 'shortcut_icon', href: '/shortcut.png', type: 'image/png', sizes: '64x64' },
   { rel: 'apple-touch-icon', href: '/icon-256.png', sizes: '256x256' },
 ];
-
-const COOKIEBOT_SCRIPT_ID = 'Cookiebot';
-const COOKIEBOT_SCRIPT_SRC = 'https://consent.cookiebot.com/uc.js';
-const COOKIEBOT_CBID = '3f0f9bb0-ff09-44b9-a911-7bd88876f7e0';
 
 type AppTheme = 'dark' | 'light';
 
@@ -70,22 +65,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const matches = useMatches();
   const theme = resolveRouteTheme(matches);
   const themeColor = theme === 'dark' ? '#000000' : '#f5f5f5';
-
-  useEffect(() => {
-    if (document.getElementById(COOKIEBOT_SCRIPT_ID)) {
-      return;
-    }
-
-    // Load Cookiebot after hydration to avoid pre-hydration DOM mutations.
-    const script = document.createElement('script');
-    script.id = COOKIEBOT_SCRIPT_ID;
-    script.src = COOKIEBOT_SCRIPT_SRC;
-    script.type = 'text/javascript';
-    script.async = true;
-    script.setAttribute('data-cbid', COOKIEBOT_CBID);
-    script.setAttribute('data-blockingmode', 'auto');
-    document.head.appendChild(script);
-  }, []);
 
   return (
     <html lang="en" data-theme={theme}>
