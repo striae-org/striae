@@ -388,7 +388,7 @@ export const MFAEnrollment: React.FC<MFAEnrollmentProps> = ({
 
         <div className={styles.signOutContainer}>
           <p className={styles.signOutText}>Need to sign in with a different account?</p>
-          <SignOut redirectTo="/auth" />
+          <SignOut redirectTo="/" />
         </div>
 
         <div id="recaptcha-container-enrollment" />

@@ -19,7 +19,7 @@ export const MobilePrevented = () => {
           <p className={styles.description}>
             Striae authentication is restricted to desktop devices. Please open this page on a desktop or laptop computer to continue.
           </p>
-          <Link viewTransition prefetch="intent" to="/" className={styles.link}>
+          <Link viewTransition prefetch="intent" to="https://striae.org" className={styles.link}>
             Return Home
           </Link>
         </div>

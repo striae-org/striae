@@ -133,10 +133,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const matches = useMatches();
+  const location = useLocation();
   const isAuthRoute = matches.some(match => 
     match.id.includes('auth') || 
     match.pathname?.includes('/auth')    
-  );
+  ) || location.pathname === '/';
 
   if (isAuthRoute) {
     return (
@@ -167,7 +168,7 @@ export function ErrorBoundary() {
               <Link 
                 viewTransition
                 prefetch="intent"
-                to="/" 
+                to="https://striae.org" 
                 className={styles.errorLink}>
                 Return Home
               </Link>
@@ -195,7 +196,7 @@ export function ErrorBoundary() {
             <Link 
               viewTransition
               prefetch="intent"
-              to="/" 
+              to="https://striae.org" 
               className={styles.errorLink}>
               Return Home
             </Link>

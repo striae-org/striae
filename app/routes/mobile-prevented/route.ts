@@ -1,13 +1,9 @@
 import { redirect, type LoaderFunctionArgs } from '@remix-run/cloudflare';
-import { isMobileOrTabletUserAgent } from '~/utils/device-detection';
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const userAgent = request.headers.get('user-agent') ?? '';
-	if (!isMobileOrTabletUserAgent(userAgent)) {
-		throw redirect('/auth');
-	}
-
-	return null;
+export const loader = async (_args: LoaderFunctionArgs) => {
+  throw redirect('/');
 };
 
-export { MobilePrevented as default, meta } from './mobilePrevented';
+export default function MobilePreventedRouteRedirect() {
+  return null;
+}

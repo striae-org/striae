@@ -1,1 +1,0 @@
-export { Terms as default, meta } from './terms';

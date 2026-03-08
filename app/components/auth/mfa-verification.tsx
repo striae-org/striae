@@ -285,7 +285,7 @@ export const MFAVerification = ({ resolver, onSuccess, onError, onCancel }: MFAV
           </button>
           <div className={styles.signOutContainer}>
             <p className={styles.signOutText}>Need to sign in with a different account?</p>
-            <SignOut redirectTo="/auth" />
+            <SignOut redirectTo="/" />
           </div>
         </div>        
         <div id="recaptcha-container"></div>

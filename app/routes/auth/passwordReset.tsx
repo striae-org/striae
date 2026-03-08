@@ -120,7 +120,7 @@ export const PasswordReset = ({ isModal, onBack }: PasswordResetProps) => {
       <Link 
         viewTransition
         prefetch="intent"
-        to="/" 
+        to="https://striae.org" 
       >
         <div className={styles.logo} />
       </Link>

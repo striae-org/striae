@@ -1,1 +1,0 @@
-export { default, meta, handle } from './home';

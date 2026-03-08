@@ -283,7 +283,7 @@ export const EmailActionHandler = ({ mode, oobCode, continueUrl, lang }: EmailAc
       <Link
         viewTransition
         prefetch="intent"
-        to="/"
+        to="https://striae.org"
         className={styles.logoLink}
       >
         <div className={styles.logo} />

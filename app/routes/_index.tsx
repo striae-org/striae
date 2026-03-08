@@ -1,1 +1,1 @@
-export { default, meta, handle } from './home/home';
+export { Login as default, meta } from './auth/login';
