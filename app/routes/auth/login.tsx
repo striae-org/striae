@@ -10,8 +10,7 @@ import {
     updateProfile,
     getMultiFactorResolver,
     MultiFactorResolver,
-    MultiFactorError,
-    multiFactor
+    MultiFactorError
 } from 'firebase/auth';
 import { PasswordReset } from '~/routes/auth/passwordReset';
 import { EmailVerification } from '~/routes/auth/emailVerification';
@@ -26,9 +25,9 @@ import { Striae } from '~/routes/striae/striae';
 import { getUserData, createUser } from '~/utils/permissions';
 import { auditService } from '~/services/audit.service';
 import { generateUniqueId } from '~/utils/id-generator';
-import { AUTH_REGISTRATION_CONFIG } from '~/config/auth-registration';
 import { evaluatePasswordPolicy } from '~/utils/password-policy';
 import { buildActionCodeSettings } from '~/utils/auth-action-settings';
+import { userHasMFA } from '~/utils/mfa';
 
 export const meta = () => {
   return baseMeta({
@@ -55,11 +54,7 @@ export const Login = () => {
   const [isClient, setIsClient] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [company, setCompany] = useState(
-    AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration
-      ? AUTH_REGISTRATION_CONFIG.defaultLabCompanyName
-      : ''
-  );
+  const [company, setCompany] = useState('');
   const [confirmPasswordValue, setConfirmPasswordValue] = useState('');
   
   // MFA state
@@ -83,37 +78,12 @@ export const Login = () => {
     setIsClient(true);
   }, []);
 
-  // Email validation with regex and optional domain/email allowlists
-  const validateRegistrationEmail = (email: string): { valid: boolean; reason?: 'invalid-format' | 'not-allowlisted' } => {
-    // Email regex pattern for basic validation
+  // Email validation with regex
+  const validateRegistrationEmail = (email: string): { valid: boolean } => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     
-    // First check if email format is valid
     if (!emailRegex.test(email)) {
-      return { valid: false, reason: 'invalid-format' };
-    }
-
-    const normalizedEmail = email.toLowerCase();
-    const normalizedAllowedDomains = AUTH_REGISTRATION_CONFIG.allowedDomainEmails
-      .map((allowedDomainEmail) => allowedDomainEmail.trim().toLowerCase())
-      .filter((allowedDomainEmail) => allowedDomainEmail.length > 0);
-
-    const normalizedAllowedEmails = AUTH_REGISTRATION_CONFIG.allowedIndividualEmails
-      .map((allowedEmail) => allowedEmail.trim().toLowerCase())
-      .filter((allowedEmail) => allowedEmail.length > 0);
-
-    if (normalizedAllowedDomains.length === 0 && normalizedAllowedEmails.length === 0) {
-      return { valid: true };
-    }
-
-    const allowedDomainEmail = normalizedAllowedDomains.some(
-      (allowedDomainEmail) => normalizedEmail.endsWith(allowedDomainEmail)
-    );
-
-    const allowedIndividualEmail = normalizedAllowedEmails.includes(normalizedEmail);
-
-    if (!allowedDomainEmail && !allowedIndividualEmail) {
-      return { valid: false, reason: 'not-allowlisted' };
+      return { valid: false };
     }
 
     return { valid: true };
@@ -200,8 +170,7 @@ export const Login = () => {
       }
       
       // Check if user has MFA enrolled
-      const mfaFactors = multiFactor(currentUser).enrolledFactors;
-      if (mfaFactors.length === 0) {
+      if (!userHasMFA(currentUser)) {
         // User has no MFA factors enrolled - require enrollment
         setShowMfaEnrollment(true);
         return;
@@ -260,8 +229,7 @@ export const Login = () => {
           return;
         }
 
-        const mfaFactors = multiFactor(refreshedUser).enrolledFactors;
-        setShowMfaEnrollment(mfaFactors.length === 0);
+        setShowMfaEnrollment(!userHasMFA(refreshedUser));
       } catch (refreshError) {
         console.error('Failed to sync MFA state after email action:', refreshError);
       }
@@ -293,11 +261,7 @@ export const Login = () => {
     if (!isLogin) {
       const emailValidation = validateRegistrationEmail(email);
       if (!emailValidation.valid) {
-        setError(
-          emailValidation.reason === 'invalid-format'
-            ? 'Please enter a valid email address'
-            : 'Registration is restricted to authorized email addresses and domains only'
-        );
+        setError('Please enter a valid email address');
         setIsLoading(false);
         return;
       }
@@ -322,9 +286,7 @@ export const Login = () => {
         displayName: `${formFirstName} ${formLastName}`
       });
 
-      const companyName = (AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration
-        ? AUTH_REGISTRATION_CONFIG.defaultLabCompanyName
-        : formCompany).trim();
+      const companyName = formCompany.trim();
 
       // Create user data using centralized function
       await createUser(
@@ -599,12 +561,12 @@ export const Login = () => {
                   <input
                     type="text"
                     name="company"
-                    required={!AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration}
-                    placeholder={`${AUTH_REGISTRATION_CONFIG.defaultLabCompanyName} (required)`}
+                    required
+                    placeholder="Company/Lab (required)"
                     autoComplete="organization"
                     className={styles.input}
-                    disabled={isLoading || AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration}
-                    value={AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration ? AUTH_REGISTRATION_CONFIG.defaultLabCompanyName : company}
+                    disabled={isLoading}
+                    value={company}
                     onChange={(e) => setCompany(e.target.value)}
                   />                      
                   {passwordStrength && (
@@ -654,7 +616,7 @@ export const Login = () => {
                   setError('');
                   setFirstName('');
                   setLastName('');
-                  setCompany(AUTH_REGISTRATION_CONFIG.autoSetLabCompanyOnRegistration ? AUTH_REGISTRATION_CONFIG.defaultLabCompanyName : '');
+                  setCompany('');
                   setConfirmPasswordValue('');
                 }}
                 className={styles.toggleButton}
