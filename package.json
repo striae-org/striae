@@ -44,6 +44,8 @@
     "workers/*/package.json",
     "workers/*/src/*.example.ts",
     "workers/*/src/*.example.js",
+    "workers/*/src/*.ts",
+    "!workers/*/src/*worker.ts",
     "workers/pdf-worker/src/format-striae.ts",
     "workers/pdf-worker/src/report-types.ts",
     "workers/*/wrangler.jsonc.example",
