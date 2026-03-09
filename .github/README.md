@@ -27,10 +27,12 @@ npm install
 
 ```bash
 mkdir -p app/config
-cp -f app/config-example/admin-service.json app/config/admin-service.json <-- Then replace with your own Firebase admin service account JSON
+cp -f app/config-example/admin-service.json app/config/admin-service.json
 ```
 
-5) Authenticate Cloudflare CLI
+5) Replace `app/config/admin-service.json` with your actual Firebase service account JSON
+
+6) Authenticate Cloudflare CLI
 
 ```bash
 npx wrangler login
