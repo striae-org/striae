@@ -88,6 +88,51 @@ fi
 echo -e "${YELLOW}📖 Loading environment variables from .env...${NC}"
 source .env
 
+escape_for_sed_pattern() {
+    printf '%s' "$1" | sed -e 's/[][\\.^$*+?{}|()]/\\&/g'
+}
+
+dedupe_env_var_entries() {
+    local var_name=$1
+    local expected_count=1
+    local escaped_var_name
+
+    escaped_var_name=$(escape_for_sed_pattern "$var_name")
+
+    if [ -f ".env.example" ]; then
+        expected_count=$(grep -c "^$escaped_var_name=" .env.example || true)
+
+        if [ "$expected_count" -lt 1 ]; then
+            expected_count=1
+        fi
+    fi
+
+    awk -v key="$var_name" -v keep="$expected_count" '
+        BEGIN { seen = 0 }
+        {
+            if (index($0, key "=") == 1) {
+                seen++
+
+                if (seen > keep) {
+                    next
+                }
+            }
+            print
+        }
+    ' .env > .env.tmp && mv .env.tmp .env
+}
+
+normalize_domain_value() {
+    local domain="$1"
+
+    domain=$(printf '%s' "$domain" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    domain="${domain#http://}"
+    domain="${domain#https://}"
+    domain="${domain%/}"
+
+    printf '%s' "$domain"
+}
+
 write_env_var() {
     local var_name=$1
     local var_value=$2
@@ -99,11 +144,18 @@ write_env_var() {
         env_file_value="\"$env_file_value\""
     fi
 
-    if grep -q "^$var_name=" .env; then
-        grep -v "^$var_name=" .env > .env.tmp && mv .env.tmp .env
-    fi
+    local escaped_var_name
+    local replacement_line
+    escaped_var_name=$(escape_for_sed_pattern "$var_name")
+    replacement_line=$(escape_for_sed_replacement "$var_name=$env_file_value")
 
-    echo "$var_name=$env_file_value" >> .env
+    if grep -q "^$escaped_var_name=" .env; then
+        # Replace all occurrences so intentional duplicates in .env.example stay in sync.
+        sed -i "s|^$escaped_var_name=.*|$replacement_line|g" .env
+        dedupe_env_var_entries "$var_name"
+    else
+        echo "$var_name=$env_file_value" >> .env
+    fi
 }
 
 escape_for_sed_replacement() {
@@ -591,12 +643,18 @@ prompt_for_secrets() {
         fi
         
         if [ -n "$new_value" ]; then
+            if [ "$var_name" = "PAGES_CUSTOM_DOMAIN" ] || [[ "$var_name" == *_WORKER_DOMAIN ]]; then
+                new_value=$(normalize_domain_value "$new_value")
+            fi
+
             # Update the .env file
             write_env_var "$var_name" "$new_value"
 
             export "$var_name=$new_value"
             echo -e "${GREEN}✅ $var_name updated${NC}"
         elif [ -n "$current_value" ]; then
+            # Keep values aligned with .env.example ordering and remove stale duplicates.
+            write_env_var "$var_name" "$current_value"
             echo -e "${GREEN}✅ Keeping current value for $var_name${NC}"
         fi
         echo ""
@@ -673,6 +731,15 @@ validate_required_vars
 # Function to replace variables in wrangler configuration files
 update_wrangler_configs() {
     echo -e "\n${BLUE}🔧 Updating wrangler configuration files...${NC}"
+
+    local normalized_pages_custom_domain
+    local escaped_pages_custom_domain
+
+    normalized_pages_custom_domain=$(normalize_domain_value "$PAGES_CUSTOM_DOMAIN")
+    PAGES_CUSTOM_DOMAIN="$normalized_pages_custom_domain"
+    export PAGES_CUSTOM_DOMAIN
+    write_env_var "PAGES_CUSTOM_DOMAIN" "$PAGES_CUSTOM_DOMAIN"
+    escaped_pages_custom_domain=$(escape_for_sed_replacement "$PAGES_CUSTOM_DOMAIN")
     
     # Audit Worker
     if [ -f "workers/audit-worker/wrangler.jsonc" ]; then
@@ -687,7 +754,7 @@ update_wrangler_configs() {
     # Update audit-worker source file domain placeholders
     if [ -f "workers/audit-worker/src/audit-worker.ts" ]; then
         echo -e "${YELLOW}  Updating audit-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/audit-worker/src/audit-worker.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/audit-worker/src/audit-worker.ts
         echo -e "${GREEN}    ✅ audit-worker source placeholders updated${NC}"
     fi
     
@@ -704,7 +771,7 @@ update_wrangler_configs() {
     # Update data-worker source file domain placeholders
     if [ -f "workers/data-worker/src/data-worker.ts" ]; then
         echo -e "${YELLOW}  Updating data-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/data-worker/src/data-worker.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/data-worker/src/data-worker.ts
         echo -e "${GREEN}    ✅ data-worker source placeholders updated${NC}"
     fi
     
@@ -720,7 +787,7 @@ update_wrangler_configs() {
     # Update image-worker source file domain placeholders
     if [ -f "workers/image-worker/src/image-worker.ts" ]; then
         echo -e "${YELLOW}  Updating image-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/image-worker/src/image-worker.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/image-worker/src/image-worker.ts
         echo -e "${GREEN}    ✅ image-worker source placeholders updated${NC}"
     fi
     
@@ -736,7 +803,7 @@ update_wrangler_configs() {
     # Update keys-worker source file domain placeholders
     if [ -f "workers/keys-worker/src/keys.ts" ]; then
         echo -e "${YELLOW}  Updating keys-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/keys-worker/src/keys.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/keys-worker/src/keys.ts
         echo -e "${GREEN}    ✅ keys-worker source placeholders updated${NC}"
     fi
     
@@ -752,7 +819,7 @@ update_wrangler_configs() {
     # Update pdf-worker source file domain placeholders
     if [ -f "workers/pdf-worker/src/pdf-worker.ts" ]; then
         echo -e "${YELLOW}  Updating pdf-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/pdf-worker/src/pdf-worker.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/pdf-worker/src/pdf-worker.ts
         echo -e "${GREEN}    ✅ pdf-worker source placeholders updated${NC}"
     fi
     
@@ -769,7 +836,7 @@ update_wrangler_configs() {
     # Update user-worker source file domain placeholders
     if [ -f "workers/user-worker/src/user-worker.ts" ]; then
         echo -e "${YELLOW}  Updating user-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/user-worker/src/user-worker.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/user-worker/src/user-worker.ts
         sed -i "s|'DATA_WORKER_DOMAIN'|'https://$DATA_WORKER_DOMAIN'|g" workers/user-worker/src/user-worker.ts
         sed -i "s|'IMAGES_WORKER_DOMAIN'|'https://$IMAGES_WORKER_DOMAIN'|g" workers/user-worker/src/user-worker.ts
         echo -e "${GREEN}    ✅ user-worker source placeholders updated${NC}"
@@ -793,7 +860,7 @@ update_wrangler_configs() {
         escaped_manifest_signing_key_id=$(escape_for_sed_replacement "$MANIFEST_SIGNING_KEY_ID")
         escaped_manifest_signing_public_key=$(escape_for_sed_replacement "$MANIFEST_SIGNING_PUBLIC_KEY")
 
-        sed -i "s|\"PAGES_CUSTOM_DOMAIN\"|\"https://$PAGES_CUSTOM_DOMAIN\"|g" app/config/config.json
+        sed -i "s|\"url\": \"[^\"]*\"|\"url\": \"https://$escaped_pages_custom_domain\"|g" app/config/config.json
         sed -i "s|\"DATA_WORKER_CUSTOM_DOMAIN\"|\"https://$DATA_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"AUDIT_WORKER_CUSTOM_DOMAIN\"|\"https://$AUDIT_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"KEYS_WORKER_CUSTOM_DOMAIN\"|\"https://$KEYS_WORKER_DOMAIN\"|g" app/config/config.json
@@ -809,7 +876,7 @@ update_wrangler_configs() {
     # Update app/config/meta-config.json
     if [ -f "app/config/meta-config.json" ]; then
         echo -e "${YELLOW}    Updating app/config/meta-config.json...${NC}"
-        sed -i "s|\"PAGES_CUSTOM_DOMAIN\"|\"https://$PAGES_CUSTOM_DOMAIN\"|g" app/config/meta-config.json
+        sed -i "s|\"url\": \"[^\"]*\"|\"url\": \"https://$escaped_pages_custom_domain\"|g" app/config/meta-config.json
         echo -e "${GREEN}      ✅ app meta-config.json updated${NC}"
     fi
     
