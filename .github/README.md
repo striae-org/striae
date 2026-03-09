@@ -18,6 +18,14 @@
 
 ## 📋 Changelog
 
+## [2026-03-09] - *[Major Security Release v3.0.0](https://github.com/striae-org/striae/releases/tag/v3.0.0)*
+
+- **🛡️ Signed Forensic Manifest Enforcement** - Replaced hash-only confirmation integrity checks with server-issued asymmetric signatures and canonical payload verification to prevent hash-bypass tampering
+- **🔒 Hard-Fail Import and Hash Verification Gates** - Import preview/execution and hash utility paths now block unsigned or invalidly signed confirmation packages
+- **📜 Signature-Aware Audit Provenance** - Expanded audit export/view and logging pathways to capture signing and verification outcomes for stronger chain-of-custody evidence
+- **⚙️ Signing Key and Deploy Hardening** - Added manifest-signing key config support, worker signing helpers, key auto-generation alignment, and deploy-config reliability fixes
+- **📚 Security Advisory Context** - Added hash-fix documentation updates capturing vulnerability impact, patch guidance, and references for release communication
+
 ## [2026-03-07] - *[Minor Release v2.2.0](https://github.com/striae-org/striae/releases/tag/v2.2.0)*
 
 - **🔐 MFA Management and Re-Authentication Improvements** - Added and iterated MFA phone-update support in profile management with re-auth flow hardening, messaging refinements, and utility-based MFA cleanup
