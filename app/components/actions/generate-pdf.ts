@@ -69,12 +69,17 @@ export const generatePDF = async ({
       notesUpdatedFormatted // Pass formatted notes updated date
     };
 
+    const pdfRequest = {
+      reportFormat: 'striae',
+      data: pdfData,
+    };
+
     const response = await fetch(paths.pdf_worker_url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(pdfData)
+      body: JSON.stringify(pdfRequest)
     });
 
     if (response.ok) {
