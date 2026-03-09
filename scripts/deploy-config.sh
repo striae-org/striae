@@ -379,29 +379,61 @@ copy_example_configs() {
     # Copy app configuration files
     echo -e "${YELLOW}  Copying app configuration files...${NC}"
     
-    # Copy app config-example directory to config
+    # Copy app config-example directory to config (always sync non-admin files)
     if [ -d "app/config-example" ]; then
-        if [ "$update_env" = "true" ] || [ ! -d "app/config" ]; then
-            local admin_service_backup=""
+        local admin_service_backup=""
+        local copied_config_files=0
+        local skipped_existing_files=0
 
-            if [ -f "app/config/admin-service.json" ]; then
-                admin_service_backup=$(mktemp)
-                cp "app/config/admin-service.json" "$admin_service_backup"
-            fi
-
-            rm -rf app/config
-            cp -r app/config-example app/config
-
-            if [ -n "$admin_service_backup" ] && [ -f "$admin_service_backup" ]; then
-                cp "$admin_service_backup" "app/config/admin-service.json"
-                rm -f "$admin_service_backup"
-                echo -e "${GREEN}    ✅ app: preserved existing admin-service.json${NC}"
-            fi
-
-            echo -e "${GREEN}    ✅ app: config directory created from config-example${NC}"
-        else
-            echo -e "${YELLOW}    ⚠️  app: config directory already exists, skipping copy${NC}"
+        if [ -f "app/config/admin-service.json" ]; then
+            admin_service_backup=$(mktemp)
+            cp "app/config/admin-service.json" "$admin_service_backup"
         fi
+
+        if [ "$update_env" = "true" ]; then
+            rm -rf app/config
+        fi
+
+        mkdir -p app/config
+
+        while IFS= read -r source_file; do
+            local relative_path
+            local destination_file
+            relative_path="${source_file#app/config-example/}"
+            destination_file="app/config/$relative_path"
+
+            mkdir -p "$(dirname "$destination_file")"
+
+            if [ "$update_env" = "true" ] || [ ! -f "$destination_file" ]; then
+                cp "$source_file" "$destination_file"
+                copied_config_files=$((copied_config_files + 1))
+            else
+                skipped_existing_files=$((skipped_existing_files + 1))
+            fi
+        done < <(find app/config-example -type f ! -name "admin-service.json")
+
+        # Ensure example credentials are never copied from config-example.
+        rm -f app/config/admin-service.json
+
+        if [ -n "$admin_service_backup" ] && [ -f "$admin_service_backup" ]; then
+            cp "$admin_service_backup" "app/config/admin-service.json"
+            rm -f "$admin_service_backup"
+            echo -e "${GREEN}    ✅ app: preserved existing admin-service.json${NC}"
+        else
+            echo -e "${YELLOW}    ⚠️  app: skipped copying admin-service.json (provide your own credentials file)${NC}"
+        fi
+
+        if [ "$update_env" = "true" ]; then
+            echo -e "${GREEN}    ✅ app: config directory reset from config-example (excluding admin-service.json)${NC}"
+        else
+            echo -e "${GREEN}    ✅ app: synced missing files from config-example (excluding admin-service.json)${NC}"
+        fi
+
+        if [ "$skipped_existing_files" -gt 0 ]; then
+            echo -e "${YELLOW}    ℹ️  app: kept $skipped_existing_files existing config file(s)${NC}"
+        fi
+
+        echo -e "${GREEN}    ✅ app: copied $copied_config_files config file(s) from config-example${NC}"
     fi
     
     # Navigate to each worker directory and copy the example file
