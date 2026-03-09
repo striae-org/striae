@@ -1,4 +1,4 @@
-# Striae Release Notes - v3.0.3
+# Striae Release Notes - v3.0.4
 
 **Release Date**: March 9, 2026
 **Period**: March 9 - March 9, 2026
@@ -8,7 +8,7 @@
 
 ## Summary
 
-- Migrated package identity from `@striae/striae` to `@striae-org/striae` and finalized package version `3.0.3`.
+- Migrated package identity from `@striae/striae` to `@striae-org/striae` and finalized package version `3.0.4`.
 - Expanded package publishing workflows with dedicated npmjs and GitHub Packages publish scripts.
 - Updated package payload rules to include worker source files while excluding runtime worker entry files.
 - Refined deploy configuration syncing to preserve real admin credentials and avoid copying example `admin-service.json`.
@@ -18,7 +18,7 @@
 
 ### Package Identity and Publishing
 
-- Updated package metadata to `@striae-org/striae` with version `3.0.3`.
+- Updated package metadata to `@striae-org/striae` with version `3.0.4`.
 - Added `publish:npm` registry targeting for npmjs and introduced `publish:github` / `publish:github:dry-run` scripts.
 
 ### Package Payload Coverage
@@ -36,7 +36,7 @@
 
 - Expanded `.github/README.md` package section to include end-to-end install, scaffold copy, credential preparation, and deployment steps.
 - Updated npm package links and package naming references to the new `@striae-org` scope.
-- Updated supported version table in `.github/SECURITY.md` to `v3.0.3`.
+- Updated supported version table in `.github/SECURITY.md` to `v3.0.4`.
 
 ## Key Fix Summary
 
@@ -69,4 +69,4 @@
 
 ## Closing Note
 
-v3.0.3 is a packaging and deployment-focused patch that improves package distribution clarity, config safety, and setup guidance for Striae adopters.
+v3.0.4 is a packaging and deployment-focused patch that improves package distribution clarity, config safety, and setup guidance for Striae adopters.

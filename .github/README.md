@@ -62,7 +62,7 @@ npm run deploy:all
 
 ## 📋 Changelog
 
-## [2026-03-09] - *[Patch Release v3.0.3](https://github.com/striae-org/striae/releases/tag/v3.0.3)*
+## [2026-03-09] - *[Patch Release v3.0.4](https://github.com/striae-org/striae/releases/tag/v3.0.4)*
 
 - **📦 Package Scope and Version Alignment** - Migrated distributable package identity to `@striae-org/striae` and finalized package metadata at `v3.0.3`
 - **🧩 Worker Source Packaging Expansion** - Included required worker source modules in npm package payload while excluding runtime worker entry files for safer distribution
