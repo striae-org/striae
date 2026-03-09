@@ -273,11 +273,19 @@ export class AuditService {
     result: AuditResult,
     errors: string[] = [],
     originalExaminerUid?: string,
-    performanceMetrics?: PerformanceMetrics
+    performanceMetrics?: PerformanceMetrics,
+    signatureDetails?: {
+      present: boolean;
+      valid: boolean;
+      keyId?: string;
+    }
   ): Promise<void> {
     const securityChecks: SecurityCheckResults = {
       selfConfirmationPrevented: false, // Not applicable for exports
-      fileIntegrityValid: result === 'success'
+      fileIntegrityValid: result === 'success',
+      manifestSignaturePresent: signatureDetails?.present,
+      manifestSignatureValid: signatureDetails?.valid,
+      manifestSignatureKeyId: signatureDetails?.keyId
     };
 
     await this.logEvent({
@@ -311,12 +319,20 @@ export class AuditService {
     reviewingExaminerUid?: string,
     performanceMetrics?: PerformanceMetrics,
     exporterUidValidated?: boolean, // Separate flag for validation status
-    totalConfirmationsInFile?: number // Total confirmations in the import file
+    totalConfirmationsInFile?: number, // Total confirmations in the import file
+    signatureDetails?: {
+      present: boolean;
+      valid: boolean;
+      keyId?: string;
+    }
   ): Promise<void> {
     const securityChecks: SecurityCheckResults = {
       selfConfirmationPrevented: reviewingExaminerUid ? reviewingExaminerUid === user.uid : false,
       fileIntegrityValid: hashValid,
-      exporterUidValidated: exporterUidValidated !== undefined ? exporterUidValidated : !!reviewingExaminerUid
+      exporterUidValidated: exporterUidValidated !== undefined ? exporterUidValidated : !!reviewingExaminerUid,
+      manifestSignaturePresent: signatureDetails?.present,
+      manifestSignatureValid: signatureDetails?.valid,
+      manifestSignatureKeyId: signatureDetails?.keyId
     };
 
     await this.logEvent({

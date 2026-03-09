@@ -54,6 +54,13 @@ export interface ConfirmationImportData {
     totalConfirmations: number;
     version: string;
     hash: string;
+    signatureVersion?: string;
+    signature?: {
+      algorithm: string;
+      keyId: string;
+      signedAt: string;
+      value: string;
+    };
     originalExportCreatedAt?: string;
   };
   confirmations: {

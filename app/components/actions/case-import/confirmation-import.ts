@@ -3,7 +3,7 @@ import paths from '~/config/config.json';
 import { getDataApiKey } from '~/utils/auth';
 import { ConfirmationImportResult, ConfirmationImportData } from '~/types';
 import { checkExistingCase } from '../case-manage';
-import { validateExporterUid, validateConfirmationHash } from './validation';
+import { validateExporterUid, validateConfirmationHash, validateConfirmationSignatureFile } from './validation';
 import { auditService } from '~/services/audit.service';
 
 const DATA_WORKER_URL = paths.data_worker_url;
@@ -17,6 +17,10 @@ export async function importConfirmationData(
   onProgress?: (stage: string, progress: number, details?: string) => void
 ): Promise<ConfirmationImportResult> {
   const startTime = Date.now();
+  let hashValid = false;
+  let signatureValid = false;
+  let signaturePresent = false;
+  let signatureKeyId: string | undefined;
   
   const result: ConfirmationImportResult = {
     success: false,
@@ -41,12 +45,24 @@ export async function importConfirmationData(
     onProgress?.('Validating hash', 20, 'Verifying data integrity...');
 
     // Validate hash
-    const hashValid = await validateConfirmationHash(fileContent, confirmationData.metadata.hash);
+    hashValid = await validateConfirmationHash(fileContent, confirmationData.metadata.hash);
     if (!hashValid) {
       throw new Error('Confirmation data hash validation failed. The file may have been tampered with or corrupted.');
     }
 
-    onProgress?.('Validating exporter', 30, 'Checking exporter credentials...');
+    onProgress?.('Validating signature', 30, 'Verifying signed confirmation metadata...');
+
+    const signatureResult = await validateConfirmationSignatureFile(confirmationData);
+    signaturePresent = !!confirmationData.metadata.signature;
+    signatureValid = signatureResult.isValid;
+    signatureKeyId = signatureResult.keyId;
+    if (!signatureResult.isValid) {
+      throw new Error(
+        `Confirmation signature validation failed: ${signatureResult.error || 'Unknown signature error'}`
+      );
+    }
+
+    onProgress?.('Validating exporter', 40, 'Checking exporter credentials...');
 
     // Validate exporter UID exists and is not current user
     const validation = await validateExporterUid(confirmationData.metadata.exportedByUid, user);
@@ -59,7 +75,7 @@ export async function importConfirmationData(
       throw new Error('You cannot import confirmation data that you exported yourself.');
     }
 
-    onProgress?.('Validating case', 40, 'Checking case exists...');
+    onProgress?.('Validating case', 50, 'Checking case exists...');
 
     // Check if case exists in user's regular cases
     const caseExists = await checkExistingCase(user, result.caseNumber);
@@ -67,7 +83,7 @@ export async function importConfirmationData(
       throw new Error(`Case "${result.caseNumber}" does not exist in your case list. You can only import confirmations for your own cases.`);
     }
 
-    onProgress?.('Processing confirmations', 50, 'Validating timestamps and updating annotations...');
+    onProgress?.('Processing confirmations', 60, 'Validating timestamps and updating annotations...');
 
     // Get case data to find image IDs
     const apiKey = await getDataApiKey();
@@ -222,7 +238,7 @@ export async function importConfirmationData(
       }
 
       processedCount++;
-      const progress = 50 + (processedCount / totalConfirmations) * 40;
+      const progress = 60 + (processedCount / totalConfirmations) * 35;
       onProgress?.('Processing confirmations', progress, `Updated ${result.imagesUpdated} images...`);
     }
 
@@ -258,7 +274,12 @@ export async function importConfirmationData(
         validationStepsFailed: result.errors ? result.errors.length : 0
       },
       true, // exporterUidValidated - true for successful imports
-      confirmationData.metadata.totalConfirmations // Total confirmations in file
+      confirmationData.metadata.totalConfirmations, // Total confirmations in file
+      {
+        present: signaturePresent,
+        valid: signatureValid,
+        keyId: signatureKeyId
+      }
     );
     
     auditService.endWorkflow();
@@ -274,16 +295,23 @@ export async function importConfirmationData(
     const endTime = Date.now();
     
     // Determine what validation failed based on error message - each check is independent
-    let hashValidForAudit = true;
+    let hashValidForAudit = hashValid;
     let exporterUidValidatedForAudit = true;
     let reviewingExaminerUidForAudit: string | undefined = undefined;
     let totalConfirmationsForAudit = 0; // Default to 0 for failed imports
+    let signaturePresentForAudit = signaturePresent;
+    let signatureValidForAudit = signatureValid;
+    let signatureKeyIdForAudit = signatureKeyId;
     
     // First, try to extract basic metadata for audit purposes (if file is parseable)
     try {
       const confirmationData: any = JSON.parse(await confirmationFile.text());
       reviewingExaminerUidForAudit = confirmationData.metadata?.exportedByUid;
       totalConfirmationsForAudit = confirmationData.metadata?.totalConfirmations || 0;
+      if (confirmationData.metadata?.signature) {
+        signaturePresentForAudit = true;
+        signatureKeyIdForAudit = confirmationData.metadata.signature.keyId;
+      }
     } catch {
       // If we can't parse the file, keep undefined/default values
     }
@@ -294,6 +322,8 @@ export async function importConfirmationData(
       hashValidForAudit = false;
       // We still pass reviewingExaminerUid if we could extract it for audit purposes
       // exporterUidValidatedForAudit stays true - we didn't test this validation
+    } else if (errorMessage.includes('signature validation failed') || errorMessage.includes('Missing confirmation signature')) {
+      signatureValidForAudit = false;
     } else if (errorMessage.includes('does not exist in the user database')) {
       // Exporter UID validation failed - only flag this check
       exporterUidValidatedForAudit = false;
@@ -318,7 +348,12 @@ export async function importConfirmationData(
         fileSizeBytes: confirmationFile.size
       },
       exporterUidValidatedForAudit,
-      totalConfirmationsForAudit // Total confirmations in file (when extractable)
+      totalConfirmationsForAudit, // Total confirmations in file (when extractable)
+      {
+        present: signaturePresentForAudit,
+        valid: signatureValidForAudit,
+        keyId: signatureKeyIdForAudit
+      }
     );
     
     auditService.endWorkflow();

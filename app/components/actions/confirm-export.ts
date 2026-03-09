@@ -1,8 +1,8 @@
 import { User } from 'firebase/auth';
 import { calculateSHA256Secure } from '~/utils/SHA256';
 import { getUserData } from '~/utils/permissions';
-import { getCaseData, updateCaseData } from '~/utils/data-operations';
-import { ConfirmationData, CaseConfirmations, CaseDataWithConfirmations } from '~/types';
+import { getCaseData, updateCaseData, signConfirmationData } from '~/utils/data-operations';
+import { ConfirmationData, CaseConfirmations, CaseDataWithConfirmations, ConfirmationImportData } from '~/types';
 import { auditService } from '~/services/audit.service';
 
 /**
@@ -180,6 +180,9 @@ export async function exportConfirmationData(
   caseNumber: string
 ): Promise<void> {
   const startTime = Date.now();
+  let signatureKeyId: string | undefined;
+  let signaturePresent = false;
+  let signatureValid = false;
   
   try {
     // Start audit workflow
@@ -228,7 +231,7 @@ export async function exportConfirmationData(
         exportDate: new Date().toISOString(),
         ...userMetadata,
         totalConfirmations: Object.keys(caseConfirmations).length,
-        version: '1.0',
+        version: '2.0',
         ...(originalExportCreatedAt && { originalExportCreatedAt })
       },
       confirmations: caseConfirmations
@@ -240,12 +243,27 @@ export async function exportConfirmationData(
     // Calculate SHA-256 hash for data integrity using secure version for forensic data
     const hash = await calculateSHA256Secure(jsonString);
     
-    // Add hash to final export data
-    const finalExportData = {
+    // Add hash prior to signing
+    const unsignedExportData: ConfirmationImportData = {
       ...exportData,
       metadata: {
         ...exportData.metadata,
         hash: hash.toUpperCase()
+      }
+    };
+
+    // Request server-side signature to prevent tamper-by-rehash attacks
+    const signingResult = await signConfirmationData(user, caseNumber, unsignedExportData);
+    signaturePresent = true;
+    signatureValid = true;
+    signatureKeyId = signingResult.signature.keyId;
+
+    const finalExportData: ConfirmationImportData = {
+      ...unsignedExportData,
+      metadata: {
+        ...unsignedExportData.metadata,
+        signatureVersion: signingResult.signatureVersion,
+        signature: signingResult.signature
       }
     };
 
@@ -292,6 +310,11 @@ export async function exportConfirmationData(
         fileSizeBytes: new Blob([jsonString]).size,
         validationStepsCompleted: confirmationCount,
         validationStepsFailed: 0
+      },
+      {
+        present: signaturePresent,
+        valid: signatureValid,
+        keyId: signatureKeyId
       }
     );
     
@@ -313,6 +336,11 @@ export async function exportConfirmationData(
       {
         processingTimeMs: endTime - startTime,
         fileSizeBytes: 0
+      },
+      {
+        present: signaturePresent,
+        valid: signatureValid,
+        keyId: signatureKeyId
       }
     );
     
