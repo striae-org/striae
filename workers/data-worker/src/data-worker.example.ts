@@ -1,12 +1,16 @@
 import { signPayload as signWithWorkerKey } from './signature-utils';
 import {
+  AUDIT_EXPORT_SIGNATURE_VERSION,
   CONFIRMATION_SIGNATURE_VERSION,
   FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
   FORENSIC_MANIFEST_VERSION,
+  AuditExportSigningPayload,
   ConfirmationSigningPayload,
   ForensicManifestPayload,
+  createAuditExportSigningPayload,
   createConfirmationSigningPayload,
   createManifestSigningPayload,
+  isValidAuditExportPayload,
   isValidConfirmationPayload,
   isValidManifestPayload
 } from './signing-payload-utils';
@@ -45,6 +49,7 @@ const hasValidHeader = (request: Request, env: Env): boolean =>
 
 const SIGN_MANIFEST_PATH = '/api/forensic/sign-manifest';
 const SIGN_CONFIRMATION_PATH = '/api/forensic/sign-confirmation';
+const SIGN_AUDIT_EXPORT_PATH = '/api/forensic/sign-audit-export';
 
 async function signPayloadWithWorkerKey(payload: string, env: Env): Promise<{
   algorithm: string;
@@ -77,6 +82,16 @@ async function signConfirmation(confirmationData: ConfirmationSigningPayload, en
   value: string;
 }> {
   const payload = createConfirmationSigningPayload(confirmationData);
+  return signPayloadWithWorkerKey(payload, env);
+}
+
+async function signAuditExport(auditExportData: AuditExportSigningPayload, env: Env): Promise<{
+  algorithm: string;
+  keyId: string;
+  signedAt: string;
+  value: string;
+}> {
+  const payload = createAuditExportSigningPayload(auditExportData);
   return signPayloadWithWorkerKey(payload, env);
 }
 
@@ -142,6 +157,45 @@ async function handleSignConfirmation(request: Request, env: Env): Promise<Respo
   }
 }
 
+async function handleSignAuditExport(request: Request, env: Env): Promise<Response> {
+  try {
+    const requestBody = await request.json() as {
+      auditExport?: Partial<AuditExportSigningPayload>;
+      signatureVersion?: string;
+    } & Partial<AuditExportSigningPayload>;
+
+    const requestedSignatureVersion =
+      typeof requestBody.signatureVersion === 'string' && requestBody.signatureVersion.trim().length > 0
+        ? requestBody.signatureVersion
+        : AUDIT_EXPORT_SIGNATURE_VERSION;
+
+    if (requestedSignatureVersion !== AUDIT_EXPORT_SIGNATURE_VERSION) {
+      return createResponse(
+        { error: `Unsupported audit export signature version: ${requestedSignatureVersion}` },
+        400
+      );
+    }
+
+    const auditExportCandidate: Partial<AuditExportSigningPayload> = requestBody.auditExport ?? requestBody;
+
+    if (!auditExportCandidate || !isValidAuditExportPayload(auditExportCandidate)) {
+      return createResponse({ error: 'Invalid audit export payload' }, 400);
+    }
+
+    const signature = await signAuditExport(auditExportCandidate, env);
+
+    return createResponse({
+      success: true,
+      signatureVersion: AUDIT_EXPORT_SIGNATURE_VERSION,
+      signature
+    });
+  } catch (error) {
+    console.error('Audit export signing failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return createResponse({ error: errorMessage }, 500);
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === 'OPTIONS') {
@@ -163,6 +217,10 @@ export default {
 
       if (request.method === 'POST' && pathname === SIGN_CONFIRMATION_PATH) {
         return await handleSignConfirmation(request, env);
+      }
+
+      if (request.method === 'POST' && pathname === SIGN_AUDIT_EXPORT_PATH) {
+        return await handleSignAuditExport(request, env);
       }
 
       const filename = pathname.slice(1) || 'data.json';

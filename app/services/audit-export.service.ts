@@ -1,5 +1,20 @@
 import { ValidationAuditEntry, AuditTrail } from '~/types';
+import { User } from 'firebase/auth';
 import { calculateSHA256Secure } from '~/utils/SHA256';
+import { signAuditExportData } from '~/utils/data-operations';
+import {
+  AUDIT_EXPORT_SIGNATURE_VERSION,
+  AuditExportFormat,
+  AuditExportSigningPayload,
+  AuditExportType
+} from '~/utils/audit-export-signature';
+
+interface AuditExportContext {
+  user: User;
+  scopeType: 'case' | 'user';
+  scopeIdentifier: string;
+  caseNumber?: string;
+}
 
 /**
  * Audit Export Service
@@ -20,7 +35,11 @@ export class AuditExportService {
   /**
    * Export audit entries to CSV format
    */
-  public async exportToCSV(entries: ValidationAuditEntry[], filename: string): Promise<void> {
+  public async exportToCSV(
+    entries: ValidationAuditEntry[],
+    filename: string,
+    context: AuditExportContext
+  ): Promise<void> {
     const headers = [
       'Timestamp',
       'User Email',
@@ -66,14 +85,26 @@ export class AuditExportService {
       ...entries.map(entry => this.entryToCSVRow(entry))
     ].join('\n');
 
-    // Calculate hash for integrity verification
+    const generatedAt = new Date().toISOString();
     const hash = await calculateSHA256Secure(csvData);
+    const signaturePayload = await this.signAuditExport(
+      {
+        exportFormat: 'csv',
+        exportType: 'entries',
+        generatedAt,
+        totalEntries: entries.length,
+        hash: hash.toUpperCase()
+      },
+      context
+    );
     
     // Add hash metadata header
     const csvContent = [
-      `# Striae Audit Export - Generated: ${new Date().toISOString()}`,
+      `# Striae Audit Export - Generated: ${generatedAt}`,
       `# Total Entries: ${entries.length}`,
       `# SHA-256 Hash: ${hash.toUpperCase()}`,
+      `# Audit Signature Metadata: ${JSON.stringify(signaturePayload.signatureMetadata)}`,
+      `# Audit Signature: ${JSON.stringify(signaturePayload.signature)}`,
       `# Verification: Recalculate SHA-256 of data rows only (excluding these comment lines)`,
       '',
       csvData
@@ -85,7 +116,11 @@ export class AuditExportService {
   /**
    * Export audit trail to detailed CSV with summary
    */
-  public async exportAuditTrailToCSV(auditTrail: AuditTrail, filename: string): Promise<void> {
+  public async exportAuditTrailToCSV(
+    auditTrail: AuditTrail,
+    filename: string,
+    context: AuditExportContext
+  ): Promise<void> {
     const summaryHeaders = [
       'Case Number',
       'Workflow ID',
@@ -162,14 +197,26 @@ export class AuditExportService {
       ...auditTrail.entries.map(entry => this.entryToCSVRow(entry))
     ].join('\n');
 
-    // Calculate hash for integrity verification
+    const generatedAt = new Date().toISOString();
     const hash = await calculateSHA256Secure(csvData);
+    const signaturePayload = await this.signAuditExport(
+      {
+        exportFormat: 'csv',
+        exportType: 'trail',
+        generatedAt,
+        totalEntries: auditTrail.summary.totalEvents,
+        hash: hash.toUpperCase()
+      },
+      context
+    );
     
     const csvContent = [
-      '# Striae Audit Trail Export - Generated: ' + new Date().toISOString(),
+      '# Striae Audit Trail Export - Generated: ' + generatedAt,
       `# Case: ${auditTrail.caseNumber} | Workflow: ${auditTrail.workflowId}`,
       `# Total Events: ${auditTrail.summary.totalEvents}`,
       `# SHA-256 Hash: ${hash.toUpperCase()}`,
+      `# Audit Signature Metadata: ${JSON.stringify(signaturePayload.signatureMetadata)}`,
+      `# Audit Signature: ${JSON.stringify(signaturePayload.signature)}`,
       '# Verification: Recalculate SHA-256 of data rows only (excluding these comment lines)',
       '',
       '# AUDIT TRAIL SUMMARY',
@@ -305,13 +352,22 @@ export class AuditExportService {
   /**
    * Export audit entries to JSON format (for technical analysis)
    */
-  public async exportToJSON(entries: ValidationAuditEntry[], filename: string): Promise<void> {
+  public async exportToJSON(
+    entries: ValidationAuditEntry[],
+    filename: string,
+    context: AuditExportContext
+  ): Promise<void> {
+    const generatedAt = new Date().toISOString();
+
     const exportData = {
       metadata: {
-        exportTimestamp: new Date().toISOString(),
+        exportTimestamp: generatedAt,
         exportVersion: '1.0',
         totalEntries: entries.length,
-        application: 'Striae'
+        application: 'Striae',
+        exportType: 'entries' as AuditExportType,
+        scopeType: context.scopeType,
+        scopeIdentifier: context.scopeIdentifier
       },
       auditEntries: entries
     };
@@ -320,13 +376,25 @@ export class AuditExportService {
     
     // Calculate hash for integrity verification
     const hash = await calculateSHA256Secure(jsonContent);
+    const signaturePayload = await this.signAuditExport(
+      {
+        exportFormat: 'json',
+        exportType: exportData.metadata.exportType,
+        generatedAt,
+        totalEntries: entries.length,
+        hash: hash.toUpperCase()
+      },
+      context
+    );
     
     // Create final export with hash included
     const finalExportData = {
       metadata: {
         ...exportData.metadata,
         hash: hash.toUpperCase(),
-        integrityNote: 'Verify by recalculating SHA256 of this entire JSON content'
+        integrityNote: 'Verify hash and signature before trusting this export',
+        signatureVersion: signaturePayload.signatureMetadata.signatureVersion,
+        signature: signaturePayload.signature
       },
       auditEntries: entries
     };
@@ -338,12 +406,22 @@ export class AuditExportService {
   /**
    * Export full audit trail to JSON
    */
-  public async exportAuditTrailToJSON(auditTrail: AuditTrail, filename: string): Promise<void> {
+  public async exportAuditTrailToJSON(
+    auditTrail: AuditTrail,
+    filename: string,
+    context: AuditExportContext
+  ): Promise<void> {
+    const generatedAt = new Date().toISOString();
+
     const exportData = {
       metadata: {
-        exportTimestamp: new Date().toISOString(),
+        exportTimestamp: generatedAt,
         exportVersion: '1.0',
-        application: 'Striae'
+        totalEntries: auditTrail.summary.totalEvents,
+        application: 'Striae',
+        exportType: 'trail' as AuditExportType,
+        scopeType: context.scopeType,
+        scopeIdentifier: context.scopeIdentifier
       },
       auditTrail
     };
@@ -352,13 +430,25 @@ export class AuditExportService {
     
     // Calculate hash for integrity verification
     const hash = await calculateSHA256Secure(jsonContent);
+    const signaturePayload = await this.signAuditExport(
+      {
+        exportFormat: 'json',
+        exportType: exportData.metadata.exportType,
+        generatedAt,
+        totalEntries: auditTrail.summary.totalEvents,
+        hash: hash.toUpperCase()
+      },
+      context
+    );
     
     // Create final export with hash included
     const finalExportData = {
       metadata: {
         ...exportData.metadata,
         hash: hash.toUpperCase(),
-        integrityNote: 'Verify by recalculating SHA256 of this entire JSON content'
+        integrityNote: 'Verify hash and signature before trusting this export',
+        signatureVersion: signaturePayload.signatureMetadata.signatureVersion,
+        signature: signaturePayload.signature
       },
       auditTrail
     };
@@ -370,9 +460,10 @@ export class AuditExportService {
   /**
    * Generate audit report summary text
    */
-  public async generateReportSummary(auditTrail: AuditTrail): Promise<string> {
+  public async generateReportSummary(auditTrail: AuditTrail, context: AuditExportContext): Promise<string> {
     const summary = auditTrail.summary;
     const successRate = ((summary.successfulEvents / summary.totalEvents) * 100).toFixed(1);
+    const generatedAt = new Date().toISOString();
     
     const reportContent = `
 STRIAE AUDIT TRAIL REPORT
@@ -380,7 +471,7 @@ STRIAE AUDIT TRAIL REPORT
 
 Case Number: ${auditTrail.caseNumber}
 Workflow ID: ${auditTrail.workflowId}
-Report Generated: ${new Date().toLocaleString()}
+Report Generated: ${new Date(generatedAt).toLocaleString()}
 
 SUMMARY STATISTICS
 ------------------
@@ -425,24 +516,116 @@ This report contains ${summary.totalEvents} audit entries providing complete for
 Generated by Striae
     `.trim();
 
-    // Calculate hash for integrity verification
+    return this.appendSignedReportIntegrity(
+      reportContent,
+      context,
+      summary.totalEvents,
+      generatedAt
+    );
+  }
+
+  /**
+   * Append signed integrity metadata to a plain-text audit report.
+   */
+  public async appendSignedReportIntegrity(
+    reportContent: string,
+    context: AuditExportContext,
+    totalEntries: number,
+    generatedAt: string = new Date().toISOString()
+  ): Promise<string> {
     const hash = await calculateSHA256Secure(reportContent);
-    
-    // Add hash section to the report
+    const signaturePayload = await this.signAuditExport(
+      {
+        exportFormat: 'txt',
+        exportType: 'report',
+        generatedAt,
+        totalEntries,
+        hash: hash.toUpperCase()
+      },
+      context
+    );
+
     return reportContent + `
 
 ============================
 INTEGRITY VERIFICATION
 ============================
 Report Content SHA-256 Hash: ${hash.toUpperCase()}
+Audit Signature Metadata: ${JSON.stringify(signaturePayload.signatureMetadata)}
+Audit Signature: ${JSON.stringify(signaturePayload.signature)}
 
 Verification Instructions:
 1. Copy the entire report content above the "INTEGRITY VERIFICATION" section
 2. Calculate SHA256 hash of that content (excluding this verification section)
-3. Compare with the hash value above to verify report integrity
+3. Validate audit signature metadata and signature with the Striae Hash Utility
+4. Confirm both hash and signature validation pass before relying on this report
 
-This hash ensures the audit report has not been modified since generation.
+This report requires both hash and signature validation for tamper detection.
 Generated by Striae`;
+  }
+
+  private buildAuditSignaturePayload(
+    exportFormat: AuditExportFormat,
+    exportType: AuditExportType,
+    generatedAt: string,
+    totalEntries: number,
+    hash: string,
+    context: AuditExportContext
+  ): AuditExportSigningPayload {
+    return {
+      signatureVersion: AUDIT_EXPORT_SIGNATURE_VERSION,
+      exportFormat,
+      exportType,
+      scopeType: context.scopeType,
+      scopeIdentifier: context.scopeIdentifier,
+      generatedAt,
+      totalEntries,
+      hash: hash.toUpperCase()
+    };
+  }
+
+  private async signAuditExport(
+    payload: {
+      exportFormat: AuditExportFormat;
+      exportType: AuditExportType;
+      generatedAt: string;
+      totalEntries: number;
+      hash: string;
+    },
+    context: AuditExportContext
+  ): Promise<{
+    signatureMetadata: AuditExportSigningPayload;
+    signature: {
+      algorithm: string;
+      keyId: string;
+      signedAt: string;
+      value: string;
+    };
+  }> {
+    const signatureMetadata = this.buildAuditSignaturePayload(
+      payload.exportFormat,
+      payload.exportType,
+      payload.generatedAt,
+      payload.totalEntries,
+      payload.hash,
+      context
+    );
+
+    const caseNumber =
+      context.scopeType === 'case'
+        ? (context.caseNumber || context.scopeIdentifier)
+        : undefined;
+
+    const signatureResponse = await signAuditExportData(
+      context.user,
+      signatureMetadata,
+      { caseNumber }
+    );
+
+    return {
+      signatureMetadata,
+      signature: signatureResponse.signature
+    };
   }
 
   /**

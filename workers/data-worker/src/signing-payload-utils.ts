@@ -35,8 +35,24 @@ export interface ConfirmationSigningPayload {
   confirmations: Record<string, ConfirmationRecord[]>;
 }
 
+export type AuditExportFormat = 'csv' | 'json' | 'txt';
+export type AuditExportType = 'entries' | 'trail' | 'report';
+export type AuditExportScopeType = 'case' | 'user';
+
+export interface AuditExportSigningPayload {
+  signatureVersion: string;
+  exportFormat: AuditExportFormat;
+  exportType: AuditExportType;
+  scopeType: AuditExportScopeType;
+  scopeIdentifier: string;
+  generatedAt: string;
+  totalEntries: number;
+  hash: string;
+}
+
 export const FORENSIC_MANIFEST_VERSION = '2.0';
 export const CONFIRMATION_SIGNATURE_VERSION = '2.0';
+export const AUDIT_EXPORT_SIGNATURE_VERSION = '1.0';
 export const FORENSIC_MANIFEST_SIGNATURE_ALGORITHM = 'RSASSA-PKCS1-v1_5-SHA-256';
 
 const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
@@ -150,6 +166,48 @@ export function isValidConfirmationPayload(
   return true;
 }
 
+export function isValidAuditExportPayload(
+  candidate: Partial<AuditExportSigningPayload>
+): candidate is AuditExportSigningPayload {
+  if (!candidate) {
+    return false;
+  }
+
+  if (candidate.signatureVersion !== AUDIT_EXPORT_SIGNATURE_VERSION) {
+    return false;
+  }
+
+  if (candidate.exportFormat !== 'csv' && candidate.exportFormat !== 'json' && candidate.exportFormat !== 'txt') {
+    return false;
+  }
+
+  if (candidate.exportType !== 'entries' && candidate.exportType !== 'trail' && candidate.exportType !== 'report') {
+    return false;
+  }
+
+  if (candidate.scopeType !== 'case' && candidate.scopeType !== 'user') {
+    return false;
+  }
+
+  if (typeof candidate.scopeIdentifier !== 'string' || candidate.scopeIdentifier.trim().length === 0) {
+    return false;
+  }
+
+  if (typeof candidate.generatedAt !== 'string' || Number.isNaN(Date.parse(candidate.generatedAt))) {
+    return false;
+  }
+
+  if (typeof candidate.totalEntries !== 'number' || candidate.totalEntries < 0) {
+    return false;
+  }
+
+  if (typeof candidate.hash !== 'string' || !SHA256_HEX_REGEX.test(candidate.hash)) {
+    return false;
+  }
+
+  return true;
+}
+
 export function createManifestSigningPayload(manifest: ForensicManifestPayload): string {
   const canonicalPayload = {
     manifestVersion: FORENSIC_MANIFEST_VERSION,
@@ -211,6 +269,21 @@ export function createConfirmationSigningPayload(confirmationData: ConfirmationS
         : {})
     },
     confirmations: normalizeConfirmations(confirmationData.confirmations)
+  };
+
+  return JSON.stringify(canonicalPayload);
+}
+
+export function createAuditExportSigningPayload(auditExportData: AuditExportSigningPayload): string {
+  const canonicalPayload = {
+    signatureVersion: auditExportData.signatureVersion,
+    exportFormat: auditExportData.exportFormat,
+    exportType: auditExportData.exportType,
+    scopeType: auditExportData.scopeType,
+    scopeIdentifier: auditExportData.scopeIdentifier,
+    generatedAt: auditExportData.generatedAt,
+    totalEntries: auditExportData.totalEntries,
+    hash: auditExportData.hash.toUpperCase()
   };
 
   return JSON.stringify(canonicalPayload);
