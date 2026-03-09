@@ -64,11 +64,11 @@ npm run deploy:all
 
 ## [2026-03-09] - *[Patch Release v3.0.4](https://github.com/striae-org/striae/releases/tag/v3.0.4)*
 
-- **📦 Package Scope and Version Alignment** - Migrated distributable package identity to `@striae-org/striae` and finalized package metadata at `v3.0.3`
+- **📦 Package Scope and Version Alignment** - Migrated distributable package identity to `@striae-org/striae` and finalized package metadata at `v3.0.4`
 - **🧩 Worker Source Packaging Expansion** - Included required worker source modules in npm package payload while excluding runtime worker entry files for safer distribution
 - **⚙️ Deploy-Config Sync Hardening** - Refined `deploy-config.sh` to sync non-admin config files, preserve existing `admin-service.json`, and avoid copying example credentials into active config
 - **📘 Installation and Publishing Workflow Updates** - Expanded package install/deploy instructions and added GitHub Packages publish guidance/scripts alongside npmjs registry targeting
-- **🔐 Supported Version Matrix Update** - Updated security support metadata to `v3.0.3` for release alignment
+- **🔐 Supported Version Matrix Update** - Updated security support metadata to `v3.0.4` for release alignment
 
 ## [2026-03-09] - *[Patch Release v3.0.2](https://github.com/striae-org/striae/releases/tag/v3.0.2)*
 
