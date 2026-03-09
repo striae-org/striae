@@ -18,6 +18,13 @@
 
 ## 📋 Changelog
 
+## [2026-03-09] - *[Patch Release v3.0.2](https://github.com/striae-org/striae/releases/tag/v3.0.2)*
+
+- **🧩 PDF Report Modularity Foundations** - Introduced report-format request envelopes and modular PDF worker report loading to support format-specific rendering paths while preserving legacy payload compatibility
+- **📄 Shared Report Type Contracts** - Centralized PDF report interfaces/types and aligned worker/client request handling for cleaner typed boundaries
+- **🧹 Package Version Correction** - Reverted an unintended npm patch increment during the release window to keep package version progression consistent before this release bump
+- **🏷️ PDF Footer Branding Update** - Added the Striae `icon-256` brand mark next to "Notes formatted by Striae" in generated report footers
+
 ## [2026-03-09] - *[Major Security Release v3.0.0](https://github.com/striae-org/striae/releases/tag/v3.0.0)*
 
 - **🛡️ Signed Forensic Manifest Enforcement** - Replaced hash-only confirmation integrity checks with server-issued asymmetric signatures and canonical payload verification to prevent hash-bypass tampering
