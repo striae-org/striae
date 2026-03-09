@@ -21,61 +21,49 @@ This npm package publishes the Striae application source and deployment scaffold
 - Not a small client SDK.
 - Not a zero-config, ready-to-run desktop app.
 
-## Install
+## npm Package, Installation, and Full Deployment
+
+**[Striae on npm](https://github.com/orgs/striae-org/packages/npm/package/striae)**
+
+1) Install the latest package:
 
 ```bash
-npm install @striae-org/striae
+npm i @striae-org/striae
 ```
 
-## First-Time Setup
-
-1. Copy files from `app/config-example/` into `app/config/`.
-2. Set your environment values in `.env` based on `.env.example`.
-3. Create worker config files from each `wrangler.jsonc.example`.
-4. Install dependencies and run locally.
-
-## Common Scripts
+2) Copy the package scaffold into the project root
 
 ```bash
-npm run dev
-npm run build
+cp -R node_modules/@striae-org/striae/. .
+```
+
+3) Reinstall using Striae's own package.json (includes dev deps like wrangler/remix)
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+4) Prepare Firebase admin credentials (required before deploy-config can pass)
+
+```bash
+mkdir -p app/config
+cp -f app/config-example/admin-service.json app/config/admin-service.json
+```
+
+5) Replace `app/config/admin-service.json` with your actual Firebase service account JSON
+
+6) Authenticate Cloudflare CLI
+
+```bash
+npx wrangler login
+```
+
+6) Run guided config + full deployment
+
+```bash
 npm run deploy:all
-npm run deploy-workers
-npm run deploy-pages
-npm run publish:npm
-npm run publish:github:dry-run
-npm run publish:github
 ```
-
-## Publish To GitHub Packages
-
-This repository can publish to GitHub Packages (`npm.pkg.github.com`) in addition to npmjs.
-
-1. Create a GitHub personal access token (classic) with `write:packages` and `read:packages` scopes.
-2. Authenticate npm to GitHub Packages (npm v9+):
-
-```bash
-npm login --scope=@striae-org --auth-type=legacy --registry=https://npm.pkg.github.com
-```
-
-3. Verify package scope and repository metadata in `package.json`.
-4. Dry-run publish to GitHub Packages:
-
-```bash
-npm run publish:github:dry-run
-```
-
-5. Publish to GitHub Packages:
-
-```bash
-npm run publish:github
-```
-
-Notes:
-
-- GitHub Packages requires scoped package names (`@scope/name`).
-- The package scope must match the GitHub user or organization namespace you publish to.
-- Current package name is `@striae-org/striae`.
 
 ## NPM Package Content Policy
 
