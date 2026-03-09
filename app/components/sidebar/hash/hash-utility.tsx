@@ -7,7 +7,9 @@ import {
   validateCaseIntegritySecure,
   verifyForensicManifestSignature
 } from '~/utils/SHA256';
+import { verifyConfirmationSignature } from '~/utils/confirmation-signature';
 import { removeForensicWarning } from '~/components/actions/case-import/validation';
+import type { ConfirmationImportData } from '~/types';
 
 interface HashUtilityProps {
   isOpen: boolean;
@@ -416,7 +418,62 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
       // First, remove forensic warnings if present
       const cleanedContent = removeForensicWarning(content);
       
-      const data = JSON.parse(cleanedContent);
+      const data = JSON.parse(cleanedContent) as Record<string, any>;
+
+      const isConfirmationExportData = Boolean(
+        data?.metadata &&
+        typeof data.metadata.caseNumber === 'string' &&
+        typeof data.metadata.hash === 'string' &&
+        data?.confirmations &&
+        typeof data.confirmations === 'object'
+      );
+
+      if (isConfirmationExportData) {
+        const confirmationData = data as unknown as ConfirmationImportData;
+        const expectedHash = confirmationData.metadata.hash;
+
+        // Confirmation export hash is computed before signature metadata is attached.
+        const {
+          hash: _hash,
+          signature: _signature,
+          signatureVersion: _signatureVersion,
+          ...metadataForHash
+        } = confirmationData.metadata;
+
+        const dataWithoutHash = {
+          ...confirmationData,
+          metadata: metadataForHash
+        };
+
+        const contentForVerification = JSON.stringify(dataWithoutHash, null, 2);
+        const calculatedHash = await calculateSHA256Secure(contentForVerification);
+        const hashValid = calculatedHash.toUpperCase() === expectedHash.toUpperCase();
+
+        const signatureResult = await verifyConfirmationSignature(confirmationData);
+        const isValid = hashValid && signatureResult.isValid;
+
+        const errorMessages: string[] = [];
+        if (!hashValid) {
+          errorMessages.push('Hash mismatch detected in confirmation data');
+        }
+        if (!signatureResult.isValid) {
+          errorMessages.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+        }
+
+        return {
+          isValid,
+          expectedHash: expectedHash.toUpperCase(),
+          calculatedHash: calculatedHash.toUpperCase(),
+          fileName,
+          fileType: 'json',
+          errorMessage: isValid ? undefined : errorMessages.join('; '),
+          details: {
+            signatureValid: signatureResult.isValid,
+            signatureKeyId: signatureResult.keyId
+          }
+        };
+      }
+
       let expectedHash = '';
       
       if (data.metadata?.hash) {
@@ -438,7 +495,7 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
       // This recreates the state BEFORE the hash was added during generation
       const originalData = { ...data };
       if (originalData.metadata) {
-        const { hash, integrityNote, ...metadataWithoutHash } = originalData.metadata;
+        const { hash, integrityNote, signature, signatureVersion, ...metadataWithoutHash } = originalData.metadata;
         originalData.metadata = metadataWithoutHash;
       }
       if (originalData.auditTrail?.metadata) {
@@ -661,6 +718,18 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
                       <span className={styles.resultValue}>{verificationResult.details.validFiles}/{verificationResult.details.totalFiles}</span>
                     </div>
                   </>
+                )}
+                {verificationResult.details?.signatureValid !== undefined && (
+                  <div className={styles.resultRow}>
+                    <span className={styles.resultLabel}>Signature Valid:</span>
+                    <span className={styles.resultValue}>{verificationResult.details.signatureValid ? 'Yes' : 'No'}</span>
+                  </div>
+                )}
+                {verificationResult.details?.signatureKeyId && (
+                  <div className={styles.resultRow}>
+                    <span className={styles.resultLabel}>Signature Key ID:</span>
+                    <span className={styles.resultValue}>{verificationResult.details.signatureKeyId}</span>
+                  </div>
                 )}
                 {verificationResult.expectedHash && verificationResult.fileType !== 'zip' && (
                   <div className={styles.resultRow}>
