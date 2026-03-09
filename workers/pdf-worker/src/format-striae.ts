@@ -359,6 +359,14 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         font-weight: 500;
         flex: 1;
         text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .footer-brand-icon {
+        width: 14px;
+        height: 14px;
+        object-fit: contain;
       }
       .footer-center {
         font-weight: 600;
@@ -509,7 +517,10 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
     </div>
     
     <div class="footer">
-      <div class="footer-left">Notes formatted by Striae</div>
+      <div class="footer-left">
+        <span>Notes formatted by Striae</span>
+        <img class="footer-brand-icon" src="https://app.striae.org/icon-256.png" alt="Striae icon" />
+      </div>
       <div class="footer-center">
         ${userCompany ? userCompany : ''}
       </div>
