@@ -93,7 +93,7 @@ write_env_var() {
     local var_value=$2
     local env_file_value="$var_value"
 
-    if [ "$var_name" = "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" ]; then
+    if [ "$var_name" = "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_PRIVATE_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_PUBLIC_KEY" ]; then
         # Store as a quoted string so sourced .env preserves escaped newline markers (\n)
         env_file_value=${env_file_value//\"/\\\"}
         env_file_value="\"$env_file_value\""
@@ -104,6 +104,10 @@ write_env_var() {
     fi
 
     echo "$var_name=$env_file_value" >> .env
+}
+
+escape_for_sed_replacement() {
+    printf '%s' "$1" | sed -e 's/[&|\\]/\\&/g'
 }
 
 is_admin_service_placeholder() {
@@ -174,6 +178,81 @@ load_admin_service_credentials() {
     echo -e "${GREEN}✅ Imported Firebase service account credentials from $admin_service_path${NC}"
 }
 
+generate_manifest_signing_key_pair() {
+    local private_key_file
+    local public_key_file
+    private_key_file=$(mktemp)
+    public_key_file=$(mktemp)
+
+    if ! node -e "const { generateKeyPairSync } = require('crypto'); const fs = require('fs'); const pair = generateKeyPairSync('rsa', { modulusLength: 2048, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); fs.writeFileSync(process.argv[1], pair.privateKey, 'utf8'); fs.writeFileSync(process.argv[2], pair.publicKey, 'utf8');" "$private_key_file" "$public_key_file"; then
+        rm -f "$private_key_file" "$public_key_file"
+        return 1
+    fi
+
+    local private_key_pem
+    local public_key_pem
+    private_key_pem=$(cat "$private_key_file")
+    public_key_pem=$(cat "$public_key_file")
+    rm -f "$private_key_file" "$public_key_file"
+
+    private_key_pem="${private_key_pem//$'\r'/}"
+    public_key_pem="${public_key_pem//$'\r'/}"
+
+    MANIFEST_SIGNING_PRIVATE_KEY="${private_key_pem//$'\n'/\\n}"
+    MANIFEST_SIGNING_PUBLIC_KEY="${public_key_pem//$'\n'/\\n}"
+
+    export MANIFEST_SIGNING_PRIVATE_KEY
+    export MANIFEST_SIGNING_PUBLIC_KEY
+
+    write_env_var "MANIFEST_SIGNING_PRIVATE_KEY" "$MANIFEST_SIGNING_PRIVATE_KEY"
+    write_env_var "MANIFEST_SIGNING_PUBLIC_KEY" "$MANIFEST_SIGNING_PUBLIC_KEY"
+
+    return 0
+}
+
+configure_manifest_signing_credentials() {
+    echo -e "${BLUE}🛡️ MANIFEST SIGNING CONFIGURATION${NC}"
+    echo "================================="
+
+    local should_generate="false"
+    local regenerate_choice=""
+
+    if [ "$update_env" = "true" ]; then
+        should_generate="true"
+    elif [ -z "$MANIFEST_SIGNING_PRIVATE_KEY" ] || is_placeholder "$MANIFEST_SIGNING_PRIVATE_KEY" || [ -z "$MANIFEST_SIGNING_PUBLIC_KEY" ] || is_placeholder "$MANIFEST_SIGNING_PUBLIC_KEY"; then
+        should_generate="true"
+    else
+        echo -e "${GREEN}Current manifest signing key pair: [HIDDEN]${NC}"
+        read -p "Generate new manifest signing key pair? (press Enter to keep current, or type 'y' to regenerate): " regenerate_choice
+        if [ "$regenerate_choice" = "y" ] || [ "$regenerate_choice" = "Y" ]; then
+            should_generate="true"
+        fi
+    fi
+
+    if [ "$should_generate" = "true" ]; then
+        echo -e "${YELLOW}Generating manifest signing RSA key pair...${NC}"
+        if generate_manifest_signing_key_pair; then
+            echo -e "${GREEN}✅ Manifest signing key pair generated${NC}"
+        else
+            echo -e "${RED}❌ Error: Failed to generate manifest signing key pair${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}✅ Keeping current manifest signing key pair${NC}"
+    fi
+
+    if [ -z "$MANIFEST_SIGNING_KEY_ID" ] || is_placeholder "$MANIFEST_SIGNING_KEY_ID"; then
+        MANIFEST_SIGNING_KEY_ID="forensic-signing-key-v1"
+        export MANIFEST_SIGNING_KEY_ID
+        write_env_var "MANIFEST_SIGNING_KEY_ID" "$MANIFEST_SIGNING_KEY_ID"
+        echo -e "${GREEN}✅ MANIFEST_SIGNING_KEY_ID set to default: $MANIFEST_SIGNING_KEY_ID${NC}"
+    else
+        echo -e "${GREEN}✅ MANIFEST_SIGNING_KEY_ID: $MANIFEST_SIGNING_KEY_ID${NC}"
+    fi
+
+    echo ""
+}
+
 # Validate required variables
 required_vars=(
     # Core Cloudflare Configuration
@@ -225,6 +304,9 @@ required_vars=(
     "ACCOUNT_HASH"
     "API_TOKEN"
     "HMAC_KEY"
+    "MANIFEST_SIGNING_PRIVATE_KEY"
+    "MANIFEST_SIGNING_KEY_ID"
+    "MANIFEST_SIGNING_PUBLIC_KEY"
 )
 
 validate_required_vars() {
@@ -572,6 +654,8 @@ prompt_for_secrets() {
     prompt_for_var "ACCOUNT_HASH" "Cloudflare Images Account Hash"
     prompt_for_var "API_TOKEN" "Cloudflare Images API token (for Images Worker)"
     prompt_for_var "HMAC_KEY" "Cloudflare Images HMAC signing key"
+
+    configure_manifest_signing_credentials
     
     # Reload the updated .env file
     source .env
@@ -704,6 +788,11 @@ update_wrangler_configs() {
     # Update app/config/config.json
     if [ -f "app/config/config.json" ]; then
         echo -e "${YELLOW}    Updating app/config/config.json...${NC}"
+        local escaped_manifest_signing_key_id
+        local escaped_manifest_signing_public_key
+        escaped_manifest_signing_key_id=$(escape_for_sed_replacement "$MANIFEST_SIGNING_KEY_ID")
+        escaped_manifest_signing_public_key=$(escape_for_sed_replacement "$MANIFEST_SIGNING_PUBLIC_KEY")
+
         sed -i "s|\"PAGES_CUSTOM_DOMAIN\"|\"https://$PAGES_CUSTOM_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"DATA_WORKER_CUSTOM_DOMAIN\"|\"https://$DATA_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"AUDIT_WORKER_CUSTOM_DOMAIN\"|\"https://$AUDIT_WORKER_DOMAIN\"|g" app/config/config.json
@@ -712,6 +801,8 @@ update_wrangler_configs() {
         sed -i "s|\"USER_WORKER_CUSTOM_DOMAIN\"|\"https://$USER_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"PDF_WORKER_CUSTOM_DOMAIN\"|\"https://$PDF_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"YOUR_KEYS_AUTH_TOKEN\"|\"$KEYS_AUTH\"|g" app/config/config.json
+        sed -i "s|\"MANIFEST_SIGNING_KEY_ID\"|\"$escaped_manifest_signing_key_id\"|g" app/config/config.json
+        sed -i "s|\"MANIFEST_SIGNING_PUBLIC_KEY\"|\"$escaped_manifest_signing_public_key\"|g" app/config/config.json
         echo -e "${GREEN}      ✅ app config.json updated${NC}"
     fi
     
