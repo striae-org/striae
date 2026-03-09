@@ -1,18 +1,12 @@
-import paths from '~/config/config.json';
 import { ConfirmationImportData } from '~/types';
 import {
   ForensicManifestSignature,
   FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
   ManifestSignatureVerificationResult
 } from './SHA256';
+import { verifySignaturePayload } from './signature-utils';
 
 export const CONFIRMATION_SIGNATURE_VERSION = '2.0';
-
-type ManifestSigningConfig = {
-  manifest_signing_public_keys?: Record<string, string>;
-  manifest_signing_public_key?: string;
-  manifest_signing_key_id?: string;
-};
 
 const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
 
@@ -28,67 +22,6 @@ type ConfirmationEntry = {
 };
 
 type ConfirmationMap = Record<string, ConfirmationEntry[]>;
-
-function normalizePemPublicKey(pem: string): string {
-  return pem.replace(/\\n/g, '\n').trim();
-}
-
-function publicKeyPemToArrayBuffer(publicKeyPem: string): ArrayBuffer {
-  const normalized = normalizePemPublicKey(publicKeyPem);
-  const pemBody = normalized
-    .replace('-----BEGIN PUBLIC KEY-----', '')
-    .replace('-----END PUBLIC KEY-----', '')
-    .replace(/\s+/g, '');
-
-  if (!pemBody) {
-    throw new Error('Confirmation signature verification failed: invalid public key');
-  }
-
-  const binary = atob(pemBody);
-  const bytes = new Uint8Array(binary.length);
-
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
-  }
-
-  return bytes.buffer;
-}
-
-function base64UrlToUint8Array(value: string): Uint8Array {
-  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
-  const padding = '='.repeat((4 - (normalized.length % 4)) % 4);
-  const decoded = atob(normalized + padding);
-  const bytes = new Uint8Array(decoded.length);
-
-  for (let i = 0; i < decoded.length; i += 1) {
-    bytes[i] = decoded.charCodeAt(i);
-  }
-
-  return bytes;
-}
-
-function getVerificationPublicKey(keyId: string): string | null {
-  const config = paths as unknown as ManifestSigningConfig;
-  const keyMap = config.manifest_signing_public_keys;
-
-  if (keyMap && typeof keyMap === 'object') {
-    const mappedKey = keyMap[keyId];
-    if (typeof mappedKey === 'string' && mappedKey.trim().length > 0) {
-      return mappedKey;
-    }
-  }
-
-  if (
-    typeof config.manifest_signing_key_id === 'string' &&
-    config.manifest_signing_key_id === keyId &&
-    typeof config.manifest_signing_public_key === 'string' &&
-    config.manifest_signing_public_key.trim().length > 0
-  ) {
-    return config.manifest_signing_public_key;
-  }
-
-  return null;
-}
 
 function hasValidConfirmationEntry(entry: Partial<ConfirmationEntry>): entry is ConfirmationEntry {
   return (
@@ -235,21 +168,6 @@ export async function verifyConfirmationSignature(
     };
   }
 
-  if (signature.algorithm !== FORENSIC_MANIFEST_SIGNATURE_ALGORITHM) {
-    return {
-      isValid: false,
-      keyId: signature.keyId,
-      error: `Unsupported confirmation signature algorithm: ${signature.algorithm}`
-    };
-  }
-
-  if (!signature.keyId || !signature.value) {
-    return {
-      isValid: false,
-      error: 'Missing confirmation signature key ID or value'
-    };
-  }
-
   if (!isValidConfirmationData(confirmationData)) {
     return {
       isValid: false,
@@ -258,49 +176,18 @@ export async function verifyConfirmationSignature(
     };
   }
 
-  const publicKeyPem = getVerificationPublicKey(signature.keyId);
-  if (!publicKeyPem) {
-    return {
-      isValid: false,
-      keyId: signature.keyId,
-      error: `No verification key configured for key ID: ${signature.keyId}`
-    };
-  }
+  const payload = createConfirmationSigningPayload(confirmationData, signatureVersion);
 
-  try {
-    const key = await crypto.subtle.importKey(
-      'spki',
-      publicKeyPemToArrayBuffer(publicKeyPem),
-      {
-        name: 'RSASSA-PKCS1-v1_5',
-        hash: 'SHA-256'
-      },
-      false,
-      ['verify']
-    );
-
-    const payload = createConfirmationSigningPayload(confirmationData, signatureVersion);
-    const signatureBytes = base64UrlToUint8Array(signature.value);
-    const signatureBuffer = new Uint8Array(signatureBytes.byteLength);
-    signatureBuffer.set(signatureBytes);
-
-    const verified = await crypto.subtle.verify(
-      { name: 'RSASSA-PKCS1-v1_5' },
-      key,
-      signatureBuffer,
-      new TextEncoder().encode(payload)
-    );
-
-    return {
-      isValid: verified,
-      keyId: signature.keyId,
-      error: verified ? undefined : 'Confirmation signature verification failed'
-    };
-  } catch (error) {
-    return {
-      isValid: false,
-      keyId: signature.keyId,
-      error: error instanceof Error ? error.message : 'Confirmation signature verification failed'
-    };
-  }
+  return verifySignaturePayload(
+    payload,
+    signature,
+    FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
+    {
+      unsupportedAlgorithmPrefix: 'Unsupported confirmation signature algorithm',
+      missingKeyOrValueError: 'Missing confirmation signature key ID or value',
+      noVerificationKeyPrefix: 'No verification key configured for key ID',
+      invalidPublicKeyError: 'Confirmation signature verification failed: invalid public key',
+      verificationFailedError: 'Confirmation signature verification failed'
+    }
+  );
 }

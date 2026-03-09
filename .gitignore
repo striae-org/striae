@@ -5,9 +5,6 @@ dist/
 archive/
 wiki/
 
-# Files
-app/routes/home/home.tsx
-
 # Workers
 workers/audit-worker/src/audit-worker.ts
 workers/data-worker/src/data-worker.ts

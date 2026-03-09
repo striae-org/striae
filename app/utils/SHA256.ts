@@ -4,7 +4,7 @@
  * Provides enhanced security compared to CRC32 for tamper detection
  */
 
-import paths from '~/config/config.json';
+import { verifySignaturePayload } from './signature-utils';
 
 export const FORENSIC_MANIFEST_VERSION = '2.0';
 export const FORENSIC_MANIFEST_SIGNATURE_ALGORITHM = 'RSASSA-PKCS1-v1_5-SHA-256';
@@ -34,12 +34,6 @@ export interface ManifestSignatureVerificationResult {
   keyId?: string;
   error?: string;
 }
-
-type ManifestSigningConfig = {
-  manifest_signing_public_keys?: Record<string, string>;
-  manifest_signing_public_key?: string;
-  manifest_signing_key_id?: string;
-};
 
 const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
 
@@ -122,67 +116,6 @@ export function createManifestSigningPayload(
   return JSON.stringify(canonicalPayload);
 }
 
-function normalizePemPublicKey(pem: string): string {
-  return pem.replace(/\\n/g, '\n').trim();
-}
-
-function publicKeyPemToArrayBuffer(publicKeyPem: string): ArrayBuffer {
-  const normalized = normalizePemPublicKey(publicKeyPem);
-  const pemBody = normalized
-    .replace('-----BEGIN PUBLIC KEY-----', '')
-    .replace('-----END PUBLIC KEY-----', '')
-    .replace(/\s+/g, '');
-
-  if (!pemBody) {
-    throw new Error('Manifest signature verification failed: invalid public key');
-  }
-
-  const binary = atob(pemBody);
-  const bytes = new Uint8Array(binary.length);
-
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
-  }
-
-  return bytes.buffer;
-}
-
-function base64UrlToUint8Array(value: string): Uint8Array {
-  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
-  const padding = '='.repeat((4 - (normalized.length % 4)) % 4);
-  const decoded = atob(normalized + padding);
-  const bytes = new Uint8Array(decoded.length);
-
-  for (let i = 0; i < decoded.length; i += 1) {
-    bytes[i] = decoded.charCodeAt(i);
-  }
-
-  return bytes;
-}
-
-function getManifestVerificationPublicKey(keyId: string): string | null {
-  const config = paths as unknown as ManifestSigningConfig;
-  const keyMap = config.manifest_signing_public_keys;
-
-  if (keyMap && typeof keyMap === 'object') {
-    const mappedKey = keyMap[keyId];
-    if (typeof mappedKey === 'string' && mappedKey.trim().length > 0) {
-      return mappedKey;
-    }
-  }
-
-  if (
-    typeof config.manifest_signing_key_id === 'string' &&
-    config.manifest_signing_key_id === keyId &&
-    typeof config.manifest_signing_public_key === 'string' &&
-    config.manifest_signing_public_key.trim().length > 0
-  ) {
-    return config.manifest_signing_public_key;
-  }
-
-  return null;
-}
-
 /**
  * Verify manifest signature using configured public key(s).
  */
@@ -204,21 +137,6 @@ export async function verifyForensicManifestSignature(
     };
   }
 
-  if (manifest.signature.algorithm !== FORENSIC_MANIFEST_SIGNATURE_ALGORITHM) {
-    return {
-      isValid: false,
-      keyId: manifest.signature.keyId,
-      error: `Unsupported signature algorithm: ${manifest.signature.algorithm}`
-    };
-  }
-
-  if (!manifest.signature.keyId || !manifest.signature.value) {
-    return {
-      isValid: false,
-      error: 'Missing signature key ID or value'
-    };
-  }
-
   const manifestData = extractForensicManifestData(manifest);
   if (!manifestData) {
     return {
@@ -228,50 +146,20 @@ export async function verifyForensicManifestSignature(
     };
   }
 
-  const publicKeyPem = getManifestVerificationPublicKey(manifest.signature.keyId);
-  if (!publicKeyPem) {
-    return {
-      isValid: false,
-      keyId: manifest.signature.keyId,
-      error: `No verification key configured for key ID: ${manifest.signature.keyId}`
-    };
-  }
+  const payload = createManifestSigningPayload(manifestData, manifest.manifestVersion);
 
-  try {
-    const key = await crypto.subtle.importKey(
-      'spki',
-      publicKeyPemToArrayBuffer(publicKeyPem),
-      {
-        name: 'RSASSA-PKCS1-v1_5',
-        hash: 'SHA-256'
-      },
-      false,
-      ['verify']
-    );
-
-    const payload = createManifestSigningPayload(manifestData, manifest.manifestVersion);
-    const signatureBytes = base64UrlToUint8Array(manifest.signature.value);
-    const signatureBuffer = new Uint8Array(signatureBytes.byteLength);
-    signatureBuffer.set(signatureBytes);
-    const verified = await crypto.subtle.verify(
-      { name: 'RSASSA-PKCS1-v1_5' },
-      key,
-      signatureBuffer,
-      new TextEncoder().encode(payload)
-    );
-
-    return {
-      isValid: verified,
-      keyId: manifest.signature.keyId,
-      error: verified ? undefined : 'Manifest signature verification failed'
-    };
-  } catch (error) {
-    return {
-      isValid: false,
-      keyId: manifest.signature.keyId,
-      error: error instanceof Error ? error.message : 'Manifest signature verification failed'
-    };
-  }
+  return verifySignaturePayload(
+    payload,
+    manifest.signature,
+    FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
+    {
+      unsupportedAlgorithmPrefix: 'Unsupported signature algorithm',
+      missingKeyOrValueError: 'Missing signature key ID or value',
+      noVerificationKeyPrefix: 'No verification key configured for key ID',
+      invalidPublicKeyError: 'Manifest signature verification failed: invalid public key',
+      verificationFailedError: 'Manifest signature verification failed'
+    }
+  );
 }
 
 /**
