@@ -1,5 +1,9 @@
 # 🔫 Striae - A Firearms Examiner's Comparison Companion
 
+## npm Package
+
+**[Striae on npm](https://www.npmjs.com/package/@striae/striae)**
+
 ## 🌐 Application URL
 
 **[Live App](https://www.striae.org)**
