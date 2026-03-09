@@ -2,7 +2,7 @@
 
 ## npm Package, Installation, and Full Deployment
 
-**[Striae on npm](https://www.npmjs.com/package/@striae-org/striae)**
+**[Striae on npm](https://github.com/orgs/striae-org/packages/npm/package/striae)**
 
 1) Install the latest package:
 
