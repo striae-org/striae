@@ -88,22 +88,78 @@ fi
 echo -e "${YELLOW}📖 Loading environment variables from .env...${NC}"
 source .env
 
+escape_for_sed_pattern() {
+    printf '%s' "$1" | sed -e 's/[][\\.^$*+?{}|()]/\\&/g'
+}
+
+dedupe_env_var_entries() {
+    local var_name=$1
+    local expected_count=1
+    local escaped_var_name
+
+    escaped_var_name=$(escape_for_sed_pattern "$var_name")
+
+    if [ -f ".env.example" ]; then
+        expected_count=$(grep -c "^$escaped_var_name=" .env.example || true)
+
+        if [ "$expected_count" -lt 1 ]; then
+            expected_count=1
+        fi
+    fi
+
+    awk -v key="$var_name" -v keep="$expected_count" '
+        BEGIN { seen = 0 }
+        {
+            if (index($0, key "=") == 1) {
+                seen++
+
+                if (seen > keep) {
+                    next
+                }
+            }
+            print
+        }
+    ' .env > .env.tmp && mv .env.tmp .env
+}
+
+normalize_domain_value() {
+    local domain="$1"
+
+    domain=$(printf '%s' "$domain" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    domain="${domain#http://}"
+    domain="${domain#https://}"
+    domain="${domain%/}"
+
+    printf '%s' "$domain"
+}
+
 write_env_var() {
     local var_name=$1
     local var_value=$2
     local env_file_value="$var_value"
 
-    if [ "$var_name" = "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" ]; then
+    if [ "$var_name" = "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_PRIVATE_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_PUBLIC_KEY" ]; then
         # Store as a quoted string so sourced .env preserves escaped newline markers (\n)
         env_file_value=${env_file_value//\"/\\\"}
         env_file_value="\"$env_file_value\""
     fi
 
-    if grep -q "^$var_name=" .env; then
-        grep -v "^$var_name=" .env > .env.tmp && mv .env.tmp .env
-    fi
+    local escaped_var_name
+    local replacement_line
+    escaped_var_name=$(escape_for_sed_pattern "$var_name")
+    replacement_line=$(escape_for_sed_replacement "$var_name=$env_file_value")
 
-    echo "$var_name=$env_file_value" >> .env
+    if grep -q "^$escaped_var_name=" .env; then
+        # Replace all occurrences so intentional duplicates in .env.example stay in sync.
+        sed -i "s|^$escaped_var_name=.*|$replacement_line|g" .env
+        dedupe_env_var_entries "$var_name"
+    else
+        echo "$var_name=$env_file_value" >> .env
+    fi
+}
+
+escape_for_sed_replacement() {
+    printf '%s' "$1" | sed -e 's/[&|\\]/\\&/g'
 }
 
 is_admin_service_placeholder() {
@@ -174,6 +230,81 @@ load_admin_service_credentials() {
     echo -e "${GREEN}✅ Imported Firebase service account credentials from $admin_service_path${NC}"
 }
 
+generate_manifest_signing_key_pair() {
+    local private_key_file
+    local public_key_file
+    private_key_file=$(mktemp)
+    public_key_file=$(mktemp)
+
+    if ! node -e "const { generateKeyPairSync } = require('crypto'); const fs = require('fs'); const pair = generateKeyPairSync('rsa', { modulusLength: 2048, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); fs.writeFileSync(process.argv[1], pair.privateKey, 'utf8'); fs.writeFileSync(process.argv[2], pair.publicKey, 'utf8');" "$private_key_file" "$public_key_file"; then
+        rm -f "$private_key_file" "$public_key_file"
+        return 1
+    fi
+
+    local private_key_pem
+    local public_key_pem
+    private_key_pem=$(cat "$private_key_file")
+    public_key_pem=$(cat "$public_key_file")
+    rm -f "$private_key_file" "$public_key_file"
+
+    private_key_pem="${private_key_pem//$'\r'/}"
+    public_key_pem="${public_key_pem//$'\r'/}"
+
+    MANIFEST_SIGNING_PRIVATE_KEY="${private_key_pem//$'\n'/\\n}"
+    MANIFEST_SIGNING_PUBLIC_KEY="${public_key_pem//$'\n'/\\n}"
+
+    export MANIFEST_SIGNING_PRIVATE_KEY
+    export MANIFEST_SIGNING_PUBLIC_KEY
+
+    write_env_var "MANIFEST_SIGNING_PRIVATE_KEY" "$MANIFEST_SIGNING_PRIVATE_KEY"
+    write_env_var "MANIFEST_SIGNING_PUBLIC_KEY" "$MANIFEST_SIGNING_PUBLIC_KEY"
+
+    return 0
+}
+
+configure_manifest_signing_credentials() {
+    echo -e "${BLUE}🛡️ MANIFEST SIGNING CONFIGURATION${NC}"
+    echo "================================="
+
+    local should_generate="false"
+    local regenerate_choice=""
+
+    if [ "$update_env" = "true" ]; then
+        should_generate="true"
+    elif [ -z "$MANIFEST_SIGNING_PRIVATE_KEY" ] || is_placeholder "$MANIFEST_SIGNING_PRIVATE_KEY" || [ -z "$MANIFEST_SIGNING_PUBLIC_KEY" ] || is_placeholder "$MANIFEST_SIGNING_PUBLIC_KEY"; then
+        should_generate="true"
+    else
+        echo -e "${GREEN}Current manifest signing key pair: [HIDDEN]${NC}"
+        read -p "Generate new manifest signing key pair? (press Enter to keep current, or type 'y' to regenerate): " regenerate_choice
+        if [ "$regenerate_choice" = "y" ] || [ "$regenerate_choice" = "Y" ]; then
+            should_generate="true"
+        fi
+    fi
+
+    if [ "$should_generate" = "true" ]; then
+        echo -e "${YELLOW}Generating manifest signing RSA key pair...${NC}"
+        if generate_manifest_signing_key_pair; then
+            echo -e "${GREEN}✅ Manifest signing key pair generated${NC}"
+        else
+            echo -e "${RED}❌ Error: Failed to generate manifest signing key pair${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}✅ Keeping current manifest signing key pair${NC}"
+    fi
+
+    if [ -z "$MANIFEST_SIGNING_KEY_ID" ] || is_placeholder "$MANIFEST_SIGNING_KEY_ID"; then
+        MANIFEST_SIGNING_KEY_ID="forensic-signing-key-v1"
+        export MANIFEST_SIGNING_KEY_ID
+        write_env_var "MANIFEST_SIGNING_KEY_ID" "$MANIFEST_SIGNING_KEY_ID"
+        echo -e "${GREEN}✅ MANIFEST_SIGNING_KEY_ID set to default: $MANIFEST_SIGNING_KEY_ID${NC}"
+    else
+        echo -e "${GREEN}✅ MANIFEST_SIGNING_KEY_ID: $MANIFEST_SIGNING_KEY_ID${NC}"
+    fi
+
+    echo ""
+}
+
 # Validate required variables
 required_vars=(
     # Core Cloudflare Configuration
@@ -225,6 +356,9 @@ required_vars=(
     "ACCOUNT_HASH"
     "API_TOKEN"
     "HMAC_KEY"
+    "MANIFEST_SIGNING_PRIVATE_KEY"
+    "MANIFEST_SIGNING_KEY_ID"
+    "MANIFEST_SIGNING_PUBLIC_KEY"
 )
 
 validate_required_vars() {
@@ -509,12 +643,18 @@ prompt_for_secrets() {
         fi
         
         if [ -n "$new_value" ]; then
+            if [ "$var_name" = "PAGES_CUSTOM_DOMAIN" ] || [[ "$var_name" == *_WORKER_DOMAIN ]]; then
+                new_value=$(normalize_domain_value "$new_value")
+            fi
+
             # Update the .env file
             write_env_var "$var_name" "$new_value"
 
             export "$var_name=$new_value"
             echo -e "${GREEN}✅ $var_name updated${NC}"
         elif [ -n "$current_value" ]; then
+            # Keep values aligned with .env.example ordering and remove stale duplicates.
+            write_env_var "$var_name" "$current_value"
             echo -e "${GREEN}✅ Keeping current value for $var_name${NC}"
         fi
         echo ""
@@ -572,6 +712,8 @@ prompt_for_secrets() {
     prompt_for_var "ACCOUNT_HASH" "Cloudflare Images Account Hash"
     prompt_for_var "API_TOKEN" "Cloudflare Images API token (for Images Worker)"
     prompt_for_var "HMAC_KEY" "Cloudflare Images HMAC signing key"
+
+    configure_manifest_signing_credentials
     
     # Reload the updated .env file
     source .env
@@ -589,6 +731,15 @@ validate_required_vars
 # Function to replace variables in wrangler configuration files
 update_wrangler_configs() {
     echo -e "\n${BLUE}🔧 Updating wrangler configuration files...${NC}"
+
+    local normalized_pages_custom_domain
+    local escaped_pages_custom_domain
+
+    normalized_pages_custom_domain=$(normalize_domain_value "$PAGES_CUSTOM_DOMAIN")
+    PAGES_CUSTOM_DOMAIN="$normalized_pages_custom_domain"
+    export PAGES_CUSTOM_DOMAIN
+    write_env_var "PAGES_CUSTOM_DOMAIN" "$PAGES_CUSTOM_DOMAIN"
+    escaped_pages_custom_domain=$(escape_for_sed_replacement "$PAGES_CUSTOM_DOMAIN")
     
     # Audit Worker
     if [ -f "workers/audit-worker/wrangler.jsonc" ]; then
@@ -603,7 +754,7 @@ update_wrangler_configs() {
     # Update audit-worker source file domain placeholders
     if [ -f "workers/audit-worker/src/audit-worker.ts" ]; then
         echo -e "${YELLOW}  Updating audit-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/audit-worker/src/audit-worker.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/audit-worker/src/audit-worker.ts
         echo -e "${GREEN}    ✅ audit-worker source placeholders updated${NC}"
     fi
     
@@ -620,7 +771,7 @@ update_wrangler_configs() {
     # Update data-worker source file domain placeholders
     if [ -f "workers/data-worker/src/data-worker.ts" ]; then
         echo -e "${YELLOW}  Updating data-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/data-worker/src/data-worker.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/data-worker/src/data-worker.ts
         echo -e "${GREEN}    ✅ data-worker source placeholders updated${NC}"
     fi
     
@@ -636,7 +787,7 @@ update_wrangler_configs() {
     # Update image-worker source file domain placeholders
     if [ -f "workers/image-worker/src/image-worker.ts" ]; then
         echo -e "${YELLOW}  Updating image-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/image-worker/src/image-worker.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/image-worker/src/image-worker.ts
         echo -e "${GREEN}    ✅ image-worker source placeholders updated${NC}"
     fi
     
@@ -652,7 +803,7 @@ update_wrangler_configs() {
     # Update keys-worker source file domain placeholders
     if [ -f "workers/keys-worker/src/keys.ts" ]; then
         echo -e "${YELLOW}  Updating keys-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/keys-worker/src/keys.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/keys-worker/src/keys.ts
         echo -e "${GREEN}    ✅ keys-worker source placeholders updated${NC}"
     fi
     
@@ -668,7 +819,7 @@ update_wrangler_configs() {
     # Update pdf-worker source file domain placeholders
     if [ -f "workers/pdf-worker/src/pdf-worker.ts" ]; then
         echo -e "${YELLOW}  Updating pdf-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/pdf-worker/src/pdf-worker.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/pdf-worker/src/pdf-worker.ts
         echo -e "${GREEN}    ✅ pdf-worker source placeholders updated${NC}"
     fi
     
@@ -685,7 +836,7 @@ update_wrangler_configs() {
     # Update user-worker source file domain placeholders
     if [ -f "workers/user-worker/src/user-worker.ts" ]; then
         echo -e "${YELLOW}  Updating user-worker source placeholders...${NC}"
-        sed -i "s|'PAGES_CUSTOM_DOMAIN'|'https://$PAGES_CUSTOM_DOMAIN'|g" workers/user-worker/src/user-worker.ts
+        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/user-worker/src/user-worker.ts
         sed -i "s|'DATA_WORKER_DOMAIN'|'https://$DATA_WORKER_DOMAIN'|g" workers/user-worker/src/user-worker.ts
         sed -i "s|'IMAGES_WORKER_DOMAIN'|'https://$IMAGES_WORKER_DOMAIN'|g" workers/user-worker/src/user-worker.ts
         echo -e "${GREEN}    ✅ user-worker source placeholders updated${NC}"
@@ -704,7 +855,12 @@ update_wrangler_configs() {
     # Update app/config/config.json
     if [ -f "app/config/config.json" ]; then
         echo -e "${YELLOW}    Updating app/config/config.json...${NC}"
-        sed -i "s|\"PAGES_CUSTOM_DOMAIN\"|\"https://$PAGES_CUSTOM_DOMAIN\"|g" app/config/config.json
+        local escaped_manifest_signing_key_id
+        local escaped_manifest_signing_public_key
+        escaped_manifest_signing_key_id=$(escape_for_sed_replacement "$MANIFEST_SIGNING_KEY_ID")
+        escaped_manifest_signing_public_key=$(escape_for_sed_replacement "$MANIFEST_SIGNING_PUBLIC_KEY")
+
+        sed -i "s|\"url\": \"[^\"]*\"|\"url\": \"https://$escaped_pages_custom_domain\"|g" app/config/config.json
         sed -i "s|\"DATA_WORKER_CUSTOM_DOMAIN\"|\"https://$DATA_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"AUDIT_WORKER_CUSTOM_DOMAIN\"|\"https://$AUDIT_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"KEYS_WORKER_CUSTOM_DOMAIN\"|\"https://$KEYS_WORKER_DOMAIN\"|g" app/config/config.json
@@ -712,13 +868,15 @@ update_wrangler_configs() {
         sed -i "s|\"USER_WORKER_CUSTOM_DOMAIN\"|\"https://$USER_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"PDF_WORKER_CUSTOM_DOMAIN\"|\"https://$PDF_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"YOUR_KEYS_AUTH_TOKEN\"|\"$KEYS_AUTH\"|g" app/config/config.json
+        sed -i "s|\"MANIFEST_SIGNING_KEY_ID\"|\"$escaped_manifest_signing_key_id\"|g" app/config/config.json
+        sed -i "s|\"MANIFEST_SIGNING_PUBLIC_KEY\"|\"$escaped_manifest_signing_public_key\"|g" app/config/config.json
         echo -e "${GREEN}      ✅ app config.json updated${NC}"
     fi
     
     # Update app/config/meta-config.json
     if [ -f "app/config/meta-config.json" ]; then
         echo -e "${YELLOW}    Updating app/config/meta-config.json...${NC}"
-        sed -i "s|\"PAGES_CUSTOM_DOMAIN\"|\"https://$PAGES_CUSTOM_DOMAIN\"|g" app/config/meta-config.json
+        sed -i "s|\"url\": \"[^\"]*\"|\"url\": \"https://$escaped_pages_custom_domain\"|g" app/config/meta-config.json
         echo -e "${GREEN}      ✅ app meta-config.json updated${NC}"
     fi
     

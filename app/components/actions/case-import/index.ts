@@ -6,6 +6,7 @@ export {
   validateExporterUid, 
   isConfirmationDataFile, 
   validateConfirmationHash, 
+  validateConfirmationSignatureFile,
   validateCaseIntegrity 
 } from './validation';
 

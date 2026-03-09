@@ -187,7 +187,7 @@ fi
 
 # Data Worker
 if ! set_worker_secrets "Data Worker" "workers/data-worker" \
-    "R2_KEY_SECRET"; then
+    "R2_KEY_SECRET" "MANIFEST_SIGNING_PRIVATE_KEY" "MANIFEST_SIGNING_KEY_ID"; then
     echo -e "${YELLOW}⚠️  Skipping Data Worker (not configured)${NC}"
 fi
 

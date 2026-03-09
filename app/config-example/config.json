@@ -7,6 +7,11 @@
   "pdf_worker_url": "PDF_WORKER_CUSTOM_DOMAIN",
   "audit_worker_url": "AUDIT_WORKER_CUSTOM_DOMAIN",
   "keys_auth": "YOUR_KEYS_AUTH_TOKEN",
+  "manifest_signing_key_id": "MANIFEST_SIGNING_KEY_ID",
+  "manifest_signing_public_key": "MANIFEST_SIGNING_PUBLIC_KEY",
+  "manifest_signing_public_keys": {
+    "MANIFEST_SIGNING_KEY_ID": "MANIFEST_SIGNING_PUBLIC_KEY"
+  },
   "max_cases_review": 0,
   "max_files_per_case_review": 0
 }

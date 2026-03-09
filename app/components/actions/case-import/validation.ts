@@ -1,8 +1,9 @@
 import { User } from 'firebase/auth';
 import paths from '~/config/config.json';
 import { getUserApiKey } from '~/utils/auth';
-import { CaseExportData } from '~/types';
-import { calculateSHA256Secure } from '~/utils/SHA256';
+import { CaseExportData, ConfirmationImportData } from '~/types';
+import { calculateSHA256Secure, ManifestSignatureVerificationResult } from '~/utils/SHA256';
+import { verifyConfirmationSignature } from '~/utils/confirmation-signature';
 
 const USER_WORKER_URL = paths.user_worker_url;
 
@@ -113,6 +114,8 @@ export async function validateConfirmationHash(jsonContent: string, expectedHash
       }
     };
     delete dataWithoutHash.metadata.hash;
+    delete dataWithoutHash.metadata.signature;
+    delete dataWithoutHash.metadata.signatureVersion;
     
     const contentForHash = JSON.stringify(dataWithoutHash, null, 2);
     const actualHash = await calculateSHA256Secure(contentForHash);
@@ -174,4 +177,13 @@ export function validateCaseIntegrity(
     isValid: issues.length === 0,
     issues
   };
+}
+
+/**
+ * Validate confirmation data file signature.
+ */
+export async function validateConfirmationSignatureFile(
+  confirmationData: Partial<ConfirmationImportData>
+): Promise<ManifestSignatureVerificationResult> {
+  return verifyConfirmationSignature(confirmationData);
 }

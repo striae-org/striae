@@ -1,7 +1,12 @@
 import { User } from 'firebase/auth';
 import { ImportOptions, ImportResult, ReadOnlyCaseMetadata, FileData } from '~/types';
 import { checkExistingCase } from '../case-manage';
-import { validateCaseIntegritySecure as validateForensicIntegrity } from '~/utils/SHA256';
+import {
+  extractForensicManifestData,
+  SignedForensicManifest,
+  validateCaseIntegritySecure as validateForensicIntegrity,
+  verifyForensicManifestSignature
+} from '~/utils/SHA256';
 import { deleteFile } from '../image-manage';
 import { parseImportZip } from './zip-processing';
 import { 
@@ -124,12 +129,16 @@ export async function importCaseForReview(
   };
   
   let hashValidationPassed = false;
+  let signatureValidationPassed = false;
+  let signatureKeyId: string | undefined;
+  let parsedForensicManifest: SignedForensicManifest | undefined;
   
   try {
     onProgress?.('Parsing ZIP file', 10, 'Extracting archive contents...');
     
     // Step 1: Parse ZIP file
     const { caseData, imageFiles, imageIdMapping, metadata, cleanedContent } = await parseImportZip(zipFile, user);
+    parsedForensicManifest = metadata?.forensicManifest as SignedForensicManifest | undefined;
     result.caseNumber = caseData.metadata.caseNumber;
     importState.caseNumber = result.caseNumber;
     
@@ -162,8 +171,25 @@ export async function importCaseForReview(
     }
     
     // Step 1.5: Validate hash if forensic metadata exists
-    if (metadata?.forensicManifest && cleanedContent) {
+    if (parsedForensicManifest && cleanedContent) {
       onProgress?.('Validating comprehensive integrity', 15, 'Checking all file hashes...');
+
+      const manifestForValidation = extractForensicManifestData(parsedForensicManifest);
+      if (!manifestForValidation) {
+        throw new Error(
+          'Forensic manifest structure is invalid. Import cannot proceed.'
+        );
+      }
+
+      const signatureResult = await verifyForensicManifestSignature(parsedForensicManifest);
+      signatureValidationPassed = signatureResult.isValid;
+      signatureKeyId = signatureResult.keyId;
+
+      if (!signatureResult.isValid) {
+        throw new Error(
+          `Manifest signature validation failed: ${signatureResult.error || 'Unknown signature error'}. Import cannot proceed.`
+        );
+      }
       
       // Extract image files for comprehensive validation
       const imageBlobs: { [filename: string]: Blob } = {};
@@ -175,7 +201,7 @@ export async function importCaseForReview(
       const validation = await validateForensicIntegrity(
         cleanedContent, 
         imageBlobs, 
-        metadata.forensicManifest
+        manifestForValidation
       );
       
       if (!validation.isValid) {
@@ -186,7 +212,11 @@ export async function importCaseForReview(
       }
       
       hashValidationPassed = true;
-      onProgress?.('Complete integrity verified', 18, validation.summary);
+      onProgress?.(
+        'Complete integrity verified',
+        18,
+        `${validation.summary}. Signature verified${signatureKeyId ? ` (${signatureKeyId})` : ''}`
+      );
       
     } else {
       // No forensic manifest found - cannot import
@@ -273,8 +303,14 @@ export async function importCaseForReview(
     onProgress?.('Storing case data', 75, 'Creating case structure...');
     
     // Step 4: Store case data in R2
-    const forensicManifestCreatedAt = metadata?.forensicManifest?.createdAt;
-    await storeCaseDataInR2(user, result.caseNumber, caseData, importedFiles, originalImageIdMapping, forensicManifestCreatedAt);
+    await storeCaseDataInR2(
+      user,
+      result.caseNumber,
+      caseData,
+      importedFiles,
+      originalImageIdMapping,
+      parsedForensicManifest
+    );
     importState.caseDataStored = true;
     
     onProgress?.('Importing annotations', 85, 'Processing annotations...');
@@ -290,7 +326,10 @@ export async function importCaseForReview(
       importedAt: new Date().toISOString(),
       originalExportDate: caseData.metadata.exportDate,
       originalExportedBy: caseData.metadata.exportedBy || 'Unknown',
-      sourceHash: metadata?.forensicManifest?.manifestHash,
+      sourceHash: parsedForensicManifest?.manifestHash,
+      sourceManifestVersion: parsedForensicManifest?.manifestVersion,
+      sourceSignatureKeyId: parsedForensicManifest?.signature?.keyId,
+      sourceSignatureValid: signatureValidationPassed,
       isReadOnly: true
     };
     
@@ -317,7 +356,12 @@ export async function importCaseForReview(
         validationStepsCompleted: result.filesImported + result.annotationsImported,
         validationStepsFailed: 0
       },
-      true // Exporter UID was validated during zip parsing
+      true, // Exporter UID was validated during zip parsing
+      {
+        present: !!parsedForensicManifest,
+        valid: signatureValidationPassed,
+        keyId: signatureKeyId
+      }
     );
     
     auditService.endWorkflow();
@@ -343,7 +387,12 @@ export async function importCaseForReview(
         processingTimeMs: endTime - startTime,
         fileSizeBytes: zipFile.size
       },
-      false // If import failed, exporter UID validation may not have completed
+      false, // If import failed, exporter UID validation may not have completed
+      {
+        present: !!parsedForensicManifest,
+        valid: signatureValidationPassed,
+        keyId: signatureKeyId
+      }
     );
     
     auditService.endWorkflow();

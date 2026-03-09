@@ -1,7 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './hash-utility.module.css';
-import { calculateSHA256Secure, validateCaseIntegritySecure } from '~/utils/SHA256';
+import {
+  calculateSHA256Secure,
+  extractForensicManifestData,
+  ForensicManifestSignature,
+  SignedForensicManifest,
+  validateCaseIntegritySecure,
+  verifyForensicManifestSignature
+} from '~/utils/SHA256';
+import { verifyConfirmationSignature } from '~/utils/confirmation-signature';
+import {
+  AuditExportSigningPayload,
+  verifyAuditExportSignature
+} from '~/utils/audit-export-signature';
 import { removeForensicWarning } from '~/components/actions/case-import/validation';
+import type { ConfirmationImportData } from '~/types';
 
 interface HashUtilityProps {
   isOpen: boolean;
@@ -18,6 +31,8 @@ interface VerificationResult {
   details?: {
     manifestValid?: boolean;
     dataValid?: boolean;
+    signatureValid?: boolean;
+    signatureKeyId?: string;
     imageValidation?: { [filename: string]: boolean };
     totalFiles?: number;
     validFiles?: number;
@@ -193,7 +208,21 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
       }
 
       const manifestContent = await manifestFile.async('text');
-      const manifest = JSON.parse(manifestContent);
+      const manifest = JSON.parse(manifestContent) as SignedForensicManifest;
+      const manifestForValidation = extractForensicManifestData(manifest);
+
+      if (!manifestForValidation) {
+        return {
+          isValid: false,
+          expectedHash: '',
+          calculatedHash: '',
+          fileName,
+          fileType: 'zip',
+          errorMessage: 'Forensic manifest format is invalid or incomplete.'
+        };
+      }
+
+      const signatureResult = await verifyForensicManifestSignature(manifest);
       
       const dataFiles = Object.keys(zipContent.files).filter(name => 
         (name.endsWith('.json') || name.endsWith('.csv')) && name !== 'FORENSIC_MANIFEST.json'
@@ -232,7 +261,7 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
         }
       }));
       
-      const validation = await validateCaseIntegritySecure(dataContent, imageFiles, manifest);
+      const validation = await validateCaseIntegritySecure(dataContent, imageFiles, manifestForValidation);
       
       // TEMPORARY FIX: Handle manifest generation bug for CSV files
       // If the main validation fails but the CSV internal integrity is confirmed,
@@ -265,16 +294,27 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
       
       const finalValidation = customValidationResult || validation;
       
+      const isValid = finalValidation.isValid && signatureResult.isValid;
+      const errorMessages: string[] = [];
+      if (!signatureResult.isValid) {
+        errorMessages.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+      }
+      if (!finalValidation.isValid) {
+        errorMessages.push(finalValidation.errors.join('; '));
+      }
+
       return {
-        isValid: finalValidation.isValid,
-        expectedHash: manifest.manifestHash || '',
+        isValid,
+        expectedHash: manifestForValidation.manifestHash,
         calculatedHash: '',
         fileName,
         fileType: 'zip',
-        errorMessage: finalValidation.isValid ? undefined : finalValidation.errors.join('; '),
+        errorMessage: isValid ? undefined : errorMessages.join('; '),
         details: {
           manifestValid: finalValidation.manifestValid,
           dataValid: finalValidation.dataValid,
+          signatureValid: signatureResult.isValid,
+          signatureKeyId: signatureResult.keyId,
           imageValidation: finalValidation.imageValidation,
           totalFiles: Object.keys(imageFiles).length + 1,
           validFiles: Object.values(finalValidation.imageValidation).filter(v => v).length + (finalValidation.dataValid ? 1 : 0)
@@ -354,8 +394,61 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
       const isValidUntrimmedHex = expectedHash === calculatedHashUntrimmed.toUpperCase();
       const isValidTrimmedHex = expectedHash === calculatedHashTrimmed.toUpperCase();
       
-      const isValid = isValidUntrimmedHex || isValidTrimmedHex;
+      const hashValid = isValidUntrimmedHex || isValidTrimmedHex;
       const calculatedHash = isValidTrimmedHex ? calculatedHashTrimmed : calculatedHashUntrimmed;
+
+      const lines = content.split('\n');
+      const metadataPrefix = 'Audit Signature Metadata: ';
+      const signaturePrefix = 'Audit Signature: ';
+
+      const metadataLine = lines.find((line) => line.startsWith(metadataPrefix));
+      const signatureLine = lines.find((line) => line.startsWith(signaturePrefix));
+
+      if (!metadataLine || !signatureLine) {
+        return {
+          isValid: false,
+          expectedHash,
+          calculatedHash: calculatedHash.toUpperCase(),
+          fileName,
+          fileType: 'txt',
+          errorMessage: 'Missing audit signature metadata or signature. Unsigned audit reports are not trusted.'
+        };
+      }
+
+      let signatureMetadata: Partial<AuditExportSigningPayload>;
+      let signature: ForensicManifestSignature;
+
+      try {
+        signatureMetadata = JSON.parse(metadataLine.slice(metadataPrefix.length)) as Partial<AuditExportSigningPayload>;
+        signature = JSON.parse(signatureLine.slice(signaturePrefix.length)) as ForensicManifestSignature;
+      } catch (error) {
+        return {
+          isValid: false,
+          expectedHash,
+          calculatedHash: calculatedHash.toUpperCase(),
+          fileName,
+          fileType: 'txt',
+          errorMessage: `Invalid audit signature metadata format: ${error instanceof Error ? error.message : 'Unknown parse error'}`
+        };
+      }
+
+      const metadataHashMatches =
+        typeof signatureMetadata.hash === 'string' &&
+        signatureMetadata.hash.toUpperCase() === expectedHash.toUpperCase();
+
+      const signatureResult = await verifyAuditExportSignature(signatureMetadata, signature);
+      const isValid = hashValid && metadataHashMatches && signatureResult.isValid;
+
+      const errorMessages: string[] = [];
+      if (!hashValid) {
+        errorMessages.push('Hash mismatch - audit report content may have been modified or corrupted');
+      }
+      if (!metadataHashMatches) {
+        errorMessages.push('Audit signature metadata hash does not match report hash');
+      }
+      if (!signatureResult.isValid) {
+        errorMessages.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+      }
 
       return {
         isValid,
@@ -363,7 +456,11 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
         calculatedHash: calculatedHash.toUpperCase(),
         fileName,
         fileType: 'txt',
-        errorMessage: isValid ? undefined : 'Hash mismatch - audit report may have been modified or corrupted'
+        errorMessage: isValid ? undefined : errorMessages.join('; '),
+        details: {
+          signatureValid: signatureResult.isValid,
+          signatureKeyId: signatureResult.keyId
+        }
       };
       
     } catch (error) {
@@ -383,7 +480,135 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
       // First, remove forensic warnings if present
       const cleanedContent = removeForensicWarning(content);
       
-      const data = JSON.parse(cleanedContent);
+      const data = JSON.parse(cleanedContent) as Record<string, any>;
+
+      const isConfirmationExportData = Boolean(
+        data?.metadata &&
+        typeof data.metadata.caseNumber === 'string' &&
+        typeof data.metadata.hash === 'string' &&
+        data?.confirmations &&
+        typeof data.confirmations === 'object'
+      );
+
+      if (isConfirmationExportData) {
+        const confirmationData = data as unknown as ConfirmationImportData;
+        const expectedHash = confirmationData.metadata.hash;
+
+        // Confirmation export hash is computed before signature metadata is attached.
+        const {
+          hash: _hash,
+          signature: _signature,
+          signatureVersion: _signatureVersion,
+          ...metadataForHash
+        } = confirmationData.metadata;
+
+        const dataWithoutHash = {
+          ...confirmationData,
+          metadata: metadataForHash
+        };
+
+        const contentForVerification = JSON.stringify(dataWithoutHash, null, 2);
+        const calculatedHash = await calculateSHA256Secure(contentForVerification);
+        const hashValid = calculatedHash.toUpperCase() === expectedHash.toUpperCase();
+
+        const signatureResult = await verifyConfirmationSignature(confirmationData);
+        const isValid = hashValid && signatureResult.isValid;
+
+        const errorMessages: string[] = [];
+        if (!hashValid) {
+          errorMessages.push('Hash mismatch detected in confirmation data');
+        }
+        if (!signatureResult.isValid) {
+          errorMessages.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+        }
+
+        return {
+          isValid,
+          expectedHash: expectedHash.toUpperCase(),
+          calculatedHash: calculatedHash.toUpperCase(),
+          fileName,
+          fileType: 'json',
+          errorMessage: isValid ? undefined : errorMessages.join('; '),
+          details: {
+            signatureValid: signatureResult.isValid,
+            signatureKeyId: signatureResult.keyId
+          }
+        };
+      }
+
+      const isAuditJsonExport = Boolean(
+        data?.metadata &&
+        data.metadata.application === 'Striae' &&
+        (Array.isArray(data.auditEntries) || Boolean(data.auditTrail))
+      );
+
+      if (isAuditJsonExport) {
+        const expectedHash = typeof data.metadata?.hash === 'string' ? data.metadata.hash : '';
+        if (!expectedHash) {
+          return {
+            isValid: false,
+            expectedHash: '',
+            calculatedHash: '',
+            fileName,
+            fileType: 'json',
+            errorMessage: 'No hash found in audit export metadata.'
+          };
+        }
+
+        const {
+          hash: _hash,
+          integrityNote: _integrityNote,
+          signature: _signature,
+          signatureVersion: _signatureVersion,
+          ...metadataWithoutHash
+        } = data.metadata as Record<string, unknown>;
+
+        const originalData = {
+          ...data,
+          metadata: metadataWithoutHash
+        };
+
+        const contentForVerification = JSON.stringify(originalData, null, 2);
+        const calculatedHash = await calculateSHA256Secure(contentForVerification);
+        const hashValid = calculatedHash.toUpperCase() === expectedHash.toUpperCase();
+
+        const signatureMetadata: Partial<AuditExportSigningPayload> = {
+          signatureVersion: data.metadata.signatureVersion,
+          exportFormat: 'json',
+          exportType: data.metadata.exportType,
+          scopeType: data.metadata.scopeType,
+          scopeIdentifier: data.metadata.scopeIdentifier,
+          generatedAt: data.metadata.exportTimestamp,
+          totalEntries: data.metadata.totalEntries,
+          hash: expectedHash.toUpperCase()
+        };
+
+        const signature = data.metadata.signature as ForensicManifestSignature | undefined;
+        const signatureResult = await verifyAuditExportSignature(signatureMetadata, signature);
+        const isValid = hashValid && signatureResult.isValid;
+
+        const errorMessages: string[] = [];
+        if (!hashValid) {
+          errorMessages.push('Hash mismatch detected in audit export data');
+        }
+        if (!signatureResult.isValid) {
+          errorMessages.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+        }
+
+        return {
+          isValid,
+          expectedHash: expectedHash.toUpperCase(),
+          calculatedHash: calculatedHash.toUpperCase(),
+          fileName,
+          fileType: 'json',
+          errorMessage: isValid ? undefined : errorMessages.join('; '),
+          details: {
+            signatureValid: signatureResult.isValid,
+            signatureKeyId: signatureResult.keyId
+          }
+        };
+      }
+
       let expectedHash = '';
       
       if (data.metadata?.hash) {
@@ -405,7 +630,7 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
       // This recreates the state BEFORE the hash was added during generation
       const originalData = { ...data };
       if (originalData.metadata) {
-        const { hash, integrityNote, ...metadataWithoutHash } = originalData.metadata;
+        const { hash, integrityNote, signature, signatureVersion, ...metadataWithoutHash } = originalData.metadata;
         originalData.metadata = metadataWithoutHash;
       }
       if (originalData.auditTrail?.metadata) {
@@ -495,13 +720,85 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
 
       const dataContent = lines.slice(dataStartIndex).join('\n');
       const calculatedHash = await calculateSHA256Secure(dataContent);
+      const hashValid = calculatedHash.toUpperCase() === expectedHash.toUpperCase();
+
+      const isAuditCsvExport = lines.some((line) =>
+        line.startsWith('# Striae Audit Export -') || line.startsWith('# Striae Audit Trail Export -')
+      );
+
+      if (!isAuditCsvExport) {
+        return {
+          isValid: hashValid,
+          expectedHash: expectedHash.toUpperCase(),
+          calculatedHash: calculatedHash.toUpperCase(),
+          fileName,
+          fileType: 'csv'
+        };
+      }
+
+      const metadataPrefix = '# Audit Signature Metadata: ';
+      const signaturePrefix = '# Audit Signature: ';
+
+      const metadataLine = lines.find((line) => line.startsWith(metadataPrefix));
+      const signatureLine = lines.find((line) => line.startsWith(signaturePrefix));
+
+      if (!metadataLine || !signatureLine) {
+        return {
+          isValid: false,
+          expectedHash: expectedHash.toUpperCase(),
+          calculatedHash: calculatedHash.toUpperCase(),
+          fileName,
+          fileType: 'csv',
+          errorMessage: 'Missing audit signature metadata or signature. Unsigned audit CSV exports are not trusted.'
+        };
+      }
+
+      let signatureMetadata: Partial<AuditExportSigningPayload>;
+      let signature: ForensicManifestSignature;
+
+      try {
+        signatureMetadata = JSON.parse(metadataLine.slice(metadataPrefix.length)) as Partial<AuditExportSigningPayload>;
+        signature = JSON.parse(signatureLine.slice(signaturePrefix.length)) as ForensicManifestSignature;
+      } catch (error) {
+        return {
+          isValid: false,
+          expectedHash: expectedHash.toUpperCase(),
+          calculatedHash: calculatedHash.toUpperCase(),
+          fileName,
+          fileType: 'csv',
+          errorMessage: `Invalid audit signature metadata format: ${error instanceof Error ? error.message : 'Unknown parse error'}`
+        };
+      }
+
+      const metadataHashMatches =
+        typeof signatureMetadata.hash === 'string' &&
+        signatureMetadata.hash.toUpperCase() === expectedHash.toUpperCase();
+
+      const signatureResult = await verifyAuditExportSignature(signatureMetadata, signature);
+      const isValid = hashValid && metadataHashMatches && signatureResult.isValid;
+
+      const errorMessages: string[] = [];
+      if (!hashValid) {
+        errorMessages.push('Hash mismatch detected in CSV data');
+      }
+      if (!metadataHashMatches) {
+        errorMessages.push('Audit signature metadata hash does not match CSV hash');
+      }
+      if (!signatureResult.isValid) {
+        errorMessages.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+      }
 
       return {
-        isValid: calculatedHash.toUpperCase() === expectedHash.toUpperCase(),
+        isValid,
         expectedHash: expectedHash.toUpperCase(),
         calculatedHash: calculatedHash.toUpperCase(),
         fileName,
-        fileType: 'csv'
+        fileType: 'csv',
+        errorMessage: isValid ? undefined : errorMessages.join('; '),
+        details: {
+          signatureValid: signatureResult.isValid,
+          signatureKeyId: signatureResult.keyId
+        }
       };
     } catch (error) {
       return {
@@ -537,7 +834,7 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
         
         <div className={styles.content}>
           <p className={styles.description}>
-            Verify the integrity of Striae export files by checking their embedded hashes. 
+            Verify the integrity of Striae export files by checking their embedded hashes and signatures. 
             Upload a JSON, CSV, ZIP, or TXT export to validate that the data hasn't been tampered with or corrupted.
           </p>
 
@@ -580,7 +877,7 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
                   {!dragOver && ' or drag and drop a Striae export file'}
                 </div>
                 <div className={styles.uploadSubtext}>
-                  Supports JSON, CSV, ZIP, and TXT export files with embedded hashes
+                  Supports JSON, CSV, ZIP, and TXT export files with embedded integrity metadata
                 </div>
               </div>
             </div>
@@ -628,6 +925,18 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
                       <span className={styles.resultValue}>{verificationResult.details.validFiles}/{verificationResult.details.totalFiles}</span>
                     </div>
                   </>
+                )}
+                {verificationResult.details?.signatureValid !== undefined && (
+                  <div className={styles.resultRow}>
+                    <span className={styles.resultLabel}>Signature Valid:</span>
+                    <span className={styles.resultValue}>{verificationResult.details.signatureValid ? 'Yes' : 'No'}</span>
+                  </div>
+                )}
+                {verificationResult.details?.signatureKeyId && (
+                  <div className={styles.resultRow}>
+                    <span className={styles.resultLabel}>Signature Key ID:</span>
+                    <span className={styles.resultValue}>{verificationResult.details.signatureKeyId}</span>
+                  </div>
                 )}
                 {verificationResult.expectedHash && verificationResult.fileType !== 'zip' && (
                   <div className={styles.resultRow}>

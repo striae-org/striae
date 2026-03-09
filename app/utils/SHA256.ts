@@ -4,6 +4,164 @@
  * Provides enhanced security compared to CRC32 for tamper detection
  */
 
+import { verifySignaturePayload } from './signature-utils';
+
+export const FORENSIC_MANIFEST_VERSION = '2.0';
+export const FORENSIC_MANIFEST_SIGNATURE_ALGORITHM = 'RSASSA-PKCS1-v1_5-SHA-256';
+
+export interface ForensicManifestData {
+  dataHash: string;
+  imageHashes: { [filename: string]: string };
+  manifestHash: string;
+  totalFiles: number;
+  createdAt: string;
+}
+
+export interface ForensicManifestSignature {
+  algorithm: string;
+  keyId: string;
+  signedAt: string;
+  value: string;
+}
+
+export interface SignedForensicManifest extends ForensicManifestData {
+  manifestVersion?: string;
+  signature?: ForensicManifestSignature;
+}
+
+export interface ManifestSignatureVerificationResult {
+  isValid: boolean;
+  keyId?: string;
+  error?: string;
+}
+
+const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
+
+function normalizeImageHashes(imageHashes: { [filename: string]: string }): { [filename: string]: string } {
+  const normalized: { [filename: string]: string } = {};
+  const sortedFilenames = Object.keys(imageHashes).sort();
+
+  for (const filename of sortedFilenames) {
+    normalized[filename] = imageHashes[filename].toLowerCase();
+  }
+
+  return normalized;
+}
+
+function isValidManifestData(candidate: Partial<ForensicManifestData>): candidate is ForensicManifestData {
+  if (!candidate) {
+    return false;
+  }
+
+  if (typeof candidate.dataHash !== 'string' || !SHA256_HEX_REGEX.test(candidate.dataHash)) {
+    return false;
+  }
+
+  if (!candidate.imageHashes || typeof candidate.imageHashes !== 'object') {
+    return false;
+  }
+
+  for (const hash of Object.values(candidate.imageHashes)) {
+    if (typeof hash !== 'string' || !SHA256_HEX_REGEX.test(hash)) {
+      return false;
+    }
+  }
+
+  if (typeof candidate.manifestHash !== 'string' || !SHA256_HEX_REGEX.test(candidate.manifestHash)) {
+    return false;
+  }
+
+  if (typeof candidate.totalFiles !== 'number' || candidate.totalFiles <= 0) {
+    return false;
+  }
+
+  if (typeof candidate.createdAt !== 'string' || Number.isNaN(Date.parse(candidate.createdAt))) {
+    return false;
+  }
+
+  return true;
+}
+
+export function extractForensicManifestData(candidate: Partial<SignedForensicManifest>): ForensicManifestData | null {
+  if (!isValidManifestData(candidate)) {
+    return null;
+  }
+
+  return {
+    dataHash: candidate.dataHash.toLowerCase(),
+    imageHashes: normalizeImageHashes(candidate.imageHashes),
+    manifestHash: candidate.manifestHash.toLowerCase(),
+    totalFiles: candidate.totalFiles,
+    createdAt: candidate.createdAt
+  };
+}
+
+/**
+ * Build canonical payload for manifest signatures.
+ * Every signer/verifier must use this exact ordering.
+ */
+export function createManifestSigningPayload(
+  manifest: ForensicManifestData,
+  manifestVersion: string = FORENSIC_MANIFEST_VERSION
+): string {
+  const canonicalPayload = {
+    manifestVersion,
+    dataHash: manifest.dataHash.toLowerCase(),
+    imageHashes: normalizeImageHashes(manifest.imageHashes),
+    manifestHash: manifest.manifestHash.toLowerCase(),
+    totalFiles: manifest.totalFiles,
+    createdAt: manifest.createdAt
+  };
+
+  return JSON.stringify(canonicalPayload);
+}
+
+/**
+ * Verify manifest signature using configured public key(s).
+ */
+export async function verifyForensicManifestSignature(
+  manifest: Partial<SignedForensicManifest>
+): Promise<ManifestSignatureVerificationResult> {
+  if (!manifest.signature) {
+    return {
+      isValid: false,
+      error: 'Missing forensic manifest signature'
+    };
+  }
+
+  if (manifest.manifestVersion !== FORENSIC_MANIFEST_VERSION) {
+    return {
+      isValid: false,
+      keyId: manifest.signature.keyId,
+      error: `Unsupported manifest version: ${manifest.manifestVersion || 'unknown'}`
+    };
+  }
+
+  const manifestData = extractForensicManifestData(manifest);
+  if (!manifestData) {
+    return {
+      isValid: false,
+      keyId: manifest.signature.keyId,
+      error: 'Manifest content is malformed'
+    };
+  }
+
+  const payload = createManifestSigningPayload(manifestData, manifest.manifestVersion);
+
+  return verifySignaturePayload(
+    payload,
+    manifest.signature,
+    FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
+    {
+      unsupportedAlgorithmPrefix: 'Unsupported signature algorithm',
+      missingKeyOrValueError: 'Missing signature key ID or value',
+      noVerificationKeyPrefix: 'No verification key configured for key ID',
+      invalidPublicKeyError: 'Manifest signature verification failed: invalid public key',
+      verificationFailedError: 'Manifest signature verification failed'
+    }
+  );
+}
+
 /**
  * Calculate SHA-256 hash for content integrity validation
  * This implementation uses the Web Crypto API's SHA-256 for cryptographically
@@ -24,14 +182,14 @@ export async function calculateSHA256(content: string): Promise<string> {
   if (typeof content !== 'string') {
     throw new Error(`SHA-256 calculation failed: Content must be a string, received ${typeof content}`);
   }
-  
+
   const encoder = new TextEncoder();
   const data = encoder.encode(content);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = new Uint8Array(hashBuffer);
-  
+
   return Array.from(hashArray)
-    .map(byte => byte.toString(16).padStart(2, '0'))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
 }
 
@@ -55,51 +213,39 @@ export async function calculateSHA256Secure(content: string): Promise<string> {
   if (typeof content !== 'string') {
     throw new Error(`SHA-256 secure calculation failed: Content must be a string, received ${typeof content}`);
   }
-  
+
   const encoder = new TextEncoder();
   const originalData = encoder.encode(content);
-  
+
   // Timing attack mitigation: pad to next 64-byte boundary
   // This reduces timing variance while maintaining algorithm correctness
   const BLOCK_SIZE = 64;
   const paddedLength = Math.ceil(originalData.length / BLOCK_SIZE) * BLOCK_SIZE;
   const paddedData = new Uint8Array(paddedLength);
-  
+
   // Copy original data and pad with zeros
   paddedData.set(originalData);
-  // Remaining bytes are already zero-initialized
-  
-  // Calculate hash on the padded data, but we'll need to reconstruct the original
-  // For SHA-256, we actually want to hash the original content, not padded
-  // The timing mitigation here is more about consistent processing time
+
+  // For SHA-256 we hash original content, then add bounded extra work.
   const hashBuffer = await crypto.subtle.digest('SHA-256', originalData);
   const hashArray = new Uint8Array(hashBuffer);
-  
-  // Add a small constant-time delay based on padding to normalize timing
-  // This replaces the trivial dummy operation with a non-trivial digest
-  // over the padded data so the work scales with padding and is less
-  // likely to be optimized away.
+
   const paddingBytes = paddedLength - originalData.length;
   if (paddingBytes > 0) {
-    // Compute a digest over the padded data (discard result) to consume
-    // CPU time proportional to the padded length. We then fold the digest
-    // bytes into a volatile variable to avoid being optimized out.
+    // Compute digest over padded data to reduce timing variance.
     const paddingDigestBuffer = await crypto.subtle.digest('SHA-256', paddedData);
     const paddingDigestArray = new Uint8Array(paddingDigestBuffer);
-    // Fold bytes into a volatile variable
     let volatile = 0;
-    for (let i = 0; i < paddingDigestArray.length; i++) {
+    for (let i = 0; i < paddingDigestArray.length; i += 1) {
       volatile = (volatile * 31) ^ paddingDigestArray[i];
     }
-    // Use volatile in a way the optimizer can't ignore (no-op branch)
     if (volatile === 0xdeadbeef) {
-      // unreachable, prevents removal of volatile usage
       console.debug('');
     }
   }
-  
+
   return Array.from(hashArray)
-    .map(byte => byte.toString(16).padStart(2, '0'))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
 }
 
@@ -121,76 +267,55 @@ export async function calculateSHA256Binary(data: Uint8Array | ArrayBuffer | Blo
   if (!(data instanceof Uint8Array || data instanceof ArrayBuffer || data instanceof Blob)) {
     throw new Error('SHA-256 binary calculation failed: Data must be Uint8Array, ArrayBuffer, or Blob');
   }
-  
+
   let buffer: ArrayBuffer;
-  
+
   if (data instanceof Blob) {
     buffer = await data.arrayBuffer();
   } else if (data instanceof ArrayBuffer) {
     buffer = data;
   } else {
-    // Handle Uint8Array by creating a proper ArrayBuffer
-    buffer = data.buffer instanceof ArrayBuffer 
+    buffer = data.buffer instanceof ArrayBuffer
       ? data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)
       : new ArrayBuffer(data.length);
     if (!(data.buffer instanceof ArrayBuffer)) {
       new Uint8Array(buffer).set(data);
     }
   }
-  
+
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
   const hashArray = new Uint8Array(hashBuffer);
-  
+
   return Array.from(hashArray)
-    .map(byte => byte.toString(16).padStart(2, '0'))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
 }
 
 /**
- * Generate comprehensive file manifest with secure hashes for forensic applications
- * Uses timing-attack resistant SHA-256 calculation for enhanced security
- * 
- * @param dataContent - JSON data content
- * @param imageFiles - Map of filename to image blob
- * @returns Forensic manifest with individual and combined hashes
+ * Generate comprehensive file manifest with secure hashes for forensic applications.
  */
 export async function generateForensicManifestSecure(
   dataContent: string,
   imageFiles: { [filename: string]: Blob }
-): Promise<{
-  dataHash: string;
-  imageHashes: { [filename: string]: string };
-  manifestHash: string;
-  totalFiles: number;
-  createdAt: string;
-}> {
-  // Calculate data file hash using secure version for forensic data
+): Promise<ForensicManifestData> {
   const dataHash = await calculateSHA256Secure(dataContent);
-  
-  // Calculate hashes for all image files
+
   const imageHashes: { [filename: string]: string } = {};
-  
-  // CRITICAL: Process files in sorted order to ensure deterministic JSON serialization
   const sortedFilenames = Object.keys(imageFiles).sort();
   for (const filename of sortedFilenames) {
     imageHashes[filename] = await calculateSHA256Binary(imageFiles[filename]);
   }
-  
-  // Create manifest content for overall hash
-  // CRITICAL: This structure must match exactly what gets saved to the manifest file
-  // (minus the manifestHash field itself to avoid circular reference)
+
   const manifestForHash = {
     dataHash,
     imageHashes,
-    totalFiles: Object.keys(imageFiles).length + 1, // +1 for data file
+    totalFiles: Object.keys(imageFiles).length + 1,
     createdAt: new Date().toISOString()
   };
-  
+
   const manifestContent = JSON.stringify(manifestForHash);
-  
-  // Calculate hash of the manifest itself using secure version
   const manifestHash = await calculateSHA256Secure(manifestContent);
-  
+
   return {
     dataHash,
     imageHashes,
@@ -201,47 +326,31 @@ export async function generateForensicManifestSecure(
 }
 
 /**
- * Generate secure forensic manifest with specific timestamp (for validation purposes)
- * Uses timing-attack resistant SHA-256 calculation for enhanced security
- * This ensures that recreated manifests use the same timestamp as the original
- * to produce identical hashes during validation
+ * Generate secure forensic manifest with specific timestamp (for validation purposes).
  */
 export async function generateForensicManifestWithTimestampSecure(
   dataContent: string,
   imageFiles: { [filename: string]: Blob },
   createdAt: string
-): Promise<{
-  dataHash: string;
-  imageHashes: { [filename: string]: string };
-  manifestHash: string;
-  totalFiles: number;
-  createdAt: string;
-}> {
-  // Calculate data file hash using secure version for forensic data
+): Promise<ForensicManifestData> {
   const dataHash = await calculateSHA256Secure(dataContent);
-  
-  // Calculate hashes for all image files
+
   const imageHashes: { [filename: string]: string } = {};
-  
-  // CRITICAL: Process files in sorted order to ensure deterministic JSON serialization
   const sortedFilenames = Object.keys(imageFiles).sort();
   for (const filename of sortedFilenames) {
     imageHashes[filename] = await calculateSHA256Binary(imageFiles[filename]);
   }
-  
-  // Create manifest content for overall hash using the provided timestamp
+
   const manifestForHash = {
     dataHash,
     imageHashes,
-    totalFiles: Object.keys(imageFiles).length + 1, // +1 for data file
-    createdAt // Use the provided timestamp for exact recreation
+    totalFiles: Object.keys(imageFiles).length + 1,
+    createdAt
   };
-  
+
   const manifestContent = JSON.stringify(manifestForHash);
-  
-  // Calculate hash of the manifest itself using secure version
   const manifestHash = await calculateSHA256Secure(manifestContent);
-  
+
   return {
     dataHash,
     imageHashes,
@@ -252,25 +361,12 @@ export async function generateForensicManifestWithTimestampSecure(
 }
 
 /**
- * Validate complete case integrity including data and images using secure SHA-256
- * This function recreates the manifest using the same logic as generation to ensure
- * tamper detection and consistent validation results.
- * 
- * @param dataContent - JSON data content
- * @param imageFiles - Map of filename to image blob
- * @param expectedManifest - Expected forensic manifest
- * @returns Comprehensive validation result
+ * Validate complete case integrity including data and images using secure SHA-256.
  */
 export async function validateCaseIntegritySecure(
   dataContent: string,
   imageFiles: { [filename: string]: Blob },
-  expectedManifest: {
-    dataHash: string;
-    imageHashes: { [filename: string]: string };
-    manifestHash: string;
-    totalFiles: number;
-    createdAt: string;
-  }
+  expectedManifest: ForensicManifestData
 ): Promise<{
   isValid: boolean;
   dataValid: boolean;
@@ -281,38 +377,32 @@ export async function validateCaseIntegritySecure(
 }> {
   const errors: string[] = [];
   const imageValidation: { [filename: string]: boolean } = {};
-  
-  // 1. Validate data content hash using secure version
+
   const actualDataHash = await calculateSHA256Secure(dataContent);
   const dataValid = actualDataHash === expectedManifest.dataHash.toLowerCase();
   if (!dataValid) {
     errors.push(`Data hash mismatch: expected ${expectedManifest.dataHash}, got ${actualDataHash}`);
   }
-  
-  // 2. Validate each image file hash using the actual files provided
-  // SECURITY FIX: Use the actual image files to determine validation scope,
-  // not the potentially tampered manifest keys
+
   const actualImageFiles = Object.keys(imageFiles).sort();
   const expectedImageFiles = Object.keys(expectedManifest.imageHashes).sort();
-  
-  // Check for missing or extra files
-  const missingFiles = expectedImageFiles.filter(f => !actualImageFiles.includes(f));
-  const extraFiles = actualImageFiles.filter(f => !expectedImageFiles.includes(f));
-  
+
+  const missingFiles = expectedImageFiles.filter((f) => !actualImageFiles.includes(f));
+  const extraFiles = actualImageFiles.filter((f) => !expectedImageFiles.includes(f));
+
   if (missingFiles.length > 0) {
     errors.push(`Missing image files: ${missingFiles.join(', ')}`);
   }
   if (extraFiles.length > 0) {
     errors.push(`Extra image files not in manifest: ${extraFiles.join(', ')}`);
   }
-  
-  // Validate hashes for files that exist in both
+
   for (const filename of actualImageFiles) {
     if (expectedManifest.imageHashes[filename]) {
       const actualHash = await calculateSHA256Binary(imageFiles[filename]);
       const isValid = actualHash === expectedManifest.imageHashes[filename].toLowerCase();
       imageValidation[filename] = isValid;
-      
+
       if (!isValid) {
         errors.push(`Image hash mismatch for ${filename}: expected ${expectedManifest.imageHashes[filename]}, got ${actualHash}`);
       }
@@ -320,51 +410,46 @@ export async function validateCaseIntegritySecure(
       imageValidation[filename] = false;
     }
   }
-  
-  // 3. SECURITY FIX: Recreate the manifest using the same generation logic with secure SHA-256
-  // This ensures we detect any tampering with the manifest structure or ordering
-  // CRITICAL: Use the same timestamp as the original manifest to ensure identical content
+
   const recreatedManifest = await generateForensicManifestWithTimestampSecure(
-    dataContent, 
-    imageFiles, 
+    dataContent,
+    imageFiles,
     expectedManifest.createdAt
   );
-  
-  // Compare the recreated manifest hash with the expected one
+
   const manifestValid = recreatedManifest.manifestHash === expectedManifest.manifestHash.toLowerCase();
   if (!manifestValid) {
     errors.push(`Manifest hash mismatch: expected ${expectedManifest.manifestHash}, got ${recreatedManifest.manifestHash}`);
-    
-    // Additional forensic detail: check what specifically differs
+
     if (recreatedManifest.dataHash !== expectedManifest.dataHash.toLowerCase()) {
-      errors.push(`Manifest data hash field differs from actual data`);
+      errors.push('Manifest data hash field differs from actual data');
     }
-    
-    // Check if image hash entries differ
+
     for (const filename of Object.keys(imageFiles).sort()) {
-      if (recreatedManifest.imageHashes[filename] && 
-          recreatedManifest.imageHashes[filename] !== expectedManifest.imageHashes[filename]?.toLowerCase()) {
+      if (
+        recreatedManifest.imageHashes[filename] &&
+        recreatedManifest.imageHashes[filename] !== expectedManifest.imageHashes[filename]?.toLowerCase()
+      ) {
         errors.push(`Manifest image hash entry for ${filename} differs from actual file`);
       }
     }
   }
-  
-  const allImageFilesValid = Object.values(imageValidation).every(valid => valid);
+
+  const allImageFilesValid = Object.values(imageValidation).every((valid) => valid);
   const isValid = dataValid && allImageFilesValid && manifestValid && errors.length === 0;
-  
-  // Generate forensic summary
+
   const totalFiles = Object.keys(imageFiles).length;
-  const validFiles = Object.values(imageValidation).filter(valid => valid).length;
-  
+  const validFiles = Object.values(imageValidation).filter((valid) => valid).length;
+
   let summary = `Validation ${isValid ? 'PASSED' : 'FAILED'}: `;
   summary += `Data ${dataValid ? 'valid' : 'invalid'}, `;
   summary += `${validFiles}/${totalFiles} images valid, `;
   summary += `manifest ${manifestValid ? 'valid' : 'invalid'}`;
-  
+
   if (errors.length > 0) {
     summary += `. ${errors.length} error(s) detected`;
   }
-  
+
   return {
     isValid,
     dataValid,
