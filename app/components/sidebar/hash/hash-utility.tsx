@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './hash-utility.module.css';
-import { calculateSHA256Secure, validateCaseIntegritySecure } from '~/utils/SHA256';
+import {
+  calculateSHA256Secure,
+  extractForensicManifestData,
+  SignedForensicManifest,
+  validateCaseIntegritySecure,
+  verifyForensicManifestSignature
+} from '~/utils/SHA256';
 import { removeForensicWarning } from '~/components/actions/case-import/validation';
 
 interface HashUtilityProps {
@@ -18,6 +24,8 @@ interface VerificationResult {
   details?: {
     manifestValid?: boolean;
     dataValid?: boolean;
+    signatureValid?: boolean;
+    signatureKeyId?: string;
     imageValidation?: { [filename: string]: boolean };
     totalFiles?: number;
     validFiles?: number;
@@ -193,7 +201,21 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
       }
 
       const manifestContent = await manifestFile.async('text');
-      const manifest = JSON.parse(manifestContent);
+      const manifest = JSON.parse(manifestContent) as SignedForensicManifest;
+      const manifestForValidation = extractForensicManifestData(manifest);
+
+      if (!manifestForValidation) {
+        return {
+          isValid: false,
+          expectedHash: '',
+          calculatedHash: '',
+          fileName,
+          fileType: 'zip',
+          errorMessage: 'Forensic manifest format is invalid or incomplete.'
+        };
+      }
+
+      const signatureResult = await verifyForensicManifestSignature(manifest);
       
       const dataFiles = Object.keys(zipContent.files).filter(name => 
         (name.endsWith('.json') || name.endsWith('.csv')) && name !== 'FORENSIC_MANIFEST.json'
@@ -232,7 +254,7 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
         }
       }));
       
-      const validation = await validateCaseIntegritySecure(dataContent, imageFiles, manifest);
+      const validation = await validateCaseIntegritySecure(dataContent, imageFiles, manifestForValidation);
       
       // TEMPORARY FIX: Handle manifest generation bug for CSV files
       // If the main validation fails but the CSV internal integrity is confirmed,
@@ -265,16 +287,27 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
       
       const finalValidation = customValidationResult || validation;
       
+      const isValid = finalValidation.isValid && signatureResult.isValid;
+      const errorMessages: string[] = [];
+      if (!signatureResult.isValid) {
+        errorMessages.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+      }
+      if (!finalValidation.isValid) {
+        errorMessages.push(finalValidation.errors.join('; '));
+      }
+
       return {
-        isValid: finalValidation.isValid,
-        expectedHash: manifest.manifestHash || '',
+        isValid,
+        expectedHash: manifestForValidation.manifestHash,
         calculatedHash: '',
         fileName,
         fileType: 'zip',
-        errorMessage: finalValidation.isValid ? undefined : finalValidation.errors.join('; '),
+        errorMessage: isValid ? undefined : errorMessages.join('; '),
         details: {
           manifestValid: finalValidation.manifestValid,
           dataValid: finalValidation.dataValid,
+          signatureValid: signatureResult.isValid,
+          signatureKeyId: signatureResult.keyId,
           imageValidation: finalValidation.imageValidation,
           totalFiles: Object.keys(imageFiles).length + 1,
           validFiles: Object.values(finalValidation.imageValidation).filter(v => v).length + (finalValidation.dataValid ? 1 : 0)

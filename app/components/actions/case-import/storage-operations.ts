@@ -17,6 +17,7 @@ import {
   ReadOnlyCaseMetadata
 } from '~/types';
 import { deleteFile } from '../image-manage';
+import { SignedForensicManifest } from '~/utils/SHA256';
 
 const USER_WORKER_URL = paths.user_worker_url;
 const DATA_WORKER_URL = paths.data_worker_url;
@@ -87,7 +88,7 @@ export async function storeCaseDataInR2(
   caseData: CaseExportData,
   importedFiles: FileData[],
   originalImageIdMapping?: Map<string, string>,
-  forensicManifestCreatedAt?: string
+  forensicManifest?: SignedForensicManifest
 ): Promise<void> {
   try {
     const apiKey = await getDataApiKey();
@@ -95,6 +96,14 @@ export async function storeCaseDataInR2(
     // Convert the mapping to a plain object for JSON serialization
     const originalImageIds = originalImageIdMapping ? 
       Object.fromEntries(originalImageIdMapping) : undefined;
+
+    const forensicManifestMetadata = forensicManifest ? {
+      manifestVersion: forensicManifest.manifestVersion,
+      createdAt: forensicManifest.createdAt,
+      dataHash: forensicManifest.dataHash,
+      manifestHash: forensicManifest.manifestHash,
+      signature: forensicManifest.signature
+    } : undefined;
     
     // Create the case data structure that matches normal cases
     const r2CaseData = {
@@ -107,7 +116,9 @@ export async function storeCaseDataInR2(
       // Add original image ID mapping for confirmation linking
       originalImageIds: originalImageIds,
       // Add forensic manifest timestamp if available for confirmation exports
-      ...(forensicManifestCreatedAt && { forensicManifestCreatedAt })
+      ...(forensicManifest?.createdAt && { forensicManifestCreatedAt: forensicManifest.createdAt }),
+      // Store full forensic manifest metadata for chain-of-custody validation
+      ...(forensicManifestMetadata && { forensicManifest: forensicManifestMetadata })
     };
     
     // Store in R2

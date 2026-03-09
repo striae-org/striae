@@ -100,6 +100,9 @@ export interface SecurityCheckResults {
   selfConfirmationPrevented: boolean;
   fileIntegrityValid: boolean;
   exporterUidValidated?: boolean;
+  manifestSignaturePresent?: boolean;
+  manifestSignatureValid?: boolean;
+  manifestSignatureKeyId?: string;
 }
 
 /**

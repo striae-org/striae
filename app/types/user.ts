@@ -19,6 +19,9 @@ export interface UserData {
     originalExportDate: string;
     originalExportedBy: string;
     sourceHash?: string;
+    sourceManifestVersion?: string;
+    sourceSignatureKeyId?: string;
+    sourceSignatureValid?: boolean;
     isReadOnly: true;
   }>;
   createdAt: string;

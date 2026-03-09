@@ -119,11 +119,19 @@ export class AuditService {
     errors: string[] = [],
     performanceMetrics?: PerformanceMetrics,
     exportFormat?: 'json' | 'csv' | 'xlsx' | 'zip',
-    protectionEnabled?: boolean
+    protectionEnabled?: boolean,
+    signatureDetails?: {
+      present?: boolean;
+      valid?: boolean;
+      keyId?: string;
+    }
   ): Promise<void> {
     const securityChecks: SecurityCheckResults = {
       selfConfirmationPrevented: false, // Not applicable for exports
-      fileIntegrityValid: result === 'success'
+      fileIntegrityValid: result === 'success',
+      manifestSignaturePresent: signatureDetails?.present,
+      manifestSignatureValid: signatureDetails?.valid,
+      manifestSignatureKeyId: signatureDetails?.keyId
     };
 
     // Determine file type based on format or fallback to filename
@@ -178,12 +186,20 @@ export class AuditService {
     errors: string[] = [],
     originalExaminerUid?: string,
     performanceMetrics?: PerformanceMetrics,
-    exporterUidValidated?: boolean // Separate flag for validation status
+    exporterUidValidated?: boolean, // Separate flag for validation status
+    signatureDetails?: {
+      present?: boolean;
+      valid?: boolean;
+      keyId?: string;
+    }
   ): Promise<void> {
     const securityChecks: SecurityCheckResults = {
       selfConfirmationPrevented: originalExaminerUid ? originalExaminerUid !== user.uid : false,
       fileIntegrityValid: hashValid,
-      exporterUidValidated: exporterUidValidated !== undefined ? exporterUidValidated : !!originalExaminerUid
+      exporterUidValidated: exporterUidValidated !== undefined ? exporterUidValidated : !!originalExaminerUid,
+      manifestSignaturePresent: signatureDetails?.present,
+      manifestSignatureValid: signatureDetails?.valid,
+      manifestSignatureKeyId: signatureDetails?.keyId
     };
 
     await this.logEvent({

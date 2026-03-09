@@ -22,6 +22,9 @@ export interface ReadOnlyCaseMetadata {
   originalExportDate: string;
   originalExportedBy: string;
   sourceHash?: string;
+  sourceManifestVersion?: string;
+  sourceSignatureKeyId?: string;
+  sourceSignatureValid?: boolean;
   isReadOnly: true;
 }
 
@@ -88,6 +91,9 @@ export interface CaseImportPreview {
     dataValid?: boolean;
     imageValidation?: { [filename: string]: boolean };
     manifestValid?: boolean;
+    signatureValid?: boolean;
+    signatureKeyId?: string;
+    signatureError?: string;
     validationSummary?: string;
     integrityErrors?: string[];
   };

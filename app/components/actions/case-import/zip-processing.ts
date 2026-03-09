@@ -1,7 +1,12 @@
 import { User } from 'firebase/auth';
 import { CaseExportData, CaseImportPreview } from '~/types';
 import { validateCaseNumber } from '../case-manage';
-import { validateCaseIntegritySecure as validateForensicIntegrity } from '~/utils/SHA256';
+import {
+  extractForensicManifestData,
+  SignedForensicManifest,
+  validateCaseIntegritySecure as validateForensicIntegrity,
+  verifyForensicManifestSignature
+} from '~/utils/SHA256';
 import { validateExporterUid, removeForensicWarning } from './validation';
 
 /**
@@ -117,68 +122,86 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
     
     if (manifestFile) {
       try {
-        let forensicManifest: any = null;
+        let forensicManifest: SignedForensicManifest | null = null;
         
         // Get forensic manifest from dedicated file
         const manifestContent = await manifestFile.async('text');
-        forensicManifest = JSON.parse(manifestContent);
+        forensicManifest = JSON.parse(manifestContent) as SignedForensicManifest;
         
         if (forensicManifest) {
-          // Enhanced validation with forensic manifest (includes individual file hashes)
-          // Handle backward compatibility: old manifests use "hash" terminology, new ones use "hash"
-          expectedHash = forensicManifest.manifestHash || forensicManifest.manifestHash;
+          const manifestForValidation = extractForensicManifestData(forensicManifest);
+          if (!manifestForValidation) {
+            hashValid = false;
+            hashError = 'Forensic manifest format is invalid or incomplete.';
+
+            validationDetails = {
+              hasForensicManifest: true,
+              dataValid: false,
+              manifestValid: false,
+              signatureValid: false,
+              validationSummary: 'Manifest schema validation failed',
+              integrityErrors: [hashError]
+            };
+          } else {
+            expectedHash = manifestForValidation.manifestHash;
           
-          // Extract image files for comprehensive validation
-          const imageFiles: { [filename: string]: Blob } = {};
-          const imagesFolder = zip.folder('images');
-          if (imagesFolder) {
-            await Promise.all(Object.keys(imagesFolder.files).map(async (path) => {
-              if (path.startsWith('images/') && !path.endsWith('/')) {
-                const filename = path.replace('images/', '');
-                const file = zip.file(path);
-                if (file) {
-                  const blob = await file.async('blob');
-                  imageFiles[filename] = blob;
+            // Extract image files for comprehensive validation
+            const imageFiles: { [filename: string]: Blob } = {};
+            const imagesFolder = zip.folder('images');
+            if (imagesFolder) {
+              await Promise.all(Object.keys(imagesFolder.files).map(async (path) => {
+                if (path.startsWith('images/') && !path.endsWith('/')) {
+                  const filename = path.replace('images/', '');
+                  const file = zip.file(path);
+                  if (file) {
+                    const blob = await file.async('blob');
+                    imageFiles[filename] = blob;
+                  }
                 }
-              }
-            }));
-          }
+              }));
+            }
+
+            const signatureResult = await verifyForensicManifestSignature(forensicManifest);
           
-          // Convert old format to new format for validation if needed
-          let manifestForValidation = forensicManifest;
-          if (forensicManifest.dataHash && !forensicManifest.dataHash) {
-            manifestForValidation = {
-              dataHash: forensicManifest.dataHash,
-              imageHashes: forensicManifest.imageHashes || {},
-              manifestHash: forensicManifest.manifestHash,
-              totalFiles: forensicManifest.totalFiles,
-              createdAt: forensicManifest.createdAt
+            // Perform comprehensive validation
+            const validation = await validateForensicIntegrity(
+              cleanedContent, 
+              imageFiles, 
+              manifestForValidation
+            );
+          
+            hashValid = validation.isValid && signatureResult.isValid;
+            actualHash = validation.manifestValid ? expectedHash : 'validation_failed';
+          
+            if (!hashValid) {
+              const errorParts: string[] = [];
+              if (!signatureResult.isValid) {
+                errorParts.push(`Signature validation failed: ${signatureResult.error}`);
+              }
+              if (!validation.isValid) {
+                errorParts.push(`Comprehensive validation failed: ${validation.summary}. Errors: ${validation.errors.join(', ')}`);
+              }
+              hashError = errorParts.join(' ');
+            }
+
+            // Capture detailed validation information
+            const integrityErrors = [...validation.errors];
+            if (!signatureResult.isValid) {
+              integrityErrors.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+            }
+
+            validationDetails = {
+              hasForensicManifest: true,
+              dataValid: validation.dataValid,
+              imageValidation: validation.imageValidation,
+              manifestValid: validation.manifestValid,
+              signatureValid: signatureResult.isValid,
+              signatureKeyId: signatureResult.keyId,
+              signatureError: signatureResult.error,
+              validationSummary: validation.summary,
+              integrityErrors
             };
           }
-          
-          // Perform comprehensive validation
-          const validation = await validateForensicIntegrity(
-            cleanedContent, 
-            imageFiles, 
-            manifestForValidation
-          );
-          
-          hashValid = validation.isValid;
-          actualHash = validation.manifestValid ? expectedHash : 'validation_failed';
-          
-          if (!hashValid) {
-            hashError = `Comprehensive validation failed: ${validation.summary}. Errors: ${validation.errors.join(', ')}`;
-          }
-          
-          // Capture detailed validation information
-          validationDetails = {
-            hasForensicManifest: true,
-            dataValid: validation.dataValid,
-            imageValidation: validation.imageValidation,
-            manifestValid: validation.manifestValid,
-            validationSummary: validation.summary,
-            integrityErrors: validation.errors
-          };
           
         } else {
           // No forensic manifest found - cannot validate
@@ -197,7 +220,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
         hashValid = false;
         
         validationDetails = {
-          hasForensicManifest: false,
+          hasForensicManifest: true,
           validationSummary: 'Validation failed due to metadata parsing error',
           integrityErrors: [hashError]
         };

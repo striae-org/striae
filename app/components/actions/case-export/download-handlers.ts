@@ -2,6 +2,7 @@ import { User } from 'firebase/auth';
 import { FileData, AllCasesExportData, CaseExportData, ExportOptions } from '~/types';
 import { getImageUrl } from '../image-manage';
 import { generateForensicManifestSecure, calculateSHA256Secure } from '~/utils/SHA256';
+import { signForensicManifest } from '~/utils/data-operations';
 import { ExportFormat, formatDateForFilename, CSV_HEADERS } from './types-constants';
 import { protectExcelWorksheet, addForensicDataWarning } from './metadata-helpers';
 import { generateMetadataRows, generateCSVContent, processFileDataForTabular } from './data-processing';
@@ -522,6 +523,8 @@ export async function downloadCaseAsZip(
   options: ExportOptions = { protectForensicData: true }
 ): Promise<void> {
   const startTime = Date.now();
+  let manifestSignatureKeyId: string | undefined;
+  let manifestSigned = false;
   
   try {
     // Start audit workflow
@@ -579,9 +582,20 @@ export async function downloadCaseAsZip(
 
       // Generate comprehensive forensic manifest with individual file hashes using secure SHA256
       const forensicManifest = await generateForensicManifestSecure(contentForHash, imageFiles);
+
+      // Request server-side signature to prevent tamper-by-rehash attacks
+      const signingResult = await signForensicManifest(user, caseNumber, forensicManifest);
+      manifestSignatureKeyId = signingResult.signature.keyId;
+      manifestSigned = true;
+
+      const signedForensicManifest = {
+        ...forensicManifest,
+        manifestVersion: signingResult.manifestVersion,
+        signature: signingResult.signature
+      };
       
       // Add dedicated forensic manifest file for validation
-      zip.file('FORENSIC_MANIFEST.json', JSON.stringify(forensicManifest, null, 2));
+      zip.file('FORENSIC_MANIFEST.json', JSON.stringify(signedForensicManifest, null, 2));
       
       // Add read-only instruction file
       const instructionContent = `EVIDENCE ARCHIVE - READ ONLY
@@ -660,7 +674,12 @@ For questions about this export, contact your Striae system administrator.
           validationStepsFailed: 0
         },
         'zip',
-        options.protectForensicData || false
+        options.protectForensicData || false,
+        {
+          present: true,
+          valid: true,
+          keyId: manifestSignatureKeyId
+        }
       );
       
       // End audit workflow
@@ -737,7 +756,14 @@ For questions about this export, contact your Striae system administrator.
         validationStepsFailed: 1
       },
       'zip',
-      options.protectForensicData || false
+      options.protectForensicData || false,
+      options.protectForensicData
+        ? {
+            present: manifestSigned,
+            valid: manifestSigned,
+            keyId: manifestSignatureKeyId
+          }
+        : undefined
     );
     
     // End audit workflow
