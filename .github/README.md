@@ -2,18 +2,18 @@
 
 ## npm Package, Installation, and Full Deployment
 
-**[Striae on npm](https://www.npmjs.com/package/@striae/striae)**
+**[Striae on npm](https://www.npmjs.com/package/@striae-org/striae)**
 
 1) Install the latest package:
 
 ```bash
-npm i @striae/striae
+npm i @striae-org/striae
 ```
 
 2) Copy the package scaffold into the project root
 
 ```bash
-cp -R node_modules/@striae/striae/. .
+cp -R node_modules/@striae-org/striae/. .
 ```
 
 3) Reinstall using Striae's own package.json (includes dev deps like wrangler/remix)

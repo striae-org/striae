@@ -1,4 +1,4 @@
-# @striae/striae
+# @striae-org/striae
 
 Striae is a cloud-native forensic annotation application for firearms identification, built with Remix and Cloudflare Workers.
 
@@ -24,7 +24,7 @@ This npm package publishes the Striae application source and deployment scaffold
 ## Install
 
 ```bash
-npm install @striae/striae
+npm install @striae-org/striae
 ```
 
 ## First-Time Setup
@@ -43,7 +43,39 @@ npm run deploy:all
 npm run deploy-workers
 npm run deploy-pages
 npm run publish:npm
+npm run publish:github:dry-run
+npm run publish:github
 ```
+
+## Publish To GitHub Packages
+
+This repository can publish to GitHub Packages (`npm.pkg.github.com`) in addition to npmjs.
+
+1. Create a GitHub personal access token (classic) with `write:packages` and `read:packages` scopes.
+2. Authenticate npm to GitHub Packages (npm v9+):
+
+```bash
+npm login --scope=@striae-org --auth-type=legacy --registry=https://npm.pkg.github.com
+```
+
+3. Verify package scope and repository metadata in `package.json`.
+4. Dry-run publish to GitHub Packages:
+
+```bash
+npm run publish:github:dry-run
+```
+
+5. Publish to GitHub Packages:
+
+```bash
+npm run publish:github
+```
+
+Notes:
+
+- GitHub Packages requires scoped package names (`@scope/name`).
+- The package scope must match the GitHub user or organization namespace you publish to.
+- Current package name is `@striae-org/striae`.
 
 ## NPM Package Content Policy
 
@@ -54,7 +86,7 @@ Included:
 - `app/` source (with `app/config-example/`)
 - `functions/`, `public/`, `scripts/`
 - Worker package manifests
-- Worker example source files (`workers/*/src/*.example.ts`)
+- Worker source files except runtime entry files (`workers/*/src/*.ts` and excluding `workers/*/src/*worker.ts`)
 - Worker example Wrangler configs (`workers/*/wrangler.jsonc.example`)
 - Project-level example and build config (`.env.example`, `wrangler.toml.example`, `tsconfig.json`, etc.)
 
