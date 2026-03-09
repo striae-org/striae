@@ -1,7 +1,61 @@
 {
-  "name": "striae",
+  "name": "@striae/striae",
   "version": "3.0.0",
-  "private": true,
+  "private": false,
+  "description": "Cloud-native forensic annotation application for firearms identification (Remix + Cloudflare Workers).",
+  "license": "Apache-2.0",
+  "homepage": "https://www.striae.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/striae-org/striae.git"
+  },
+  "bugs": {
+    "url": "https://github.com/striae-org/striae/issues"
+  },
+  "keywords": [
+    "forensics",
+    "firearms",
+    "annotation",
+    "remix",
+    "cloudflare-workers",
+    "chain-of-custody",
+    "audit-trail"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "app/components/",
+    "app/config-example/",
+    "app/contexts/",
+    "app/hooks/",
+    "app/routes/",
+    "app/services/",
+    "app/styles/",
+    "app/types/",
+    "app/utils/",
+    "app/entry.client.tsx",
+    "app/entry.server.tsx",
+    "app/root.tsx",
+    "app/tailwind.css",
+    "functions/",
+    "public/",
+    "scripts/",
+    "workers/*/package.json",
+    "workers/*/src/*.example.ts",
+    "workers/*/src/*.example.js",
+    "workers/*/wrangler.jsonc.example",
+    ".env.example",
+    "firebase.json",
+    "postcss.config.js",
+    "tailwind.config.ts",
+    "tsconfig.json",
+    "vite.config.ts",
+    "worker-configuration.d.ts",
+    "wrangler.toml.example",
+    "LICENSE",
+    "NOTICE"
+  ],
   "sideEffects": [
     "**/*.css"
   ],
@@ -14,6 +68,7 @@
     "clean": "rm -rf build node_modules/.cache .cache",
     "clean:build": "npm run clean && npm run build",
     "deploy": "npm run build && wrangler pages deploy",
+    "publish:npm": "npm publish --access public",
     "lint": "node ./scripts/run-eslint.cjs",
     "start": "node ./scripts/dev.cjs && wrangler pages dev ./build/client",
     "typecheck": "tsc",
