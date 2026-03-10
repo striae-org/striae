@@ -290,6 +290,179 @@
   box-shadow: none;
 }
 
+.publicKeySection {
+  margin-top: var(--spaceS);
+}
+
+.publicKeyButton {
+  width: 100%;
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid color-mix(in lab, var(--primary) 35%, transparent);
+  border-radius: var(--spaceXS);
+  padding: var(--spaceS) var(--spaceM);
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.publicKeyButton:hover {
+  background: color-mix(in lab, var(--primary) 10%, transparent);
+  border-color: color-mix(in lab, var(--primary) 55%, transparent);
+}
+
+.publicKeyOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: color-mix(in lab, var(--background) 60%, transparent);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--zIndex5);
+  padding: var(--spaceL);
+}
+
+.publicKeyModal {
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  background: var(--backgroundLight);
+  border-radius: var(--spaceXS);
+  box-shadow: 0 var(--spaceXS) var(--spaceL)
+    color-mix(in lab, var(--black) 18%, transparent);
+  overflow: hidden;
+}
+
+.publicKeyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spaceL);
+  border-bottom: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+}
+
+.publicKeyTitle {
+  margin: 0;
+  font-size: var(--fontSizeBodyL);
+  font-weight: 600;
+  color: var(--textTitle);
+}
+
+.publicKeyContent {
+  padding: var(--spaceL);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceM);
+  overflow-y: auto;
+  max-height: calc(90vh - var(--space3XL));
+}
+
+.publicKeyDescription {
+  margin: 0;
+  font-size: var(--fontSizeBodyS);
+  color: var(--textBody);
+}
+
+.publicKeyMeta {
+  margin: 0;
+  font-size: var(--fontSizeBodyS);
+  color: var(--textTitle);
+}
+
+.publicKeyMeta span {
+  font-weight: var(--fontWeightMedium);
+}
+
+.publicKeyLabel {
+  font-size: var(--fontSizeBodyXS);
+  font-weight: var(--fontWeightMedium);
+  color: var(--textTitle);
+}
+
+.publicKeyField {
+  width: 100%;
+  min-height: 180px;
+  padding: var(--spaceM);
+  border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+  border-radius: var(--spaceXS);
+  background: color-mix(in lab, var(--background) 96%, transparent);
+  color: var(--textBody);
+  font-size: var(--fontSizeBodyXS);
+  line-height: 1.4;
+  font-family: Consolas, "Courier New", monospace;
+  resize: vertical;
+}
+
+.publicKeyHowToTitle {
+  margin: 0;
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  color: var(--textTitle);
+}
+
+.publicKeyHowToList {
+  margin: 0;
+  padding-left: var(--spaceL);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceXS);
+  color: var(--textBody);
+  font-size: var(--fontSizeBodyS);
+}
+
+.publicKeyActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spaceS);
+}
+
+.publicKeyStatus {
+  margin: 0;
+  font-size: var(--fontSizeBodyXS);
+  color: var(--textBody);
+}
+
+.publicKeyCopyButton {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid color-mix(in lab, var(--primary) 35%, transparent);
+  border-radius: var(--spaceXS);
+  padding: var(--spaceS) var(--spaceL);
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.publicKeyCopyButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--primary) 10%, transparent);
+  border-color: color-mix(in lab, var(--primary) 55%, transparent);
+}
+
+.publicKeyCopyButton:disabled {
+  background: color-mix(in lab, var(--background) 95%, transparent);
+  color: var(--textLight);
+  border-color: color-mix(in lab, var(--text) 10%, transparent);
+  cursor: not-allowed;
+}
+
+.publicKeyCloseButton {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--spaceXS);
+  padding: var(--spaceS) var(--spaceL);
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.publicKeyCloseButton:hover {
+  background: color-mix(in lab, var(--primary) 85%, var(--black));
+}
+
 .divider {
   margin: var(--spaceL) 0;
   text-align: center;
