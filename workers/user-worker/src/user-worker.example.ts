@@ -24,13 +24,13 @@ interface UserData {
 interface CaseItem {
   caseNumber: string;
   caseName?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface ReadOnlyCaseItem {
   caseNumber: string;
   caseName?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface UserRequestData {
@@ -51,8 +51,8 @@ interface DeleteCasesRequest {
 }
 
 interface CaseData {
-  files?: Array<{ id: string; [key: string]: any }>;
-  [key: string]: any;
+  files?: Array<{ id: string; [key: string]: unknown }>;
+  [key: string]: unknown;
 }
 
 interface AccountDeletionProgressEvent {
@@ -247,7 +247,7 @@ async function handleGetUser(env: Env, userUid: string): Promise<Response> {
       status: 200, 
       headers: corsHeaders 
     });
-  } catch (error) {
+  } catch {
     return new Response('Failed to get user data', { 
       status: 500, 
       headers: corsHeaders 
@@ -304,7 +304,7 @@ async function handleAddUser(request: Request, env: Env, userUid: string): Promi
       status: value !== null ? 200 : 201,
       headers: corsHeaders
     });
-  } catch (error) {
+  } catch {
     return new Response('Failed to save user data', { 
       status: 500, 
       headers: corsHeaders 
@@ -346,7 +346,7 @@ async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): 
             method: 'DELETE',
             headers: { 'X-Custom-Auth-Key': dataApiKey }
           });
-        } catch (fileError) {
+        } catch {
           // Continue with other files
         }
       }
@@ -358,7 +358,7 @@ async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): 
       headers: { 'X-Custom-Auth-Key': dataApiKey }
     });
 
-  } catch (error) {
+  } catch {
     // Continue with user deletion even if case deletion fails
   }
 }
@@ -532,7 +532,7 @@ async function handleAddCases(request: Request, env: Env, userUid: string): Prom
       status: 200,
       headers: corsHeaders
     });
-  } catch (error) {
+  } catch {
     return new Response('Failed to add cases', { 
       status: 500, 
       headers: corsHeaders 
@@ -567,7 +567,7 @@ async function handleDeleteCases(request: Request, env: Env, userUid: string): P
       status: 200,
       headers: corsHeaders
     });
-  } catch (error) {
+  } catch {
     return new Response('Failed to delete cases', { 
       status: 500, 
       headers: corsHeaders 

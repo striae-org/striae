@@ -4,6 +4,11 @@ import { previewCaseImport } from '~/components/actions/case-review';
 import { CaseImportPreview } from '~/types';
 import { ConfirmationPreview } from '../components/ConfirmationPreviewSection';
 
+type UnknownRecord = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is UnknownRecord =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 interface UseFilePreviewReturn {
   casePreview: CaseImportPreview | null;
   confirmationPreview: ConfirmationPreview | null;
@@ -52,15 +57,22 @@ export const useFilePreview = (
     setIsLoadingPreview(true);
     try {
       const text = await file.text();
-      const data = JSON.parse(text);
+      const parsed = JSON.parse(text) as unknown;
+
+      if (!isRecord(parsed)) {
+        throw new Error('Invalid confirmation data format');
+      }
+
+      const metadata = isRecord(parsed.metadata) ? parsed.metadata : undefined;
+      const confirmations = isRecord(parsed.confirmations) ? parsed.confirmations : undefined;
       
       // Extract confirmation IDs from the confirmations object
       const confirmationIds: string[] = [];
-      if (data.confirmations) {
-        Object.values(data.confirmations).forEach((imageConfirmations: any) => {
+      if (confirmations) {
+        Object.values(confirmations).forEach((imageConfirmations) => {
           if (Array.isArray(imageConfirmations)) {
-            imageConfirmations.forEach((confirmation: any) => {
-              if (confirmation.confirmationId) {
+            imageConfirmations.forEach((confirmation) => {
+              if (isRecord(confirmation) && typeof confirmation.confirmationId === 'string') {
                 confirmationIds.push(confirmation.confirmationId);
               }
             });
@@ -68,11 +80,24 @@ export const useFilePreview = (
         });
       }
 
+      const caseNumber =
+        metadata && typeof metadata.caseNumber === 'string' ? metadata.caseNumber : 'Unknown';
+      const fullName =
+        metadata && typeof metadata.exportedByName === 'string' ? metadata.exportedByName : 'Unknown';
+      const exportDate =
+        metadata && typeof metadata.exportDate === 'string'
+          ? metadata.exportDate
+          : new Date().toISOString();
+      const totalConfirmations =
+        metadata && typeof metadata.totalConfirmations === 'number'
+          ? metadata.totalConfirmations
+          : confirmationIds.length;
+
       const preview: ConfirmationPreview = {
-        caseNumber: data.metadata?.caseNumber || 'Unknown',
-        fullName: data.metadata?.exportedByName || 'Unknown',
-        exportDate: data.metadata?.exportDate || new Date().toISOString(),
-        totalConfirmations: data.metadata?.totalConfirmations || confirmationIds.length,
+        caseNumber,
+        fullName,
+        exportDate,
+        totalConfirmations,
         confirmationIds
       };
       

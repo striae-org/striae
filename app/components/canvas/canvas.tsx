@@ -1,10 +1,9 @@
-import { useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useState, useRef, useContext, useCallback } from 'react';
 import { BoxAnnotations } from './box-annotations/box-annotations';
 import { ConfirmationModal } from './confirmation/confirmation';
 import { AnnotationData, BoxAnnotation, ConfirmationData } from '~/types/annotations';
 import { AuthContext } from '~/contexts/auth.context';
 import { storeConfirmation } from '~/components/actions/confirm-export';
-import { auditService } from '~/services/audit.service';
 import styles from './canvas.module.css';
 
 interface CanvasProps {
@@ -50,6 +49,15 @@ export const Canvas = ({
   const [isFlashing, setIsFlashing] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
+
+  const resetImageLoadState = useCallback(() => {
+    setLoadError(undefined);
+    setIsLoading(false);
+  }, []);
+
+  const clearFlashingState = useCallback(() => {
+    setIsFlashing(false);
+  }, []);
 
   // Handle box annotation changes
   const handleBoxAnnotationsChange = (boxAnnotations: BoxAnnotation[]) => {
@@ -114,13 +122,19 @@ export const Canvas = ({
 
   useEffect(() => {
     if (!imageUrl) {
-      setLoadError(undefined);
-      setIsLoading(false);
-      return;
+      const resetTimer = window.setTimeout(() => {
+        resetImageLoadState();
+      }, 0);
+
+      return () => {
+        window.clearTimeout(resetTimer);
+      };
     }
     
-    setIsLoading(true);
-    setLoadError(undefined);
+    const startLoadingTimer = window.setTimeout(() => {
+      setIsLoading(true);
+      setLoadError(undefined);
+    }, 0);
 
     const img = new Image();
     
@@ -129,36 +143,33 @@ export const Canvas = ({
       setLoadError(undefined);
     };
     
-    img.onerror = (e) => {
+    img.onerror = () => {
       setLoadError({
         type: 'load',
-        message: `Failed to load image: ${e instanceof Error ? e.message : 'Unknown error'}`
+        message: 'Failed to load image: Unknown error'
       });
       setIsLoading(false);
     };
 
-    try {
-      img.src = imageUrl;
-    } catch (e) {
-      setLoadError({
-        type: 'invalid',
-        message: 'Invalid image URL provided'
-      });
-      setIsLoading(false);
-    }
+    img.src = imageUrl;
     
     return () => {
+      window.clearTimeout(startLoadingTimer);
       img.onload = null;
       img.onerror = null;
-      setLoadError(undefined);
-      setIsLoading(false);
+      resetImageLoadState();
     };
-  }, [imageUrl]);
+  }, [imageUrl, resetImageLoadState]);
   
   useEffect(() => {
     if (!activeAnnotations?.has('class') || !annotationData?.hasSubclass) {
-      setIsFlashing(false);
-      return;
+      const flashResetTimer = window.setTimeout(() => {
+        clearFlashingState();
+      }, 0);
+
+      return () => {
+        window.clearTimeout(flashResetTimer);
+      };
     }
 
     const flashInterval = setInterval(() => {
@@ -171,7 +182,7 @@ export const Canvas = ({
     }, 60000);
 
     return () => clearInterval(flashInterval);
-  }, [activeAnnotations, annotationData?.hasSubclass]);
+  }, [activeAnnotations, annotationData?.hasSubclass, clearFlashingState]);
 
   const getErrorMessage = () => {
     if (error) return error;

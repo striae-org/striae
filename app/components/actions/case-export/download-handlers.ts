@@ -36,7 +36,7 @@ export async function downloadAllCasesAsJSON(user: User, exportData: AllCasesExp
   
   try {
     // Start audit workflow
-    const workflowId = auditService.startWorkflow('all-cases');
+    auditService.startWorkflow('all-cases');
     
     const dataStr = JSON.stringify(exportData, null, 2);
     
@@ -120,7 +120,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
   
   try {
     // Start audit workflow
-    const workflowId = auditService.startWorkflow('all-cases');
+    auditService.startWorkflow('all-cases');
     
     // Dynamic import of XLSX to avoid bundle size issues
     const XLSX = await import('xlsx');
@@ -207,7 +207,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
     XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Summary');
 
     // Create a worksheet for each case
-    exportData.cases.forEach((caseData, index) => {
+    exportData.cases.forEach((caseData) => {
       if (caseData.summary?.exportError) {
         // For failed cases, create a simple error sheet
         const errorData = [
@@ -231,7 +231,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
       const metadataRows = generateMetadataRows(caseData);
       
       // Create case details with headers
-      const caseDetailsData = [
+      const caseDetailsData: Array<Array<string | number | boolean | null | undefined>> = [
         protectForensicData 
           ? [`CASE DATA - ${caseData.metadata.caseNumber} - PROTECTED`]
           : [`Case ${caseData.metadata.caseNumber} - Detailed Export`],
@@ -245,7 +245,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
 
       // Add file data if available
       if (caseData.files && caseData.files.length > 0) {
-        const fileRows: any[][] = [];
+        const fileRows: Array<Array<string | number | boolean | null | undefined>> = [];
         
         caseData.files.forEach(fileEntry => {
           const processedRows = processFileDataForTabular(fileEntry);
@@ -265,7 +265,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
       }
       
       // Clean sheet name for Excel compatibility
-      const sheetName = `Case_${caseData.metadata.caseNumber}`.replace(/[\\\/\?\*\[\]]/g, '_').substring(0, 31);
+      const sheetName = `Case_${caseData.metadata.caseNumber}`.replace(/[\\/?*\x5B\x5D]/g, '_').substring(0, 31);
       XLSX.utils.book_append_sheet(workbook, caseWorksheet, sheetName);
     });
 
@@ -302,8 +302,6 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
     
     // Clean up
     window.URL.revokeObjectURL(url);
-    
-    const passwordInfo = protectForensicData && exportPassword ? ` (Password: ${exportPassword})` : '';
     
     // Log successful export audit event
     const endTime = Date.now();
@@ -366,7 +364,7 @@ export async function downloadCaseAsJSON(
   
   try {
     // Start audit workflow
-    const workflowId = auditService.startWorkflow(exportData.metadata.caseNumber);
+    auditService.startWorkflow(exportData.metadata.caseNumber);
     
     const jsonContent = await generateJSONContent(exportData, options.includeUserInfo, options.protectForensicData);
     const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonContent);
@@ -445,7 +443,7 @@ export async function downloadCaseAsCSV(
   
   try {
     // Start audit workflow
-    const workflowId = auditService.startWorkflow(exportData.metadata.caseNumber);
+    auditService.startWorkflow(exportData.metadata.caseNumber);
     
     const csvContent = await generateCSVContent(exportData, options.protectForensicData);
     const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
@@ -528,7 +526,7 @@ export async function downloadCaseAsZip(
   
   try {
     // Start audit workflow
-    const workflowId = auditService.startWorkflow(caseNumber);
+    auditService.startWorkflow(caseNumber);
     
     onProgress?.(10);
     
@@ -856,7 +854,7 @@ async function generateJSONContent(
   includeUserInfo: boolean = true, 
   protectForensicData: boolean = true
 ): Promise<string> {
-  let jsonData = { ...exportData };
+  const jsonData = { ...exportData };
   
   // Remove sensitive user info if not included
   if (!includeUserInfo) {

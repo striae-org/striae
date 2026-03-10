@@ -64,7 +64,7 @@ export interface AuditExportSigningResponse {
 }
 
 // Higher-order function type for data operations
-export type DataOperation<T> = (user: User, ...args: any[]) => Promise<T>;
+export type DataOperation<T> = (user: User, ...args: unknown[]) => Promise<T>;
 
 // ============================================================================
 // CORE CASE DATA OPERATIONS
@@ -88,10 +88,12 @@ export const getCaseData = async (
       throw new Error(`Session validation failed: ${sessionValidation.reason}`);
     }
 
-    // Validate case access - return null if access denied (normal case)
-    const accessCheck = await canAccessCase(user, caseNumber);
-    if (!accessCheck.allowed) {
-      return null; // Case doesn't exist or user doesn't have access
+    // Validate case access unless explicitly skipped.
+    if (options.skipValidation !== true) {
+      const accessCheck = await canAccessCase(user, caseNumber);
+      if (!accessCheck.allowed) {
+        return null; // Case doesn't exist or user doesn't have access
+      }
     }
 
     // Validate case number format
@@ -459,10 +461,15 @@ export const batchUpdateFiles = async (
       throw new Error(`Batch update denied: ${modifyCheck.reason}`);
     }
 
+    const perFileOptions: DataOperationOptions = {
+      ...options,
+      skipValidation: true
+    };
+
     // Process each file update
     for (const update of updates) {
       try {
-        await saveFileAnnotations(user, caseNumber, update.fileId, update.annotations);
+        await saveFileAnnotations(user, caseNumber, update.fileId, update.annotations, perFileOptions);
         result.successful.push(update.fileId);
       } catch (error) {
         result.failed.push({
@@ -598,7 +605,7 @@ export const validateDataAccess = async (
  */
 export const withDataOperation = <T>(
   operation: DataOperation<T>
-) => async (user: User, ...args: any[]): Promise<T> => {
+) => async (user: User, ...args: unknown[]): Promise<T> => {
   try {
     // Standard session validation
     const sessionValidation = await validateUserSession(user);

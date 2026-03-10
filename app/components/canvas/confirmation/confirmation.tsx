@@ -104,14 +104,32 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, existin
     }
   };
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
+  const handleOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
+  const handleOverlayKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) {
+      return;
+    }
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClose();
+    }
+  };
+
   return (
-    <div className={styles.overlay} onClick={handleOverlayClick}>
+    <div
+      className={styles.overlay}
+      onMouseDown={handleOverlayMouseDown}
+      onKeyDown={handleOverlayKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Close confirmation dialog"
+    >
       <div className={styles.modal}>
         <div className={styles.header}>
           <h2 className={styles.title}>
@@ -135,7 +153,7 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, existin
         <div className={styles.content}>
           <div className={styles.fieldGroup}>
             <div className={styles.field}>
-              <label className={styles.label}>Name:</label>
+              <span className={styles.label}>Name:</span>
               <div className={styles.readOnlyValue}>
                 {hasExistingConfirmation ? existingConfirmation.fullName : fullName}
               </div>
@@ -154,33 +172,32 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, existin
                 }}
                 placeholder="Enter your badge or ID number"
                 disabled={isConfirming || hasExistingConfirmation}
-                autoFocus={!hasExistingConfirmation}
               />
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Email:</label>
+              <span className={styles.label}>Email:</span>
               <div className={styles.readOnlyValue}>
                 {hasExistingConfirmation ? existingConfirmation.confirmedByEmail : userEmail}
               </div>
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Lab/Company:</label>
+              <span className={styles.label}>Lab/Company:</span>
               <div className={styles.readOnlyValue}>
                 {hasExistingConfirmation ? existingConfirmation.confirmedByCompany : labCompany}
               </div>
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Timestamp:</label>
+              <span className={styles.label}>Timestamp:</span>
               <div className={styles.readOnlyValue}>
                 {hasExistingConfirmation ? existingConfirmation.timestamp : timestamp}
               </div>
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Confirmation ID:</label>
+              <span className={styles.label}>Confirmation ID:</span>
               <div className={styles.readOnlyValue}>
                 {hasExistingConfirmation ? existingConfirmation.confirmationId : confirmationId}
               </div>

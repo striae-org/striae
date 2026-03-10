@@ -44,35 +44,6 @@ function extractImageIdFromFilename(exportFilename: string): string | null {
 }
 
 /**
- * Reconstruct original filename from export filename
- * Format: {originalFilename}-{id}.{extension} → {originalFilename}.{extension}
- * Example: "evidence-2b365c5e-0559-4d6a-564f-d40bf1770101.jpg" returns "evidence.jpg"
- */
-function reconstructOriginalFilename(exportFilename: string): string {
-  const lastDotIndex = exportFilename.lastIndexOf('.');
-  const extension = lastDotIndex === -1 ? '' : exportFilename.substring(lastDotIndex);
-  const filenameWithoutExt = lastDotIndex === -1 ? exportFilename : exportFilename.substring(0, lastDotIndex);
-  
-  // UUID pattern: 8-4-4-4-12 (36 chars including hyphens)
-  const uuidPattern = /^(.+)-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
-  const match = filenameWithoutExt.match(uuidPattern);
-  
-  if (match) {
-    return match[1] + extension; // Return the original filename part + extension
-  }
-  
-  // Fallback: remove everything after the last hyphen
-  const lastHyphenIndex = filenameWithoutExt.lastIndexOf('-');
-  
-  if (lastHyphenIndex === -1) {
-    return exportFilename; // No hyphen found, return as-is (backward compatibility)
-  }
-  
-  const originalBasename = filenameWithoutExt.substring(0, lastHyphenIndex);
-  return originalBasename + extension;
-}
-
-/**
  * Preview case information from ZIP file without importing
  */
 export async function previewCaseImport(zipFile: File, currentUser: User): Promise<CaseImportPreview> {
@@ -301,7 +272,7 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
   caseData: CaseExportData;
   imageFiles: { [filename: string]: Blob };
   imageIdMapping: { [exportFilename: string]: string }; // exportFilename -> originalImageId
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   cleanedContent?: string; // Add cleaned content for hash validation
 }> {
   // Dynamic import of JSZip to avoid bundle size issues
@@ -390,12 +361,12 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
     }
     
     // Extract forensic manifest if present
-    let metadata: any = undefined;
+    let metadata: Record<string, unknown> | undefined;
     const manifestFile = zip.file('FORENSIC_MANIFEST.json');
     
     if (manifestFile) {
       const manifestContent = await manifestFile.async('text');
-      metadata = { forensicManifest: JSON.parse(manifestContent) };
+      metadata = { forensicManifest: JSON.parse(manifestContent) as unknown };
     }
     
     return {

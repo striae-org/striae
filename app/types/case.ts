@@ -82,7 +82,7 @@ export interface CaseConfirmations {
 export interface CaseDataWithConfirmations {
   createdAt: string;
   caseNumber: string;
-  files: any[];
+  files: FileData[];
   isReadOnly?: boolean;
   importedAt?: string;
   originalImageIds?: { [originalId: string]: string };

@@ -111,7 +111,7 @@ export const BoxAnnotations = ({
         x: Math.max(0, Math.min(100, x)), 
         y: Math.max(0, Math.min(100, y))
       };
-    } catch (error) {
+    } catch {
       return { x: 0, y: 0 };
     }
   }, [imageRef]);
@@ -143,7 +143,7 @@ export const BoxAnnotations = ({
       x: Math.max(DIALOG_OFFSET, adjustedX),
       y: Math.max(DIALOG_OFFSET, adjustedY)
     };
-  }, []);
+  }, [imageRef]);
 
   // Handle mouse down - start drawing
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -173,7 +173,7 @@ export const BoxAnnotations = ({
         currentY: y
       });
     }
-  }, [isAnnotationMode, getRelativeCoordinates]);
+  }, [isReadOnly, isAnnotationMode, imageRef, getRelativeCoordinates]);
 
   // Handle mouse move - update current drawing box
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -281,9 +281,14 @@ export const BoxAnnotations = ({
     annotationColor, 
     annotations, 
     onAnnotationsChange, 
+    annotationData,
+    onAnnotationDataChange,
     generateAnnotationId,
     calculateDialogPosition,
-    user
+    user,
+    caseNumber,
+    imageFileId,
+    originalImageFileName
   ]);
 
   // Remove a box annotation with validation
@@ -364,7 +369,16 @@ export const BoxAnnotations = ({
       console.error('Failed to remove annotation or log audit:', error);
       // Continue with removal even if audit logging fails
     }
-  }, [annotations, onAnnotationsChange, annotationData, onAnnotationDataChange, user]);
+  }, [
+    annotations,
+    onAnnotationsChange,
+    annotationData,
+    onAnnotationDataChange,
+    user,
+    caseNumber,
+    imageFileId,
+    originalImageFileName
+  ]);
 
   // Handle right-click to remove annotation
   const handleAnnotationRightClick = useCallback((e: React.MouseEvent, annotationId: string) => {
@@ -461,7 +475,17 @@ export const BoxAnnotations = ({
       // Still try to close dialog even if update fails
       setLabelDialog({ isVisible: false, annotationId: null, x: 0, y: 0, label: '' });
     }
-  }, [labelDialog, annotations, onAnnotationsChange, annotationData, onAnnotationDataChange, user]);
+  }, [
+    labelDialog,
+    annotations,
+    onAnnotationsChange,
+    annotationData,
+    onAnnotationDataChange,
+    user,
+    caseNumber,
+    imageFileId,
+    originalImageFileName
+  ]);
 
   // Handle label cancellation
   const handleLabelCancel = useCallback(() => {
@@ -584,7 +608,6 @@ export const BoxAnnotations = ({
             onKeyDown={handleLabelKeyDown}
             placeholder="Enter label..."
             className={styles.labelInput}
-            autoFocus
           />
           <div className={styles.labelDialogButtons}>
             <button
@@ -620,6 +643,12 @@ export const BoxAnnotations = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onKeyDown={() => {
+          // Keyboard interactions are handled by parent canvas tools.
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label="Box annotation canvas"
         style={{ 
           cursor: isAnnotationMode && !isReadOnly ? 'crosshair' : 'default',
           pointerEvents: 'auto' // Always allow pointer events for viewing annotations

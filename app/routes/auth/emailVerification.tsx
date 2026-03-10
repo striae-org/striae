@@ -107,7 +107,7 @@ export const EmailVerification = ({
         </div>
         
         <div className={styles.verificationHints}>
-          <p className={styles.hint}>Didn't receive the email?</p>
+          <p className={styles.hint}>Didn&apos;t receive the email?</p>
           <ul className={styles.hintList}>
             <li>Check your spam or junk folder</li>
             <li>Make sure {user?.email} is correct</li>

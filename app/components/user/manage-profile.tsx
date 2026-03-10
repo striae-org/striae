@@ -21,7 +21,6 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
-  const [permitted, setPermitted] = useState(false); // Default to false for safety - updated after data loads.
   const [isLoading, setIsLoading] = useState(false);
   const [isMfaBusy, setIsMfaBusy] = useState(false);
   const [error, setError] = useState('');
@@ -52,7 +51,6 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
           if (userData) {
             setCompany(userData.company || '');
             setEmail(userData.email || '');
-            setPermitted(userData.permitted === true);
           }
         } catch (err) {
           console.error('Failed to load user data:', err);

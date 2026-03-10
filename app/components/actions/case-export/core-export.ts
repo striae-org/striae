@@ -278,7 +278,7 @@ export async function exportCaseData(
             latestAnnotationDate = annotations.updatedAt;
           }
         }
-      } catch (error) {
+      } catch {
         // Continue without annotations for this file
       }
 

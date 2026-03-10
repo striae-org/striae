@@ -17,7 +17,7 @@ export const ConfirmationDialog = ({
   if (!showConfirmation || !casePreview) return null;
 
   return (
-    <div className={styles.confirmationOverlay} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.confirmationOverlay}>
       <div className={styles.confirmationModal}>
         <div className={styles.confirmationContent}>
           <h3 className={styles.confirmationTitle}>Confirm Case Import</h3>

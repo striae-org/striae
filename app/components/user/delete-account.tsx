@@ -317,18 +317,37 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
           ? `Deleting case ${deletionProgress.currentCaseNumber}...`
           : 'Preparing account deletion...');
 
+  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleOverlayKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClose();
+    }
+  };
+
   return (
     <div 
       className={styles.modalOverlay} 
-      onClick={onClose}
-      role="presentation"
+      onClick={handleOverlayClick}
+      onKeyDown={handleOverlayKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Close delete account dialog"
     >
       <div 
         className={styles.modal}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <header className={styles.modalHeader}>

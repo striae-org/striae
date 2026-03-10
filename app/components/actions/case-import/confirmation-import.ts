@@ -8,6 +8,21 @@ import { auditService } from '~/services/audit.service';
 
 const DATA_WORKER_URL = paths.data_worker_url;
 
+interface CaseDataFile {
+  id: string;
+  originalFilename?: string;
+}
+
+interface CaseDataResponse {
+  files?: CaseDataFile[];
+  originalImageIds?: Record<string, string>;
+}
+
+type AnnotationImportData = Record<string, unknown> & {
+  confirmationData?: unknown;
+  updatedAt?: string;
+};
+
 /**
  * Import confirmation data from JSON file
  */
@@ -98,7 +113,7 @@ export async function importConfirmationData(
       throw new Error(`Failed to fetch case data: ${caseResponse.status}`);
     }
 
-    const caseData = await caseResponse.json() as any; // Using any for flexibility with originalImageIds
+    const caseData = await caseResponse.json() as CaseDataResponse;
     
     // Build mapping from original image IDs to current image IDs
     const imageIdMapping = new Map<string, string>();
@@ -110,7 +125,7 @@ export async function importConfirmationData(
       }
     } else {
       // For regular cases, assume original IDs match current IDs
-      for (const file of caseData.files) {
+      for (const file of caseData.files || []) {
         imageIdMapping.set(file.id, file.id);
       }
     }
@@ -128,7 +143,7 @@ export async function importConfirmationData(
       }
 
       // Get the original filename for user-friendly messages
-      const currentFile = caseData.files.find((file: any) => file.id === currentImageId);
+      const currentFile = (caseData.files || []).find((file) => file.id === currentImageId);
       const displayFilename = currentFile?.originalFilename || currentImageId;
 
       // Get current annotation data for this image
@@ -139,22 +154,22 @@ export async function importConfirmationData(
         }
       });
 
-      let annotationData = {};
+      let annotationData: AnnotationImportData = {};
       if (annotationResponse.ok) {
-        annotationData = await annotationResponse.json();
+        annotationData = await annotationResponse.json() as AnnotationImportData;
       }
 
       // Check if confirmation data already exists
-      if ((annotationData as any).confirmationData) {
+      if (annotationData.confirmationData) {
         result.warnings?.push(`Image ${displayFilename} already has confirmation data - skipping`);
         continue;
       }
 
       // Validate that annotations haven't been modified after original export
       const importedConfirmationData = confirmations.length > 0 ? confirmations[0] : null;
-      if (importedConfirmationData && confirmationData.metadata.originalExportCreatedAt && (annotationData as any).updatedAt) {
+      if (importedConfirmationData && confirmationData.metadata.originalExportCreatedAt && annotationData.updatedAt) {
         const originalExportDate = new Date(confirmationData.metadata.originalExportCreatedAt);
-        const annotationUpdatedAt = new Date((annotationData as any).updatedAt);
+        const annotationUpdatedAt = new Date(annotationData.updatedAt);
         
         if (annotationUpdatedAt > originalExportDate) {
           // Format timestamps in user's timezone
@@ -305,7 +320,7 @@ export async function importConfirmationData(
     
     // First, try to extract basic metadata for audit purposes (if file is parseable)
     try {
-      const confirmationData: any = JSON.parse(await confirmationFile.text());
+      const confirmationData = JSON.parse(await confirmationFile.text()) as ConfirmationImportData;
       reviewingExaminerUidForAudit = confirmationData.metadata?.exportedByUid;
       totalConfirmationsForAudit = confirmationData.metadata?.totalConfirmations || 0;
       if (confirmationData.metadata?.signature) {

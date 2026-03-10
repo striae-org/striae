@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '../button/button';
 import { ToolbarColorSelector } from './toolbar-color-selector';
 import styles from './toolbar.module.css';
@@ -34,18 +34,28 @@ export const Toolbar = ({
   const [isVisible, setIsVisible] = useState(true);
   const [showColorSelector, setShowColorSelector] = useState(false);
 
+  const deactivateBoxTool = useCallback(() => {
+    setActiveTools(prev => {
+      const next = new Set(prev);
+      next.delete('box');
+      onToolSelect?.('box', false);
+      return next;
+    });
+    setShowColorSelector(false);
+  }, [onToolSelect]);
+
   // Automatically deactivate box annotations when notes are opened
   useEffect(() => {
     if (isNotesOpen && activeTools.has('box')) {
-      setActiveTools(prev => {
-        const next = new Set(prev);
-        next.delete('box');
-        onToolSelect?.('box', false);
-        return next;
-      });
-      setShowColorSelector(false);
+      const deactivateTimer = window.setTimeout(() => {
+        deactivateBoxTool();
+      }, 0);
+
+      return () => {
+        window.clearTimeout(deactivateTimer);
+      };
     }
-  }, [isNotesOpen, activeTools, onToolSelect]);
+  }, [isNotesOpen, activeTools, deactivateBoxTool]);
 
   const handleToolClick = (toolId: ToolId) => {
     if (toolId === 'print') {

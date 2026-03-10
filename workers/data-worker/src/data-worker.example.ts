@@ -30,7 +30,7 @@ interface ErrorResponse {
   error: string;
 }
 
-type APIResponse = SuccessResponse | ErrorResponse | any[] | Record<string, any>;
+type APIResponse = SuccessResponse | ErrorResponse | unknown[] | Record<string, unknown>;
 
 const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': 'PAGES_CUSTOM_DOMAIN',

@@ -8,7 +8,7 @@ interface AuditEntry {
   userId: string;
   action: string;
   // Optional metadata fields that can be included
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface SuccessResponse {
@@ -70,13 +70,15 @@ const appendAuditEntry = async (bucket: R2Bucket, filename: string, newEntry: Au
 };
 
 // Type guard to validate audit entry structure
-const isValidAuditEntry = (entry: any): entry is AuditEntry => {
+const isValidAuditEntry = (entry: unknown): entry is AuditEntry => {
+  const candidate = entry as Partial<AuditEntry> | null;
+
   return (
-    typeof entry === 'object' &&
-    entry !== null &&
-    typeof entry.timestamp === 'string' &&
-    typeof entry.userId === 'string' &&
-    typeof entry.action === 'string'
+    typeof candidate === 'object' &&
+    candidate !== null &&
+    typeof candidate.timestamp === 'string' &&
+    typeof candidate.userId === 'string' &&
+    typeof candidate.action === 'string'
   );
 };
 

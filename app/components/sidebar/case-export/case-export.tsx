@@ -169,14 +169,32 @@ export const CaseExport = ({
     }
   };
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
+  const handleOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
+  const handleOverlayKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) {
+      return;
+    }
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClose();
+    }
+  };
+
   return (
-    <div className={styles.overlay} onClick={handleOverlayClick}>
+    <div
+      className={styles.overlay}
+      onMouseDown={handleOverlayMouseDown}
+      onKeyDown={handleOverlayKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Close case export dialog"
+    >
       <div className={styles.modal}>
         <div className={styles.header}>
           <h2 className={styles.title}>Export Case Data</h2>
@@ -234,13 +252,14 @@ export const CaseExport = ({
 
             {/* 3. Image inclusion option - disabled for read-only cases */}
             <div className={styles.imageOption}>
-              <label className={styles.checkboxLabel}>
+              <div className={styles.checkboxLabel}>
                 <input
                   type="checkbox"
                   className={styles.checkbox}
                   checked={includeImages}
                   onChange={(e) => setIncludeImages(e.target.checked)}
                   disabled={!caseNumber.trim() || isExporting || isExportingAll || isReadOnly}
+                  aria-label="Include images in ZIP export"
                 />
                 <div className={styles.checkboxText}>
                   <span>Include Images (ZIP)</span>
@@ -248,7 +267,7 @@ export const CaseExport = ({
                     Available for single case exports only. Downloads a ZIP file containing data and all associated image files. Case imports support only JSON data format.
                   </p>
                 </div>
-              </label>
+              </div>
             </div>
             
             {/* 4. Export buttons (case OR all cases) */}

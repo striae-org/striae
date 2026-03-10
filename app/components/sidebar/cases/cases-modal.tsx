@@ -23,6 +23,11 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
   }>({});
   const CASES_PER_PAGE = 10;
 
+  const startLoading = () => {
+    setIsLoading(true);
+    setError('');
+  };
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -38,8 +43,9 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
 
   useEffect(() => {
     if (isOpen) {
-      setIsLoading(true);
-      setError('');
+      const loadingTimer = window.setTimeout(() => {
+        startLoading();
+      }, 0);
       
       listCases(user)
         .then(fetchedCases => {
@@ -52,6 +58,10 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
         .finally(() => {
           setIsLoading(false);
         });
+
+      return () => {
+        window.clearTimeout(loadingTimer);
+      };
     }
   }, [isOpen, user]);
 

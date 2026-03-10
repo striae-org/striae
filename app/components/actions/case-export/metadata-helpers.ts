@@ -71,7 +71,7 @@ export function generateRandomPassword(): string {
 /**
  * Protect Excel worksheet from editing
  */
-export function protectExcelWorksheet(worksheet: any, sheetPassword?: string): string {
+export function protectExcelWorksheet(worksheet: Record<string, unknown>, sheetPassword?: string): string {
   // Generate random password if none provided
   const password = sheetPassword || generateRandomPassword();
   

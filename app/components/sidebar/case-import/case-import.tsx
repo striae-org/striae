@@ -212,8 +212,19 @@ export const CaseImport = ({
     onClose();
   }, [clearImportData, onClose]);
 
-  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
+  const handleOverlayMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !importState.isImporting && !importState.isClearing) {
+      onClose();
+    }
+  }, [importState.isImporting, importState.isClearing, onClose]);
+
+  const handleOverlayKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget || importState.isImporting || importState.isClearing) {
+      return;
+    }
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
       onClose();
     }
   }, [importState.isImporting, importState.isClearing, onClose]);
@@ -259,8 +270,15 @@ export const CaseImport = ({
 
   return (
     <>
-      <div className={styles.overlay} onClick={handleOverlayClick}>
-      <div className={styles.modal}>
+      <div
+        className={styles.overlay}
+        onMouseDown={handleOverlayMouseDown}
+        onKeyDown={handleOverlayKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label="Close case import dialog"
+      >
+        <div className={styles.modal}>
         <div className={styles.header}>
           <h2 className={styles.title}>Import RO Case or Confirmations</h2>
           <button 

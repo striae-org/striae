@@ -18,6 +18,20 @@ import { generateWorkflowId } from '../utils/id-generator';
 
 const AUDIT_WORKER_URL = paths.audit_worker_url;
 
+type AnnotationSnapshot = Record<string, unknown> & {
+  type?: 'measurement' | 'identification' | 'comparison' | 'note' | 'region';
+  position?: { x: number; y: number };
+  size?: { width: number; height: number };
+};
+
+const toAnnotationSnapshot = (value: unknown): AnnotationSnapshot | undefined => {
+  if (typeof value !== 'object' || value === null) {
+    return undefined;
+  }
+
+  return value as AnnotationSnapshot;
+};
+
 /**
  * Audit Service for ValidationAuditEntry system
  * Provides comprehensive audit logging throughout the confirmation workflow
@@ -552,7 +566,7 @@ export class AuditService {
         fileId,
         originalFileName,
         fileSize: 0, // File size not available for access events
-        uploadMethod: accessMethod as any, // Reuse for access method
+        uploadMethod: accessMethod,
         processingTime,
         sourceLocation: accessReason || 'Image viewer'
       },
@@ -570,12 +584,14 @@ export class AuditService {
     user: User,
     annotationId: string,
     annotationType: 'measurement' | 'identification' | 'comparison' | 'note' | 'region',
-    annotationData: any,
+    annotationData: unknown,
     caseNumber: string,
     tool?: string,
     imageFileId?: string,
     originalImageFileName?: string
   ): Promise<void> {
+    const annotationSnapshot = toAnnotationSnapshot(annotationData);
+
     await this.logEvent({
       userId: user.uid,
       userEmail: user.email || '',
@@ -591,8 +607,8 @@ export class AuditService {
         annotationType,
         annotationData,
         tool,
-        canvasPosition: annotationData?.position,
-        annotationSize: annotationData?.size
+        canvasPosition: annotationSnapshot?.position,
+        annotationSize: annotationSnapshot?.size
       },
       fileDetails: imageFileId || originalImageFileName ? {
         fileId: imageFileId,
@@ -610,13 +626,15 @@ export class AuditService {
   public async logAnnotationEdit(
     user: User,
     annotationId: string,
-    previousValue: any,
-    newValue: any,
+    previousValue: unknown,
+    newValue: unknown,
     caseNumber: string,
     tool?: string,
     imageFileId?: string,
     originalImageFileName?: string
   ): Promise<void> {
+    const newValueSnapshot = toAnnotationSnapshot(newValue);
+
     await this.logEvent({
       userId: user.uid,
       userEmail: user.email || '',
@@ -629,7 +647,7 @@ export class AuditService {
       workflowPhase: 'casework',
       annotationDetails: {
         annotationId,
-        annotationType: newValue?.type,
+        annotationType: newValueSnapshot?.type,
         annotationData: newValue,
         previousValue,
         tool
@@ -650,12 +668,14 @@ export class AuditService {
   public async logAnnotationDelete(
     user: User,
     annotationId: string,
-    annotationData: any,
+    annotationData: unknown,
     caseNumber: string,
     deleteReason?: string,
     imageFileId?: string,
     originalImageFileName?: string
   ): Promise<void> {
+    const annotationSnapshot = toAnnotationSnapshot(annotationData);
+
     await this.logEvent({
       userId: user.uid,
       userEmail: user.email || '',
@@ -668,7 +688,7 @@ export class AuditService {
       workflowPhase: 'casework',
       annotationDetails: {
         annotationId,
-        annotationType: annotationData?.type,
+        annotationType: annotationSnapshot?.type,
         annotationData,
         tool: deleteReason
       },

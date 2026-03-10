@@ -39,6 +39,40 @@ interface VerificationResult {
   };
 }
 
+type UnknownRecord = Record<string, unknown>;
+
+const asRecord = (value: unknown): UnknownRecord | undefined => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value as UnknownRecord;
+};
+
+const getStringValue = (record: UnknownRecord | undefined, key: string): string | undefined => {
+  if (!record) {
+    return undefined;
+  }
+
+  const value = record[key];
+  return typeof value === 'string' ? value : undefined;
+};
+
+const omitKeys = (record: UnknownRecord, keys: string[]): UnknownRecord =>
+  Object.fromEntries(Object.entries(record).filter(([key]) => !keys.includes(key)));
+
+const toAuditExportType = (
+  value: unknown
+): AuditExportSigningPayload['exportType'] | undefined => {
+  return value === 'entries' || value === 'trail' || value === 'report' ? value : undefined;
+};
+
+const toAuditScopeType = (
+  value: unknown
+): AuditExportSigningPayload['scopeType'] | undefined => {
+  return value === 'case' || value === 'user' ? value : undefined;
+};
+
 export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
@@ -479,15 +513,31 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
     try {
       // First, remove forensic warnings if present
       const cleanedContent = removeForensicWarning(content);
-      
-      const data = JSON.parse(cleanedContent) as Record<string, any>;
+
+      const parsed = JSON.parse(cleanedContent) as unknown;
+      const data = asRecord(parsed);
+
+      if (!data) {
+        return {
+          isValid: false,
+          expectedHash: '',
+          calculatedHash: '',
+          fileName,
+          fileType: 'json',
+          errorMessage: 'Invalid JSON structure: expected an object at the root.'
+        };
+      }
+
+      const metadata = asRecord(data.metadata);
+      const confirmations = asRecord(data.confirmations);
+      const auditTrail = asRecord(data.auditTrail);
+      const auditTrailMetadata = asRecord(auditTrail?.metadata);
 
       const isConfirmationExportData = Boolean(
-        data?.metadata &&
-        typeof data.metadata.caseNumber === 'string' &&
-        typeof data.metadata.hash === 'string' &&
-        data?.confirmations &&
-        typeof data.confirmations === 'object'
+        metadata &&
+        getStringValue(metadata, 'caseNumber') &&
+        getStringValue(metadata, 'hash') &&
+        confirmations
       );
 
       if (isConfirmationExportData) {
@@ -495,12 +545,10 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
         const expectedHash = confirmationData.metadata.hash;
 
         // Confirmation export hash is computed before signature metadata is attached.
-        const {
-          hash: _hash,
-          signature: _signature,
-          signatureVersion: _signatureVersion,
-          ...metadataForHash
-        } = confirmationData.metadata;
+        const metadataForHash = omitKeys(
+          confirmationData.metadata as unknown as UnknownRecord,
+          ['hash', 'signature', 'signatureVersion']
+        );
 
         const dataWithoutHash = {
           ...confirmationData,
@@ -537,13 +585,13 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
       }
 
       const isAuditJsonExport = Boolean(
-        data?.metadata &&
-        data.metadata.application === 'Striae' &&
-        (Array.isArray(data.auditEntries) || Boolean(data.auditTrail))
+        metadata &&
+        getStringValue(metadata, 'application') === 'Striae' &&
+        (Array.isArray(data.auditEntries) || Boolean(auditTrail))
       );
 
-      if (isAuditJsonExport) {
-        const expectedHash = typeof data.metadata?.hash === 'string' ? data.metadata.hash : '';
+      if (isAuditJsonExport && metadata) {
+        const expectedHash = getStringValue(metadata, 'hash') || '';
         if (!expectedHash) {
           return {
             isValid: false,
@@ -555,13 +603,12 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
           };
         }
 
-        const {
-          hash: _hash,
-          integrityNote: _integrityNote,
-          signature: _signature,
-          signatureVersion: _signatureVersion,
-          ...metadataWithoutHash
-        } = data.metadata as Record<string, unknown>;
+        const metadataWithoutHash = omitKeys(metadata, [
+          'hash',
+          'integrityNote',
+          'signature',
+          'signatureVersion'
+        ]);
 
         const originalData = {
           ...data,
@@ -572,18 +619,23 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
         const calculatedHash = await calculateSHA256Secure(contentForVerification);
         const hashValid = calculatedHash.toUpperCase() === expectedHash.toUpperCase();
 
+        const totalEntriesValue = metadata.totalEntries;
+        const totalEntries = typeof totalEntriesValue === 'number' ? totalEntriesValue : undefined;
+
         const signatureMetadata: Partial<AuditExportSigningPayload> = {
-          signatureVersion: data.metadata.signatureVersion,
+          signatureVersion: getStringValue(metadata, 'signatureVersion'),
           exportFormat: 'json',
-          exportType: data.metadata.exportType,
-          scopeType: data.metadata.scopeType,
-          scopeIdentifier: data.metadata.scopeIdentifier,
-          generatedAt: data.metadata.exportTimestamp,
-          totalEntries: data.metadata.totalEntries,
+          exportType: toAuditExportType(metadata.exportType),
+          scopeType: toAuditScopeType(metadata.scopeType),
+          scopeIdentifier: getStringValue(metadata, 'scopeIdentifier'),
+          generatedAt: getStringValue(metadata, 'exportTimestamp'),
+          totalEntries,
           hash: expectedHash.toUpperCase()
         };
 
-        const signature = data.metadata.signature as ForensicManifestSignature | undefined;
+        const signature = asRecord(metadata.signature)
+          ? (metadata.signature as ForensicManifestSignature)
+          : undefined;
         const signatureResult = await verifyAuditExportSignature(signatureMetadata, signature);
         const isValid = hashValid && signatureResult.isValid;
 
@@ -609,13 +661,9 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
         };
       }
 
-      let expectedHash = '';
-      
-      if (data.metadata?.hash) {
-        expectedHash = data.metadata.hash;
-      } else if (data.auditTrail?.metadata?.hash) {
-        expectedHash = data.auditTrail.metadata.hash;
-      } else {
+      const expectedHash = getStringValue(metadata, 'hash') || getStringValue(auditTrailMetadata, 'hash') || '';
+
+      if (!expectedHash) {
         return {
           isValid: false,
           expectedHash: '',
@@ -628,14 +676,24 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
 
       // CRITICAL FIX: Create the original data structure by removing hash and integrityNote
       // This recreates the state BEFORE the hash was added during generation
-      const originalData = { ...data };
-      if (originalData.metadata) {
-        const { hash, integrityNote, signature, signatureVersion, ...metadataWithoutHash } = originalData.metadata;
+      const originalData: UnknownRecord = { ...data };
+
+      if (metadata) {
+        const metadataWithoutHash = omitKeys(metadata, [
+          'hash',
+          'integrityNote',
+          'signature',
+          'signatureVersion'
+        ]);
         originalData.metadata = metadataWithoutHash;
       }
-      if (originalData.auditTrail?.metadata) {
-        const { hash, integrityNote, ...metadataWithoutHash } = originalData.auditTrail.metadata;
-        originalData.auditTrail.metadata = metadataWithoutHash;
+
+      if (auditTrail && auditTrailMetadata) {
+        const auditMetadataWithoutHash = omitKeys(auditTrailMetadata, ['hash', 'integrityNote']);
+        originalData.auditTrail = {
+          ...auditTrail,
+          metadata: auditMetadataWithoutHash
+        };
       }
 
       // Stringify the original data structure (without hash fields)
@@ -649,7 +707,7 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
         fileName,
         fileType: 'json'
       };
-    } catch (error) {
+    } catch {
       return {
         isValid: false,
         expectedHash: '',
@@ -800,7 +858,7 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
           signatureKeyId: signatureResult.keyId
         }
       };
-    } catch (error) {
+    } catch {
       return {
         isValid: false,
         expectedHash: '',
@@ -812,14 +870,32 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
     }
   };
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
+  const handleOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
+  const handleOverlayKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) {
+      return;
+    }
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClose();
+    }
+  };
+
   return (
-    <div className={styles.overlay} onClick={handleOverlayClick}>
+    <div
+      className={styles.overlay}
+      onMouseDown={handleOverlayMouseDown}
+      onKeyDown={handleOverlayKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Close hash utility dialog"
+    >
       <div className={styles.modal}>
         <div className={styles.header}>
           <h2 className={styles.title}>Hash Utility</h2>
@@ -835,7 +911,7 @@ export const HashUtility: React.FC<HashUtilityProps> = ({ isOpen, onClose }) => 
         <div className={styles.content}>
           <p className={styles.description}>
             Verify the integrity of Striae export files by checking their embedded hashes and signatures. 
-            Upload a JSON, CSV, ZIP, or TXT export to validate that the data hasn't been tampered with or corrupted.
+            Upload a JSON, CSV, ZIP, or TXT export to validate that the data has not been tampered with or corrupted.
           </p>
 
           <div className={styles.uploadWrapper}>

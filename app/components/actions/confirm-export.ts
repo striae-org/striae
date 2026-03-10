@@ -218,7 +218,7 @@ export async function exportConfirmationData(
     }
 
     // Try to get the forensic manifest createdAt timestamp from the original case export
-    let originalExportCreatedAt: string | undefined = forensicManifestCreatedAt;
+    const originalExportCreatedAt: string | undefined = forensicManifestCreatedAt;
     
     if (!originalExportCreatedAt) {
       console.warn(`No forensic manifest timestamp found for case ${caseNumber}. This case may have been imported before forensic linking was implemented, or the original export did not include a forensic manifest.`);

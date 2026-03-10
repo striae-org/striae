@@ -211,7 +211,7 @@ export interface FileAuditDetails {
   originalFileName?: string;
   fileSize: number;
   mimeType?: string;
-  uploadMethod?: 'drag-drop' | 'file-picker' | 'api' | 'import';
+  uploadMethod?: 'drag-drop' | 'file-picker' | 'api' | 'import' | 'direct-url' | 'signed-url' | 'download';
   processingTime?: number;
   thumbnailGenerated?: boolean;
   deleteReason?: string;
@@ -224,10 +224,10 @@ export interface FileAuditDetails {
 export interface AnnotationAuditDetails {
   annotationId?: string;
   annotationType?: 'measurement' | 'identification' | 'comparison' | 'note' | 'region';
-  annotationData?: any; // The actual annotation data structure
+  annotationData?: unknown; // The actual annotation data structure
   canvasPosition?: { x: number; y: number };
   annotationSize?: { width: number; height: number };
-  previousValue?: any; // For edit operations
+  previousValue?: unknown; // For edit operations
   tool?: string; // Which tool was used to create/edit
 }
 

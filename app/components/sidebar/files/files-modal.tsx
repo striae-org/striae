@@ -84,6 +84,21 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
     fetchConfirmationStatuses();
   }, [isOpen, currentCase, currentPage, files, user]);
 
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+      };
+    }
+  }, [isOpen, onClose]);
+
   const handleFileSelect = (file: FileData) => {
     onFileSelect?.(file);
     onClose();
@@ -123,12 +138,6 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      onClose();
-    }
-  };
-
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString();
@@ -153,7 +162,7 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay} onKeyDown={handleKeyDown} tabIndex={-1}>
+    <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h2>Files in Case {currentCase}</h2>
@@ -188,6 +197,14 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
                     key={file.id}
                     className={`${styles.fileItem} ${selectedFileId === file.id ? styles.active : ''} ${confirmationClass}`}
                     onClick={() => handleFileSelect(file)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleFileSelect(file);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                   >
                     <div className={styles.fileInfo}>
                       <div className={styles.fileName} title={file.originalFilename}>

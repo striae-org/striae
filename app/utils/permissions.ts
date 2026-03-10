@@ -205,8 +205,6 @@ export const getLimitsDescription = async (user: User): Promise<string> => {
       return `Account limits: ${MAX_CASES_REVIEW} case, ${MAX_FILES_PER_CASE_REVIEW} files per case`;
     }
 
-    const limits = getUserLimits(userData);
-    
     if (userData.permitted) {
       return '';
     } else {

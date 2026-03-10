@@ -20,7 +20,7 @@ export const ExistingCaseSection = ({
   return (
     <div className={styles.warningSection}>
       <div className={styles.warningText}>
-        <strong>Current Review Case:</strong> "{existingReadOnlyCase}"
+        <strong>Current Review Case:</strong> &quot;{existingReadOnlyCase}&quot;
         <p className={styles.warningSubtext}>
           {selectedFile 
             ? 'Importing a new case will automatically replace the existing one.'

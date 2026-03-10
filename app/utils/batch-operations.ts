@@ -9,8 +9,8 @@ interface BatchOperationOptions {
   retryMultiplier: number;
 }
 
-interface BatchResult<T> {
-  successful: Array<{ item: T; result: any }>;
+interface BatchResult<T, R = unknown> {
+  successful: Array<{ item: T; result: R }>;
   failed: Array<{ item: T; error: string; retryCount: number }>;
   totalProcessed: number;
 }
@@ -18,11 +18,11 @@ interface BatchResult<T> {
 /**
  * Execute operations in batches with exponential backoff on failures
  */
-export const executeBatchOperations = async <T>(
+export const executeBatchOperations = async <T, R = unknown>(
   items: T[],
-  operation: (item: T) => Promise<any>,
+  operation: (item: T) => Promise<R>,
   options: Partial<BatchOperationOptions> = {}
-): Promise<BatchResult<T>> => {
+): Promise<BatchResult<T, R>> => {
   const config = {
     batchSize: 3,
     baseDelay: 300,
@@ -31,7 +31,7 @@ export const executeBatchOperations = async <T>(
     ...options
   };
 
-  const successful: Array<{ item: T; result: any }> = [];
+  const successful: Array<{ item: T; result: R }> = [];
   const failed: Array<{ item: T; error: string; retryCount: number }> = [];
   let totalProcessed = 0;
 
