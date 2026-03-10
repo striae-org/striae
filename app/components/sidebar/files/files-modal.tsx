@@ -41,7 +41,10 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
   // Fetch confirmation status only for currently visible paginated files
   useEffect(() => {
     const fetchConfirmationStatuses = async () => {
-      const visibleFiles = currentFiles;
+      const visibleFiles = files.slice(
+        currentPage * FILES_PER_PAGE,
+        currentPage * FILES_PER_PAGE + FILES_PER_PAGE
+      );
 
       if (!isOpen || !currentCase || !user || visibleFiles.length === 0) {
         return;

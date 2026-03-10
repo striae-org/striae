@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
 import { auditService } from '~/services/audit.service';
 import { auditExportService } from '~/services/audit-export.service';
@@ -38,13 +38,6 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
   const [auditTrail, setAuditTrail] = useState<AuditTrail | null>(null);
 
   useEffect(() => {
-    if (isOpen && user) {
-      loadAuditData();
-      loadUserData();
-    }
-  }, [isOpen, user, dateRange, customStartDate, customEndDate, filterCaseNumber, caseNumber]);
-
-  useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isOpen) {
         onClose();
@@ -59,7 +52,7 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
     }
   }, [isOpen, onClose]);
 
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -69,9 +62,9 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
       console.error('Failed to load user data:', error);
       // Don't set error state for user data failure, just log it
     }
-  };
+  }, [user]);
 
-  const loadAuditData = async () => {
+  const loadAuditData = useCallback(async () => {
     if (!user?.uid) return;
 
     setLoading(true);
@@ -161,7 +154,21 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    user,
+    dateRange,
+    customStartDate,
+    customEndDate,
+    caseNumber,
+    filterCaseNumber
+  ]);
+
+  useEffect(() => {
+    if (isOpen && user) {
+      loadAuditData();
+      loadUserData();
+    }
+  }, [isOpen, user, loadAuditData, loadUserData]);
 
   const handleApplyCaseFilter = () => {
     setFilterCaseNumber(caseNumberInput.trim());

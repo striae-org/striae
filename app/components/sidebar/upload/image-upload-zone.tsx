@@ -198,7 +198,7 @@ export const ImageUploadZone = ({
     }
   };
 
-  const handleFileInputChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (isReadOnly) {
       return;
     }
@@ -209,7 +209,7 @@ export const ImageUploadZone = ({
     // Convert FileList to Array
     const filesToUpload = Array.from(files);
     await processFileQueue(filesToUpload);
-  }, [isReadOnly, currentCase, processFileQueue]);
+  };
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -234,7 +234,7 @@ export const ImageUploadZone = ({
     e.stopPropagation();
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDraggingFiles(false);
@@ -249,7 +249,7 @@ export const ImageUploadZone = ({
     // Convert FileList to Array and process all files
     const filesToUpload = Array.from(files);
     await processFileQueue(filesToUpload);
-  }, [isReadOnly, currentCase, processFileQueue]);
+  };
 
   // If read-only or uploads restricted, show only error message
   if (isReadOnly || !canUploadNewFile) {

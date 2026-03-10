@@ -1,4 +1,4 @@
-import puppeteer from "@cloudflare/puppeteer";
+import { launch } from "@cloudflare/puppeteer";
 import type { PDFGenerationData, PDFGenerationRequest, ReportModule } from './report-types';
 
 interface Env {
@@ -72,13 +72,13 @@ export default {
     }
 
     if (request.method === 'POST') {
-      let browser: Awaited<ReturnType<typeof puppeteer.launch>> | undefined;
+      let browser: Awaited<ReturnType<typeof launch>> | undefined;
 
       try {
         const payload = await request.json() as PDFGenerationData | PDFGenerationRequest;
         const { reportFormat, data } = resolveReportRequest(payload);
 
-        browser = await puppeteer.launch(env.BROWSER);
+        browser = await launch(env.BROWSER);
         const page = await browser.newPage();
 
         // Render report from module selected by report format name.

@@ -125,7 +125,7 @@ export const Striae = ({ user }: StriaePage) => {
     };
 
     checkReadOnlyStatus();
-  }, [currentCase, user?.uid]);
+  }, [currentCase, user]);
 
   // Disable box annotation mode when notes sidebar is opened
   useEffect(() => {

@@ -8,8 +8,7 @@ import { NotesSidebar } from './notes/notes-sidebar';
 import { CaseImport } from './case-import/case-import';
 import { HashUtility } from './hash/hash-utility';
 import { Toast } from '../toast/toast';
-import { FileData } from '~/types';
-import { ImportResult, ConfirmationImportResult } from '~/types';
+import { FileData, ImportResult, ConfirmationImportResult } from '~/types';
 
 interface SidebarProps {
   user: User;

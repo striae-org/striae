@@ -63,7 +63,7 @@ export const CaseExport = ({
     };
 
     checkConfirmationData();
-  }, [isReadOnly, user?.uid, caseNumber]);
+  }, [isReadOnly, user, caseNumber]);
 
   // Additional useEffect to check when modal opens
   useEffect(() => {
@@ -80,7 +80,7 @@ export const CaseExport = ({
       };
       checkOnOpen();
     }
-  }, [isOpen, isReadOnly, user?.uid, caseNumber]);
+  }, [isOpen, isReadOnly, user, caseNumber]);
 
   // Force JSON format and disable images for read-only cases
   useEffect(() => {

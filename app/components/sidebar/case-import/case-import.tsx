@@ -53,10 +53,9 @@ export const CaseImport = ({
   const [existingReadOnlyCase, setExistingReadOnlyCase] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Clear import data helper
-  const clearImportData = useCallback(() => {
+  // Clear import selection state (used by preview hook on validation failure)
+  const clearImportSelection = useCallback(() => {
     updateImportState({ selectedFile: null, importType: null });
-    clearPreviews();
     resetFileInput(fileInputRef);
   }, [updateImportState]);
 
@@ -71,8 +70,14 @@ export const CaseImport = ({
     user,
     setError,
     (loading) => updateImportState({ isLoadingPreview: loading }),
-    clearImportData
+    clearImportSelection
   );
+
+  // Clear import data helper used by UI actions.
+  const clearImportData = useCallback(() => {
+    clearImportSelection();
+    clearPreviews();
+  }, [clearImportSelection, clearPreviews]);
 
   // Import execution hook
   const { executeImport } = useImportExecution({

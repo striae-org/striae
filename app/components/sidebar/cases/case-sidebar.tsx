@@ -137,13 +137,8 @@ export const CaseSidebar = ({
     };
   }, [files]);
 
-  // Check user permissions on mount and when user changes
-  useEffect(() => {
-    checkUserPermissions();
-  }, [user]);
-
   // Function to check user permissions (extracted for reuse)
-  const checkUserPermissions = async () => {
+  const checkUserPermissions = useCallback(async () => {
     setPermissionChecking(true);
     try {
       const casePermission = await canCreateCase(user);
@@ -164,10 +159,10 @@ export const CaseSidebar = ({
     } finally {
       setPermissionChecking(false);
     }
-  };
+  }, [user]);
 
   // Function to check file upload permissions (extracted for reuse)
-  const checkFileUploadPermissions = async (fileCount?: number) => {
+  const checkFileUploadPermissions = useCallback(async (fileCount?: number) => {
     if (currentCase) {
       try {
         // Use provided fileCount or fall back to current files.length
@@ -184,12 +179,17 @@ export const CaseSidebar = ({
       setCanUploadNewFile(true);
       setUploadFileError('');
     }
-  };
+  }, [currentCase, files.length, user]);
+
+  // Check user permissions on mount and when user changes
+  useEffect(() => {
+    checkUserPermissions();
+  }, [checkUserPermissions]);
 
   // Check file upload permissions when currentCase or files change
   useEffect(() => {
     checkFileUploadPermissions();
-  }, [user, currentCase, files.length]);
+  }, [checkFileUploadPermissions]);
    
   useEffect(() => {
     if (currentCase) {
@@ -267,7 +267,7 @@ export const CaseSidebar = ({
     return () => {
       isCancelled = true;
     };
-  }, [currentCase, fileIdsKey, user, calculateCaseConfirmationStatus]);
+  }, [currentCase, fileIdsKey, user, files, calculateCaseConfirmationStatus]);
 
   // Refresh only selected file confirmation status after confirmation-related data is persisted
   useEffect(() => {
@@ -308,7 +308,7 @@ export const CaseSidebar = ({
     return () => {
       isCancelled = true;
     };
-  }, [currentCase, fileIdsKey, user, selectedFileId, confirmationSaveVersion, calculateCaseConfirmationStatus]);
+  }, [currentCase, fileIdsKey, user, selectedFileId, confirmationSaveVersion, files.length, calculateCaseConfirmationStatus]);
   
   const handleCase = async () => {
     setIsLoading(true);
