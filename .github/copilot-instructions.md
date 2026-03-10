@@ -8,6 +8,10 @@ Please bump to version v{VERSION}. Create release notes and update README change
 
 git rm --cached workers/pdf-worker/src/format-yourcustom.ts
 
+git rm -r --cached --ignore-unmatch release-notes/
+git add .gitignore
+git commit -m "Stop tracking release-notes directory"
+
 For future releases, the flow is:
 
 Bump version (npm version patch|minor|major)
