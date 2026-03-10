@@ -55,8 +55,6 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
     // First, validate hash if forensic metadata exists
     let hashValid: boolean | undefined = undefined;
     let hashError: string | undefined = undefined;
-    let expectedHash: string | undefined = undefined;
-    let actualHash: string | undefined = undefined;
     let validationDetails: CaseImportPreview['validationDetails'];
     
     // Find the main data file (JSON or CSV)
@@ -103,7 +101,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
           const manifestForValidation = extractForensicManifestData(forensicManifest);
           if (!manifestForValidation) {
             hashValid = false;
-            hashError = 'Forensic manifest format is invalid or incomplete.';
+            hashError = 'Validation failed.';
 
             validationDetails = {
               hasForensicManifest: true,
@@ -114,8 +112,6 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
               integrityErrors: [hashError]
             };
           } else {
-            expectedHash = manifestForValidation.manifestHash;
-          
             // Extract image files for comprehensive validation
             const imageFiles: { [filename: string]: Blob } = {};
             const imagesFolder = zip.folder('images');
@@ -142,17 +138,16 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
             );
           
             hashValid = validation.isValid && signatureResult.isValid;
-            actualHash = validation.manifestValid ? expectedHash : 'validation_failed';
-          
+
             if (!hashValid) {
               const errorParts: string[] = [];
               if (!signatureResult.isValid) {
-                errorParts.push(`Signature validation failed: ${signatureResult.error}`);
+                errorParts.push('Signature validation failed.');
               }
               if (!validation.isValid) {
-                errorParts.push(`Comprehensive validation failed: ${validation.summary}. Errors: ${validation.errors.join(', ')}`);
+                errorParts.push('Integrity validation failed.');
               }
-              hashError = errorParts.join(' ');
+              hashError = errorParts.length > 0 ? errorParts.join(' ') : 'Validation failed.';
             }
 
             // Capture detailed validation information
@@ -177,7 +172,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
         } else {
           // No forensic manifest found - cannot validate
           hashValid = false;
-          hashError = 'No forensic manifest found. This case export does not support comprehensive integrity validation.';
+          hashError = 'Validation failed.';
           
           validationDetails = {
             hasForensicManifest: false,
@@ -186,8 +181,8 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
             integrityErrors: ['Export does not contain forensic manifest required for validation']
           };
         }
-      } catch (error) {
-        hashError = `Failed to validate forensic metadata: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      } catch {
+        hashError = 'Validation failed.';
         hashValid = false;
         
         validationDetails = {
@@ -251,11 +246,9 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
       totalFiles,
       caseCreatedDate: caseData.metadata.caseCreatedDate,
       hasAnnotations: false, // We'll need to determine this during parsing if needed
-      validationSummary: hashValid ? 'Validation successful' : (hashError || 'Validation failed'),
+      validationSummary: hashValid ? 'Validation passed' : 'Validation failed',
       hashValid,
       hashError,
-      expectedHash,
-      actualHash,
       validationDetails
     };
     

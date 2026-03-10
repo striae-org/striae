@@ -292,7 +292,7 @@ export async function exportConfirmationData(
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    console.log(`Confirmation data exported for case ${caseNumber} with hash ${hash.toUpperCase()}`);
+    console.log(`Confirmation data exported for case ${caseNumber}`);
     
     // Log successful confirmation export
     const endTime = Date.now();

@@ -59,9 +59,9 @@ export const CasePreviewSection = ({ casePreview, isLoadingPreview }: CasePrevie
           <div className={styles.validationItem}>            
             <span className={`${styles.validationValue} ${casePreview.hashValid ? styles.validationSuccess : styles.validationError}`}>
               {casePreview.hashValid ? (
-                <>✓ Verified (SHA-256: {casePreview.expectedHash})</>
+                <>✓ Validation passed</>
               ) : (
-                <>✗ FAILED - {casePreview.hashError}</>
+                <>✗ Validation failed</>
               )}
             </span>
           </div>

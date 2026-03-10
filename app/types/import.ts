@@ -87,8 +87,6 @@ export interface CaseImportPreview {
   caseCreatedDate?: string;
   hashValid?: boolean;
   hashError?: string;
-  expectedHash?: string;
-  actualHash?: string;
   hasAnnotations: boolean;
   validationSummary: string;
   errors?: string[];

@@ -100,7 +100,7 @@ export async function validateConfirmationHash(jsonContent: string, expectedHash
   try {
     // Validate input parameters
     if (!expectedHash || typeof expectedHash !== 'string') {
-      console.error('validateConfirmationHash: expectedHash is invalid:', expectedHash);
+      console.error('validateConfirmationHash: expected hash input is invalid');
       return false;
     }
 
@@ -126,8 +126,8 @@ export async function validateConfirmationHash(jsonContent: string, expectedHash
     }
     
     return actualHash.toUpperCase() === expectedHash.toUpperCase();
-  } catch (error) {
-    console.error('validateConfirmationHash: validation failed:', error);
+  } catch {
+    console.error('validateConfirmationHash: validation failed');
     return false;
   }
 }

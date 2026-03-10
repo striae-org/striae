@@ -187,7 +187,7 @@ export async function importCaseForReview(
 
       if (!signatureResult.isValid) {
         throw new Error(
-          `Manifest signature validation failed: ${signatureResult.error || 'Unknown signature error'}. Import cannot proceed.`
+          'Manifest signature validation failed. Import cannot proceed.'
         );
       }
       
@@ -206,8 +206,7 @@ export async function importCaseForReview(
       
       if (!validation.isValid) {
         throw new Error(
-          `Comprehensive integrity validation failed: ${validation.summary}. ` +
-          `Errors: ${validation.errors.join(', ')}. Import cannot proceed.`
+          'Comprehensive integrity validation failed. Import cannot proceed.'
         );
       }
       
@@ -215,7 +214,7 @@ export async function importCaseForReview(
       onProgress?.(
         'Complete integrity verified',
         18,
-        `${validation.summary}. Signature verified${signatureKeyId ? ` (${signatureKeyId})` : ''}`
+        `Integrity validation passed. Signature verified${signatureKeyId ? ` (${signatureKeyId})` : ''}`
       );
       
     } else {

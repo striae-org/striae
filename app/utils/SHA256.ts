@@ -381,7 +381,7 @@ export async function validateCaseIntegritySecure(
   const actualDataHash = await calculateSHA256Secure(dataContent);
   const dataValid = actualDataHash === expectedManifest.dataHash.toLowerCase();
   if (!dataValid) {
-    errors.push(`Data hash mismatch: expected ${expectedManifest.dataHash}, got ${actualDataHash}`);
+    errors.push('Data hash mismatch detected');
   }
 
   const actualImageFiles = Object.keys(imageFiles).sort();
@@ -404,7 +404,7 @@ export async function validateCaseIntegritySecure(
       imageValidation[filename] = isValid;
 
       if (!isValid) {
-        errors.push(`Image hash mismatch for ${filename}: expected ${expectedManifest.imageHashes[filename]}, got ${actualHash}`);
+        errors.push(`Image hash mismatch detected for ${filename}`);
       }
     } else {
       imageValidation[filename] = false;
@@ -419,7 +419,7 @@ export async function validateCaseIntegritySecure(
 
   const manifestValid = recreatedManifest.manifestHash === expectedManifest.manifestHash.toLowerCase();
   if (!manifestValid) {
-    errors.push(`Manifest hash mismatch: expected ${expectedManifest.manifestHash}, got ${recreatedManifest.manifestHash}`);
+    errors.push('Manifest hash mismatch detected');
 
     if (recreatedManifest.dataHash !== expectedManifest.dataHash.toLowerCase()) {
       errors.push('Manifest data hash field differs from actual data');
