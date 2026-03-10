@@ -1,12 +1,15 @@
 import { Link } from '@remix-run/react';
-import { baseMeta } from '~/utils/meta';
 import styles from './mobilePrevented.module.css';
 
 export const meta = () => {
-  return baseMeta({
-    title: 'Desktop Required',
-    description: 'Striae authentication is available on desktop devices only.',
-  });
+  const titleText = 'Striae | Desktop Required';
+  const description = 'Striae authentication is available on desktop devices only.';
+
+  return [
+    { title: titleText },
+    { name: 'description', content: description },
+    { name: 'author', content: 'Stephen J. Lu' },
+  ];
 };
 
 export const MobilePrevented = () => {

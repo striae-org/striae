@@ -20,7 +20,6 @@ import { MFAVerification } from '~/components/auth/mfa-verification';
 import { MFAEnrollment } from '~/components/auth/mfa-enrollment';
 import { Icon } from '~/components/icon/icon';
 import styles from './login.module.css';
-import { baseMeta } from '~/utils/meta';
 import { Striae } from '~/routes/striae/striae';
 import { getUserData, createUser } from '~/utils/permissions';
 import { auditService } from '~/services/audit.service';
@@ -30,10 +29,14 @@ import { buildActionCodeSettings } from '~/utils/auth-action-settings';
 import { userHasMFA } from '~/utils/mfa';
 
 export const meta = () => {
-  return baseMeta({
-    title: 'Welcome to Striae',
-    description: 'Login to your Striae account to access your projects and data',
-  });
+  const titleText = 'Striae | Welcome to Striae';
+  const description = 'Login to your Striae account to access your projects and data';
+
+  return [
+    { title: titleText },
+    { name: 'description', content: description },
+    { name: 'author', content: 'Stephen J. Lu' },
+  ];
 };
 
 const SUPPORTED_EMAIL_ACTION_MODES = new Set(['resetPassword', 'verifyEmail', 'recoverEmail']);
