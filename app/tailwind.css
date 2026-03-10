@@ -43,8 +43,23 @@
     display: block;
   }
 
+  ul,
+  ol {
+    padding-left: var(--spaceL);
+    margin: 0;
+    list-style-position: outside;
+  }
+
   ul {
-    padding: 0;
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  ol li::marker {
+    content: counter(list-item) ") ";
   }
 
   html,
