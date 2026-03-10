@@ -6,6 +6,7 @@
   justify-content: center;
   align-items: center;
   z-index: var(--zIndex5);
+  cursor: default;
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
 }
 
@@ -15,10 +16,12 @@
   width: 90%;
   max-width: 600px;
   max-height: 95vh;
-  box-shadow: 0 var(--spaceXS) var(--spaceL) color-mix(in lab, var(--black) 10%, transparent);
+  box-shadow: 0 var(--spaceXS) var(--spaceL)
+    color-mix(in lab, var(--black) 10%, transparent);
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
   display: flex;
   flex-direction: column;
+  cursor: default;
 }
 
 .header {
@@ -337,7 +340,7 @@
   box-shadow: 0 1px 3px color-mix(in lab, var(--error) 30%, transparent);
 }
 
-.cancelButton:hover:not(:disabled) {  
+.cancelButton:hover:not(:disabled) {
   background: color-mix(in lab, var(--error) 80%, white);
   border-color: color-mix(in lab, var(--error) 60%, transparent);
   box-shadow: 0 2px 6px color-mix(in lab, var(--error) 40%, transparent);
@@ -525,7 +528,8 @@
   border-radius: var(--spaceXS);
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 var(--spaceM) var(--spaceXL) color-mix(in lab, var(--black) 20%, transparent);
+  box-shadow: 0 var(--spaceM) var(--spaceXL)
+    color-mix(in lab, var(--black) 20%, transparent);
 }
 
 .confirmationContent {
@@ -610,7 +614,7 @@
   transition: all var(--durationS) var(--bezierFastoutSlowin);
 }
 
-.confirmButton:hover {  
+.confirmButton:hover {
   box-shadow: 0 2px 6px color-mix(in lab, var(--primary) 30%, transparent);
 }
 

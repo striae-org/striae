@@ -6,6 +6,7 @@
   justify-content: center;
   align-items: center;
   z-index: var(--zIndex5);
+  cursor: default;
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
 }
 
@@ -15,7 +16,9 @@
   width: 90%;
   max-width: 400px;
   max-height: 90vh;
-  box-shadow: 0 var(--spaceXS) var(--spaceL) color-mix(in lab, var(--black) 10%, transparent);
+  box-shadow: 0 var(--spaceXS) var(--spaceL)
+    color-mix(in lab, var(--black) 10%, transparent);
+  cursor: default;
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
 }
 
@@ -106,7 +109,7 @@
   border-radius: var(--spaceXS);
   font-size: var(--fontSizeBodyXS);
   color: var(--text);
-  font-family: 'Inter', monospace;
+  font-family: "Inter", monospace;
 }
 
 .error {

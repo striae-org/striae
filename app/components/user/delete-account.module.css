@@ -7,6 +7,7 @@
   justify-content: center;
   align-items: center;
   z-index: var(--zIndex5);
+  cursor: default;
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
 }
 
@@ -16,11 +17,13 @@
   border-radius: var(--spaceXS);
   width: 90%;
   max-width: 600px;
-  box-shadow: 0 var(--spaceXS) var(--spaceL) color-mix(in lab, var(--black) 10%, transparent);
+  box-shadow: 0 var(--spaceXS) var(--spaceL)
+    color-mix(in lab, var(--black) 10%, transparent);
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
   overflow: hidden;
   max-height: 90vh;
   overflow-y: auto;
+  cursor: default;
 }
 
 /* Modal Header */

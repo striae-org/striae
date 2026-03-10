@@ -12,6 +12,7 @@
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  cursor: default;
 }
 
 .modal {
@@ -24,6 +25,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
+  cursor: default;
 }
 
 .header {
@@ -100,7 +102,8 @@
 }
 
 /* Loading & Error States */
-.loading, .error {
+.loading,
+.error {
   text-align: center;
   padding: 40px 20px;
   color: var(--textBody);
@@ -117,8 +120,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error {
