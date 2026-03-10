@@ -339,6 +339,7 @@
   box-shadow: 0 var(--spaceXS) var(--spaceL)
     color-mix(in lab, var(--black) 18%, transparent);
   overflow: hidden;
+  cursor: default;
 }
 
 .publicKeyHeader {
