@@ -35,7 +35,6 @@ export const meta = () => {
   return [
     { title: titleText },
     { name: 'description', content: description },
-    { name: 'author', content: 'Stephen J. Lu' },
   ];
 };
 

@@ -56,7 +56,7 @@ npm run deploy:all
 
 ## 👥 Project Contributors
 
-[![Stephen J. Lu](https://github.com/StephenJLu.png?size=50)](https://github.com/StephenJLu)
+Striae is maintained by the open-source contributor community.
 
 ---
 
