@@ -84,7 +84,7 @@
   border-radius: 3px;
   padding: var(--spaceXS) var(--spaceS);
   cursor: pointer;
-  font-size: var(--fontSizeXS);
+  font-size: var(--fontSizeBodyXS);
 }
 
 .toggleButton:hover {
@@ -157,7 +157,7 @@
 }
 
 .previewLabel {
-  font-size: var(--fontSizeXS);
+  font-size: var(--fontSizeBodyXS);
   color: var(--foreground);
   font-weight: 500;
 }
