@@ -8,6 +8,11 @@ Please bump to version v{VERSION}. Create release notes and update README change
 
 git rm --cached workers/pdf-worker/src/format-yourcustom.ts
 
+For future releases, the flow is:
+
+Bump version (npm version patch|minor|major)
+npm run publish:all
+
 ## Project Overview
 Striae is a cloud-native forensic annotation application for firearms examination, built on Remix + Cloudflare infrastructure with a microservices architecture using Cloudflare Workers.
 
