@@ -54,9 +54,9 @@ npm run deploy:all
 
 **[Email Support](mailto:info@striae.org)**
 
-## 👥 Project Contributors
+## 👥 Project Maintainers
 
-Striae is maintained by the open-source contributor community.
+[![Stephen J. Lu](https://github.com/StephenJLu.png?size=50)](https://github.com/StephenJLu)
 
 ---
 
