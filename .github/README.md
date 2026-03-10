@@ -62,6 +62,12 @@ Striae is maintained by the open-source contributor community.
 
 ## 📋 Changelog
 
+## [2026-03-09] - *[Patch Release v3.0.5](https://github.com/striae-org/striae/releases/tag/v3.0.5)*
+
+- **🧹 Metadata and Public Surface Cleanup** - Removed legacy author meta tag references and retired stale meta/public asset remnants
+- **🚫 Header Policy Adjustment** - Removed outdated no-index related header leftovers
+- **🎨 UI Polish** - Fixed toolbar color selector font-size style tagging
+
 ## [2026-03-09] - *[Patch Release v3.0.4](https://github.com/striae-org/striae/releases/tag/v3.0.4)*
 
 - **📦 Package Scope and Version Alignment** - Migrated distributable package identity to `@striae-org/striae` and finalized package metadata at `v3.0.4`
