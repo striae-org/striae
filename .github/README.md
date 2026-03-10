@@ -62,6 +62,13 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-10] - *[Minor Release v3.1.0](https://github.com/striae-org/striae/releases/tag/v3.1.0)*
+
+- **🔐 Signature-First Verification Posture** - Removed hash-utility-dependent validation pathways and hash-value exposure in UI flows to align with signed export verification.
+- **🔑 Public Signing Key UX** - Added export-modal access to the public signing key with copy support and concise verification guidance for independent validation workflows.
+- **🧩 Export Modal Reliability & Layout Refinements** - Improved modal behavior and layout structure, including cursor consistency, action ordering, and content containment fixes.
+- **🧹 Lint and Config Hygiene** - Completed ESLint flat-config migration and related repository cleanup, including compatibility/config maintenance.
+
 ## [2026-03-09] - *[Patch Release v3.0.5](https://github.com/striae-org/striae/releases/tag/v3.0.5)*
 
 - **🧹 Metadata and Public Surface Cleanup** - Removed legacy author meta tag references and retired stale meta/public asset remnants

@@ -4,7 +4,6 @@ build/
 dist/
 archive/
 wiki/
-release-notes/
 
 # Workers
 workers/audit-worker/src/audit-worker.ts
