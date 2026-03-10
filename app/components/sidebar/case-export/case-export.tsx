@@ -254,6 +254,7 @@ export const CaseExport = ({
             <div className={styles.imageOption}>
               <div className={styles.checkboxLabel}>
                 <input
+                  id="includeImagesOption"
                   type="checkbox"
                   className={styles.checkbox}
                   checked={includeImages}
@@ -261,12 +262,12 @@ export const CaseExport = ({
                   disabled={!caseNumber.trim() || isExporting || isExportingAll || isReadOnly}
                   aria-label="Include images in ZIP export"
                 />
-                <div className={styles.checkboxText}>
+                <label htmlFor="includeImagesOption" className={styles.checkboxText}>
                   <span>Include Images (ZIP)</span>
-                  <p className={styles.checkboxTooltip}>
+                  <span className={styles.checkboxTooltip}>
                     Available for single case exports only. Downloads a ZIP file containing data and all associated image files. Case imports support only JSON data format.
-                  </p>
-                </div>
+                  </span>
+                </label>
               </div>
             </div>
             

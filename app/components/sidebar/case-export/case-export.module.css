@@ -194,6 +194,7 @@
 }
 
 .checkboxTooltip {
+  display: block;
   font-size: var(--fontSizeBodyXS);
   color: var(--textBody);
   margin: 0;
