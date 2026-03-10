@@ -16,6 +16,9 @@
   width: 90%;
   max-width: 480px;
   max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 var(--spaceXS) var(--spaceL)
     color-mix(in lab, var(--black) 10%, transparent);
   cursor: default;
@@ -55,8 +58,10 @@
 
 .content {
   padding: var(--spaceL);
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  max-height: calc(90vh - var(--space3XL));
+  overflow-x: hidden;
 }
 
 .formatSelector {
@@ -326,9 +331,11 @@
 .publicKeyModal {
   width: 100%;
   max-width: 640px;
-  max-height: 90vh;
+  max-height: 90vw;
   background: var(--backgroundLight);
   border-radius: var(--spaceXS);
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 var(--spaceXS) var(--spaceL)
     color-mix(in lab, var(--black) 18%, transparent);
   overflow: hidden;
@@ -351,11 +358,13 @@
 
 .publicKeyContent {
   padding: var(--spaceL);
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: var(--spaceM);
   overflow-y: auto;
-  max-height: calc(90vh - var(--space3XL));
+  overflow-x: hidden;
 }
 
 .publicKeyDescription {
@@ -382,6 +391,8 @@
 
 .publicKeyField {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   min-height: 180px;
   padding: var(--spaceM);
   border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
