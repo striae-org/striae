@@ -432,16 +432,6 @@ export const CaseExport = ({
                  isReadOnly ? 'Export Confirmation Data' : 'Export Case Data'}
               </button>
             </div>
-
-            <div className={styles.publicKeySection}>
-              <button
-                type="button"
-                className={styles.publicKeyButton}
-                onClick={() => setIsPublicKeyModalOpen(true)}
-              >
-                View Public Signing Key
-              </button>
-            </div>
             
             {/* Hide "Export All Cases" for read-only cases */}
             {!isReadOnly && (
@@ -461,6 +451,20 @@ export const CaseExport = ({
                 </div>
               </>
             )}
+
+            <div className={styles.divider}>
+              <span>Verification</span>
+            </div>
+
+            <div className={styles.publicKeySection}>
+              <button
+                type="button"
+                className={styles.publicKeyButton}
+                onClick={() => setIsPublicKeyModalOpen(true)}
+              >
+                View Public Signing Key
+              </button>
+            </div>
             
             {exportProgress && exportProgress.total > 0 && (
               <div className={styles.progressSection}>
