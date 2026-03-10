@@ -255,7 +255,8 @@
 
 .oinBadgeLink {
   display: inline-block;
-  transition: opacity var(--durationS, 0.2s) var(--bezierFastoutSlowin, ease-out);
+  transition: opacity var(--durationS, 0.2s)
+    var(--bezierFastoutSlowin, ease-out);
 }
 
 .oinBadgeLink:hover {
@@ -317,5 +318,3 @@
   background: #5c636a;
   box-shadow: 0 2px 6px color-mix(in lab, #6c757d 40%, transparent);
 }
-
-

@@ -6,7 +6,6 @@ import { SignOut } from '../actions/signout';
 import { CaseSidebar } from './cases/case-sidebar';
 import { NotesSidebar } from './notes/notes-sidebar';
 import { CaseImport } from './case-import/case-import';
-import { HashUtility } from './hash/hash-utility';
 import { Toast } from '../toast/toast';
 import { FileData, ImportResult, ConfirmationImportResult } from '~/types';
 
@@ -63,7 +62,6 @@ export const Sidebar = ({
 }: SidebarProps) => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isHashModalOpen, setIsHashModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(initialIsUploading);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error' | 'warning'>('success');
@@ -142,10 +140,6 @@ export const Sidebar = ({
         onClose={() => setIsImportModalOpen(false)}
         onImportComplete={handleImportComplete}
       />
-      <HashUtility 
-        isOpen={isHashModalOpen}
-        onClose={() => setIsHashModalOpen(false)}
-      />
       {showNotes ? (
         <NotesSidebar 
           currentCase={currentCase}
@@ -191,14 +185,6 @@ export const Sidebar = ({
               title={isUploading ? 'Cannot import while uploading files' : undefined}
             >
               Import/Clear RO Case
-            </button>
-            <button 
-              onClick={() => setIsHashModalOpen(true)}
-              className={styles.hashButton}
-              disabled={isUploading}
-              title={isUploading ? 'Cannot open hash utility while uploading files' : undefined}
-            >
-              Hash Utility
             </button>
           </div>
         </>
