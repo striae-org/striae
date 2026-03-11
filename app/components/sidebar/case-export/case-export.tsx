@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import styles from './case-export.module.css';
 import config from '~/config/config.json';
 import { AuthContext } from '~/contexts/auth.context';
+import { PublicSigningKeyModal } from '~/components/public-signing-key-modal/public-signing-key-modal';
 import { getVerificationPublicKey } from '~/utils/signature-utils';
 import { getCaseConfirmations, exportConfirmationData } from '../../actions/confirm-export';
 
@@ -86,8 +87,6 @@ export const CaseExport = ({
   const [includeImages, setIncludeImages] = useState(false);
   const [hasConfirmationData, setHasConfirmationData] = useState(false);
   const [isPublicKeyModalOpen, setIsPublicKeyModalOpen] = useState(false);
-  const [isCopyingPublicKey, setIsCopyingPublicKey] = useState(false);
-  const [publicKeyCopyMessage, setPublicKeyCopyMessage] = useState('');
   const { keyId: publicSigningKeyId, publicKeyPem } = getPublicSigningKeyDetails();
 
   // Update caseNumber when currentCaseNumber prop changes
@@ -153,22 +152,10 @@ export const CaseExport = ({
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isPublicKeyModalOpen) {
-      setIsCopyingPublicKey(false);
-      setPublicKeyCopyMessage('');
-    }
-  }, [isPublicKeyModalOpen]);
-
   // Handle Escape key to close modal
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
-        if (isPublicKeyModalOpen) {
-          setIsPublicKeyModalOpen(false);
-          return;
-        }
-
+      if (event.key === 'Escape' && isOpen && !isPublicKeyModalOpen) {
         onClose();
       }
     };
@@ -258,81 +245,6 @@ export const CaseExport = ({
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       onClose();
-    }
-  };
-
-  const handlePublicKeyOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      setIsPublicKeyModalOpen(false);
-    }
-  };
-
-  const handlePublicKeyOverlayKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.target !== e.currentTarget) {
-      return;
-    }
-
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      setIsPublicKeyModalOpen(false);
-    }
-  };
-
-  const copyTextWithExecCommand = (text: string): boolean => {
-    const tempTextarea = document.createElement('textarea');
-    tempTextarea.value = text;
-    tempTextarea.setAttribute('readonly', '');
-    tempTextarea.style.position = 'fixed';
-    tempTextarea.style.opacity = '0';
-    tempTextarea.style.pointerEvents = 'none';
-
-    document.body.appendChild(tempTextarea);
-    tempTextarea.select();
-
-    let copied = false;
-    try {
-      copied = document.execCommand('copy');
-    } finally {
-      document.body.removeChild(tempTextarea);
-    }
-
-    return copied;
-  };
-
-  const handleCopyPublicKey = async () => {
-    if (!publicKeyPem) {
-      setPublicKeyCopyMessage('No public signing key is configured for this environment.');
-      return;
-    }
-
-    setIsCopyingPublicKey(true);
-    setPublicKeyCopyMessage('');
-
-    try {
-      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-        await navigator.clipboard.writeText(publicKeyPem);
-        setPublicKeyCopyMessage('Public key copied to clipboard.');
-      } else {
-        const copied = copyTextWithExecCommand(publicKeyPem);
-        setPublicKeyCopyMessage(
-          copied
-            ? 'Public key copied to clipboard.'
-            : 'Copy failed. Select and copy the key manually.'
-        );
-      }
-    } catch (copyError) {
-      const copied = copyTextWithExecCommand(publicKeyPem);
-      setPublicKeyCopyMessage(
-        copied
-          ? 'Public key copied to clipboard.'
-          : 'Copy failed. Select and copy the key manually.'
-      );
-
-      if (!copied) {
-        console.error('Failed to copy public signing key:', copyError);
-      }
-    } finally {
-      setIsCopyingPublicKey(false);
     }
   };
 
@@ -497,101 +409,12 @@ export const CaseExport = ({
         </div>
       </div>
 
-      {isPublicKeyModalOpen && (
-        <div
-          className={styles.publicKeyOverlay}
-          onMouseDown={handlePublicKeyOverlayMouseDown}
-          onKeyDown={handlePublicKeyOverlayKeyDown}
-          role="button"
-          tabIndex={0}
-          aria-label="Close public signing key dialog"
-        >
-          <div
-            className={styles.publicKeyModal}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="publicSigningKeyTitle"
-          >
-            <div className={styles.publicKeyHeader}>
-              <h3 id="publicSigningKeyTitle" className={styles.publicKeyTitle}>
-                Striae Public Signing Key
-              </h3>
-              <button
-                type="button"
-                className={styles.closeButton}
-                onClick={() => setIsPublicKeyModalOpen(false)}
-                aria-label="Close public signing key dialog"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className={styles.publicKeyContent}>
-              <p className={styles.publicKeyDescription}>
-                This key verifies digital signatures attached to Striae exports. It is safe to share for
-                independent verification.
-              </p>
-
-              {publicSigningKeyId && (
-                <p className={styles.publicKeyMeta}>
-                  Key ID: <span>{publicSigningKeyId}</span>
-                </p>
-              )}
-
-              <label htmlFor="publicSigningKey" className={styles.publicKeyLabel}>
-                Public signing key (PEM)
-              </label>
-              <textarea
-                id="publicSigningKey"
-                className={styles.publicKeyField}
-                value={publicKeyPem || 'No public signing key is configured for this environment.'}
-                readOnly
-                rows={10}
-              />
-
-              <p className={styles.publicKeyHowToTitle}>How to verify Striae exports</p>
-              <ol className={styles.publicKeyHowToList}>
-                <li>
-                  Locate signature metadata in the export (for case ZIP exports, see FORENSIC_MANIFEST.json;
-                  for confirmation exports, see metadata.signature).
-                </li>
-                <li>
-                  Use this public key with your signature verification workflow (for example OpenSSL or an
-                  internal verifier) to validate the signed payload.
-                </li>
-                <li>
-                  Trust the export only when signature verification succeeds and the key ID matches the export
-                  metadata.
-                </li>
-              </ol>
-
-              {publicKeyCopyMessage && (
-                <p className={styles.publicKeyStatus} role="status" aria-live="polite">
-                  {publicKeyCopyMessage}
-                </p>
-              )}
-
-              <div className={styles.publicKeyActions}>
-                <button
-                  type="button"
-                  className={styles.publicKeyCopyButton}
-                  onClick={handleCopyPublicKey}
-                  disabled={isCopyingPublicKey || !publicKeyPem}
-                >
-                  {isCopyingPublicKey ? 'Copying...' : 'Copy Key'}
-                </button>
-                <button
-                  type="button"
-                  className={styles.publicKeyCloseButton}
-                  onClick={() => setIsPublicKeyModalOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <PublicSigningKeyModal
+        isOpen={isPublicKeyModalOpen}
+        onClose={() => setIsPublicKeyModalOpen(false)}
+        publicSigningKeyId={publicSigningKeyId}
+        publicKeyPem={publicKeyPem}
+      />
     </div>
   );
 };
