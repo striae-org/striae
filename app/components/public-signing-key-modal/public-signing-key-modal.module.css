@@ -12,7 +12,7 @@
 .modal {
   width: 100%;
   max-width: 640px;
-  max-height: 90vw;
+  max-height: 90vh;
   background: var(--backgroundLight);
   border-radius: var(--spaceXS);
   display: flex;
