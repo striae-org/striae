@@ -79,7 +79,7 @@
     "publish:all": "npm run publish:npm && npm run publish:github",
     "publish:all:dry-run": "npm run publish:npm:dry-run && npm run publish:github:dry-run",
     "lint": "node ./scripts/run-eslint.cjs",
-    "start": "node ./scripts/dev.cjs && wrangler pages dev ./build/client",
+    "start": "node ./scripts/dev.cjs && wrangler pages dev",
     "typecheck": "tsc",
     "typegen": "wrangler types",
     "preview": "npm run build && wrangler pages dev",
