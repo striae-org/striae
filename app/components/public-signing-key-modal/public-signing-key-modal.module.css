@@ -1,0 +1,171 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: color-mix(in lab, var(--background) 60%, transparent);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--zIndex5);
+  padding: var(--spaceL);
+}
+
+.modal {
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vw;
+  background: var(--backgroundLight);
+  border-radius: var(--spaceXS);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 var(--spaceXS) var(--spaceL)
+    color-mix(in lab, var(--black) 18%, transparent);
+  overflow: hidden;
+  cursor: default;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spaceL);
+  border-bottom: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fontSizeBodyL);
+  font-weight: 600;
+  color: var(--textTitle);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: var(--fontSizeH5);
+  cursor: pointer;
+  padding: var(--spaceS);
+  color: var(--textLight);
+  transition: color var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.closeButton:hover {
+  color: var(--text);
+}
+
+.content {
+  padding: var(--spaceL);
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceM);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.description {
+  margin: 0;
+  font-size: var(--fontSizeBodyS);
+  color: var(--textBody);
+}
+
+.meta {
+  margin: 0;
+  font-size: var(--fontSizeBodyS);
+  color: var(--textTitle);
+}
+
+.meta span {
+  font-weight: var(--fontWeightMedium);
+}
+
+.label {
+  font-size: var(--fontSizeBodyXS);
+  font-weight: var(--fontWeightMedium);
+  color: var(--textTitle);
+}
+
+.field {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 180px;
+  padding: var(--spaceM);
+  border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+  border-radius: var(--spaceXS);
+  background: color-mix(in lab, var(--background) 96%, transparent);
+  color: var(--textBody);
+  font-size: var(--fontSizeBodyXS);
+  line-height: 1.4;
+  font-family: Consolas, "Courier New", monospace;
+  resize: vertical;
+}
+
+.howToTitle {
+  margin: 0;
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  color: var(--textTitle);
+}
+
+.howToList {
+  margin: 0;
+  padding-left: var(--spaceL);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceXS);
+  color: var(--textBody);
+  font-size: var(--fontSizeBodyS);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spaceS);
+}
+
+.status {
+  margin: 0;
+  font-size: var(--fontSizeBodyXS);
+  color: var(--textBody);
+}
+
+.copyButton {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid color-mix(in lab, var(--primary) 35%, transparent);
+  border-radius: var(--spaceXS);
+  padding: var(--spaceS) var(--spaceL);
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.copyButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--primary) 10%, transparent);
+  border-color: color-mix(in lab, var(--primary) 55%, transparent);
+}
+
+.copyButton:disabled {
+  background: color-mix(in lab, var(--background) 95%, transparent);
+  color: var(--textLight);
+  border-color: color-mix(in lab, var(--text) 10%, transparent);
+  cursor: not-allowed;
+}
+
+.closeModalButton {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--spaceXS);
+  padding: var(--spaceS) var(--spaceL);
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.closeModalButton:hover {
+  background: color-mix(in lab, var(--primary) 85%, var(--black));
+}
