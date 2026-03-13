@@ -1,4 +1,5 @@
 import type { PDFGenerationData, ReportRenderer } from './report-types';
+import { ICON_256 } from './generated-assets';
 
 export const renderReport: ReportRenderer = (data: PDFGenerationData): string => {
   const { imageUrl, caseNumber, annotationData, activeAnnotations, currentDate, notesUpdatedFormatted, userCompany } = data;
@@ -519,7 +520,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
     <div class="footer">
       <div class="footer-left">
         <span>Notes formatted by Striae</span>
-        <img class="footer-brand-icon" src="https://app.striae.org/icon-256.png" alt="Striae icon" />
+          <img class="footer-brand-icon" src="${ICON_256}" alt="Striae icon" />
       </div>
       <div class="footer-center">
         ${userCompany ? userCompany : ''}
