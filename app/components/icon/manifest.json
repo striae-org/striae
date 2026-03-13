@@ -1,76 +1,4 @@
 {
-  "send": {
-    "width": 24,
-    "height": 24
-  },
-  "arrow-right": {
-    "width": 24,
-    "height": 24
-  },
-  "chevron-right": {
-    "width": 24,
-    "height": 24
-  },
-  "github": {
-    "width": 24,
-    "height": 24
-  },
-  "google": {
-    "width": 24,
-    "height": 24
-  },
-  "menu": {
-    "width": 24,
-    "height": 24
-  },
-  "figma": {
-    "width": 24,
-    "height": 24
-  },
-  "copy": {
-    "width": 24,
-    "height": 24
-  },
-  "error": {
-    "width": 24,
-    "height": 24
-  },
-  "arrow-left": {
-    "width": 24,
-    "height": 24
-  },
-  "check": {
-    "width": 24,
-    "height": 24
-  },
-  "link": {
-    "width": 24,
-    "height": 24
-  },
-  "close": {
-    "width": 24,
-    "height": 24
-  },
-  "pause": {
-    "width": 24,
-    "height": 24
-  },
-  "play": {
-    "width": 24,
-    "height": 24
-  },
-  "bluesky": {
-    "width": 24,
-    "height": 24
-  },
-  "linkedin": {
-    "width": 24,
-    "height": 24
-  },
-  "soundcloud": {
-    "width": 24,
-    "height": 24
-  },
   "number": {
     "width": 24,
     "height": 24
@@ -84,8 +12,8 @@
     "height": 24
   },
   "print": {
-    "width": 24,
-    "height": 24
+    "width": 28,
+    "height": 28
   },
   "id": {
     "width": 24,
@@ -95,7 +23,7 @@
     "width": 24,
     "height": 24
   },
-  "tictactoe": {
+  "box": {
     "width": 24,
     "height": 24
   },
