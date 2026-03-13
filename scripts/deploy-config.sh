@@ -57,9 +57,16 @@ is_placeholder() {
 
 # Check if .env file exists
 env_created_from_example=false
+preserved_domain_env_file=""
+
+if [ -f ".env" ]; then
+    preserved_domain_env_file=".env"
+fi
+
 if [ "$update_env" = "true" ]; then
     if [ -f ".env" ]; then
         cp .env .env.backup
+        preserved_domain_env_file=".env.backup"
         echo -e "${GREEN}📄 Existing .env backed up to .env.backup${NC}"
     fi
 
@@ -133,10 +140,150 @@ normalize_domain_value() {
     printf '%s' "$domain"
 }
 
+strip_carriage_returns() {
+    printf '%s' "$1" | tr -d '\r'
+}
+
+read_env_var_from_file() {
+    local env_file=$1
+    local var_name=$2
+
+    if [ ! -f "$env_file" ]; then
+        return 0
+    fi
+
+    awk -v key="$var_name" '
+        index($0, key "=") == 1 {
+            value = substr($0, length(key) + 2)
+        }
+        END {
+            if (value != "") {
+                gsub(/\r/, "", value)
+                gsub(/^"/, "", value)
+                gsub(/"$/, "", value)
+                print value
+            }
+        }
+    ' "$env_file"
+}
+
+worker_domain_wrangler_path() {
+    case "$1" in
+        KEYS_WORKER_DOMAIN)
+            printf '%s' "workers/keys-worker/wrangler.jsonc"
+            ;;
+        USER_WORKER_DOMAIN)
+            printf '%s' "workers/user-worker/wrangler.jsonc"
+            ;;
+        DATA_WORKER_DOMAIN)
+            printf '%s' "workers/data-worker/wrangler.jsonc"
+            ;;
+        AUDIT_WORKER_DOMAIN)
+            printf '%s' "workers/audit-worker/wrangler.jsonc"
+            ;;
+        IMAGES_WORKER_DOMAIN)
+            printf '%s' "workers/image-worker/wrangler.jsonc"
+            ;;
+        PDF_WORKER_DOMAIN)
+            printf '%s' "workers/pdf-worker/wrangler.jsonc"
+            ;;
+    esac
+}
+
+read_worker_domain_from_wrangler() {
+    local wrangler_file=$1
+
+    if [ ! -f "$wrangler_file" ]; then
+        return 0
+    fi
+
+    sed -n 's/.*"pattern"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$wrangler_file" | head -n 1
+}
+
+resolve_existing_domain_value() {
+    local var_name=$1
+    local current_value=$2
+    local preserved_value=""
+    local wrangler_file=""
+
+    current_value=$(normalize_domain_value "$current_value")
+
+    if [ "$current_value" = "$var_name" ]; then
+        current_value=""
+    fi
+
+    if [ -n "$current_value" ] && ! is_placeholder "$current_value"; then
+        printf '%s' "$current_value"
+        return 0
+    fi
+
+    if [ -n "$preserved_domain_env_file" ] && [ -f "$preserved_domain_env_file" ]; then
+        preserved_value=$(read_env_var_from_file "$preserved_domain_env_file" "$var_name")
+        preserved_value=$(normalize_domain_value "$preserved_value")
+
+        if [ "$preserved_value" = "$var_name" ]; then
+            preserved_value=""
+        fi
+
+        if [ -n "$preserved_value" ] && ! is_placeholder "$preserved_value"; then
+            printf '%s' "$preserved_value"
+            return 0
+        fi
+    fi
+
+    if [[ "$var_name" == *_WORKER_DOMAIN ]]; then
+        wrangler_file=$(worker_domain_wrangler_path "$var_name")
+
+        if [ -n "$wrangler_file" ] && [ -f "$wrangler_file" ]; then
+            preserved_value=$(read_worker_domain_from_wrangler "$wrangler_file")
+            preserved_value=$(normalize_domain_value "$preserved_value")
+
+            if [ "$preserved_value" = "$var_name" ]; then
+                preserved_value=""
+            fi
+
+            if [ -n "$preserved_value" ] && ! is_placeholder "$preserved_value"; then
+                printf '%s' "$preserved_value"
+                return 0
+            fi
+        fi
+    fi
+
+    printf '%s' "$current_value"
+}
+
+generate_worker_subdomain_label() {
+    node -e "const { randomInt } = require('crypto'); const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789'; let value = ''; for (let index = 0; index < 10; index += 1) { value += alphabet[randomInt(alphabet.length)]; } process.stdout.write(value);" 2>/dev/null
+}
+
+generate_worker_subdomain() {
+    local pages_domain=$1
+    local subdomain_label=""
+
+    pages_domain=$(normalize_domain_value "$pages_domain")
+
+    if [ -z "$pages_domain" ] || is_placeholder "$pages_domain"; then
+        return 1
+    fi
+
+    if ! subdomain_label=$(generate_worker_subdomain_label); then
+        return 1
+    fi
+
+    if [ ${#subdomain_label} -ne 10 ]; then
+        return 1
+    fi
+
+    printf '%s.%s' "$subdomain_label" "$pages_domain"
+}
+
 write_env_var() {
     local var_name=$1
     local var_value=$2
     local env_file_value="$var_value"
+
+    var_value=$(strip_carriage_returns "$var_value")
+    env_file_value="$var_value"
 
     if [ "$var_name" = "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_PRIVATE_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_PUBLIC_KEY" ]; then
         # Store as a quoted string so sourced .env preserves escaped newline markers (\n)
@@ -276,6 +423,7 @@ configure_manifest_signing_credentials() {
     else
         echo -e "${GREEN}Current manifest signing key pair: [HIDDEN]${NC}"
         read -p "Generate new manifest signing key pair? (press Enter to keep current, or type 'y' to regenerate): " regenerate_choice
+        regenerate_choice=$(strip_carriage_returns "$regenerate_choice")
         if [ "$regenerate_choice" = "y" ] || [ "$regenerate_choice" = "Y" ]; then
             should_generate="true"
         fi
@@ -579,6 +727,12 @@ prompt_for_secrets() {
         local current_value="${!var_name}"
         local new_value=""
         local allow_keep="false"
+
+        current_value=$(strip_carriage_returns "$current_value")
+
+        if [ "$var_name" = "PAGES_CUSTOM_DOMAIN" ] || [[ "$var_name" == *_WORKER_DOMAIN ]]; then
+            current_value=$(resolve_existing_domain_value "$var_name" "$current_value")
+        fi
         
         # Auto-generate specific authentication secrets - but allow keeping current
         if [ "$var_name" = "USER_DB_AUTH" ] || [ "$var_name" = "R2_KEY_SECRET" ] || [ "$var_name" = "KEYS_AUTH" ]; then
@@ -589,6 +743,7 @@ prompt_for_secrets() {
                 # Current value exists and is not a placeholder
                 echo -e "${GREEN}Current value: [HIDDEN]${NC}"
                 read -p "Generate new secret? (press Enter to keep current, or type 'y' to generate): " gen_choice
+                gen_choice=$(strip_carriage_returns "$gen_choice")
                 
                 if [ "$gen_choice" = "y" ] || [ "$gen_choice" = "Y" ]; then
                     new_value=$(openssl rand -hex 32 2>/dev/null || echo "")
@@ -598,6 +753,7 @@ prompt_for_secrets() {
                         while true; do
                             echo -e "${RED}❌ Failed to auto-generate, please enter manually:${NC}"
                             read -p "Enter value: " new_value
+                            new_value=$(strip_carriage_returns "$new_value")
                             if [ -z "$new_value" ]; then
                                 echo -e "${RED}❌ A value is required.${NC}"
                                 continue
@@ -624,6 +780,7 @@ prompt_for_secrets() {
                     while true; do
                         echo -e "${RED}❌ Failed to auto-generate, please enter manually:${NC}"
                         read -p "Enter value: " new_value
+                        new_value=$(strip_carriage_returns "$new_value")
                         if [ -z "$new_value" ]; then
                             echo -e "${RED}❌ A value is required.${NC}"
                             continue
@@ -636,6 +793,68 @@ prompt_for_secrets() {
                         break
                     done
                 fi
+            fi
+        elif [[ "$var_name" == *_WORKER_DOMAIN ]]; then
+            local pages_domain
+            local domain_choice=""
+
+            pages_domain=$(resolve_existing_domain_value "PAGES_CUSTOM_DOMAIN" "$PAGES_CUSTOM_DOMAIN")
+
+            echo -e "${BLUE}$var_name${NC}"
+            echo -e "${YELLOW}$description${NC}"
+
+            if [ -n "$current_value" ] && ! is_placeholder "$current_value"; then
+                echo -e "${GREEN}Current value: $current_value${NC}"
+            else
+                while true; do
+                    if [ -n "$pages_domain" ] && ! is_placeholder "$pages_domain"; then
+                        echo -e "${YELLOW}Choose how to configure this worker domain:${NC}"
+                        echo "  A) Auto-generate a 10-character subdomain of $pages_domain"
+                        echo "  M) Manually enter the worker domain"
+                        read -p "Selection (A/M): " domain_choice
+                        domain_choice=$(strip_carriage_returns "$domain_choice")
+                        domain_choice=$(printf '%s' "$domain_choice" | tr '[:upper:]' '[:lower:]')
+
+                        if [ -z "$domain_choice" ] || [ "$domain_choice" = "a" ]; then
+                            new_value=$(generate_worker_subdomain "$pages_domain" || echo "")
+
+                            if [ -n "$new_value" ]; then
+                                echo -e "${GREEN}✅ Generated worker domain: $new_value${NC}"
+                                break
+                            fi
+
+                            echo -e "${RED}❌ Failed to auto-generate a worker subdomain. Please try manual entry.${NC}"
+                            continue
+                        fi
+
+                        if [ "$domain_choice" = "m" ]; then
+                            read -p "Enter value: " new_value
+                            new_value=$(strip_carriage_returns "$new_value")
+                        else
+                            echo -e "${RED}❌ Please choose 'A' for automatic or 'M' for manual.${NC}"
+                            continue
+                        fi
+                    else
+                        echo -e "${YELLOW}PAGES_CUSTOM_DOMAIN is required for auto-generated worker subdomains.${NC}"
+                        read -p "Enter value: " new_value
+                        new_value=$(strip_carriage_returns "$new_value")
+                    fi
+
+                    if [ -z "$new_value" ]; then
+                        echo -e "${RED}❌ A value is required.${NC}"
+                        continue
+                    fi
+
+                    new_value=$(normalize_domain_value "$new_value")
+
+                    if is_placeholder "$new_value"; then
+                        echo -e "${RED}❌ Placeholder values are not allowed.${NC}"
+                        new_value=""
+                        continue
+                    fi
+
+                    break
+                done
             fi
         else
             # Normal prompt for other variables
@@ -653,11 +872,13 @@ prompt_for_secrets() {
             while true; do
                 if [ "$allow_keep" = "true" ]; then
                     read -p "New value (or press Enter to keep current): " new_value
+                    new_value=$(strip_carriage_returns "$new_value")
                     if [ -z "$new_value" ]; then
                         break
                     fi
                 else
                     read -p "Enter value: " new_value
+                    new_value=$(strip_carriage_returns "$new_value")
                     if [ -z "$new_value" ]; then
                         echo -e "${RED}❌ A value is required.${NC}"
                         continue
@@ -687,6 +908,7 @@ prompt_for_secrets() {
         elif [ -n "$current_value" ]; then
             # Keep values aligned with .env.example ordering and remove stale duplicates.
             write_env_var "$var_name" "$current_value"
+            export "$var_name=$current_value"
             echo -e "${GREEN}✅ Keeping current value for $var_name${NC}"
         fi
         echo ""
