@@ -96,6 +96,5 @@ When asked to bump to `vX.Y.Z`:
 Use these for details that are intentionally not duplicated here:
 
 - `wiki/striae.wiki/Architecture-Guide.md`
-- `wiki/striae.wiki/Development-Protocol-Guide.md`
 - `wiki/striae.wiki/API-Reference.md`
 - `wiki/striae.wiki/Security-Guide.md`
