@@ -18,12 +18,11 @@
 - `b7fb2a5` upd compat dates
 - `b288ba0` wrangler upd
 - `951710c` Bump isbot from 5.1.35 to 5.1.36
-- `fef15ec` Bump wrangler from 3.114.17 to 4.72.0
 
 ## Summary
 
 - **🧹 Icon Sprite Cleanup** - Removed unused SVG symbols and manifest entries; sprite now contains only the 9 icons actively referenced in the app
 - **🔑 Public Signing Key Component** - Extracted public signing key display into a dedicated component for cleaner modal integration
 - **📋 Audit Report Integrity** - Updated integrity verification messaging in audit report output
-- **📦 Dependency Updates** - Bumped Wrangler (3.x → 4.x) and isbot; applied DepBot security advisory fix (GHSA)
+- **📦 Dependency Updates** - Bumped isbot; applied DepBot security advisory fix (GHSA)
 - **⚙️ Config and Compat Maintenance** - Refreshed Cloudflare compatibility dates, worker config, and Pages secrets handling

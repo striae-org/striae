@@ -67,7 +67,7 @@ npm run deploy:all
 - **🧹 Icon Sprite Cleanup** - Removed unused SVG symbols and manifest entries; sprite now contains only the 9 icons actively referenced in the app
 - **🔑 Public Signing Key Component** - Extracted public signing key display into a dedicated component for cleaner modal integration
 - **📋 Audit Report Integrity** - Updated integrity verification messaging in audit report output
-- **📦 Dependency Updates** - Bumped Wrangler (3.x → 4.x) and isbot; applied DepBot security advisory fix (GHSA)
+- **📦 Dependency Updates** - Bumped isbot; applied DepBot security advisory fix (GHSA)
 - **⚙️ Config and Compat Maintenance** - Refreshed Cloudflare compatibility dates, worker config, and Pages secrets handling
 
 ## [2026-03-10] - *[Minor Release v3.1.0](https://github.com/striae-org/striae/releases/tag/v3.1.0)*
