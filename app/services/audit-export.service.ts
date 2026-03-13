@@ -557,7 +557,7 @@ Audit Signature: ${JSON.stringify(signaturePayload.signature)}
 Verification Instructions:
 1. Copy the entire report content above the "INTEGRITY VERIFICATION" section
 2. Calculate SHA256 hash of that content (excluding this verification section)
-3. Validate audit signature metadata and signature with the Striae Hash Utility
+3. Validate audit signature metadata and signature with your signature verification workflow (for example OpenSSL or an internal verifier)
 4. Confirm both hash and signature validation pass before relying on this report
 
 This report requires both hash and signature validation for tamper detection.
