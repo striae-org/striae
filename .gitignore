@@ -3,7 +3,6 @@ node_modules/
 build/
 dist/
 archive/
-wiki/
 
 # Workers
 workers/audit-worker/src/audit-worker.ts
