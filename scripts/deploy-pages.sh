@@ -27,8 +27,8 @@ fi
 echo -e "${GREEN}✅ Pages deployment completed successfully${NC}"
 
 echo -e "\n${BLUE}💡 Next Steps:${NC}"
-echo "   1. Deploy Pages secrets: npm run deploy-pages:secrets"
+echo "   1. Test your application"
 echo "   2. Configure custom domain (optional)"
-echo "   3. Test your application"
+echo "   3. Verify Pages environment variables in Cloudflare dashboard"
 
 echo -e "\n${GREEN}✨ Pages deployment complete!${NC}"
