@@ -5,7 +5,7 @@ For deep implementation details, use the wiki docs.
 
 ## Scope and Architecture Snapshot
 
-- Frontend: Remix app in `app/`, deployed with Cloudflare Pages.
+- Frontend: React Router app in `app/`, deployed with Cloudflare Pages.
 - Workers: `user`, `image`, `pdf`, `data`, `keys`, and `audit` in `workers/`.
 - Data services: Firebase Auth plus Cloudflare KV, R2, and Images.
 - Config sources:

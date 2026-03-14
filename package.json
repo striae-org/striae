@@ -1,14 +1,24 @@
 {
   "name": "@striae-org/striae",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "private": false,
-  "description": "Cloud-native forensic annotation application for firearms identification (Remix + Cloudflare Workers).",
+  "description": "Striae is a cloud-native forensic annotation application for firearms identification, built with React Router and Cloudflare Workers.",
   "license": "Apache-2.0",
   "homepage": "https://www.striae.org",
   "repository": {
     "type": "git",
     "url": "https://github.com/striae-org/striae.git"
   },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/striae-org"
+    },
+    {
+      "type": "patreon",
+      "url": "https://join.striae.org"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/striae-org/striae/issues"
   },
@@ -16,7 +26,7 @@
     "forensics",
     "firearms",
     "annotation",
-    "remix",
+    "react",
     "cloudflare-workers",
     "chain-of-custody",
     "audit-trail"

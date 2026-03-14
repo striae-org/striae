@@ -1,6 +1,6 @@
 # @striae-org/striae
 
-Striae is a cloud-native forensic annotation application for firearms identification, built with Remix and Cloudflare Workers.
+Striae is a cloud-native forensic annotation application for firearms identification, built with React Router and Cloudflare Workers.
 
 This npm package publishes the Striae application source and deployment scaffolding for teams that run their own Striae environment.
 
@@ -40,7 +40,7 @@ npm i @striae-org/striae
 cp -R node_modules/@striae-org/striae/. .
 ```
 
-3) Reinstall using Striae's own package.json (includes dev deps like wrangler/remix)
+3) Reinstall using Striae's own package.json (includes dev deps like wrangler/react-router)
 
 ```bash
 rm -rf node_modules package-lock.json
@@ -62,39 +62,10 @@ cp -f app/config-example/admin-service.json app/config/admin-service.json
 npx wrangler login
 ```
 
-6) Run guided config + full deployment
+7) Run guided config + full deployment
 
 ```bash
 npm run deploy:all
-```
-
-## Publish To npmjs And GitHub Packages
-
-1) Verify auth for both registries
-
-```bash
-npm whoami --registry=https://registry.npmjs.org/
-npm whoami --registry=https://npm.pkg.github.com/
-```
-
-2) Publish current version to npmjs (public)
-
-```bash
-npm run publish:npm
-```
-
-3) Publish the same version to GitHub Packages
-
-```bash
-npm run publish:github
-```
-
-4) Optional dry-runs before a real release
-
-```bash
-npm run publish:npm:dry-run
-npm run publish:github:dry-run
-npm run publish:all:dry-run
 ```
 
 ## NPM Package Content Policy
