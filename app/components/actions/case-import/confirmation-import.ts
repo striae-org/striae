@@ -1,12 +1,29 @@
 import { User } from 'firebase/auth';
-import paths from '~/config/config.json';
 import { getDataApiKey } from '~/utils/auth';
 import { ConfirmationImportResult, ConfirmationImportData } from '~/types';
 import { checkExistingCase } from '../case-manage';
 import { validateExporterUid, validateConfirmationHash, validateConfirmationSignatureFile } from './validation';
 import { auditService } from '~/services/audit.service';
 
-const DATA_WORKER_URL = paths.data_worker_url;
+const DATA_API_BASE = '/api/data';
+
+const getDataProxyHeaders = async (
+  user: User,
+  apiKey: string,
+  includeJsonContentType: boolean = false
+): Promise<Record<string, string>> => {
+  const idToken = await user.getIdToken();
+  const headers: Record<string, string> = {
+    'X-Custom-Auth-Key': apiKey,
+    'Authorization': `Bearer ${idToken}`
+  };
+
+  if (includeJsonContentType) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  return headers;
+};
 
 interface CaseDataFile {
   id: string;
@@ -102,11 +119,9 @@ export async function importConfirmationData(
 
     // Get case data to find image IDs
     const apiKey = await getDataApiKey();
-    const caseResponse = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/data.json`, {
+    const caseResponse = await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/data.json`, {
       method: 'GET',
-      headers: {
-        'X-Custom-Auth-Key': apiKey
-      }
+      headers: await getDataProxyHeaders(user, apiKey)
     });
 
     if (!caseResponse.ok) {
@@ -147,11 +162,9 @@ export async function importConfirmationData(
       const displayFilename = currentFile?.originalFilename || currentImageId;
 
       // Get current annotation data for this image
-      const annotationResponse = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`, {
+      const annotationResponse = await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`, {
         method: 'GET',
-        headers: {
-          'X-Custom-Auth-Key': apiKey
-        }
+        headers: await getDataProxyHeaders(user, apiKey)
       });
 
       let annotationData: AnnotationImportData = {};
@@ -204,12 +217,9 @@ export async function importConfirmationData(
       };
 
       // Save updated annotation data
-      const saveResponse = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`, {
+      const saveResponse = await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Custom-Auth-Key': apiKey
-        },
+        headers: await getDataProxyHeaders(user, apiKey, true),
         body: JSON.stringify(updatedAnnotationData)
       });
 

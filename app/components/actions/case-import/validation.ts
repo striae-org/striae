@@ -1,11 +1,10 @@
 import { User } from 'firebase/auth';
-import paths from '~/config/config.json';
 import { getUserApiKey } from '~/utils/auth';
 import { CaseExportData, ConfirmationImportData } from '~/types';
 import { calculateSHA256Secure, ManifestSignatureVerificationResult } from '~/utils/SHA256';
 import { verifyConfirmationSignature } from '~/utils/confirmation-signature';
 
-const USER_WORKER_URL = paths.user_worker_url;
+const USER_API_BASE = '/api/user';
 
 /**
  * Remove forensic warning from content for hash validation (supports both JSON and CSV formats)
@@ -69,10 +68,12 @@ export function removeForensicWarning(content: string): string {
 export async function validateExporterUid(exporterUid: string, currentUser: User): Promise<{ exists: boolean; isSelf: boolean }> {
   try {
     const apiKey = await getUserApiKey();
-    const response = await fetch(`${USER_WORKER_URL}/${exporterUid}`, {
+    const idToken = await currentUser.getIdToken();
+    const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(exporterUid)}`, {
       method: 'GET',
       headers: {
-        'X-Custom-Auth-Key': apiKey
+        'X-Custom-Auth-Key': apiKey,
+        'Authorization': `Bearer ${idToken}`
       }
     });
     

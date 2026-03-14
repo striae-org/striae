@@ -6,7 +6,6 @@
 
 import { User } from 'firebase/auth';
 import { CaseData, AnnotationData, ConfirmationImportData } from '~/types';
-import paths from '~/config/config.json';
 import { getDataApiKey } from './auth';
 import { validateUserSession, canAccessCase, canModifyCase } from './permissions';
 import {
@@ -21,7 +20,20 @@ import {
   isValidAuditExportSigningPayload
 } from './audit-export-signature';
 
-const DATA_WORKER_URL = paths.data_worker_url;
+const DATA_API_BASE = '/api/data';
+
+const getDataWorkerHeaders = async (user: User, apiKey: string): Promise<Record<string, string>> => {
+  const idToken = await user.getIdToken();
+
+  if (!idToken) {
+    throw new Error('Unable to resolve Firebase ID token for data operation');
+  }
+
+  return {
+    'X-Custom-Auth-Key': apiKey,
+    'Authorization': `Bearer ${idToken}`
+  };
+};
 
 // ============================================================================
 // INTERFACES AND TYPES
@@ -102,13 +114,11 @@ export const getCaseData = async (
     }
 
     const apiKey = await getDataApiKey();
-    const url = `${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`;
+    const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`;
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'X-Custom-Auth-Key': apiKey
-      }
+      headers: await getDataWorkerHeaders(user, apiKey)
     });
 
     if (response.status === 404) {
@@ -164,7 +174,7 @@ export const updateCaseData = async (
     }
 
     const apiKey = await getDataApiKey();
-    const url = `${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`;
+    const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`;
 
     // Add timestamp if requested (default: true)
     const dataToSave = options.includeTimestamp !== false ? {
@@ -176,7 +186,7 @@ export const updateCaseData = async (
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Custom-Auth-Key': apiKey
+        ...(await getDataWorkerHeaders(user, apiKey))
       },
       body: JSON.stringify(dataToSave)
     });
@@ -217,13 +227,11 @@ export const deleteCaseData = async (
     }
 
     const apiKey = await getDataApiKey();
-    const url = `${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`;
+    const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`;
 
     const response = await fetch(url, {
       method: 'DELETE',
-      headers: {
-        'X-Custom-Auth-Key': apiKey
-      }
+      headers: await getDataWorkerHeaders(user, apiKey)
     });
 
     if (!response.ok && response.status !== 404) {
@@ -270,13 +278,11 @@ export const getFileAnnotations = async (
     }
 
     const apiKey = await getDataApiKey();
-    const url = `${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(fileId)}/data.json`;
+    const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(fileId)}/data.json`;
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'X-Custom-Auth-Key': apiKey
-      }
+      headers: await getDataWorkerHeaders(user, apiKey)
     });
 
     if (response.status === 404) {
@@ -335,14 +341,12 @@ export const saveFileAnnotations = async (
     }
 
     const apiKey = await getDataApiKey();
-    const url = `${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(fileId)}/data.json`;
+    const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(fileId)}/data.json`;
 
     // Enforce immutability once confirmation data exists on an image.
     const existingResponse = await fetch(url, {
       method: 'GET',
-      headers: {
-        'X-Custom-Auth-Key': apiKey
-      }
+      headers: await getDataWorkerHeaders(user, apiKey)
     });
 
     if (existingResponse.ok) {
@@ -364,7 +368,7 @@ export const saveFileAnnotations = async (
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Custom-Auth-Key': apiKey
+        ...(await getDataWorkerHeaders(user, apiKey))
       },
       body: JSON.stringify(dataToSave)
     });
@@ -408,13 +412,11 @@ export const deleteFileAnnotations = async (
     }
 
     const apiKey = await getDataApiKey();
-    const url = `${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(fileId)}/data.json`;
+    const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(fileId)}/data.json`;
 
     const response = await fetch(url, {
       method: 'DELETE',
-      headers: {
-        'X-Custom-Auth-Key': apiKey
-      }
+      headers: await getDataWorkerHeaders(user, apiKey)
     });
 
     if (!response.ok && response.status !== 404) {
@@ -685,11 +687,11 @@ export const signForensicManifest = async (
     }
 
     const apiKey = await getDataApiKey();
-    const response = await fetch(`${DATA_WORKER_URL}/api/forensic/sign-manifest`, {
+    const response = await fetch(`${DATA_API_BASE}/api/forensic/sign-manifest`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Custom-Auth-Key': apiKey
+        ...(await getDataWorkerHeaders(user, apiKey))
       },
       body: JSON.stringify({
         userId: user.uid,
@@ -753,11 +755,11 @@ export const signConfirmationData = async (
     }
 
     const apiKey = await getDataApiKey();
-    const response = await fetch(`${DATA_WORKER_URL}/api/forensic/sign-confirmation`, {
+    const response = await fetch(`${DATA_API_BASE}/api/forensic/sign-confirmation`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Custom-Auth-Key': apiKey
+        ...(await getDataWorkerHeaders(user, apiKey))
       },
       body: JSON.stringify({
         userId: user.uid,
@@ -829,11 +831,11 @@ export const signAuditExportData = async (
     }
 
     const apiKey = await getDataApiKey();
-    const response = await fetch(`${DATA_WORKER_URL}/api/forensic/sign-audit-export`, {
+    const response = await fetch(`${DATA_API_BASE}/api/forensic/sign-audit-export`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Custom-Auth-Key': apiKey
+        ...(await getDataWorkerHeaders(user, apiKey))
       },
       body: JSON.stringify({
         userId: user.uid,
