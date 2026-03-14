@@ -1,6 +1,6 @@
 {
   "name": "@striae-org/striae",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "private": false,
   "description": "Striae is a cloud-native forensic annotation application for firearms identification, built with React Router and Cloudflare Workers.",
   "license": "Apache-2.0",

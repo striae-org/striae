@@ -62,6 +62,16 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-14] - *[Patch Release v3.2.2](https://github.com/striae-org/striae/releases/tag/v3.2.2)*
+
+_Note: Summary is based on 33 non-merge commits since v3.2.1 (same-day patch window)._
+
+- **🧭 Audit Service Refactor Consolidation** - Completed phased audit-service refactor/cleanup and normalized shared type import plus `User` type usage patterns.
+- **📄 PDF Worker Asset and Format Reorganization** - Reorganized PDF worker assets/formats and removed legacy custom-asset remnants.
+- **🧹 Repository Hygiene and Tooling Passes** - Applied lint/typegen, filename normalization, and `.gitignore` maintenance updates.
+- **↩️ Stability-Preserving Reverts** - Reverted in-window keys/config migration and keys-worker decommission experiments to keep runtime baseline stable.
+- **💖 Funding and Dependency Metadata Updates** - Updated Patreon/funding metadata and captured Vite bump/revert history in release lineage.
+
 ## [2026-03-14] - *[Patch Release v3.2.1](https://github.com/striae-org/striae/releases/tag/v3.2.1)*
 
 _Note: Summary is based on 15 non-merge commits since v3.2.0._
