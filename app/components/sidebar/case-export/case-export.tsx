@@ -364,20 +364,6 @@ export const CaseExport = ({
               </>
             )}
 
-            <div className={styles.divider}>
-              <span>Verification</span>
-            </div>
-
-            <div className={styles.publicKeySection}>
-              <button
-                type="button"
-                className={styles.publicKeyButton}
-                onClick={() => setIsPublicKeyModalOpen(true)}
-              >
-                View Public Signing Key
-              </button>
-            </div>
-            
             {exportProgress && exportProgress.total > 0 && (
               <div className={styles.progressSection}>
                 <div className={styles.progressText}>
@@ -391,7 +377,7 @@ export const CaseExport = ({
                 </div>
               </div>
             )}
-            
+
             {isExportingAll && !exportProgress && (
               <div className={styles.progressSection}>
                 <div className={styles.progressText}>
@@ -399,6 +385,20 @@ export const CaseExport = ({
                 </div>
               </div>
             )}
+
+            <div className={styles.divider}>
+              <span>Verification</span>
+            </div>
+
+            <div className={styles.publicKeySection}>
+              <button
+                type="button"
+                className={styles.publicKeyButton}
+                onClick={() => setIsPublicKeyModalOpen(true)}
+              >
+                View Public Signing Key
+              </button>
+            </div>
             
             {error && (
               <div className={styles.error}>

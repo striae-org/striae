@@ -68,16 +68,38 @@ export function generateRandomPassword(): string {
   return password.split('').sort(() => Math.random() - 0.5).join('');
 }
 
+type WorksheetProtectionOptions = {
+  selectLockedCells: boolean;
+  selectUnlockedCells: boolean;
+  formatCells: boolean;
+  formatColumns: boolean;
+  formatRows: boolean;
+  insertColumns: boolean;
+  insertRows: boolean;
+  insertHyperlinks: boolean;
+  deleteColumns: boolean;
+  deleteRows: boolean;
+  sort: boolean;
+  autoFilter: boolean;
+  pivotTables: boolean;
+  objects: boolean;
+  scenarios: boolean;
+  spinCount: number;
+};
+
+type ProtectableWorksheet = {
+  protect: (password: string, options: Record<string, unknown>) => Promise<unknown> | unknown;
+};
+
 /**
  * Protect Excel worksheet from editing
  */
-export function protectExcelWorksheet(worksheet: Record<string, unknown>, sheetPassword?: string): string {
+export async function protectExcelWorksheet(worksheet: ProtectableWorksheet, sheetPassword?: string): Promise<string> {
   // Generate random password if none provided
   const password = sheetPassword || generateRandomPassword();
-  
-  // Set worksheet protection
-  worksheet['!protect'] = {
-    password: password,
+
+  const protectionOptions: WorksheetProtectionOptions = {
+    // Keep read-only defaults and prevent structural edits.
     selectLockedCells: true,
     selectUnlockedCells: true,
     formatCells: false,
@@ -92,15 +114,11 @@ export function protectExcelWorksheet(worksheet: Record<string, unknown>, sheetP
     autoFilter: false,
     pivotTables: false,
     objects: false,
-    scenarios: false
+    scenarios: false,
+    spinCount: 100000
   };
-  
-  // Lock all cells by default
-  if (!worksheet['!cols']) worksheet['!cols'] = [];
-  if (!worksheet['!rows']) worksheet['!rows'] = [];
-  
-  // Add protection metadata
-  worksheet['!margins'] = { left: 0.7, right: 0.7, top: 0.75, bottom: 0.75, header: 0.3, footer: 0.3 };
+
+  await Promise.resolve(worksheet.protect(password, protectionOptions as Record<string, unknown>));
   
   // Return the password for inclusion in metadata
   return password;

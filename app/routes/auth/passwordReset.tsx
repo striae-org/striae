@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Link } from '@remix-run/react';
+import { Link } from 'react-router';
 import { sendPasswordResetEmail, signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';
 import { handleAuthError, ERROR_MESSAGES } from '~/services/firebase-errors';

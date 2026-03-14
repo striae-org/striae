@@ -5,9 +5,95 @@ import { generateForensicManifestSecure, calculateSHA256Secure } from '~/utils/S
 import { signForensicManifest } from '~/utils/data-operations';
 import { ExportFormat, formatDateForFilename, CSV_HEADERS } from './types-constants';
 import { protectExcelWorksheet, addForensicDataWarning } from './metadata-helpers';
-import { generateMetadataRows, generateCSVContent, processFileDataForTabular } from './data-processing';
+import { generateMetadataRows, generateCSVContent, processFileDataForTabular, sanitizeTabularMatrix } from './data-processing';
 import { exportCaseData } from './core-export';
 import { auditService } from '~/services/audit.service';
+
+type TabularRow = Array<string | number | boolean | null | undefined>;
+type ExcelJsBrowserBundle = typeof import('exceljs');
+
+const EXCELJS_BROWSER_BUNDLE_SRC = '/vendor/exceljs.bare.min.js';
+let excelJsBundlePromise: Promise<ExcelJsBrowserBundle> | null = null;
+
+async function loadExcelJsBrowserBundle(): Promise<ExcelJsBrowserBundle> {
+  if (typeof window === 'undefined') {
+    throw new Error('Excel export is only available in a browser context.');
+  }
+
+  if (window.ExcelJS?.Workbook) {
+    return window.ExcelJS;
+  }
+
+  if (!excelJsBundlePromise) {
+    excelJsBundlePromise = new Promise((resolve, reject) => {
+      const resolveFromWindow = () => {
+        if (window.ExcelJS?.Workbook) {
+          resolve(window.ExcelJS);
+          return;
+        }
+
+        excelJsBundlePromise = null;
+        reject(new Error('ExcelJS bundle loaded but Workbook API is unavailable.'));
+      };
+
+      const failLoad = () => {
+        excelJsBundlePromise = null;
+        reject(new Error('Failed to load ExcelJS browser bundle.'));
+      };
+
+      const existingScript = document.querySelector<HTMLScriptElement>('script[data-exceljs-bundle="true"]');
+
+      if (existingScript) {
+        if (existingScript.dataset.loaded === 'true') {
+          resolveFromWindow();
+          return;
+        }
+
+        existingScript.addEventListener('load', resolveFromWindow, { once: true });
+        existingScript.addEventListener('error', failLoad, { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = EXCELJS_BROWSER_BUNDLE_SRC;
+      script.async = true;
+      script.dataset.exceljsBundle = 'true';
+      script.addEventListener(
+        'load',
+        () => {
+          script.dataset.loaded = 'true';
+          resolveFromWindow();
+        },
+        { once: true }
+      );
+      script.addEventListener('error', failLoad, { once: true });
+      document.head.appendChild(script);
+    });
+  }
+
+  return excelJsBundlePromise;
+}
+
+function sanitizeWorksheetName(name: string): string {
+  const cleaned = name.replace(/[\\/?*:\x5B\x5D]/g, '_').trim();
+  const normalized = cleaned.length > 0 ? cleaned : 'Sheet';
+  return normalized.substring(0, 31);
+}
+
+function createUniqueWorksheetName(existingNames: Set<string>, desiredName: string): string {
+  const baseName = sanitizeWorksheetName(desiredName);
+  let candidate = baseName;
+  let suffix = 1;
+
+  while (existingNames.has(candidate)) {
+    const suffixText = `_${suffix}`;
+    candidate = `${baseName.substring(0, 31 - suffixText.length)}${suffixText}`;
+    suffix += 1;
+  }
+
+  existingNames.add(candidate);
+  return candidate;
+}
 
 /**
  * Generate export filename with embedded ID to prevent collisions
@@ -122,10 +208,22 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
     // Start audit workflow
     auditService.startWorkflow('all-cases');
     
-    // Dynamic import of XLSX to avoid bundle size issues
-    const XLSX = await import('xlsx');
+    const ExcelJS = await loadExcelJsBrowserBundle();
     
-    const workbook = XLSX.utils.book_new();
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = exportData.metadata.exportedBy || 'Striae';
+    workbook.lastModifiedBy = exportData.metadata.exportedBy || 'Striae';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+
+    const existingWorksheetNames = new Set<string>();
+
+    const appendRowsToWorksheet = (worksheet: { addRow: (row: TabularRow) => unknown }, rows: TabularRow[]) => {
+      rows.forEach((row) => {
+        worksheet.addRow(row);
+      });
+    };
+
     let exportPassword: string | undefined;
 
     // Create summary worksheet
@@ -146,7 +244,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
     ];
     
     // XLSX files are inherently protected, no hash validation needed
-    const summaryData = [
+    const summaryData = sanitizeTabularMatrix([
       protectForensicData ? ['CASE DATA - PROTECTED EXPORT'] : ['Striae - All Cases Export Summary'],
       protectForensicData ? ['WARNING: This workbook contains evidence data and is protected from editing.'] : [''],
       [''],
@@ -195,36 +293,37 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
         caseData.summary?.latestAnnotationDate || '',
         caseData.summary?.exportError || ''
       ])
-    ];
+    ]);
 
-    const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
+    const summaryWorksheetName = createUniqueWorksheetName(existingWorksheetNames, 'Summary');
+    const summaryWorksheet = workbook.addWorksheet(summaryWorksheetName);
+    appendRowsToWorksheet(summaryWorksheet, summaryData);
     
     // Protect summary worksheet if forensic protection is enabled
     if (protectForensicData) {
-      exportPassword = protectExcelWorksheet(summaryWorksheet);
+      exportPassword = await protectExcelWorksheet(summaryWorksheet);
     }
-    
-    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Summary');
 
     // Create a worksheet for each case
-    exportData.cases.forEach((caseData) => {
+    for (const caseData of exportData.cases) {
       if (caseData.summary?.exportError) {
         // For failed cases, create a simple error sheet
-        const errorData = [
+        const errorData = sanitizeTabularMatrix([
           [`Case ${caseData.metadata.caseNumber} - Export Failed`],
           [''],
           ['Error:', caseData.summary.exportError],
           ['Case Number:', caseData.metadata.caseNumber],
           ['Total Files:', caseData.metadata.totalFiles]
-        ];
-        const errorWorksheet = XLSX.utils.aoa_to_sheet(errorData);
+        ]);
+        const errorSheetName = createUniqueWorksheetName(existingWorksheetNames, `Case_${caseData.metadata.caseNumber}_Error`);
+        const errorWorksheet = workbook.addWorksheet(errorSheetName);
+        appendRowsToWorksheet(errorWorksheet, errorData);
         
         if (protectForensicData && exportPassword) {
-          protectExcelWorksheet(errorWorksheet, exportPassword);
+          await protectExcelWorksheet(errorWorksheet, exportPassword);
         }
-        
-        XLSX.utils.book_append_sheet(workbook, errorWorksheet, `Case_${caseData.metadata.caseNumber}_Error`);
-        return;
+
+        continue;
       }
 
       // For successful cases, create detailed worksheets
@@ -257,36 +356,22 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
         caseDetailsData.push(['No detailed file data available for this case']);
       }
 
-      const caseWorksheet = XLSX.utils.aoa_to_sheet(caseDetailsData);
+      const sanitizedCaseDetailsData = sanitizeTabularMatrix(caseDetailsData);
+
+      // Clean sheet name for Excel compatibility and uniqueness
+      const sheetName = createUniqueWorksheetName(existingWorksheetNames, `Case_${caseData.metadata.caseNumber}`);
+      const caseWorksheet = workbook.addWorksheet(sheetName);
+      appendRowsToWorksheet(caseWorksheet, sanitizedCaseDetailsData);
       
       // Protect worksheet if forensic protection is enabled
       if (protectForensicData && exportPassword) {
-        protectExcelWorksheet(caseWorksheet, exportPassword);
+        await protectExcelWorksheet(caseWorksheet, exportPassword);
       }
-      
-      // Clean sheet name for Excel compatibility
-      const sheetName = `Case_${caseData.metadata.caseNumber}`.replace(/[\\/?*\x5B\x5D]/g, '_').substring(0, 31);
-      XLSX.utils.book_append_sheet(workbook, caseWorksheet, sheetName);
-    });
 
-    // Set workbook protection if forensic protection is enabled
-    if (protectForensicData && exportPassword) {
-      workbook.Props = {
-        Title: 'Striae Case Export - Protected',
-        Subject: 'Case Data Export',
-        Author: exportData.metadata.exportedBy || 'Striae',
-        Comments: `This workbook contains protected case data. Modification may compromise evidence integrity. Worksheets are password protected.`,
-        Company: 'Striae'
-      };
     }
 
     // Generate Excel file
-    const excelBuffer = XLSX.write(workbook, { 
-      bookType: 'xlsx', 
-      type: 'array',
-      bookSST: true, // Shared string table for better compression
-      cellStyles: true
-    });
+    const excelBuffer = await workbook.xlsx.writeBuffer();
     
     // Create blob and download
     const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });

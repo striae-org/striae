@@ -10,6 +10,9 @@
 # 4. Worker secrets/environment variables
 # 5. Pages (frontend)
 
+set -e
+set -o pipefail
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -24,6 +27,54 @@ echo ""
 
 # Get the script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
+
+trap 'echo -e "\n${RED}❌ deploy-all.sh failed near line ${LINENO}${NC}"' ERR
+
+require_command() {
+    local cmd=$1
+    if ! command -v "$cmd" > /dev/null 2>&1; then
+        echo -e "${RED}❌ Error: required command '$cmd' is not installed or not in PATH${NC}"
+        exit 1
+    fi
+}
+
+assert_file_exists() {
+    local file_path=$1
+    if [ ! -f "$file_path" ]; then
+        echo -e "${RED}❌ Error: required file is missing: $file_path${NC}"
+        exit 1
+    fi
+}
+
+run_config_checkpoint() {
+    echo -e "${YELLOW}🧪 Running configuration checkpoint validation...${NC}"
+    if ! bash "$SCRIPT_DIR/deploy-config.sh" --validate-only; then
+        echo -e "${RED}❌ Configuration checkpoint validation failed!${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✅ Configuration checkpoint validation passed${NC}"
+}
+
+echo -e "${BLUE}🔍 Running deployment preflight checks...${NC}"
+require_command bash
+require_command node
+require_command npm
+require_command wrangler
+
+assert_file_exists "$SCRIPT_DIR/deploy-config.sh"
+assert_file_exists "$SCRIPT_DIR/install-workers.sh"
+assert_file_exists "$SCRIPT_DIR/deploy-worker-secrets.sh"
+assert_file_exists "package.json"
+
+if [ ! -f ".env" ] && [ ! -f ".env.example" ]; then
+    echo -e "${RED}❌ Error: neither .env nor .env.example was found in project root${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Preflight checks passed${NC}"
+echo ""
 
 # Step 1: Configuration Setup
 echo -e "${PURPLE}Step 1/5: Configuration Setup${NC}"
@@ -35,6 +86,7 @@ if ! bash "$SCRIPT_DIR/deploy-config.sh"; then
     exit 1
 fi
 echo -e "${GREEN}✅ Configuration setup completed successfully${NC}"
+run_config_checkpoint
 echo ""
 
 # Step 2: Install Worker Dependencies
