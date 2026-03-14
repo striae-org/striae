@@ -10,6 +10,69 @@ import { exportCaseData } from './core-export';
 import { auditService } from '~/services/audit.service';
 
 type TabularRow = Array<string | number | boolean | null | undefined>;
+type ExcelJsBrowserBundle = typeof import('exceljs');
+
+const EXCELJS_BROWSER_BUNDLE_SRC = '/vendor/exceljs.bare.min.js';
+let excelJsBundlePromise: Promise<ExcelJsBrowserBundle> | null = null;
+
+async function loadExcelJsBrowserBundle(): Promise<ExcelJsBrowserBundle> {
+  if (typeof window === 'undefined') {
+    throw new Error('Excel export is only available in a browser context.');
+  }
+
+  if (window.ExcelJS?.Workbook) {
+    return window.ExcelJS;
+  }
+
+  if (!excelJsBundlePromise) {
+    excelJsBundlePromise = new Promise((resolve, reject) => {
+      const resolveFromWindow = () => {
+        if (window.ExcelJS?.Workbook) {
+          resolve(window.ExcelJS);
+          return;
+        }
+
+        excelJsBundlePromise = null;
+        reject(new Error('ExcelJS bundle loaded but Workbook API is unavailable.'));
+      };
+
+      const failLoad = () => {
+        excelJsBundlePromise = null;
+        reject(new Error('Failed to load ExcelJS browser bundle.'));
+      };
+
+      const existingScript = document.querySelector<HTMLScriptElement>('script[data-exceljs-bundle="true"]');
+
+      if (existingScript) {
+        if (existingScript.dataset.loaded === 'true') {
+          resolveFromWindow();
+          return;
+        }
+
+        existingScript.addEventListener('load', resolveFromWindow, { once: true });
+        existingScript.addEventListener('error', failLoad, { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = EXCELJS_BROWSER_BUNDLE_SRC;
+      script.async = true;
+      script.dataset.exceljsBundle = 'true';
+      script.addEventListener(
+        'load',
+        () => {
+          script.dataset.loaded = 'true';
+          resolveFromWindow();
+        },
+        { once: true }
+      );
+      script.addEventListener('error', failLoad, { once: true });
+      document.head.appendChild(script);
+    });
+  }
+
+  return excelJsBundlePromise;
+}
 
 function sanitizeWorksheetName(name: string): string {
   const cleaned = name.replace(/[\\/?*:\x5B\x5D]/g, '_').trim();
@@ -145,10 +208,9 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
     // Start audit workflow
     auditService.startWorkflow('all-cases');
     
-    // Dynamic import of ExcelJS to avoid increasing initial bundle size
-    const { Workbook } = await import('exceljs');
+    const ExcelJS = await loadExcelJsBrowserBundle();
     
-    const workbook = new Workbook();
+    const workbook = new ExcelJS.Workbook();
     workbook.creator = exportData.metadata.exportedBy || 'Striae';
     workbook.lastModifiedBy = exportData.metadata.exportedBy || 'Striae';
     workbook.created = new Date();

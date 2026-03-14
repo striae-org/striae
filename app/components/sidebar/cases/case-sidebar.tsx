@@ -1,13 +1,4 @@
 import { User } from 'firebase/auth';
-import {
-  exportCaseData,
-  exportAllCases,
-  downloadCaseAsJSON,
-  downloadCaseAsCSV,
-  downloadAllCasesAsJSON,
-  downloadAllCasesAsCSV,
-  downloadCaseAsZip
-} from '../../actions/case-export';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './cases.module.css';
 import { CasesModal } from './cases-modal';
@@ -65,6 +56,18 @@ interface CaseSidebarProps {
 }
 
 const SUCCESS_MESSAGE_TIMEOUT = 3000;
+
+type CaseExportActionsModule = typeof import('../../actions/case-export');
+
+let caseExportActionsPromise: Promise<CaseExportActionsModule> | null = null;
+
+const loadCaseExportActions = (): Promise<CaseExportActionsModule> => {
+  if (!caseExportActionsPromise) {
+    caseExportActionsPromise = import('../../actions/case-export');
+  }
+
+  return caseExportActionsPromise;
+};
 
 export const CaseSidebar = ({ 
   user, 
@@ -512,20 +515,22 @@ const handleImageSelect = (file: FileData) => {
 
   const handleExport = async (exportCaseNumber: string, format: ExportFormat, includeImages?: boolean) => {
     try {
+      const caseExportActions = await loadCaseExportActions();
+
       if (includeImages) {
         // ZIP export with images - only available for single case exports
-        await downloadCaseAsZip(user, exportCaseNumber, format);
+        await caseExportActions.downloadCaseAsZip(user, exportCaseNumber, format);
       } else {
         // Standard data-only export
-        const exportData = await exportCaseData(user, exportCaseNumber, {
+        const exportData = await caseExportActions.exportCaseData(user, exportCaseNumber, {
           includeMetadata: true
         });
         
         // Download the exported data in the selected format
         if (format === 'json') {
-          await downloadCaseAsJSON(user, exportData);
+          await caseExportActions.downloadCaseAsJSON(user, exportData);
         } else {
-          await downloadCaseAsCSV(user, exportData);
+          await caseExportActions.downloadCaseAsCSV(user, exportData);
         }
       }
       
@@ -537,16 +542,18 @@ const handleImageSelect = (file: FileData) => {
 
   const handleExportAll = async (onProgress: (current: number, total: number, caseName: string) => void, format: ExportFormat) => {
     try {
+      const caseExportActions = await loadCaseExportActions();
+
       // Export all cases with progress callback
-      const exportData = await exportAllCases(user, {
+      const exportData = await caseExportActions.exportAllCases(user, {
         includeMetadata: true
       }, onProgress);
       
       // Download the exported data in the selected format
       if (format === 'json') {
-        await downloadAllCasesAsJSON(user, exportData);
+        await caseExportActions.downloadAllCasesAsJSON(user, exportData);
       } else {
-        await downloadAllCasesAsCSV(user, exportData);
+        await caseExportActions.downloadAllCasesAsCSV(user, exportData);
       }
       
     } catch (error) {
