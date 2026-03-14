@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { signAuditExportData } from '~/utils/data-operations';
 import {
   AUDIT_EXPORT_SIGNATURE_VERSION,

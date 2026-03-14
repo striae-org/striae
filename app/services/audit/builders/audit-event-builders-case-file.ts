@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { AuditResult, CreateAuditEntryParams } from '~/types';
 import { getAuditFileTypeFromMime, isImageMimeType } from '../audit-file-type';
 
