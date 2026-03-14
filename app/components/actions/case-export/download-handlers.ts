@@ -9,6 +9,29 @@ import { generateMetadataRows, generateCSVContent, processFileDataForTabular, sa
 import { exportCaseData } from './core-export';
 import { auditService } from '~/services/audit.service';
 
+type TabularRow = Array<string | number | boolean | null | undefined>;
+
+function sanitizeWorksheetName(name: string): string {
+  const cleaned = name.replace(/[\\/?*:\x5B\x5D]/g, '_').trim();
+  const normalized = cleaned.length > 0 ? cleaned : 'Sheet';
+  return normalized.substring(0, 31);
+}
+
+function createUniqueWorksheetName(existingNames: Set<string>, desiredName: string): string {
+  const baseName = sanitizeWorksheetName(desiredName);
+  let candidate = baseName;
+  let suffix = 1;
+
+  while (existingNames.has(candidate)) {
+    const suffixText = `_${suffix}`;
+    candidate = `${baseName.substring(0, 31 - suffixText.length)}${suffixText}`;
+    suffix += 1;
+  }
+
+  existingNames.add(candidate);
+  return candidate;
+}
+
 /**
  * Generate export filename with embedded ID to prevent collisions
  * Format: {originalFilename}-{id}.{extension}
@@ -122,10 +145,23 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
     // Start audit workflow
     auditService.startWorkflow('all-cases');
     
-    // Dynamic import of XLSX to avoid bundle size issues
-    const XLSX = await import('xlsx');
+    // Dynamic import of ExcelJS to avoid increasing initial bundle size
+    const { Workbook } = await import('exceljs');
     
-    const workbook = XLSX.utils.book_new();
+    const workbook = new Workbook();
+    workbook.creator = exportData.metadata.exportedBy || 'Striae';
+    workbook.lastModifiedBy = exportData.metadata.exportedBy || 'Striae';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+
+    const existingWorksheetNames = new Set<string>();
+
+    const appendRowsToWorksheet = (worksheet: { addRow: (row: TabularRow) => unknown }, rows: TabularRow[]) => {
+      rows.forEach((row) => {
+        worksheet.addRow(row);
+      });
+    };
+
     let exportPassword: string | undefined;
 
     // Create summary worksheet
@@ -197,17 +233,17 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
       ])
     ]);
 
-    const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
+    const summaryWorksheetName = createUniqueWorksheetName(existingWorksheetNames, 'Summary');
+    const summaryWorksheet = workbook.addWorksheet(summaryWorksheetName);
+    appendRowsToWorksheet(summaryWorksheet, summaryData);
     
     // Protect summary worksheet if forensic protection is enabled
     if (protectForensicData) {
-      exportPassword = protectExcelWorksheet(summaryWorksheet);
+      exportPassword = await protectExcelWorksheet(summaryWorksheet);
     }
-    
-    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Summary');
 
     // Create a worksheet for each case
-    exportData.cases.forEach((caseData) => {
+    for (const caseData of exportData.cases) {
       if (caseData.summary?.exportError) {
         // For failed cases, create a simple error sheet
         const errorData = sanitizeTabularMatrix([
@@ -217,14 +253,15 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
           ['Case Number:', caseData.metadata.caseNumber],
           ['Total Files:', caseData.metadata.totalFiles]
         ]);
-        const errorWorksheet = XLSX.utils.aoa_to_sheet(errorData);
+        const errorSheetName = createUniqueWorksheetName(existingWorksheetNames, `Case_${caseData.metadata.caseNumber}_Error`);
+        const errorWorksheet = workbook.addWorksheet(errorSheetName);
+        appendRowsToWorksheet(errorWorksheet, errorData);
         
         if (protectForensicData && exportPassword) {
-          protectExcelWorksheet(errorWorksheet, exportPassword);
+          await protectExcelWorksheet(errorWorksheet, exportPassword);
         }
-        
-        XLSX.utils.book_append_sheet(workbook, errorWorksheet, `Case_${caseData.metadata.caseNumber}_Error`);
-        return;
+
+        continue;
       }
 
       // For successful cases, create detailed worksheets
@@ -257,36 +294,22 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
         caseDetailsData.push(['No detailed file data available for this case']);
       }
 
-      const caseWorksheet = XLSX.utils.aoa_to_sheet(sanitizeTabularMatrix(caseDetailsData));
+      const sanitizedCaseDetailsData = sanitizeTabularMatrix(caseDetailsData);
+
+      // Clean sheet name for Excel compatibility and uniqueness
+      const sheetName = createUniqueWorksheetName(existingWorksheetNames, `Case_${caseData.metadata.caseNumber}`);
+      const caseWorksheet = workbook.addWorksheet(sheetName);
+      appendRowsToWorksheet(caseWorksheet, sanitizedCaseDetailsData);
       
       // Protect worksheet if forensic protection is enabled
       if (protectForensicData && exportPassword) {
-        protectExcelWorksheet(caseWorksheet, exportPassword);
+        await protectExcelWorksheet(caseWorksheet, exportPassword);
       }
-      
-      // Clean sheet name for Excel compatibility
-      const sheetName = `Case_${caseData.metadata.caseNumber}`.replace(/[\\/?*\x5B\x5D]/g, '_').substring(0, 31);
-      XLSX.utils.book_append_sheet(workbook, caseWorksheet, sheetName);
-    });
 
-    // Set workbook protection if forensic protection is enabled
-    if (protectForensicData && exportPassword) {
-      workbook.Props = {
-        Title: 'Striae Case Export - Protected',
-        Subject: 'Case Data Export',
-        Author: exportData.metadata.exportedBy || 'Striae',
-        Comments: `This workbook contains protected case data. Modification may compromise evidence integrity. Worksheets are password protected.`,
-        Company: 'Striae'
-      };
     }
 
     // Generate Excel file
-    const excelBuffer = XLSX.write(workbook, { 
-      bookType: 'xlsx', 
-      type: 'array',
-      bookSST: true, // Shared string table for better compression
-      cellStyles: true
-    });
+    const excelBuffer = await workbook.xlsx.writeBuffer();
     
     // Create blob and download
     const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
