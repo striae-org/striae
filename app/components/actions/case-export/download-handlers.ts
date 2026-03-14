@@ -5,7 +5,7 @@ import { generateForensicManifestSecure, calculateSHA256Secure } from '~/utils/S
 import { signForensicManifest } from '~/utils/data-operations';
 import { ExportFormat, formatDateForFilename, CSV_HEADERS } from './types-constants';
 import { protectExcelWorksheet, addForensicDataWarning } from './metadata-helpers';
-import { generateMetadataRows, generateCSVContent, processFileDataForTabular } from './data-processing';
+import { generateMetadataRows, generateCSVContent, processFileDataForTabular, sanitizeTabularMatrix } from './data-processing';
 import { exportCaseData } from './core-export';
 import { auditService } from '~/services/audit.service';
 
@@ -146,7 +146,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
     ];
     
     // XLSX files are inherently protected, no hash validation needed
-    const summaryData = [
+    const summaryData = sanitizeTabularMatrix([
       protectForensicData ? ['CASE DATA - PROTECTED EXPORT'] : ['Striae - All Cases Export Summary'],
       protectForensicData ? ['WARNING: This workbook contains evidence data and is protected from editing.'] : [''],
       [''],
@@ -195,7 +195,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
         caseData.summary?.latestAnnotationDate || '',
         caseData.summary?.exportError || ''
       ])
-    ];
+    ]);
 
     const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
     
@@ -210,13 +210,13 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
     exportData.cases.forEach((caseData) => {
       if (caseData.summary?.exportError) {
         // For failed cases, create a simple error sheet
-        const errorData = [
+        const errorData = sanitizeTabularMatrix([
           [`Case ${caseData.metadata.caseNumber} - Export Failed`],
           [''],
           ['Error:', caseData.summary.exportError],
           ['Case Number:', caseData.metadata.caseNumber],
           ['Total Files:', caseData.metadata.totalFiles]
-        ];
+        ]);
         const errorWorksheet = XLSX.utils.aoa_to_sheet(errorData);
         
         if (protectForensicData && exportPassword) {
@@ -257,7 +257,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
         caseDetailsData.push(['No detailed file data available for this case']);
       }
 
-      const caseWorksheet = XLSX.utils.aoa_to_sheet(caseDetailsData);
+      const caseWorksheet = XLSX.utils.aoa_to_sheet(sanitizeTabularMatrix(caseDetailsData));
       
       // Protect worksheet if forensic protection is enabled
       if (protectForensicData && exportPassword) {

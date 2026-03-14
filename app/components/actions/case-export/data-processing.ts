@@ -3,11 +3,51 @@ import { calculateSHA256Secure } from '~/utils/SHA256';
 import { CSV_HEADERS } from './types-constants';
 import { addForensicDataWarning } from './metadata-helpers';
 
+export type TabularCell = string | number | boolean | null;
+
+const MAX_SPREADSHEET_CELL_LENGTH = 32767;
+const CONTROL_CHAR_PATTERN = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
+const DANGEROUS_FORMULA_PREFIX_PATTERN = /^[\s\u0000-\u001F]*[=+\-@]/;
+
+/**
+ * Sanitize cell values before CSV/XLSX export.
+ * - Strips non-printable control characters (except tab/newline/carriage return)
+ * - Prevents formula injection when files are opened in spreadsheet tools
+ * - Caps content length to Excel's per-cell limit
+ */
+export function sanitizeTabularCell(value: unknown): TabularCell {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+
+  let normalized = String(value).replace(CONTROL_CHAR_PATTERN, '');
+
+  if (normalized.length > MAX_SPREADSHEET_CELL_LENGTH) {
+    normalized = normalized.slice(0, MAX_SPREADSHEET_CELL_LENGTH);
+  }
+
+  if (DANGEROUS_FORMULA_PREFIX_PATTERN.test(normalized)) {
+    return `'${normalized}`;
+  }
+
+  return normalized;
+}
+
+export function sanitizeTabularMatrix(
+  rows: Array<Array<string | number | boolean | null | undefined>>
+): TabularCell[][] {
+  return rows.map((row) => row.map((cell) => sanitizeTabularCell(cell)));
+}
+
 /**
  * Generate metadata rows for tabular format
  */
-export function generateMetadataRows(exportData: CaseExportData): string[][] {
-  return [
+export function generateMetadataRows(exportData: CaseExportData): TabularCell[][] {
+  return sanitizeTabularMatrix([
     ['Case Export Report'],
     [''],
     ['Case Number', exportData.metadata.caseNumber],
@@ -31,13 +71,13 @@ export function generateMetadataRows(exportData: CaseExportData): string[][] {
     ['Latest Annotation Date', exportData.summary?.latestAnnotationDate || 'N/A'],
     [''],
     ['File Details']
-  ];
+  ]);
 }
 
 /**
  * Process file data for tabular format (CSV/Excel)
  */
-export function processFileDataForTabular(fileEntry: CaseExportData['files'][0]): string[][] {
+export function processFileDataForTabular(fileEntry: CaseExportData['files'][0]): TabularCell[][] {
   // Full file data for the first row (excluding Additional Notes and Last Updated)
   const fullFileData = [
     fileEntry.fileData.id,
@@ -83,7 +123,7 @@ export function processFileDataForTabular(fileEntry: CaseExportData['files'][0])
   const emptyFileData = Array(fileDataColumnCount).fill('');
   const emptyAdditionalData = Array(additionalDataColumnCount).fill('');
 
-  const rows: string[][] = [];
+  const rows: Array<Array<string | number | boolean | null | undefined>> = [];
 
   // If there are box annotations, create a row for each one
   if (fileEntry.annotations?.boxAnnotations && fileEntry.annotations.boxAnnotations.length > 0) {
@@ -120,7 +160,7 @@ export function processFileDataForTabular(fileEntry: CaseExportData['files'][0])
     ]);
   }
 
-  return rows;
+  return sanitizeTabularMatrix(rows);
 }
 
 /**
@@ -131,16 +171,16 @@ export async function generateCSVContent(exportData: CaseExportData, protectFore
   const metadataRows = generateMetadataRows(exportData);
 
   // File data rows
-  const fileRows: string[][] = [];
+  const fileRows: TabularCell[][] = [];
   exportData.files.forEach(fileEntry => {
     const processedRows = processFileDataForTabular(fileEntry);
     fileRows.push(...processedRows);
   });
 
   // Combine data rows for hash calculation (excluding header comments)
-  const dataRows = [
+  const dataRows: TabularCell[][] = [
     ...metadataRows,
-    CSV_HEADERS,
+    ...sanitizeTabularMatrix([CSV_HEADERS]),
     ...fileRows
   ];
 
