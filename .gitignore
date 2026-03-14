@@ -15,6 +15,10 @@ workers/pdf-worker/src/format-*.ts
 !workers/pdf-worker/src/format-striae.ts
 workers/user-worker/src/user-worker.ts
 
+# PDF Report Assets (Proprietary)
+workers/pdf-worker/src/assets
+workers/pdf-worker/src/generated-assets.ts
+
 # Logs and Miscellaneous
 .vscode
 .cache
