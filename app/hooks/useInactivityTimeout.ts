@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { useLocation } from '@remix-run/react';
+import { useLocation } from 'react-router';
 import { signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';
 import { INACTIVITY_CONFIG } from '~/config/inactivity';
