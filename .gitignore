@@ -18,6 +18,7 @@ workers/pdf-worker/src/formats/*.ts
 
 # PDF Report Assets (Proprietary/Sensitive)
 workers/pdf-worker/src/assets/*
+!workers/pdf-worker/src/assets/generated-assets.ts
 
 # Logs and Miscellaneous
 .vscode
