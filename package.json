@@ -70,9 +70,7 @@
     "LICENSE",
     "NOTICE"
   ],
-  "sideEffects": [
-    "**/*.css"
-  ],
+  "sideEffects": false,
   "type": "module",
   "scripts": {
     "deploy:all": "bash ./scripts/deploy-all.sh",
