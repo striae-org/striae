@@ -23,6 +23,7 @@ workers/user-worker/src/user-worker.ts
 .firebase
 .firebaserc
 firebase-debug.log
+.react-router/
 
 # Secrets and Configuration
 *.env

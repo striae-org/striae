@@ -1,4 +1,4 @@
-import { Form as RemixForm } from '@remix-run/react';
+import { Form as RemixForm } from 'react-router';
 import styles from './form.module.css';
 
 interface BaseFormProps {

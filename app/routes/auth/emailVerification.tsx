@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from '@remix-run/react';
+import { Link } from 'react-router';
 import { sendEmailVerification, User } from 'firebase/auth';
 import { auditService } from '~/services/audit.service';
 import { buildActionCodeSettings } from '~/utils/auth-action-settings';

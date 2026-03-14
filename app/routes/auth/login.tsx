@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from '@remix-run/react';
+import { Link, useSearchParams } from 'react-router';
 import { auth } from '~/services/firebase';
 import {
     signInWithEmailAndPassword, 
