@@ -23,6 +23,7 @@ import {
   sortAuditEntriesNewestFirst
 } from './audit-query-helpers';
 import { buildValidationAuditEntry } from './audit-entry-builder';
+import { logAuditEntryToConsole } from './audit-console-logger';
 
 type AnnotationSnapshot = Record<string, unknown> & {
   type?: 'measurement' | 'identification' | 'comparison' | 'note' | 'region';
@@ -89,7 +90,7 @@ export class AuditService {
       this.auditBuffer.push(auditEntry);
 
       // Log to console for immediate feedback
-      this.logToConsole(auditEntry);
+      logAuditEntryToConsole(auditEntry);
 
       // Persist to storage asynchronously
       await this.persistAuditEntry(auditEntry);
@@ -1282,46 +1283,6 @@ export class AuditService {
       }
     } catch (error) {
       console.error('🚨 Audit: Storage error:', error);
-    }
-  }
-
-  /**
-   * Log audit entry to console for development
-   */
-  private logToConsole(entry: ValidationAuditEntry): void {
-    const icon = entry.result === 'success' ? '✅' : 
-                 entry.result === 'failure' ? '❌' : '⚠️';
-    
-    console.log(
-      `${icon} Audit [${entry.action.toUpperCase()}]: ${entry.details.fileName} ` +
-      `(Case: ${entry.details.caseNumber || 'N/A'}) - ${entry.result.toUpperCase()}`
-    );
-
-    if (entry.details.validationErrors.length > 0) {
-      console.log('   Errors:', entry.details.validationErrors);
-    }
-
-    if (entry.details.securityChecks) {
-      const securityIssues = [];
-      
-      // selfConfirmationPrevented: Only check for import actions when self-confirmation was actually prevented
-      if (entry.action === 'import' && entry.details.securityChecks.selfConfirmationPrevented === true) {
-        securityIssues.push('selfConfirmationPrevented');
-      }
-      
-      // fileIntegrityValid: false means issue (integrity failed)
-      if (entry.details.securityChecks.fileIntegrityValid === false) {
-        securityIssues.push('fileIntegrityValid');
-      }
-      
-      // exporterUidValidated: false means issue (validation failed)
-      if (entry.details.securityChecks.exporterUidValidated === false) {
-        securityIssues.push('exporterUidValidated');
-      }
-      
-      if (securityIssues.length > 0) {
-        console.warn('   Security Issues:', securityIssues);
-      }
     }
   }
 
