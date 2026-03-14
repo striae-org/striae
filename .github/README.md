@@ -38,7 +38,7 @@ cp -f app/config-example/admin-service.json app/config/admin-service.json
 npx wrangler login
 ```
 
-6) Run guided config + full deployment
+7) Run guided config + full deployment
 
 ```bash
 npm run deploy:all
@@ -61,6 +61,16 @@ npm run deploy:all
 ---
 
 ## 📋 Changelog
+
+## [2026-03-14] - *[Patch Release v3.2.1](https://github.com/striae-org/striae/releases/tag/v3.2.1)*
+
+_Note: Summary is based on 15 non-merge commits since v3.2.0._
+
+- **🧭 React Router Migration Baseline** - Completed app/runtime migration to React Router across route config, entrypoints, and Cloudflare Pages integration.
+- **📊 Export Pipeline Hardening** - Hardened spreadsheet export workflows, migrated export generation to ExcelJS, and externalized ExcelJS bundle delivery.
+- **⏱️ Export UX Reliability** - Moved case export progress behavior to improve long-running export status visibility.
+- **⚙️ Dependency and Worker Refresh** - Applied React/package audit/deprecation updates and synchronized worker package/lock refresh.
+- **📘 Release Metadata and Docs Alignment** - Added funding metadata, updated React Router documentation references, and finalized 3.2.1 version rebuild outputs.
 
 ## [2026-03-13] - *[Minor Release v3.2.0](https://github.com/striae-org/striae/releases/tag/v3.2.0)*
 
