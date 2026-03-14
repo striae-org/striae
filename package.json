@@ -9,14 +9,10 @@
     "type": "git",
     "url": "https://github.com/striae-org/striae.git"
   },
-  "funding": [
-    {
-      "type": "github",
-      "url": "https://github.com/sponsors/striae-org"
-    },
+  "funding": [    
     {
       "type": "patreon",
-      "url": "https://join.striae.org"
+      "url": "https://www.patreon.com/striae"
     }
   ],
   "bugs": {
@@ -55,8 +51,11 @@
     "workers/*/src/*.example.ts",
     "workers/*/src/*.example.js",
     "workers/*/src/*.ts",
+    "workers/*/src/assets/*.ts",
+    "workers/*/src/formats/*.ts",
     "!workers/*/src/*worker.ts",
-    "workers/pdf-worker/src/format-striae.ts",
+    "workers/pdf-worker/src/assets/generated-assets.ts",
+    "workers/pdf-worker/src/formats/format-striae.ts",
     "workers/pdf-worker/src/report-types.ts",
     "workers/*/wrangler.jsonc.example",
     ".env.example",

@@ -1,6 +1,6 @@
 import paths from '~/config/config.json';
 import { getImageApiKey } from '~/utils/auth';
-import { FileData, ImageUploadResponse } from '~/types';
+import { type FileData, type ImageUploadResponse } from '~/types';
 
 const IMAGE_WORKER_URL = paths.image_worker_url;
 

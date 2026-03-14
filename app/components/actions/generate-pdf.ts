@@ -1,8 +1,8 @@
 import paths from '~/config/config.json';
-import { AnnotationData } from '~/types/annotations';
-import { auditService } from '~/services/audit.service';
+import { type AnnotationData } from '~/types/annotations';
+import { auditService } from '~/services/audit';
 import { getPdfApiKey } from '~/utils/auth';
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 
 interface GeneratePDFParams {
   user: User;

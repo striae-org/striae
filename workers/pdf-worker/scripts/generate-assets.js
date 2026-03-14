@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Scans src/assets/ and generates src/generated-assets.ts with one named
+ * Scans src/assets/ and generates src/assets/generated-assets.ts with one named
  * export per file.  Run via:  npm run generate:assets
  *
  * Naming rule: filename → remove extension → uppercase → non-alphanumeric → _
@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ASSETS_DIR = path.join(__dirname, '../src/assets');
-const OUTPUT_FILE = path.join(__dirname, '../src/generated-assets.ts');
+const OUTPUT_FILE = path.join(__dirname, '../src/assets/generated-assets.ts');
 
 const MIME_TYPES = {
   '.png': 'image/png',

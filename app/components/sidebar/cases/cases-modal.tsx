@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { listCases } from '~/components/actions/case-manage';
 import { getFileAnnotations } from '~/utils/data-operations';
 import { fetchFiles } from '~/components/actions/image-manage';

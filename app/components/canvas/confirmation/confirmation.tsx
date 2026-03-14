@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { ConfirmationData } from '~/types/annotations';
+import { type ConfirmationData } from '~/types/annotations';
 import { AuthContext } from '~/contexts/auth.context';
 import { generateConfirmationId } from '~/utils/id-generator';
 import styles from './confirmation.module.css';

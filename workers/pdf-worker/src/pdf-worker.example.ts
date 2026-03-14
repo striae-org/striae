@@ -10,7 +10,7 @@ const DEFAULT_REPORT_FORMAT = 'striae';
 
 const reportModuleLoaders: Record<string, () => Promise<ReportModule>> = {
   // Default Striae report format module
-  striae: () => import('./format-striae'),
+  striae: () => import('./formats/format-striae'),
 };
 
 const corsHeaders: Record<string, string> = {

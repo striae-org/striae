@@ -1,8 +1,8 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './image-upload-zone.module.css';
 import { uploadFile } from '~/components/actions/image-manage';
-import { FileData } from '~/types';
+import { type FileData } from '~/types';
 
 interface ImageUploadZoneProps {
   user: User;

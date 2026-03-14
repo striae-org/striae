@@ -1,6 +1,6 @@
 // User-related types and interfaces
 
-import { ReadOnlyCaseMetadata } from './import';
+import { type ReadOnlyCaseMetadata } from './import';
 
 export interface UserData {
   uid: string;

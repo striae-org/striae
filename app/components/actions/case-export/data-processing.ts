@@ -1,4 +1,4 @@
-import { CaseExportData } from '~/types';
+import { type CaseExportData } from '~/types';
 import { calculateSHA256Secure } from '~/utils/SHA256';
 import { CSV_HEADERS } from './types-constants';
 import { addForensicDataWarning } from './metadata-helpers';
@@ -6,8 +6,23 @@ import { addForensicDataWarning } from './metadata-helpers';
 export type TabularCell = string | number | boolean | null;
 
 const MAX_SPREADSHEET_CELL_LENGTH = 32767;
-const CONTROL_CHAR_PATTERN = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
-const DANGEROUS_FORMULA_PREFIX_PATTERN = /^[\s\u0000-\u001F]*[=+\-@]/;
+const DANGEROUS_FORMULA_PREFIX_PATTERN = /^\s*[=+\-@]/;
+
+function stripUnsafeControlChars(input: string): string {
+  let output = '';
+
+  for (let index = 0; index < input.length; index += 1) {
+    const code = input.charCodeAt(index);
+    const isControlChar = code <= 0x1f || code === 0x7f;
+    const isAllowedWhitespace = code === 0x09 || code === 0x0a || code === 0x0d;
+
+    if (!isControlChar || isAllowedWhitespace) {
+      output += input[index];
+    }
+  }
+
+  return output;
+}
 
 /**
  * Sanitize cell values before CSV/XLSX export.
@@ -24,7 +39,7 @@ export function sanitizeTabularCell(value: unknown): TabularCell {
     return value;
   }
 
-  let normalized = String(value).replace(CONTROL_CHAR_PATTERN, '');
+  let normalized = stripUnsafeControlChars(String(value));
 
   if (normalized.length > MAX_SPREADSHEET_CELL_LENGTH) {
     normalized = normalized.slice(0, MAX_SPREADSHEET_CELL_LENGTH);

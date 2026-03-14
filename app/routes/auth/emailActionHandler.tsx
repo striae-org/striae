@@ -7,10 +7,10 @@ import {
   verifyPasswordResetCode,
 } from 'firebase/auth';
 import { auth } from '~/services/firebase';
-import { handleAuthError } from '~/services/firebase-errors';
+import { handleAuthError } from '~/services/firebase/errors';
 import { evaluatePasswordPolicy } from '~/utils/password-policy';
 import { getSafeContinuePath } from '~/utils/auth-action-settings';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 import { Icon } from '~/components/icon/icon';
 import styles from './emailActionHandler.module.css';
 

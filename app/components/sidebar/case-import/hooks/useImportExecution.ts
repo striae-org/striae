@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { importCaseForReview, importConfirmationData } from '~/components/actions/case-review';
-import { ImportResult, ConfirmationImportResult } from '~/types';
+import { type ImportResult, type ConfirmationImportResult } from '~/types';
 
 interface ProgressState {
   stage: string;

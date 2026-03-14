@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useContext, useCallback } from 'react';
 import { BoxAnnotations } from './box-annotations/box-annotations';
 import { ConfirmationModal } from './confirmation/confirmation';
-import { AnnotationData, BoxAnnotation, ConfirmationData } from '~/types/annotations';
+import { type AnnotationData, type BoxAnnotation, type ConfirmationData } from '~/types/annotations';
 import { AuthContext } from '~/contexts/auth.context';
 import { storeConfirmation } from '~/components/actions/confirm-export';
 import styles from './canvas.module.css';

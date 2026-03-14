@@ -1,5 +1,5 @@
-import { FileData } from './file';
-import { AnnotationData, ConfirmationData } from './annotations';
+import { type FileData } from './file';
+import { type AnnotationData, type ConfirmationData } from './annotations';
 
 // Case-related types and interfaces
 

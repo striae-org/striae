@@ -1,8 +1,8 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import paths from '~/config/config.json';
 import { getUserApiKey } from '~/utils/auth';
-import { CaseExportData, ConfirmationImportData } from '~/types';
-import { calculateSHA256Secure, ManifestSignatureVerificationResult } from '~/utils/SHA256';
+import { type CaseExportData, type ConfirmationImportData } from '~/types';
+import { calculateSHA256Secure, type ManifestSignatureVerificationResult } from '~/utils/SHA256';
 import { verifyConfirmationSignature } from '~/utils/confirmation-signature';
 
 const USER_WORKER_URL = paths.user_worker_url;

@@ -5,8 +5,8 @@ import {
   deleteReadOnlyCase
 } from '~/components/actions/case-review';
 import {
-  ImportResult,  
-  ConfirmationImportResult
+  type ImportResult,  
+  type ConfirmationImportResult
 } from '~/types';
 import {
   FileSelector,

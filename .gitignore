@@ -10,10 +10,14 @@ workers/data-worker/src/data-worker.ts
 workers/image-worker/src/image-worker.ts
 workers/keys-worker/src/keys.ts
 workers/pdf-worker/src/pdf-worker.ts
-# Ignore custom PDF format renderers, but keep the canonical Striae renderer tracked.
-workers/pdf-worker/src/format-*.ts
-!workers/pdf-worker/src/format-striae.ts
 workers/user-worker/src/user-worker.ts
+
+# PDF Formats (Except Striae Default)
+workers/pdf-worker/src/formats/*.ts
+!workers/pdf-worker/src/formats/format-striae.ts
+
+# PDF Report Assets (Proprietary/Sensitive)
+workers/pdf-worker/src/assets/*
 
 # Logs and Miscellaneous
 .vscode

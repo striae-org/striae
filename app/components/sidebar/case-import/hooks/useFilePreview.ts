@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { previewCaseImport } from '~/components/actions/case-review';
-import { CaseImportPreview } from '~/types';
-import { ConfirmationPreview } from '../components/ConfirmationPreviewSection';
+import { type CaseImportPreview } from '~/types';
+import { type ConfirmationPreview } from '../components/ConfirmationPreviewSection';
 
 type UnknownRecord = Record<string, unknown>;
 

@@ -12,9 +12,9 @@ import {
   type MultiFactorResolver,
   type User,
 } from 'firebase/auth';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 import { auth } from '~/services/firebase';
-import { ERROR_MESSAGES, getValidationError, handleAuthError } from '~/services/firebase-errors';
+import { ERROR_MESSAGES, getValidationError, handleAuthError } from '~/services/firebase/errors';
 import {
   formatPhoneNumberForMfa,
   getMaskedFactorDisplay,

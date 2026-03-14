@@ -1,4 +1,4 @@
-import { CaseImportPreview } from '~/types';
+import { type CaseImportPreview } from '~/types';
 import styles from '../case-import.module.css';
 
 interface ConfirmationDialogProps {

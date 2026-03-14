@@ -19,7 +19,7 @@ For deep implementation details, use the wiki docs.
 1. Use centralized utilities for app data and permissions.
    - `app/utils/data-operations.ts`
    - `app/utils/permissions.ts`
-   - `app/services/audit.service.ts`
+    - `app/services/audit/audit.service.ts`
    - Avoid introducing direct worker `fetch` calls in `app/components` or `app/routes` unless extending these utility modules.
 2. Validate permissions before case operations.
    - Read access: `canAccessCase`

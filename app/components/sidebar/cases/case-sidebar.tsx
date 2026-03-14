@@ -1,9 +1,10 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
+import type * as CaseExportActions from '../../actions/case-export';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './cases.module.css';
 import { CasesModal } from './cases-modal';
 import { FilesModal } from '../files/files-modal';
-import { CaseExport, ExportFormat } from '../case-export/case-export';
+import { CaseExport, type ExportFormat } from '../case-export/case-export';
 import { ImageUploadZone } from '../upload/image-upload-zone';
 import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import {
@@ -27,7 +28,7 @@ import {
   getUserData
 } from '~/utils/permissions';
 import { getFileAnnotations } from '~/utils/data-operations';
-import { FileData, CaseActionType } from '~/types';
+import { type FileData, type CaseActionType } from '~/types';
 
 interface CaseSidebarProps {
   user: User;
@@ -57,7 +58,7 @@ interface CaseSidebarProps {
 
 const SUCCESS_MESSAGE_TIMEOUT = 3000;
 
-type CaseExportActionsModule = typeof import('../../actions/case-export');
+type CaseExportActionsModule = typeof CaseExportActions;
 
 let caseExportActionsPromise: Promise<CaseExportActionsModule> | null = null;
 

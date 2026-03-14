@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { useState, useEffect } from 'react';
 import { SidebarContainer } from '~/components/sidebar/sidebar-container';
 import { Toolbar } from '~/components/toolbar/toolbar';
@@ -9,7 +9,7 @@ import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
 import { getUserApiKey } from '~/utils/auth';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
-import { AnnotationData, FileData } from '~/types';
+import { type AnnotationData, type FileData } from '~/types';
 import { checkCaseIsReadOnly } from '~/components/actions/case-manage';
 import paths from '~/config/config.json';
 import styles from './striae.module.css';

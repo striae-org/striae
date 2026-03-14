@@ -6,23 +6,23 @@ import {
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     sendEmailVerification,
-    User,
+  type User,
     updateProfile,
     getMultiFactorResolver,
-    MultiFactorResolver,
-    MultiFactorError
+    type MultiFactorResolver,
+    type MultiFactorError
 } from 'firebase/auth';
 import { PasswordReset } from '~/routes/auth/passwordReset';
 import { EmailVerification } from '~/routes/auth/emailVerification';
 import { EmailActionHandler } from '~/routes/auth/emailActionHandler';
-import { handleAuthError } from '~/services/firebase-errors';
+import { handleAuthError } from '~/services/firebase/errors';
 import { MFAVerification } from '~/components/auth/mfa-verification';
 import { MFAEnrollment } from '~/components/auth/mfa-enrollment';
 import { Icon } from '~/components/icon/icon';
 import styles from './login.module.css';
 import { Striae } from '~/routes/striae/striae';
 import { getUserData, createUser } from '~/utils/permissions';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 import { generateUniqueId } from '~/utils/id-generator';
 import { evaluatePasswordPolicy } from '~/utils/password-policy';
 import { buildActionCodeSettings } from '~/utils/auth-action-settings';

@@ -1,4 +1,4 @@
-import { JSX, createContext, useContext } from 'react';
+import { type JSX, createContext, useContext } from 'react';
 import { classes, media } from '~/utils/style';
 import { themes, tokens } from './theme';
 

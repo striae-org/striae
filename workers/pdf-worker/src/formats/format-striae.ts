@@ -1,5 +1,5 @@
-import type { PDFGenerationData, ReportRenderer } from './report-types';
-import { ICON_256 } from './generated-assets';
+import type { PDFGenerationData, ReportRenderer } from '../report-types';
+import { ICON_256 } from '../assets/generated-assets';
 
 export const renderReport: ReportRenderer = (data: PDFGenerationData): string => {
   const { imageUrl, caseNumber, annotationData, activeAnnotations, currentDate, notesUpdatedFormatted, userCompany } = data;

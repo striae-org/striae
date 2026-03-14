@@ -4,20 +4,20 @@
  * for all interactions with the data worker microservice
  */
 
-import { User } from 'firebase/auth';
-import { CaseData, AnnotationData, ConfirmationImportData } from '~/types';
+import type { User } from 'firebase/auth';
+import { type CaseData, type AnnotationData, type ConfirmationImportData } from '~/types';
 import paths from '~/config/config.json';
 import { getDataApiKey } from './auth';
 import { validateUserSession, canAccessCase, canModifyCase } from './permissions';
 import {
-  ForensicManifestData,
-  ForensicManifestSignature,
+  type ForensicManifestData,
+  type ForensicManifestSignature,
   FORENSIC_MANIFEST_VERSION
 } from './SHA256';
 import { CONFIRMATION_SIGNATURE_VERSION } from './confirmation-signature';
 import {
   AUDIT_EXPORT_SIGNATURE_VERSION,
-  AuditExportSigningPayload,
+  type AuditExportSigningPayload,
   isValidAuditExportSigningPayload
 } from './audit-export-signature';
 
