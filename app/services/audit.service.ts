@@ -12,10 +12,11 @@ import {
   SecurityCheckResults,
   PerformanceMetrics
 } from '~/types';
-import { auth } from '~/services/firebase';
+import paths from '~/config/config.json';
+import { getDataApiKey } from '~/utils/auth';
 import { generateWorkflowId } from '../utils/id-generator';
 
-const AUDIT_API_URL = '/api/audit/entries';
+const AUDIT_WORKER_URL = paths.audit_worker_url;
 
 type AnnotationSnapshot = Record<string, unknown> & {
   type?: 'measurement' | 'identification' | 'comparison' | 'note' | 'region';
@@ -47,20 +48,6 @@ export class AuditService {
       AuditService.instance = new AuditService();
     }
     return AuditService.instance;
-  }
-
-  private async getAuthorizationHeader(): Promise<string | null> {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      return null;
-    }
-
-    try {
-      const idToken = await currentUser.getIdToken();
-      return idToken ? `Bearer ${idToken}` : null;
-    } catch {
-      return null;
-    }
   }
 
   /**
@@ -1304,57 +1291,55 @@ export class AuditService {
     try {
       // If userId is provided, fetch from server
       if (params.userId) {
-        const authorizationHeader = await this.getAuthorizationHeader();
-        if (authorizationHeader) {
-          const url = new URL(AUDIT_API_URL, 'http://localhost');
-          url.searchParams.set('userId', params.userId);
-
-          if (params.startDate) {
-            url.searchParams.set('startDate', params.startDate);
-          }
-
-          if (params.endDate) {
-            url.searchParams.set('endDate', params.endDate);
-          }
+        const apiKey = await getDataApiKey();
+        const url = new URL(`${AUDIT_WORKER_URL}/audit/`);
+        url.searchParams.set('userId', params.userId);
         
-          const response = await fetch(`${url.pathname}${url.search}`, {
-            method: 'GET',
-            headers: {
-              'Authorization': authorizationHeader
-            }
-          });
+        if (params.startDate) {
+          url.searchParams.set('startDate', params.startDate);
+        }
+        
+        if (params.endDate) {
+          url.searchParams.set('endDate', params.endDate);
+        }
+        
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'X-Custom-Auth-Key': apiKey
+          }
+        });
 
-          if (response.ok) {
-            const result = await response.json() as { entries: ValidationAuditEntry[]; total: number };
-            let entries = result.entries;
+        if (response.ok) {
+          const result = await response.json() as { entries: ValidationAuditEntry[]; total: number };
+          let entries = result.entries;
 
-            // Apply client-side filters
-            if (params.caseNumber) {
-              entries = entries.filter(e => e.details.caseNumber === params.caseNumber);
-            }
-
-            if (params.action) {
-              entries = entries.filter(e => e.action === params.action);
-            }
-
-            if (params.result) {
-              entries = entries.filter(e => e.result === params.result);
-            }
-
-            if (params.workflowPhase) {
-              entries = entries.filter(e => e.details.workflowPhase === params.workflowPhase);
-            }
-
-            // Apply pagination
-            if (params.offset || params.limit) {
-              const offset = params.offset || 0;
-              const limit = params.limit || 100;
-              entries = entries.slice(offset, offset + limit);
-            }
-
-            return entries;
+          // Apply client-side filters
+          if (params.caseNumber) {
+            entries = entries.filter(e => e.details.caseNumber === params.caseNumber);
           }
 
+          if (params.action) {
+            entries = entries.filter(e => e.action === params.action);
+          }
+
+          if (params.result) {
+            entries = entries.filter(e => e.result === params.result);
+          }
+
+          if (params.workflowPhase) {
+            entries = entries.filter(e => e.details.workflowPhase === params.workflowPhase);
+          }
+
+          // Apply pagination
+          if (params.offset || params.limit) {
+            const offset = params.offset || 0;
+            const limit = params.limit || 100;
+            entries = entries.slice(offset, offset + limit);
+          }
+
+          return entries;
+        } else {
           console.error('🚨 Audit: Failed to fetch entries from server');
         }
       }
@@ -1405,19 +1390,15 @@ export class AuditService {
   private async persistAuditEntry(entry: ValidationAuditEntry): Promise<void> {
     try {
       // Store to audit worker
-      const authorizationHeader = await this.getAuthorizationHeader();
-      if (!authorizationHeader) {
-        return;
-      }
-
-      const url = new URL(AUDIT_API_URL, 'http://localhost');
+      const apiKey = await getDataApiKey();
+      const url = new URL(`${AUDIT_WORKER_URL}/audit/`);
       url.searchParams.set('userId', entry.userId);
       
-      const response = await fetch(`${url.pathname}${url.search}`, {
+      const response = await fetch(url.toString(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': authorizationHeader
+          'X-Custom-Auth-Key': apiKey
         },
         body: JSON.stringify(entry)
       });

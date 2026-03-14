@@ -1,8 +1,8 @@
+import paths from '~/config/config.json';
 import { AnnotationData } from '~/types/annotations';
 import { auditService } from '~/services/audit.service';
+import { getPdfApiKey } from '~/utils/auth';
 import { User } from 'firebase/auth';
-
-const PDF_API_URL = '/api/pdf/generate';
 
 interface GeneratePDFParams {
   user: User;
@@ -75,13 +75,13 @@ export const generatePDF = async ({
       data: pdfData,
     };
 
-    const idToken = await user.getIdToken();
+    const pdfAuthKey = await getPdfApiKey();
 
-    const response = await fetch(PDF_API_URL, {
+    const response = await fetch(paths.pdf_worker_url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
+        'X-Custom-Auth-Key': pdfAuthKey,
       },
       body: JSON.stringify(pdfRequest)
     });

@@ -7,6 +7,7 @@ import { Toast } from '~/components/toast/toast';
 import { getImageUrl } from '~/components/actions/image-manage';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
+import { getUserApiKey } from '~/utils/auth';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
 import { AnnotationData, FileData } from '~/types';
 import { checkCaseIsReadOnly } from '~/components/actions/case-manage';
@@ -74,9 +75,11 @@ export const Striae = ({ user }: StriaePage) => {
   useEffect(() => {
     const fetchUserCompany = async () => {
       try {
+        const apiKey = await getUserApiKey();
         const idToken = await user.getIdToken();
         const response = await fetch(`/api/user/${encodeURIComponent(user.uid)}`, {
           headers: {
+            'X-Custom-Auth-Key': apiKey,
             'Authorization': `Bearer ${idToken}`
           }
         });

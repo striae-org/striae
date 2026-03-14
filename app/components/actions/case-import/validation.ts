@@ -1,4 +1,5 @@
 import { User } from 'firebase/auth';
+import { getUserApiKey } from '~/utils/auth';
 import { CaseExportData, ConfirmationImportData } from '~/types';
 import { calculateSHA256Secure, ManifestSignatureVerificationResult } from '~/utils/SHA256';
 import { verifyConfirmationSignature } from '~/utils/confirmation-signature';
@@ -66,10 +67,12 @@ export function removeForensicWarning(content: string): string {
  */
 export async function validateExporterUid(exporterUid: string, currentUser: User): Promise<{ exists: boolean; isSelf: boolean }> {
   try {
+    const apiKey = await getUserApiKey();
     const idToken = await currentUser.getIdToken();
     const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(exporterUid)}`, {
       method: 'GET',
       headers: {
+        'X-Custom-Auth-Key': apiKey,
         'Authorization': `Bearer ${idToken}`
       }
     });

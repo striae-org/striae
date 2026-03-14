@@ -1,4 +1,8 @@
 import { User } from 'firebase/auth';
+import { 
+  getDataApiKey,
+  getUserApiKey
+} from '~/utils/auth';
 import {
   getUserReadOnlyCases,
   updateUserData,
@@ -19,10 +23,12 @@ const DATA_API_BASE = '/api/data';
 
 const getProxyHeaders = async (
   user: User,
+  apiKey: string,
   includeJsonContentType: boolean = false
 ): Promise<Record<string, string>> => {
   const idToken = await user.getIdToken();
   const headers: Record<string, string> = {
+    'X-Custom-Auth-Key': apiKey,
     'Authorization': `Bearer ${idToken}`
   };
 
@@ -102,6 +108,8 @@ export async function storeCaseDataInR2(
   forensicManifest?: SignedForensicManifest
 ): Promise<void> {
   try {
+    const apiKey = await getDataApiKey();
+    
     // Convert the mapping to a plain object for JSON serialization
     const originalImageIds = originalImageIdMapping ? 
       Object.fromEntries(originalImageIdMapping) : undefined;
@@ -133,7 +141,7 @@ export async function storeCaseDataInR2(
     // Store in R2
     const response = await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
       method: 'PUT',
-      headers: await getProxyHeaders(user, true),
+      headers: await getProxyHeaders(user, apiKey, true),
       body: JSON.stringify(r2CaseData)
     });
 
@@ -152,9 +160,11 @@ export async function storeCaseDataInR2(
  */
 export async function listReadOnlyCases(user: User): Promise<ReadOnlyCaseMetadata[]> {
   try {
+    const apiKey = await getUserApiKey();
+    
     const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}`, {
       method: 'GET',
-      headers: await getProxyHeaders(user, true)
+      headers: await getProxyHeaders(user, apiKey, true)
     });
 
     if (!response.ok) {
@@ -177,10 +187,12 @@ export async function listReadOnlyCases(user: User): Promise<ReadOnlyCaseMetadat
  */
 export async function removeReadOnlyCase(user: User, caseNumber: string): Promise<boolean> {
   try {
+    const apiKey = await getUserApiKey();
+    
     // Get current user data
     const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}`, {
       method: 'GET',
-      headers: await getProxyHeaders(user, true)
+      headers: await getProxyHeaders(user, apiKey, true)
     });
 
     if (!response.ok) {
@@ -204,7 +216,7 @@ export async function removeReadOnlyCase(user: User, caseNumber: string): Promis
     // Update user data
     const updateResponse = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}`, {
       method: 'PUT',
-      headers: await getProxyHeaders(user, true),
+      headers: await getProxyHeaders(user, apiKey, true),
       body: JSON.stringify(userData)
     });
 
@@ -225,9 +237,11 @@ export async function removeReadOnlyCase(user: User, caseNumber: string): Promis
  */
 export async function deleteReadOnlyCase(user: User, caseNumber: string): Promise<boolean> {
   try {
+    const dataApiKey = await getDataApiKey();
+    
     // Get case data first to get file IDs for deletion
     const caseResponse = await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
-      headers: await getProxyHeaders(user)
+      headers: await getProxyHeaders(user, dataApiKey)
     });
 
     if (caseResponse.ok) {
@@ -245,7 +259,7 @@ export async function deleteReadOnlyCase(user: User, caseNumber: string): Promis
       // Delete case file using data worker
       await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
         method: 'DELETE',
-        headers: await getProxyHeaders(user)
+        headers: await getProxyHeaders(user, dataApiKey)
       });
     }
     
