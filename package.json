@@ -128,10 +128,11 @@
     "typescript": "^5.9.3",
     "vite": "^6.4.1",
     "vite-tsconfig-paths": "^6.1.1",
-    "wrangler": "^4.69.0"
+    "wrangler": "^4.73.0"
   },
   "overrides": {
-    "tar": "7.5.11"
+    "tar": "7.5.11",
+    "undici": "7.24.1"
   },
   "engines": {
     "node": ">=20.0.0"
