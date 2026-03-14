@@ -1,6 +1,6 @@
 {
   "name": "@striae-org/striae",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "private": false,
   "description": "Cloud-native forensic annotation application for firearms identification (Remix + Cloudflare Workers).",
   "license": "Apache-2.0",

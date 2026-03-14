@@ -62,6 +62,16 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-13] - *[Minor Release v3.2.0](https://github.com/striae-org/striae/releases/tag/v3.2.0)*
+
+_Note: Summary excludes duplicate internal version-bump commits and focuses on functional changes._
+
+- **🔐 PDF Worker Authentication Hardening** - Added PDF-worker auth key protection and aligned worker key flow for secure report generation.
+- **📄 PDF Pipeline Expansion** - Added generated PDF assets and supporting PDF documentation updates.
+- **🧭 Session and Timeout Behavior Updates** - Switched Firebase Auth to session persistence and reduced default timeout interval behavior.
+- **⚙️ Deployment and Config Improvements** - Added automated worker-domain entry scripting and refreshed compatibility-date configuration.
+- **🧹 Repository and Route Hygiene** - Moved wiki content to a separate directory, updated `.gitignore`, and refined icon/PNG route handling.
+
 ## [2026-03-12] - *[Patch Release v3.1.1](https://github.com/striae-org/striae/releases/tag/v3.1.1)*
 
 - **🧹 Icon Sprite Cleanup** - Removed unused SVG symbols and manifest entries; sprite now contains only the 9 icons actively referenced in the app
