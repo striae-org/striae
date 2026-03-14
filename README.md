@@ -1,6 +1,6 @@
 # @striae-org/striae
 
-Striae is a cloud-native forensic annotation application for firearms identification, built with Remix and Cloudflare Workers.
+Striae is a cloud-native forensic annotation application for firearms identification, built with React Router and Cloudflare Workers.
 
 This npm package publishes the Striae application source and deployment scaffolding for teams that run their own Striae environment.
 
@@ -40,7 +40,7 @@ npm i @striae-org/striae
 cp -R node_modules/@striae-org/striae/. .
 ```
 
-3) Reinstall using Striae's own package.json (includes dev deps like wrangler/remix)
+3) Reinstall using Striae's own package.json (includes dev deps like wrangler/react-router)
 
 ```bash
 rm -rf node_modules package-lock.json

@@ -16,7 +16,7 @@ npm i @striae-org/striae
 cp -R node_modules/@striae-org/striae/. .
 ```
 
-3) Reinstall using Striae's own package.json (includes dev deps like wrangler/remix)
+3) Reinstall using Striae's own package.json (includes dev deps like wrangler/react-router)
 
 ```bash
 rm -rf node_modules package-lock.json
