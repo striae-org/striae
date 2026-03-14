@@ -210,9 +210,6 @@ read_env_var_from_file() {
 
 worker_domain_wrangler_path() {
     case "$1" in
-        KEYS_WORKER_DOMAIN)
-            printf '%s' "workers/keys-worker/wrangler.jsonc"
-            ;;
         USER_WORKER_DOMAIN)
             printf '%s' "workers/user-worker/wrangler.jsonc"
             ;;
@@ -520,7 +517,6 @@ required_vars=(
     "PAGES_CUSTOM_DOMAIN"
     
     # Worker Names (required for config replacement)
-    "KEYS_WORKER_NAME"
     "USER_WORKER_NAME"
     "DATA_WORKER_NAME"
     "AUDIT_WORKER_NAME"
@@ -528,7 +524,6 @@ required_vars=(
     "PDF_WORKER_NAME"
     
     # Worker Domains (required for config replacement)
-    "KEYS_WORKER_DOMAIN"
     "USER_WORKER_DOMAIN"
     "DATA_WORKER_DOMAIN"
     "AUDIT_WORKER_DOMAIN"
@@ -541,7 +536,6 @@ required_vars=(
     "KV_STORE_ID"
     
     # Worker-Specific Secrets (required for deployment)
-    "KEYS_AUTH"
     "PDF_WORKER_AUTH"
     "ACCOUNT_HASH"
     "API_TOKEN"
@@ -636,7 +630,6 @@ validate_env_value_formats() {
     echo -e "${YELLOW}🔍 Validating environment value formats...${NC}"
 
     validate_domain_var "PAGES_CUSTOM_DOMAIN"
-    validate_domain_var "KEYS_WORKER_DOMAIN"
     validate_domain_var "USER_WORKER_DOMAIN"
     validate_domain_var "DATA_WORKER_DOMAIN"
     validate_domain_var "AUDIT_WORKER_DOMAIN"
@@ -685,13 +678,11 @@ validate_generated_configs() {
         "workers/audit-worker/wrangler.jsonc"
         "workers/data-worker/wrangler.jsonc"
         "workers/image-worker/wrangler.jsonc"
-        "workers/keys-worker/wrangler.jsonc"
         "workers/pdf-worker/wrangler.jsonc"
         "workers/user-worker/wrangler.jsonc"
         "workers/audit-worker/src/audit-worker.ts"
         "workers/data-worker/src/data-worker.ts"
         "workers/image-worker/src/image-worker.ts"
-        "workers/keys-worker/src/keys.ts"
         "workers/pdf-worker/src/pdf-worker.ts"
         "workers/user-worker/src/user-worker.ts"
     )
@@ -706,21 +697,18 @@ validate_generated_configs() {
 
     assert_contains_literal "wrangler.toml" "\"$PAGES_PROJECT_NAME\"" "PAGES_PROJECT_NAME was not applied to wrangler.toml"
 
-    assert_contains_literal "workers/keys-worker/wrangler.jsonc" "$KEYS_WORKER_NAME" "KEYS_WORKER_NAME was not applied"
     assert_contains_literal "workers/user-worker/wrangler.jsonc" "$USER_WORKER_NAME" "USER_WORKER_NAME was not applied"
     assert_contains_literal "workers/data-worker/wrangler.jsonc" "$DATA_WORKER_NAME" "DATA_WORKER_NAME was not applied"
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$AUDIT_WORKER_NAME" "AUDIT_WORKER_NAME was not applied"
     assert_contains_literal "workers/image-worker/wrangler.jsonc" "$IMAGES_WORKER_NAME" "IMAGES_WORKER_NAME was not applied"
     assert_contains_literal "workers/pdf-worker/wrangler.jsonc" "$PDF_WORKER_NAME" "PDF_WORKER_NAME was not applied"
 
-    assert_contains_literal "workers/keys-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in keys worker config"
     assert_contains_literal "workers/user-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in user worker config"
     assert_contains_literal "workers/data-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in data worker config"
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in audit worker config"
     assert_contains_literal "workers/image-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in image worker config"
     assert_contains_literal "workers/pdf-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in pdf worker config"
 
-    assert_contains_literal "workers/keys-worker/wrangler.jsonc" "$KEYS_WORKER_DOMAIN" "KEYS_WORKER_DOMAIN missing in keys worker config"
     assert_contains_literal "workers/user-worker/wrangler.jsonc" "$USER_WORKER_DOMAIN" "USER_WORKER_DOMAIN missing in user worker config"
     assert_contains_literal "workers/data-worker/wrangler.jsonc" "$DATA_WORKER_DOMAIN" "DATA_WORKER_DOMAIN missing in data worker config"
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$AUDIT_WORKER_DOMAIN" "AUDIT_WORKER_DOMAIN missing in audit worker config"
@@ -734,7 +722,6 @@ validate_generated_configs() {
     assert_contains_literal "app/config/config.json" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in app/config/config.json"
     assert_contains_literal "app/config/config.json" "https://$DATA_WORKER_DOMAIN" "DATA_WORKER_DOMAIN missing in app/config/config.json"
     assert_contains_literal "app/config/config.json" "https://$AUDIT_WORKER_DOMAIN" "AUDIT_WORKER_DOMAIN missing in app/config/config.json"
-    assert_contains_literal "app/config/config.json" "https://$KEYS_WORKER_DOMAIN" "KEYS_WORKER_DOMAIN missing in app/config/config.json"
     assert_contains_literal "app/config/config.json" "https://$IMAGES_WORKER_DOMAIN" "IMAGES_WORKER_DOMAIN missing in app/config/config.json"
     assert_contains_literal "app/config/config.json" "https://$USER_WORKER_DOMAIN" "USER_WORKER_DOMAIN missing in app/config/config.json"
     assert_contains_literal "app/config/config.json" "https://$PDF_WORKER_DOMAIN" "PDF_WORKER_DOMAIN missing in app/config/config.json"
@@ -750,27 +737,24 @@ validate_generated_configs() {
     assert_contains_literal "workers/audit-worker/src/audit-worker.ts" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in audit-worker source"
     assert_contains_literal "workers/data-worker/src/data-worker.ts" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in data-worker source"
     assert_contains_literal "workers/image-worker/src/image-worker.ts" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in image-worker source"
-    assert_contains_literal "workers/keys-worker/src/keys.ts" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in keys-worker source"
     assert_contains_literal "workers/pdf-worker/src/pdf-worker.ts" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in pdf-worker source"
     assert_contains_literal "workers/user-worker/src/user-worker.ts" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in user-worker source"
     assert_contains_literal "workers/user-worker/src/user-worker.ts" "https://$DATA_WORKER_DOMAIN" "DATA_WORKER_DOMAIN missing in user-worker source"
     assert_contains_literal "workers/user-worker/src/user-worker.ts" "https://$IMAGES_WORKER_DOMAIN" "IMAGES_WORKER_DOMAIN missing in user-worker source"
 
     local placeholder_pattern
-    placeholder_pattern="(\"(ACCOUNT_ID|PAGES_PROJECT_NAME|PAGES_CUSTOM_DOMAIN|KEYS_WORKER_NAME|USER_WORKER_NAME|DATA_WORKER_NAME|AUDIT_WORKER_NAME|IMAGES_WORKER_NAME|PDF_WORKER_NAME|KEYS_WORKER_DOMAIN|USER_WORKER_DOMAIN|DATA_WORKER_DOMAIN|AUDIT_WORKER_DOMAIN|IMAGES_WORKER_DOMAIN|PDF_WORKER_DOMAIN|DATA_BUCKET_NAME|AUDIT_BUCKET_NAME|KV_STORE_ID|DATA_WORKER_CUSTOM_DOMAIN|AUDIT_WORKER_CUSTOM_DOMAIN|KEYS_WORKER_CUSTOM_DOMAIN|IMAGE_WORKER_CUSTOM_DOMAIN|USER_WORKER_CUSTOM_DOMAIN|PDF_WORKER_CUSTOM_DOMAIN|YOUR_KEYS_AUTH_TOKEN|MANIFEST_SIGNING_KEY_ID|MANIFEST_SIGNING_PUBLIC_KEY|YOUR_FIREBASE_API_KEY|YOUR_FIREBASE_AUTH_DOMAIN|YOUR_FIREBASE_PROJECT_ID|YOUR_FIREBASE_STORAGE_BUCKET|YOUR_FIREBASE_MESSAGING_SENDER_ID|YOUR_FIREBASE_APP_ID|YOUR_FIREBASE_MEASUREMENT_ID)\"|'(PAGES_CUSTOM_DOMAIN|DATA_WORKER_DOMAIN|IMAGES_WORKER_DOMAIN)')"
+    placeholder_pattern="(\"(ACCOUNT_ID|PAGES_PROJECT_NAME|PAGES_CUSTOM_DOMAIN|USER_WORKER_NAME|DATA_WORKER_NAME|AUDIT_WORKER_NAME|IMAGES_WORKER_NAME|PDF_WORKER_NAME|USER_WORKER_DOMAIN|DATA_WORKER_DOMAIN|AUDIT_WORKER_DOMAIN|IMAGES_WORKER_DOMAIN|PDF_WORKER_DOMAIN|DATA_BUCKET_NAME|AUDIT_BUCKET_NAME|KV_STORE_ID|DATA_WORKER_CUSTOM_DOMAIN|AUDIT_WORKER_CUSTOM_DOMAIN|IMAGE_WORKER_CUSTOM_DOMAIN|USER_WORKER_CUSTOM_DOMAIN|PDF_WORKER_CUSTOM_DOMAIN|MANIFEST_SIGNING_KEY_ID|MANIFEST_SIGNING_PUBLIC_KEY|YOUR_FIREBASE_API_KEY|YOUR_FIREBASE_AUTH_DOMAIN|YOUR_FIREBASE_PROJECT_ID|YOUR_FIREBASE_STORAGE_BUCKET|YOUR_FIREBASE_MESSAGING_SENDER_ID|YOUR_FIREBASE_APP_ID|YOUR_FIREBASE_MEASUREMENT_ID)\"|'(PAGES_CUSTOM_DOMAIN|DATA_WORKER_DOMAIN|IMAGES_WORKER_DOMAIN)')"
 
     local files_to_scan=(
         "wrangler.toml"
         "workers/audit-worker/wrangler.jsonc"
         "workers/data-worker/wrangler.jsonc"
         "workers/image-worker/wrangler.jsonc"
-        "workers/keys-worker/wrangler.jsonc"
         "workers/pdf-worker/wrangler.jsonc"
         "workers/user-worker/wrangler.jsonc"
         "workers/audit-worker/src/audit-worker.ts"
         "workers/data-worker/src/data-worker.ts"
         "workers/image-worker/src/image-worker.ts"
-        "workers/keys-worker/src/keys.ts"
         "workers/pdf-worker/src/pdf-worker.ts"
         "workers/user-worker/src/user-worker.ts"
         "app/config/config.json"
@@ -865,15 +849,7 @@ copy_example_configs() {
     # Navigate to each worker directory and copy the example file
     echo -e "${YELLOW}  Copying worker configuration files...${NC}"
     
-    cd workers/keys-worker
-    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
-        cp wrangler.jsonc.example wrangler.jsonc
-        echo -e "${GREEN}    ✅ keys-worker: wrangler.jsonc created from example${NC}"
-    elif [ -f "wrangler.jsonc" ]; then
-        echo -e "${YELLOW}    ⚠️  keys-worker: wrangler.jsonc already exists, skipping copy${NC}"
-    fi
-
-    cd ../user-worker
+    cd workers/user-worker
     if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
         cp wrangler.jsonc.example wrangler.jsonc
         echo -e "${GREEN}    ✅ user-worker: wrangler.jsonc created from example${NC}"
@@ -918,13 +894,6 @@ copy_example_configs() {
 
     # Copy worker source template files
     echo -e "${YELLOW}  Copying worker source template files...${NC}"
-
-    if [ -f "workers/keys-worker/src/keys.example.ts" ] && { [ "$update_env" = "true" ] || [ ! -f "workers/keys-worker/src/keys.ts" ]; }; then
-        cp workers/keys-worker/src/keys.example.ts workers/keys-worker/src/keys.ts
-        echo -e "${GREEN}    ✅ keys-worker: keys.ts created from example${NC}"
-    elif [ -f "workers/keys-worker/src/keys.ts" ]; then
-        echo -e "${YELLOW}    ⚠️  keys-worker: keys.ts already exists, skipping copy${NC}"
-    fi
 
     if [ -f "workers/user-worker/src/user-worker.example.ts" ] && { [ "$update_env" = "true" ] || [ ! -f "workers/user-worker/src/user-worker.ts" ]; }; then
         cp workers/user-worker/src/user-worker.example.ts workers/user-worker/src/user-worker.ts
@@ -1013,11 +982,11 @@ prompt_for_secrets() {
         fi
         
         # Auto-generate specific authentication secrets - but allow keeping current
-        if [ "$var_name" = "USER_DB_AUTH" ] || [ "$var_name" = "R2_KEY_SECRET" ] || [ "$var_name" = "KEYS_AUTH" ] || [ "$var_name" = "PDF_WORKER_AUTH" ]; then
+        if [ "$var_name" = "USER_DB_AUTH" ] || [ "$var_name" = "R2_KEY_SECRET" ] || [ "$var_name" = "PDF_WORKER_AUTH" ]; then
             echo -e "${BLUE}$var_name${NC}"
             echo -e "${YELLOW}$description${NC}"
             
-            if [ "$update_env" != "true" ] && [ -n "$current_value" ] && ! is_placeholder "$current_value" && [ "$current_value" != "your_custom_user_db_auth_token_here" ] && [ "$current_value" != "your_custom_r2_secret_here" ] && [ "$current_value" != "your_custom_keys_auth_token_here" ] && [ "$current_value" != "your_custom_pdf_worker_auth_token_here" ]; then
+            if [ "$update_env" != "true" ] && [ -n "$current_value" ] && ! is_placeholder "$current_value" && [ "$current_value" != "your_custom_user_db_auth_token_here" ] && [ "$current_value" != "your_custom_r2_secret_here" ] && [ "$current_value" != "your_custom_pdf_worker_auth_token_here" ]; then
                 # Current value exists and is not a placeholder
                 echo -e "${GREEN}Current value: [HIDDEN]${NC}"
                 read -p "Generate new secret? (press Enter to keep current, or type 'y' to generate): " gen_choice
@@ -1219,8 +1188,6 @@ prompt_for_secrets() {
     
     echo -e "${BLUE}🔑 WORKER NAMES & DOMAINS${NC}"
     echo "========================="
-    prompt_for_var "KEYS_WORKER_NAME" "Keys worker name"
-    prompt_for_var "KEYS_WORKER_DOMAIN" "Keys worker domain (e.g., keys.striae.org) - DO NOT include https://"
     prompt_for_var "USER_WORKER_NAME" "User worker name"
     prompt_for_var "USER_WORKER_DOMAIN" "User worker domain (e.g., users.striae.org) - DO NOT include https://"
     prompt_for_var "DATA_WORKER_NAME" "Data worker name"
@@ -1240,7 +1207,6 @@ prompt_for_secrets() {
     
     echo -e "${BLUE}🔐 SERVICE-SPECIFIC SECRETS${NC}"
     echo "============================"
-    prompt_for_var "KEYS_AUTH" "Keys worker authentication token (generate with: openssl rand -hex 16)"
     prompt_for_var "PDF_WORKER_AUTH" "PDF worker authentication token (generate with: openssl rand -hex 16)"
     prompt_for_var "ACCOUNT_HASH" "Cloudflare Images Account Hash"
     prompt_for_var "API_TOKEN" "Cloudflare Images API token (for Images Worker)"
@@ -1324,22 +1290,6 @@ update_wrangler_configs() {
         echo -e "${GREEN}    ✅ image-worker source placeholders updated${NC}"
     fi
     
-    # Keys Worker
-    if [ -f "workers/keys-worker/wrangler.jsonc" ]; then
-        echo -e "${YELLOW}  Updating keys-worker/wrangler.jsonc...${NC}"
-        sed -i "s/\"KEYS_WORKER_NAME\"/\"$KEYS_WORKER_NAME\"/g" workers/keys-worker/wrangler.jsonc
-        sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/keys-worker/wrangler.jsonc
-        sed -i "s/\"KEYS_WORKER_DOMAIN\"/\"$KEYS_WORKER_DOMAIN\"/g" workers/keys-worker/wrangler.jsonc
-        echo -e "${GREEN}    ✅ keys-worker configuration updated${NC}"
-    fi
-    
-    # Update keys-worker source file domain placeholders
-    if [ -f "workers/keys-worker/src/keys.ts" ]; then
-        echo -e "${YELLOW}  Updating keys-worker source placeholders...${NC}"
-        sed -i "s|'Access-Control-Allow-Origin': '[^']*'|'Access-Control-Allow-Origin': 'https://$escaped_pages_custom_domain'|g" workers/keys-worker/src/keys.ts
-        echo -e "${GREEN}    ✅ keys-worker source placeholders updated${NC}"
-    fi
-    
     # PDF Worker
     if [ -f "workers/pdf-worker/wrangler.jsonc" ]; then
         echo -e "${YELLOW}  Updating pdf-worker/wrangler.jsonc...${NC}"
@@ -1396,7 +1346,6 @@ update_wrangler_configs() {
         sed -i "s|\"url\": \"[^\"]*\"|\"url\": \"https://$escaped_pages_custom_domain\"|g" app/config/config.json
         sed -i "s|\"DATA_WORKER_CUSTOM_DOMAIN\"|\"https://$DATA_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"AUDIT_WORKER_CUSTOM_DOMAIN\"|\"https://$AUDIT_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"KEYS_WORKER_CUSTOM_DOMAIN\"|\"https://$KEYS_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"IMAGE_WORKER_CUSTOM_DOMAIN\"|\"https://$IMAGES_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"USER_WORKER_CUSTOM_DOMAIN\"|\"https://$USER_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"PDF_WORKER_CUSTOM_DOMAIN\"|\"https://$PDF_WORKER_DOMAIN\"|g" app/config/config.json
