@@ -1,9 +1,9 @@
 import type { User } from 'firebase/auth';
-import { ImportOptions, ImportResult, ReadOnlyCaseMetadata, FileData } from '~/types';
+import { type ImportOptions, type ImportResult, type ReadOnlyCaseMetadata, type FileData } from '~/types';
 import { checkExistingCase } from '../case-manage';
 import {
   extractForensicManifestData,
-  SignedForensicManifest,
+  type SignedForensicManifest,
   validateCaseIntegritySecure as validateForensicIntegrity,
   verifyForensicManifestSignature
 } from '~/utils/SHA256';

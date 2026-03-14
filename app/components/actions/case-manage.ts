@@ -13,7 +13,7 @@ import {
   duplicateCaseData,
   deleteFileAnnotations
 } from '~/utils/data-operations';
-import { CaseData, ReadOnlyCaseData, FileData } from '~/types';
+import { type CaseData, type ReadOnlyCaseData, type FileData } from '~/types';
 import { auditService } from '~/services/audit';
 import { getImageApiKey } from '~/utils/auth';
 import paths from '~/config/config.json';

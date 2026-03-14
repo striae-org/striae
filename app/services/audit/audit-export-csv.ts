@@ -1,4 +1,4 @@
-import { ValidationAuditEntry } from '~/types';
+import { type ValidationAuditEntry } from '~/types';
 
 export const AUDIT_CSV_ENTRY_HEADERS = [
   'Timestamp',

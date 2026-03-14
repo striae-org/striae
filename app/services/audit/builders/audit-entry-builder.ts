@@ -1,4 +1,4 @@
-import { CreateAuditEntryParams, ValidationAuditEntry } from '~/types';
+import { type CreateAuditEntryParams, type ValidationAuditEntry } from '~/types';
 
 export const buildValidationAuditEntry = (
   params: CreateAuditEntryParams,

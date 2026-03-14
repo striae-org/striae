@@ -1,4 +1,4 @@
-import { AuditTrail, ValidationAuditEntry } from '~/types';
+import { type AuditTrail, type ValidationAuditEntry } from '~/types';
 
 const calculateDuration = (start: string, end: string): string => {
   const startTime = new Date(start).getTime();

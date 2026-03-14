@@ -7,7 +7,7 @@ import { CaseSidebar } from './cases/case-sidebar';
 import { NotesSidebar } from './notes/notes-sidebar';
 import { CaseImport } from './case-import/case-import';
 import { Toast } from '../toast/toast';
-import { FileData, ImportResult, ConfirmationImportResult } from '~/types';
+import { type FileData, type ImportResult, type ConfirmationImportResult } from '~/types';
 
 interface SidebarProps {
   user: User;

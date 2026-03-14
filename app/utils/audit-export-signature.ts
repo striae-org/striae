@@ -1,7 +1,7 @@
 import {
-  ForensicManifestSignature,
+  type ForensicManifestSignature,
   FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
-  ManifestSignatureVerificationResult
+  type ManifestSignatureVerificationResult
 } from './SHA256';
 import { verifySignaturePayload } from './signature-utils';
 

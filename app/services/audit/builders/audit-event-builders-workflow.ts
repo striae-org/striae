@@ -1,10 +1,10 @@
 import type { User } from 'firebase/auth';
 import {
-  AuditFileType,
-  AuditResult,
-  CreateAuditEntryParams,
-  PerformanceMetrics,
-  SecurityCheckResults
+  type AuditFileType,
+  type AuditResult,
+  type CreateAuditEntryParams,
+  type PerformanceMetrics,
+  type SecurityCheckResults
 } from '~/types';
 
 interface SignatureDetailsInput {

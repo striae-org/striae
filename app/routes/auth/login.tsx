@@ -9,8 +9,8 @@ import {
   type User,
     updateProfile,
     getMultiFactorResolver,
-    MultiFactorResolver,
-    MultiFactorError
+    type MultiFactorResolver,
+    type MultiFactorError
 } from 'firebase/auth';
 import { PasswordReset } from '~/routes/auth/passwordReset';
 import { EmailVerification } from '~/routes/auth/emailVerification';

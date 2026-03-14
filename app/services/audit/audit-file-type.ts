@@ -1,4 +1,4 @@
-import { AuditFileType } from '~/types';
+import { type AuditFileType } from '~/types';
 
 export const getAuditFileTypeFromMime = (mimeType: string): AuditFileType => {
   if (mimeType.startsWith('image/')) return 'image-file';

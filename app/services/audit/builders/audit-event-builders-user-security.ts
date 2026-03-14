@@ -1,5 +1,5 @@
 import type { User } from 'firebase/auth';
-import { AuditResult, CreateAuditEntryParams } from '~/types';
+import { type AuditResult, type CreateAuditEntryParams } from '~/types';
 
 interface BuildUserLoginAuditParamsInput {
   user: User;

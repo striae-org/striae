@@ -1,8 +1,8 @@
 import {
-  AuditQueryParams,
-  AuditSummary,
-  ValidationAuditEntry,
-  WorkflowPhase
+  type AuditQueryParams,
+  type AuditSummary,
+  type ValidationAuditEntry,
+  type WorkflowPhase
 } from '~/types';
 
 export const applyAuditEntryFilters = (

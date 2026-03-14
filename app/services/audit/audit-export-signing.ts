@@ -2,9 +2,9 @@ import type { User } from 'firebase/auth';
 import { signAuditExportData } from '~/utils/data-operations';
 import {
   AUDIT_EXPORT_SIGNATURE_VERSION,
-  AuditExportFormat,
-  AuditExportSigningPayload,
-  AuditExportType
+  type AuditExportFormat,
+  type AuditExportSigningPayload,
+  type AuditExportType
 } from '~/utils/audit-export-signature';
 
 export interface AuditExportContext {

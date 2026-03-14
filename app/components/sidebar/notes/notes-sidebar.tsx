@@ -3,7 +3,7 @@ import type { User } from 'firebase/auth';
 import { ColorSelector } from '~/components/colors/colors';
 import { NotesModal } from './notes-modal';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
-import { AnnotationData } from '~/types/annotations';
+import { type AnnotationData } from '~/types/annotations';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
 import { auditService } from '~/services/audit';
 import styles from './notes.module.css';

@@ -10,14 +10,14 @@ import {
   validateUserSession
 } from '~/utils/permissions';
 import { 
-  CaseExportData,   
-  ExtendedUserData,
-  FileData,
-  CaseData,
-  ReadOnlyCaseMetadata
+  type CaseExportData,   
+  type ExtendedUserData,
+  type FileData,
+  type CaseData,
+  type ReadOnlyCaseMetadata
 } from '~/types';
 import { deleteFile } from '../image-manage';
-import { SignedForensicManifest } from '~/utils/SHA256';
+import { type SignedForensicManifest } from '~/utils/SHA256';
 
 const USER_WORKER_URL = paths.user_worker_url;
 const DATA_WORKER_URL = paths.data_worker_url;

@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useRef, useEffect, useContext } from 'react';
-import { BoxAnnotation } from '~/types';
+import { type BoxAnnotation } from '~/types';
 import { AuthContext } from '~/contexts/auth.context';
 import { auditService } from '~/services/audit';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';

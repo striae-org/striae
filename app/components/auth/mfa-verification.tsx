@@ -3,8 +3,8 @@ import {
   PhoneAuthProvider, 
   PhoneMultiFactorGenerator, 
   RecaptchaVerifier,
-  MultiFactorResolver,
-  UserCredential
+  type MultiFactorResolver,
+  type UserCredential
 } from 'firebase/auth';
 import { auth } from '~/services/firebase';
 import { handleAuthError, getValidationError } from '~/services/firebase/errors';

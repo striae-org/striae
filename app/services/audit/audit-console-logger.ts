@@ -1,4 +1,4 @@
-import { ValidationAuditEntry } from '~/types';
+import { type ValidationAuditEntry } from '~/types';
 
 export const getAuditSecurityIssuesForConsole = (
   entry: ValidationAuditEntry

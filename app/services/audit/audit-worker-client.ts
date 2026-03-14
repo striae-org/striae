@@ -1,5 +1,5 @@
 import paths from '~/config/config.json';
-import { ValidationAuditEntry } from '~/types';
+import { type ValidationAuditEntry } from '~/types';
 import { getDataApiKey } from '~/utils/auth';
 
 const AUDIT_WORKER_URL = paths.audit_worker_url;

@@ -1,5 +1,5 @@
 import type { User } from 'firebase/auth';
-import { CaseExportData } from '~/types';
+import { type CaseExportData } from '~/types';
 import { saveNotes } from '../notes-manage';
 
 /**

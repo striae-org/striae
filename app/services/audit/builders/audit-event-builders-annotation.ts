@@ -1,5 +1,5 @@
 import type { User } from 'firebase/auth';
-import { CreateAuditEntryParams } from '~/types';
+import { type CreateAuditEntryParams } from '~/types';
 
 type AnnotationSnapshot = Record<string, unknown> & {
   type?: 'measurement' | 'identification' | 'comparison' | 'note' | 'region';
