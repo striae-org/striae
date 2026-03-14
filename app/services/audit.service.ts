@@ -4,7 +4,6 @@ import {
   CreateAuditEntryParams, 
   AuditTrail, 
   AuditQueryParams,
-  AuditSummary,
   WorkflowPhase,
   AuditAction,
   AuditResult,
@@ -17,6 +16,12 @@ import {
   fetchAuditEntriesForUser,
   persistAuditEntryForUser
 } from './audit-worker-client';
+import {
+  applyAuditEntryFilters,
+  applyAuditPagination,
+  generateAuditSummary,
+  sortAuditEntriesNewestFirst
+} from './audit-query-helpers';
 
 type AnnotationSnapshot = Record<string, unknown> & {
   type?: 'measurement' | 'identification' | 'comparison' | 'note' | 'region';
@@ -1234,7 +1239,7 @@ export class AuditService {
         return null;
       }
 
-      const summary = this.generateAuditSummary(entries);
+      const summary = generateAuditSummary(entries);
       const workflowId = this.workflowId || `${caseNumber}-archived`;
 
       return {
@@ -1247,41 +1252,6 @@ export class AuditService {
       console.error('🚨 Audit: Failed to get audit trail:', error);
       return null;
     }
-  }
-
-  /**
-   * Generate audit summary from entries
-   */
-  private generateAuditSummary(entries: ValidationAuditEntry[]): AuditSummary {
-    const successCount = entries.filter(e => e.result === 'success').length;
-    const failureCount = entries.filter(e => e.result === 'failure').length;
-    const warningCount = entries.filter(e => e.result === 'warning').length;
-    
-    const phases = [...new Set(entries
-      .map(e => e.details.workflowPhase)
-      .filter(Boolean))] as WorkflowPhase[];
-    
-    const users = [...new Set(entries.map(e => e.userId))];
-    
-    const timestamps = entries.map(e => e.timestamp).sort();
-    const securityIncidents = entries.filter(e => 
-      e.result === 'failure' && 
-      (e.details.securityChecks?.selfConfirmationPrevented === true ||
-       !e.details.securityChecks?.fileIntegrityValid)
-    ).length;
-
-    return {
-      totalEvents: entries.length,
-      successfulEvents: successCount,
-      failedEvents: failureCount,
-      warningEvents: warningCount,
-      workflowPhases: phases,
-      participatingUsers: users,
-      startTimestamp: timestamps[0] || new Date().toISOString(),
-      endTimestamp: timestamps[timestamps.length - 1] || new Date().toISOString(),
-      complianceStatus: failureCount === 0 ? 'compliant' : 'non-compliant',
-      securityIncidents
-    };
   }
 
   /**
@@ -1298,72 +1268,20 @@ export class AuditService {
         });
 
         if (serverEntries) {
-          let entries = serverEntries;
-
-          // Apply client-side filters
-          if (params.caseNumber) {
-            entries = entries.filter(e => e.details.caseNumber === params.caseNumber);
-          }
-
-          if (params.action) {
-            entries = entries.filter(e => e.action === params.action);
-          }
-
-          if (params.result) {
-            entries = entries.filter(e => e.result === params.result);
-          }
-
-          if (params.workflowPhase) {
-            entries = entries.filter(e => e.details.workflowPhase === params.workflowPhase);
-          }
-
-          // Apply pagination
-          if (params.offset || params.limit) {
-            const offset = params.offset || 0;
-            const limit = params.limit || 100;
-            entries = entries.slice(offset, offset + limit);
-          }
-
-          return entries;
+          const filteredEntries = applyAuditEntryFilters(serverEntries, {
+            ...params,
+            userId: undefined
+          });
+          return applyAuditPagination(filteredEntries, params);
         }
 
         console.error('🚨 Audit: Failed to fetch entries from server');
       }
 
       // Fallback to buffer for backward compatibility
-      let entries = [...this.auditBuffer];
-
-      if (params.caseNumber) {
-        entries = entries.filter(e => e.details.caseNumber === params.caseNumber);
-      }
-
-      if (params.userId) {
-        entries = entries.filter(e => e.userId === params.userId);
-      }
-
-      if (params.action) {
-        entries = entries.filter(e => e.action === params.action);
-      }
-
-      if (params.result) {
-        entries = entries.filter(e => e.result === params.result);
-      }
-
-      if (params.workflowPhase) {
-        entries = entries.filter(e => e.details.workflowPhase === params.workflowPhase);
-      }
-
-      // Sort by timestamp (newest first)
-      entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-      // Apply pagination
-      if (params.offset || params.limit) {
-        const offset = params.offset || 0;
-        const limit = params.limit || 100;
-        entries = entries.slice(offset, offset + limit);
-      }
-
-      return entries;
+      const filteredEntries = applyAuditEntryFilters([...this.auditBuffer], params);
+      const sortedEntries = sortAuditEntriesNewestFirst(filteredEntries);
+      return applyAuditPagination(sortedEntries, params);
     } catch (error) {
       console.error('🚨 Audit: Failed to get audit entries:', error);
       return [];
