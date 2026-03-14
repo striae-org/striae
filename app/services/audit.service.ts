@@ -12,11 +12,11 @@ import {
   SecurityCheckResults,
   PerformanceMetrics
 } from '~/types';
-import paths from '~/config/config.json';
-import { getDataApiKey } from '~/utils/auth';
 import { generateWorkflowId } from '../utils/id-generator';
-
-const AUDIT_WORKER_URL = paths.audit_worker_url;
+import {
+  fetchAuditEntriesForUser,
+  persistAuditEntryForUser
+} from './audit-worker-client';
 
 type AnnotationSnapshot = Record<string, unknown> & {
   type?: 'measurement' | 'identification' | 'comparison' | 'note' | 'region';
@@ -1291,28 +1291,14 @@ export class AuditService {
     try {
       // If userId is provided, fetch from server
       if (params.userId) {
-        const apiKey = await getDataApiKey();
-        const url = new URL(`${AUDIT_WORKER_URL}/audit/`);
-        url.searchParams.set('userId', params.userId);
-        
-        if (params.startDate) {
-          url.searchParams.set('startDate', params.startDate);
-        }
-        
-        if (params.endDate) {
-          url.searchParams.set('endDate', params.endDate);
-        }
-        
-        const response = await fetch(url.toString(), {
-          method: 'GET',
-          headers: {
-            'X-Custom-Auth-Key': apiKey
-          }
+        const serverEntries = await fetchAuditEntriesForUser({
+          userId: params.userId,
+          startDate: params.startDate,
+          endDate: params.endDate
         });
 
-        if (response.ok) {
-          const result = await response.json() as { entries: ValidationAuditEntry[]; total: number };
-          let entries = result.entries;
+        if (serverEntries) {
+          let entries = serverEntries;
 
           // Apply client-side filters
           if (params.caseNumber) {
@@ -1339,9 +1325,9 @@ export class AuditService {
           }
 
           return entries;
-        } else {
-          console.error('🚨 Audit: Failed to fetch entries from server');
         }
+
+        console.error('🚨 Audit: Failed to fetch entries from server');
       }
 
       // Fallback to buffer for backward compatibility
@@ -1389,26 +1375,16 @@ export class AuditService {
    */
   private async persistAuditEntry(entry: ValidationAuditEntry): Promise<void> {
     try {
-      // Store to audit worker
-      const apiKey = await getDataApiKey();
-      const url = new URL(`${AUDIT_WORKER_URL}/audit/`);
-      url.searchParams.set('userId', entry.userId);
-      
-      const response = await fetch(url.toString(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Custom-Auth-Key': apiKey
-        },
-        body: JSON.stringify(entry)
-      });
+      const persistResult = await persistAuditEntryForUser(entry);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('🚨 Audit: Failed to persist entry:', response.status, errorData);
+      if (!persistResult.ok) {
+        console.error(
+          '🚨 Audit: Failed to persist entry:',
+          persistResult.status,
+          persistResult.errorData
+        );
       } else {
-        const result = await response.json() as { success: boolean; entryCount: number; filename: string };
-        console.log(`🔍 Audit: Entry persisted (${result.entryCount} total entries)`);
+        console.log(`🔍 Audit: Entry persisted (${persistResult.entryCount} total entries)`);
       }
     } catch (error) {
       console.error('🚨 Audit: Storage error:', error);

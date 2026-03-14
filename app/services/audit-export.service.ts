@@ -8,6 +8,7 @@ import {
   AuditExportSigningPayload,
   AuditExportType
 } from '~/utils/audit-export-signature';
+import { AUDIT_CSV_ENTRY_HEADERS, entryToCSVRow } from './audit-export-csv';
 
 interface AuditExportContext {
   user: User;
@@ -40,49 +41,9 @@ export class AuditExportService {
     filename: string,
     context: AuditExportContext
   ): Promise<void> {
-    const headers = [
-      'Timestamp',
-      'User Email',
-      'Action',
-      'Result',
-      'File Name',
-      'File Type',
-      'Case Number',
-      'Confirmation ID',
-      'Original Examiner UID',
-      'Reviewing Examiner UID',
-      'File ID',
-      'Original Filename',
-      'File Size (MB)',
-      'MIME Type',
-      'Upload Method',
-      'Delete Reason',
-      'Annotation ID',
-      'Annotation Type',
-      'Annotation Tool',
-      'Session ID',
-      'User Agent',
-      'Processing Time (ms)',
-      'Hash Valid',
-      'Validation Errors',
-      'Security Issues',
-      'Workflow Phase',
-      'Profile Field',
-      'Old Value',
-      'New Value',
-      'Total Confirmations In File',
-      'Confirmations Successfully Imported',
-      'Validation Steps Failed',
-      'Case Name',
-      'Total Files',
-      'MFA Method',
-      'Security Incident Type',
-      'Security Severity'
-    ];
-
     const csvData = [
-      headers.join(','),
-      ...entries.map(entry => this.entryToCSVRow(entry))
+      AUDIT_CSV_ENTRY_HEADERS.join(','),
+      ...entries.map(entry => entryToCSVRow(entry))
     ].join('\n');
 
     const generatedAt = new Date().toISOString();
@@ -149,52 +110,12 @@ export class AuditExportService {
       auditTrail.summary.participatingUsers.join('; ')
     ].join(',');
 
-    const entryHeaders = [
-      'Timestamp',
-      'User Email',
-      'Action',
-      'Result',
-      'File Name',
-      'File Type',
-      'Case Number',
-      'Confirmation ID',
-      'Original Examiner UID',
-      'Reviewing Examiner UID',
-      'File ID',
-      'Original Filename',
-      'File Size (MB)',
-      'MIME Type',
-      'Upload Method',
-      'Delete Reason',
-      'Annotation ID',
-      'Annotation Type',
-      'Annotation Tool',
-      'Session ID',
-      'User Agent',
-      'Processing Time (ms)',
-      'Hash Valid',
-      'Validation Errors',
-      'Security Issues',
-      'Workflow Phase',
-      'Profile Field',
-      'Old Value',
-      'New Value',
-      'Total Confirmations In File',
-      'Confirmations Successfully Imported',
-      'Validation Steps Failed',
-      'Case Name',
-      'Total Files',
-      'MFA Method',
-      'Security Incident Type',
-      'Security Severity'
-    ];
-
     const csvData = [
       summaryHeaders.join(','),
       summaryRow,
       '',
-      entryHeaders.join(','),
-      ...auditTrail.entries.map(entry => this.entryToCSVRow(entry))
+      AUDIT_CSV_ENTRY_HEADERS.join(','),
+      ...auditTrail.entries.map(entry => entryToCSVRow(entry))
     ].join('\n');
 
     const generatedAt = new Date().toISOString();
@@ -224,100 +145,6 @@ export class AuditExportService {
     ].join('\n');
 
     this.downloadFile(csvContent, filename, 'text/csv');
-  }
-
-  /**
-   * Convert audit entry to CSV row
-   */
-  private entryToCSVRow(entry: ValidationAuditEntry): string {
-    const fileDetails = entry.details.fileDetails;
-    const annotationDetails = entry.details.annotationDetails;
-    const sessionDetails = entry.details.sessionDetails;
-    const securityChecks = entry.details.securityChecks;
-    const userProfileDetails = entry.details.userProfileDetails;
-    const caseDetails = entry.details.caseDetails;
-    const performanceMetrics = entry.details.performanceMetrics;
-    const securityDetails = entry.details.securityDetails;
-    
-    // Calculate security check status - different checks have different semantics
-    const securityIssues = securityChecks ? (() => {
-      const issues = [];
-      
-      // selfConfirmationPrevented: true means issue (prevention was triggered)
-      if (securityChecks.selfConfirmationPrevented === true) {
-        issues.push('selfConfirmationPrevented');
-      }
-      
-      // fileIntegrityValid: false means issue (file integrity failed)
-      if (securityChecks.fileIntegrityValid === false) {
-        issues.push('fileIntegrityValid');
-      }
-      
-      // exporterUidValidated: false means issue (validation failed)
-      if (securityChecks.exporterUidValidated === false) {
-        issues.push('exporterUidValidated');
-      }
-      
-      return issues.join('; ');
-    })() : '';
-
-    const values = [
-      this.formatForCSV(entry.timestamp),
-      this.formatForCSV(entry.userEmail),
-      this.formatForCSV(entry.action),
-      this.formatForCSV(entry.result),
-      this.formatForCSV(entry.details.fileName),
-      this.formatForCSV(entry.details.fileType),
-      this.formatForCSV(entry.details.caseNumber),
-      this.formatForCSV(entry.details.confirmationId),
-      this.formatForCSV(entry.details.originalExaminerUid),
-      this.formatForCSV(entry.details.reviewingExaminerUid),
-      this.formatForCSV(fileDetails?.fileId),
-      this.formatForCSV(fileDetails?.originalFileName),
-      fileDetails?.fileSize ? (fileDetails.fileSize / 1024 / 1024).toFixed(2) : '',
-      this.formatForCSV(fileDetails?.mimeType),
-      this.formatForCSV(fileDetails?.uploadMethod),
-      this.formatForCSV(fileDetails?.deleteReason),
-      this.formatForCSV(annotationDetails?.annotationId),
-      this.formatForCSV(annotationDetails?.annotationType),
-      this.formatForCSV(annotationDetails?.tool),
-      this.formatForCSV(sessionDetails?.sessionId),
-      this.formatForCSV(sessionDetails?.userAgent),
-      performanceMetrics?.processingTimeMs || '',
-      entry.details.hashValid !== undefined ? 
-        (entry.details.hashValid ? 'Yes' : 'No') : '',
-      this.formatForCSV(entry.details.validationErrors?.join('; ')),
-      this.formatForCSV(securityIssues),
-      this.formatForCSV(entry.details.workflowPhase),
-      this.formatForCSV(userProfileDetails?.profileField),
-      this.formatForCSV(userProfileDetails?.oldValue),
-      this.formatForCSV(userProfileDetails?.newValue),
-      // New confirmation tracking fields
-      caseDetails?.totalAnnotations?.toString() || '', // Total confirmations in file
-      performanceMetrics?.validationStepsCompleted?.toString() || '', // Successfully imported
-      performanceMetrics?.validationStepsFailed?.toString() || '', // Validation steps failed
-      // Additional case and audit details
-      this.formatForCSV(caseDetails?.newCaseName || caseDetails?.oldCaseName), // Case name
-      caseDetails?.totalFiles?.toString() || '', // Total files in case
-      this.formatForCSV(securityDetails?.mfaMethod), // MFA method
-      this.formatForCSV(securityDetails?.incidentType), // Security incident type
-      this.formatForCSV(securityDetails?.severity) // Security severity
-    ];
-
-    return values.join(',');
-  }
-
-  /**
-   * Format value for CSV (handle quotes and commas)
-   */
-  private formatForCSV(value?: string | number | null): string {
-    if (value === undefined || value === null) return '';
-    const str = String(value);
-    // Escape quotes and wrap in quotes if contains comma, quote, or newline
-    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
   }
 
   /**
