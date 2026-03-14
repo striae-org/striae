@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { UserData, ExtendedUserData, UserLimits, ReadOnlyCaseMetadata } from '~/types';
 import paths from '~/config/config.json';
 import { getUserApiKey } from './auth';

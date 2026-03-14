@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { useState, useEffect } from 'react';
 import { SidebarContainer } from '~/components/sidebar/sidebar-container';
 import { Toolbar } from '~/components/toolbar/toolbar';

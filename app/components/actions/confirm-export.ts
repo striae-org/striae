@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { calculateSHA256Secure } from '~/utils/SHA256';
 import { getUserData } from '~/utils/permissions';
 import { getCaseData, updateCaseData, signConfirmationData } from '~/utils/data-operations';

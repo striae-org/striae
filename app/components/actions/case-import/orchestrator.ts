@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { ImportOptions, ImportResult, ReadOnlyCaseMetadata, FileData } from '~/types';
 import { checkExistingCase } from '../case-manage';
 import {

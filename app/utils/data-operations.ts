@@ -4,7 +4,7 @@
  * for all interactions with the data worker microservice
  */
 
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { CaseData, AnnotationData, ConfirmationImportData } from '~/types';
 import paths from '~/config/config.json';
 import { getDataApiKey } from './auth';

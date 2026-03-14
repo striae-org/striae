@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { AnnotationData } from '~/types/annotations';
 import { saveFileAnnotations, getFileAnnotations, DataOperationOptions } from '~/utils/data-operations';
 

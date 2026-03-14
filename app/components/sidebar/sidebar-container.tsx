@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Sidebar } from './sidebar';
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { FileData } from '~/types';
 import styles from './sidebar.module.css';
 import { getAppVersion } from '../../utils/version';

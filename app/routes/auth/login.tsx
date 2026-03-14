@@ -6,7 +6,7 @@ import {
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     sendEmailVerification,
-    User,
+  type User,
     updateProfile,
     getMultiFactorResolver,
     MultiFactorResolver,

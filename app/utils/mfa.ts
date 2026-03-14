@@ -1,7 +1,7 @@
 // MFA Configuration Helper
 // This file contains utilities and documentation for managing MFA in your Firebase project
 
-import { multiFactor, User } from 'firebase/auth';
+import { multiFactor, type User } from 'firebase/auth';
 
 /**
  * Check if a user has MFA enrolled

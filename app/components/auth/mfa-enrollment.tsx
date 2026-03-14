@@ -6,7 +6,7 @@ import {
   PhoneMultiFactorGenerator,
   RecaptchaVerifier,
   multiFactor,
-  User
+  type User
 } from 'firebase/auth';
 import { handleAuthError, getValidationError } from '~/services/firebase/errors';
 import { SignOut } from '~/components/actions/signout';

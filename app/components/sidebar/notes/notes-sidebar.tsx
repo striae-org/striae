@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { ColorSelector } from '~/components/colors/colors';
 import { NotesModal } from './notes-modal';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';

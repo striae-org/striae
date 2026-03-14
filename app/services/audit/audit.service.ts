@@ -1,5 +1,5 @@
 import type { User } from 'firebase/auth';
-import { 
+import type {
   ValidationAuditEntry, 
   CreateAuditEntryParams, 
   AuditTrail, 

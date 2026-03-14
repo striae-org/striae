@@ -56,6 +56,15 @@ export default [
         files: ["**/*.{ts,tsx}"],
         plugins: ["@typescript-eslint", "import"],
         parser: "@typescript-eslint/parser",
+        rules: {
+          "@typescript-eslint/consistent-type-imports": [
+            "error",
+            {
+              prefer: "type-imports",
+              fixStyle: "inline-type-imports"
+            }
+          ],
+        },
         settings: {
           "import/internal-regex": "^~/",
           "import/resolver": {

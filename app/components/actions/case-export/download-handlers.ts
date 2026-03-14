@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { FileData, AllCasesExportData, CaseExportData, ExportOptions } from '~/types';
 import { getImageUrl } from '../image-manage';
 import { generateForensicManifestSecure, calculateSHA256Secure } from '~/utils/SHA256';

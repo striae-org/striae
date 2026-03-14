@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { AnnotationData, CaseExportData, AllCasesExportData, ExportOptions } from '~/types';
 import { fetchFiles } from '../image-manage';
 import { getNotes } from '../notes-manage';

@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { useState, useCallback } from 'react';
 import styles from './sidebar.module.css';
 import { ManageProfile } from '../user/manage-profile';

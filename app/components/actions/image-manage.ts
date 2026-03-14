@@ -1,4 +1,4 @@
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import paths from '~/config/config.json';
 import { 
   getImageApiKey,
@@ -6,7 +6,7 @@ import {
 } from '~/utils/auth';
 import { canUploadFile } from '~/utils/permissions';
 import { getCaseData, updateCaseData, deleteFileAnnotations } from '~/utils/data-operations';
-import { CaseData, FileData, ImageUploadResponse } from '~/types';
+import type { CaseData, FileData, ImageUploadResponse } from '~/types';
 import { auditService } from '~/services/audit';
 
 const IMAGE_URL = paths.image_worker_url;
