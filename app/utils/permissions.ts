@@ -1,13 +1,12 @@
 import { User } from 'firebase/auth';
 import { UserData, ExtendedUserData, UserLimits, ReadOnlyCaseMetadata } from '~/types';
 import paths from '~/config/config.json';
-import { getUserApiKey } from './auth';
 
 const USER_API_BASE = '/api/user';
 const MAX_CASES_REVIEW = paths.max_cases_review;
 const MAX_FILES_PER_CASE_REVIEW = paths.max_files_per_case_review;
 
-const getUserWorkerHeaders = async (user: User, apiKey: string): Promise<Record<string, string>> => {
+const getUserWorkerHeaders = async (user: User): Promise<Record<string, string>> => {
   const idToken = await user.getIdToken();
 
   if (!idToken) {
@@ -15,7 +14,6 @@ const getUserWorkerHeaders = async (user: User, apiKey: string): Promise<Record<
   }
 
   return {
-    'X-Custom-Auth-Key': apiKey,
     'Authorization': `Bearer ${idToken}`
   };
 };
@@ -45,10 +43,9 @@ export interface CaseMetadata {
  */
 export const getUserData = async (user: User): Promise<UserData | null> => {
   try {
-    const apiKey = await getUserApiKey();
     const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}`, {
       method: 'GET',
-      headers: await getUserWorkerHeaders(user, apiKey)
+      headers: await getUserWorkerHeaders(user)
     });
 
     if (response.ok) {
@@ -132,12 +129,11 @@ export const createUser = async (
       createdAt: new Date().toISOString()
     };
 
-    const apiKey = await getUserApiKey();
     const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...(await getUserWorkerHeaders(user, apiKey))
+        ...(await getUserWorkerHeaders(user))
       },
       body: JSON.stringify(userData)
     });
@@ -291,12 +287,11 @@ export const updateUserData = async (user: User, updates: Partial<UserData>): Pr
     };
 
     // Perform the update with API key management
-    const apiKey = await getUserApiKey();
     const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...(await getUserWorkerHeaders(user, apiKey))
+        ...(await getUserWorkerHeaders(user))
       },
       body: JSON.stringify(updatedUserData)
     });
@@ -500,12 +495,11 @@ export const addUserCase = async (user: User, caseData: CaseMetadata): Promise<v
     }
 
     // Use the dedicated /cases endpoint to add the case
-    const apiKey = await getUserApiKey();
     const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}/cases`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...(await getUserWorkerHeaders(user, apiKey))
+        ...(await getUserWorkerHeaders(user))
       },
       body: JSON.stringify({
         cases: [caseData]
@@ -547,12 +541,11 @@ export const removeUserCase = async (user: User, caseNumber: string): Promise<vo
     }
 
     // Use the dedicated /cases DELETE endpoint to remove the case
-    const apiKey = await getUserApiKey();
     const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}/cases`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        ...(await getUserWorkerHeaders(user, apiKey))
+        ...(await getUserWorkerHeaders(user))
       },
       body: JSON.stringify({
         casesToDelete: [caseNumber]

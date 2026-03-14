@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';
-import { getUserApiKey } from '~/utils/auth';
 import { auditService } from '~/services/audit.service';
 import styles from './delete-account.module.css';
 
@@ -219,8 +218,6 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
         false // emailNotificationSent - deletion emails disabled
       );
 
-      // Get API key for user-worker authentication
-      const apiKey = await getUserApiKey();
       const idToken = await auth.currentUser?.getIdToken();
 
       if (!idToken) {
@@ -231,7 +228,6 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
       const deleteResponse = await fetch(`/api/user/${encodeURIComponent(user.uid)}?stream=true`, {
         method: 'DELETE',
         headers: {
-          'X-Custom-Auth-Key': apiKey,
           'Authorization': `Bearer ${idToken}`,
           'Accept': 'text/event-stream'
         }

@@ -1,18 +1,18 @@
-import paths from '~/config/config.json';
-import { getImageApiKey } from '~/utils/auth';
+import { User } from 'firebase/auth';
 import { FileData, ImageUploadResponse } from '~/types';
 
-const IMAGE_WORKER_URL = paths.image_worker_url;
+const IMAGE_API_BASE = '/api/image';
 
 /**
  * Upload image blob to image worker and get file data
  */
 export async function uploadImageBlob(
+  user: User,
   imageBlob: Blob, 
   originalFilename: string,
   onProgress?: (filename: string, progress: number) => void
 ): Promise<FileData> {
-  const imagesApiToken = await getImageApiKey();
+  const idToken = await user.getIdToken();
   
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -54,8 +54,8 @@ export async function uploadImageBlob(
 
     xhr.addEventListener('error', () => reject(new Error('Upload failed')));
 
-    xhr.open('POST', IMAGE_WORKER_URL);
-    xhr.setRequestHeader('Authorization', `Bearer ${imagesApiToken}`);
+    xhr.open('POST', `${IMAGE_API_BASE}/upload`);
+    xhr.setRequestHeader('Authorization', `Bearer ${idToken}`);
     xhr.send(formData);
   });
 }

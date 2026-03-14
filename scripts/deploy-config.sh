@@ -738,7 +738,6 @@ validate_generated_configs() {
     assert_contains_literal "app/config/config.json" "https://$IMAGES_WORKER_DOMAIN" "IMAGES_WORKER_DOMAIN missing in app/config/config.json"
     assert_contains_literal "app/config/config.json" "https://$USER_WORKER_DOMAIN" "USER_WORKER_DOMAIN missing in app/config/config.json"
     assert_contains_literal "app/config/config.json" "https://$PDF_WORKER_DOMAIN" "PDF_WORKER_DOMAIN missing in app/config/config.json"
-    assert_contains_literal "app/config/config.json" "$KEYS_AUTH" "KEYS_AUTH missing in app/config/config.json"
 
     assert_contains_literal "app/config/firebase.ts" "$API_KEY" "API_KEY missing in app/config/firebase.ts"
     assert_contains_literal "app/config/firebase.ts" "$AUTH_DOMAIN" "AUTH_DOMAIN missing in app/config/firebase.ts"
@@ -1401,7 +1400,6 @@ update_wrangler_configs() {
         sed -i "s|\"IMAGE_WORKER_CUSTOM_DOMAIN\"|\"https://$IMAGES_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"USER_WORKER_CUSTOM_DOMAIN\"|\"https://$USER_WORKER_DOMAIN\"|g" app/config/config.json
         sed -i "s|\"PDF_WORKER_CUSTOM_DOMAIN\"|\"https://$PDF_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"YOUR_KEYS_AUTH_TOKEN\"|\"$KEYS_AUTH\"|g" app/config/config.json
         sed -i "s|\"MANIFEST_SIGNING_KEY_ID\"|\"$escaped_manifest_signing_key_id\"|g" app/config/config.json
         sed -i "s|\"MANIFEST_SIGNING_PUBLIC_KEY\"|\"$escaped_manifest_signing_public_key\"|g" app/config/config.json
         echo -e "${GREEN}      ✅ app config.json updated${NC}"

@@ -1,5 +1,4 @@
 import { User } from 'firebase/auth';
-import { getDataApiKey } from '~/utils/auth';
 import { ConfirmationImportResult, ConfirmationImportData } from '~/types';
 import { checkExistingCase } from '../case-manage';
 import { validateExporterUid, validateConfirmationHash, validateConfirmationSignatureFile } from './validation';
@@ -9,12 +8,10 @@ const DATA_API_BASE = '/api/data';
 
 const getDataProxyHeaders = async (
   user: User,
-  apiKey: string,
   includeJsonContentType: boolean = false
 ): Promise<Record<string, string>> => {
   const idToken = await user.getIdToken();
   const headers: Record<string, string> = {
-    'X-Custom-Auth-Key': apiKey,
     'Authorization': `Bearer ${idToken}`
   };
 
@@ -118,10 +115,9 @@ export async function importConfirmationData(
     onProgress?.('Processing confirmations', 60, 'Validating timestamps and updating annotations...');
 
     // Get case data to find image IDs
-    const apiKey = await getDataApiKey();
     const caseResponse = await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/data.json`, {
       method: 'GET',
-      headers: await getDataProxyHeaders(user, apiKey)
+      headers: await getDataProxyHeaders(user)
     });
 
     if (!caseResponse.ok) {
@@ -164,7 +160,7 @@ export async function importConfirmationData(
       // Get current annotation data for this image
       const annotationResponse = await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`, {
         method: 'GET',
-        headers: await getDataProxyHeaders(user, apiKey)
+        headers: await getDataProxyHeaders(user)
       });
 
       let annotationData: AnnotationImportData = {};
@@ -219,7 +215,7 @@ export async function importConfirmationData(
       // Save updated annotation data
       const saveResponse = await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`, {
         method: 'PUT',
-        headers: await getDataProxyHeaders(user, apiKey, true),
+        headers: await getDataProxyHeaders(user, true),
         body: JSON.stringify(updatedAnnotationData)
       });
 

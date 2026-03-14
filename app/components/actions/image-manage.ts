@@ -1,15 +1,10 @@
 import { User } from 'firebase/auth';
-import paths from '~/config/config.json';
-import { 
-  getImageApiKey,
-  getAccountHash 
-} from '~/utils/auth';
 import { canUploadFile } from '~/utils/permissions';
 import { getCaseData, updateCaseData, deleteFileAnnotations } from '~/utils/data-operations';
 import { CaseData, FileData, ImageUploadResponse } from '~/types';
 import { auditService } from '~/services/audit.service';
 
-const IMAGE_URL = paths.image_worker_url;
+const IMAGE_API_BASE = '/api/image';
 
 export const fetchFiles = async (
   user: User, 
@@ -52,7 +47,7 @@ export const uploadFile = async (
     throw new Error(permission.reason || 'You cannot upload more files to this case.');
   }
 
-  const imagesApiToken = await getImageApiKey();
+  const idToken = await user.getIdToken();
   
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -169,8 +164,8 @@ export const uploadFile = async (
       reject(new Error('Upload failed'));
     });
 
-    xhr.open('POST', IMAGE_URL);
-    xhr.setRequestHeader('Authorization', `Bearer ${imagesApiToken}`);
+    xhr.open('POST', `${IMAGE_API_BASE}/upload`);
+    xhr.setRequestHeader('Authorization', `Bearer ${idToken}`);
     xhr.send(formData);
   });
 };
@@ -197,11 +192,11 @@ export const deleteFile = async (user: User, caseNumber: string, fileId: string,
     let imageDeleteError = '';
 
     // Attempt to delete image file
-    const imagesApiToken = await getImageApiKey();
-    const imageResponse = await fetch(`${IMAGE_URL}/${fileId}`, {
+    const idToken = await user.getIdToken();
+    const imageResponse = await fetch(`${IMAGE_API_BASE}/${encodeURIComponent(fileId)}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${imagesApiToken}`
+        'Authorization': `Bearer ${idToken}`
       }
     });
 
@@ -291,29 +286,21 @@ export const deleteFile = async (user: User, caseNumber: string, fileId: string,
 };
 
 const DEFAULT_VARIANT = 'striae';
-interface ImageDeliveryConfig {
-  accountHash: string;
-}
-
-const getImageConfig = async (): Promise<ImageDeliveryConfig> => {
-  const accountHash = await getAccountHash();
-  return { accountHash };
-};
-
 
 export const getImageUrl = async (user: User, fileData: FileData, caseNumber: string, accessReason?: string): Promise<string> => {
   const startTime = Date.now();
   const defaultAccessReason = accessReason || 'Image viewer access';
   
   try {
-    const { accountHash } = await getImageConfig();  
-    const imagesApiToken = await getImageApiKey();
-    const imageDeliveryUrl = `https://imagedelivery.net/${accountHash}/${fileData.id}/${DEFAULT_VARIANT}`;
+    const idToken = await user.getIdToken();
+    const signedUrlEndpoint =
+      `${IMAGE_API_BASE}/signed-url?imageId=${encodeURIComponent(fileData.id)}` +
+      `&variant=${encodeURIComponent(DEFAULT_VARIANT)}`;
     
-    const workerResponse = await fetch(`${IMAGE_URL}/${imageDeliveryUrl}`, {
+    const workerResponse = await fetch(signedUrlEndpoint, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${imagesApiToken}`,
+        'Authorization': `Bearer ${idToken}`,
         'Accept': 'text/plain'
       }
     });

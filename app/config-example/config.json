@@ -6,7 +6,7 @@
   "user_worker_url": "USER_WORKER_CUSTOM_DOMAIN",
   "pdf_worker_url": "PDF_WORKER_CUSTOM_DOMAIN",
   "audit_worker_url": "AUDIT_WORKER_CUSTOM_DOMAIN",
-  "keys_auth": "YOUR_KEYS_AUTH_TOKEN",
+  "keys_auth": "MOVED_TO_SERVER_API",
   "manifest_signing_key_id": "MANIFEST_SIGNING_KEY_ID",
   "manifest_signing_public_key": "MANIFEST_SIGNING_PUBLIC_KEY",
   "manifest_signing_public_keys": {

@@ -273,7 +273,7 @@ export async function importCaseForReview(
         const originalFileEntry = caseData.files.find(f => f.fileData.id === originalImageId);
         const originalFilename = originalFileEntry?.fileData.originalFilename || exportFilename;
         
-        const fileData = await uploadImageBlob(blob, originalFilename, (fname, progress) => {
+        const fileData = await uploadImageBlob(user, blob, originalFilename, (fname, progress) => {
           const overallProgress = 30 + (uploadedCount / totalImages) * 40 + (progress / totalImages) * 0.4;
           onProgress?.('Uploading images', overallProgress, `Uploading ${fname}...`);
         });

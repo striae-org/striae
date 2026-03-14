@@ -6,7 +6,6 @@
 
 import { User } from 'firebase/auth';
 import { CaseData, AnnotationData, ConfirmationImportData } from '~/types';
-import { getDataApiKey } from './auth';
 import { validateUserSession, canAccessCase, canModifyCase } from './permissions';
 import {
   ForensicManifestData,
@@ -22,7 +21,7 @@ import {
 
 const DATA_API_BASE = '/api/data';
 
-const getDataWorkerHeaders = async (user: User, apiKey: string): Promise<Record<string, string>> => {
+const getDataWorkerHeaders = async (user: User): Promise<Record<string, string>> => {
   const idToken = await user.getIdToken();
 
   if (!idToken) {
@@ -30,7 +29,6 @@ const getDataWorkerHeaders = async (user: User, apiKey: string): Promise<Record<
   }
 
   return {
-    'X-Custom-Auth-Key': apiKey,
     'Authorization': `Bearer ${idToken}`
   };
 };
@@ -113,12 +111,11 @@ export const getCaseData = async (
       throw new Error('Invalid case number provided');
     }
 
-    const apiKey = await getDataApiKey();
     const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`;
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: await getDataWorkerHeaders(user, apiKey)
+      headers: await getDataWorkerHeaders(user)
     });
 
     if (response.status === 404) {
@@ -173,7 +170,6 @@ export const updateCaseData = async (
       throw new Error('Invalid case data provided');
     }
 
-    const apiKey = await getDataApiKey();
     const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`;
 
     // Add timestamp if requested (default: true)
@@ -186,7 +182,7 @@ export const updateCaseData = async (
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...(await getDataWorkerHeaders(user, apiKey))
+        ...(await getDataWorkerHeaders(user))
       },
       body: JSON.stringify(dataToSave)
     });
@@ -226,12 +222,11 @@ export const deleteCaseData = async (
       }
     }
 
-    const apiKey = await getDataApiKey();
     const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`;
 
     const response = await fetch(url, {
       method: 'DELETE',
-      headers: await getDataWorkerHeaders(user, apiKey)
+      headers: await getDataWorkerHeaders(user)
     });
 
     if (!response.ok && response.status !== 404) {
@@ -277,12 +272,11 @@ export const getFileAnnotations = async (
       throw new Error('Invalid file ID provided');
     }
 
-    const apiKey = await getDataApiKey();
     const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(fileId)}/data.json`;
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: await getDataWorkerHeaders(user, apiKey)
+      headers: await getDataWorkerHeaders(user)
     });
 
     if (response.status === 404) {
@@ -340,13 +334,12 @@ export const saveFileAnnotations = async (
       throw new Error('Invalid annotation data provided');
     }
 
-    const apiKey = await getDataApiKey();
     const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(fileId)}/data.json`;
 
     // Enforce immutability once confirmation data exists on an image.
     const existingResponse = await fetch(url, {
       method: 'GET',
-      headers: await getDataWorkerHeaders(user, apiKey)
+      headers: await getDataWorkerHeaders(user)
     });
 
     if (existingResponse.ok) {
@@ -368,7 +361,7 @@ export const saveFileAnnotations = async (
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...(await getDataWorkerHeaders(user, apiKey))
+        ...(await getDataWorkerHeaders(user))
       },
       body: JSON.stringify(dataToSave)
     });
@@ -411,12 +404,11 @@ export const deleteFileAnnotations = async (
       }
     }
 
-    const apiKey = await getDataApiKey();
     const url = `${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(fileId)}/data.json`;
 
     const response = await fetch(url, {
       method: 'DELETE',
-      headers: await getDataWorkerHeaders(user, apiKey)
+      headers: await getDataWorkerHeaders(user)
     });
 
     if (!response.ok && response.status !== 404) {
@@ -686,12 +678,11 @@ export const signForensicManifest = async (
       throw new Error(`Manifest signing denied: ${accessCheck.reason}`);
     }
 
-    const apiKey = await getDataApiKey();
     const response = await fetch(`${DATA_API_BASE}/api/forensic/sign-manifest`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(await getDataWorkerHeaders(user, apiKey))
+        ...(await getDataWorkerHeaders(user))
       },
       body: JSON.stringify({
         userId: user.uid,
@@ -754,12 +745,11 @@ export const signConfirmationData = async (
       throw new Error(`Confirmation signing denied: ${accessCheck.reason}`);
     }
 
-    const apiKey = await getDataApiKey();
     const response = await fetch(`${DATA_API_BASE}/api/forensic/sign-confirmation`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(await getDataWorkerHeaders(user, apiKey))
+        ...(await getDataWorkerHeaders(user))
       },
       body: JSON.stringify({
         userId: user.uid,
@@ -830,12 +820,11 @@ export const signAuditExportData = async (
       }
     }
 
-    const apiKey = await getDataApiKey();
     const response = await fetch(`${DATA_API_BASE}/api/forensic/sign-audit-export`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(await getDataWorkerHeaders(user, apiKey))
+        ...(await getDataWorkerHeaders(user))
       },
       body: JSON.stringify({
         userId: user.uid,
