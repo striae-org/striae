@@ -22,6 +22,7 @@ import {
   generateAuditSummary,
   sortAuditEntriesNewestFirst
 } from './audit-query-helpers';
+import { buildValidationAuditEntry } from './audit-entry-builder';
 
 type AnnotationSnapshot = Record<string, unknown> & {
   type?: 'measurement' | 'identification' | 'comparison' | 'note' | 'region';
@@ -82,32 +83,7 @@ export class AuditService {
     const startTime = Date.now();
 
     try {
-      const auditEntry: ValidationAuditEntry = {
-        timestamp: new Date().toISOString(),
-        userId: params.userId,
-        userEmail: params.userEmail,
-        action: params.action,
-        result: params.result,
-        details: {
-          fileName: params.fileName,
-          fileType: params.fileType,
-          hashValid: params.hashValid,
-          validationErrors: params.validationErrors || [],
-          caseNumber: params.caseNumber,
-          confirmationId: params.confirmationId,
-          originalExaminerUid: params.originalExaminerUid,
-          reviewingExaminerUid: params.reviewingExaminerUid,
-          workflowPhase: params.workflowPhase,
-          securityChecks: params.securityChecks,
-          performanceMetrics: params.performanceMetrics,
-          // Extended detail fields
-          caseDetails: params.caseDetails,
-          fileDetails: params.fileDetails,
-          annotationDetails: params.annotationDetails,
-          sessionDetails: params.sessionDetails,
-          securityDetails: params.securityDetails
-        }
-      };
+      const auditEntry = buildValidationAuditEntry(params);
 
       // Add to buffer for batch processing
       this.auditBuffer.push(auditEntry);
