@@ -8,7 +8,6 @@ archive/
 workers/audit-worker/src/audit-worker.ts
 workers/data-worker/src/data-worker.ts
 workers/image-worker/src/image-worker.ts
-workers/keys-worker/src/keys.ts
 workers/pdf-worker/src/pdf-worker.ts
 # Ignore custom PDF format renderers, but keep the canonical Striae renderer tracked.
 workers/pdf-worker/src/format-*.ts
