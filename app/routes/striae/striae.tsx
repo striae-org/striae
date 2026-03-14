@@ -11,6 +11,7 @@ import { getUserApiKey } from '~/utils/auth';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
 import { AnnotationData, FileData } from '~/types';
 import { checkCaseIsReadOnly } from '~/components/actions/case-manage';
+import paths from '~/config/config.json';
 import styles from './striae.module.css';
 
 interface StriaePage {
@@ -76,11 +77,9 @@ export const Striae = ({ user }: StriaePage) => {
     const fetchUserCompany = async () => {
       try {
         const apiKey = await getUserApiKey();
-        const idToken = await user.getIdToken();
-        const response = await fetch(`/api/user/${encodeURIComponent(user.uid)}`, {
+        const response = await fetch(`${paths.user_worker_url}/${user.uid}`, {
           headers: {
-            'X-Custom-Auth-Key': apiKey,
-            'Authorization': `Bearer ${idToken}`
+            'X-Custom-Auth-Key': apiKey
           }
         });
         
@@ -97,7 +96,7 @@ export const Striae = ({ user }: StriaePage) => {
     if (user?.uid) {
       fetchUserCompany();
     }
-  }, [user]);
+  }, [user?.uid]);
 
   const handleCaseChange = (caseNumber: string) => {
     setCurrentCase(caseNumber);

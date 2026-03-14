@@ -1,4 +1,5 @@
 import { User } from 'firebase/auth';
+import paths from '~/config/config.json';
 import { 
   getDataApiKey,
   getUserApiKey
@@ -18,26 +19,8 @@ import {
 import { deleteFile } from '../image-manage';
 import { SignedForensicManifest } from '~/utils/SHA256';
 
-const USER_API_BASE = '/api/user';
-const DATA_API_BASE = '/api/data';
-
-const getProxyHeaders = async (
-  user: User,
-  apiKey: string,
-  includeJsonContentType: boolean = false
-): Promise<Record<string, string>> => {
-  const idToken = await user.getIdToken();
-  const headers: Record<string, string> = {
-    'X-Custom-Auth-Key': apiKey,
-    'Authorization': `Bearer ${idToken}`
-  };
-
-  if (includeJsonContentType) {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  return headers;
-};
+const USER_WORKER_URL = paths.user_worker_url;
+const DATA_WORKER_URL = paths.data_worker_url;
 
 /**
  * Check if user already has a read-only case with the same number
@@ -139,9 +122,12 @@ export async function storeCaseDataInR2(
     };
     
     // Store in R2
-    const response = await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
+    const response = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
       method: 'PUT',
-      headers: await getProxyHeaders(user, apiKey, true),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Custom-Auth-Key': apiKey
+      },
       body: JSON.stringify(r2CaseData)
     });
 
@@ -162,9 +148,12 @@ export async function listReadOnlyCases(user: User): Promise<ReadOnlyCaseMetadat
   try {
     const apiKey = await getUserApiKey();
     
-    const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}`, {
+    const response = await fetch(`${USER_WORKER_URL}/${encodeURIComponent(user.uid)}`, {
       method: 'GET',
-      headers: await getProxyHeaders(user, apiKey, true)
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Custom-Auth-Key': apiKey
+      }
     });
 
     if (!response.ok) {
@@ -190,9 +179,12 @@ export async function removeReadOnlyCase(user: User, caseNumber: string): Promis
     const apiKey = await getUserApiKey();
     
     // Get current user data
-    const response = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}`, {
+    const response = await fetch(`${USER_WORKER_URL}/${encodeURIComponent(user.uid)}`, {
       method: 'GET',
-      headers: await getProxyHeaders(user, apiKey, true)
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Custom-Auth-Key': apiKey
+      }
     });
 
     if (!response.ok) {
@@ -214,9 +206,12 @@ export async function removeReadOnlyCase(user: User, caseNumber: string): Promis
     }
     
     // Update user data
-    const updateResponse = await fetch(`${USER_API_BASE}/${encodeURIComponent(user.uid)}`, {
+    const updateResponse = await fetch(`${USER_WORKER_URL}/${encodeURIComponent(user.uid)}`, {
       method: 'PUT',
-      headers: await getProxyHeaders(user, apiKey, true),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Custom-Auth-Key': apiKey
+      },
       body: JSON.stringify(userData)
     });
 
@@ -240,8 +235,8 @@ export async function deleteReadOnlyCase(user: User, caseNumber: string): Promis
     const dataApiKey = await getDataApiKey();
     
     // Get case data first to get file IDs for deletion
-    const caseResponse = await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
-      headers: await getProxyHeaders(user, dataApiKey)
+    const caseResponse = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
+      headers: { 'X-Custom-Auth-Key': dataApiKey }
     });
 
     if (caseResponse.ok) {
@@ -257,9 +252,9 @@ export async function deleteReadOnlyCase(user: User, caseNumber: string): Promis
       }
 
       // Delete case file using data worker
-      await fetch(`${DATA_API_BASE}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
+      await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
         method: 'DELETE',
-        headers: await getProxyHeaders(user, dataApiKey)
+        headers: { 'X-Custom-Auth-Key': dataApiKey }
       });
     }
     
