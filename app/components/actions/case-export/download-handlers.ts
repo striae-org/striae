@@ -7,7 +7,7 @@ import { ExportFormat, formatDateForFilename, CSV_HEADERS } from './types-consta
 import { protectExcelWorksheet, addForensicDataWarning } from './metadata-helpers';
 import { generateMetadataRows, generateCSVContent, processFileDataForTabular, sanitizeTabularMatrix } from './data-processing';
 import { exportCaseData } from './core-export';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 
 type TabularRow = Array<string | number | boolean | null | undefined>;
 type ExcelJsBrowserBundle = typeof import('exceljs');

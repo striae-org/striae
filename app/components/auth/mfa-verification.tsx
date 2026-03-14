@@ -7,9 +7,9 @@ import {
   UserCredential
 } from 'firebase/auth';
 import { auth } from '~/services/firebase';
-import { handleAuthError, getValidationError } from '~/services/firebase-errors';
+import { handleAuthError, getValidationError } from '~/services/firebase/errors';
 import { SignOut } from '~/components/actions/signout';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 import { generateUniqueId } from '~/utils/id-generator';
 import styles from './mfa-verification.module.css';
 

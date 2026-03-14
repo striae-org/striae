@@ -1,5 +1,5 @@
 import type { MultiFactorInfo } from 'firebase/auth';
-import { getValidationError } from '~/services/firebase-errors';
+import { getValidationError } from '~/services/firebase/errors';
 
 export interface PhoneValidationResult {
   isValid: boolean;

@@ -3,7 +3,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';
 import paths from '~/config/config.json';
 import { getUserApiKey } from '~/utils/auth';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 import styles from './delete-account.module.css';
 
 interface DeletionProgress {

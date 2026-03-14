@@ -3,7 +3,7 @@ import { calculateSHA256Secure } from '~/utils/SHA256';
 import { getUserData } from '~/utils/permissions';
 import { getCaseData, updateCaseData, signConfirmationData } from '~/utils/data-operations';
 import { ConfirmationData, CaseConfirmations, CaseDataWithConfirmations, ConfirmationImportData } from '~/types';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 
 /**
  * Store a confirmation for a specific image, linked to the original image ID

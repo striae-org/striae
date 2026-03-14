@@ -2,8 +2,8 @@ import { useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { sendPasswordResetEmail, signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';
-import { handleAuthError, ERROR_MESSAGES } from '~/services/firebase-errors';
-import { auditService } from '~/services/audit.service';
+import { handleAuthError, ERROR_MESSAGES } from '~/services/firebase/errors';
+import { auditService } from '~/services/audit';
 import { buildActionCodeSettings } from '~/utils/auth-action-settings';
 import styles from './passwordReset.module.css';
 

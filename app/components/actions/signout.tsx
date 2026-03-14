@@ -1,5 +1,5 @@
 import { auth } from '~/services/firebase';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 import { generateUniqueId } from '~/utils/id-generator';
 import styles from './signout.module.css';
 

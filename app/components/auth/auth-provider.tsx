@@ -5,7 +5,7 @@ import { useInactivityTimeout } from '~/hooks/useInactivityTimeout';
 import { INACTIVITY_CONFIG } from '~/config/inactivity';
 import { AuthContext } from '~/contexts/auth.context';
 import { InactivityWarning } from '~/components/user/inactivity-warning';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 import { generateUniqueId } from '~/utils/id-generator';
 
 interface AuthProviderProps {

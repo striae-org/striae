@@ -5,7 +5,7 @@ import { NotesModal } from './notes-modal';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { AnnotationData } from '~/types/annotations';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 import styles from './notes.module.css';
 
 interface NotesSidebarProps {

@@ -4,7 +4,7 @@ import { getDataApiKey } from '~/utils/auth';
 import { ConfirmationImportResult, ConfirmationImportData } from '~/types';
 import { checkExistingCase } from '../case-manage';
 import { validateExporterUid, validateConfirmationHash, validateConfirmationSignatureFile } from './validation';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 
 const DATA_WORKER_URL = paths.data_worker_url;
 

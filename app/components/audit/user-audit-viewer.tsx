@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
-import { auditService } from '~/services/audit.service';
-import { auditExportService } from '~/services/audit-export.service';
+import { auditService, auditExportService } from '~/services/audit';
 import { ValidationAuditEntry, AuditAction, AuditResult, AuditTrail, UserData, WorkflowPhase } from '~/types';
 import { getUserData } from '~/utils/permissions';
 import styles from './user-audit.module.css';

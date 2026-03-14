@@ -19,7 +19,7 @@ import {
 } from './storage-operations';
 import { uploadImageBlob } from './image-operations';
 import { importAnnotations } from './annotation-import';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 
 /**
  * Track the state of an import operation for cleanup purposes

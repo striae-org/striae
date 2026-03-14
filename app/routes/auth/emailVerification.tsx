@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { sendEmailVerification, User } from 'firebase/auth';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 import { buildActionCodeSettings } from '~/utils/auth-action-settings';
 import styles from './login.module.css';
 

@@ -7,7 +7,7 @@ import {
 import { canUploadFile } from '~/utils/permissions';
 import { getCaseData, updateCaseData, deleteFileAnnotations } from '~/utils/data-operations';
 import { CaseData, FileData, ImageUploadResponse } from '~/types';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 
 const IMAGE_URL = paths.image_worker_url;
 

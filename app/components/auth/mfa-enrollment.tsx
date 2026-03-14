@@ -8,9 +8,9 @@ import {
   multiFactor,
   User
 } from 'firebase/auth';
-import { handleAuthError, getValidationError } from '~/services/firebase-errors';
+import { handleAuthError, getValidationError } from '~/services/firebase/errors';
 import { SignOut } from '~/components/actions/signout';
-import { auditService } from '~/services/audit.service';
+import { auditService } from '~/services/audit';
 import styles from './mfa-enrollment.module.css';
 
 interface MFAEnrollmentProps {
