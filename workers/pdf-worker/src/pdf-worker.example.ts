@@ -3,6 +3,7 @@ import type { PDFGenerationData, PDFGenerationRequest, ReportModule } from './re
 
 interface Env {
   BROWSER: Fetcher;
+  PDF_WORKER_AUTH: string;
 }
 
 const DEFAULT_REPORT_FORMAT = 'striae';
@@ -15,8 +16,11 @@ const reportModuleLoaders: Record<string, () => Promise<ReportModule>> = {
 const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': 'PAGES_CUSTOM_DOMAIN',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Custom-Auth-Key',
 };
+
+const hasValidHeader = (request: Request, env: Env): boolean =>
+  request.headers.get('X-Custom-Auth-Key') === env.PDF_WORKER_AUTH;
 
 function normalizeReportFormat(format: unknown): string {
   if (typeof format !== 'string') {
@@ -69,6 +73,13 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders });
+    }
+
+    if (!hasValidHeader(request, env)) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'content-type': 'application/json' },
+      });
     }
 
     if (request.method === 'POST') {

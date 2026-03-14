@@ -3,6 +3,7 @@ interface Env {
   ACCOUNT_HASH: string;
   IMAGES_API_TOKEN: string;
   USER_DB_AUTH: string;
+  PDF_WORKER_AUTH: string;
   KEYS_AUTH: string;
 }
 

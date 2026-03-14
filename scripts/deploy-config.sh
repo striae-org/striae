@@ -501,6 +501,7 @@ required_vars=(
     
     # Worker-Specific Secrets (required for deployment)
     "KEYS_AUTH"
+    "PDF_WORKER_AUTH"
     "ACCOUNT_HASH"
     "API_TOKEN"
     "HMAC_KEY"
@@ -735,11 +736,11 @@ prompt_for_secrets() {
         fi
         
         # Auto-generate specific authentication secrets - but allow keeping current
-        if [ "$var_name" = "USER_DB_AUTH" ] || [ "$var_name" = "R2_KEY_SECRET" ] || [ "$var_name" = "KEYS_AUTH" ]; then
+        if [ "$var_name" = "USER_DB_AUTH" ] || [ "$var_name" = "R2_KEY_SECRET" ] || [ "$var_name" = "KEYS_AUTH" ] || [ "$var_name" = "PDF_WORKER_AUTH" ]; then
             echo -e "${BLUE}$var_name${NC}"
             echo -e "${YELLOW}$description${NC}"
             
-            if [ "$update_env" != "true" ] && [ -n "$current_value" ] && ! is_placeholder "$current_value" && [ "$current_value" != "your_custom_user_db_auth_token_here" ] && [ "$current_value" != "your_custom_r2_secret_here" ] && [ "$current_value" != "your_custom_keys_auth_token_here" ]; then
+            if [ "$update_env" != "true" ] && [ -n "$current_value" ] && ! is_placeholder "$current_value" && [ "$current_value" != "your_custom_user_db_auth_token_here" ] && [ "$current_value" != "your_custom_r2_secret_here" ] && [ "$current_value" != "your_custom_keys_auth_token_here" ] && [ "$current_value" != "your_custom_pdf_worker_auth_token_here" ]; then
                 # Current value exists and is not a placeholder
                 echo -e "${GREEN}Current value: [HIDDEN]${NC}"
                 read -p "Generate new secret? (press Enter to keep current, or type 'y' to generate): " gen_choice
@@ -963,6 +964,7 @@ prompt_for_secrets() {
     echo -e "${BLUE}🔐 SERVICE-SPECIFIC SECRETS${NC}"
     echo "============================"
     prompt_for_var "KEYS_AUTH" "Keys worker authentication token (generate with: openssl rand -hex 16)"
+    prompt_for_var "PDF_WORKER_AUTH" "PDF worker authentication token (generate with: openssl rand -hex 16)"
     prompt_for_var "ACCOUNT_HASH" "Cloudflare Images Account Hash"
     prompt_for_var "API_TOKEN" "Cloudflare Images API token (for Images Worker)"
     prompt_for_var "HMAC_KEY" "Cloudflare Images HMAC signing key"

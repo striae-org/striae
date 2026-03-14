@@ -175,7 +175,7 @@ fi
 
 # Keys Worker
 if ! set_worker_secrets "Keys Worker" "workers/keys-worker" \
-    "KEYS_AUTH" "USER_DB_AUTH" "R2_KEY_SECRET" "ACCOUNT_HASH" "IMAGES_API_TOKEN"; then
+    "KEYS_AUTH" "USER_DB_AUTH" "R2_KEY_SECRET" "ACCOUNT_HASH" "IMAGES_API_TOKEN" "PDF_WORKER_AUTH"; then
     echo -e "${YELLOW}⚠️  Skipping Keys Worker (not configured)${NC}"
 fi
 
@@ -198,7 +198,11 @@ if ! set_worker_secrets "Images Worker" "workers/image-worker" \
 fi
 
 # PDF Worker (no secrets needed)
-echo -e "\n${BLUE}📄 PDF Worker: No environment variables needed${NC}"
+# PDF Worker
+if ! set_worker_secrets "PDF Worker" "workers/pdf-worker" \
+    "PDF_WORKER_AUTH"; then
+    echo -e "${YELLOW}⚠️  Skipping PDF Worker (not configured)${NC}"
+fi
 
 echo -e "\n${GREEN}🎉 Worker secrets deployment completed!${NC}"
 
