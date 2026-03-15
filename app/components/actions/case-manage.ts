@@ -15,8 +15,7 @@ import {
 } from '~/utils/data-operations';
 import { type CaseData, type ReadOnlyCaseData, type FileData } from '~/types';
 import { auditService } from '~/services/audit';
-import { getImageApiKey } from '~/utils/auth';
-import paths from '~/config/config.json';
+import { fetchImageApi } from '~/utils/image-api-client';
 
 /**
  * Delete a file without individual audit logging (for bulk operations)
@@ -36,14 +35,8 @@ const deleteFileWithoutAudit = async (user: User, caseNumber: string, fileId: st
 
   // Delete the image file from Cloudflare Images (but don't audit this individual operation)
   try {
-    const IMAGE_URL = paths.image_worker_url;
-    
-    const imagesApiToken = await getImageApiKey();
-    const imageResponse = await fetch(`${IMAGE_URL}/${fileId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${imagesApiToken}`
-      }
+    const imageResponse = await fetchImageApi(user, `/${encodeURIComponent(fileId)}`, {
+      method: 'DELETE'
     });
 
     // Only fail if it's not a 404 (file might already be deleted)
