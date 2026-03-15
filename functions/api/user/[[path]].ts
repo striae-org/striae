@@ -6,6 +6,7 @@ interface UserProxyContext {
 }
 
 const SUPPORTED_METHODS = new Set(['GET', 'PUT', 'DELETE', 'OPTIONS']);
+const USER_EXISTS_PATH_PREFIX = '/exists/';
 
 function textResponse(message: string, status: number): Response {
   return new Response(message, {
@@ -13,6 +14,16 @@ function textResponse(message: string, status: number): Response {
     headers: {
       'Cache-Control': 'no-store',
       'Content-Type': 'text/plain; charset=utf-8'
+    }
+  });
+}
+
+function jsonResponse(payload: Record<string, unknown>, status: number = 200): Response {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: {
+      'Cache-Control': 'no-store',
+      'Content-Type': 'application/json; charset=utf-8'
     }
   });
 }
@@ -53,6 +64,24 @@ function extractUserIdFromProxyPath(proxyPath: string): string | null {
   }
 }
 
+function extractExistenceCheckUserId(proxyPath: string): string | null {
+  if (!proxyPath.startsWith(USER_EXISTS_PATH_PREFIX)) {
+    return null;
+  }
+
+  const remainder = proxyPath.slice(USER_EXISTS_PATH_PREFIX.length);
+  const firstSegment = remainder.split('/').filter(Boolean)[0];
+  if (!firstSegment) {
+    return null;
+  }
+
+  try {
+    return decodeURIComponent(firstSegment);
+  } catch {
+    return null;
+  }
+}
+
 export const onRequest = async ({ request, env }: UserProxyContext): Promise<Response> => {
   if (!SUPPORTED_METHODS.has(request.method)) {
     return textResponse('Method not allowed', 405);
@@ -79,6 +108,45 @@ export const onRequest = async ({ request, env }: UserProxyContext): Promise<Res
     return textResponse('Not Found', 404);
   }
 
+  if (!env.USER_WORKER_DOMAIN || !env.USER_DB_AUTH) {
+    return textResponse('User service not configured', 502);
+  }
+
+  const userWorkerBaseUrl = normalizeWorkerBaseUrl(env.USER_WORKER_DOMAIN);
+
+  const existenceCheckUserId = extractExistenceCheckUserId(proxyPath);
+  if (existenceCheckUserId !== null) {
+    if (request.method !== 'GET') {
+      return textResponse('Method not allowed', 405);
+    }
+
+    let existenceResponse: Response;
+    try {
+      existenceResponse = await fetch(
+        `${userWorkerBaseUrl}/${encodeURIComponent(existenceCheckUserId)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'X-Custom-Auth-Key': env.USER_DB_AUTH
+          }
+        }
+      );
+    } catch {
+      return textResponse('Upstream user service unavailable', 502);
+    }
+
+    if (existenceResponse.status === 404) {
+      return jsonResponse({ exists: false });
+    }
+
+    if (!existenceResponse.ok) {
+      return textResponse('Upstream user service unavailable', 502);
+    }
+
+    return jsonResponse({ exists: true });
+  }
+
   const requestedUserId = extractUserIdFromProxyPath(proxyPath);
   if (!requestedUserId) {
     return textResponse('Missing user identifier', 400);
@@ -87,12 +155,6 @@ export const onRequest = async ({ request, env }: UserProxyContext): Promise<Res
   if (requestedUserId !== identity.uid) {
     return textResponse('Forbidden', 403);
   }
-
-  if (!env.USER_WORKER_DOMAIN || !env.USER_DB_AUTH) {
-    return textResponse('User service not configured', 502);
-  }
-
-  const userWorkerBaseUrl = normalizeWorkerBaseUrl(env.USER_WORKER_DOMAIN);
   const upstreamUrl = `${userWorkerBaseUrl}${proxyPath}${requestUrl.search}`;
 
   const upstreamHeaders = new Headers();

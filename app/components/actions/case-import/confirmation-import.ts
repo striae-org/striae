@@ -1,13 +1,10 @@
 import type { User } from 'firebase/auth';
-import paths from '~/config/config.json';
-import { getDataApiKey } from '~/utils/auth';
+import { fetchDataApi } from '~/utils/data-api-client';
 import { type ConfirmationImportResult, type ConfirmationImportData } from '~/types';
 import { checkExistingCase } from '../case-manage';
 import { extractConfirmationImportPackage } from './confirmation-package';
 import { validateExporterUid, validateConfirmationHash, validateConfirmationSignatureFile } from './validation';
 import { auditService } from '~/services/audit';
-
-const DATA_WORKER_URL = paths.data_worker_url;
 
 interface CaseDataFile {
   id: string;
@@ -113,13 +110,13 @@ export async function importConfirmationData(
     onProgress?.('Processing confirmations', 60, 'Validating timestamps and updating annotations...');
 
     // Get case data to find image IDs
-    const apiKey = await getDataApiKey();
-    const caseResponse = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/data.json`, {
-      method: 'GET',
-      headers: {
-        'X-Custom-Auth-Key': apiKey
+    const caseResponse = await fetchDataApi(
+      user,
+      `/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/data.json`,
+      {
+        method: 'GET'
       }
-    });
+    );
 
     if (!caseResponse.ok) {
       throw new Error(`Failed to fetch case data: ${caseResponse.status}`);
@@ -159,12 +156,13 @@ export async function importConfirmationData(
       const displayFilename = currentFile?.originalFilename || currentImageId;
 
       // Get current annotation data for this image
-      const annotationResponse = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`, {
-        method: 'GET',
-        headers: {
-          'X-Custom-Auth-Key': apiKey
+      const annotationResponse = await fetchDataApi(
+        user,
+        `/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`,
+        {
+          method: 'GET'
         }
-      });
+      );
 
       let annotationData: AnnotationImportData = {};
       if (annotationResponse.ok) {
@@ -216,14 +214,17 @@ export async function importConfirmationData(
       };
 
       // Save updated annotation data
-      const saveResponse = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Custom-Auth-Key': apiKey
-        },
-        body: JSON.stringify(updatedAnnotationData)
-      });
+      const saveResponse = await fetchDataApi(
+        user,
+        `/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedAnnotationData)
+        }
+      );
 
       if (saveResponse.ok) {
         result.imagesUpdated++;
