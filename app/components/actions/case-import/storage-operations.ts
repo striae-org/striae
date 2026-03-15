@@ -189,26 +189,38 @@ export async function deleteReadOnlyCase(user: User, caseNumber: string): Promis
       }
     );
 
-    if (caseResponse.ok) {
-      const caseData = await caseResponse.json() as CaseData;
+    if (caseResponse.status === 404) {
+      // No backing data object exists; only remove the case reference from user metadata.
+      await removeReadOnlyCase(user, caseNumber);
+      return true;
+    }
 
-      // Delete all files using data worker
-      if (caseData.files && caseData.files.length > 0) {
-        await Promise.all(
-          caseData.files.map((file: FileData) => 
-            deleteFile(user, caseNumber, file.id, 'Read-only case clearing - API operation')
-          )
-        );
-      }
+    if (!caseResponse.ok) {
+      throw new Error(`Failed to fetch read-only case data for deletion: ${caseResponse.status}`);
+    }
 
-      // Delete case file using data worker
-      await fetchDataApi(
-        user,
-        `/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`,
-        {
-          method: 'DELETE'
-        }
+    const caseData = await caseResponse.json() as CaseData;
+
+    // Delete all files using data worker
+    if (caseData.files && caseData.files.length > 0) {
+      await Promise.all(
+        caseData.files.map((file: FileData) => 
+          deleteFile(user, caseNumber, file.id, 'Read-only case clearing - API operation')
+        )
       );
+    }
+
+    // Delete case file using data worker
+    const deleteCaseResponse = await fetchDataApi(
+      user,
+      `/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+    if (!deleteCaseResponse.ok && deleteCaseResponse.status !== 404) {
+      throw new Error(`Failed to delete read-only case data: ${deleteCaseResponse.status}`);
     }
     
     // Remove from user's read-only case list (separate from regular cases)
