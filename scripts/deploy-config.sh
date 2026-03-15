@@ -482,11 +482,17 @@ configure_manifest_signing_credentials() {
         echo -e "${GREEN}✅ Keeping current manifest signing key pair${NC}"
     fi
 
-    if [ -z "$MANIFEST_SIGNING_KEY_ID" ] || is_placeholder "$MANIFEST_SIGNING_KEY_ID"; then
-        MANIFEST_SIGNING_KEY_ID="forensic-signing-key-v1"
+    if [ -z "$MANIFEST_SIGNING_KEY_ID" ] || is_placeholder "$MANIFEST_SIGNING_KEY_ID" || [ "$should_generate" = "true" ]; then
+        local generated_key_id
+        generated_key_id=$(generate_worker_subdomain_label)
+        if [ -z "$generated_key_id" ] || [ ${#generated_key_id} -ne 10 ]; then
+            echo -e "${RED}❌ Error: Failed to generate MANIFEST_SIGNING_KEY_ID${NC}"
+            exit 1
+        fi
+        MANIFEST_SIGNING_KEY_ID="$generated_key_id"
         export MANIFEST_SIGNING_KEY_ID
         write_env_var "MANIFEST_SIGNING_KEY_ID" "$MANIFEST_SIGNING_KEY_ID"
-        echo -e "${GREEN}✅ MANIFEST_SIGNING_KEY_ID set to default: $MANIFEST_SIGNING_KEY_ID${NC}"
+        echo -e "${GREEN}✅ MANIFEST_SIGNING_KEY_ID generated: $MANIFEST_SIGNING_KEY_ID${NC}"
     else
         echo -e "${GREEN}✅ MANIFEST_SIGNING_KEY_ID: $MANIFEST_SIGNING_KEY_ID${NC}"
     fi
