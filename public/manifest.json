@@ -1,0 +1,39 @@
+{
+  "id": "/",
+  "name": "Striae: A Firearms Examiner's Comparison Companion",
+  "short_name": "Striae",
+  "description": "Striae is a cloud-native forensic annotation and comparison workspace for firearms identification teams.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "orientation": "any",
+  "lang": "en-US",
+  "dir": "ltr",
+  "theme_color": "#f5f5f5",
+  "background_color": "#f5f5f5",
+  "categories": [
+    "business",
+    "productivity",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "shortcut.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
