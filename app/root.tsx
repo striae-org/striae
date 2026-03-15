@@ -32,7 +32,6 @@ export const links: LinksFunction = () => [
   },
   { rel: 'manifest', href: '/manifest.json' },
   { rel: 'icon', href: '/favicon.ico' },
-  { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
 ];
 
 type AppTheme = 'dark' | 'light';

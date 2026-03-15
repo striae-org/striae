@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { Link, useSearchParams, type MetaFunction } from 'react-router';
 import { auth } from '~/services/firebase';
 import {
     signInWithEmailAndPassword, 
@@ -28,13 +28,93 @@ import { evaluatePasswordPolicy } from '~/utils/password-policy';
 import { buildActionCodeSettings } from '~/utils/auth-action-settings';
 import { userHasMFA } from '~/utils/mfa';
 
-export const meta = () => {
-  const titleText = 'Striae | Welcome to Striae';
-  const description = 'Login to your Striae account to access your projects and data';
+const APP_CANONICAL_ORIGIN = 'https://app.striae.org';
+const SOCIAL_IMAGE_PATH = '/social-image.png';
+const SOCIAL_IMAGE_ALT = 'Striae forensic annotation and comparison workspace';
+const LOGIN_PATH_ALIASES = new Set(['/auth', '/auth/', '/auth/login', '/auth/login/']);
+
+type AuthMetaContent = {
+  title: string;
+  description: string;
+  robots: string;
+};
+
+const getCanonicalPath = (pathname: string): string => {
+  if (!pathname || LOGIN_PATH_ALIASES.has(pathname)) {
+    return '/';
+  }
+
+  return pathname.startsWith('/') ? pathname : `/${pathname}`;
+};
+
+const getAuthMetaContent = (mode: string | null, hasActionCode: boolean): AuthMetaContent => {
+  if (!mode && !hasActionCode) {
+    return {
+      title: 'Striae | Secure Login for Firearms Examiners',
+      description: 'Sign in to Striae to access your forensic annotation workspace, case files, and comparison tools.',
+      robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+    };
+  }
+
+  if (mode === 'resetPassword') {
+    return {
+      title: 'Striae | Reset Your Password',
+      description: 'Use this secure page to reset your Striae account password and restore access to your workspace.',
+      robots: 'noindex,nofollow,noarchive',
+    };
+  }
+
+  if (mode === 'verifyEmail') {
+    return {
+      title: 'Striae | Verify Your Email Address',
+      description: 'Confirm your email address to complete Striae account activation and continue securely.',
+      robots: 'noindex,nofollow,noarchive',
+    };
+  }
+
+  if (mode === 'recoverEmail') {
+    return {
+      title: 'Striae | Recover Email Access',
+      description: 'Complete your Striae account email recovery steps securely.',
+      robots: 'noindex,nofollow,noarchive',
+    };
+  }
+
+  return {
+    title: 'Striae | Account Action',
+    description: 'Complete your Striae account action securely.',
+    robots: 'noindex,nofollow,noarchive',
+  };
+};
+
+export const meta: MetaFunction = ({ location }) => {
+  const searchParams = new URLSearchParams(location.search);
+  const mode = searchParams.get('mode');
+  const hasActionCode = Boolean(searchParams.get('oobCode'));
+
+  const canonicalPath = getCanonicalPath(location.pathname);
+  const canonicalHref = `${APP_CANONICAL_ORIGIN}${canonicalPath}`;
+  const socialImageHref = `${APP_CANONICAL_ORIGIN}${SOCIAL_IMAGE_PATH}`;
+  const { title, description, robots } = getAuthMetaContent(mode, hasActionCode);
 
   return [
-    { title: titleText },
+    { title },
     { name: 'description', content: description },
+    { name: 'robots', content: robots },
+    { property: 'og:site_name', content: 'Striae' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: canonicalHref },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:image', content: socialImageHref },
+    { property: 'og:image:secure_url', content: socialImageHref },
+    { property: 'og:image:alt', content: SOCIAL_IMAGE_ALT },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:image', content: socialImageHref },
+    { name: 'twitter:image:alt', content: SOCIAL_IMAGE_ALT },
+    { tagName: 'link', rel: 'canonical', href: canonicalHref },
   ];
 };
 
