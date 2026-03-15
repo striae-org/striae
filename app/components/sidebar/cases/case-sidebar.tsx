@@ -644,7 +644,7 @@ return (
               </button>
             </div>
             {currentCase && (
-              <div className={`${styles.caseInput} mb-4`}>
+              <div className="mb-4">
                 <button
                   className={styles.cancelSwitchButton}
                   onClick={() => setShowCaseManagement(false)}
