@@ -8,7 +8,8 @@
 # 2. Worker dependencies installation
 # 3. Workers (all 7 workers)
 # 4. Worker secrets/environment variables
-# 5. Pages (frontend)
+# 5. Pages secrets/environment variables
+# 6. Pages (frontend)
 
 set -e
 set -o pipefail
@@ -66,6 +67,7 @@ require_command wrangler
 assert_file_exists "$SCRIPT_DIR/deploy-config.sh"
 assert_file_exists "$SCRIPT_DIR/install-workers.sh"
 assert_file_exists "$SCRIPT_DIR/deploy-worker-secrets.sh"
+assert_file_exists "$SCRIPT_DIR/deploy-pages-secrets.sh"
 assert_file_exists "package.json"
 
 if [ ! -f ".env" ] && [ ! -f ".env.example" ]; then
@@ -77,7 +79,7 @@ echo -e "${GREEN}✅ Preflight checks passed${NC}"
 echo ""
 
 # Step 1: Configuration Setup
-echo -e "${PURPLE}Step 1/5: Configuration Setup${NC}"
+echo -e "${PURPLE}Step 1/6: Configuration Setup${NC}"
 echo "------------------------------"
 echo -e "${YELLOW}⚙️  Setting up configuration files and replacing placeholders...${NC}"
 if ! bash "$SCRIPT_DIR/deploy-config.sh"; then
@@ -90,7 +92,7 @@ run_config_checkpoint
 echo ""
 
 # Step 2: Install Worker Dependencies
-echo -e "${PURPLE}Step 2/5: Installing Worker Dependencies${NC}"
+echo -e "${PURPLE}Step 2/6: Installing Worker Dependencies${NC}"
 echo "----------------------------------------"
 echo -e "${YELLOW}📦 Installing npm dependencies for all workers...${NC}"
 if ! bash "$SCRIPT_DIR/install-workers.sh"; then
@@ -101,7 +103,7 @@ echo -e "${GREEN}✅ All worker dependencies installed successfully${NC}"
 echo ""
 
 # Step 3: Deploy Workers
-echo -e "${PURPLE}Step 3/5: Deploying Workers${NC}"
+echo -e "${PURPLE}Step 3/6: Deploying Workers${NC}"
 echo "----------------------------"
 echo -e "${YELLOW}🔧 Deploying all 7 Cloudflare Workers...${NC}"
 if ! npm run deploy-workers; then
@@ -112,7 +114,7 @@ echo -e "${GREEN}✅ All workers deployed successfully${NC}"
 echo ""
 
 # Step 4: Deploy Worker Secrets
-echo -e "${PURPLE}Step 4/5: Deploying Worker Secrets${NC}"
+echo -e "${PURPLE}Step 4/6: Deploying Worker Secrets${NC}"
 echo "-----------------------------------"
 echo -e "${YELLOW}🔐 Deploying worker environment variables...${NC}"
 if ! bash "$SCRIPT_DIR/deploy-worker-secrets.sh"; then
@@ -122,8 +124,19 @@ fi
 echo -e "${GREEN}✅ Worker secrets deployed successfully${NC}"
 echo ""
 
-# Step 5: Deploy Pages
-echo -e "${PURPLE}Step 5/5: Deploying Pages${NC}"
+# Step 5: Deploy Pages Secrets
+echo -e "${PURPLE}Step 5/6: Deploying Pages Secrets${NC}"
+echo "----------------------------------"
+echo -e "${YELLOW}🔐 Deploying Pages environment variables...${NC}"
+if ! bash "$SCRIPT_DIR/deploy-pages-secrets.sh"; then
+    echo -e "${RED}❌ Pages secrets deployment failed!${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Pages secrets deployed successfully${NC}"
+echo ""
+
+# Step 6: Deploy Pages
+echo -e "${PURPLE}Step 6/6: Deploying Pages${NC}"
 echo "--------------------------"
 echo -e "${YELLOW}🌐 Building and deploying Pages...${NC}"
 if ! npm run deploy-pages; then
@@ -142,6 +155,7 @@ echo -e "${BLUE}Deployed Components:${NC}"
 echo "  ✅ Worker dependencies (npm install)"
 echo "  ✅ 7 Cloudflare Workers"
 echo "  ✅ Worker environment variables"
+echo "  ✅ Pages environment variables"
 echo "  ✅ Cloudflare Pages frontend"
 echo ""
 echo -e "${BLUE}Next Steps:${NC}"
