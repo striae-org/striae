@@ -15,6 +15,7 @@ export interface ExportVerificationResult {
 }
 
 const CASE_EXPORT_FILE_REGEX = /_data\.(json|csv)$/i;
+const CONFIRMATION_EXPORT_FILE_REGEX = /^confirmation-data-.*\.json$/i;
 
 function createVerificationResult(
   isValid: boolean,
@@ -216,6 +217,21 @@ async function verifyConfirmationExport(
 ): Promise<ExportVerificationResult> {
   try {
     const fileContent = await file.text();
+    return verifyConfirmationContent(fileContent, verificationPublicKeyPem);
+  } catch {
+    return createVerificationResult(
+      false,
+      'The JSON file could not be read as a supported Striae confirmation export.',
+      'confirmation'
+    );
+  }
+}
+
+async function verifyConfirmationContent(
+  fileContent: string,
+  verificationPublicKeyPem: string
+): Promise<ExportVerificationResult> {
+  try {
     const parsedContent = JSON.parse(fileContent) as unknown;
 
     if (!isConfirmationImportCandidate(parsedContent)) {
@@ -270,8 +286,43 @@ async function verifyConfirmationExport(
   } catch {
     return createVerificationResult(
       false,
-      'The JSON file could not be read as a supported Striae confirmation export.',
+      'The confirmation content could not be read as a supported Striae confirmation export.',
       'confirmation'
+    );
+  }
+}
+
+async function verifyConfirmationZipExport(
+  file: File,
+  verificationPublicKeyPem: string
+): Promise<ExportVerificationResult> {
+  const JSZip = (await import('jszip')).default;
+
+  try {
+    const zip = await JSZip.loadAsync(file);
+    const confirmationFiles = Object.keys(zip.files).filter((name) => CONFIRMATION_EXPORT_FILE_REGEX.test(name));
+
+    if (confirmationFiles.length !== 1) {
+      return createVerificationResult(
+        false,
+        'The ZIP file is not a supported Striae confirmation export package.'
+      );
+    }
+
+    const confirmationContent = await zip.file(confirmationFiles[0])?.async('text');
+    if (!confirmationContent) {
+      return createVerificationResult(
+        false,
+        'The confirmation JSON file inside the ZIP could not be read.',
+        'confirmation'
+      );
+    }
+
+    return verifyConfirmationContent(confirmationContent, verificationPublicKeyPem);
+  } catch {
+    return createVerificationResult(
+      false,
+      'The ZIP file could not be read as a supported Striae export.'
     );
   }
 }
@@ -283,6 +334,11 @@ export async function verifyExportFile(
   const lowerName = file.name.toLowerCase();
 
   if (lowerName.endsWith('.zip')) {
+    const confirmationZipResult = await verifyConfirmationZipExport(file, verificationPublicKeyPem);
+    if (confirmationZipResult.exportType === 'confirmation' || confirmationZipResult.isValid) {
+      return confirmationZipResult;
+    }
+
     return verifyCaseZipExport(file, verificationPublicKeyPem);
   }
 
@@ -292,6 +348,6 @@ export async function verifyExportFile(
 
   return createVerificationResult(
     false,
-    'Select a confirmation JSON file or a case export ZIP file.'
+    'Select a confirmation JSON/ZIP file or a case export ZIP file.'
   );
 }

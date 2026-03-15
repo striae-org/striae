@@ -3,6 +3,11 @@ import { calculateSHA256Secure } from '~/utils/SHA256';
 import { getUserData } from '~/utils/permissions';
 import { getCaseData, updateCaseData, signConfirmationData } from '~/utils/data-operations';
 import { type ConfirmationData, type CaseConfirmations, type CaseDataWithConfirmations, type ConfirmationImportData } from '~/types';
+import {
+  createPublicSigningKeyFileName,
+  getCurrentPublicSigningKeyDetails,
+  getVerificationPublicKey
+} from '~/utils/signature-utils';
 import { auditService } from '~/services/audit';
 
 /**
@@ -267,15 +272,8 @@ export async function exportConfirmationData(
       }
     };
 
-    // Convert final data to JSON blob
     const finalJsonString = JSON.stringify(finalExportData, null, 2);
-    const blob = new Blob([finalJsonString], { type: 'application/json' });
-    
-    // Create download
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    
+
     // Use local timezone for filename timestamp
     const now = new Date();
     const year = now.getFullYear();
@@ -285,14 +283,47 @@ export async function exportConfirmationData(
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
     const timestampString = `${year}${month}${day}-${hours}${minutes}${seconds}`;
+
+    const confirmationFileName = `confirmation-data-${caseNumber}-${timestampString}.json`;
+
+    const keyFromSignature = getVerificationPublicKey(signingResult.signature.keyId);
+    const currentKey = getCurrentPublicSigningKeyDetails();
+    const publicKeyPem = keyFromSignature ?? currentKey.publicKeyPem;
+    const publicKeyFileName = createPublicSigningKeyFileName(
+      keyFromSignature ? signingResult.signature.keyId : currentKey.keyId
+    );
+
+    if (!publicKeyPem || publicKeyPem.trim().length === 0) {
+      throw new Error('No public signing key is configured for confirmation export packaging.');
+    }
+
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    const normalizedPem = publicKeyPem.endsWith('\n') ? publicKeyPem : `${publicKeyPem}\n`;
+
+    zip.file(confirmationFileName, finalJsonString);
+    zip.file(publicKeyFileName, normalizedPem);
+
+    const zipBlob = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    });
+
+    const exportFileName = `confirmation-export-${caseNumber}-${timestampString}.zip`;
+
+    // Create download
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url;
     
-    a.download = `confirmation-data-${caseNumber}-${timestampString}.json`;
+    a.download = exportFileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    console.log(`Confirmation data exported for case ${caseNumber}`);
+    console.log(`Confirmation export ZIP generated for case ${caseNumber}`);
     
     // Log successful confirmation export
     const endTime = Date.now();
@@ -300,14 +331,14 @@ export async function exportConfirmationData(
     await auditService.logConfirmationExport(
       user,
       caseNumber,
-      `confirmation-data-${caseNumber}-${timestampString}.json`,
+      exportFileName,
       confirmationCount,
       'success',
       [],
       undefined, // Original examiner UID not available here
       {
         processingTimeMs: endTime - startTime,
-        fileSizeBytes: new Blob([jsonString]).size,
+        fileSizeBytes: zipBlob.size,
         validationStepsCompleted: confirmationCount,
         validationStepsFailed: 0
       },
@@ -328,7 +359,7 @@ export async function exportConfirmationData(
     await auditService.logConfirmationExport(
       user,
       caseNumber,
-      `confirmation-data-${caseNumber}-error.json`,
+      `confirmation-export-${caseNumber}-error.zip`,
       0,
       'failure',
       [error instanceof Error ? error.message : 'Unknown error'],

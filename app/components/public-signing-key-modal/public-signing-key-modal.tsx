@@ -332,7 +332,7 @@ export const PublicSigningKeyModal = ({
     const lowerName = file.name.toLowerCase();
 
     if (!lowerName.endsWith('.zip') && !lowerName.endsWith('.json')) {
-      setExportFileError('Select a confirmation JSON file or a case export ZIP file.');
+      setExportFileError('Select a confirmation JSON/ZIP file or a case export ZIP file.');
       return;
     }
 
@@ -346,7 +346,7 @@ export const PublicSigningKeyModal = ({
     const hasExportFile = !!selectedExportFile;
 
     setKeyError(hasPublicKey ? '' : 'Select or download a public key PEM file first.');
-    setExportFileError(hasExportFile ? '' : 'Select a confirmation JSON file or a case export ZIP file.');
+    setExportFileError(hasExportFile ? '' : 'Select a confirmation JSON/ZIP file or a case export ZIP file.');
 
     if (!hasPublicKey || !hasExportFile || !selectedPublicKey || !selectedExportFile) {
       return;
@@ -373,7 +373,14 @@ export const PublicSigningKeyModal = ({
     : undefined;
 
   const selectedExportDescription = selectedExportFile
-    ? `${selectedExportFile.name.toLowerCase().endsWith('.zip') ? 'Case export ZIP' : 'Confirmation JSON'} • ${formatFileSize(selectedExportFile.size)}`
+    ? `${(() => {
+        const lowerName = selectedExportFile.name.toLowerCase();
+        if (lowerName.endsWith('.zip')) {
+          return lowerName.includes('confirmation-data-') ? 'Confirmation ZIP' : 'Case export ZIP';
+        }
+
+        return 'Confirmation JSON';
+      })()} • ${formatFileSize(selectedExportFile.size)}`
     : undefined;
 
   return (
@@ -407,7 +414,7 @@ export const PublicSigningKeyModal = ({
 
         <div className={styles.content}>
           <p className={styles.description}>
-            Drop a public key PEM file and a Striae confirmation JSON or case export ZIP, then run
+            Drop a public key PEM file and a Striae confirmation JSON/ZIP or case export ZIP, then run
             verification directly in the browser.
           </p>
 
@@ -442,10 +449,10 @@ export const PublicSigningKeyModal = ({
 
             <VerificationDropZone
               inputId={exportFileInputId}
-              label="2. Confirmation JSON or Export ZIP"
+              label="2. Confirmation File or Export ZIP"
               accept=".json,.zip"
-              emptyText="Drop a confirmation JSON or case export ZIP here"
-              helperText="Confirmation exports use .json. Case exports use .zip."
+              emptyText="Drop a confirmation JSON/ZIP or case export ZIP here"
+              helperText="Case exports use .zip. Confirmation exports can be .json or .zip."
               selectedFileName={selectedExportFile?.name}
               selectedDescription={selectedExportDescription}
               errorMessage={exportFileError}
