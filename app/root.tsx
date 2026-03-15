@@ -61,7 +61,7 @@ const resolveRouteTheme = (matches: ReturnType<typeof useMatches>): AppTheme => 
 export function Layout({ children }: { children: React.ReactNode }) {
   const matches = useMatches();
   const theme = resolveRouteTheme(matches);
-  const themeColor = theme === 'dark' ? '#000000' : '#f5f5f5';
+  const themeColor = theme === 'dark' ? '#000000' : '#377087';
 
   return (
     <html lang="en" data-theme={theme}>
