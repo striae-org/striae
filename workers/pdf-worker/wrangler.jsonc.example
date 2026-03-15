@@ -15,5 +15,12 @@
 	"enabled": true
   },
 
+  "routes": [
+    {
+      "pattern": "PDF_WORKER_DOMAIN",
+      "custom_domain": true
+    }
+  ],
+
   "placement": { "mode": "smart" }
 }
