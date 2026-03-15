@@ -551,15 +551,6 @@ required_vars=(
     # Pages Configuration
     "PAGES_PROJECT_NAME"
     "PAGES_CUSTOM_DOMAIN"
-
-    # Cloudflare Access Worker Security
-    "CF_ACCESS_JWKS_URL"
-    "KEYS_CF_ACCESS_AUD"
-    "USER_CF_ACCESS_AUD"
-    "DATA_CF_ACCESS_AUD"
-    "AUDIT_CF_ACCESS_AUD"
-    "IMAGES_CF_ACCESS_AUD"
-    "PDF_CF_ACCESS_AUD"
     
     # Worker Names (required for config replacement)
     "KEYS_WORKER_NAME"
@@ -692,11 +683,6 @@ validate_env_value_formats() {
 
     if [[ "$ACCOUNT_ID" =~ [[:space:]] ]]; then
         echo -e "${RED}❌ Error: ACCOUNT_ID must not contain whitespace${NC}"
-        exit 1
-    fi
-
-    if ! [[ "$CF_ACCESS_JWKS_URL" =~ ^https://[^[:space:]]+$ ]]; then
-        echo -e "${RED}❌ Error: CF_ACCESS_JWKS_URL must be a valid https URL${NC}"
         exit 1
     fi
 
@@ -1048,11 +1034,6 @@ prompt_for_secrets() {
 
         current_value=$(strip_carriage_returns "$current_value")
 
-        # Allow one-time migration from legacy shared CF_ACCESS_AUD to per-worker AUD values.
-        if [[ "$var_name" == *_CF_ACCESS_AUD ]] && { [ -z "$current_value" ] || is_placeholder "$current_value"; } && [ -n "$CF_ACCESS_AUD" ] && ! is_placeholder "$CF_ACCESS_AUD"; then
-            current_value=$(strip_carriage_returns "$CF_ACCESS_AUD")
-        fi
-
         if [ "$var_name" = "PAGES_CUSTOM_DOMAIN" ] || [[ "$var_name" == *_WORKER_DOMAIN ]]; then
             current_value=$(resolve_existing_domain_value "$var_name" "$current_value")
         fi
@@ -1300,16 +1281,6 @@ prompt_for_secrets() {
     echo "======================"
     prompt_for_var "PAGES_PROJECT_NAME" "Your Cloudflare Pages project name"
     prompt_for_var "PAGES_CUSTOM_DOMAIN" "Your custom domain (e.g., striae.org) - DO NOT include https://"
-
-    echo -e "${BLUE}🛡️ CLOUDFLARE ACCESS (WORKER PROTECTION)${NC}"
-    echo "========================================="
-    prompt_for_var "CF_ACCESS_JWKS_URL" "Cloudflare Access JWKS URL (e.g., https://<team>.cloudflareaccess.com/cdn-cgi/access/certs)"
-    prompt_for_var "KEYS_CF_ACCESS_AUD" "Cloudflare Access AUD claim for Keys Worker"
-    prompt_for_var "USER_CF_ACCESS_AUD" "Cloudflare Access AUD claim for User Worker"
-    prompt_for_var "DATA_CF_ACCESS_AUD" "Cloudflare Access AUD claim for Data Worker"
-    prompt_for_var "AUDIT_CF_ACCESS_AUD" "Cloudflare Access AUD claim for Audit Worker"
-    prompt_for_var "IMAGES_CF_ACCESS_AUD" "Cloudflare Access AUD claim for Images Worker"
-    prompt_for_var "PDF_CF_ACCESS_AUD" "Cloudflare Access AUD claim for PDF Worker"
     
     echo -e "${BLUE}🔑 WORKER NAMES & DOMAINS${NC}"
     echo "========================="
