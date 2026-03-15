@@ -33,7 +33,6 @@ const APP_CANONICAL_ORIGIN = 'https://app.striae.org';
 const SOCIAL_IMAGE_PATH = '/social-image.png';
 const SOCIAL_IMAGE_ALT = 'Striae forensic annotation and comparison workspace';
 const LOGIN_PATH_ALIASES = new Set(['/auth', '/auth/', '/auth/login', '/auth/login/']);
-const NOTIFICATION_PERMISSION_PROMPTED_KEY = 'striae_notification_permission_prompted';
 
 type AuthMetaContent = {
   title: string;
@@ -141,7 +140,6 @@ const getUserFirstName = (user: User): string => {
 
 export const Login = () => {
   const [searchParams] = useSearchParams();
-  const hasPromptedNotificationPermissionRef = useRef(false);
   const shouldShowWelcomeToastRef = useRef(false);
 
   const [error, setError] = useState('');
@@ -182,33 +180,6 @@ export const Login = () => {
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  const requestDesktopNotificationPermission = async () => {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
-      return;
-    }
-
-    if (Notification.permission !== 'default' || hasPromptedNotificationPermissionRef.current) {
-      return;
-    }
-
-    hasPromptedNotificationPermissionRef.current = true;
-
-    try {
-      if (window.sessionStorage.getItem(NOTIFICATION_PERMISSION_PROMPTED_KEY) === '1') {
-        return;
-      }
-      window.sessionStorage.setItem(NOTIFICATION_PERMISSION_PROMPTED_KEY, '1');
-    } catch {
-      // Continue with permission request if storage is unavailable.
-    }
-
-    try {
-      await Notification.requestPermission();
-    } catch (notificationError) {
-      console.error('Failed to request desktop notification permission after login:', notificationError);
-    }
-  };
 
   // Email validation with regex
   const validateRegistrationEmail = (email: string): { valid: boolean } => {
@@ -316,8 +287,6 @@ export const Login = () => {
         setIsWelcomeToastVisible(true);
         shouldShowWelcomeToastRef.current = false;
       }
-
-      void requestDesktopNotificationPermission();
       
       // Log successful login audit
       try {
