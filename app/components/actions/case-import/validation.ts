@@ -89,7 +89,8 @@ export function validateCaseIntegrity(
  * Validate confirmation data file signature.
  */
 export async function validateConfirmationSignatureFile(
-  confirmationData: Partial<ConfirmationImportData>
+  confirmationData: Partial<ConfirmationImportData>,
+  verificationPublicKeyPem?: string
 ): Promise<ManifestSignatureVerificationResult> {
-  return verifyConfirmationSignature(confirmationData);
+  return verifyConfirmationSignature(confirmationData, verificationPublicKeyPem);
 }

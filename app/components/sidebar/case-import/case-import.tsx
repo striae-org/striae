@@ -19,7 +19,7 @@ import {
   useFilePreview,
   useImportExecution,
   isValidImportFile,
-  getImportType,
+  resolveImportType,
   resetFileInput
 } from './index';
 import styles from './case-import.module.css';
@@ -146,12 +146,18 @@ export const CaseImport = ({
     clearMessages();
 
     if (!isValidImportFile(file)) {
-      setError('Only ZIP files (case imports) or JSON files (confirmation imports) are allowed. Please select a valid file.');
+      setError('Only Striae case ZIP files, confirmation ZIP files, or confirmation JSON files are allowed.');
       clearImportData();
       return;
     }
 
-    const importType = getImportType(file);
+    const importType = await resolveImportType(file);
+    if (!importType) {
+      setError('The selected file is not a supported Striae case or confirmation import package.');
+      clearImportData();
+      return;
+    }
+
     updateImportState({ 
       selectedFile: file, 
       importType 
@@ -172,12 +178,18 @@ export const CaseImport = ({
     clearMessages();
 
     if (!isValidImportFile(file)) {
-      setError('Only ZIP files (case imports) or JSON files (confirmation imports) are allowed. Please select a valid file.');
+      setError('Only Striae case ZIP files, confirmation ZIP files, or confirmation JSON files are allowed.');
       clearImportData();
       return;
     }
 
-    const importType = getImportType(file);
+    const importType = await resolveImportType(file);
+    if (!importType) {
+      setError('The selected file is not a supported Striae case or confirmation import package.');
+      clearImportData();
+      return;
+    }
+
     updateImportState({ 
       selectedFile: file, 
       importType 
@@ -404,7 +416,7 @@ export const CaseImport = ({
               <br />
               <h3 className={styles.instructionsTitle}>Confirmation Import Instructions:</h3>
               <ul className={styles.instructionsList}>
-                <li>Only JSON files (.json) with confirmation data exported from Striae are accepted</li>
+                <li>Confirmation imports accept either confirmation JSON files or confirmation ZIP packages exported from Striae</li>
                 <li>Only one confirmation file can be imported at a time</li>
                 <li>Confirmed images will become read-only and cannot be modified</li>
                 <li>If an image has a pre-existing confirmation, it will be skipped</li>

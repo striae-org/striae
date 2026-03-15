@@ -62,6 +62,16 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-14] - *[Minor Release v3.3.0](https://github.com/striae-org/striae/releases/tag/v3.3.0)*
+
+_Note: Summary is based on 20 non-merge commits since v3.2.2 (same-day minor release window)._ 
+
+- **🔐 Portable Verification Packages** - Added internal verifier support and bundled public signing key PEM files with case and confirmation export packages for independent authenticity checks.
+- **📥 Import Verification Hardening** - Extended import flows to use ZIP-contained PEM files for signature verification with configured-key fallback when PEM material is absent.
+- **🎛️ Sidebar UX Refinement** - Reduced case-management clutter, moved sidebar status messaging to toasts, and applied iterative button/UI polish during active-case workflows.
+- **📦 npm Package Metadata and Publish Surface Updates** - Refined package description/keywords and publish file selection to better represent authenticated workflows and ship required PDF worker helpers.
+- **🧹 Manifest and Metadata Stabilization** - Reinstated manifest behavior and refreshed metadata/notification-related surfaces during the release window.
+
 ## [2026-03-14] - *[Patch Release v3.2.2](https://github.com/striae-org/striae/releases/tag/v3.2.2)*
 
 _Note: Summary is based on 33 non-merge commits since v3.2.1 (same-day patch window)._

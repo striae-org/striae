@@ -1,8 +1,8 @@
 {
   "name": "@striae-org/striae",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "private": false,
-  "description": "Striae is a cloud-native forensic annotation application for firearms identification, built with React Router and Cloudflare Workers.",
+  "description": "Striae is a specialized, cloud-native platform designed to streamline forensic firearms identification by providing an intuitive environment for digital comparison image annotation, authenticated confirmations, and automated report generation.",
   "license": "Apache-2.0",
   "homepage": "https://www.striae.org",
   "repository": {
@@ -24,6 +24,8 @@
     "annotation",
     "react",
     "cloudflare-workers",
+    "authenticated",
+    "confirmations",
     "chain-of-custody",
     "audit-trail"
   ],
@@ -44,6 +46,7 @@
     "app/entry.server.tsx",
     "app/root.tsx",
     "app/tailwind.css",
+    "react-router.config.ts",
     "functions/",
     "public/",
     "scripts/",
@@ -51,8 +54,8 @@
     "workers/*/src/*.example.ts",
     "workers/*/src/*.example.js",
     "workers/*/src/*.ts",
-    "workers/*/src/assets/*.ts",
-    "workers/*/src/formats/*.ts",
+    "workers/pdf-worker/scripts/*.js",
+    "workers/pdf-worker/src/assets/icon-256.png",
     "!workers/*/src/*worker.ts",
     "workers/pdf-worker/src/assets/generated-assets.ts",
     "workers/pdf-worker/src/formats/format-striae.ts",

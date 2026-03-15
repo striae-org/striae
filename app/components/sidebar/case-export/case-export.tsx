@@ -1,63 +1,11 @@
 import { useState, useEffect, useContext } from 'react';
 import styles from './case-export.module.css';
-import config from '~/config/config.json';
 import { AuthContext } from '~/contexts/auth.context';
 import { PublicSigningKeyModal } from '~/components/public-signing-key-modal/public-signing-key-modal';
-import { getVerificationPublicKey } from '~/utils/signature-utils';
+import { getCurrentPublicSigningKeyDetails } from '~/utils/signature-utils';
 import { getCaseConfirmations, exportConfirmationData } from '../../actions/confirm-export';
 
 export type ExportFormat = 'json' | 'csv';
-
-type ManifestSigningConfig = {
-  manifest_signing_key_id?: string;
-  manifest_signing_public_key?: string;
-  manifest_signing_public_keys?: Record<string, string>;
-};
-
-function getPublicSigningKeyDetails(): { keyId: string | null; publicKeyPem: string | null } {
-  const signingConfig = config as unknown as ManifestSigningConfig;
-  const configuredKeyId =
-    typeof signingConfig.manifest_signing_key_id === 'string' &&
-    signingConfig.manifest_signing_key_id.trim().length > 0
-      ? signingConfig.manifest_signing_key_id
-      : null;
-
-  if (configuredKeyId) {
-    return {
-      keyId: configuredKeyId,
-      publicKeyPem: getVerificationPublicKey(configuredKeyId)
-    };
-  }
-
-  const keyMap = signingConfig.manifest_signing_public_keys;
-  if (keyMap && typeof keyMap === 'object') {
-    const firstConfiguredEntry = Object.entries(keyMap).find(
-      ([, value]) => typeof value === 'string' && value.trim().length > 0
-    );
-
-    if (firstConfiguredEntry) {
-      return {
-        keyId: firstConfiguredEntry[0],
-        publicKeyPem: firstConfiguredEntry[1]
-      };
-    }
-  }
-
-  if (
-    typeof signingConfig.manifest_signing_public_key === 'string' &&
-    signingConfig.manifest_signing_public_key.trim().length > 0
-  ) {
-    return {
-      keyId: null,
-      publicKeyPem: signingConfig.manifest_signing_public_key
-    };
-  }
-
-  return {
-    keyId: null,
-    publicKeyPem: null
-  };
-}
 
 interface CaseExportProps {
   isOpen: boolean;
@@ -87,7 +35,7 @@ export const CaseExport = ({
   const [includeImages, setIncludeImages] = useState(false);
   const [hasConfirmationData, setHasConfirmationData] = useState(false);
   const [isPublicKeyModalOpen, setIsPublicKeyModalOpen] = useState(false);
-  const { keyId: publicSigningKeyId, publicKeyPem } = getPublicSigningKeyDetails();
+  const { keyId: publicSigningKeyId, publicKeyPem } = getCurrentPublicSigningKeyDetails();
 
   // Update caseNumber when currentCaseNumber prop changes
   useEffect(() => {

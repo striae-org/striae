@@ -2,6 +2,7 @@ import type { User } from 'firebase/auth';
 import type * as CaseExportActions from '../../actions/case-export';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './cases.module.css';
+import { Toast } from '~/components/toast/toast';
 import { CasesModal } from './cases-modal';
 import { FilesModal } from '../files/files-modal';
 import { CaseExport, type ExportFormat } from '../case-export/case-export';
@@ -103,7 +104,11 @@ export const CaseSidebar = ({
   const [, setFileError] = useState('');
   const [newCaseName, setNewCaseName] = useState('');
   const [showCaseActions, setShowCaseActions] = useState(false);
+  const [showCaseManagement, setShowCaseManagement] = useState(false);
   const [canCreateNewCase, setCanCreateNewCase] = useState(true);
+  const [isToastVisible, setIsToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'warning'>('success');
   const [canUploadNewFile, setCanUploadNewFile] = useState(true);
   const [createCaseError, setCreateCaseError] = useState('');
   const [uploadFileError, setUploadFileError] = useState('');
@@ -313,6 +318,24 @@ export const CaseSidebar = ({
       isCancelled = true;
     };
   }, [currentCase, fileIdsKey, user, selectedFileId, confirmationSaveVersion, files.length, calculateCaseConfirmationStatus]);
+
+  useEffect(() => {
+    if (error) {
+      setToastMessage(error);
+      setToastType('error');
+      setIsToastVisible(true);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (successAction) {
+      setToastMessage(`Case ${currentCase} ${successAction} successfully!`);
+      setToastType('success');
+      setIsToastVisible(true);
+    }
+    // currentCase intentionally omitted: we capture its value at the time successAction changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [successAction]);
   
   const handleCase = async () => {
     setIsLoading(true);
@@ -336,6 +359,7 @@ export const CaseSidebar = ({
         setFiles(files);
         setCaseNumber('');
         setSuccessAction('loaded');
+        setShowCaseManagement(false);
         setTimeout(() => setSuccessAction(null), SUCCESS_MESSAGE_TIMEOUT);
         return;
       }
@@ -362,6 +386,7 @@ export const CaseSidebar = ({
       setFiles([]);
       setCaseNumber('');
       setSuccessAction('created');
+      setShowCaseManagement(false);
       setTimeout(() => setSuccessAction(null), SUCCESS_MESSAGE_TIMEOUT);
       
       // Refresh permissions after successful case creation
@@ -564,53 +589,73 @@ const handleImageSelect = (file: FileData) => {
   };
 
 return (
+    <>
     <div className={styles.caseSection}>
-     <div className={styles.caseSection}>
-        <h4>Case Management</h4>
-        {limitsDescription && (
-          <p className={styles.limitsInfo}>
-            {limitsDescription}
-          </p>
-        )}
-        <div className={`${styles.caseInput} mb-4`}>
-          <input
-            type="text"
-            value={caseNumber}
-            onChange={(e) => setCaseNumber(e.target.value)}
-            placeholder="Case #"
-          />
-          </div>
+        {currentCase && !showCaseManagement ? (
           <div className={`${styles.caseLoad} mb-4`}>
-          <button
-        onClick={handleCase}
-        disabled={isLoading || !caseNumber || permissionChecking || (isReadOnly && !!currentCase) || isUploading}
-        title={
-          isUploading
-            ? "Cannot load/create cases while uploading files"
-            : (isReadOnly && currentCase)
-            ? "Cannot load/create cases while reviewing a read-only case. Clear the current case first." 
-            : (!canCreateNewCase ? createCaseError : undefined)
-        }
-      >
-            {isLoading ? 'Loading...' : permissionChecking ? 'Checking permissions...' : 'Load/Create Case'}
-      </button>      
-      </div>
-      <div className={styles.caseInput}>            
-      <button 
-            onClick={() => setIsModalOpen(true)}
-            className={styles.listButton}
-            disabled={isUploading}
-            title={isUploading ? "Cannot list cases while uploading files" : undefined}
-          >
-            List All Cases
-          </button>
-    </div>
-    {error && <p className={styles.error}>{error}</p>}
-    {successAction && (
-      <p className={styles.success}>
-        Case {currentCase} {successAction} successfully!
-      </p>
-    )}  
+            <button
+              className={styles.switchCaseButton}
+              onClick={() => setShowCaseManagement(true)}
+              disabled={isUploading}
+              title={isUploading ? "Cannot switch cases while uploading files" : undefined}
+            >
+              Switch Case
+            </button>
+          </div>
+        ) : (
+          <>
+            <h4>Case Management</h4>
+            {limitsDescription && (
+              <p className={styles.limitsInfo}>
+                {limitsDescription}
+              </p>
+            )}
+            <div className={`${styles.caseInput} mb-4`}>
+              <input
+                type="text"
+                value={caseNumber}
+                onChange={(e) => setCaseNumber(e.target.value)}
+                placeholder="Case #"
+              />
+            </div>
+            <div className={`${styles.caseLoad} mb-4`}>
+              <button
+                onClick={handleCase}
+                disabled={isLoading || !caseNumber || permissionChecking || (isReadOnly && !!currentCase) || isUploading}
+                title={
+                  isUploading
+                    ? "Cannot load/create cases while uploading files"
+                    : (isReadOnly && currentCase)
+                    ? "Cannot load/create cases while reviewing a read-only case. Clear the current case first."
+                    : (!canCreateNewCase ? createCaseError : undefined)
+                }
+              >
+                {isLoading ? 'Loading...' : permissionChecking ? 'Checking permissions...' : 'Load/Create Case'}
+              </button>
+            </div>
+            <div className={styles.caseInput}>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className={styles.listButton}
+                disabled={isUploading}
+                title={isUploading ? "Cannot list cases while uploading files" : undefined}
+              >
+                List All Cases
+              </button>
+            </div>
+            {currentCase && (
+              <div className="mb-4">
+                <button
+                  className={styles.cancelSwitchButton}
+                  onClick={() => setShowCaseManagement(false)}
+                  disabled={isUploading}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </>
+        )}
     <CasesModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -830,6 +875,16 @@ return (
       />
       
       </div>
-    </div>
+    <Toast
+      message={toastMessage}
+      type={toastType}
+      isVisible={isToastVisible}
+      onClose={() => {
+        setIsToastVisible(false);
+        setError('');
+        setSuccessAction(null);
+      }}
+    />
+    </>
   );
 };

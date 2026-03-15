@@ -58,6 +58,7 @@ export const MfaPhoneUpdateSection = ({
   const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
 
   const isMfaBusy = isMfaLoading || isMfaReauthLoading;
+  const hasMfaPhoneInput = mfaPhoneInput.trim().length > 0;
 
   const resetMfaReauthFlow = useCallback(() => {
     setShowMfaReauthPrompt(false);
@@ -665,18 +666,20 @@ export const MfaPhoneUpdateSection = ({
           )}
         </div>
       ) : !isMfaCodeSent ? (
-        <div className={styles.mfaButtonGroup}>
-          <FormButton
-            variant="secondary"
-            type="button"
-            onClick={handleSendMfaVerificationCode}
-            isLoading={isMfaLoading}
-            loadingText="Sending Code..."
-            disabled={!mfaPhoneInput.trim()}
-          >
-            Send Verification Code
-          </FormButton>
-        </div>
+        hasMfaPhoneInput ? (
+          <div className={styles.mfaButtonGroup}>
+            <FormButton
+              variant="secondary"
+              type="button"
+              onClick={handleSendMfaVerificationCode}
+              isLoading={isMfaLoading}
+              loadingText="Sending Code..."
+              disabled={!hasMfaPhoneInput}
+            >
+              Send Verification Code
+            </FormButton>
+          </div>
+        ) : null
       ) : (
         <div className={styles.mfaVerificationSection}>
           <input

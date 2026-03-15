@@ -34,6 +34,7 @@ export { importAnnotations } from './annotation-import';
 
 // Confirmation import
 export { importConfirmationData } from './confirmation-import';
+export { extractConfirmationImportPackage } from './confirmation-package';
 
 // Main orchestrator
 export { importCaseForReview } from './orchestrator';

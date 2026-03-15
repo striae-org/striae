@@ -137,7 +137,14 @@ export async function importCaseForReview(
     onProgress?.('Parsing ZIP file', 10, 'Extracting archive contents...');
     
     // Step 1: Parse ZIP file
-    const { caseData, imageFiles, imageIdMapping, metadata, cleanedContent } = await parseImportZip(zipFile, user);
+    const {
+      caseData,
+      imageFiles,
+      imageIdMapping,
+      metadata,
+      cleanedContent,
+      verificationPublicKeyPem
+    } = await parseImportZip(zipFile, user);
     parsedForensicManifest = metadata?.forensicManifest as SignedForensicManifest | undefined;
     result.caseNumber = caseData.metadata.caseNumber;
     importState.caseNumber = result.caseNumber;
@@ -181,7 +188,10 @@ export async function importCaseForReview(
         );
       }
 
-      const signatureResult = await verifyForensicManifestSignature(parsedForensicManifest);
+      const signatureResult = await verifyForensicManifestSignature(
+        parsedForensicManifest,
+        verificationPublicKeyPem
+      );
       signatureValidationPassed = signatureResult.isValid;
       signatureKeyId = signatureResult.keyId;
 

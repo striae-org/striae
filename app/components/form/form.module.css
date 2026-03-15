@@ -124,6 +124,15 @@
   background-color: color-mix(in lab, var(--error) 85%, var(--black));
 }
 
+.buttonAudit {
+  background-color: #6f42c1;
+  color: var(--white);
+}
+
+.buttonAudit:hover:not(:disabled) {
+  background-color: #5a359a;
+}
+
 .button:disabled {
   background-color: color-mix(in lab, var(--background) 95%, transparent);
   color: var(--textLight);

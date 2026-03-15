@@ -24,6 +24,11 @@ export interface SignatureVerificationOptions {
   verificationPublicKeyPem?: string;
 }
 
+export interface PublicSigningKeyDetails {
+  keyId: string | null;
+  publicKeyPem: string | null;
+}
+
 type ManifestSigningConfig = {
   manifest_signing_public_keys?: Record<string, string>;
   manifest_signing_public_key?: string;
@@ -32,6 +37,63 @@ type ManifestSigningConfig = {
 
 function normalizePemPublicKey(pem: string): string {
   return pem.replace(/\\n/g, '\n').trim();
+}
+
+function normalizePemOrNull(pem: unknown): string | null {
+  if (typeof pem !== 'string' || pem.trim().length === 0) {
+    return null;
+  }
+
+  return normalizePemPublicKey(pem);
+}
+
+function sanitizeKeyIdForFileName(keyId: string): string {
+  return keyId.trim().replace(/[^a-z0-9_-]+/gi, '-');
+}
+
+export function createPublicSigningKeyFileName(keyId?: string | null): string {
+  if (typeof keyId === 'string' && keyId.trim().length > 0) {
+    return `striae-public-signing-key-${sanitizeKeyIdForFileName(keyId)}.pem`;
+  }
+
+  return 'striae-public-signing-key.pem';
+}
+
+export function getCurrentPublicSigningKeyDetails(): PublicSigningKeyDetails {
+  const config = paths as unknown as ManifestSigningConfig;
+  const configuredKeyId =
+    typeof config.manifest_signing_key_id === 'string' && config.manifest_signing_key_id.trim().length > 0
+      ? config.manifest_signing_key_id
+      : null;
+
+  if (configuredKeyId) {
+    const configuredKey = getVerificationPublicKey(configuredKeyId);
+    if (configuredKey) {
+      return {
+        keyId: configuredKeyId,
+        publicKeyPem: configuredKey
+      };
+    }
+  }
+
+  const keyMap = config.manifest_signing_public_keys;
+  if (keyMap && typeof keyMap === 'object') {
+    const firstConfiguredEntry = Object.entries(keyMap).find(
+      ([, value]) => typeof value === 'string' && value.trim().length > 0
+    );
+
+    if (firstConfiguredEntry) {
+      return {
+        keyId: firstConfiguredEntry[0],
+        publicKeyPem: normalizePemPublicKey(firstConfiguredEntry[1])
+      };
+    }
+  }
+
+  return {
+    keyId: null,
+    publicKeyPem: normalizePemOrNull(config.manifest_signing_public_key)
+  };
 }
 
 function publicKeyPemToArrayBuffer(publicKeyPem: string, invalidPublicKeyError: string): ArrayBuffer {
@@ -75,7 +137,7 @@ export function getVerificationPublicKey(keyId: string): string | null {
   if (keyMap && typeof keyMap === 'object') {
     const mappedKey = keyMap[keyId];
     if (typeof mappedKey === 'string' && mappedKey.trim().length > 0) {
-      return mappedKey;
+      return normalizePemPublicKey(mappedKey);
     }
   }
 
@@ -85,7 +147,7 @@ export function getVerificationPublicKey(keyId: string): string | null {
     typeof config.manifest_signing_public_key === 'string' &&
     config.manifest_signing_public_key.trim().length > 0
   ) {
-    return config.manifest_signing_public_key;
+    return normalizePemPublicKey(config.manifest_signing_public_key);
   }
 
   return null;

@@ -4,6 +4,11 @@ import { type FileData, type AllCasesExportData, type CaseExportData, type Expor
 import { getImageUrl } from '../image-manage';
 import { generateForensicManifestSecure, calculateSHA256Secure } from '~/utils/SHA256';
 import { signForensicManifest } from '~/utils/data-operations';
+import {
+  createPublicSigningKeyFileName,
+  getCurrentPublicSigningKeyDetails,
+  getVerificationPublicKey
+} from '~/utils/signature-utils';
 import { type ExportFormat, formatDateForFilename, CSV_HEADERS } from './types-constants';
 import { protectExcelWorksheet, addForensicDataWarning } from './metadata-helpers';
 import { generateMetadataRows, generateCSVContent, processFileDataForTabular, sanitizeTabularMatrix } from './data-processing';
@@ -113,6 +118,30 @@ function generateExportFilename(originalFilename: string, id: string): string {
   const extension = originalFilename.substring(lastDotIndex);
   
   return `${basename}-${id}${extension}`;
+}
+
+function addPublicSigningKeyPemToZip(
+  zip: { file: (path: string, data: string) => unknown },
+  preferredKeyId?: string
+): string {
+  const preferredPublicKey =
+    typeof preferredKeyId === 'string' && preferredKeyId.trim().length > 0
+      ? getVerificationPublicKey(preferredKeyId)
+      : null;
+
+  const currentKey = getCurrentPublicSigningKeyDetails();
+  const keyId = preferredPublicKey ? preferredKeyId ?? null : currentKey.keyId;
+  const publicKeyPem = preferredPublicKey ?? currentKey.publicKeyPem;
+
+  if (!publicKeyPem || publicKeyPem.trim().length === 0) {
+    throw new Error('No public signing key is configured for ZIP export packaging.');
+  }
+
+  const publicKeyFileName = createPublicSigningKeyFileName(keyId);
+  const normalizedPem = publicKeyPem.endsWith('\n') ? publicKeyPem : `${publicKeyPem}\n`;
+  zip.file(publicKeyFileName, normalizedPem);
+
+  return publicKeyFileName;
 }
 
 /**
@@ -609,6 +638,7 @@ export async function downloadCaseAsZip(
   const startTime = Date.now();
   let manifestSignatureKeyId: string | undefined;
   let manifestSigned = false;
+  let publicKeyFileName: string | undefined;
   
   try {
     // Start audit workflow
@@ -672,6 +702,8 @@ export async function downloadCaseAsZip(
       manifestSignatureKeyId = signingResult.signature.keyId;
       manifestSigned = true;
 
+      publicKeyFileName = addPublicSigningKeyPemToZip(zip, signingResult.signature.keyId);
+
       const signedForensicManifest = {
         ...forensicManifest,
         manifestVersion: signingResult.manifestVersion,
@@ -696,6 +728,7 @@ Archive Contents:
 - ${caseNumber}_data.${format}: Complete case data in ${format.toUpperCase()} format
 - images/: Original image files with annotations
 - FORENSIC_MANIFEST.json: File integrity validation manifest
+- ${publicKeyFileName}: Public signing key PEM for verification
 - README.txt: General information about this export
 
 Case Information:
@@ -713,7 +746,11 @@ For questions about this export, contact your Striae system administrator.
       zip.file('READ_ONLY_INSTRUCTIONS.txt', instructionContent);
       
       // Add README 
-      const readme = generateZipReadme(exportData, options.protectForensicData);
+      const readme = generateZipReadme(
+        exportData,
+        options.protectForensicData,
+        publicKeyFileName
+      );
       zip.file('README.txt', readme);
       onProgress?.(85);
       
@@ -772,8 +809,14 @@ For questions about this export, contact your Striae system administrator.
       return; // Exit early as we've handled the forensic case
     }
 
+    publicKeyFileName = addPublicSigningKeyPemToZip(zip);
+
     // Add README (standard or enhanced for forensic)
-    const readme = generateZipReadme(exportData, options.protectForensicData);
+    const readme = generateZipReadme(
+      exportData,
+      options.protectForensicData,
+      publicKeyFileName
+    );
     zip.file('README.txt', readme);
     onProgress?.(85);
     
@@ -878,7 +921,11 @@ async function fetchImageAsBlob(user: User, fileData: FileData, caseNumber: stri
 /**
  * Generate README content for ZIP export with optional forensic protection
  */
-function generateZipReadme(exportData: CaseExportData, protectForensicData: boolean = true): string {
+function generateZipReadme(
+  exportData: CaseExportData,
+  protectForensicData: boolean = true,
+  publicKeyFileName: string = createPublicSigningKeyFileName()
+): string {
   const totalFiles = exportData.files?.length || 0;
   const filesWithAnnotations = exportData.summary?.filesWithAnnotations || 0;
   const totalBoxAnnotations = exportData.summary?.totalBoxAnnotations || 0;
@@ -912,6 +959,7 @@ Summary:
 Contents:
 - ${exportData.metadata.caseNumber}_data.json/.csv: Case data and annotations
 - images/: Original uploaded images
+- ${publicKeyFileName}: Public signing key PEM for verification
 - README.txt: This file`;
 
   const forensicAddition = `

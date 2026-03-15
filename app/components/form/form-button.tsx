@@ -1,7 +1,7 @@
 import styles from './form.module.css';
 
 interface FormButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'success' | 'error';
+  variant?: 'primary' | 'secondary' | 'success' | 'error' | 'audit';
   isLoading?: boolean;
   loadingText?: string;
   children: React.ReactNode;

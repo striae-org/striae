@@ -9,6 +9,41 @@ import {
 } from '~/utils/SHA256';
 import { validateExporterUid, removeForensicWarning } from './validation';
 
+function getLeafFileName(path: string): string {
+  const segments = path.split('/').filter(Boolean);
+  return segments.length > 0 ? segments[segments.length - 1] : path;
+}
+
+function selectPreferredPemPath(pemPaths: string[]): string | undefined {
+  if (pemPaths.length === 0) {
+    return undefined;
+  }
+
+  const sortedPaths = [...pemPaths].sort((left, right) => left.localeCompare(right));
+  const preferred = sortedPaths.find((path) =>
+    /^striae-public-signing-key.*\.pem$/i.test(getLeafFileName(path))
+  );
+
+  return preferred ?? sortedPaths[0];
+}
+
+async function extractVerificationPublicKeyFromZip(
+  zip: {
+    files: Record<string, { dir: boolean }>;
+    file: (path: string) => { async: (type: 'text') => Promise<string> } | null;
+  }
+): Promise<string | undefined> {
+  const filePaths = Object.keys(zip.files).filter((path) => !zip.files[path].dir);
+  const pemPaths = filePaths.filter((path) => getLeafFileName(path).toLowerCase().endsWith('.pem'));
+  const preferredPemPath = selectPreferredPemPath(pemPaths);
+
+  if (!preferredPemPath) {
+    return undefined;
+  }
+
+  return zip.file(preferredPemPath)?.async('text');
+}
+
 /**
  * Extract original image ID from export filename format
  * Format: {originalFilename}-{id}.{extension}
@@ -51,6 +86,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
   
   try {
     const zip = await JSZip.loadAsync(zipFile);
+    const verificationPublicKeyPem = await extractVerificationPublicKeyFromZip(zip);
     
     // First, validate hash if forensic metadata exists
     let hashValid: boolean | undefined = undefined;
@@ -128,7 +164,10 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
               }));
             }
 
-            const signatureResult = await verifyForensicManifestSignature(forensicManifest);
+            const signatureResult = await verifyForensicManifestSignature(
+              forensicManifest,
+              verificationPublicKeyPem
+            );
           
             // Perform comprehensive validation
             const validation = await validateForensicIntegrity(
@@ -267,12 +306,14 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
   imageIdMapping: { [exportFilename: string]: string }; // exportFilename -> originalImageId
   metadata?: Record<string, unknown>;
   cleanedContent?: string; // Add cleaned content for hash validation
+  verificationPublicKeyPem?: string;
 }> {
   // Dynamic import of JSZip to avoid bundle size issues
   const JSZip = (await import('jszip')).default;
   
   try {
     const zip = await JSZip.loadAsync(zipFile);
+    const verificationPublicKeyPem = await extractVerificationPublicKeyFromZip(zip);
     
     // Find the main data file (JSON or CSV)
     const dataFiles = Object.keys(zip.files).filter(name => 
@@ -367,7 +408,8 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
       imageFiles,
       imageIdMapping,
       metadata,
-      cleanedContent
+      cleanedContent,
+      verificationPublicKeyPem
     };
     
   } catch (error) {

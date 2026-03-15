@@ -10,12 +10,12 @@ hr {
 }
 
 .section {
-  margin-bottom: 2rem;  
+  margin-bottom: 2rem;
 }
 
 .sectionTitle {
   font-size: 1.3rem;
-  font-weight: 600;  
+  font-weight: 600;
   color: #495057;
   margin-bottom: 1rem;
 }
@@ -50,7 +50,7 @@ input[type="color"]:focus,
 textarea:focus {
   outline: none;
   border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13,110,253,.25);
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }
 
 .caseNumbers {
@@ -74,10 +74,14 @@ textarea:focus {
   box-sizing: border-box;
 }
 
+.caseInput input:not(:disabled) {
+  background-color: #ffffff;
+}
+
 .caseInput input:focus {
   outline: none;
   border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13,110,253,.25);
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }
 
 .checkboxLabel {
@@ -108,6 +112,11 @@ textarea:focus {
   transition: border-color 0.2s;
 }
 
+.classCharacteristics input:not(:disabled),
+.classCharacteristics textarea:not(:disabled) {
+  background-color: #ffffff;
+}
+
 .classCharacteristics select,
 .support select {
   width: 100%;
@@ -124,7 +133,7 @@ textarea:focus {
 .support select:focus {
   outline: none;
   border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13,110,253,.25);
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }
 
 .classCharacteristics textarea {
@@ -138,11 +147,14 @@ textarea:focus {
   box-sizing: border-box;
 }
 
+.classCharacteristics input + textarea {
+  margin-top: 1rem;
+}
+
 .classCharacteristics textarea:focus {
   outline: none;
   border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13,110,253,.25);
-  margin-top: 1rem;
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
   resize: vertical;
 }
 
@@ -188,13 +200,17 @@ textarea:focus {
   box-sizing: border-box;
 }
 
+.indexing input[type="text"]:not(:disabled) {
+  background-color: #ffffff;
+}
+
 .indexing input[type="text"]:focus {
   outline: none;
   border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13,110,253,.25);
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }
 
-.confirmation {  
+.confirmation {
   padding: 0.75rem;
   background-color: #f8f9fa;
   border-radius: 6px;
@@ -232,7 +248,7 @@ textarea:focus {
 }
 
 .notesButton:hover {
-  background-color: color-mix(in lab, var(--primary) 95%, transparent);  
+  background-color: color-mix(in lab, var(--primary) 95%, transparent);
 }
 
 .modalOverlay {
@@ -355,6 +371,10 @@ textarea:focus {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

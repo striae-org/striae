@@ -50,7 +50,7 @@
 .caseInput input:focus {
   outline: none;
   border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13,110,253,.25);
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }
 
 /* Buttons */
@@ -126,7 +126,7 @@
   background-color: #0d6efd;
   color: white;
   border: none;
-  border-radius: 6px;  
+  border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -174,7 +174,7 @@
   padding: 0.5rem;
   border-radius: 4px;
   color: #198754;
-  background-color: rgba(25,135,84,0.1);
+  background-color: rgba(25, 135, 84, 0.1);
 }
 
 /* Files Section */
@@ -182,7 +182,7 @@
   margin-top: 2rem;
 }
 
-.filesSection h4 {  
+.filesSection h4 {
   margin-bottom: 1rem;
   font-size: 1.3rem;
   font-weight: 900;
@@ -274,8 +274,6 @@
   background-color: #dee2e6;
 }
 
-
-
 /* Files and Case Management */
 
 .fileName {
@@ -284,7 +282,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 
 /* Rename and Delete Cases */
 
@@ -307,12 +304,12 @@
 .caseRename input:focus {
   outline: none;
   border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13,110,253,.25);
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }
 
 /* Buttons */
 .caseRename button {
-   width: 100%;
+  width: 100%;
   padding: 0.75rem;
   background-color: #ffc107;
   color: #000;
@@ -681,33 +678,119 @@
 }
 /* Confirmation Status Indicators */
 .fileItemNotConfirmed {
-  background-color: color-mix(in lab, var(--warning) 15%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--warning) 15%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItemNotConfirmed:hover {
-  background-color: color-mix(in lab, var(--warning) 20%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--warning) 20%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItem.active.fileItemNotConfirmed {
-  background-color: color-mix(in lab, var(--warning) 15%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--warning) 15%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItem.active.fileItemNotConfirmed:hover {
-  background-color: color-mix(in lab, var(--warning) 20%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--warning) 20%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItemConfirmed {
-  background-color: color-mix(in lab, var(--success) 20%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--success) 20%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItemConfirmed:hover {
-  background-color: color-mix(in lab, var(--success) 28%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--success) 28%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItem.active.fileItemConfirmed {
-  background-color: color-mix(in lab, var(--success) 20%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--success) 20%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItem.active.fileItemConfirmed:hover {
-  background-color: color-mix(in lab, var(--success) 28%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--success) 28%,
+    var(--backgroundLight)
+  );
+}
+
+/* Switch/Cancel Case buttons */
+.switchCaseButton {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #198754;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+  box-sizing: border-box;
+}
+
+.switchCaseButton:hover:not(:disabled) {
+  background-color: #105032;
+}
+
+.switchCaseButton:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancelSwitchButton {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.cancelSwitchButton:hover:not(:disabled) {
+  background-color: #bd2130;
+}
+
+.cancelSwitchButton:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancelSwitchButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

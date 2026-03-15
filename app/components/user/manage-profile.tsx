@@ -234,7 +234,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
             <FormButton variant="primary" type="submit" isLoading={isLoading} loadingText="Updating...">
               Update Profile
             </FormButton>
-            <FormButton variant="secondary" type="button" onClick={() => setShowAuditViewer(true)}>
+            <FormButton variant="audit" type="button" onClick={() => setShowAuditViewer(true)}>
               View My Audit Trail
             </FormButton>
             <FormButton variant="secondary" type="button" onClick={() => setShowResetForm(true)}>
