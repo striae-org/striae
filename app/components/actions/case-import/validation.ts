@@ -2,66 +2,11 @@ import type { User } from 'firebase/auth';
 import paths from '~/config/config.json';
 import { getUserApiKey } from '~/utils/auth';
 import { type CaseExportData, type ConfirmationImportData } from '~/types';
-import { calculateSHA256Secure, type ManifestSignatureVerificationResult } from '~/utils/SHA256';
+import { type ManifestSignatureVerificationResult } from '~/utils/SHA256';
 import { verifyConfirmationSignature } from '~/utils/confirmation-signature';
+export { removeForensicWarning, validateConfirmationHash } from '~/utils/export-verification';
 
 const USER_WORKER_URL = paths.user_worker_url;
-
-/**
- * Remove forensic warning from content for hash validation (supports both JSON and CSV formats)
- * This function ensures exact match with the content used during export hash generation
- */
-export function removeForensicWarning(content: string): string {
-  // Handle JSON forensic warnings (block comment format)
-  // /* CASE DATA WARNING
-  //  * This file contains evidence data for forensic examination.
-  //  * Any modification may compromise the integrity of the evidence.
-  //  * Handle according to your organization's chain of custody procedures.
-  //  * 
-  //  * File generated: YYYY-MM-DDTHH:mm:ss.sssZ
-  //  */
-  const jsonForensicWarningRegex = /^\/\*\s*CASE\s+DATA\s+WARNING[\s\S]*?\*\/\s*\r?\n*/;
-  
-  // Handle CSV forensic warnings (quoted string format at the beginning of file)
-  // CRITICAL: The CSV forensic warning is ONLY the first quoted line, followed by two newlines
-  // Format: "CASE DATA WARNING: This file contains evidence data for forensic examination. Any modification may compromise the integrity of the evidence. Handle according to your organization's chain of custody procedures."\n\n
-  // 
-  // After removal, what remains should be the csvWithHash content:
-  // # Striae Case Export - Generated: ...
-  // # Case: ...
-  // # Total Files: ...
-  // # SHA256 Hash: ...
-  // # Verification: ...
-  //
-  // [actual CSV data]
-  // More robust regex to handle various line endings and exact format from generation
-  const csvForensicWarningRegex = /^"CASE DATA WARNING: This file contains evidence data for forensic examination\. Any modification may compromise the integrity of the evidence\. Handle according to your organization's chain of custody procedures\."(?:\r?\n){2}/;
-  
-  let cleaned = content;
-  
-  // Try JSON format first
-  if (jsonForensicWarningRegex.test(content)) {
-    cleaned = content.replace(jsonForensicWarningRegex, '');
-  }
-  // Try CSV format with exact pattern match
-  else if (csvForensicWarningRegex.test(content)) {
-    cleaned = content.replace(csvForensicWarningRegex, '');
-  }
-  // Fallback: try broader CSV pattern in case of slight format differences
-  else if (content.startsWith('"CASE DATA WARNING:')) {
-    // Find the end of the first quoted string followed by newlines
-    const match = content.match(/^"[^"]*"(?:\r?\n)+/);
-    if (match) {
-      cleaned = content.substring(match[0].length);
-    }
-  }
-  
-  // Additional cleanup: remove any leading whitespace that might remain
-  // This ensures we match exactly what the generation functions produce with protectForensicData: false
-  cleaned = cleaned.replace(/^\s+/, '');
-  
-  return cleaned;
-}
 
 /**
  * Validate that a user exists in the database by UID and is not the current user
@@ -91,45 +36,6 @@ export async function validateExporterUid(exporterUid: string, currentUser: User
  */
 export function isConfirmationDataFile(filename: string): boolean {
   return filename.startsWith('confirmation-data') && filename.endsWith('.json');
-}
-
-/**
- * Validate confirmation data file hash
- */
-export async function validateConfirmationHash(jsonContent: string, expectedHash: string): Promise<boolean> {
-  try {
-    // Validate input parameters
-    if (!expectedHash || typeof expectedHash !== 'string') {
-      console.error('validateConfirmationHash: expected hash input is invalid');
-      return false;
-    }
-
-    // Create data without hash for validation
-    const data = JSON.parse(jsonContent);
-    const dataWithoutHash = {
-      ...data,
-      metadata: {
-        ...data.metadata,
-        hash: undefined
-      }
-    };
-    delete dataWithoutHash.metadata.hash;
-    delete dataWithoutHash.metadata.signature;
-    delete dataWithoutHash.metadata.signatureVersion;
-    
-    const contentForHash = JSON.stringify(dataWithoutHash, null, 2);
-    const actualHash = await calculateSHA256Secure(contentForHash);
-    
-    if (!actualHash) {
-      console.error('validateConfirmationHash: failed to calculate hash');
-      return false;
-    }
-    
-    return actualHash.toUpperCase() === expectedHash.toUpperCase();
-  } catch {
-    console.error('validateConfirmationHash: validation failed');
-    return false;
-  }
 }
 
 /**

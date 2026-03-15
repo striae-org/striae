@@ -1,16 +1,212 @@
-import { useEffect, useId, useState, type KeyboardEvent, type MouseEvent } from 'react';
-import styles from './public-signing-key-modal.module.css';
-import { copyTextToClipboard } from '~/utils/clipboard';
 import {
-  APPLE_COMMAND_EXAMPLES,
-  DEFAULT_EXPECTED_KEY_ID,
-  POWER_SHELL_COMMAND_EXAMPLES,
-  createAppleVerifierTemplate,
-  createPowerShellVerifierTemplate
-} from './verifier-templates';
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type KeyboardEvent,
+  type MouseEvent
+} from 'react';
+import styles from './public-signing-key-modal.module.css';
+import { verifyExportFile } from '~/utils/export-verification';
 
 const NO_PUBLIC_KEY_MESSAGE = 'No public signing key is configured for this environment.';
-const COPY_FAILED_MESSAGE = 'Copy failed. Select and copy the text manually.';
+
+interface SelectedPublicKeyFile {
+  name: string;
+  content: string;
+  source: 'download' | 'upload';
+}
+
+interface VerificationOutcome {
+  state: 'pass' | 'fail';
+  message: string;
+}
+
+interface VerificationDropZoneProps {
+  inputId: string;
+  label: string;
+  accept: string;
+  emptyText: string;
+  helperText: string;
+  selectedFileName?: string | null;
+  selectedDescription?: string;
+  errorMessage?: string;
+  isDisabled?: boolean;
+  onFileSelected: (file: File) => void | Promise<void>;
+  onClear?: () => void;
+  actionButton?: {
+    label: string;
+    onClick: () => void;
+    disabled?: boolean;
+  };
+}
+
+const VerificationDropZone = ({
+  inputId,
+  label,
+  accept,
+  emptyText,
+  helperText,
+  selectedFileName,
+  selectedDescription,
+  errorMessage,
+  isDisabled = false,
+  onFileSelected,
+  onClear,
+  actionButton
+}: VerificationDropZoneProps) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openFilePicker = () => {
+    if (!isDisabled) {
+      inputRef.current?.click();
+    }
+  };
+
+  const handleSelectedFile = (file?: File) => {
+    if (!file || isDisabled) {
+      return;
+    }
+
+    void onFileSelected(file);
+
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+  };
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    handleSelectedFile(event.target.files?.[0]);
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (!isDisabled) {
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const relatedTarget = event.relatedTarget as HTMLElement | null;
+
+    if (!relatedTarget || !event.currentTarget.contains(relatedTarget)) {
+      setIsDragOver(false);
+    }
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(false);
+    handleSelectedFile(event.dataTransfer.files?.[0]);
+  };
+
+  return (
+    <div className={styles.verificationField}>
+      <div className={styles.fieldHeader}>
+        <label htmlFor={inputId} className={styles.fieldLabel}>
+          {label}
+        </label>
+        {selectedFileName && onClear && (
+          <button type="button" className={styles.clearButton} onClick={onClear}>
+            Clear
+          </button>
+        )}
+      </div>
+
+      <input
+        id={inputId}
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        onChange={handleInputChange}
+        disabled={isDisabled}
+        className={styles.hiddenFileInput}
+      />
+
+      <div
+        className={`${styles.dropZone} ${isDragOver ? styles.dropZoneActive : ''} ${isDisabled ? styles.dropZoneDisabled : ''}`}
+        onClick={openFilePicker}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        role="button"
+        tabIndex={isDisabled ? -1 : 0}
+        aria-disabled={isDisabled}
+        aria-label={label}
+        onKeyDown={(event) => {
+          if ((event.key === 'Enter' || event.key === ' ') && !isDisabled) {
+            if (event.key === ' ') {
+              event.preventDefault();
+            }
+            openFilePicker();
+          }
+        }}
+      >
+        <p className={styles.dropZonePrimary}>
+          {isDragOver ? 'Drop file to continue' : selectedFileName || emptyText}
+        </p>
+        <p className={styles.dropZoneSecondary}>{selectedFileName ? selectedDescription : helperText}</p>
+      </div>
+
+      <div className={styles.fieldActions}>
+        <button type="button" className={styles.secondaryButton} onClick={openFilePicker} disabled={isDisabled}>
+          Choose File
+        </button>
+        {actionButton && (
+          <button
+            type="button"
+            className={styles.secondaryButton}
+            onClick={actionButton.onClick}
+            disabled={isDisabled || actionButton.disabled}
+          >
+            {actionButton.label}
+          </button>
+        )}
+      </div>
+
+      {errorMessage && <p className={styles.fieldError}>{errorMessage}</p>}
+    </div>
+  );
+};
+
+function createPublicKeyDownloadFileName(publicSigningKeyId?: string | null): string {
+  const normalizedKeyId =
+    typeof publicSigningKeyId === 'string' && publicSigningKeyId.trim().length > 0
+      ? `-${publicSigningKeyId.trim().replace(/[^a-z0-9_-]+/gi, '-')}`
+      : '';
+
+  return `striae-public-signing-key${normalizedKeyId}.pem`;
+}
+
+function downloadTextFile(fileName: string, content: string, mimeType: string): void {
+  const blob = new Blob([content], { type: mimeType });
+  const objectUrl = URL.createObjectURL(blob);
+  const linkElement = document.createElement('a');
+
+  linkElement.href = objectUrl;
+  linkElement.download = fileName;
+  linkElement.style.display = 'none';
+
+  document.body.appendChild(linkElement);
+  linkElement.click();
+  document.body.removeChild(linkElement);
+
+  window.setTimeout(() => {
+    URL.revokeObjectURL(objectUrl);
+  }, 0);
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
 
 interface PublicSigningKeyModalProps {
   isOpen: boolean;
@@ -25,25 +221,24 @@ export const PublicSigningKeyModal = ({
   publicSigningKeyId,
   publicKeyPem
 }: PublicSigningKeyModalProps) => {
-  const [isCopyingPublicKey, setIsCopyingPublicKey] = useState(false);
-  const [isCopyingPowerShellTemplate, setIsCopyingPowerShellTemplate] = useState(false);
-  const [isCopyingAppleTemplate, setIsCopyingAppleTemplate] = useState(false);
-  const [publicKeyCopyMessage, setPublicKeyCopyMessage] = useState('');
-  const [instructionCopyMessage, setInstructionCopyMessage] = useState('');
+  const [selectedPublicKey, setSelectedPublicKey] = useState<SelectedPublicKeyFile | null>(null);
+  const [selectedExportFile, setSelectedExportFile] = useState<File | null>(null);
+  const [keyError, setKeyError] = useState('');
+  const [exportFileError, setExportFileError] = useState('');
+  const [verificationOutcome, setVerificationOutcome] = useState<VerificationOutcome | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
   const publicSigningKeyTitleId = useId();
-  const publicSigningKeyFieldId = useId();
-  const expectedKeyId =
-    typeof publicSigningKeyId === 'string' && publicSigningKeyId.trim().length > 0
-      ? publicSigningKeyId.trim()
-      : DEFAULT_EXPECTED_KEY_ID;
+  const publicKeyInputId = useId();
+  const exportFileInputId = useId();
 
   useEffect(() => {
     if (!isOpen) {
-      setIsCopyingPublicKey(false);
-      setIsCopyingPowerShellTemplate(false);
-      setIsCopyingAppleTemplate(false);
-      setPublicKeyCopyMessage('');
-      setInstructionCopyMessage('');
+      setSelectedPublicKey(null);
+      setSelectedExportFile(null);
+      setKeyError('');
+      setExportFileError('');
+      setVerificationOutcome(null);
+      setIsVerifying(false);
     }
   }, [isOpen]);
 
@@ -86,70 +281,100 @@ export const PublicSigningKeyModal = ({
     }
   };
 
-  const resetCopyMessages = () => {
-    setInstructionCopyMessage('');
-    setPublicKeyCopyMessage('');
+  const resetVerificationState = () => {
+    setVerificationOutcome(null);
   };
 
-  const copyVerifierTemplate = async (
-    templateText: string,
-    setIsCopying: (isCopying: boolean) => void,
-    successMessage: string,
-    errorLabel: string
-  ) => {
-    setIsCopying(true);
-    resetCopyMessages();
-
+  const handlePublicKeySelected = async (file: File) => {
     try {
-      const { copied, error } = await copyTextToClipboard(templateText);
-      setInstructionCopyMessage(copied ? successMessage : COPY_FAILED_MESSAGE);
-      if (!copied) {
-        console.error(`Failed to copy ${errorLabel}:`, error);
+      const lowerName = file.name.toLowerCase();
+      if (!lowerName.endsWith('.pem')) {
+        setKeyError('Select a PEM public key file.');
+        return;
       }
-    } finally {
-      setIsCopying(false);
+
+      const content = await file.text();
+      if (!content.includes('-----BEGIN PUBLIC KEY-----') || !content.includes('-----END PUBLIC KEY-----')) {
+        setKeyError('The selected file is not a valid PEM public key file.');
+        return;
+      }
+
+      setSelectedPublicKey({
+        name: file.name,
+        content,
+        source: 'upload'
+      });
+      setKeyError('');
+      resetVerificationState();
+    } catch {
+      setKeyError('The public key file could not be read.');
     }
   };
 
-  const handleCopyPublicKey = async () => {
+  const handleDownloadCurrentPublicKey = () => {
     if (!publicKeyPem) {
-      setPublicKeyCopyMessage(NO_PUBLIC_KEY_MESSAGE);
+      setKeyError(NO_PUBLIC_KEY_MESSAGE);
       return;
     }
 
-    setIsCopyingPublicKey(true);
-    resetCopyMessages();
+    const fileName = createPublicKeyDownloadFileName(publicSigningKeyId);
+    downloadTextFile(fileName, publicKeyPem, 'application/x-pem-file');
+    setSelectedPublicKey({
+      name: fileName,
+      content: publicKeyPem,
+      source: 'download'
+    });
+    setKeyError('');
+    resetVerificationState();
+  };
+
+  const handleExportFileSelected = async (file: File) => {
+    const lowerName = file.name.toLowerCase();
+
+    if (!lowerName.endsWith('.zip') && !lowerName.endsWith('.json')) {
+      setExportFileError('Select a confirmation JSON file or a case export ZIP file.');
+      return;
+    }
+
+    setSelectedExportFile(file);
+    setExportFileError('');
+    resetVerificationState();
+  };
+
+  const handleVerify = async () => {
+    const hasPublicKey = !!selectedPublicKey?.content;
+    const hasExportFile = !!selectedExportFile;
+
+    setKeyError(hasPublicKey ? '' : 'Select or download a public key PEM file first.');
+    setExportFileError(hasExportFile ? '' : 'Select a confirmation JSON file or a case export ZIP file.');
+
+    if (!hasPublicKey || !hasExportFile || !selectedPublicKey || !selectedExportFile) {
+      return;
+    }
+
+    setIsVerifying(true);
+    setVerificationOutcome(null);
 
     try {
-      const { copied, error } = await copyTextToClipboard(publicKeyPem);
-      setPublicKeyCopyMessage(copied ? 'Public key copied to clipboard.' : COPY_FAILED_MESSAGE);
-      if (!copied) {
-        console.error('Failed to copy public signing key:', error);
-      }
+      const result = await verifyExportFile(selectedExportFile, selectedPublicKey.content);
+      setVerificationOutcome({
+        state: result.isValid ? 'pass' : 'fail',
+        message: result.message
+      });
     } finally {
-      setIsCopyingPublicKey(false);
+      setIsVerifying(false);
     }
   };
 
-  const handleCopyAppleTemplate = async () => {
-    await copyVerifierTemplate(
-      createAppleVerifierTemplate(expectedKeyId),
-      setIsCopyingAppleTemplate,
-      'Apple/Linux verifier script copied to clipboard.',
-      'Apple/Linux verifier script'
-    );
-  };
+  const selectedKeyDescription = selectedPublicKey
+    ? selectedPublicKey.source === 'download'
+      ? 'Downloaded from this Striae environment and ready to use.'
+      : 'Loaded from your device and ready to use.'
+    : undefined;
 
-  const handleCopyPowerShellTemplate = async () => {
-    await copyVerifierTemplate(
-      createPowerShellVerifierTemplate(expectedKeyId),
-      setIsCopyingPowerShellTemplate,
-      'PowerShell verifier script copied to clipboard.',
-      'PowerShell verifier script'
-    );
-  };
-
-  const statusMessage = instructionCopyMessage || publicKeyCopyMessage;
+  const selectedExportDescription = selectedExportFile
+    ? `${selectedExportFile.name.toLowerCase().endsWith('.zip') ? 'Case export ZIP' : 'Confirmation JSON'} • ${formatFileSize(selectedExportFile.size)}`
+    : undefined;
 
   return (
     <div
@@ -182,231 +407,80 @@ export const PublicSigningKeyModal = ({
 
         <div className={styles.content}>
           <p className={styles.description}>
-            This key verifies digital signatures attached to Striae exports. It is safe to share for
-            independent verification.
+            Drop a public key PEM file and a Striae confirmation JSON or case export ZIP, then run
+            verification directly in the browser.
           </p>
 
           {publicSigningKeyId && (
             <p className={styles.meta}>
-              Key ID: <span>{publicSigningKeyId}</span>
+              Current key ID: <span>{publicSigningKeyId}</span>
             </p>
           )}
 
-          <label htmlFor={publicSigningKeyFieldId} className={styles.label}>
-            Public signing key (PEM)
-          </label>
-          <textarea
-            id={publicSigningKeyFieldId}
-            className={styles.field}
-            value={publicKeyPem || NO_PUBLIC_KEY_MESSAGE}
-            readOnly
-            rows={10}
-          />
+          <div className={styles.verifierLayout}>
+            <VerificationDropZone
+              inputId={publicKeyInputId}
+              label="1. Public Key PEM"
+              accept=".pem"
+              emptyText="Drop a public key PEM file here"
+              helperText="Use a .pem file containing the Striae public signing key."
+              selectedFileName={selectedPublicKey?.name}
+              selectedDescription={selectedKeyDescription}
+              errorMessage={keyError}
+              onFileSelected={handlePublicKeySelected}
+              onClear={() => {
+                setSelectedPublicKey(null);
+                setKeyError('');
+                resetVerificationState();
+              }}
+              actionButton={{
+                label: 'Download Current Public Key',
+                onClick: handleDownloadCurrentPublicKey,
+                disabled: !publicKeyPem
+              }}
+            />
 
-          <p className={styles.howToTitle}>How to verify Striae exports</p>
-          <p className={styles.howToIntro}>
-            Follow this checklist exactly. Treat the export as untrusted unless every step passes.
-          </p>
+            <VerificationDropZone
+              inputId={exportFileInputId}
+              label="2. Confirmation JSON or Export ZIP"
+              accept=".json,.zip"
+              emptyText="Drop a confirmation JSON or case export ZIP here"
+              helperText="Confirmation exports use .json. Case exports use .zip."
+              selectedFileName={selectedExportFile?.name}
+              selectedDescription={selectedExportDescription}
+              errorMessage={exportFileError}
+              onFileSelected={handleExportFileSelected}
+              onClear={() => {
+                setSelectedExportFile(null);
+                setExportFileError('');
+                resetVerificationState();
+              }}
+            />
+          </div>
 
-          <details className={styles.howToSection} open>
-            <summary className={styles.howToSectionSummary}>Quick checks (all exports)</summary>
-            <div className={styles.howToSectionBody}>
-              <ol className={styles.howToList}>
-                <li>
-                  Locate the signature envelope and confirm it includes
-                  {' '}
-                  <code className={styles.inlineCode}>algorithm</code>,
-                  {' '}
-                  <code className={styles.inlineCode}>keyId</code>, and
-                  {' '}
-                  <code className={styles.inlineCode}>value</code>.
-                </li>
-                <li>
-                  Require
-                  {' '}
-                  <code className={styles.inlineCode}>algorithm=RSASSA-PKCS1-v1_5-SHA-256</code>.
-                </li>
-                <li>
-                  Require
-                  {' '}
-                  <code className={styles.inlineCode}>keyId</code>
-                  {' '}
-                  to match the key ID shown above.
-                </li>
-                <li>
-                  Base64url-decode
-                  {' '}
-                  <code className={styles.inlineCode}>value</code>
-                  {' '}
-                  before verification.
-                </li>
-              </ol>
+          {verificationOutcome && (
+            <div
+              className={`${styles.resultCard} ${verificationOutcome.state === 'pass' ? styles.resultPass : styles.resultFail}`}
+              role="status"
+              aria-live="polite"
+            >
+              <p className={styles.resultTitle}>{verificationOutcome.state === 'pass' ? 'PASS' : 'FAIL'}</p>
+              <p className={styles.resultMessage}>{verificationOutcome.message}</p>
             </div>
-          </details>
-
-          <details className={styles.howToSection}>
-            <summary className={styles.howToSectionSummary}>Case ZIP export (FORENSIC_MANIFEST.json)</summary>
-            <div className={styles.howToSectionBody}>
-              <ol className={styles.howToList}>
-                <li>
-                  Open
-                  {' '}
-                  <code className={styles.inlineCode}>FORENSIC_MANIFEST.json</code>
-                  {' '}
-                  and read signature metadata from
-                  {' '}
-                  <code className={styles.inlineCode}>signature</code>.
-                </li>
-                <li>
-                  Build canonical payload JSON with this exact order and normalization:
-                  {' '}
-                  <code className={styles.inlineCode}>
-                    manifestVersion, dataHash(lowercase), imageHashes(sorted by filename + lowercase values),
-                    manifestHash(lowercase), totalFiles, createdAt
-                  </code>
-                  .
-                </li>
-                <li>
-                  Verify signature over UTF-8 bytes of that canonical payload using RSA PKCS#1 v1.5 + SHA-256.
-                </li>
-                <li>
-                  Recompute data/image/manifest hashes and require all hash checks to pass.
-                </li>
-              </ol>
-              <p className={styles.howToNote}>
-                Use the platform-specific script buttons below to run this workflow.
-              </p>
-            </div>
-          </details>
-
-          <details className={styles.howToSection}>
-            <summary className={styles.howToSectionSummary}>
-              Confirmation export (confirmation-data-*.json)
-            </summary>
-            <div className={styles.howToSectionBody}>
-              <ol className={styles.howToList}>
-                <li>
-                  Read signature metadata from
-                  {' '}
-                  <code className={styles.inlineCode}>metadata.signature</code>
-                  {' '}
-                  and version from
-                  {' '}
-                  <code className={styles.inlineCode}>metadata.signatureVersion</code>.
-                </li>
-                <li>
-                  Recompute
-                  {' '}
-                  <code className={styles.inlineCode}>metadata.hash</code>
-                  {' '}
-                  from the unsigned payload (remove
-                  {' '}
-                  <code className={styles.inlineCode}>metadata.hash</code>,
-                  {' '}
-                  <code className={styles.inlineCode}>metadata.signature</code>, and
-                  {' '}
-                  <code className={styles.inlineCode}>metadata.signatureVersion</code>
-                  {' '}
-                  first).
-                </li>
-                <li>
-                  Build canonical signing payload with stable metadata field order, uppercase hash, sorted
-                  image IDs, and sorted confirmation entries.
-                </li>
-                <li>
-                  Verify signature over UTF-8 bytes of the canonical payload using RSA PKCS#1 v1.5 + SHA-256.
-                </li>
-              </ol>
-              <p className={styles.howToNote}>
-                Use the platform-specific script buttons below to run this workflow.
-              </p>
-            </div>
-          </details>
-
-          <details className={styles.howToSection}>
-            <summary className={styles.howToSectionSummary}>Windows PowerShell verifier</summary>
-            <div className={styles.howToSectionBody}>
-              <p className={styles.howToNote}>
-                Use this option to validate case ZIP or confirmation exports with PowerShell plus OpenSSL.
-              </p>
-              <button
-                type="button"
-                className={styles.templateButton}
-                onClick={handleCopyPowerShellTemplate}
-                disabled={isCopyingPowerShellTemplate}
-              >
-                {isCopyingPowerShellTemplate ? 'Copying...' : 'Copy PowerShell Verifier Script'}
-              </button>
-              <p className={styles.commandExample}>
-                Case:
-                {' '}
-                <code className={styles.commandCode}>
-                  {POWER_SHELL_COMMAND_EXAMPLES.case}
-                </code>
-              </p>
-              <p className={styles.commandExample}>
-                Confirmation:
-                {' '}
-                <code className={styles.commandCode}>
-                  {POWER_SHELL_COMMAND_EXAMPLES.confirmation}
-                </code>
-              </p>
-            </div>
-          </details>
-
-          <details className={styles.howToSection}>
-            <summary className={styles.howToSectionSummary}>Apple / Linux verifier</summary>
-            <div className={styles.howToSectionBody}>
-              <p className={styles.howToNote}>
-                Use this option to validate exports with Python 3 plus OpenSSL on macOS or Linux.
-              </p>
-              <button
-                type="button"
-                className={styles.templateButton}
-                onClick={handleCopyAppleTemplate}
-                disabled={isCopyingAppleTemplate}
-              >
-                {isCopyingAppleTemplate ? 'Copying...' : 'Copy Apple/Linux Verifier Script'}
-              </button>
-              <p className={styles.commandExample}>
-                Case:
-                {' '}
-                <code className={styles.commandCode}>
-                  {APPLE_COMMAND_EXAMPLES.case}
-                </code>
-              </p>
-              <p className={styles.commandExample}>
-                Confirmation:
-                {' '}
-                <code className={styles.commandCode}>
-                  {APPLE_COMMAND_EXAMPLES.confirmation}
-                </code>
-              </p>
-            </div>
-          </details>
-
-          <p className={styles.passFailNote}>
-            Result rule: trust the export only when signature verification and integrity checks both PASS.
-          </p>
-
-          {statusMessage && (
-            <p className={styles.status} role="status" aria-live="polite">
-              {statusMessage}
-            </p>
           )}
 
           <div className={styles.actions}>
             <button
               type="button"
-              className={styles.copyButton}
-              onClick={handleCopyPublicKey}
-              disabled={isCopyingPublicKey || !publicKeyPem}
+              className={styles.primaryButton}
+              onClick={handleVerify}
+              disabled={isVerifying || !selectedPublicKey || !selectedExportFile}
             >
-              {isCopyingPublicKey ? 'Copying...' : 'Copy Key'}
+              {isVerifying ? 'Verifying...' : 'Verify File'}
             </button>
             <button
               type="button"
-              className={styles.closeModalButton}
+              className={styles.secondaryButton}
               onClick={onClose}
             >
               Close

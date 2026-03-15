@@ -20,6 +20,10 @@ export interface SignatureVerificationMessages {
   verificationFailedError?: string;
 }
 
+export interface SignatureVerificationOptions {
+  verificationPublicKeyPem?: string;
+}
+
 type ManifestSigningConfig = {
   manifest_signing_public_keys?: Record<string, string>;
   manifest_signing_public_key?: string;
@@ -91,7 +95,8 @@ export async function verifySignaturePayload(
   payload: string,
   signature: SignatureEnvelope,
   expectedAlgorithm: string,
-  messages: SignatureVerificationMessages = {}
+  messages: SignatureVerificationMessages = {},
+  options: SignatureVerificationOptions = {}
 ): Promise<SignatureVerificationResult> {
   if (signature.algorithm !== expectedAlgorithm) {
     return {
@@ -108,7 +113,10 @@ export async function verifySignaturePayload(
     };
   }
 
-  const publicKeyPem = getVerificationPublicKey(signature.keyId);
+  const publicKeyPem =
+    typeof options.verificationPublicKeyPem === 'string' && options.verificationPublicKeyPem.trim().length > 0
+      ? options.verificationPublicKeyPem
+      : getVerificationPublicKey(signature.keyId);
   if (!publicKeyPem) {
     return {
       isValid: false,
