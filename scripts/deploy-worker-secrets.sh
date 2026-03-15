@@ -131,9 +131,23 @@ set_worker_secrets() {
     echo -e "${YELLOW}  Using worker name: $config_worker_name${NC}"
     
     for secret in "${secrets[@]}"; do
-        echo -e "${YELLOW}  Setting $secret...${NC}"
-        if ! echo "${!secret}" | wrangler secret put "$secret" --name "$config_worker_name"; then
-            echo -e "${RED}❌ Failed to set $secret for $worker_name${NC}"
+        local secret_name="$secret"
+        local env_var_name="$secret"
+
+        if [[ "$secret" == *=* ]]; then
+            secret_name="${secret%%=*}"
+            env_var_name="${secret#*=}"
+        fi
+
+        if [ -z "${!env_var_name}" ]; then
+            echo -e "${RED}❌ Missing value for $env_var_name while setting $secret_name for $worker_name${NC}"
+            popd > /dev/null
+            return 1
+        fi
+
+        echo -e "${YELLOW}  Setting $secret_name (from $env_var_name)...${NC}"
+        if ! echo "${!env_var_name}" | wrangler secret put "$secret_name" --name "$config_worker_name"; then
+            echo -e "${RED}❌ Failed to set $secret_name for $worker_name${NC}"
             popd > /dev/null
             return 1
         fi
@@ -169,38 +183,37 @@ fi
 
 # Audit Worker
 if ! set_worker_secrets "Audit Worker" "workers/audit-worker" \
-    "R2_KEY_SECRET"; then
+    "R2_KEY_SECRET" "CF_ACCESS_AUD=AUDIT_CF_ACCESS_AUD" "CF_ACCESS_JWKS_URL"; then
     echo -e "${YELLOW}⚠️  Skipping Audit Worker (not configured)${NC}"
 fi
 
 # Keys Worker
 if ! set_worker_secrets "Keys Worker" "workers/keys-worker" \
-    "KEYS_AUTH" "USER_DB_AUTH" "R2_KEY_SECRET" "ACCOUNT_HASH" "IMAGES_API_TOKEN" "PDF_WORKER_AUTH"; then
+    "KEYS_AUTH" "USER_DB_AUTH" "R2_KEY_SECRET" "ACCOUNT_HASH" "IMAGES_API_TOKEN" "PDF_WORKER_AUTH" "CF_ACCESS_AUD=KEYS_CF_ACCESS_AUD" "CF_ACCESS_JWKS_URL"; then
     echo -e "${YELLOW}⚠️  Skipping Keys Worker (not configured)${NC}"
 fi
 
 # User Worker  
 if ! set_worker_secrets "User Worker" "workers/user-worker" \
-    "USER_DB_AUTH" "R2_KEY_SECRET" "IMAGES_API_TOKEN" "DATA_WORKER_DOMAIN" "IMAGES_WORKER_DOMAIN" "PROJECT_ID" "FIREBASE_SERVICE_ACCOUNT_EMAIL" "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY"; then
+    "USER_DB_AUTH" "R2_KEY_SECRET" "IMAGES_API_TOKEN" "DATA_WORKER_DOMAIN" "IMAGES_WORKER_DOMAIN" "PROJECT_ID" "FIREBASE_SERVICE_ACCOUNT_EMAIL" "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" "CF_ACCESS_AUD=USER_CF_ACCESS_AUD" "CF_ACCESS_JWKS_URL"; then
     echo -e "${YELLOW}⚠️  Skipping User Worker (not configured)${NC}"
 fi
 
 # Data Worker
 if ! set_worker_secrets "Data Worker" "workers/data-worker" \
-    "R2_KEY_SECRET" "MANIFEST_SIGNING_PRIVATE_KEY" "MANIFEST_SIGNING_KEY_ID"; then
+    "R2_KEY_SECRET" "MANIFEST_SIGNING_PRIVATE_KEY" "MANIFEST_SIGNING_KEY_ID" "CF_ACCESS_AUD=DATA_CF_ACCESS_AUD" "CF_ACCESS_JWKS_URL"; then
     echo -e "${YELLOW}⚠️  Skipping Data Worker (not configured)${NC}"
 fi
 
 # Images Worker
 if ! set_worker_secrets "Images Worker" "workers/image-worker" \
-    "ACCOUNT_ID" "API_TOKEN" "HMAC_KEY"; then
+    "ACCOUNT_ID" "API_TOKEN" "HMAC_KEY" "CF_ACCESS_AUD=IMAGES_CF_ACCESS_AUD" "CF_ACCESS_JWKS_URL"; then
     echo -e "${YELLOW}⚠️  Skipping Images Worker (not configured)${NC}"
 fi
 
-# PDF Worker (no secrets needed)
 # PDF Worker
 if ! set_worker_secrets "PDF Worker" "workers/pdf-worker" \
-    "PDF_WORKER_AUTH"; then
+    "PDF_WORKER_AUTH" "CF_ACCESS_AUD=PDF_CF_ACCESS_AUD" "CF_ACCESS_JWKS_URL"; then
     echo -e "${YELLOW}⚠️  Skipping PDF Worker (not configured)${NC}"
 fi
 
