@@ -18,6 +18,10 @@ function textResponse(message: string, status: number): Response {
 }
 
 function normalizeWorkerBaseUrl(workerDomain: string): string {
+  if (typeof workerDomain !== 'string' || workerDomain.trim().length === 0) {
+    throw new Error('Invalid worker domain');
+  }
+
   const trimmedDomain = workerDomain.trim().replace(/\/+$/, '');
   if (trimmedDomain.startsWith('http://') || trimmedDomain.startsWith('https://')) {
     return trimmedDomain;
@@ -82,6 +86,10 @@ export const onRequest = async ({ request, env }: UserProxyContext): Promise<Res
 
   if (requestedUserId !== identity.uid) {
     return textResponse('Forbidden', 403);
+  }
+
+  if (!env.USER_WORKER_DOMAIN || !env.USER_DB_AUTH) {
+    return textResponse('User service not configured', 502);
   }
 
   const userWorkerBaseUrl = normalizeWorkerBaseUrl(env.USER_WORKER_DOMAIN);
