@@ -1,4 +1,4 @@
-import { isValidElement, useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import styles from './toast.module.css';
 
 interface ToastProps {
@@ -9,37 +9,7 @@ interface ToastProps {
   duration?: number;
 }
 
-const TOAST_NOTIFICATION_TITLES: Record<ToastProps['type'], string> = {
-  success: 'Striae Notification',
-  warning: 'Striae Warning',
-  error: 'Striae Alert'
-};
-
-const getDesktopNotificationMessage = (message: ReactNode): string => {
-  if (typeof message === 'string' || typeof message === 'number') {
-    return String(message);
-  }
-
-  if (Array.isArray(message)) {
-    const joinedMessage = message
-      .map((item) => getDesktopNotificationMessage(item))
-      .filter(Boolean)
-      .join(' ')
-      .trim();
-
-    return joinedMessage;
-  }
-
-  if (isValidElement<{ children?: ReactNode }>(message) && message.props.children) {
-    return getDesktopNotificationMessage(message.props.children);
-  }
-
-  return 'You have a new alert notification in Striae.';
-};
-
 export const Toast = ({ message, type, isVisible, onClose, duration = 4000 }: ToastProps) => {
-  const wasVisibleRef = useRef(false);
-
   useEffect(() => {
     if (isVisible && duration > 0) {
       const timer = setTimeout(() => {
@@ -49,30 +19,6 @@ export const Toast = ({ message, type, isVisible, onClose, duration = 4000 }: To
       return () => clearTimeout(timer);
     }
   }, [isVisible, onClose, duration]);
-
-  useEffect(() => {
-    const isNewToast = isVisible && !wasVisibleRef.current;
-
-    if (isNewToast && typeof window !== 'undefined' && 'Notification' in window) {
-      const desktopMessage = getDesktopNotificationMessage(message);
-      const notificationTitle = TOAST_NOTIFICATION_TITLES[type];
-
-      const showDesktopNotification = () => {
-        const notification = new Notification(notificationTitle, {
-          body: desktopMessage,
-          tag: `striae-${type}-toast`
-        });
-
-        setTimeout(() => notification.close(), 8000);
-      };
-
-      if (Notification.permission === 'granted') {
-        showDesktopNotification();
-      }
-    }
-
-    wasVisibleRef.current = isVisible;
-  }, [isVisible, message, type]);
 
   if (!isVisible) return null;
 
