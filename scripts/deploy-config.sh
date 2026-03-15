@@ -208,44 +208,10 @@ read_env_var_from_file() {
     ' "$env_file"
 }
 
-worker_domain_wrangler_path() {
-    case "$1" in
-        KEYS_WORKER_DOMAIN)
-            printf '%s' "workers/keys-worker/wrangler.jsonc"
-            ;;
-        USER_WORKER_DOMAIN)
-            printf '%s' "workers/user-worker/wrangler.jsonc"
-            ;;
-        DATA_WORKER_DOMAIN)
-            printf '%s' "workers/data-worker/wrangler.jsonc"
-            ;;
-        AUDIT_WORKER_DOMAIN)
-            printf '%s' "workers/audit-worker/wrangler.jsonc"
-            ;;
-        IMAGES_WORKER_DOMAIN)
-            printf '%s' "workers/image-worker/wrangler.jsonc"
-            ;;
-        PDF_WORKER_DOMAIN)
-            printf '%s' "workers/pdf-worker/wrangler.jsonc"
-            ;;
-    esac
-}
-
-read_worker_domain_from_wrangler() {
-    local wrangler_file=$1
-
-    if [ ! -f "$wrangler_file" ]; then
-        return 0
-    fi
-
-    sed -n 's/.*"pattern"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$wrangler_file" | head -n 1
-}
-
 resolve_existing_domain_value() {
     local var_name=$1
     local current_value=$2
     local preserved_value=""
-    local wrangler_file=""
 
     current_value=$(normalize_domain_value "$current_value")
 
@@ -269,24 +235,6 @@ resolve_existing_domain_value() {
         if [ -n "$preserved_value" ] && ! is_placeholder "$preserved_value"; then
             printf '%s' "$preserved_value"
             return 0
-        fi
-    fi
-
-    if [[ "$var_name" == *_WORKER_DOMAIN ]]; then
-        wrangler_file=$(worker_domain_wrangler_path "$var_name")
-
-        if [ -n "$wrangler_file" ] && [ -f "$wrangler_file" ]; then
-            preserved_value=$(read_worker_domain_from_wrangler "$wrangler_file")
-            preserved_value=$(normalize_domain_value "$preserved_value")
-
-            if [ "$preserved_value" = "$var_name" ]; then
-                preserved_value=""
-            fi
-
-            if [ -n "$preserved_value" ] && ! is_placeholder "$preserved_value"; then
-                printf '%s' "$preserved_value"
-                return 0
-            fi
         fi
     fi
 
@@ -560,7 +508,7 @@ required_vars=(
     "IMAGES_WORKER_NAME"
     "PDF_WORKER_NAME"
     
-    # Worker Domains (required for config replacement)
+    # Worker Domains (required for proxy/env secrets and worker fallbacks)
     "KEYS_WORKER_DOMAIN"
     "USER_WORKER_DOMAIN"
     "DATA_WORKER_DOMAIN"
@@ -752,13 +700,6 @@ validate_generated_configs() {
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in audit worker config"
     assert_contains_literal "workers/image-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in image worker config"
     assert_contains_literal "workers/pdf-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in pdf worker config"
-
-    assert_contains_literal "workers/keys-worker/wrangler.jsonc" "$KEYS_WORKER_DOMAIN" "KEYS_WORKER_DOMAIN missing in keys worker config"
-    assert_contains_literal "workers/user-worker/wrangler.jsonc" "$USER_WORKER_DOMAIN" "USER_WORKER_DOMAIN missing in user worker config"
-    assert_contains_literal "workers/data-worker/wrangler.jsonc" "$DATA_WORKER_DOMAIN" "DATA_WORKER_DOMAIN missing in data worker config"
-    assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$AUDIT_WORKER_DOMAIN" "AUDIT_WORKER_DOMAIN missing in audit worker config"
-    assert_contains_literal "workers/image-worker/wrangler.jsonc" "$IMAGES_WORKER_DOMAIN" "IMAGES_WORKER_DOMAIN missing in image worker config"
-    assert_contains_literal "workers/pdf-worker/wrangler.jsonc" "$PDF_WORKER_DOMAIN" "PDF_WORKER_DOMAIN missing in pdf worker config"
 
     assert_contains_literal "workers/data-worker/wrangler.jsonc" "$DATA_BUCKET_NAME" "DATA_BUCKET_NAME missing in data worker config"
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$AUDIT_BUCKET_NAME" "AUDIT_BUCKET_NAME missing in audit worker config"
@@ -1344,7 +1285,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating audit-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"AUDIT_WORKER_NAME\"/\"$AUDIT_WORKER_NAME\"/g" workers/audit-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/audit-worker/wrangler.jsonc
-        sed -i "s/\"AUDIT_WORKER_DOMAIN\"/\"$AUDIT_WORKER_DOMAIN\"/g" workers/audit-worker/wrangler.jsonc
         sed -i "s/\"AUDIT_BUCKET_NAME\"/\"$AUDIT_BUCKET_NAME\"/g" workers/audit-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ audit-worker configuration updated${NC}"
     fi
@@ -1361,7 +1301,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating data-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"DATA_WORKER_NAME\"/\"$DATA_WORKER_NAME\"/g" workers/data-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/data-worker/wrangler.jsonc
-        sed -i "s/\"DATA_WORKER_DOMAIN\"/\"$DATA_WORKER_DOMAIN\"/g" workers/data-worker/wrangler.jsonc
         sed -i "s/\"DATA_BUCKET_NAME\"/\"$DATA_BUCKET_NAME\"/g" workers/data-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ data-worker configuration updated${NC}"
     fi
@@ -1378,7 +1317,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating image-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"IMAGES_WORKER_NAME\"/\"$IMAGES_WORKER_NAME\"/g" workers/image-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/image-worker/wrangler.jsonc
-        sed -i "s/\"IMAGES_WORKER_DOMAIN\"/\"$IMAGES_WORKER_DOMAIN\"/g" workers/image-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ image-worker configuration updated${NC}"
     fi
     
@@ -1394,7 +1332,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating keys-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"KEYS_WORKER_NAME\"/\"$KEYS_WORKER_NAME\"/g" workers/keys-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/keys-worker/wrangler.jsonc
-        sed -i "s/\"KEYS_WORKER_DOMAIN\"/\"$KEYS_WORKER_DOMAIN\"/g" workers/keys-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ keys-worker configuration updated${NC}"
     fi
     
@@ -1410,7 +1347,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating pdf-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"PDF_WORKER_NAME\"/\"$PDF_WORKER_NAME\"/g" workers/pdf-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/pdf-worker/wrangler.jsonc
-        sed -i "s/\"PDF_WORKER_DOMAIN\"/\"$PDF_WORKER_DOMAIN\"/g" workers/pdf-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ pdf-worker configuration updated${NC}"
     fi
     
@@ -1426,7 +1362,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating user-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"USER_WORKER_NAME\"/\"$USER_WORKER_NAME\"/g" workers/user-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/user-worker/wrangler.jsonc
-        sed -i "s/\"USER_WORKER_DOMAIN\"/\"$USER_WORKER_DOMAIN\"/g" workers/user-worker/wrangler.jsonc
         sed -i "s/\"KV_STORE_ID\"/\"$KV_STORE_ID\"/g" workers/user-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ user-worker configuration updated${NC}"
     fi
