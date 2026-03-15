@@ -770,8 +770,8 @@
   width: 100%;
   padding: 0.75rem;
   background-color: #dc3545;
-  color: #dc3545;
-  border: 1.5px solid #dc3545;
+  color: white;
+  border: none;
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
@@ -780,9 +780,13 @@
 }
 
 .cancelSwitchButton:hover:not(:disabled) {
-  background-color: rgba(220, 53, 69, 0.08);
-  border-color: #bd2130;
-  color: #bd2130;
+  background-color: #bd2130;
+}
+
+.cancelSwitchButton:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
 }
 
 .cancelSwitchButton:disabled {
