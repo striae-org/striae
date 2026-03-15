@@ -68,16 +68,6 @@ export const Toast = ({ message, type, isVisible, onClose, duration = 4000 }: To
 
       if (Notification.permission === 'granted') {
         showDesktopNotification();
-      } else if (Notification.permission === 'default') {
-        void Notification.requestPermission()
-          .then((permission) => {
-            if (permission === 'granted') {
-              showDesktopNotification();
-            }
-          })
-          .catch((error) => {
-            console.error('Failed to request desktop notification permission:', error);
-          });
       }
     }
 

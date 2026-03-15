@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams, type MetaFunction } from 'react-router';
 import { auth } from '~/services/firebase';
 import {
@@ -18,6 +18,7 @@ import { EmailActionHandler } from '~/routes/auth/emailActionHandler';
 import { handleAuthError } from '~/services/firebase/errors';
 import { MFAVerification } from '~/components/auth/mfa-verification';
 import { MFAEnrollment } from '~/components/auth/mfa-enrollment';
+import { Toast } from '~/components/toast/toast';
 import { Icon } from '~/components/icon/icon';
 import styles from './login.module.css';
 import { Striae } from '~/routes/striae/striae';
@@ -32,6 +33,7 @@ const APP_CANONICAL_ORIGIN = 'https://app.striae.org';
 const SOCIAL_IMAGE_PATH = '/social-image.png';
 const SOCIAL_IMAGE_ALT = 'Striae forensic annotation and comparison workspace';
 const LOGIN_PATH_ALIASES = new Set(['/auth', '/auth/', '/auth/login', '/auth/login/']);
+const NOTIFICATION_PERMISSION_PROMPTED_KEY = 'striae_notification_permission_prompted';
 
 type AuthMetaContent = {
   title: string;
@@ -120,11 +122,32 @@ export const meta: MetaFunction = ({ location }) => {
 
 const SUPPORTED_EMAIL_ACTION_MODES = new Set(['resetPassword', 'verifyEmail', 'recoverEmail']);
 
+const getUserFirstName = (user: User): string => {
+  const displayName = user.displayName?.trim();
+  if (displayName) {
+    const [firstName] = displayName.split(/\s+/);
+    if (firstName) {
+      return firstName;
+    }
+  }
+
+  const emailPrefix = user.email?.split('@')[0]?.trim();
+  if (emailPrefix) {
+    return emailPrefix;
+  }
+
+  return 'User';
+};
+
 export const Login = () => {
   const [searchParams] = useSearchParams();
+  const hasPromptedNotificationPermissionRef = useRef(false);
+  const shouldShowWelcomeToastRef = useRef(false);
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [welcomeToastMessage, setWelcomeToastMessage] = useState('');
+  const [isWelcomeToastVisible, setIsWelcomeToastVisible] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingUser, setIsCheckingUser] = useState(false);
@@ -159,6 +182,33 @@ export const Login = () => {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const requestDesktopNotificationPermission = async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return;
+    }
+
+    if (Notification.permission !== 'default' || hasPromptedNotificationPermissionRef.current) {
+      return;
+    }
+
+    hasPromptedNotificationPermissionRef.current = true;
+
+    try {
+      if (window.sessionStorage.getItem(NOTIFICATION_PERMISSION_PROMPTED_KEY) === '1') {
+        return;
+      }
+      window.sessionStorage.setItem(NOTIFICATION_PERMISSION_PROMPTED_KEY, '1');
+    } catch {
+      // Continue with permission request if storage is unavailable.
+    }
+
+    try {
+      await Notification.requestPermission();
+    } catch (notificationError) {
+      console.error('Failed to request desktop notification permission after login:', notificationError);
+    }
+  };
 
   // Email validation with regex
   const validateRegistrationEmail = (email: string): { valid: boolean } => {
@@ -260,6 +310,14 @@ export const Login = () => {
       
       console.log("User signed in:", currentUser.email);
       setShowMfaEnrollment(false);
+
+      if (shouldShowWelcomeToastRef.current) {
+        setWelcomeToastMessage(`Welcome to Striae, ${getUserFirstName(currentUser)}!`);
+        setIsWelcomeToastVisible(true);
+        shouldShowWelcomeToastRef.current = false;
+      }
+
+      void requestDesktopNotificationPermission();
       
       // Log successful login audit
       try {
@@ -278,6 +336,8 @@ export const Login = () => {
       setUser(null);
       setShowMfaEnrollment(false);
       setIsCheckingUser(false);
+      setIsWelcomeToastVisible(false);
+      shouldShowWelcomeToastRef.current = false;
     }
   });
 
@@ -419,6 +479,7 @@ export const Login = () => {
       // Don't sign out - let user stay logged in but unverified to see verification screen
     } else {
       // Login
+      shouldShowWelcomeToastRef.current = true;
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (loginError: unknown) {
@@ -436,10 +497,12 @@ export const Login = () => {
           setIsLoading(false);
           return;
         }
+        shouldShowWelcomeToastRef.current = false;
         throw loginError; // Re-throw non-MFA errors
       }
     }
   } catch (err) {
+    shouldShowWelcomeToastRef.current = false;
     const { message } = handleAuthError(err);
     setError(message);
     
@@ -488,6 +551,8 @@ export const Login = () => {
       setShowMfaEnrollment(false);
       setShowMfaVerification(false);
       setMfaResolver(null);
+      setIsWelcomeToastVisible(false);
+      shouldShowWelcomeToastRef.current = false;
     } catch (err) {
       console.error('Sign out error:', err);
     }
@@ -726,6 +791,15 @@ export const Login = () => {
           onSuccess={handleMfaEnrollmentSuccess}
           onError={handleMfaEnrollmentError}
           mandatory={true}
+        />
+      )}
+
+      {!shouldHandleEmailAction && (
+        <Toast
+          message={welcomeToastMessage}
+          type="success"
+          isVisible={isWelcomeToastVisible}
+          onClose={() => setIsWelcomeToastVisible(false)}
         />
       )}
       
