@@ -262,8 +262,8 @@ async function validateCloudflareAccessJwt(request: Request, env: Env): Promise<
 }
 
 async function isRequestAuthorized(request: Request, env: Env): Promise<boolean> {
-  if (hasValidHeader(request, env)) {
-    return true;
+  if (!hasValidHeader(request, env)) {
+    return false;
   }
 
   return validateCloudflareAccessJwt(request, env);

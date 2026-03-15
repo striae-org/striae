@@ -333,9 +333,7 @@ async function validateCloudflareAccessJwt(request: Request, env: Env): Promise<
 
 async function authenticate(request: Request, env: Env): Promise<void> {
   const authKey = request.headers.get('X-Custom-Auth-Key');
-  if (authKey === env.USER_DB_AUTH) {
-    return;
-  }
+  if (authKey !== env.USER_DB_AUTH) throw new Error('Unauthorized');
 
   const accessJwtValid = await validateCloudflareAccessJwt(request, env);
   if (!accessJwtValid) throw new Error('Unauthorized');
