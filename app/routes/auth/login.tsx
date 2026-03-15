@@ -214,11 +214,9 @@ export const Login = () => {
   };  
 
   // Check if user exists in the USER_DB using centralized function
-  const checkUserExists = async (uid: string): Promise<boolean> => {
+  const checkUserExists = async (currentUser: User): Promise<boolean> => {
     try {
-      // Create a minimal user object for the centralized function
-      const tempUser = { uid } as User;
-      const userData = await getUserData(tempUser);
+      const userData = await getUserData(currentUser);
       
       return userData !== null;
     } catch (error) {
@@ -257,7 +255,7 @@ export const Login = () => {
       // Check if user exists in the USER_DB
       setIsCheckingUser(true);
       try {
-        const userExists = await checkUserExists(currentUser.uid);
+        const userExists = await checkUserExists(currentUser);
         setIsCheckingUser(false);
         
         if (!userExists) {

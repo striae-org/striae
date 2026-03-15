@@ -19,22 +19,34 @@ export async function fetchUserApi(
   init: RequestInit = {}
 ): Promise<Response> {
   const normalizedPath = normalizePath(path);
+  const userWithOptionalToken = user as User & { getIdToken?: () => Promise<string> };
 
-  const headers = new Headers(init.headers);
-  const idToken = await user.getIdToken();
-  headers.set('Authorization', `Bearer ${idToken}`);
+  if (typeof userWithOptionalToken.getIdToken === 'function') {
+    let idToken: string | null = null;
 
-  try {
-    const proxyResponse = await fetch(`${USER_API_BASE}${normalizedPath}`, {
-      ...init,
-      headers
-    });
-
-    if (proxyResponse.status !== 404 && proxyResponse.status !== 405) {
-      return proxyResponse;
+    try {
+      idToken = await userWithOptionalToken.getIdToken();
+    } catch {
+      idToken = null;
     }
-  } catch {
-    // Temporary fallback while the proxy route rolls out through all environments.
+
+    if (idToken) {
+      const headers = new Headers(init.headers);
+      headers.set('Authorization', `Bearer ${idToken}`);
+
+      try {
+        const proxyResponse = await fetch(`${USER_API_BASE}${normalizedPath}`, {
+          ...init,
+          headers
+        });
+
+        if (proxyResponse.status !== 404 && proxyResponse.status !== 405) {
+          return proxyResponse;
+        }
+      } catch {
+        // Temporary fallback while the proxy route rolls out through all environments.
+      }
+    }
   }
 
   const apiKey = await getUserApiKey();
