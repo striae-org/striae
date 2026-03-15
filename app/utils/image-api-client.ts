@@ -1,11 +1,7 @@
 import type { User } from 'firebase/auth';
-import paths from '~/config/config.json';
-import { getImageApiKey } from './auth';
 import { type ImageUploadResponse } from '~/types';
 
 const IMAGE_API_BASE = '/api/image';
-const IMAGE_WORKER_URL = paths.image_worker_url;
-const PROXY_FALLBACK_STATUSES = new Set([401, 403, 404, 405, 500, 502, 503, 504]);
 
 function normalizePath(path: string): string {
   if (!path) {
@@ -23,42 +19,27 @@ export async function fetchImageApi(
   const normalizedPath = normalizePath(path);
   const userWithOptionalToken = user as User & { getIdToken?: () => Promise<string> };
 
-  if (typeof userWithOptionalToken.getIdToken === 'function') {
-    let idToken: string | null = null;
-
-    try {
-      idToken = await userWithOptionalToken.getIdToken();
-    } catch {
-      idToken = null;
-    }
-
-    if (idToken) {
-      const headers = new Headers(init.headers);
-      headers.set('Authorization', `Bearer ${idToken}`);
-
-      try {
-        const proxyResponse = await fetch(`${IMAGE_API_BASE}${normalizedPath}`, {
-          ...init,
-          headers
-        });
-
-        if (!PROXY_FALLBACK_STATUSES.has(proxyResponse.status)) {
-          return proxyResponse;
-        }
-      } catch {
-        // Temporary fallback while the proxy route rolls out through all environments.
-      }
-    }
+  if (typeof userWithOptionalToken.getIdToken !== 'function') {
+    throw new Error('Unable to authenticate request: missing Firebase token provider');
   }
 
-  const apiKey = await getImageApiKey();
-  const legacyHeaders = new Headers(init.headers);
-  legacyHeaders.delete('Authorization');
-  legacyHeaders.set('Authorization', `Bearer ${apiKey}`);
+  let idToken: string;
+  try {
+    idToken = await userWithOptionalToken.getIdToken();
+  } catch {
+    throw new Error('Unable to authenticate request: failed to retrieve Firebase token');
+  }
 
-  return fetch(`${IMAGE_WORKER_URL}${normalizedPath}`, {
+  if (!idToken) {
+    throw new Error('Unable to authenticate request: empty Firebase token');
+  }
+
+  const headers = new Headers(init.headers);
+  headers.set('Authorization', `Bearer ${idToken}`);
+
+  return fetch(`${IMAGE_API_BASE}${normalizedPath}`, {
     ...init,
-    headers: legacyHeaders
+    headers
   });
 }
 
@@ -119,48 +100,31 @@ export async function uploadImageApi(
 ): Promise<ImageUploadResponse> {
   const userWithOptionalToken = user as User & { getIdToken?: () => Promise<string> };
 
-  if (typeof userWithOptionalToken.getIdToken === 'function') {
-    let idToken: string | null = null;
-
-    try {
-      idToken = await userWithOptionalToken.getIdToken();
-    } catch {
-      idToken = null;
-    }
-
-    if (idToken) {
-      try {
-        const proxyUploadResult = await uploadWithXhr(
-          `${IMAGE_API_BASE}/`,
-          `Bearer ${idToken}`,
-          file,
-          onProgress
-        );
-
-        if (!PROXY_FALLBACK_STATUSES.has(proxyUploadResult.status)) {
-          if (proxyUploadResult.status >= 200 && proxyUploadResult.status < 300) {
-            return parseUploadResponse(proxyUploadResult.responseText);
-          }
-
-          throw new Error(`Upload failed with status ${proxyUploadResult.status}`);
-        }
-      } catch {
-        // Temporary fallback while the proxy route rolls out through all environments.
-      }
-    }
+  if (typeof userWithOptionalToken.getIdToken !== 'function') {
+    throw new Error('Unable to authenticate upload: missing Firebase token provider');
   }
 
-  const apiKey = await getImageApiKey();
-  const legacyUploadResult = await uploadWithXhr(
-    `${IMAGE_WORKER_URL}/`,
-    `Bearer ${apiKey}`,
+  let idToken: string;
+  try {
+    idToken = await userWithOptionalToken.getIdToken();
+  } catch {
+    throw new Error('Unable to authenticate upload: failed to retrieve Firebase token');
+  }
+
+  if (!idToken) {
+    throw new Error('Unable to authenticate upload: empty Firebase token');
+  }
+
+  const proxyUploadResult = await uploadWithXhr(
+    `${IMAGE_API_BASE}/`,
+    `Bearer ${idToken}`,
     file,
     onProgress
   );
 
-  if (legacyUploadResult.status < 200 || legacyUploadResult.status >= 300) {
-    throw new Error(`Upload failed with status ${legacyUploadResult.status}`);
+  if (proxyUploadResult.status < 200 || proxyUploadResult.status >= 300) {
+    throw new Error(`Upload failed with status ${proxyUploadResult.status}`);
   }
 
-  return parseUploadResponse(legacyUploadResult.responseText);
+  return parseUploadResponse(proxyUploadResult.responseText);
 }

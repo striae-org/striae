@@ -1,10 +1,6 @@
 import type { User } from 'firebase/auth';
-import paths from '~/config/config.json';
-import { getDataApiKey } from './auth';
 
 const DATA_API_BASE = '/api/data';
-const DATA_WORKER_URL = paths.data_worker_url;
-const PROXY_FALLBACK_STATUSES = new Set([401, 403, 404, 405, 500, 502, 503, 504]);
 
 function normalizePath(path: string): string {
   if (!path) {
@@ -22,41 +18,26 @@ export async function fetchDataApi(
   const normalizedPath = normalizePath(path);
   const userWithOptionalToken = user as User & { getIdToken?: () => Promise<string> };
 
-  if (typeof userWithOptionalToken.getIdToken === 'function') {
-    let idToken: string | null = null;
-
-    try {
-      idToken = await userWithOptionalToken.getIdToken();
-    } catch {
-      idToken = null;
-    }
-
-    if (idToken) {
-      const headers = new Headers(init.headers);
-      headers.set('Authorization', `Bearer ${idToken}`);
-
-      try {
-        const proxyResponse = await fetch(`${DATA_API_BASE}${normalizedPath}`, {
-          ...init,
-          headers
-        });
-
-        if (!PROXY_FALLBACK_STATUSES.has(proxyResponse.status)) {
-          return proxyResponse;
-        }
-      } catch {
-        // Temporary fallback while the proxy route rolls out through all environments.
-      }
-    }
+  if (typeof userWithOptionalToken.getIdToken !== 'function') {
+    throw new Error('Unable to authenticate request: missing Firebase token provider');
   }
 
-  const apiKey = await getDataApiKey();
-  const legacyHeaders = new Headers(init.headers);
-  legacyHeaders.delete('Authorization');
-  legacyHeaders.set('X-Custom-Auth-Key', apiKey);
+  let idToken: string;
+  try {
+    idToken = await userWithOptionalToken.getIdToken();
+  } catch {
+    throw new Error('Unable to authenticate request: failed to retrieve Firebase token');
+  }
 
-  return fetch(`${DATA_WORKER_URL}${normalizedPath}`, {
+  if (!idToken) {
+    throw new Error('Unable to authenticate request: empty Firebase token');
+  }
+
+  const headers = new Headers(init.headers);
+  headers.set('Authorization', `Bearer ${idToken}`);
+
+  return fetch(`${DATA_API_BASE}${normalizedPath}`, {
     ...init,
-    headers: legacyHeaders
+    headers
   });
 }

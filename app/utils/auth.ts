@@ -1,38 +1,11 @@
 import paths from '~/config/config.json';
 
-const KEYS_URL = paths.keys_url;
-const KEYS_AUTH = paths.keys_auth;
-
-type KeyType = 'USER_DB_AUTH' | 'R2_KEY_SECRET' | 'IMAGES_API_TOKEN' | 'ACCOUNT_HASH' | 'PDF_WORKER_AUTH';
-
-async function getApiKey(keyType: KeyType): Promise<string> {
-  const keyResponse = await fetch(`${KEYS_URL}/${keyType}`, {
-    headers: {
-      'X-Custom-Auth-Key': KEYS_AUTH
-    }
-  });
-  if (!keyResponse.ok) {
-    throw new Error(`Failed to retrieve ${keyType}`);
-  }
-  return keyResponse.text();
-}
-
-export async function getUserApiKey(): Promise<string> {
-  return getApiKey('USER_DB_AUTH');
-}
-
-export async function getDataApiKey(): Promise<string> {
-  return getApiKey('R2_KEY_SECRET');
-}
-
-export async function getImageApiKey(): Promise<string> {
-  return getApiKey('IMAGES_API_TOKEN');
-}
+const ACCOUNT_HASH = typeof paths.account_hash === 'string' ? paths.account_hash.trim() : '';
 
 export async function getAccountHash(): Promise<string> {
-  return getApiKey('ACCOUNT_HASH');
-}
+  if (!ACCOUNT_HASH) {
+    throw new Error('ACCOUNT_HASH is not configured in app/config/config.json');
+  }
 
-export async function getPdfApiKey(): Promise<string> {
-  return getApiKey('PDF_WORKER_AUTH');
+  return ACCOUNT_HASH;
 }
