@@ -7,11 +7,10 @@ import { Toast } from '~/components/toast/toast';
 import { getImageUrl } from '~/components/actions/image-manage';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
-import { getUserApiKey } from '~/utils/auth';
+import { fetchUserApi } from '~/utils/user-api-client';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
 import { type AnnotationData, type FileData } from '~/types';
 import { checkCaseIsReadOnly } from '~/components/actions/case-manage';
-import paths from '~/config/config.json';
 import styles from './striae.module.css';
 
 interface StriaePage {
@@ -76,11 +75,8 @@ export const Striae = ({ user }: StriaePage) => {
   useEffect(() => {
     const fetchUserCompany = async () => {
       try {
-        const apiKey = await getUserApiKey();
-        const response = await fetch(`${paths.user_worker_url}/${user.uid}`, {
-          headers: {
-            'X-Custom-Auth-Key': apiKey
-          }
+        const response = await fetchUserApi(user, `/${encodeURIComponent(user.uid)}`, {
+          method: 'GET'
         });
         
         if (response.ok) {
@@ -96,7 +92,7 @@ export const Striae = ({ user }: StriaePage) => {
     if (user?.uid) {
       fetchUserCompany();
     }
-  }, [user?.uid]);
+  }, [user]);
 
   const handleCaseChange = (caseNumber: string) => {
     setCurrentCase(caseNumber);
