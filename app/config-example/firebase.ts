@@ -8,8 +8,6 @@ interface FirebaseConfig {
   measurementId: string;  
 }
 
-// Firebase Web SDK config values are intended for client use.
-// Keep service-account credentials in server/worker secrets only.
 const firebaseConfig: FirebaseConfig = {
   apiKey: "YOUR_FIREBASE_API_KEY",
   authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
