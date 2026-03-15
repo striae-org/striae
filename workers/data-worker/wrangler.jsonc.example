@@ -19,12 +19,5 @@
     }
   ],
 
-  "routes": [
-    {
-      "pattern": "DATA_WORKER_DOMAIN",
-      "custom_domain": true
-    }
-  ],
-
   "placement": { "mode": "smart" }
 }

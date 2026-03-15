@@ -11,12 +11,5 @@
 	"enabled": true
   },  
 
-  "routes": [
-    {
-      "pattern": "KEYS_WORKER_DOMAIN",
-      "custom_domain": true
-    }
-  ],
-
   "placement": { "mode": "smart" }
 }

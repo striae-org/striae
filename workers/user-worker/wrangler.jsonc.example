@@ -18,12 +18,5 @@
     }
   ],
 
-  "routes": [
-    {
-      "pattern": "USER_WORKER_DOMAIN",
-      "custom_domain": true
-    }
-  ],
-
   "placement": { "mode": "smart" }
 }
