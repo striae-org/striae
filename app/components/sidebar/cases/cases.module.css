@@ -769,7 +769,7 @@
 .cancelSwitchButton {
   width: 100%;
   padding: 0.75rem;
-  background-color: transparent;
+  background-color: #dc3545;
   color: #6c757d;
   border: 1.5px solid #ced4da;
   border-radius: 6px;

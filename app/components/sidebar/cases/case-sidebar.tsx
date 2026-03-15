@@ -2,6 +2,7 @@ import type { User } from 'firebase/auth';
 import type * as CaseExportActions from '../../actions/case-export';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './cases.module.css';
+import { Toast } from '~/components/toast/toast';
 import { CasesModal } from './cases-modal';
 import { FilesModal } from '../files/files-modal';
 import { CaseExport, type ExportFormat } from '../case-export/case-export';
@@ -105,6 +106,9 @@ export const CaseSidebar = ({
   const [showCaseActions, setShowCaseActions] = useState(false);
   const [showCaseManagement, setShowCaseManagement] = useState(false);
   const [canCreateNewCase, setCanCreateNewCase] = useState(true);
+  const [isToastVisible, setIsToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'warning'>('success');
   const [canUploadNewFile, setCanUploadNewFile] = useState(true);
   const [createCaseError, setCreateCaseError] = useState('');
   const [uploadFileError, setUploadFileError] = useState('');
@@ -314,6 +318,24 @@ export const CaseSidebar = ({
       isCancelled = true;
     };
   }, [currentCase, fileIdsKey, user, selectedFileId, confirmationSaveVersion, files.length, calculateCaseConfirmationStatus]);
+
+  useEffect(() => {
+    if (error) {
+      setToastMessage(error);
+      setToastType('error');
+      setIsToastVisible(true);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (successAction) {
+      setToastMessage(`Case ${currentCase} ${successAction} successfully!`);
+      setToastType('success');
+      setIsToastVisible(true);
+    }
+    // currentCase intentionally omitted: we capture its value at the time successAction changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [successAction]);
   
   const handleCase = async () => {
     setIsLoading(true);
@@ -567,8 +589,8 @@ const handleImageSelect = (file: FileData) => {
   };
 
 return (
+    <>
     <div className={styles.caseSection}>
-     <div className={styles.caseSection}>
         {currentCase && !showCaseManagement ? (
           <div className={`${styles.caseLoad} mb-4`}>
             <button
@@ -633,12 +655,6 @@ return (
               </div>
             )}
           </>
-        )}
-        {error && <p className={styles.error}>{error}</p>}
-        {successAction && (
-          <p className={styles.success}>
-            Case {currentCase} {successAction} successfully!
-          </p>
         )}
     <CasesModal
         isOpen={isModalOpen}
@@ -859,6 +875,16 @@ return (
       />
       
       </div>
-    </div>
+    <Toast
+      message={toastMessage}
+      type={toastType}
+      isVisible={isToastVisible}
+      onClose={() => {
+        setIsToastVisible(false);
+        setError('');
+        setSuccessAction(null);
+      }}
+    />
+    </>
   );
 };
