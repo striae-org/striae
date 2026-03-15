@@ -74,6 +74,10 @@ textarea:focus {
   box-sizing: border-box;
 }
 
+.caseInput input:not(:disabled) {
+  background-color: #ffffff;
+}
+
 .caseInput input:focus {
   outline: none;
   border-color: #0d6efd;
@@ -106,6 +110,11 @@ textarea:focus {
   border-radius: 6px;
   font-size: 0.9rem;
   transition: border-color 0.2s;
+}
+
+.classCharacteristics input:not(:disabled),
+.classCharacteristics textarea:not(:disabled) {
+  background-color: #ffffff;
 }
 
 .classCharacteristics select,
@@ -189,6 +198,10 @@ textarea:focus {
   margin-top: 0.5rem;
   transition: border-color 0.2s;
   box-sizing: border-box;
+}
+
+.indexing input[type="text"]:not(:disabled) {
+  background-color: #ffffff;
 }
 
 .indexing input[type="text"]:focus {
