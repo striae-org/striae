@@ -539,25 +539,40 @@ const handleImageSelect = (file: FileData) => {
     ? 'Select an image first'
     : undefined;
 
-  const handleExport = async (exportCaseNumber: string, format: ExportFormat, includeImages?: boolean) => {
+  const handleExport = async (exportCaseNumber: string, format: ExportFormat, includeImages?: boolean, onProgress?: (progress: number, label: string) => void) => {
     try {
       const caseExportActions = await loadCaseExportActions();
 
       if (includeImages) {
         // ZIP export with images - only available for single case exports
-        await caseExportActions.downloadCaseAsZip(user, exportCaseNumber, format);
+        await caseExportActions.downloadCaseAsZip(user, exportCaseNumber, format, (progress) => {
+          const label = progress < 30 ? 'Loading case data' :
+                        progress < 50 ? 'Preparing archive' :
+                        progress < 80 ? 'Adding images' :
+                        progress < 96 ? 'Finalizing' : 'Downloading';
+          onProgress?.(Math.round(progress), label);
+        });
       } else {
         // Standard data-only export
-        const exportData = await caseExportActions.exportCaseData(user, exportCaseNumber, {
-          includeMetadata: true
-        });
-        
+        onProgress?.(5, 'Loading case data');
+        const exportData = await caseExportActions.exportCaseData(
+          user,
+          exportCaseNumber,
+          { includeMetadata: true },
+          (current, total, label) => {
+            const p = total > 0 ? Math.round(10 + (current / total) * 60) : 10;
+            onProgress?.(p, label);
+          }
+        );
+        onProgress?.(75, 'Preparing download');
+
         // Download the exported data in the selected format
         if (format === 'json') {
           await caseExportActions.downloadCaseAsJSON(user, exportData);
         } else {
           await caseExportActions.downloadCaseAsCSV(user, exportData);
         }
+        onProgress?.(100, 'Complete');
       }
       
     } catch (error) {
