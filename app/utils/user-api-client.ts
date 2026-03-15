@@ -4,6 +4,7 @@ import { getUserApiKey } from './auth';
 
 const USER_API_BASE = '/api/user';
 const USER_WORKER_URL = paths.user_worker_url;
+const PROXY_FALLBACK_STATUSES = new Set([401, 403, 404, 405, 500, 502, 503, 504]);
 
 function normalizePath(path: string): string {
   if (!path) {
@@ -40,7 +41,7 @@ export async function fetchUserApi(
           headers
         });
 
-        if (proxyResponse.status !== 404 && proxyResponse.status !== 405) {
+        if (!PROXY_FALLBACK_STATUSES.has(proxyResponse.status)) {
           return proxyResponse;
         }
       } catch {
