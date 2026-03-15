@@ -148,7 +148,8 @@ export function createConfirmationSigningPayload(
 }
 
 export async function verifyConfirmationSignature(
-  confirmationData: Partial<ConfirmationImportData>
+  confirmationData: Partial<ConfirmationImportData>,
+  verificationPublicKeyPem?: string
 ): Promise<ManifestSignatureVerificationResult> {
   const signature = confirmationData.metadata?.signature as ForensicManifestSignature | undefined;
   const signatureVersion = confirmationData.metadata?.signatureVersion;
@@ -188,6 +189,9 @@ export async function verifyConfirmationSignature(
       noVerificationKeyPrefix: 'No verification key configured for key ID',
       invalidPublicKeyError: 'Confirmation signature verification failed: invalid public key',
       verificationFailedError: 'Confirmation signature verification failed'
+    },
+    {
+      verificationPublicKeyPem
     }
   );
 }

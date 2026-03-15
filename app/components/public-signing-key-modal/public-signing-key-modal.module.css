@@ -79,93 +79,207 @@
   font-weight: var(--fontWeightMedium);
 }
 
-.label {
+.verifierLayout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceL);
+}
+
+.verificationField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceS);
+}
+
+.fieldHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spaceS);
+}
+
+.fieldLabel {
   font-size: var(--fontSizeBodyXS);
   font-weight: var(--fontWeightMedium);
   color: var(--textTitle);
 }
 
-.field {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  min-height: 180px;
-  padding: var(--spaceM);
-  border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
-  border-radius: var(--spaceXS);
-  background: color-mix(in lab, var(--background) 96%, transparent);
-  color: var(--textBody);
-  font-size: var(--fontSizeBodyXS);
-  line-height: 1.4;
-  font-family: Consolas, "Courier New", monospace;
-  resize: vertical;
+.hiddenFileInput {
+  display: none;
 }
 
-.howToTitle {
+.clearButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--primary);
+  font-size: var(--fontSizeBodyXS);
+  font-weight: var(--fontWeightMedium);
+  cursor: pointer;
+}
+
+.dropZone {
+  min-height: 144px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--spaceXS);
+  padding: var(--spaceL);
+  border: 1px dashed color-mix(in lab, var(--text) 18%, transparent);
+  border-radius: var(--radiusM);
+  background: linear-gradient(
+    135deg,
+    color-mix(in lab, var(--primary) 4%, var(--backgroundLight)),
+    color-mix(in lab, var(--background) 94%, transparent)
+  );
+  cursor: pointer;
+  transition:
+    border-color var(--durationS) var(--bezierFastoutSlowin),
+    background-color var(--durationS) var(--bezierFastoutSlowin),
+    box-shadow var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.dropZone:hover {
+  border-color: color-mix(in lab, var(--primary) 35%, transparent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in lab, var(--primary) 7%, var(--backgroundLight)),
+    color-mix(in lab, var(--background) 92%, transparent)
+  );
+}
+
+.dropZone:focus-visible {
+  outline: none;
+  border-color: color-mix(in lab, var(--primary) 48%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in lab, var(--primary) 14%, transparent);
+}
+
+.dropZoneActive {
+  border-color: color-mix(in lab, var(--primary) 50%, transparent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in lab, var(--primary) 10%, var(--backgroundLight)),
+    color-mix(in lab, var(--background) 90%, transparent)
+  );
+  box-shadow: 0 0 0 3px color-mix(in lab, var(--primary) 12%, transparent);
+}
+
+.dropZoneDisabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.dropZonePrimary {
   margin: 0;
   font-size: var(--fontSizeBodyS);
   font-weight: var(--fontWeightMedium);
   color: var(--textTitle);
 }
 
-.howToList {
+.dropZoneSecondary {
   margin: 0;
-  padding-left: var(--spaceL);
+  font-size: var(--fontSizeBodyXS);
+  color: var(--textBody);
+}
+
+.fieldActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spaceS);
+}
+
+.fieldError {
+  margin: 0;
+  font-size: var(--fontSizeBodyXS);
+  color: var(--error);
+}
+
+.resultCard {
   display: flex;
   flex-direction: column;
   gap: var(--spaceXS);
-  color: var(--textBody);
+  padding: var(--spaceM) var(--spaceL);
+  border-radius: var(--radiusM);
+}
+
+.resultPass {
+  border: 1px solid color-mix(in lab, var(--success) 38%, transparent);
+  background: color-mix(in lab, var(--success) 12%, var(--backgroundLight));
+}
+
+.resultFail {
+  border: 1px solid color-mix(in lab, var(--error) 32%, transparent);
+  background: color-mix(in lab, var(--errorLight) 40%, var(--backgroundLight));
+}
+
+.resultTitle {
+  margin: 0;
+  font-size: var(--fontSizeBodyM);
+  font-weight: var(--fontWeightBold);
+  letter-spacing: 0.06em;
+}
+
+.resultPass .resultTitle {
+  color: color-mix(in lab, var(--success) 78%, var(--black));
+}
+
+.resultFail .resultTitle {
+  color: color-mix(in lab, var(--error) 78%, var(--black));
+}
+
+.resultMessage {
+  margin: 0;
   font-size: var(--fontSizeBodyS);
+  color: var(--textBody);
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--spaceS);
+  flex-wrap: wrap;
 }
 
-.status {
-  margin: 0;
-  font-size: var(--fontSizeBodyXS);
-  color: var(--textBody);
-}
-
-.copyButton {
-  background: transparent;
-  color: var(--primary);
-  border: 1px solid color-mix(in lab, var(--primary) 35%, transparent);
+.primaryButton,
+.secondaryButton {
   border-radius: var(--spaceXS);
   padding: var(--spaceS) var(--spaceL);
   font-size: var(--fontSizeBodyS);
   font-weight: var(--fontWeightMedium);
   cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
+  transition:
+    background-color var(--durationS) var(--bezierFastoutSlowin),
+    border-color var(--durationS) var(--bezierFastoutSlowin),
+    color var(--durationS) var(--bezierFastoutSlowin);
 }
 
-.copyButton:hover:not(:disabled) {
-  background: color-mix(in lab, var(--primary) 10%, transparent);
-  border-color: color-mix(in lab, var(--primary) 55%, transparent);
+.primaryButton {
+  background: var(--primary);
+  color: var(--white);
+  border: 1px solid var(--primary);
 }
 
-.copyButton:disabled {
+.primaryButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--primary) 84%, var(--black));
+  border-color: color-mix(in lab, var(--primary) 84%, var(--black));
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--textTitle);
+  border: 1px solid color-mix(in lab, var(--text) 16%, transparent);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--text) 5%, transparent);
+  border-color: color-mix(in lab, var(--text) 22%, transparent);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
   background: color-mix(in lab, var(--background) 95%, transparent);
   color: var(--textLight);
   border-color: color-mix(in lab, var(--text) 10%, transparent);
   cursor: not-allowed;
-}
-
-.closeModalButton {
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: var(--spaceXS);
-  padding: var(--spaceS) var(--spaceL);
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
-  cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-}
-
-.closeModalButton:hover {
-  background: color-mix(in lab, var(--primary) 85%, var(--black));
 }

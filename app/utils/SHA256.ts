@@ -120,7 +120,8 @@ export function createManifestSigningPayload(
  * Verify manifest signature using configured public key(s).
  */
 export async function verifyForensicManifestSignature(
-  manifest: Partial<SignedForensicManifest>
+  manifest: Partial<SignedForensicManifest>,
+  verificationPublicKeyPem?: string
 ): Promise<ManifestSignatureVerificationResult> {
   if (!manifest.signature) {
     return {
@@ -158,6 +159,9 @@ export async function verifyForensicManifestSignature(
       noVerificationKeyPrefix: 'No verification key configured for key ID',
       invalidPublicKeyError: 'Manifest signature verification failed: invalid public key',
       verificationFailedError: 'Manifest signature verification failed'
+    },
+    {
+      verificationPublicKeyPem
     }
   );
 }
