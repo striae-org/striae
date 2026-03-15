@@ -1,7 +1,16 @@
 import { useEffect, useId, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import styles from './public-signing-key-modal.module.css';
+import { copyTextToClipboard } from '~/utils/clipboard';
+import {
+  APPLE_COMMAND_EXAMPLES,
+  DEFAULT_EXPECTED_KEY_ID,
+  POWER_SHELL_COMMAND_EXAMPLES,
+  createAppleVerifierTemplate,
+  createPowerShellVerifierTemplate
+} from './verifier-templates';
 
 const NO_PUBLIC_KEY_MESSAGE = 'No public signing key is configured for this environment.';
+const COPY_FAILED_MESSAGE = 'Copy failed. Select and copy the text manually.';
 
 interface PublicSigningKeyModalProps {
   isOpen: boolean;
@@ -17,14 +26,24 @@ export const PublicSigningKeyModal = ({
   publicKeyPem
 }: PublicSigningKeyModalProps) => {
   const [isCopyingPublicKey, setIsCopyingPublicKey] = useState(false);
+  const [isCopyingPowerShellTemplate, setIsCopyingPowerShellTemplate] = useState(false);
+  const [isCopyingAppleTemplate, setIsCopyingAppleTemplate] = useState(false);
   const [publicKeyCopyMessage, setPublicKeyCopyMessage] = useState('');
+  const [instructionCopyMessage, setInstructionCopyMessage] = useState('');
   const publicSigningKeyTitleId = useId();
   const publicSigningKeyFieldId = useId();
+  const expectedKeyId =
+    typeof publicSigningKeyId === 'string' && publicSigningKeyId.trim().length > 0
+      ? publicSigningKeyId.trim()
+      : DEFAULT_EXPECTED_KEY_ID;
 
   useEffect(() => {
     if (!isOpen) {
       setIsCopyingPublicKey(false);
+      setIsCopyingPowerShellTemplate(false);
+      setIsCopyingAppleTemplate(false);
       setPublicKeyCopyMessage('');
+      setInstructionCopyMessage('');
     }
   }, [isOpen]);
 
@@ -67,25 +86,29 @@ export const PublicSigningKeyModal = ({
     }
   };
 
-  const copyTextWithExecCommand = (text: string): boolean => {
-    const tempTextarea = document.createElement('textarea');
-    tempTextarea.value = text;
-    tempTextarea.setAttribute('readonly', '');
-    tempTextarea.style.position = 'fixed';
-    tempTextarea.style.opacity = '0';
-    tempTextarea.style.pointerEvents = 'none';
+  const resetCopyMessages = () => {
+    setInstructionCopyMessage('');
+    setPublicKeyCopyMessage('');
+  };
 
-    document.body.appendChild(tempTextarea);
-    tempTextarea.select();
+  const copyVerifierTemplate = async (
+    templateText: string,
+    setIsCopying: (isCopying: boolean) => void,
+    successMessage: string,
+    errorLabel: string
+  ) => {
+    setIsCopying(true);
+    resetCopyMessages();
 
-    let copied = false;
     try {
-      copied = document.execCommand('copy');
+      const { copied, error } = await copyTextToClipboard(templateText);
+      setInstructionCopyMessage(copied ? successMessage : COPY_FAILED_MESSAGE);
+      if (!copied) {
+        console.error(`Failed to copy ${errorLabel}:`, error);
+      }
     } finally {
-      document.body.removeChild(tempTextarea);
+      setIsCopying(false);
     }
-
-    return copied;
   };
 
   const handleCopyPublicKey = async () => {
@@ -95,35 +118,38 @@ export const PublicSigningKeyModal = ({
     }
 
     setIsCopyingPublicKey(true);
-    setPublicKeyCopyMessage('');
+    resetCopyMessages();
 
     try {
-      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-        await navigator.clipboard.writeText(publicKeyPem);
-        setPublicKeyCopyMessage('Public key copied to clipboard.');
-      } else {
-        const copied = copyTextWithExecCommand(publicKeyPem);
-        setPublicKeyCopyMessage(
-          copied
-            ? 'Public key copied to clipboard.'
-            : 'Copy failed. Select and copy the key manually.'
-        );
-      }
-    } catch (copyError) {
-      const copied = copyTextWithExecCommand(publicKeyPem);
-      setPublicKeyCopyMessage(
-        copied
-          ? 'Public key copied to clipboard.'
-          : 'Copy failed. Select and copy the key manually.'
-      );
-
+      const { copied, error } = await copyTextToClipboard(publicKeyPem);
+      setPublicKeyCopyMessage(copied ? 'Public key copied to clipboard.' : COPY_FAILED_MESSAGE);
       if (!copied) {
-        console.error('Failed to copy public signing key:', copyError);
+        console.error('Failed to copy public signing key:', error);
       }
     } finally {
       setIsCopyingPublicKey(false);
     }
   };
+
+  const handleCopyAppleTemplate = async () => {
+    await copyVerifierTemplate(
+      createAppleVerifierTemplate(expectedKeyId),
+      setIsCopyingAppleTemplate,
+      'Apple/Linux verifier script copied to clipboard.',
+      'Apple/Linux verifier script'
+    );
+  };
+
+  const handleCopyPowerShellTemplate = async () => {
+    await copyVerifierTemplate(
+      createPowerShellVerifierTemplate(expectedKeyId),
+      setIsCopyingPowerShellTemplate,
+      'PowerShell verifier script copied to clipboard.',
+      'PowerShell verifier script'
+    );
+  };
+
+  const statusMessage = instructionCopyMessage || publicKeyCopyMessage;
 
   return (
     <div
@@ -178,24 +204,194 @@ export const PublicSigningKeyModal = ({
           />
 
           <p className={styles.howToTitle}>How to verify Striae exports</p>
-          <ol className={styles.howToList}>
-            <li>
-              Locate signature metadata in the export (for case ZIP exports, see FORENSIC_MANIFEST.json;
-              for confirmation exports, see metadata.signature).
-            </li>
-            <li>
-              Use this public key with your signature verification workflow (for example OpenSSL or an
-              internal verifier) to validate the signed payload.
-            </li>
-            <li>
-              Trust the export only when signature verification succeeds and the key ID matches the export
-              metadata.
-            </li>
-          </ol>
+          <p className={styles.howToIntro}>
+            Follow this checklist exactly. Treat the export as untrusted unless every step passes.
+          </p>
 
-          {publicKeyCopyMessage && (
+          <details className={styles.howToSection} open>
+            <summary className={styles.howToSectionSummary}>Quick checks (all exports)</summary>
+            <div className={styles.howToSectionBody}>
+              <ol className={styles.howToList}>
+                <li>
+                  Locate the signature envelope and confirm it includes
+                  {' '}
+                  <code className={styles.inlineCode}>algorithm</code>,
+                  {' '}
+                  <code className={styles.inlineCode}>keyId</code>, and
+                  {' '}
+                  <code className={styles.inlineCode}>value</code>.
+                </li>
+                <li>
+                  Require
+                  {' '}
+                  <code className={styles.inlineCode}>algorithm=RSASSA-PKCS1-v1_5-SHA-256</code>.
+                </li>
+                <li>
+                  Require
+                  {' '}
+                  <code className={styles.inlineCode}>keyId</code>
+                  {' '}
+                  to match the key ID shown above.
+                </li>
+                <li>
+                  Base64url-decode
+                  {' '}
+                  <code className={styles.inlineCode}>value</code>
+                  {' '}
+                  before verification.
+                </li>
+              </ol>
+            </div>
+          </details>
+
+          <details className={styles.howToSection}>
+            <summary className={styles.howToSectionSummary}>Case ZIP export (FORENSIC_MANIFEST.json)</summary>
+            <div className={styles.howToSectionBody}>
+              <ol className={styles.howToList}>
+                <li>
+                  Open
+                  {' '}
+                  <code className={styles.inlineCode}>FORENSIC_MANIFEST.json</code>
+                  {' '}
+                  and read signature metadata from
+                  {' '}
+                  <code className={styles.inlineCode}>signature</code>.
+                </li>
+                <li>
+                  Build canonical payload JSON with this exact order and normalization:
+                  {' '}
+                  <code className={styles.inlineCode}>
+                    manifestVersion, dataHash(lowercase), imageHashes(sorted by filename + lowercase values),
+                    manifestHash(lowercase), totalFiles, createdAt
+                  </code>
+                  .
+                </li>
+                <li>
+                  Verify signature over UTF-8 bytes of that canonical payload using RSA PKCS#1 v1.5 + SHA-256.
+                </li>
+                <li>
+                  Recompute data/image/manifest hashes and require all hash checks to pass.
+                </li>
+              </ol>
+              <p className={styles.howToNote}>
+                Use the platform-specific script buttons below to run this workflow.
+              </p>
+            </div>
+          </details>
+
+          <details className={styles.howToSection}>
+            <summary className={styles.howToSectionSummary}>
+              Confirmation export (confirmation-data-*.json)
+            </summary>
+            <div className={styles.howToSectionBody}>
+              <ol className={styles.howToList}>
+                <li>
+                  Read signature metadata from
+                  {' '}
+                  <code className={styles.inlineCode}>metadata.signature</code>
+                  {' '}
+                  and version from
+                  {' '}
+                  <code className={styles.inlineCode}>metadata.signatureVersion</code>.
+                </li>
+                <li>
+                  Recompute
+                  {' '}
+                  <code className={styles.inlineCode}>metadata.hash</code>
+                  {' '}
+                  from the unsigned payload (remove
+                  {' '}
+                  <code className={styles.inlineCode}>metadata.hash</code>,
+                  {' '}
+                  <code className={styles.inlineCode}>metadata.signature</code>, and
+                  {' '}
+                  <code className={styles.inlineCode}>metadata.signatureVersion</code>
+                  {' '}
+                  first).
+                </li>
+                <li>
+                  Build canonical signing payload with stable metadata field order, uppercase hash, sorted
+                  image IDs, and sorted confirmation entries.
+                </li>
+                <li>
+                  Verify signature over UTF-8 bytes of the canonical payload using RSA PKCS#1 v1.5 + SHA-256.
+                </li>
+              </ol>
+              <p className={styles.howToNote}>
+                Use the platform-specific script buttons below to run this workflow.
+              </p>
+            </div>
+          </details>
+
+          <details className={styles.howToSection}>
+            <summary className={styles.howToSectionSummary}>Windows PowerShell verifier</summary>
+            <div className={styles.howToSectionBody}>
+              <p className={styles.howToNote}>
+                Use this option to validate case ZIP or confirmation exports with PowerShell plus OpenSSL.
+              </p>
+              <button
+                type="button"
+                className={styles.templateButton}
+                onClick={handleCopyPowerShellTemplate}
+                disabled={isCopyingPowerShellTemplate}
+              >
+                {isCopyingPowerShellTemplate ? 'Copying...' : 'Copy PowerShell Verifier Script'}
+              </button>
+              <p className={styles.commandExample}>
+                Case:
+                {' '}
+                <code className={styles.commandCode}>
+                  {POWER_SHELL_COMMAND_EXAMPLES.case}
+                </code>
+              </p>
+              <p className={styles.commandExample}>
+                Confirmation:
+                {' '}
+                <code className={styles.commandCode}>
+                  {POWER_SHELL_COMMAND_EXAMPLES.confirmation}
+                </code>
+              </p>
+            </div>
+          </details>
+
+          <details className={styles.howToSection}>
+            <summary className={styles.howToSectionSummary}>Apple / Linux verifier</summary>
+            <div className={styles.howToSectionBody}>
+              <p className={styles.howToNote}>
+                Use this option to validate exports with Python 3 plus OpenSSL on macOS or Linux.
+              </p>
+              <button
+                type="button"
+                className={styles.templateButton}
+                onClick={handleCopyAppleTemplate}
+                disabled={isCopyingAppleTemplate}
+              >
+                {isCopyingAppleTemplate ? 'Copying...' : 'Copy Apple/Linux Verifier Script'}
+              </button>
+              <p className={styles.commandExample}>
+                Case:
+                {' '}
+                <code className={styles.commandCode}>
+                  {APPLE_COMMAND_EXAMPLES.case}
+                </code>
+              </p>
+              <p className={styles.commandExample}>
+                Confirmation:
+                {' '}
+                <code className={styles.commandCode}>
+                  {APPLE_COMMAND_EXAMPLES.confirmation}
+                </code>
+              </p>
+            </div>
+          </details>
+
+          <p className={styles.passFailNote}>
+            Result rule: trust the export only when signature verification and integrity checks both PASS.
+          </p>
+
+          {statusMessage && (
             <p className={styles.status} role="status" aria-live="polite">
-              {publicKeyCopyMessage}
+              {statusMessage}
             </p>
           )}
 
