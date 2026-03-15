@@ -24,6 +24,8 @@
     "annotation",
     "react",
     "cloudflare-workers",
+    "authenticated",
+    "confirmations",
     "chain-of-custody",
     "audit-trail"
   ],
