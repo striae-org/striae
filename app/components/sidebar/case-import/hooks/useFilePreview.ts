@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { User } from 'firebase/auth';
-import { previewCaseImport } from '~/components/actions/case-review';
+import { previewCaseImport, extractConfirmationImportPackage } from '~/components/actions/case-review';
 import { type CaseImportPreview } from '~/types';
 import { type ConfirmationPreview } from '../components/ConfirmationPreviewSection';
 
@@ -56,8 +56,8 @@ export const useFilePreview = (
 
     setIsLoadingPreview(true);
     try {
-      const text = await file.text();
-      const parsed = JSON.parse(text) as unknown;
+      const { confirmationData } = await extractConfirmationImportPackage(file);
+      const parsed = confirmationData as unknown;
 
       if (!isRecord(parsed)) {
         throw new Error('Invalid confirmation data format');
@@ -104,7 +104,9 @@ export const useFilePreview = (
       setConfirmationPreview(preview);
     } catch (error) {
       console.error('Error loading confirmation preview:', error);
-      setError(`Failed to read confirmation data: ${error instanceof Error ? error.message : 'Invalid JSON format'}`);
+      setError(
+        `Failed to read confirmation data: ${error instanceof Error ? error.message : 'Invalid confirmation package format'}`
+      );
       clearImportData();
     } finally {
       setIsLoadingPreview(false);

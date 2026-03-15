@@ -3,6 +3,7 @@ import paths from '~/config/config.json';
 import { getDataApiKey } from '~/utils/auth';
 import { type ConfirmationImportResult, type ConfirmationImportData } from '~/types';
 import { checkExistingCase } from '../case-manage';
+import { extractConfirmationImportPackage } from './confirmation-package';
 import { validateExporterUid, validateConfirmationHash, validateConfirmationSignatureFile } from './validation';
 import { auditService } from '~/services/audit';
 
@@ -36,6 +37,8 @@ export async function importConfirmationData(
   let signatureValid = false;
   let signaturePresent = false;
   let signatureKeyId: string | undefined;
+  let confirmationDataForAudit: ConfirmationImportData | null = null;
+  let confirmationJsonFileNameForAudit = confirmationFile.name;
   
   const result: ConfirmationImportResult = {
     success: false,
@@ -47,11 +50,17 @@ export async function importConfirmationData(
   };
 
   try {
-    onProgress?.('Reading confirmation file', 10, 'Loading JSON data...');
+    onProgress?.('Reading confirmation file', 10, 'Loading confirmation package...');
 
-    // Read and parse the JSON file
-    const fileContent = await confirmationFile.text();
-    const confirmationData: ConfirmationImportData = JSON.parse(fileContent);
+    const {
+      confirmationData,
+      confirmationJsonContent,
+      verificationPublicKeyPem,
+      confirmationFileName
+    } = await extractConfirmationImportPackage(confirmationFile);
+
+    confirmationDataForAudit = confirmationData;
+    confirmationJsonFileNameForAudit = confirmationFileName;
     result.caseNumber = confirmationData.metadata.caseNumber;
     
     // Start audit workflow
@@ -60,14 +69,17 @@ export async function importConfirmationData(
     onProgress?.('Validating hash', 20, 'Verifying data integrity...');
 
     // Validate hash
-    hashValid = await validateConfirmationHash(fileContent, confirmationData.metadata.hash);
+    hashValid = await validateConfirmationHash(confirmationJsonContent, confirmationData.metadata.hash);
     if (!hashValid) {
       throw new Error('Confirmation data hash validation failed. The file may have been tampered with or corrupted.');
     }
 
     onProgress?.('Validating signature', 30, 'Verifying signed confirmation metadata...');
 
-    const signatureResult = await validateConfirmationSignatureFile(confirmationData);
+    const signatureResult = await validateConfirmationSignatureFile(
+      confirmationData,
+      verificationPublicKeyPem
+    );
     signaturePresent = !!confirmationData.metadata.signature;
     signatureValid = signatureResult.isValid;
     signatureKeyId = signatureResult.keyId;
@@ -276,7 +288,7 @@ export async function importConfirmationData(
     await auditService.logConfirmationImport(
       user,
       result.caseNumber,
-      confirmationFile.name,
+      confirmationJsonFileNameForAudit,
       result.success ? (result.errors && result.errors.length > 0 ? 'warning' : 'success') : 'failure',
       hashValid,
       result.confirmationsImported, // Successfully imported confirmations
@@ -318,19 +330,31 @@ export async function importConfirmationData(
     let signatureValidForAudit = signatureValid;
     let signatureKeyIdForAudit = signatureKeyId;
     
+    const auditConfirmationData = confirmationDataForAudit;
+
     // First, try to extract basic metadata for audit purposes (if file is parseable)
-    try {
-      const confirmationData = JSON.parse(await confirmationFile.text()) as ConfirmationImportData;
-      reviewingExaminerUidForAudit = confirmationData.metadata?.exportedByUid;
-      totalConfirmationsForAudit = confirmationData.metadata?.totalConfirmations || 0;
-      if (confirmationData.metadata?.signature) {
+    if (auditConfirmationData) {
+      reviewingExaminerUidForAudit = auditConfirmationData.metadata?.exportedByUid;
+      totalConfirmationsForAudit = auditConfirmationData.metadata?.totalConfirmations || 0;
+      if (auditConfirmationData.metadata?.signature) {
         signaturePresentForAudit = true;
-        signatureKeyIdForAudit = confirmationData.metadata.signature.keyId;
+        signatureKeyIdForAudit = auditConfirmationData.metadata.signature.keyId;
       }
-    } catch {
-      // If we can't parse the file, keep undefined/default values
+    } else {
+      try {
+        const extracted = await extractConfirmationImportPackage(confirmationFile);
+        reviewingExaminerUidForAudit = extracted.confirmationData.metadata?.exportedByUid;
+        totalConfirmationsForAudit = extracted.confirmationData.metadata?.totalConfirmations || 0;
+        confirmationJsonFileNameForAudit = extracted.confirmationFileName;
+        if (extracted.confirmationData.metadata?.signature) {
+          signaturePresentForAudit = true;
+          signatureKeyIdForAudit = extracted.confirmationData.metadata.signature.keyId;
+        }
+      } catch {
+        // If we can't parse the file, keep undefined/default values
+      }
     }
-    
+
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     if (errorMessage.includes('hash validation failed')) {
       // Hash failed - only flag file integrity, don't affect other validations
@@ -352,7 +376,7 @@ export async function importConfirmationData(
     await auditService.logConfirmationImport(
       user,
       result.caseNumber || 'unknown',
-      confirmationFile.name,
+      confirmationJsonFileNameForAudit,
       'failure',
       hashValidForAudit,
       0, // No confirmations successfully imported for failures
