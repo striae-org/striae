@@ -8,7 +8,6 @@ import {
   isRouteErrorResponse,
   useRouteError,
   Link,
-  useLocation,
   useMatches,
 } from 'react-router';
 import { 
@@ -88,22 +87,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const matches = useMatches();
-  const location = useLocation();
-  const isAuthRoute = matches.some(match => 
-    match.id.includes('auth') || 
-    match.pathname?.includes('/auth')    
-  ) || location.pathname === '/';
-
-  if (isAuthRoute) {
-    return (
-      <AuthProvider>
-        <Outlet />
-      </AuthProvider>
-    );
-  }
-
-  return <Outlet />;
+  return (
+    <AuthProvider>
+      <Outlet />
+    </AuthProvider>
+  );
 }
 
 export function ErrorBoundary() {
