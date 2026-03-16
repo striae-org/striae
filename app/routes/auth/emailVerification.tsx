@@ -78,7 +78,7 @@ export const EmailVerification = ({
       <Link 
         viewTransition
         prefetch="intent"
-        to="https://striae.org" 
+        to="https://striae.app" 
         className={styles.logoLink}>
         <div className={styles.logo} />
       </Link>
