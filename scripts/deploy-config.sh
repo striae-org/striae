@@ -192,10 +192,27 @@ normalize_worker_label_value() {
     printf '%s' "$label"
 }
 
+normalize_worker_subdomain_value() {
+    local subdomain="$1"
+
+    subdomain=$(normalize_domain_value "$subdomain")
+    subdomain="${subdomain#.}"
+    subdomain="${subdomain%.}"
+    subdomain=$(printf '%s' "$subdomain" | tr '[:upper:]' '[:lower:]')
+
+    printf '%s' "$subdomain"
+}
+
 is_valid_worker_label() {
     local label="$1"
 
     [[ "$label" =~ ^[a-z0-9-]+$ ]]
+}
+
+is_valid_worker_subdomain() {
+    local subdomain="$1"
+
+    [[ "$subdomain" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$ ]]
 }
 
 strip_carriage_returns() {
@@ -267,13 +284,13 @@ compose_worker_domain() {
     local worker_subdomain=$2
 
     worker_name=$(normalize_worker_label_value "$worker_name")
-    worker_subdomain=$(normalize_worker_label_value "$worker_subdomain")
+    worker_subdomain=$(normalize_worker_subdomain_value "$worker_subdomain")
 
     if [ -z "$worker_name" ] || [ -z "$worker_subdomain" ]; then
         return 1
     fi
 
-    if ! is_valid_worker_label "$worker_name" || ! is_valid_worker_label "$worker_subdomain"; then
+    if ! is_valid_worker_label "$worker_name" || ! is_valid_worker_subdomain "$worker_subdomain"; then
         return 1
     fi
 
@@ -297,9 +314,9 @@ infer_worker_subdomain_from_domain() {
     case "$worker_domain" in
         "$worker_name".*)
             worker_subdomain="${worker_domain#${worker_name}.}"
-            worker_subdomain=$(normalize_worker_label_value "$worker_subdomain")
+            worker_subdomain=$(normalize_worker_subdomain_value "$worker_subdomain")
 
-            if is_valid_worker_label "$worker_subdomain"; then
+            if is_valid_worker_subdomain "$worker_subdomain"; then
                 printf '%s' "$worker_subdomain"
                 return 0
             fi
@@ -1179,8 +1196,9 @@ prompt_for_secrets() {
     
     echo -e "${BLUE}🔑 WORKER NAMES & DOMAINS${NC}"
     echo "========================="
-    echo -e "${YELLOW}Worker names and worker-subdomains are lowercased automatically and must use only letters, numbers, and dashes.${NC}"
-    echo -e "${YELLOW}You will enter one shared worker-subdomain; each worker domain is generated as {worker-name}.{worker-subdomain}.${NC}"
+    echo -e "${YELLOW}Worker names are lowercased automatically and must use only letters, numbers, and dashes.${NC}"
+    echo -e "${YELLOW}Enter one shared worker-subdomain as a hostname (for example: team-name.workers.dev).${NC}"
+    echo -e "${YELLOW}Each worker domain is generated as {worker-name}.{worker-subdomain}.${NC}"
 
     local shared_worker_subdomain=""
     local shared_worker_subdomain_default=""
@@ -1217,7 +1235,7 @@ prompt_for_secrets() {
                 shared_worker_subdomain="$shared_worker_subdomain_input"
             fi
         else
-            read -p "Enter shared worker-subdomain: " shared_worker_subdomain_input
+            read -p "Enter shared worker-subdomain (e.g., team-name.workers.dev): " shared_worker_subdomain_input
             shared_worker_subdomain_input=$(strip_carriage_returns "$shared_worker_subdomain_input")
             shared_worker_subdomain="$shared_worker_subdomain_input"
         fi
@@ -1227,10 +1245,10 @@ prompt_for_secrets() {
             continue
         fi
 
-        shared_worker_subdomain=$(normalize_worker_label_value "$shared_worker_subdomain")
+        shared_worker_subdomain=$(normalize_worker_subdomain_value "$shared_worker_subdomain")
 
-        if [ -z "$shared_worker_subdomain" ] || ! is_valid_worker_label "$shared_worker_subdomain"; then
-            echo -e "${RED}❌ shared worker-subdomain must use only lowercase letters, numbers, and dashes.${NC}"
+        if [ -z "$shared_worker_subdomain" ] || ! is_valid_worker_subdomain "$shared_worker_subdomain"; then
+            echo -e "${RED}❌ shared worker-subdomain must be a valid hostname like team-name.workers.dev (letters, numbers, dashes, and dots).${NC}"
             continue
         fi
 
