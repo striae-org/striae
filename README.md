@@ -6,7 +6,7 @@ This npm package publishes the Striae application source and deployment scaffold
 
 ## Live Project
 
-- Application: [https://www.striae.org](https://www.striae.org)
+- Application: [https://striae.app](https://striae.app)
 - Source repository: [https://github.com/striae-org/striae](https://github.com/striae-org/striae)
 - Releases: [https://github.com/striae-org/striae/releases](https://github.com/striae-org/striae/releases)
 - Security policy: [https://github.com/striae-org/striae/security/policy](https://github.com/striae-org/striae/security/policy)

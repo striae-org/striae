@@ -46,11 +46,11 @@ npm run deploy:all
 
 ## 🌐 Application URL
 
-**[Live App](https://www.striae.org)**
+**[Live App](https://striae.app)**
 
 ## 💬 Contact & Support
 
-**[Striae Support](https://www.striae.org/support)**
+**[Striae Support](https://www.striae.org/support)**`
 
 **[Email Support](mailto:info@striae.org)**
 
@@ -61,6 +61,16 @@ npm run deploy:all
 ---
 
 ## 📋 Changelog
+
+## [2026-03-15] - *[Patch Release v4.0.1](https://github.com/striae-org/striae/releases/tag/v4.0.1)*
+
+_Note: Summary is based on 7 non-merge commits since v4.0.0 (same-day patch release window)._
+
+- **🌐 Canonical and Metadata Updates** - Updated canonical URL handling and page meta titles to better align public-route metadata behavior.
+- **🔐 Security Metadata Refresh** - Updated `security.txt` release-surface metadata for current disclosure alignment.
+- **🛠️ Worker Subdomain Validation Fixes** - Fixed worker subdomain check behavior and patched signed URL GET handling across route-sensitive proxy paths.
+- **⚙️ Deployment Script Refinement** - Simplified worker subdomain automation behavior and normalized worker-name casing in script flows.
+- **📦 Runtime Type Synchronization** - Refreshed Wrangler-generated runtime types to keep worker contract outputs current.
 
 ## [2026-03-15] - *[Major Release v4.0.0](https://github.com/striae-org/striae/releases/tag/v4.0.0)*
 
