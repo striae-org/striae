@@ -1,5 +1,4 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { useLocation } from 'react-router';
 import { signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';
 import { INACTIVITY_CONFIG } from '~/config/inactivity';
@@ -19,13 +18,11 @@ export const useInactivityTimeout = ({
   onTimeout,
   enabled = true
 }: UseInactivityTimeoutOptions = {}) => {
-  const location = useLocation();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<number>(0);
 
-  const isAuthRoute = location.pathname.startsWith('/auth');
-  const shouldEnable = enabled && isAuthRoute;
+  const shouldEnable = enabled;
 
   useEffect(() => {
     lastActivityRef.current = Date.now();
@@ -104,7 +101,7 @@ export const useInactivityTimeout = ({
       });
       clearTimeouts();
     };
-  }, [shouldEnable, resetTimer, clearTimeouts, location.pathname]);
+  }, [shouldEnable, resetTimer, clearTimeouts]);
 
   return {
     extendSession,
