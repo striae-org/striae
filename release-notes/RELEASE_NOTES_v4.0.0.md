@@ -2,7 +2,7 @@
 
 **Release Date**: March 15, 2026
 **Period**: March 14 - March 15, 2026
-**Total Commits**: 28 (non-merge; security, API proxy migration, and secret/config hardening)
+**Total Commits**: 37 (non-merge; security, API proxy migration, and secret/config hardening; general cleanup and stabilization)
 
 ## Major Release - Security, API, and Secret Hardening Migration
 
@@ -75,8 +75,8 @@
 
 ## Release Statistics
 
-- **Commit Range**: `v3.3.0..HEAD`
-- **Commits Included**: 28 (non-merge)
+- **Commit Range**: `v3.3.0..v4.0.0`
+- **Commits Included**: 37 (non-merge)
 - **Build Status**: Succeeded (`npm run build`)
 - **Typecheck Status**: Succeeded (`npm run typecheck`)
 - **Lint Status**: Succeeded with warnings (`npm run lint`: 0 errors, 2 warnings)
