@@ -37,7 +37,23 @@ function extractProxyPath(url: URL): string | null {
   }
 
   const remainder = url.pathname.slice(routePrefix.length);
-  return remainder.length > 0 ? remainder : '/';
+  if (remainder.length === 0) {
+    return '/';
+  }
+
+  const normalizedRemainder = remainder.startsWith('/') ? remainder : `/${remainder}`;
+  const encodedPath = normalizedRemainder.slice(1);
+
+  try {
+    const decodedPath = decodeURIComponent(encodedPath);
+    if (decodedPath.length > 0) {
+      return decodedPath.startsWith('/') ? decodedPath : `/${decodedPath}`;
+    }
+  } catch {
+    // Keep legacy behavior for non-encoded paths.
+  }
+
+  return normalizedRemainder;
 }
 
 function resolveImageWorkerToken(env: Env): string {

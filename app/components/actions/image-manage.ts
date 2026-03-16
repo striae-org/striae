@@ -244,8 +244,9 @@ export const getImageUrl = async (user: User, fileData: FileData, caseNumber: st
   try {
     const { accountHash } = await getImageConfig();
     const imageDeliveryUrl = `https://imagedelivery.net/${accountHash}/${fileData.id}/${DEFAULT_VARIANT}`;
+    const encodedImageDeliveryUrl = encodeURIComponent(imageDeliveryUrl);
 
-    const workerResponse = await fetchImageApi(user, `/${imageDeliveryUrl}`, {
+    const workerResponse = await fetchImageApi(user, `/${encodedImageDeliveryUrl}`, {
       method: 'GET',
       headers: {
         'Accept': 'text/plain'

@@ -144,9 +144,17 @@ async function handleImageServing(request: Request, env: Env): Promise<Response>
   }
 
   const url = new URL(request.url);
-  const pathWithoutSlash = url.pathname.slice(1);
+  const encodedPath = url.pathname.slice(1);
+  let decodedPath = encodedPath;
+
+  try {
+    decodedPath = decodeURIComponent(encodedPath);
+  } catch {
+    decodedPath = encodedPath;
+  }
+
   const imageDeliveryURL = new URL(
-    pathWithoutSlash.replace('https:/imagedelivery.net', 'https://imagedelivery.net')
+    decodedPath.replace('https:/imagedelivery.net', 'https://imagedelivery.net')
   );
   
   return generateSignedUrl(imageDeliveryURL, env);
