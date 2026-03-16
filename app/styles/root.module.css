@@ -1,47 +1,4 @@
 @layer layout {
-
-  .container {
-    width: 100%;
-    position: relative;
-    transition: opacity 0.8s var(--bezierFastoutSlowin);    
-
-    &[data-loading='true'] {
-      opacity: 0;
-    }
-  }
-
-  .skip {
-    isolation: isolate;
-    color: var(--background);
-    z-index: var(--zIndex4);
-
-    &:focus {
-      padding: var(--spaceS) var(--spaceM);
-      position: fixed;
-      top: var(--spaceM);
-      left: var(--spaceM);
-      text-decoration: none;
-      font-weight: var(--fontWeightMedium);
-      line-height: 1;
-      box-shadow: 0 0 0 4px var(--background), 0 0 0 8px var(--text);
-    }
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-color: var(--primary);
-      clip-path: polygon(
-        0 0,
-        100% 0,
-        100% calc(100% - 8px),
-        calc(100% - 8px) 100%,
-        0 100%
-      );
-      z-index: -1;
-    }
-  }
-
   .errorContainer {
     display: flex;
     flex-direction: column;
@@ -69,68 +26,24 @@
   }
 
   .errorLink {
-    color: var(--primary);
-    text-decoration: none;
-    font-size: var(--fontSizeBodyL);
-    font-weight: var(--fontWeightMedium);
-    padding: var(--spaceM) var(--spaceL);
-    border-radius: var(--radiusS);
-    transition: all var(--durationS) var(--bezierFastoutSlowin);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition:
+      background-color var(--durationS) var(--bezierFastoutSlowin),
+      border-color var(--durationS) var(--bezierFastoutSlowin),
+      color var(--durationS) var(--bezierFastoutSlowin);
   }
 
   .errorLink:hover {
-    background: color-mix(in lab, var(--primary) 10%, transparent);
-    color: color-mix(in lab, var(--primary) 85%, var(--black));
+    background-color: color-mix(in lab, var(--primary) 82%, var(--black));
+    border-color: color-mix(in lab, var(--primary) 58%, var(--black));
+    color: var(--white);
+    text-decoration: none;
   }
 
-  .returnToTop {
-    position: fixed;
-    right: var(--space2XL);
-    bottom: var(--spaceM);
-    width: 50px;
-    height: 50px;
-    border: none;
-    background: transparent;
-    color: color-mix(in lab, var(--white) 60%, var(--textLight));
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    z-index: var(--zIndex4);
-    cursor: pointer;
-    transition: all var(--durationS) var(--bezierFastoutSlowin);
-  }
-
-  .returnToTop:hover {
-    color: var(--primary);
-  }
-
-  .returnToTopIcon {
-    transform: rotate(-90deg);
-    color: color-mix(in lab, var(--white) 60%, var(--textLight));
-    filter: drop-shadow(0 0 1px color-mix(in lab, var(--black) 45%, transparent))
-      drop-shadow(0 0 1px color-mix(in lab, var(--white) 45%, transparent));
-    transition: color var(--durationS) var(--bezierFastoutSlowin);
-  }
-
-  .returnToTop:hover .returnToTopIcon {
-    color: var(--primary);
-  }
-
-  /* Global enhanced button hover effects */
-  :global(button:not([data-no-enhance]):hover:not(:disabled)) {
-    transform: translateY(-1px);
-    transition: all var(--durationS) var(--bezierFastoutSlowin);
-  }
-
-  :global(button[class*="Button"]:hover:not(:disabled)) {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px color-mix(in lab, currentColor 20%, transparent);
-    transition: all var(--durationS) var(--bezierFastoutSlowin);
-  }
-
-  /* Ensure disabled buttons don't get transforms */
-  :global(button:disabled) {
-    transform: none !important;
+  .errorLink:focus-visible {
+    outline: 3px solid color-mix(in lab, var(--white) 65%, var(--primary));
+    outline-offset: 3px;
   }
 
   @media (max-width: 768px) {
@@ -142,5 +55,4 @@
       font-size: var(--fontSizeBodyL);
     }
   }
-
 }
