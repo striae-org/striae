@@ -81,37 +81,6 @@
 - **Typecheck Status**: Succeeded (`npm run typecheck`)
 - **Lint Status**: Succeeded with warnings (`npm run lint`: 0 errors, 2 warnings)
 
-## Commit List (Non-Merge)
-
-- `67c4d216` (2026-03-15) - upd deploy scripts
-- `a1059734` (2026-03-15) - rm custom routes for workers
-- `e5560ebf` (2026-03-15) - Revert "add Cloudflare Access flows to workers"
-- `7ad7bf9c` (2026-03-15) - Revert "add comment about Firebase SDK values"
-- `eebf7048` (2026-03-15) - Revert "rm routes for workers"
-- `2d66682d` (2026-03-15) - Revert "upd deploy scripts"
-- `a0f2f6f3` (2026-03-15) - Revert "wrangler types"
-- `9837edbb` (2026-03-15) - Revert "fix header auth responses"
-- `9d176312` (2026-03-15) - fix header auth responses
-- `186a799e` (2026-03-15) - wrangler types
-- `fe763156` (2026-03-15) - upd deploy scripts
-- `4c1ebf77` (2026-03-15) - rm routes for workers
-- `582a63af` (2026-03-15) - add comment about Firebase SDK values
-- `83839d58` (2026-03-15) - add Cloudflare Access flows to workers
-- `6de62819` (2026-03-15) - pages secrets deployment scripts
-- `120afc69` (2026-03-15) - update config, rm fallback and legacy config
-- `40887d0a` (2026-03-15) - fix deletion operations
-- `0021b64b` (2026-03-15) - Phase 4 - audit, images, pdf migration
-- `bd531975` (2026-03-15) - Phase 3 - migrate high risk operations
-- `277c805c` (2026-03-15) - Phase 2 - data operations
-- `ad73cc6e` (2026-03-15) - 500 fix
-- `715dce28` (2026-03-15) - firebase auth api call fix
-- `94841e3c` (2026-03-15) - firebase auth lookup fix
-- `960d6de3` (2026-03-15) - fix user token retrieval
-- `faba244a` (2026-03-15) - refactor user API interactions to use fetchUserApi utility and streamline authentication handling - Phase 1
-- `22466606` (2026-03-15) - upd compat dates
-- `dd89525b` (2026-03-14) - add progress bar for single case exports
-- `20f44c93` (2026-03-14) - manifest signing key automation - deploy config
-
 ## Closing Note
 
 v4.0.0 marks a major architectural hardening milestone: API transport now centers on authenticated edge proxy boundaries, worker auth and secrets are more rigorously managed, and deployment scripts are aligned to a safer secret/config migration model for production operations.
