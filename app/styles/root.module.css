@@ -1,9 +1,3 @@
-@layer base {
-  :global(button:hover:not(:disabled)) {
-    transform: translateY(-1px);
-  }
-}
-
 @layer layout {
   .errorContainer {
     display: flex;
