@@ -181,6 +181,23 @@ normalize_domain_value() {
     printf '%s' "$domain"
 }
 
+normalize_worker_label_value() {
+    local label="$1"
+
+    label=$(normalize_domain_value "$label")
+    label="${label#.}"
+    label="${label%.}"
+    label=$(printf '%s' "$label" | tr '[:upper:]' '[:lower:]')
+
+    printf '%s' "$label"
+}
+
+is_valid_worker_label() {
+    local label="$1"
+
+    [[ "$label" =~ ^[a-z0-9-]+$ ]]
+}
+
 strip_carriage_returns() {
     printf '%s' "$1" | tr -d '\r'
 }
@@ -245,52 +262,51 @@ generate_worker_subdomain_label() {
     node -e "const { randomInt } = require('crypto'); const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789'; let value = ''; for (let index = 0; index < 10; index += 1) { value += alphabet[randomInt(alphabet.length)]; } process.stdout.write(value);" 2>/dev/null
 }
 
-worker_name_var_for_domain_var() {
-    case "$1" in
-        KEYS_WORKER_DOMAIN)
-            printf '%s' "KEYS_WORKER_NAME"
-            ;;
-        USER_WORKER_DOMAIN)
-            printf '%s' "USER_WORKER_NAME"
-            ;;
-        DATA_WORKER_DOMAIN)
-            printf '%s' "DATA_WORKER_NAME"
-            ;;
-        AUDIT_WORKER_DOMAIN)
-            printf '%s' "AUDIT_WORKER_NAME"
-            ;;
-        IMAGES_WORKER_DOMAIN)
-            printf '%s' "IMAGES_WORKER_NAME"
-            ;;
-        PDF_WORKER_DOMAIN)
-            printf '%s' "PDF_WORKER_NAME"
-            ;;
-        *)
-            printf '%s' ""
-            ;;
-    esac
-}
-
 compose_worker_domain() {
     local worker_name=$1
     local worker_subdomain=$2
 
-    worker_name=$(normalize_domain_value "$worker_name")
-    worker_subdomain=$(normalize_domain_value "$worker_subdomain")
-    worker_name="${worker_name#.}"
-    worker_name="${worker_name%.}"
-    worker_subdomain="${worker_subdomain#.}"
-    worker_subdomain="${worker_subdomain%.}"
+    worker_name=$(normalize_worker_label_value "$worker_name")
+    worker_subdomain=$(normalize_worker_label_value "$worker_subdomain")
 
     if [ -z "$worker_name" ] || [ -z "$worker_subdomain" ]; then
         return 1
     fi
 
-    if [[ "$worker_name" == *.* ]] || [[ "$worker_name" == */* ]] || [[ "$worker_subdomain" == */* ]]; then
+    if ! is_valid_worker_label "$worker_name" || ! is_valid_worker_label "$worker_subdomain"; then
         return 1
     fi
 
     printf '%s.%s' "$worker_name" "$worker_subdomain"
+}
+
+infer_worker_subdomain_from_domain() {
+    local worker_name=$1
+    local worker_domain=$2
+    local worker_subdomain=""
+
+    worker_name=$(normalize_worker_label_value "$worker_name")
+    worker_domain=$(normalize_domain_value "$worker_domain")
+    worker_domain=$(printf '%s' "$worker_domain" | tr '[:upper:]' '[:lower:]')
+
+    if [ -z "$worker_name" ] || [ -z "$worker_domain" ] || is_placeholder "$worker_name" || is_placeholder "$worker_domain"; then
+        printf '%s' ""
+        return 0
+    fi
+
+    case "$worker_domain" in
+        "$worker_name".*)
+            worker_subdomain="${worker_domain#${worker_name}.}"
+            worker_subdomain=$(normalize_worker_label_value "$worker_subdomain")
+
+            if is_valid_worker_label "$worker_subdomain"; then
+                printf '%s' "$worker_subdomain"
+                return 0
+            fi
+            ;;
+    esac
+
+    printf '%s' ""
 }
 
 write_env_var() {
@@ -975,7 +991,7 @@ prompt_for_secrets() {
 
         current_value=$(strip_carriage_returns "$current_value")
 
-        if [ "$var_name" = "PAGES_CUSTOM_DOMAIN" ] || [[ "$var_name" == *_WORKER_DOMAIN ]]; then
+        if [ "$var_name" = "PAGES_CUSTOM_DOMAIN" ]; then
             current_value=$(resolve_existing_domain_value "$var_name" "$current_value")
         fi
         
@@ -1039,107 +1055,6 @@ prompt_for_secrets() {
                     done
                 fi
             fi
-        elif [[ "$var_name" == *_WORKER_DOMAIN ]]; then
-            local worker_name_var
-            local worker_name_current=""
-            local worker_name_input=""
-            local worker_subdomain_input=""
-            local inferred_subdomain=""
-            local domain_choice=""
-            local composed_domain=""
-
-            worker_name_var=$(worker_name_var_for_domain_var "$var_name")
-            worker_name_current=$(strip_carriage_returns "${!worker_name_var}")
-
-            if [ -n "$worker_name_current" ] && ! is_placeholder "$worker_name_current" && [ -n "$current_value" ] && ! is_placeholder "$current_value"; then
-                case "$current_value" in
-                    "$worker_name_current".*)
-                        inferred_subdomain="${current_value#${worker_name_current}.}"
-                        ;;
-                esac
-            fi
-
-            echo -e "${BLUE}$var_name${NC}"
-            echo -e "${YELLOW}$description${NC}"
-
-            while true; do
-                if [ "$update_env" != "true" ] && [ -n "$current_value" ] && ! is_placeholder "$current_value"; then
-                    echo -e "${GREEN}Current value: $current_value${NC}"
-                    read -p "Press Enter to keep current, or type 'y' to rebuild from worker-name and worker-subdomain: " domain_choice
-                    domain_choice=$(strip_carriage_returns "$domain_choice")
-
-                    if [ -z "$domain_choice" ]; then
-                        new_value=""
-                        break
-                    fi
-
-                    if [ "$domain_choice" != "y" ] && [ "$domain_choice" != "Y" ]; then
-                        echo -e "${RED}❌ Please press Enter to keep current or type 'y' to rebuild.${NC}"
-                        continue
-                    fi
-                fi
-
-                if [ -n "$worker_name_current" ] && ! is_placeholder "$worker_name_current"; then
-                    read -p "Prompt: worker-name [$worker_name_current]: " worker_name_input
-                    worker_name_input=$(strip_carriage_returns "$worker_name_input")
-                    if [ -z "$worker_name_input" ]; then
-                        worker_name_input="$worker_name_current"
-                    fi
-                else
-                    read -p "Prompt: worker-name: " worker_name_input
-                    worker_name_input=$(strip_carriage_returns "$worker_name_input")
-                fi
-
-                if [ -z "$worker_name_input" ] || is_placeholder "$worker_name_input"; then
-                    echo -e "${RED}❌ worker-name is required and cannot be a placeholder.${NC}"
-                    continue
-                fi
-
-                worker_name_input=$(normalize_domain_value "$worker_name_input")
-                worker_name_input="${worker_name_input#.}"
-                worker_name_input="${worker_name_input%.}"
-
-                if [[ "$worker_name_input" == *.* ]] || [[ "$worker_name_input" == */* ]]; then
-                    echo -e "${RED}❌ worker-name must be a single hostname label (for example: striae-dev-data).${NC}"
-                    continue
-                fi
-
-                if [ -n "$inferred_subdomain" ]; then
-                    read -p "Prompt: worker-subdomain [$inferred_subdomain]: " worker_subdomain_input
-                    worker_subdomain_input=$(strip_carriage_returns "$worker_subdomain_input")
-                    if [ -z "$worker_subdomain_input" ]; then
-                        worker_subdomain_input="$inferred_subdomain"
-                    fi
-                else
-                    read -p "Prompt: worker-subdomain: " worker_subdomain_input
-                    worker_subdomain_input=$(strip_carriage_returns "$worker_subdomain_input")
-                fi
-
-                if [ -z "$worker_subdomain_input" ] || is_placeholder "$worker_subdomain_input"; then
-                    echo -e "${RED}❌ worker-subdomain is required and cannot be a placeholder.${NC}"
-                    continue
-                fi
-
-                worker_subdomain_input=$(normalize_domain_value "$worker_subdomain_input")
-                worker_subdomain_input="${worker_subdomain_input#.}"
-                worker_subdomain_input="${worker_subdomain_input%.}"
-
-                composed_domain=$(compose_worker_domain "$worker_name_input" "$worker_subdomain_input" || echo "")
-                if [ -z "$composed_domain" ]; then
-                    echo -e "${RED}❌ Invalid worker-name/worker-subdomain combination.${NC}"
-                    continue
-                fi
-
-                if [ -n "$worker_name_var" ]; then
-                    write_env_var "$worker_name_var" "$worker_name_input"
-                    export "$worker_name_var=$worker_name_input"
-                    worker_name_current="$worker_name_input"
-                fi
-
-                new_value="$composed_domain"
-                echo -e "${GREEN}Resulting worker domain: $new_value${NC}"
-                break
-            done
         else
             # Normal prompt for other variables
             echo -e "${BLUE}$var_name${NC}"
@@ -1175,12 +1090,22 @@ prompt_for_secrets() {
                     continue
                 fi
 
+                if [[ "$var_name" == *_WORKER_NAME ]]; then
+                    new_value=$(normalize_worker_label_value "$new_value")
+
+                    if [ -z "$new_value" ] || ! is_valid_worker_label "$new_value"; then
+                        echo -e "${RED}❌ $var_name must use only lowercase letters, numbers, and dashes.${NC}"
+                        new_value=""
+                        continue
+                    fi
+                fi
+
                 break
             done
         fi
         
         if [ -n "$new_value" ]; then
-            if [ "$var_name" = "PAGES_CUSTOM_DOMAIN" ] || [[ "$var_name" == *_WORKER_DOMAIN ]]; then
+            if [ "$var_name" = "PAGES_CUSTOM_DOMAIN" ]; then
                 new_value=$(normalize_domain_value "$new_value")
             fi
 
@@ -1190,12 +1115,41 @@ prompt_for_secrets() {
             export "$var_name=$new_value"
             echo -e "${GREEN}✅ $var_name updated${NC}"
         elif [ -n "$current_value" ]; then
+            if [[ "$var_name" == *_WORKER_NAME ]]; then
+                current_value=$(normalize_worker_label_value "$current_value")
+            fi
+
             # Keep values aligned with .env.example ordering and remove stale duplicates.
             write_env_var "$var_name" "$current_value"
             export "$var_name=$current_value"
             echo -e "${GREEN}✅ Keeping current value for $var_name${NC}"
         fi
         echo ""
+    }
+
+    set_worker_domain_from_shared_subdomain() {
+        local worker_name_var=$1
+        local worker_domain_var=$2
+        local worker_name_value="${!worker_name_var}"
+        local composed_domain=""
+
+        worker_name_value=$(normalize_worker_label_value "$worker_name_value")
+
+        if [ -z "$worker_name_value" ] || ! is_valid_worker_label "$worker_name_value"; then
+            echo -e "${RED}❌ $worker_name_var must use only lowercase letters, numbers, and dashes.${NC}"
+            exit 1
+        fi
+
+        composed_domain=$(compose_worker_domain "$worker_name_value" "$shared_worker_subdomain" || echo "")
+
+        if [ -z "$composed_domain" ]; then
+            echo -e "${RED}❌ Could not build $worker_domain_var from $worker_name_var and shared worker-subdomain.${NC}"
+            exit 1
+        fi
+
+        write_env_var "$worker_domain_var" "$composed_domain"
+        export "$worker_domain_var=$composed_domain"
+        echo -e "${GREEN}✅ $worker_domain_var set to $composed_domain${NC}"
     }
     
     echo -e "${BLUE}📊 CLOUDFLARE CORE CONFIGURATION${NC}"
@@ -1225,18 +1179,80 @@ prompt_for_secrets() {
     
     echo -e "${BLUE}🔑 WORKER NAMES & DOMAINS${NC}"
     echo "========================="
+    echo -e "${YELLOW}Worker names and worker-subdomains are lowercased automatically and must use only letters, numbers, and dashes.${NC}"
+    echo -e "${YELLOW}You will enter one shared worker-subdomain; each worker domain is generated as {worker-name}.{worker-subdomain}.${NC}"
+
+    local shared_worker_subdomain=""
+    local shared_worker_subdomain_default=""
+    local shared_worker_subdomain_input=""
+
+    shared_worker_subdomain_default=$(infer_worker_subdomain_from_domain "$KEYS_WORKER_NAME" "$KEYS_WORKER_DOMAIN")
+    if [ -z "$shared_worker_subdomain_default" ]; then
+        shared_worker_subdomain_default=$(infer_worker_subdomain_from_domain "$USER_WORKER_NAME" "$USER_WORKER_DOMAIN")
+    fi
+    if [ -z "$shared_worker_subdomain_default" ]; then
+        shared_worker_subdomain_default=$(infer_worker_subdomain_from_domain "$DATA_WORKER_NAME" "$DATA_WORKER_DOMAIN")
+    fi
+    if [ -z "$shared_worker_subdomain_default" ]; then
+        shared_worker_subdomain_default=$(infer_worker_subdomain_from_domain "$AUDIT_WORKER_NAME" "$AUDIT_WORKER_DOMAIN")
+    fi
+    if [ -z "$shared_worker_subdomain_default" ]; then
+        shared_worker_subdomain_default=$(infer_worker_subdomain_from_domain "$IMAGES_WORKER_NAME" "$IMAGES_WORKER_DOMAIN")
+    fi
+    if [ -z "$shared_worker_subdomain_default" ]; then
+        shared_worker_subdomain_default=$(infer_worker_subdomain_from_domain "$PDF_WORKER_NAME" "$PDF_WORKER_DOMAIN")
+    fi
+
+    while true; do
+        echo -e "${BLUE}WORKER_SUBDOMAIN${NC}"
+
+        if [ "$update_env" != "true" ] && [ -n "$shared_worker_subdomain_default" ] && ! is_placeholder "$shared_worker_subdomain_default"; then
+            echo -e "${GREEN}Current value: $shared_worker_subdomain_default${NC}"
+            read -p "New value (or press Enter to keep current): " shared_worker_subdomain_input
+            shared_worker_subdomain_input=$(strip_carriage_returns "$shared_worker_subdomain_input")
+
+            if [ -z "$shared_worker_subdomain_input" ]; then
+                shared_worker_subdomain="$shared_worker_subdomain_default"
+            else
+                shared_worker_subdomain="$shared_worker_subdomain_input"
+            fi
+        else
+            read -p "Enter shared worker-subdomain: " shared_worker_subdomain_input
+            shared_worker_subdomain_input=$(strip_carriage_returns "$shared_worker_subdomain_input")
+            shared_worker_subdomain="$shared_worker_subdomain_input"
+        fi
+
+        if [ -z "$shared_worker_subdomain" ] || is_placeholder "$shared_worker_subdomain"; then
+            echo -e "${RED}❌ shared worker-subdomain is required and cannot be a placeholder.${NC}"
+            continue
+        fi
+
+        shared_worker_subdomain=$(normalize_worker_label_value "$shared_worker_subdomain")
+
+        if [ -z "$shared_worker_subdomain" ] || ! is_valid_worker_label "$shared_worker_subdomain"; then
+            echo -e "${RED}❌ shared worker-subdomain must use only lowercase letters, numbers, and dashes.${NC}"
+            continue
+        fi
+
+        echo -e "${GREEN}✅ Shared worker-subdomain set to: $shared_worker_subdomain${NC}"
+        echo ""
+        break
+    done
+
     prompt_for_var "KEYS_WORKER_NAME" "Keys worker name"
-    prompt_for_var "KEYS_WORKER_DOMAIN" "Keys worker domain (format: {worker-name}.{worker-subdomain})"
     prompt_for_var "USER_WORKER_NAME" "User worker name"
-    prompt_for_var "USER_WORKER_DOMAIN" "User worker domain (format: {worker-name}.{worker-subdomain})"
     prompt_for_var "DATA_WORKER_NAME" "Data worker name"
-    prompt_for_var "DATA_WORKER_DOMAIN" "Data worker domain (format: {worker-name}.{worker-subdomain})"
     prompt_for_var "AUDIT_WORKER_NAME" "Audit worker name"
-    prompt_for_var "AUDIT_WORKER_DOMAIN" "Audit worker domain (format: {worker-name}.{worker-subdomain})"
     prompt_for_var "IMAGES_WORKER_NAME" "Images worker name"
-    prompt_for_var "IMAGES_WORKER_DOMAIN" "Images worker domain (format: {worker-name}.{worker-subdomain})"
     prompt_for_var "PDF_WORKER_NAME" "PDF worker name"
-    prompt_for_var "PDF_WORKER_DOMAIN" "PDF worker domain (format: {worker-name}.{worker-subdomain})"
+
+    set_worker_domain_from_shared_subdomain "KEYS_WORKER_NAME" "KEYS_WORKER_DOMAIN"
+    set_worker_domain_from_shared_subdomain "USER_WORKER_NAME" "USER_WORKER_DOMAIN"
+    set_worker_domain_from_shared_subdomain "DATA_WORKER_NAME" "DATA_WORKER_DOMAIN"
+    set_worker_domain_from_shared_subdomain "AUDIT_WORKER_NAME" "AUDIT_WORKER_DOMAIN"
+    set_worker_domain_from_shared_subdomain "IMAGES_WORKER_NAME" "IMAGES_WORKER_DOMAIN"
+    set_worker_domain_from_shared_subdomain "PDF_WORKER_NAME" "PDF_WORKER_DOMAIN"
+    echo ""
     
     echo -e "${BLUE}🗄️ STORAGE CONFIGURATION${NC}"
     echo "========================="
