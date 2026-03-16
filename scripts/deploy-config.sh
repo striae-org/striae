@@ -208,44 +208,10 @@ read_env_var_from_file() {
     ' "$env_file"
 }
 
-worker_domain_wrangler_path() {
-    case "$1" in
-        KEYS_WORKER_DOMAIN)
-            printf '%s' "workers/keys-worker/wrangler.jsonc"
-            ;;
-        USER_WORKER_DOMAIN)
-            printf '%s' "workers/user-worker/wrangler.jsonc"
-            ;;
-        DATA_WORKER_DOMAIN)
-            printf '%s' "workers/data-worker/wrangler.jsonc"
-            ;;
-        AUDIT_WORKER_DOMAIN)
-            printf '%s' "workers/audit-worker/wrangler.jsonc"
-            ;;
-        IMAGES_WORKER_DOMAIN)
-            printf '%s' "workers/image-worker/wrangler.jsonc"
-            ;;
-        PDF_WORKER_DOMAIN)
-            printf '%s' "workers/pdf-worker/wrangler.jsonc"
-            ;;
-    esac
-}
-
-read_worker_domain_from_wrangler() {
-    local wrangler_file=$1
-
-    if [ ! -f "$wrangler_file" ]; then
-        return 0
-    fi
-
-    sed -n 's/.*"pattern"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$wrangler_file" | head -n 1
-}
-
 resolve_existing_domain_value() {
     local var_name=$1
     local current_value=$2
     local preserved_value=""
-    local wrangler_file=""
 
     current_value=$(normalize_domain_value "$current_value")
 
@@ -272,24 +238,6 @@ resolve_existing_domain_value() {
         fi
     fi
 
-    if [[ "$var_name" == *_WORKER_DOMAIN ]]; then
-        wrangler_file=$(worker_domain_wrangler_path "$var_name")
-
-        if [ -n "$wrangler_file" ] && [ -f "$wrangler_file" ]; then
-            preserved_value=$(read_worker_domain_from_wrangler "$wrangler_file")
-            preserved_value=$(normalize_domain_value "$preserved_value")
-
-            if [ "$preserved_value" = "$var_name" ]; then
-                preserved_value=""
-            fi
-
-            if [ -n "$preserved_value" ] && ! is_placeholder "$preserved_value"; then
-                printf '%s' "$preserved_value"
-                return 0
-            fi
-        fi
-    fi
-
     printf '%s' "$current_value"
 }
 
@@ -297,25 +245,52 @@ generate_worker_subdomain_label() {
     node -e "const { randomInt } = require('crypto'); const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789'; let value = ''; for (let index = 0; index < 10; index += 1) { value += alphabet[randomInt(alphabet.length)]; } process.stdout.write(value);" 2>/dev/null
 }
 
-generate_worker_subdomain() {
-    local pages_domain=$1
-    local subdomain_label=""
+worker_name_var_for_domain_var() {
+    case "$1" in
+        KEYS_WORKER_DOMAIN)
+            printf '%s' "KEYS_WORKER_NAME"
+            ;;
+        USER_WORKER_DOMAIN)
+            printf '%s' "USER_WORKER_NAME"
+            ;;
+        DATA_WORKER_DOMAIN)
+            printf '%s' "DATA_WORKER_NAME"
+            ;;
+        AUDIT_WORKER_DOMAIN)
+            printf '%s' "AUDIT_WORKER_NAME"
+            ;;
+        IMAGES_WORKER_DOMAIN)
+            printf '%s' "IMAGES_WORKER_NAME"
+            ;;
+        PDF_WORKER_DOMAIN)
+            printf '%s' "PDF_WORKER_NAME"
+            ;;
+        *)
+            printf '%s' ""
+            ;;
+    esac
+}
 
-    pages_domain=$(normalize_domain_value "$pages_domain")
+compose_worker_domain() {
+    local worker_name=$1
+    local worker_subdomain=$2
 
-    if [ -z "$pages_domain" ] || is_placeholder "$pages_domain"; then
+    worker_name=$(normalize_domain_value "$worker_name")
+    worker_subdomain=$(normalize_domain_value "$worker_subdomain")
+    worker_name="${worker_name#.}"
+    worker_name="${worker_name%.}"
+    worker_subdomain="${worker_subdomain#.}"
+    worker_subdomain="${worker_subdomain%.}"
+
+    if [ -z "$worker_name" ] || [ -z "$worker_subdomain" ]; then
         return 1
     fi
 
-    if ! subdomain_label=$(generate_worker_subdomain_label); then
+    if [[ "$worker_name" == *.* ]] || [[ "$worker_name" == */* ]] || [[ "$worker_subdomain" == */* ]]; then
         return 1
     fi
 
-    if [ ${#subdomain_label} -ne 10 ]; then
-        return 1
-    fi
-
-    printf '%s.%s' "$subdomain_label" "$pages_domain"
+    printf '%s.%s' "$worker_name" "$worker_subdomain"
 }
 
 write_env_var() {
@@ -533,7 +508,7 @@ required_vars=(
     "IMAGES_WORKER_NAME"
     "PDF_WORKER_NAME"
     
-    # Worker Domains (required for config replacement)
+    # Worker Domains (required for proxy/env secrets and worker fallbacks)
     "KEYS_WORKER_DOMAIN"
     "USER_WORKER_DOMAIN"
     "DATA_WORKER_DOMAIN"
@@ -726,25 +701,12 @@ validate_generated_configs() {
     assert_contains_literal "workers/image-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in image worker config"
     assert_contains_literal "workers/pdf-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in pdf worker config"
 
-    assert_contains_literal "workers/keys-worker/wrangler.jsonc" "$KEYS_WORKER_DOMAIN" "KEYS_WORKER_DOMAIN missing in keys worker config"
-    assert_contains_literal "workers/user-worker/wrangler.jsonc" "$USER_WORKER_DOMAIN" "USER_WORKER_DOMAIN missing in user worker config"
-    assert_contains_literal "workers/data-worker/wrangler.jsonc" "$DATA_WORKER_DOMAIN" "DATA_WORKER_DOMAIN missing in data worker config"
-    assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$AUDIT_WORKER_DOMAIN" "AUDIT_WORKER_DOMAIN missing in audit worker config"
-    assert_contains_literal "workers/image-worker/wrangler.jsonc" "$IMAGES_WORKER_DOMAIN" "IMAGES_WORKER_DOMAIN missing in image worker config"
-    assert_contains_literal "workers/pdf-worker/wrangler.jsonc" "$PDF_WORKER_DOMAIN" "PDF_WORKER_DOMAIN missing in pdf worker config"
-
     assert_contains_literal "workers/data-worker/wrangler.jsonc" "$DATA_BUCKET_NAME" "DATA_BUCKET_NAME missing in data worker config"
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$AUDIT_BUCKET_NAME" "AUDIT_BUCKET_NAME missing in audit worker config"
     assert_contains_literal "workers/user-worker/wrangler.jsonc" "$KV_STORE_ID" "KV_STORE_ID missing in user worker config"
 
     assert_contains_literal "app/config/config.json" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in app/config/config.json"
-    assert_contains_literal "app/config/config.json" "https://$DATA_WORKER_DOMAIN" "DATA_WORKER_DOMAIN missing in app/config/config.json"
-    assert_contains_literal "app/config/config.json" "https://$AUDIT_WORKER_DOMAIN" "AUDIT_WORKER_DOMAIN missing in app/config/config.json"
-    assert_contains_literal "app/config/config.json" "https://$KEYS_WORKER_DOMAIN" "KEYS_WORKER_DOMAIN missing in app/config/config.json"
-    assert_contains_literal "app/config/config.json" "https://$IMAGES_WORKER_DOMAIN" "IMAGES_WORKER_DOMAIN missing in app/config/config.json"
-    assert_contains_literal "app/config/config.json" "https://$USER_WORKER_DOMAIN" "USER_WORKER_DOMAIN missing in app/config/config.json"
-    assert_contains_literal "app/config/config.json" "https://$PDF_WORKER_DOMAIN" "PDF_WORKER_DOMAIN missing in app/config/config.json"
-    assert_contains_literal "app/config/config.json" "$KEYS_AUTH" "KEYS_AUTH missing in app/config/config.json"
+    assert_contains_literal "app/config/config.json" "$ACCOUNT_HASH" "ACCOUNT_HASH missing in app/config/config.json"
 
     assert_contains_literal "app/config/firebase.ts" "$API_KEY" "API_KEY missing in app/config/firebase.ts"
     assert_contains_literal "app/config/firebase.ts" "$AUTH_DOMAIN" "AUTH_DOMAIN missing in app/config/firebase.ts"
@@ -760,11 +722,9 @@ validate_generated_configs() {
     assert_contains_literal "workers/keys-worker/src/keys.ts" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in keys-worker source"
     assert_contains_literal "workers/pdf-worker/src/pdf-worker.ts" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in pdf-worker source"
     assert_contains_literal "workers/user-worker/src/user-worker.ts" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in user-worker source"
-    assert_contains_literal "workers/user-worker/src/user-worker.ts" "https://$DATA_WORKER_DOMAIN" "DATA_WORKER_DOMAIN missing in user-worker source"
-    assert_contains_literal "workers/user-worker/src/user-worker.ts" "https://$IMAGES_WORKER_DOMAIN" "IMAGES_WORKER_DOMAIN missing in user-worker source"
 
     local placeholder_pattern
-    placeholder_pattern="(\"(ACCOUNT_ID|PAGES_PROJECT_NAME|PAGES_CUSTOM_DOMAIN|KEYS_WORKER_NAME|USER_WORKER_NAME|DATA_WORKER_NAME|AUDIT_WORKER_NAME|IMAGES_WORKER_NAME|PDF_WORKER_NAME|KEYS_WORKER_DOMAIN|USER_WORKER_DOMAIN|DATA_WORKER_DOMAIN|AUDIT_WORKER_DOMAIN|IMAGES_WORKER_DOMAIN|PDF_WORKER_DOMAIN|DATA_BUCKET_NAME|AUDIT_BUCKET_NAME|KV_STORE_ID|DATA_WORKER_CUSTOM_DOMAIN|AUDIT_WORKER_CUSTOM_DOMAIN|KEYS_WORKER_CUSTOM_DOMAIN|IMAGE_WORKER_CUSTOM_DOMAIN|USER_WORKER_CUSTOM_DOMAIN|PDF_WORKER_CUSTOM_DOMAIN|YOUR_KEYS_AUTH_TOKEN|MANIFEST_SIGNING_KEY_ID|MANIFEST_SIGNING_PUBLIC_KEY|YOUR_FIREBASE_API_KEY|YOUR_FIREBASE_AUTH_DOMAIN|YOUR_FIREBASE_PROJECT_ID|YOUR_FIREBASE_STORAGE_BUCKET|YOUR_FIREBASE_MESSAGING_SENDER_ID|YOUR_FIREBASE_APP_ID|YOUR_FIREBASE_MEASUREMENT_ID)\"|'(PAGES_CUSTOM_DOMAIN|DATA_WORKER_DOMAIN|IMAGES_WORKER_DOMAIN)')"
+    placeholder_pattern="(\"(ACCOUNT_ID|PAGES_PROJECT_NAME|PAGES_CUSTOM_DOMAIN|KEYS_WORKER_NAME|USER_WORKER_NAME|DATA_WORKER_NAME|AUDIT_WORKER_NAME|IMAGES_WORKER_NAME|PDF_WORKER_NAME|KEYS_WORKER_DOMAIN|USER_WORKER_DOMAIN|DATA_WORKER_DOMAIN|AUDIT_WORKER_DOMAIN|IMAGES_WORKER_DOMAIN|PDF_WORKER_DOMAIN|DATA_BUCKET_NAME|AUDIT_BUCKET_NAME|KV_STORE_ID|ACCOUNT_HASH|MANIFEST_SIGNING_KEY_ID|MANIFEST_SIGNING_PUBLIC_KEY|YOUR_FIREBASE_API_KEY|YOUR_FIREBASE_AUTH_DOMAIN|YOUR_FIREBASE_PROJECT_ID|YOUR_FIREBASE_STORAGE_BUCKET|YOUR_FIREBASE_MESSAGING_SENDER_ID|YOUR_FIREBASE_APP_ID|YOUR_FIREBASE_MEASUREMENT_ID)\"|'(PAGES_CUSTOM_DOMAIN|DATA_WORKER_DOMAIN|IMAGES_WORKER_DOMAIN)')"
 
     local files_to_scan=(
         "wrangler.toml"
@@ -1080,67 +1040,106 @@ prompt_for_secrets() {
                 fi
             fi
         elif [[ "$var_name" == *_WORKER_DOMAIN ]]; then
-            local pages_domain
+            local worker_name_var
+            local worker_name_current=""
+            local worker_name_input=""
+            local worker_subdomain_input=""
+            local inferred_subdomain=""
             local domain_choice=""
+            local composed_domain=""
 
-            pages_domain=$(resolve_existing_domain_value "PAGES_CUSTOM_DOMAIN" "$PAGES_CUSTOM_DOMAIN")
+            worker_name_var=$(worker_name_var_for_domain_var "$var_name")
+            worker_name_current=$(strip_carriage_returns "${!worker_name_var}")
+
+            if [ -n "$worker_name_current" ] && ! is_placeholder "$worker_name_current" && [ -n "$current_value" ] && ! is_placeholder "$current_value"; then
+                case "$current_value" in
+                    "$worker_name_current".*)
+                        inferred_subdomain="${current_value#${worker_name_current}.}"
+                        ;;
+                esac
+            fi
 
             echo -e "${BLUE}$var_name${NC}"
             echo -e "${YELLOW}$description${NC}"
 
-            if [ -n "$current_value" ] && ! is_placeholder "$current_value"; then
-                echo -e "${GREEN}Current value: $current_value${NC}"
-            else
-                while true; do
-                    if [ -n "$pages_domain" ] && ! is_placeholder "$pages_domain"; then
-                        echo -e "${YELLOW}Choose how to configure this worker domain:${NC}"
-                        echo "  A) Auto-generate a 10-character subdomain of $pages_domain"
-                        echo "  M) Manually enter the worker domain"
-                        read -p "Selection (A/M): " domain_choice
-                        domain_choice=$(strip_carriage_returns "$domain_choice")
-                        domain_choice=$(printf '%s' "$domain_choice" | tr '[:upper:]' '[:lower:]')
+            while true; do
+                if [ "$update_env" != "true" ] && [ -n "$current_value" ] && ! is_placeholder "$current_value"; then
+                    echo -e "${GREEN}Current value: $current_value${NC}"
+                    read -p "Press Enter to keep current, or type 'y' to rebuild from worker-name and worker-subdomain: " domain_choice
+                    domain_choice=$(strip_carriage_returns "$domain_choice")
 
-                        if [ -z "$domain_choice" ] || [ "$domain_choice" = "a" ]; then
-                            new_value=$(generate_worker_subdomain "$pages_domain" || echo "")
-
-                            if [ -n "$new_value" ]; then
-                                echo -e "${GREEN}✅ Generated worker domain: $new_value${NC}"
-                                break
-                            fi
-
-                            echo -e "${RED}❌ Failed to auto-generate a worker subdomain. Please try manual entry.${NC}"
-                            continue
-                        fi
-
-                        if [ "$domain_choice" = "m" ]; then
-                            read -p "Enter value: " new_value
-                            new_value=$(strip_carriage_returns "$new_value")
-                        else
-                            echo -e "${RED}❌ Please choose 'A' for automatic or 'M' for manual.${NC}"
-                            continue
-                        fi
-                    else
-                        echo -e "${YELLOW}PAGES_CUSTOM_DOMAIN is required for auto-generated worker subdomains.${NC}"
-                        read -p "Enter value: " new_value
-                        new_value=$(strip_carriage_returns "$new_value")
-                    fi
-
-                    if [ -z "$new_value" ]; then
-                        echo -e "${RED}❌ A value is required.${NC}"
-                        continue
-                    fi
-
-                    new_value=$(normalize_domain_value "$new_value")
-
-                    if is_placeholder "$new_value"; then
-                        echo -e "${RED}❌ Placeholder values are not allowed.${NC}"
+                    if [ -z "$domain_choice" ]; then
                         new_value=""
-                        continue
+                        break
                     fi
 
-                    break
-                done
-            fi
+                    if [ "$domain_choice" != "y" ] && [ "$domain_choice" != "Y" ]; then
+                        echo -e "${RED}❌ Please press Enter to keep current or type 'y' to rebuild.${NC}"
+                        continue
+                    fi
+                fi
+
+                if [ -n "$worker_name_current" ] && ! is_placeholder "$worker_name_current"; then
+                    read -p "Prompt: worker-name [$worker_name_current]: " worker_name_input
+                    worker_name_input=$(strip_carriage_returns "$worker_name_input")
+                    if [ -z "$worker_name_input" ]; then
+                        worker_name_input="$worker_name_current"
+                    fi
+                else
+                    read -p "Prompt: worker-name: " worker_name_input
+                    worker_name_input=$(strip_carriage_returns "$worker_name_input")
+                fi
+
+                if [ -z "$worker_name_input" ] || is_placeholder "$worker_name_input"; then
+                    echo -e "${RED}❌ worker-name is required and cannot be a placeholder.${NC}"
+                    continue
+                fi
+
+                worker_name_input=$(normalize_domain_value "$worker_name_input")
+                worker_name_input="${worker_name_input#.}"
+                worker_name_input="${worker_name_input%.}"
+
+                if [[ "$worker_name_input" == *.* ]] || [[ "$worker_name_input" == */* ]]; then
+                    echo -e "${RED}❌ worker-name must be a single hostname label (for example: striae-dev-data).${NC}"
+                    continue
+                fi
+
+                if [ -n "$inferred_subdomain" ]; then
+                    read -p "Prompt: worker-subdomain [$inferred_subdomain]: " worker_subdomain_input
+                    worker_subdomain_input=$(strip_carriage_returns "$worker_subdomain_input")
+                    if [ -z "$worker_subdomain_input" ]; then
+                        worker_subdomain_input="$inferred_subdomain"
+                    fi
+                else
+                    read -p "Prompt: worker-subdomain: " worker_subdomain_input
+                    worker_subdomain_input=$(strip_carriage_returns "$worker_subdomain_input")
+                fi
+
+                if [ -z "$worker_subdomain_input" ] || is_placeholder "$worker_subdomain_input"; then
+                    echo -e "${RED}❌ worker-subdomain is required and cannot be a placeholder.${NC}"
+                    continue
+                fi
+
+                worker_subdomain_input=$(normalize_domain_value "$worker_subdomain_input")
+                worker_subdomain_input="${worker_subdomain_input#.}"
+                worker_subdomain_input="${worker_subdomain_input%.}"
+
+                composed_domain=$(compose_worker_domain "$worker_name_input" "$worker_subdomain_input" || echo "")
+                if [ -z "$composed_domain" ]; then
+                    echo -e "${RED}❌ Invalid worker-name/worker-subdomain combination.${NC}"
+                    continue
+                fi
+
+                if [ -n "$worker_name_var" ]; then
+                    write_env_var "$worker_name_var" "$worker_name_input"
+                    export "$worker_name_var=$worker_name_input"
+                    worker_name_current="$worker_name_input"
+                fi
+
+                new_value="$composed_domain"
+                echo -e "${GREEN}Resulting worker domain: $new_value${NC}"
+                break
+            done
         else
             # Normal prompt for other variables
             echo -e "${BLUE}$var_name${NC}"
@@ -1227,17 +1226,17 @@ prompt_for_secrets() {
     echo -e "${BLUE}🔑 WORKER NAMES & DOMAINS${NC}"
     echo "========================="
     prompt_for_var "KEYS_WORKER_NAME" "Keys worker name"
-    prompt_for_var "KEYS_WORKER_DOMAIN" "Keys worker domain (e.g., keys.striae.org) - DO NOT include https://"
+    prompt_for_var "KEYS_WORKER_DOMAIN" "Keys worker domain (format: {worker-name}.{worker-subdomain})"
     prompt_for_var "USER_WORKER_NAME" "User worker name"
-    prompt_for_var "USER_WORKER_DOMAIN" "User worker domain (e.g., users.striae.org) - DO NOT include https://"
+    prompt_for_var "USER_WORKER_DOMAIN" "User worker domain (format: {worker-name}.{worker-subdomain})"
     prompt_for_var "DATA_WORKER_NAME" "Data worker name"
-    prompt_for_var "DATA_WORKER_DOMAIN" "Data worker domain (e.g., data.striae.org) - DO NOT include https://"
+    prompt_for_var "DATA_WORKER_DOMAIN" "Data worker domain (format: {worker-name}.{worker-subdomain})"
     prompt_for_var "AUDIT_WORKER_NAME" "Audit worker name"
-    prompt_for_var "AUDIT_WORKER_DOMAIN" "Audit worker domain (e.g., audit.striae.org) - DO NOT include https://"
+    prompt_for_var "AUDIT_WORKER_DOMAIN" "Audit worker domain (format: {worker-name}.{worker-subdomain})"
     prompt_for_var "IMAGES_WORKER_NAME" "Images worker name"
-    prompt_for_var "IMAGES_WORKER_DOMAIN" "Images worker domain (e.g., images.striae.org) - DO NOT include https://"
+    prompt_for_var "IMAGES_WORKER_DOMAIN" "Images worker domain (format: {worker-name}.{worker-subdomain})"
     prompt_for_var "PDF_WORKER_NAME" "PDF worker name"
-    prompt_for_var "PDF_WORKER_DOMAIN" "PDF worker domain (e.g., pdf.striae.org) - DO NOT include https://"
+    prompt_for_var "PDF_WORKER_DOMAIN" "PDF worker domain (format: {worker-name}.{worker-subdomain})"
     
     echo -e "${BLUE}🗄️ STORAGE CONFIGURATION${NC}"
     echo "========================="
@@ -1286,7 +1285,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating audit-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"AUDIT_WORKER_NAME\"/\"$AUDIT_WORKER_NAME\"/g" workers/audit-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/audit-worker/wrangler.jsonc
-        sed -i "s/\"AUDIT_WORKER_DOMAIN\"/\"$AUDIT_WORKER_DOMAIN\"/g" workers/audit-worker/wrangler.jsonc
         sed -i "s/\"AUDIT_BUCKET_NAME\"/\"$AUDIT_BUCKET_NAME\"/g" workers/audit-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ audit-worker configuration updated${NC}"
     fi
@@ -1303,7 +1301,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating data-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"DATA_WORKER_NAME\"/\"$DATA_WORKER_NAME\"/g" workers/data-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/data-worker/wrangler.jsonc
-        sed -i "s/\"DATA_WORKER_DOMAIN\"/\"$DATA_WORKER_DOMAIN\"/g" workers/data-worker/wrangler.jsonc
         sed -i "s/\"DATA_BUCKET_NAME\"/\"$DATA_BUCKET_NAME\"/g" workers/data-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ data-worker configuration updated${NC}"
     fi
@@ -1320,7 +1317,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating image-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"IMAGES_WORKER_NAME\"/\"$IMAGES_WORKER_NAME\"/g" workers/image-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/image-worker/wrangler.jsonc
-        sed -i "s/\"IMAGES_WORKER_DOMAIN\"/\"$IMAGES_WORKER_DOMAIN\"/g" workers/image-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ image-worker configuration updated${NC}"
     fi
     
@@ -1336,7 +1332,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating keys-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"KEYS_WORKER_NAME\"/\"$KEYS_WORKER_NAME\"/g" workers/keys-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/keys-worker/wrangler.jsonc
-        sed -i "s/\"KEYS_WORKER_DOMAIN\"/\"$KEYS_WORKER_DOMAIN\"/g" workers/keys-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ keys-worker configuration updated${NC}"
     fi
     
@@ -1352,7 +1347,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating pdf-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"PDF_WORKER_NAME\"/\"$PDF_WORKER_NAME\"/g" workers/pdf-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/pdf-worker/wrangler.jsonc
-        sed -i "s/\"PDF_WORKER_DOMAIN\"/\"$PDF_WORKER_DOMAIN\"/g" workers/pdf-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ pdf-worker configuration updated${NC}"
     fi
     
@@ -1368,7 +1362,6 @@ update_wrangler_configs() {
         echo -e "${YELLOW}  Updating user-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"USER_WORKER_NAME\"/\"$USER_WORKER_NAME\"/g" workers/user-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$ACCOUNT_ID\"/g" workers/user-worker/wrangler.jsonc
-        sed -i "s/\"USER_WORKER_DOMAIN\"/\"$USER_WORKER_DOMAIN\"/g" workers/user-worker/wrangler.jsonc
         sed -i "s/\"KV_STORE_ID\"/\"$KV_STORE_ID\"/g" workers/user-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ user-worker configuration updated${NC}"
     fi
@@ -1397,17 +1390,13 @@ update_wrangler_configs() {
         echo -e "${YELLOW}    Updating app/config/config.json...${NC}"
         local escaped_manifest_signing_key_id
         local escaped_manifest_signing_public_key
+        local escaped_account_hash
         escaped_manifest_signing_key_id=$(escape_for_sed_replacement "$MANIFEST_SIGNING_KEY_ID")
         escaped_manifest_signing_public_key=$(escape_for_sed_replacement "$MANIFEST_SIGNING_PUBLIC_KEY")
+        escaped_account_hash=$(escape_for_sed_replacement "$ACCOUNT_HASH")
 
         sed -i "s|\"url\": \"[^\"]*\"|\"url\": \"https://$escaped_pages_custom_domain\"|g" app/config/config.json
-        sed -i "s|\"DATA_WORKER_CUSTOM_DOMAIN\"|\"https://$DATA_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"AUDIT_WORKER_CUSTOM_DOMAIN\"|\"https://$AUDIT_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"KEYS_WORKER_CUSTOM_DOMAIN\"|\"https://$KEYS_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"IMAGE_WORKER_CUSTOM_DOMAIN\"|\"https://$IMAGES_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"USER_WORKER_CUSTOM_DOMAIN\"|\"https://$USER_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"PDF_WORKER_CUSTOM_DOMAIN\"|\"https://$PDF_WORKER_DOMAIN\"|g" app/config/config.json
-        sed -i "s|\"YOUR_KEYS_AUTH_TOKEN\"|\"$KEYS_AUTH\"|g" app/config/config.json
+        sed -i "s|\"account_hash\": \"[^\"]*\"|\"account_hash\": \"$escaped_account_hash\"|g" app/config/config.json
         sed -i "s|\"MANIFEST_SIGNING_KEY_ID\"|\"$escaped_manifest_signing_key_id\"|g" app/config/config.json
         sed -i "s|\"MANIFEST_SIGNING_PUBLIC_KEY\"|\"$escaped_manifest_signing_public_key\"|g" app/config/config.json
         echo -e "${GREEN}      ✅ app config.json updated${NC}"

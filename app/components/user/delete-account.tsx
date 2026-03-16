@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';
-import paths from '~/config/config.json';
-import { getUserApiKey } from '~/utils/auth';
+import { fetchUserApi } from '~/utils/user-api-client';
 import { auditService } from '~/services/audit';
 import styles from './delete-account.module.css';
 
@@ -220,14 +219,15 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
         false // emailNotificationSent - deletion emails disabled
       );
 
-      // Get API key for user-worker authentication
-      const apiKey = await getUserApiKey();
+      const currentUser = auth.currentUser;
+      if (!currentUser || currentUser.uid !== user.uid) {
+        throw new Error('User session mismatch. Please sign in again.');
+      }
       
-      // Delete the user account via user-worker
-      const deleteResponse = await fetch(`${paths.user_worker_url}/${user.uid}?stream=true`, {
+      // Delete the user account via user proxy
+      const deleteResponse = await fetchUserApi(currentUser, `/${encodeURIComponent(user.uid)}?stream=true`, {
         method: 'DELETE',
         headers: {
-          'X-Custom-Auth-Key': apiKey,
           'Accept': 'text/event-stream'
         }
       });

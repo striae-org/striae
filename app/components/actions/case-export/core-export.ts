@@ -183,7 +183,8 @@ export async function exportAllCases(
 export async function exportCaseData(
   user: User,
   caseNumber: string,
-  options: ExportOptions = {}
+  options: ExportOptions = {},
+  onProgress?: (current: number, total: number, label: string) => void
 ): Promise<CaseExportData> {
   // NOTE: startTime and fileName tracking moved to download handlers
   
@@ -225,7 +226,8 @@ export async function exportCaseData(
     let earliestAnnotationDate: string | undefined;
     let latestAnnotationDate: string | undefined;
 
-    for (const file of files) {
+    for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
+      const file = files[fileIndex];
       let annotations: AnnotationData | undefined;
       let hasAnnotations = false;
 
@@ -287,6 +289,7 @@ export async function exportCaseData(
         annotations,
         hasAnnotations
       });
+      onProgress?.(fileIndex + 1, files.length, `Loading file ${fileIndex + 1} of ${files.length}`);
     }
 
     // Build export data

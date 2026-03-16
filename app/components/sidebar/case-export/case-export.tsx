@@ -10,8 +10,8 @@ export type ExportFormat = 'json' | 'csv';
 interface CaseExportProps {
   isOpen: boolean;
   onClose: () => void;
-  onExport: (caseNumber: string, format: ExportFormat, includeImages?: boolean) => void;
-  onExportAll: (onProgress: (current: number, total: number, caseName: string) => void, format: ExportFormat) => void;
+  onExport: (caseNumber: string, format: ExportFormat, includeImages?: boolean, onProgress?: (progress: number, label: string) => void) => Promise<void>;
+  onExportAll: (onProgress: (current: number, total: number, caseName: string) => void, format: ExportFormat) => Promise<void>;
   currentCaseNumber?: string;
   isReadOnly?: boolean;
 }
@@ -30,7 +30,7 @@ export const CaseExport = ({
   const [isExportingAll, setIsExportingAll] = useState(false);
   const [isExportingConfirmations, setIsExportingConfirmations] = useState(false);
   const [error, setError] = useState<string>('');
-  const [exportProgress, setExportProgress] = useState<{ current: number; total: number; caseName: string } | null>(null);
+  const [exportProgress, setExportProgress] = useState<{ current: number; total: number; caseName: string; mode?: 'single' | 'all' } | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('json');
   const [includeImages, setIncludeImages] = useState(false);
   const [hasConfirmationData, setHasConfirmationData] = useState(false);
@@ -130,13 +130,16 @@ export const CaseExport = ({
     setExportProgress(null);
     
     try {
-      await onExport(caseNumber.trim(), selectedFormat, includeImages);
+      await onExport(caseNumber.trim(), selectedFormat, includeImages, (progress, label) => {
+        setExportProgress({ current: progress, total: 100, caseName: label, mode: 'single' });
+      });
       onClose();
     } catch (error) {
       console.error('Export failed:', error);
       setError(error instanceof Error ? error.message : 'Export failed. Please try again.');
     } finally {
       setIsExporting(false);
+      setExportProgress(null);
     }
   };
 
@@ -315,7 +318,9 @@ export const CaseExport = ({
             {exportProgress && exportProgress.total > 0 && (
               <div className={styles.progressSection}>
                 <div className={styles.progressText}>
-                  Exporting case {exportProgress.current} of {exportProgress.total}: {exportProgress.caseName}
+                  {exportProgress.mode === 'single'
+                    ? `${exportProgress.caseName} (${exportProgress.current}%)`
+                    : `Exporting case ${exportProgress.current} of ${exportProgress.total}: ${exportProgress.caseName}`}
                 </div>
                 <div className={styles.progressBar}>
                   <div 
@@ -326,7 +331,7 @@ export const CaseExport = ({
               </div>
             )}
 
-            {isExportingAll && !exportProgress && (
+            {(isExporting || isExportingAll) && !exportProgress && (
               <div className={styles.progressSection}>
                 <div className={styles.progressText}>
                   Preparing export...

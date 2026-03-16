@@ -2,7 +2,7 @@
   "name": "AUDIT_WORKER_NAME",
   "account_id": "ACCOUNT_ID",
   "main": "src/audit-worker.ts",
-  "compatibility_date": "2026-03-14",
+  "compatibility_date": "2026-03-15",
   "compatibility_flags": [
     "nodejs_compat"
   ], 
@@ -15,13 +15,6 @@
     {
       "binding": "STRIAE_AUDIT",
       "bucket_name": "AUDIT_BUCKET_NAME"
-    }
-  ],
-
-  "routes": [
-    {
-      "pattern": "AUDIT_WORKER_DOMAIN",
-      "custom_domain": true
     }
   ],
 

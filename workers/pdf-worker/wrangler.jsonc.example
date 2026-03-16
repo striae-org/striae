@@ -2,7 +2,7 @@
   "name": "PDF_WORKER_NAME",
   "account_id": "ACCOUNT_ID",
   "main": "src/pdf-worker.ts",
-  "compatibility_date": "2026-03-14",
+  "compatibility_date": "2026-03-15",
   "compatibility_flags": [
     "nodejs_compat"
   ],
@@ -14,13 +14,6 @@
   "observability": { 
 	"enabled": true
   },
-
-  "routes": [
-    {
-      "pattern": "PDF_WORKER_DOMAIN",
-      "custom_domain": true
-    }
-  ],
 
   "placement": { "mode": "smart" }
 }

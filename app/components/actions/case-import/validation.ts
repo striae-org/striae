@@ -1,27 +1,16 @@
 import type { User } from 'firebase/auth';
-import paths from '~/config/config.json';
-import { getUserApiKey } from '~/utils/auth';
+import { checkUserExistsApi } from '~/utils/user-api-client';
 import { type CaseExportData, type ConfirmationImportData } from '~/types';
 import { type ManifestSignatureVerificationResult } from '~/utils/SHA256';
 import { verifyConfirmationSignature } from '~/utils/confirmation-signature';
 export { removeForensicWarning, validateConfirmationHash } from '~/utils/export-verification';
-
-const USER_WORKER_URL = paths.user_worker_url;
 
 /**
  * Validate that a user exists in the database by UID and is not the current user
  */
 export async function validateExporterUid(exporterUid: string, currentUser: User): Promise<{ exists: boolean; isSelf: boolean }> {
   try {
-    const apiKey = await getUserApiKey();
-    const response = await fetch(`${USER_WORKER_URL}/${exporterUid}`, {
-      method: 'GET',
-      headers: {
-        'X-Custom-Auth-Key': apiKey
-      }
-    });
-    
-    const exists = response.status === 200;
+    const exists = await checkUserExistsApi(currentUser, exporterUid);
     const isSelf = exporterUid === currentUser.uid;
     
     return { exists, isSelf };

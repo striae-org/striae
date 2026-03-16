@@ -1,8 +1,5 @@
-import paths from '~/config/config.json';
 import { type ValidationAuditEntry } from '~/types';
-import { getDataApiKey } from '~/utils/auth';
-
-const AUDIT_WORKER_URL = paths.audit_worker_url;
+import { fetchAuditApi } from './audit-api-client';
 
 interface FetchAuditEntriesParams {
   userId: string;
@@ -35,22 +32,23 @@ export type PersistAuditEntryResult =
 export async function fetchAuditEntriesForUser(
   params: FetchAuditEntriesParams
 ): Promise<ValidationAuditEntry[] | null> {
-  const apiKey = await getDataApiKey();
-  const url = new URL(`${AUDIT_WORKER_URL}/audit/`);
-  url.searchParams.set('userId', params.userId);
+  const searchParams = new URLSearchParams();
+  searchParams.set('userId', params.userId);
 
   if (params.startDate) {
-    url.searchParams.set('startDate', params.startDate);
+    searchParams.set('startDate', params.startDate);
   }
 
   if (params.endDate) {
-    url.searchParams.set('endDate', params.endDate);
+    searchParams.set('endDate', params.endDate);
   }
 
-  const response = await fetch(url.toString(), {
+  const requestPath = `/audit/?${searchParams.toString()}`;
+
+  const response = await fetchAuditApi(requestPath, {
     method: 'GET',
     headers: {
-      'X-Custom-Auth-Key': apiKey
+      'Accept': 'application/json'
     }
   });
 
@@ -65,15 +63,14 @@ export async function fetchAuditEntriesForUser(
 export async function persistAuditEntryForUser(
   entry: ValidationAuditEntry
 ): Promise<PersistAuditEntryResult> {
-  const apiKey = await getDataApiKey();
-  const url = new URL(`${AUDIT_WORKER_URL}/audit/`);
-  url.searchParams.set('userId', entry.userId);
+  const searchParams = new URLSearchParams();
+  searchParams.set('userId', entry.userId);
+  const requestPath = `/audit/?${searchParams.toString()}`;
 
-  const response = await fetch(url.toString(), {
+  const response = await fetchAuditApi(requestPath, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'X-Custom-Auth-Key': apiKey
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(entry)
   });

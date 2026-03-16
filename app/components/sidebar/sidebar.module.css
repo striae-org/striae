@@ -109,7 +109,6 @@
 .footerSectionButton:hover {
   background-color: #5c636a;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
 }
 
 /* Footer Modal */
@@ -163,7 +162,6 @@
 
 .footerModalClose:hover {
   background-color: #f8f9fa;
-  transform: translateY(-1px);
 }
 
 .footerModalContent {

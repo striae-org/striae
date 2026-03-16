@@ -3,6 +3,8 @@ interface Env {
   USER_DB: KVNamespace;
   R2_KEY_SECRET: string;
   IMAGES_API_TOKEN: string;
+  DATA_WORKER_DOMAIN?: string;
+  IMAGES_WORKER_DOMAIN?: string;
   PROJECT_ID: string;
   FIREBASE_SERVICE_ACCOUNT_EMAIL: string;
   FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY: string;
@@ -84,9 +86,8 @@ const corsHeaders: Record<string, string> = {
 };
 
 // Worker URLs - configure these for deployment
-const DATA_WORKER_URL = 'DATA_WORKER_DOMAIN';
-
-const IMAGE_WORKER_URL = 'IMAGES_WORKER_DOMAIN';
+const DEFAULT_DATA_WORKER_BASE_URL = 'DATA_WORKER_DOMAIN';
+const DEFAULT_IMAGE_WORKER_BASE_URL = 'IMAGES_WORKER_DOMAIN';
 
 const GOOGLE_OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const FIREBASE_IDENTITY_TOOLKIT_BASE_URL = 'https://identitytoolkit.googleapis.com/v1/projects';
@@ -96,6 +97,33 @@ const textEncoder = new TextEncoder();
 async function authenticate(request: Request, env: Env): Promise<void> {
   const authKey = request.headers.get('X-Custom-Auth-Key');
   if (authKey !== env.USER_DB_AUTH) throw new Error('Unauthorized');
+}
+
+function normalizeWorkerBaseUrl(workerDomain: string): string {
+  const trimmedDomain = workerDomain.trim().replace(/\/+$/, '');
+  if (trimmedDomain.startsWith('http://') || trimmedDomain.startsWith('https://')) {
+    return trimmedDomain;
+  }
+
+  return `https://${trimmedDomain}`;
+}
+
+function resolveDataWorkerBaseUrl(env: Env): string {
+  const configuredDomain = typeof env.DATA_WORKER_DOMAIN === 'string' ? env.DATA_WORKER_DOMAIN.trim() : '';
+  if (configuredDomain.length > 0) {
+    return normalizeWorkerBaseUrl(configuredDomain);
+  }
+
+  return normalizeWorkerBaseUrl(DEFAULT_DATA_WORKER_BASE_URL);
+}
+
+function resolveImageWorkerBaseUrl(env: Env): string {
+  const configuredDomain = typeof env.IMAGES_WORKER_DOMAIN === 'string' ? env.IMAGES_WORKER_DOMAIN.trim() : '';
+  if (configuredDomain.length > 0) {
+    return normalizeWorkerBaseUrl(configuredDomain);
+  }
+
+  return normalizeWorkerBaseUrl(DEFAULT_IMAGE_WORKER_BASE_URL);
 }
 
 function base64UrlEncode(value: string | Uint8Array): string {
@@ -317,49 +345,86 @@ async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): 
   const dataApiKey = env.R2_KEY_SECRET;
   const imageApiKey = env.IMAGES_API_TOKEN;
 
-  try {
-    // Get case data from data worker
-    const caseResponse = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(userUid)}/${encodeURIComponent(caseNumber)}/data.json`, {
-      headers: { 'X-Custom-Auth-Key': dataApiKey }
-    });
+  const dataWorkerBaseUrl = resolveDataWorkerBaseUrl(env);
+  const imageWorkerBaseUrl = resolveImageWorkerBaseUrl(env);
+  const encodedUserId = encodeURIComponent(userUid);
+  const encodedCaseNumber = encodeURIComponent(caseNumber);
 
-    if (!caseResponse.ok) {
-      return;
-    }
+  const caseResponse = await fetch(`${dataWorkerBaseUrl}/${encodedUserId}/${encodedCaseNumber}/data.json`, {
+    headers: { 'X-Custom-Auth-Key': dataApiKey }
+  });
 
-    const caseData: CaseData = await caseResponse.json();
+  if (caseResponse.status === 404) {
+    return;
+  }
 
-    // Delete all files associated with this case
-    if (caseData.files && caseData.files.length > 0) {
-      for (const file of caseData.files) {
-        try {
-          // Delete image file - correct endpoint
-          await fetch(`${IMAGE_WORKER_URL}/${encodeURIComponent(file.id)}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${imageApiKey}`
-            }
-          });
-          
-          // Delete notes file if exists
-          await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(userUid)}/${encodeURIComponent(caseNumber)}/${encodeURIComponent(file.id)}/data.json`, {
+  if (!caseResponse.ok) {
+    throw new Error(`Failed to load case data for deletion (${caseNumber}): ${caseResponse.status}`);
+  }
+
+  const caseData = await caseResponse.json() as CaseData;
+  const deletionErrors: string[] = [];
+
+  // Delete all files associated with this case
+  if (caseData.files && caseData.files.length > 0) {
+    for (const file of caseData.files) {
+      const encodedFileId = encodeURIComponent(file.id);
+
+      try {
+        const imageDeleteResponse = await fetch(`${imageWorkerBaseUrl}/${encodedFileId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${imageApiKey}`
+          }
+        });
+
+        if (!imageDeleteResponse.ok && imageDeleteResponse.status !== 404) {
+          deletionErrors.push(`image ${file.id} delete failed (${imageDeleteResponse.status})`);
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'unknown image delete error';
+        deletionErrors.push(`image ${file.id} delete threw (${message})`);
+      }
+
+      try {
+        const notesDeleteResponse = await fetch(
+          `${dataWorkerBaseUrl}/${encodedUserId}/${encodedCaseNumber}/${encodedFileId}/data.json`,
+          {
             method: 'DELETE',
             headers: { 'X-Custom-Auth-Key': dataApiKey }
-          });
-        } catch {
-          // Continue with other files
+          }
+        );
+
+        if (!notesDeleteResponse.ok && notesDeleteResponse.status !== 404) {
+          deletionErrors.push(`annotation ${file.id} delete failed (${notesDeleteResponse.status})`);
         }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'unknown annotation delete error';
+        deletionErrors.push(`annotation ${file.id} delete threw (${message})`);
       }
     }
+  }
 
-    // Delete the case data file
-    await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(userUid)}/${encodeURIComponent(caseNumber)}/data.json`, {
-      method: 'DELETE',
-      headers: { 'X-Custom-Auth-Key': dataApiKey }
-    });
+  // Delete case data file
+  try {
+    const caseDeleteResponse = await fetch(
+      `${dataWorkerBaseUrl}/${encodedUserId}/${encodedCaseNumber}/data.json`,
+      {
+        method: 'DELETE',
+        headers: { 'X-Custom-Auth-Key': dataApiKey }
+      }
+    );
 
-  } catch {
-    // Continue with user deletion even if case deletion fails
+    if (!caseDeleteResponse.ok && caseDeleteResponse.status !== 404) {
+      deletionErrors.push(`case ${caseNumber} delete failed (${caseDeleteResponse.status})`);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown case delete error';
+    deletionErrors.push(`case ${caseNumber} delete threw (${message})`);
+  }
+
+  if (deletionErrors.length > 0) {
+    throw new Error(`Case cleanup incomplete for ${caseNumber}: ${deletionErrors.join('; ')}`);
   }
 }
 
@@ -376,11 +441,10 @@ async function executeUserDeletion(
   const userObject: UserData = JSON.parse(userData);
   const ownedCases = (userObject.cases || []).map((caseItem) => caseItem.caseNumber);
   const readOnlyCases = (userObject.readOnlyCases || []).map((caseItem) => caseItem.caseNumber);
-  const allCaseNumbers = [...ownedCases, ...readOnlyCases];
+  const allCaseNumbers = Array.from(new Set([...ownedCases, ...readOnlyCases]));
   const totalCases = allCaseNumbers.length;
   let completedCases = 0;
-
-  await deleteFirebaseAuthUser(env, userUid);
+  const caseCleanupErrors: string[] = [];
 
   reportProgress?.({
     event: 'start',
@@ -396,16 +460,32 @@ async function executeUserDeletion(
       currentCaseNumber: caseNumber
     });
 
-    await deleteSingleCase(env, userUid, caseNumber);
+    let caseDeletionError: string | null = null;
+    try {
+      await deleteSingleCase(env, userUid, caseNumber);
+    } catch (error) {
+      caseDeletionError = error instanceof Error ? error.message : `Case cleanup failed for ${caseNumber}`;
+      caseCleanupErrors.push(caseDeletionError);
+      console.error(`Case cleanup error for ${caseNumber}:`, error);
+    }
+
     completedCases += 1;
 
     reportProgress?.({
       event: 'case-complete',
       totalCases,
       completedCases,
-      currentCaseNumber: caseNumber
+      currentCaseNumber: caseNumber,
+      success: caseDeletionError === null,
+      message: caseDeletionError || undefined
     });
   }
+
+  if (caseCleanupErrors.length > 0) {
+    throw new Error(`Failed to fully delete all case data: ${caseCleanupErrors.join(' | ')}`);
+  }
+
+  await deleteFirebaseAuthUser(env, userUid);
 
   // Delete the user account from the database
   await env.USER_DB.delete(userUid);

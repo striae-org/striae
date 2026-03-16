@@ -15,8 +15,7 @@ import {
 } from '~/utils/data-operations';
 import { type CaseData, type ReadOnlyCaseData, type FileData } from '~/types';
 import { auditService } from '~/services/audit';
-import { getImageApiKey } from '~/utils/auth';
-import paths from '~/config/config.json';
+import { fetchImageApi } from '~/utils/image-api-client';
 
 /**
  * Delete a file without individual audit logging (for bulk operations)
@@ -34,34 +33,17 @@ const deleteFileWithoutAudit = async (user: User, caseNumber: string, fileId: st
     throw new Error('File not found in case');
   }
 
-  // Delete the image file from Cloudflare Images (but don't audit this individual operation)
-  try {
-    const IMAGE_URL = paths.image_worker_url;
-    
-    const imagesApiToken = await getImageApiKey();
-    const imageResponse = await fetch(`${IMAGE_URL}/${fileId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${imagesApiToken}`
-      }
-    });
+  // Delete image file and fail fast on non-404 failures so case deletion can be retried safely
+  const imageResponse = await fetchImageApi(user, `/${encodeURIComponent(fileId)}`, {
+    method: 'DELETE'
+  });
 
-    // Only fail if it's not a 404 (file might already be deleted)
-    if (!imageResponse.ok && imageResponse.status !== 404) {
-      throw new Error(`Failed to delete image: ${imageResponse.statusText}`);
-    }
-  } catch (error) {
-    console.warn(`Image deletion warning for ${fileToDelete.originalFilename}:`, error);
-    // Continue with data cleanup even if image deletion fails
+  if (!imageResponse.ok && imageResponse.status !== 404) {
+    throw new Error(`Failed to delete image: ${imageResponse.status} ${imageResponse.statusText}`);
   }
 
-  // Delete annotation data
-  try {
-    await deleteFileAnnotations(user, caseNumber, fileId);
-  } catch (error) {
-    // Annotation file might not exist, continue
-    console.warn(`Annotation deletion warning for ${fileToDelete.originalFilename}:`, error);
-  }
+  // Delete annotation data (404s are handled by deleteFileAnnotations)
+  await deleteFileAnnotations(user, caseNumber, fileId);
 
   // Update case data to remove file reference
   const updatedData: CaseData = {
@@ -465,6 +447,12 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
         console.log(`✅ Batch deletion complete: ${successCount} files deleted, ${failureCount} failed`);
       } catch (auditError) {
         console.error('⚠️  Failed to log batch file deletion (continuing with case deletion):', auditError);
+      }
+
+      if (failedFiles.length > 0) {
+        throw new Error(
+          `Case deletion aborted: failed to delete ${failedFiles.length} file(s): ${failedFiles.map(f => f.originalFilename).join(', ')}`
+        );
       }
     }
 

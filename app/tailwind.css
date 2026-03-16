@@ -39,6 +39,10 @@
     touch-action: manipulation;
   }
 
+  :where(button:hover:not(:disabled)) {
+    transform: translateY(-1px);
+  }
+
   :where(svg, img, picture, video, iframe, canvas) {
     display: block;
   }
@@ -73,10 +77,13 @@
     font-family: var(--fontStack);
     font-weight: var(--fontWeightRegular);
     color: var(--textBody);
-    background: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.95)),
+    background:
+      linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.95)),
       url("/assets/striae.jpg") center/cover no-repeat fixed;
     background-blend-mode: normal;
-    transition: background var(--durationM) ease, opacity var(--durationM) ease;
+    transition:
+      background var(--durationM) ease,
+      opacity var(--durationM) ease;
     opacity: 1;
   }
 

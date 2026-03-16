@@ -1,15 +1,12 @@
 import type { User } from 'firebase/auth';
-import paths from '~/config/config.json';
 import { 
-  getImageApiKey,
   getAccountHash 
 } from '~/utils/auth';
+import { fetchImageApi, uploadImageApi } from '~/utils/image-api-client';
 import { canUploadFile } from '~/utils/permissions';
 import { getCaseData, updateCaseData, deleteFileAnnotations } from '~/utils/data-operations';
 import type { CaseData, FileData, ImageUploadResponse } from '~/types';
 import { auditService } from '~/services/audit';
-
-const IMAGE_URL = paths.image_worker_url;
 
 export const fetchFiles = async (
   user: User, 
@@ -52,127 +49,70 @@ export const uploadFile = async (
     throw new Error(permission.reason || 'You cannot upload more files to this case.');
   }
 
-  const imagesApiToken = await getImageApiKey();
-  
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    const formData = new FormData();
-    formData.append('file', file);
+  try {
+    const imageData: ImageUploadResponse = await uploadImageApi(user, file, onProgress);
+    const uploadedImageId = imageData.result?.id;
+    if (!uploadedImageId) {
+      throw new Error('Upload failed');
+    }
 
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable && onProgress) {
-        const progress = Math.round((event.loaded / event.total) * 100);
-        onProgress(progress);
-      }
-    });
+    const newFile: FileData = {
+      id: uploadedImageId,
+      originalFilename: file.name,
+      uploadedAt: new Date().toISOString()
+    };
 
-    xhr.addEventListener('load', async () => {
-      const endTime = Date.now();
-      
-      if (xhr.status === 200) {
-        try {
-          const imageData = JSON.parse(xhr.responseText) as ImageUploadResponse;
-          if (!imageData.success) throw new Error('Upload failed');
+    // Update case data using centralized function
+    const existingData = await getCaseData(user, caseNumber);
+    if (!existingData) {
+      throw new Error('Case not found');
+    }
 
-          const newFile: FileData = {
-            id: imageData.result.id,
-            originalFilename: file.name,
-            uploadedAt: new Date().toISOString()
-          };
+    const updatedData = {
+      ...existingData,
+      files: [...(existingData.files || []), newFile]
+    };
 
-          // Update case data using centralized function
-          const existingData = await getCaseData(user, caseNumber);
-          if (!existingData) {
-            throw new Error('Case not found');
-          }
+    await updateCaseData(user, caseNumber, updatedData);
 
-          const updatedData = {
-            ...existingData,
-            files: [...(existingData.files || []), newFile]
-          };
+    // Log successful file upload
+    try {
+      await auditService.logFileUpload(
+        user,
+        file.name,
+        file.size,
+        file.type,
+        'file-picker',
+        caseNumber,
+        'success',
+        Date.now() - startTime,
+        uploadedImageId
+      );
+    } catch (auditError) {
+      console.error('Failed to log successful file upload:', auditError);
+    }
 
-          await updateCaseData(user, caseNumber, updatedData);
+    console.log(`✅ File uploaded: ${file.name} (${file.size} bytes) (${Date.now() - startTime}ms)`);
+    return newFile;
+  } catch (error) {
+    // Log failed file upload
+    try {
+      await auditService.logFileUpload(
+        user,
+        file.name,
+        file.size,
+        file.type,
+        'file-picker',
+        caseNumber,
+        'failure',
+        Date.now() - startTime
+      );
+    } catch (auditError) {
+      console.error('Failed to log file upload failure:', auditError);
+    }
 
-          // Log successful file upload
-          try {
-            await auditService.logFileUpload(
-              user,
-              file.name,
-              file.size,
-              file.type,
-              'file-picker',
-              caseNumber,
-              'success',
-              endTime - startTime,
-              imageData.result.id
-            );
-          } catch (auditError) {
-            console.error('Failed to log successful file upload:', auditError);
-          }
-
-          console.log(`✅ File uploaded: ${file.name} (${file.size} bytes) (${endTime - startTime}ms)`);
-          resolve(newFile);
-        } catch (error) {
-          // Log failed file upload
-          try {
-            await auditService.logFileUpload(
-              user,
-              file.name,
-              file.size,
-              file.type,
-              'file-picker',
-              caseNumber,
-              'failure',
-              endTime - startTime
-            );
-          } catch (auditError) {
-            console.error('Failed to log file upload failure:', auditError);
-          }
-          reject(error);
-        }
-      } else {
-        // Log failed file upload
-        try {
-          await auditService.logFileUpload(
-            user,
-            file.name,
-            file.size,
-            file.type,
-            'file-picker',
-            caseNumber,
-            'failure',
-            endTime - startTime
-          );
-        } catch (auditError) {
-          console.error('Failed to log file upload failure:', auditError);
-        }
-        reject(new Error('Upload failed'));
-      }
-    });
-
-    xhr.addEventListener('error', async () => {
-      // Log upload error
-      try {
-        await auditService.logFileUpload(
-          user,
-          file.name,
-          file.size,
-          file.type,
-          'file-picker',
-          caseNumber,
-          'failure',
-          Date.now() - startTime
-        );
-      } catch (auditError) {
-        console.error('Failed to log file upload error:', auditError);
-      }
-      reject(new Error('Upload failed'));
-    });
-
-    xhr.open('POST', IMAGE_URL);
-    xhr.setRequestHeader('Authorization', `Bearer ${imagesApiToken}`);
-    xhr.send(formData);
-  });
+    throw error;
+  }
 };
 
 export const deleteFile = async (user: User, caseNumber: string, fileId: string, deleteReason: string = 'User-requested deletion via file list'): Promise<void> => {
@@ -197,12 +137,8 @@ export const deleteFile = async (user: User, caseNumber: string, fileId: string,
     let imageDeleteError = '';
 
     // Attempt to delete image file
-    const imagesApiToken = await getImageApiKey();
-    const imageResponse = await fetch(`${IMAGE_URL}/${fileId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${imagesApiToken}`
-      }
+    const imageResponse = await fetchImageApi(user, `/${encodeURIComponent(fileId)}`, {
+      method: 'DELETE'
     });
 
     // Handle image deletion response
@@ -306,14 +242,12 @@ export const getImageUrl = async (user: User, fileData: FileData, caseNumber: st
   const defaultAccessReason = accessReason || 'Image viewer access';
   
   try {
-    const { accountHash } = await getImageConfig();  
-    const imagesApiToken = await getImageApiKey();
+    const { accountHash } = await getImageConfig();
     const imageDeliveryUrl = `https://imagedelivery.net/${accountHash}/${fileData.id}/${DEFAULT_VARIANT}`;
-    
-    const workerResponse = await fetch(`${IMAGE_URL}/${imageDeliveryUrl}`, {
+
+    const workerResponse = await fetchImageApi(user, `/${imageDeliveryUrl}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${imagesApiToken}`,
         'Accept': 'text/plain'
       }
     });

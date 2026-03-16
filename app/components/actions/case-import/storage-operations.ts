@@ -1,9 +1,5 @@
 import type { User } from 'firebase/auth';
-import paths from '~/config/config.json';
-import { 
-  getDataApiKey,
-  getUserApiKey
-} from '~/utils/auth';
+import { fetchDataApi } from '~/utils/data-api-client';
 import {
   getUserReadOnlyCases,
   updateUserData,
@@ -11,16 +7,12 @@ import {
 } from '~/utils/permissions';
 import { 
   type CaseExportData,   
-  type ExtendedUserData,
   type FileData,
   type CaseData,
   type ReadOnlyCaseMetadata
 } from '~/types';
 import { deleteFile } from '../image-manage';
 import { type SignedForensicManifest } from '~/utils/SHA256';
-
-const USER_WORKER_URL = paths.user_worker_url;
-const DATA_WORKER_URL = paths.data_worker_url;
 
 /**
  * Check if user already has a read-only case with the same number
@@ -91,8 +83,6 @@ export async function storeCaseDataInR2(
   forensicManifest?: SignedForensicManifest
 ): Promise<void> {
   try {
-    const apiKey = await getDataApiKey();
-    
     // Convert the mapping to a plain object for JSON serialization
     const originalImageIds = originalImageIdMapping ? 
       Object.fromEntries(originalImageIdMapping) : undefined;
@@ -122,14 +112,17 @@ export async function storeCaseDataInR2(
     };
     
     // Store in R2
-    const response = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Custom-Auth-Key': apiKey
-      },
-      body: JSON.stringify(r2CaseData)
-    });
+    const response = await fetchDataApi(
+      user,
+      `/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(r2CaseData)
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to store case data: ${response.status}`);
@@ -146,24 +139,7 @@ export async function storeCaseDataInR2(
  */
 export async function listReadOnlyCases(user: User): Promise<ReadOnlyCaseMetadata[]> {
   try {
-    const apiKey = await getUserApiKey();
-    
-    const response = await fetch(`${USER_WORKER_URL}/${encodeURIComponent(user.uid)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Custom-Auth-Key': apiKey
-      }
-    });
-
-    if (!response.ok) {
-      console.error('Failed to fetch user data:', response.status);
-      return [];
-    }
-
-    const userData: ExtendedUserData = await response.json();
-    
-    return userData.readOnlyCases || [];
+    return await getUserReadOnlyCases(user);
     
   } catch (error) {
     console.error('Error listing read-only cases:', error);
@@ -176,48 +152,20 @@ export async function listReadOnlyCases(user: User): Promise<ReadOnlyCaseMetadat
  */
 export async function removeReadOnlyCase(user: User, caseNumber: string): Promise<boolean> {
   try {
-    const apiKey = await getUserApiKey();
-    
-    // Get current user data
-    const response = await fetch(`${USER_WORKER_URL}/${encodeURIComponent(user.uid)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Custom-Auth-Key': apiKey
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch user data: ${response.status}`);
-    }
-
-    const userData: ExtendedUserData = await response.json();
-    
-    if (!userData.readOnlyCases) {
+    const currentReadOnlyCases = await getUserReadOnlyCases(user);
+    if (!currentReadOnlyCases.length) {
       return false; // Nothing to remove
     }
     
     // Remove the case from the list
-    const initialLength = userData.readOnlyCases.length;
-    userData.readOnlyCases = userData.readOnlyCases.filter(c => c.caseNumber !== caseNumber);
+    const nextReadOnlyCases = currentReadOnlyCases.filter(c => c.caseNumber !== caseNumber);
     
-    if (userData.readOnlyCases.length === initialLength) {
+    if (nextReadOnlyCases.length === currentReadOnlyCases.length) {
       return false; // Case wasn't found
     }
     
     // Update user data
-    const updateResponse = await fetch(`${USER_WORKER_URL}/${encodeURIComponent(user.uid)}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Custom-Auth-Key': apiKey
-      },
-      body: JSON.stringify(userData)
-    });
-
-    if (!updateResponse.ok) {
-      throw new Error(`Failed to update user data: ${updateResponse.status}`);
-    }
+    await updateUserData(user, { readOnlyCases: nextReadOnlyCases });
     
     return true;
     
@@ -232,30 +180,47 @@ export async function removeReadOnlyCase(user: User, caseNumber: string): Promis
  */
 export async function deleteReadOnlyCase(user: User, caseNumber: string): Promise<boolean> {
   try {
-    const dataApiKey = await getDataApiKey();
-    
     // Get case data first to get file IDs for deletion
-    const caseResponse = await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
-      headers: { 'X-Custom-Auth-Key': dataApiKey }
-    });
-
-    if (caseResponse.ok) {
-      const caseData = await caseResponse.json() as CaseData;
-
-      // Delete all files using data worker
-      if (caseData.files && caseData.files.length > 0) {
-        await Promise.all(
-          caseData.files.map((file: FileData) => 
-            deleteFile(user, caseNumber, file.id, 'Read-only case clearing - API operation')
-          )
-        );
+    const caseResponse = await fetchDataApi(
+      user,
+      `/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`,
+      {
+        method: 'GET'
       }
+    );
 
-      // Delete case file using data worker
-      await fetch(`${DATA_WORKER_URL}/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`, {
-        method: 'DELETE',
-        headers: { 'X-Custom-Auth-Key': dataApiKey }
-      });
+    if (caseResponse.status === 404) {
+      // No backing data object exists; only remove the case reference from user metadata.
+      await removeReadOnlyCase(user, caseNumber);
+      return true;
+    }
+
+    if (!caseResponse.ok) {
+      throw new Error(`Failed to fetch read-only case data for deletion: ${caseResponse.status}`);
+    }
+
+    const caseData = await caseResponse.json() as CaseData;
+
+    // Delete all files using data worker
+    if (caseData.files && caseData.files.length > 0) {
+      await Promise.all(
+        caseData.files.map((file: FileData) => 
+          deleteFile(user, caseNumber, file.id, 'Read-only case clearing - API operation')
+        )
+      );
+    }
+
+    // Delete case file using data worker
+    const deleteCaseResponse = await fetchDataApi(
+      user,
+      `/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+    if (!deleteCaseResponse.ok && deleteCaseResponse.status !== 404) {
+      throw new Error(`Failed to delete read-only case data: ${deleteCaseResponse.status}`);
     }
     
     // Remove from user's read-only case list (separate from regular cases)
