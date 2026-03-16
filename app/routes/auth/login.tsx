@@ -51,8 +51,8 @@ const getCanonicalPath = (pathname: string): string => {
 const getAuthMetaContent = (mode: string | null, hasActionCode: boolean): AuthMetaContent => {
   if (!mode && !hasActionCode) {
     return {
-      title: 'Striae | Secure Login for Firearms Examiners',
-      description: 'Sign in to Striae to access your forensic annotation workspace, case files, and comparison tools.',
+      title: 'Striae: A Firearms Examiner\'s Comparison Companion',
+      description: 'Sign in to Striae to access your comparison annotation workspace, case files, and review tools.',
       robots: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
     };
   }
