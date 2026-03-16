@@ -62,6 +62,16 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-15] - *[Major Release v4.0.0](https://github.com/striae-org/striae/releases/tag/v4.0.0)*
+
+_Note: Summary is based on 28 non-merge commits since v3.3.0 (security/API/secret hardening migration window)._
+
+- **🛡️ API Security Boundary Migration** - Migrated app transport to same-origin Pages `/api/*` proxy routes with Firebase bearer-token verification and stronger auth-scoped request forwarding.
+- **🔐 Secret and Config Hardening** - Expanded worker/Pages secret deployment flow, tightened deployment-script validation, and reduced legacy fallback/config drift paths.
+- **🧱 Worker Auth and Route Surface Stabilization** - Refined header-auth behavior across workers and removed custom worker-route replacement flows from deployment config updates.
+- **↩️ Controlled Migration Stabilization** - Applied targeted reverts and follow-up fixes during rollout to preserve secure baseline behavior while converging on hardened architecture.
+- **⚙️ Reliability and Operations Cleanup** - Included deletion-path, API error-path, compatibility, and type-generation updates to stabilize the major migration surface.
+
 ## [2026-03-14] - *[Minor Release v3.3.0](https://github.com/striae-org/striae/releases/tag/v3.3.0)*
 
 _Note: Summary is based on 20 non-merge commits since v3.2.2 (same-day minor release window)._ 
