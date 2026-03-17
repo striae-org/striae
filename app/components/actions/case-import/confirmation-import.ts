@@ -1,5 +1,5 @@
 import type { User } from 'firebase/auth';
-import { fetchDataApi } from '~/utils/data-api-client';
+import { fetchDataApi } from '~/utils/api';
 import { type ConfirmationImportResult, type ConfirmationImportData } from '~/types';
 import { checkExistingCase } from '../case-manage';
 import { extractConfirmationImportPackage } from './confirmation-package';

@@ -10,7 +10,7 @@ import { auth } from '~/services/firebase';
 import { handleAuthError, getValidationError } from '~/services/firebase/errors';
 import { SignOut } from '~/components/actions/signout';
 import { auditService } from '~/services/audit';
-import { generateUniqueId } from '~/utils/id-generator';
+import { generateUniqueId } from '~/utils/common';
 import styles from './mfa-verification.module.css';
 
 interface MFAVerificationProps {

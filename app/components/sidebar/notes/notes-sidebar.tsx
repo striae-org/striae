@@ -4,7 +4,7 @@ import { ColorSelector } from '~/components/colors/colors';
 import { NotesModal } from './notes-modal';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { type AnnotationData } from '~/types/annotations';
-import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
+import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { auditService } from '~/services/audit';
 import styles from './notes.module.css';
 

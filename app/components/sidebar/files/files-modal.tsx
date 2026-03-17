@@ -2,7 +2,7 @@ import type React from 'react';
 import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
 import { deleteFile } from '~/components/actions/image-manage';
-import { getFileAnnotations } from '~/utils/data-operations';
+import { getFileAnnotations } from '~/utils/data';
 import { type FileData } from '~/types';
 import styles from './files-modal.module.css';
 

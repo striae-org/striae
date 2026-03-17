@@ -4,18 +4,16 @@ import {
   getUserCases,
   validateUserSession,
   addUserCase,
-  removeUserCase
-} from '~/utils/permissions';
-import { 
+  removeUserCase,
   getCaseData,
   updateCaseData,
   deleteCaseData,
   duplicateCaseData,
   deleteFileAnnotations
-} from '~/utils/data-operations';
+} from '~/utils/data';
 import { type CaseData, type ReadOnlyCaseData, type FileData } from '~/types';
 import { auditService } from '~/services/audit';
-import { fetchImageApi } from '~/utils/image-api-client';
+import { fetchImageApi } from '~/utils/api';
 
 /**
  * Delete a file without individual audit logging (for bulk operations)

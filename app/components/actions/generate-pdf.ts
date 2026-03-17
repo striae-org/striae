@@ -1,7 +1,7 @@
 import { type AnnotationData } from '~/types/annotations';
 import { auditService } from '~/services/audit';
 import type { User } from 'firebase/auth';
-import { fetchPdfApi } from '~/utils/pdf-api-client';
+import { fetchPdfApi } from '~/utils/api';
 
 interface GeneratePDFParams {
   user: User;

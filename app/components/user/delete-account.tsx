@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';
-import { fetchUserApi } from '~/utils/user-api-client';
+import { fetchUserApi } from '~/utils/api';
 import { auditService } from '~/services/audit';
 import styles from './delete-account.module.css';
 

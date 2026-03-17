@@ -9,7 +9,7 @@ import {
   type MouseEvent
 } from 'react';
 import styles from './public-signing-key-modal.module.css';
-import { verifyExportFile } from '~/utils/export-verification';
+import { verifyExportFile } from '~/utils/forensics';
 
 const NO_PUBLIC_KEY_MESSAGE = 'No public signing key is configured for this environment.';
 

@@ -6,19 +6,19 @@
 
 import type { User } from 'firebase/auth';
 import { type CaseData, type AnnotationData, type ConfirmationImportData } from '~/types';
-import { fetchDataApi } from './data-api-client';
+import { fetchDataApi } from '../api';
 import { validateUserSession, canAccessCase, canModifyCase } from './permissions';
 import {
   type ForensicManifestData,
   type ForensicManifestSignature,
   FORENSIC_MANIFEST_VERSION
-} from './SHA256';
-import { CONFIRMATION_SIGNATURE_VERSION } from './confirmation-signature';
+} from '../forensics/SHA256';
+import { CONFIRMATION_SIGNATURE_VERSION } from '../forensics/confirmation-signature';
 import {
   AUDIT_EXPORT_SIGNATURE_VERSION,
   type AuditExportSigningPayload,
   isValidAuditExportSigningPayload
-} from './audit-export-signature';
+} from '../forensics/audit-export-signature';
 
 // ============================================================================
 // INTERFACES AND TYPES

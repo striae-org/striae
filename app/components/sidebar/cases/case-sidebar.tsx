@@ -26,9 +26,9 @@ import {
   canCreateCase, 
   canUploadFile, 
   getLimitsDescription,
-  getUserData
-} from '~/utils/permissions';
-import { getFileAnnotations } from '~/utils/data-operations';
+  getUserData,
+  getFileAnnotations
+} from '~/utils/data';
 import { type FileData, type CaseActionType } from '~/types';
 
 interface CaseSidebarProps {

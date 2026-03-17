@@ -1,6 +1,6 @@
 import { Icon } from '../icon/icon';
 import styles from './button.module.css';
-import { classes } from '~/utils/style';
+import { classes } from '~/utils/ui';
 
 interface ButtonProps {
   iconId: string;

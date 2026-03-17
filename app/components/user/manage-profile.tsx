@@ -4,7 +4,7 @@ import { PasswordReset } from '~/routes/auth/passwordReset';
 import { DeleteAccount } from './delete-account';
 import { UserAuditViewer } from '../audit/user-audit-viewer';
 import { AuthContext } from '~/contexts/auth.context';
-import { getUserData, updateUserData } from '~/utils/permissions';
+import { getUserData, updateUserData } from '~/utils/data';
 import { auditService } from '~/services/audit';
 import { handleAuthError, ERROR_MESSAGES } from '~/services/firebase/errors';
 import { FormField, FormButton, FormMessage } from '../form';

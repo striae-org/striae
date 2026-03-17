@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import styles from './case-export.module.css';
 import { AuthContext } from '~/contexts/auth.context';
 import { PublicSigningKeyModal } from '~/components/public-signing-key-modal/public-signing-key-modal';
-import { getCurrentPublicSigningKeyDetails } from '~/utils/signature-utils';
+import { getCurrentPublicSigningKeyDetails } from '~/utils/forensics';
 import { getCaseConfirmations, exportConfirmationData } from '../../actions/confirm-export';
 
 export type ExportFormat = 'json' | 'csv';

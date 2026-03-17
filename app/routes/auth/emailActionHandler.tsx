@@ -8,8 +8,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '~/services/firebase';
 import { handleAuthError } from '~/services/firebase/errors';
-import { evaluatePasswordPolicy } from '~/utils/password-policy';
-import { getSafeContinuePath } from '~/utils/auth-action-settings';
+import { evaluatePasswordPolicy, getSafeContinuePath } from '~/utils/auth';
 import { auditService } from '~/services/audit';
 import { Icon } from '~/components/icon/icon';
 import styles from './emailActionHandler.module.css';

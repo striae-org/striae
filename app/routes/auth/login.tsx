@@ -22,12 +22,10 @@ import { Toast } from '~/components/toast/toast';
 import { Icon } from '~/components/icon/icon';
 import styles from './login.module.css';
 import { Striae } from '~/routes/striae/striae';
-import { getUserData, createUser } from '~/utils/permissions';
+import { getUserData, createUser } from '~/utils/data';
 import { auditService } from '~/services/audit';
-import { generateUniqueId } from '~/utils/id-generator';
-import { evaluatePasswordPolicy } from '~/utils/password-policy';
-import { buildActionCodeSettings } from '~/utils/auth-action-settings';
-import { userHasMFA } from '~/utils/mfa';
+import { generateUniqueId } from '~/utils/common';
+import { evaluatePasswordPolicy, buildActionCodeSettings, userHasMFA } from '~/utils/auth';
 
 const APP_CANONICAL_ORIGIN = 'https://striae.app';
 const SOCIAL_IMAGE_PATH = '/social-image.png';

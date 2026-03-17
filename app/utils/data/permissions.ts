@@ -1,7 +1,7 @@
 import type { User } from 'firebase/auth';
 import type { UserData, ExtendedUserData, UserLimits, ReadOnlyCaseMetadata } from '~/types';
 import paths from '~/config/config.json';
-import { fetchUserApi } from './user-api-client';
+import { fetchUserApi } from '../api';
 
 const MAX_CASES_REVIEW = paths.max_cases_review;
 const MAX_FILES_PER_CASE_REVIEW = paths.max_files_per_case_review;

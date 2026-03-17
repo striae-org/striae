@@ -6,7 +6,7 @@ import { INACTIVITY_CONFIG } from '~/config/inactivity';
 import { AuthContext } from '~/contexts/auth.context';
 import { InactivityWarning } from '~/components/user/inactivity-warning';
 import { auditService } from '~/services/audit';
-import { generateUniqueId } from '~/utils/id-generator';
+import { generateUniqueId } from '~/utils/common';
 
 interface AuthProviderProps {
   children: React.ReactNode;

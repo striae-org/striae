@@ -1,9 +1,8 @@
 import type { User } from 'firebase/auth';
-import { checkUserExistsApi } from '~/utils/user-api-client';
+import { checkUserExistsApi } from '~/utils/api';
 import { type CaseExportData, type ConfirmationImportData } from '~/types';
-import { type ManifestSignatureVerificationResult } from '~/utils/SHA256';
-import { verifyConfirmationSignature } from '~/utils/confirmation-signature';
-export { removeForensicWarning, validateConfirmationHash } from '~/utils/export-verification';
+import { type ManifestSignatureVerificationResult, verifyConfirmationSignature } from '~/utils/forensics';
+export { removeForensicWarning, validateConfirmationHash } from '~/utils/forensics';
 
 /**
  * Validate that a user exists in the database by UID and is not the current user

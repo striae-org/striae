@@ -2,9 +2,8 @@ import type { User } from 'firebase/auth';
 import { 
   getAccountHash 
 } from '~/utils/auth';
-import { fetchImageApi, uploadImageApi } from '~/utils/image-api-client';
-import { canUploadFile } from '~/utils/permissions';
-import { getCaseData, updateCaseData, deleteFileAnnotations } from '~/utils/data-operations';
+import { fetchImageApi, uploadImageApi } from '~/utils/api';
+import { canUploadFile, getCaseData, updateCaseData, deleteFileAnnotations } from '~/utils/data';
 import type { CaseData, FileData, ImageUploadResponse } from '~/types';
 import { auditService } from '~/services/audit';
 

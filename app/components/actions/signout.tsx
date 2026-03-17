@@ -1,6 +1,6 @@
 import { auth } from '~/services/firebase';
 import { auditService } from '~/services/audit';
-import { generateUniqueId } from '~/utils/id-generator';
+import { generateUniqueId } from '~/utils/common';
 import styles from './signout.module.css';
 
 interface SignOutProps {

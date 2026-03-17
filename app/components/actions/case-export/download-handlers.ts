@@ -2,13 +2,14 @@ import type { User } from 'firebase/auth';
 import type * as ExcelJSModule from 'exceljs';
 import { type FileData, type AllCasesExportData, type CaseExportData, type ExportOptions } from '~/types';
 import { getImageUrl } from '../image-manage';
-import { generateForensicManifestSecure, calculateSHA256Secure } from '~/utils/SHA256';
-import { signForensicManifest } from '~/utils/data-operations';
 import {
+  generateForensicManifestSecure,
+  calculateSHA256Secure,
   createPublicSigningKeyFileName,
   getCurrentPublicSigningKeyDetails,
   getVerificationPublicKey
-} from '~/utils/signature-utils';
+} from '~/utils/forensics';
+import { signForensicManifest } from '~/utils/data';
 import { type ExportFormat, formatDateForFilename, CSV_HEADERS } from './types-constants';
 import { protectExcelWorksheet, addForensicDataWarning } from './metadata-helpers';
 import { generateMetadataRows, generateCSVContent, processFileDataForTabular, sanitizeTabularMatrix } from './data-processing';

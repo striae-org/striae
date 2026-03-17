@@ -1,5 +1,5 @@
 import { type JSX, createContext, useContext } from 'react';
-import { classes, media } from '~/utils/style';
+import { classes, media } from '~/utils/ui';
 import { themes, tokens } from './theme';
 
 interface ThemeContextType {

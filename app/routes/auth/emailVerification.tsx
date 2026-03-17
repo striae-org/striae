@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { sendEmailVerification, type User } from 'firebase/auth';
 import { auditService } from '~/services/audit';
-import { buildActionCodeSettings } from '~/utils/auth-action-settings';
+import { buildActionCodeSettings } from '~/utils/auth';
 import styles from './login.module.css';
 
 interface EmailVerificationProps {

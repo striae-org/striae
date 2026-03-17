@@ -1,10 +1,10 @@
 import type { User } from 'firebase/auth';
-import { fetchDataApi } from '~/utils/data-api-client';
+import { fetchDataApi } from '~/utils/api';
 import {
   getUserReadOnlyCases,
   updateUserData,
   validateUserSession
-} from '~/utils/permissions';
+} from '~/utils/data';
 import { 
   type CaseExportData,   
   type FileData,
@@ -12,7 +12,7 @@ import {
   type ReadOnlyCaseMetadata
 } from '~/types';
 import { deleteFile } from '../image-manage';
-import { type SignedForensicManifest } from '~/utils/SHA256';
+import { type SignedForensicManifest } from '~/utils/forensics';
 
 /**
  * Check if user already has a read-only case with the same number

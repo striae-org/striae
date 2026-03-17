@@ -1,4 +1,4 @@
-import { pxToRem } from '~/utils/style';
+import { pxToRem } from '~/utils/ui';
 
 // Full list of tokens
 const baseTokens = {

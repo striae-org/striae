@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { type ConfirmationData } from '~/types/annotations';
 import { AuthContext } from '~/contexts/auth.context';
-import { generateConfirmationId } from '~/utils/id-generator';
+import { generateConfirmationId } from '~/utils/common';
 import styles from './confirmation.module.css';
 
 interface ConfirmationModalProps {

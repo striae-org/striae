@@ -6,7 +6,7 @@ import {
     //connectAuthEmulator,    
  } from 'firebase/auth';
 import firebaseConfig from '~/config/firebase';
-import { getAppVersion } from '~/utils/version';
+import { getAppVersion } from '~/utils/common';
 
 export const app = initializeApp(firebaseConfig, "Striae");
 export const auth = getAuth(app);

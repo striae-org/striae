@@ -9,7 +9,7 @@ import type {
   AuditResult,
   PerformanceMetrics
 } from '~/types';
-import { generateWorkflowId } from '../../utils/id-generator';
+import { generateWorkflowId } from '~/utils/common';
 import {
   fetchAuditEntriesForUser,
   persistAuditEntryForUser

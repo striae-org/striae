@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import { listCases } from '~/components/actions/case-manage';
-import { getFileAnnotations } from '~/utils/data-operations';
+import { getFileAnnotations } from '~/utils/data';
 import { fetchFiles } from '~/components/actions/image-manage';
 import styles from './cases-modal.module.css';
 

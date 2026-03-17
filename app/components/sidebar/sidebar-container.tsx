@@ -7,7 +7,7 @@ import { Sidebar } from './sidebar';
 import type { User } from 'firebase/auth';
 import { type FileData } from '~/types';
 import styles from './sidebar.module.css';
-import { getAppVersion } from '../../utils/version';
+import { getAppVersion } from '~/utils/common';
 
 interface SidebarContainerProps {
   user: User;

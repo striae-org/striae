@@ -1,5 +1,5 @@
 import type { User } from 'firebase/auth';
-import { uploadImageApi } from '~/utils/image-api-client';
+import { uploadImageApi } from '~/utils/api';
 import { type FileData } from '~/types';
 
 /**

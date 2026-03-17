@@ -6,7 +6,7 @@ import {
   type SignedForensicManifest,
   validateCaseIntegritySecure as validateForensicIntegrity,
   verifyForensicManifestSignature
-} from '~/utils/SHA256';
+} from '~/utils/forensics';
 import { deleteFile } from '../image-manage';
 import { parseImportZip } from './zip-processing';
 import { 

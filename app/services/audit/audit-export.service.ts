@@ -1,6 +1,5 @@
 import { type ValidationAuditEntry, type AuditTrail } from '~/types';
-import { calculateSHA256Secure } from '~/utils/SHA256';
-import { type AuditExportType } from '~/utils/audit-export-signature';
+import { calculateSHA256Secure, type AuditExportType } from '~/utils/forensics';
 import { AUDIT_CSV_ENTRY_HEADERS, entryToCSVRow } from './audit-export-csv';
 import { buildAuditReportContent } from './audit-export-report';
 import { type AuditExportContext, signAuditExport } from './audit-export-signing';

@@ -21,7 +21,7 @@ import {
   getPhoneDisplayValue,
   maskPhoneNumber,
   validatePhoneNumber,
-} from '~/utils/mfa-phone';
+} from '~/utils/auth';
 import { FormButton, FormMessage } from '../form';
 import styles from './manage-profile.module.css';
 

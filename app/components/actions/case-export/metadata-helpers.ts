@@ -1,5 +1,5 @@
 import type { User } from 'firebase/auth';
-import { getUserData } from '~/utils/permissions';
+import { getUserData } from '~/utils/data';
 
 /**
  * Helper function to get user export metadata

@@ -6,7 +6,7 @@ import {
   type SignedForensicManifest,
   validateCaseIntegritySecure as validateForensicIntegrity,
   verifyForensicManifestSignature
-} from '~/utils/SHA256';
+} from '~/utils/forensics';
 import { validateExporterUid, removeForensicWarning } from './validation';
 
 function getLeafFileName(path: string): string {

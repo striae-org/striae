@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useRef, useEffect, useContext } from 'r
 import { type BoxAnnotation } from '~/types';
 import { AuthContext } from '~/contexts/auth.context';
 import { auditService } from '~/services/audit';
-import { resolveEarliestAnnotationTimestamp } from '~/utils/annotation-timestamp';
+import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import styles from './box-annotations.module.css';
 
 // Constants

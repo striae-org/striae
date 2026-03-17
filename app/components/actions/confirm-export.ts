@@ -1,13 +1,12 @@
 import type { User } from 'firebase/auth';
-import { calculateSHA256Secure } from '~/utils/SHA256';
-import { getUserData } from '~/utils/permissions';
-import { getCaseData, updateCaseData, signConfirmationData } from '~/utils/data-operations';
-import { type ConfirmationData, type CaseConfirmations, type CaseDataWithConfirmations, type ConfirmationImportData } from '~/types';
 import {
+  calculateSHA256Secure,
   createPublicSigningKeyFileName,
   getCurrentPublicSigningKeyDetails,
   getVerificationPublicKey
-} from '~/utils/signature-utils';
+} from '~/utils/forensics';
+import { getUserData, getCaseData, updateCaseData, signConfirmationData } from '~/utils/data';
+import { type ConfirmationData, type CaseConfirmations, type CaseDataWithConfirmations, type ConfirmationImportData } from '~/types';
 import { auditService } from '~/services/audit';
 
 /**

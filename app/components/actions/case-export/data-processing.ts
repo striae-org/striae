@@ -1,5 +1,5 @@
 import { type CaseExportData } from '~/types';
-import { calculateSHA256Secure } from '~/utils/SHA256';
+import { calculateSHA256Secure } from '~/utils/forensics';
 import { CSV_HEADERS } from './types-constants';
 import { addForensicDataWarning } from './metadata-helpers';
 

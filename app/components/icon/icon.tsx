@@ -1,4 +1,4 @@
-import { classes } from '~/utils/style';
+import { classes } from '~/utils/ui';
 import styles from './icon.module.css';
 import { forwardRef } from 'react';
 import sprites from './icons.svg';

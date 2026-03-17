@@ -1,6 +1,6 @@
 import type { User } from 'firebase/auth';
 import { type AnnotationData } from '~/types/annotations';
-import { saveFileAnnotations, getFileAnnotations, type DataOperationOptions } from '~/utils/data-operations';
+import { saveFileAnnotations, getFileAnnotations, type DataOperationOptions } from '~/utils/data';
 
 export const saveNotes = async (
   user: User,
