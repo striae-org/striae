@@ -94,11 +94,6 @@ export default function App() {
   );
 }
 
-interface ErrorBoundaryShellProps {
-  title: string;
-  children: React.ReactNode;
-}
-
 const LOGIN_REDIRECT_PATH = '/';
 
 const errorActionStyle = {
@@ -133,30 +128,6 @@ async function returnToLogin() {
   }
 }
 
-function ErrorBoundaryShell({ title, children }: ErrorBoundaryShellProps) {
-  return (
-    <html lang="en" data-theme="light">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#377087" />
-        <meta name="color-scheme" content="light" />
-        <style dangerouslySetInnerHTML={{ __html: themeStyles }} />
-        <title>{title}</title>
-        <Meta />
-        <Links />
-      </head>
-      <body className="flex flex-col h-screen w-full overflow-x-hidden">
-        <ThemeProvider theme="light" className="">
-          <main>{children}</main>
-        </ThemeProvider>
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
 export function ErrorBoundary() {
   const error = useRouteError();
 
@@ -164,27 +135,9 @@ export function ErrorBoundary() {
     const statusText = error.statusText || 'Unexpected error';
 
     return (
-      <ErrorBoundaryShell title={`${error.status} ${statusText}`}>
-        <div className={styles.errorContainer}>
-          <div className={styles.errorTitle}>{error.status}</div>
-          <p className={styles.errorMessage}>{statusText}</p>
-          <button
-            type="button"
-            onClick={() => void returnToLogin()}
-            style={errorActionStyle}
-            className={styles.errorLink}>
-            Return to Login
-          </button>
-        </div>
-      </ErrorBoundaryShell>
-    );
-  }
-
-  return (
-    <ErrorBoundaryShell title="Oops! Something went wrong">
       <div className={styles.errorContainer}>
-        <div className={styles.errorTitle}>500</div>
-        <p className={styles.errorMessage}>Something went wrong. Please try again later.</p>
+        <div className={styles.errorTitle}>{error.status}</div>
+        <p className={styles.errorMessage}>{statusText}</p>
         <button
           type="button"
           onClick={() => void returnToLogin()}
@@ -193,6 +146,20 @@ export function ErrorBoundary() {
           Return to Login
         </button>
       </div>
-    </ErrorBoundaryShell>
+    );
+  }
+
+  return (
+    <div className={styles.errorContainer}>
+      <div className={styles.errorTitle}>500</div>
+      <p className={styles.errorMessage}>Something went wrong. Please try again later.</p>
+      <button
+        type="button"
+        onClick={() => void returnToLogin()}
+        style={errorActionStyle}
+        className={styles.errorLink}>
+        Return to Login
+      </button>
+    </div>
   );
 }
