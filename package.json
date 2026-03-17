@@ -9,12 +9,10 @@
     "type": "git",
     "url": "https://github.com/striae-org/striae.git"
   },
-  "funding": [    
-    {
+  "funding": {
       "type": "github",
       "url": "https://github.com/sponsors/striae-org"
-    }
-  ],
+  },  
   "bugs": {
     "url": "https://github.com/striae-org/striae/issues"
   },
