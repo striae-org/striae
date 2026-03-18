@@ -1,4 +1,4 @@
-import { launch } from "@cloudflare/puppeteer";
+import { acquire, connect, limits } from "@cloudflare/puppeteer";
 import type { PDFGenerationData, PDFGenerationRequest, ReportModule } from './report-types';
 
 interface Env {
@@ -7,7 +7,10 @@ interface Env {
 }
 
 const DEFAULT_REPORT_FORMAT = 'striae';
-const BROWSER_LAUNCH_TIMEOUT_MS = 25_000;
+const BROWSER_KEEP_ALIVE_MS = 60_000;
+const BROWSER_LIMITS_TIMEOUT_MS = 5_000;
+const BROWSER_ACQUIRE_TIMEOUT_MS = 10_000;
+const BROWSER_CONNECT_TIMEOUT_MS = 20_000;
 const PAGE_CONTENT_TIMEOUT_MS = 25_000;
 const IMAGE_SETTLE_TIMEOUT_MS = 10_000;
 const PDF_RENDER_TIMEOUT_MS = 45_000;
@@ -136,13 +139,48 @@ export default {
     }
 
     if (request.method === 'POST') {
-      let browser: Awaited<ReturnType<typeof launch>> | undefined;
+      let browser: Awaited<ReturnType<typeof connect>> | undefined;
 
       try {
         const payload = await request.json() as PDFGenerationData | PDFGenerationRequest;
         const { reportFormat, data } = resolveReportRequest(payload);
 
-        browser = await withTimeout(launch(env.BROWSER), BROWSER_LAUNCH_TIMEOUT_MS, 'browser launch');
+        const browserLimits = await withTimeout(
+          limits(env.BROWSER),
+          BROWSER_LIMITS_TIMEOUT_MS,
+          'browser limits'
+        );
+
+        if (browserLimits.allowedBrowserAcquisitions < 1) {
+          const retryAfterSeconds = Math.max(
+            1,
+            Math.ceil(browserLimits.timeUntilNextAllowedBrowserAcquisition / 1000)
+          );
+
+          return new Response(
+            JSON.stringify({ error: `Browser rendering capacity reached. Retry in about ${retryAfterSeconds}s.` }),
+            {
+              status: 503,
+              headers: {
+                ...corsHeaders,
+                'content-type': 'application/json',
+                'Retry-After': `${retryAfterSeconds}`,
+              },
+            }
+          );
+        }
+
+        const acquiredSession = await withTimeout(
+          acquire(env.BROWSER, { keep_alive: BROWSER_KEEP_ALIVE_MS }),
+          BROWSER_ACQUIRE_TIMEOUT_MS,
+          'browser acquire'
+        );
+
+        browser = await withTimeout(
+          connect(env.BROWSER, acquiredSession.sessionId),
+          BROWSER_CONNECT_TIMEOUT_MS,
+          'browser connect'
+        );
         const page = await browser.newPage();
 
         // Render report from module selected by report format name.
@@ -171,7 +209,8 @@ export default {
         });
       } catch (error) {
         if (isTimeoutError(error)) {
-          return new Response(JSON.stringify({ error: 'PDF generation timed out' }), {
+          const timeoutMessage = error instanceof Error ? error.message : 'PDF generation timed out';
+          return new Response(JSON.stringify({ error: timeoutMessage }), {
             status: 504,
             headers: { ...corsHeaders, 'content-type': 'application/json' },
           });
