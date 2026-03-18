@@ -15,6 +15,8 @@ export const ERROR_MESSAGES = {
   GOOGLE_POPUP_CLOSED: 'Google sign-in was cancelled before completion.',
   GOOGLE_POPUP_BLOCKED: 'Google sign-in popup was blocked by your browser. Please allow popups and try again.',
   GOOGLE_ACCOUNT_CONFLICT: 'An account already exists with this email using a different sign-in method.',
+  PROVIDER_ALREADY_LINKED: 'This sign-in provider is already linked to your account.',
+  CREDENTIAL_ALREADY_IN_USE: 'These sign-in credentials are already in use by another account.',
   
   // Reset/Verify Errors
   RESET_EMAIL_SENT: 'Password reset email sent! Check your inbox',
@@ -76,6 +78,10 @@ export const handleAuthError = (err: unknown): { message: string; data?: AuthErr
         return { message: ERROR_MESSAGES.GOOGLE_POPUP_BLOCKED, data: errorData };
       case 'auth/account-exists-with-different-credential':
         return { message: ERROR_MESSAGES.GOOGLE_ACCOUNT_CONFLICT, data: errorData };
+      case 'auth/provider-already-linked':
+        return { message: ERROR_MESSAGES.PROVIDER_ALREADY_LINKED, data: errorData };
+      case 'auth/credential-already-in-use':
+        return { message: ERROR_MESSAGES.CREDENTIAL_ALREADY_IN_USE, data: errorData };
       case 'auth/invalid-action-code':
         return { message: ERROR_MESSAGES.INVALID_ACTION_CODE, data: errorData };
       case 'auth/expired-action-code':

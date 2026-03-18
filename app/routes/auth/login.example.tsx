@@ -1,13 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams, type MetaFunction } from 'react-router';
+import type { FirebaseError } from 'firebase/app';
 import { auth } from '~/services/firebase';
 import {
     signInWithEmailAndPassword, 
     signInWithPopup,
+    fetchSignInMethodsForEmail,
+    linkWithCredential,
+    EmailAuthProvider,
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     sendEmailVerification,
     GoogleAuthProvider,
+  type AuthCredential,
   type User,
     updateProfile,
     getMultiFactorResolver,
@@ -204,18 +209,77 @@ export const Login = () => {
   const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
   const [showMfaVerification, setShowMfaVerification] = useState(false);
   const [showMfaEnrollment, setShowMfaEnrollment] = useState(false);
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<AuthCredential | null>(null);
+  const [pendingLinkEmail, setPendingLinkEmail] = useState('');
+  const [linkPassword, setLinkPassword] = useState('');
+  const [isLinkingAccount, setIsLinkingAccount] = useState(false);
 
   const actionMode = searchParams.get('mode');
   const actionCode = searchParams.get('oobCode');
   const continueUrl = searchParams.get('continueUrl');
   const actionLang = searchParams.get('lang');
 
+  const resetPendingGoogleLink = () => {
+    setPendingGoogleCredential(null);
+    setPendingLinkEmail('');
+    setLinkPassword('');
+    setIsLinkingAccount(false);
+  };
+
+  const getAuthErrorCode = (authError: unknown): string => {
+    if (authError && typeof authError === 'object' && 'code' in authError && typeof authError.code === 'string') {
+      return authError.code;
+    }
+
+    return 'unknown';
+  };
+
+  const getAuthErrorEmail = (authError: unknown): string => {
+    if (
+      authError &&
+      typeof authError === 'object' &&
+      'customData' in authError &&
+      authError.customData &&
+      typeof authError.customData === 'object' &&
+      'email' in authError.customData &&
+      typeof authError.customData.email === 'string'
+    ) {
+      return authError.customData.email;
+    }
+
+    return '';
+  };
+
+  const waitForCurrentUser = async (): Promise<User | null> => {
+    const maxRetries = 10;
+    const retryDelayMs = 100;
+
+    for (let attempt = 0; attempt < maxRetries; attempt += 1) {
+      if (auth.currentUser) {
+        return auth.currentUser;
+      }
+
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, retryDelayMs);
+      });
+    }
+
+    return auth.currentUser;
+  };
+
   const logFailedAuthAttempt = async (authError: unknown, message: string): Promise<void> => {
     try {
-      const errorCode = authError && typeof authError === 'object' && 'code' in authError
-        ? authError.code
-        : 'unknown';
+      const errorCode = getAuthErrorCode(authError);
       const isAuthError = typeof errorCode === 'string' && errorCode.startsWith('auth/');
+
+      if (
+        errorCode === 'auth/popup-closed-by-user' ||
+        errorCode === 'auth/cancelled-popup-request' ||
+        errorCode === 'auth/popup-blocked' ||
+        errorCode === 'auth/account-exists-with-different-credential'
+      ) {
+        return;
+      }
 
       if (isAuthError) {
         let severity: 'low' | 'medium' | 'high' | 'critical' = 'medium';
@@ -240,6 +304,55 @@ export const Login = () => {
     } catch (auditError) {
       console.error('Failed to log security violation audit:', auditError);
     }
+  };
+
+  const tryStartGoogleAccountLink = async (authError: unknown): Promise<boolean> => {
+    const errorCode = getAuthErrorCode(authError);
+    if (errorCode !== 'auth/account-exists-with-different-credential') {
+      return false;
+    }
+
+    const pendingCredential = GoogleAuthProvider.credentialFromError(authError as FirebaseError);
+    const email = getAuthErrorEmail(authError);
+
+    if (!pendingCredential || !email) {
+      return false;
+    }
+
+    try {
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+
+      if (signInMethods.includes(EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD)) {
+        setPendingGoogleCredential(pendingCredential);
+        setPendingLinkEmail(email);
+        setLinkPassword('');
+        setError('');
+        setSuccess('An account with this email already exists. Enter your password below to link Google sign-in.');
+        return true;
+      }
+
+      setError('This email is already linked to another provider. Sign in with that provider first, then link Google from your account settings.');
+      setSuccess('');
+      return true;
+    } catch (linkLookupError) {
+      console.error('Failed to start account linking flow:', linkLookupError);
+      setError('Unable to start account linking right now. Please try again.');
+      setSuccess('');
+      return true;
+    }
+  };
+
+  const completePendingGoogleLink = async (currentUser: User) => {
+    if (!pendingGoogleCredential) {
+      return;
+    }
+
+    await linkWithCredential(currentUser, pendingGoogleCredential);
+    resetPendingGoogleLink();
+    loginMethodRef.current = 'sso';
+    shouldShowWelcomeToastRef.current = true;
+    setError('');
+    setSuccess('Google sign-in linked successfully. You can now sign in with either method.');
   };
 
   const ensureGoogleUserRecord = async (googleUser: User): Promise<void> => {
@@ -466,6 +579,7 @@ export const Login = () => {
     setSuccess('');
     shouldShowWelcomeToastRef.current = true;
     loginMethodRef.current = 'sso';
+    resetPendingGoogleLink();
 
     try {
       const signInCredential = await signInWithPopup(auth, googleAuthProvider);
@@ -474,6 +588,13 @@ export const Login = () => {
         await ensureGoogleUserRecord(signInCredential.user);
       }
     } catch (err: unknown) {
+      const linkingStarted = await tryStartGoogleAccountLink(err);
+      if (linkingStarted) {
+        shouldShowWelcomeToastRef.current = false;
+        loginMethodRef.current = 'firebase';
+        return;
+      }
+
       if (
         err &&
         typeof err === 'object' &&
@@ -488,12 +609,54 @@ export const Login = () => {
       }
 
       shouldShowWelcomeToastRef.current = false;
-  loginMethodRef.current = 'firebase';
+      loginMethodRef.current = 'firebase';
       const { message } = handleAuthError(err);
       setError(message);
       await logFailedAuthAttempt(err, message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleLinkGoogleAccount = async () => {
+    if (!pendingGoogleCredential || !pendingLinkEmail) {
+      return;
+    }
+
+    if (!linkPassword.trim()) {
+      setError('Enter your password to link your Google sign-in.');
+      setSuccess('');
+      return;
+    }
+
+    setIsLinkingAccount(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      loginMethodRef.current = 'firebase';
+      const existingCredential = await signInWithEmailAndPassword(auth, pendingLinkEmail, linkPassword);
+      await completePendingGoogleLink(existingCredential.user);
+    } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        err.code === 'auth/multi-factor-auth-required'
+      ) {
+        const resolver = getMultiFactorResolver(auth, err as MultiFactorError);
+        setMfaResolver(resolver);
+        setShowMfaVerification(true);
+        setSuccess('Complete MFA to finish linking Google sign-in.');
+        return;
+      }
+
+      const { message } = handleAuthError(err);
+      setError(message);
+      setSuccess('');
+      await logFailedAuthAttempt(err, message);
+    } finally {
+      setIsLinkingAccount(false);
     }
   };
   
@@ -647,9 +810,24 @@ export const Login = () => {
 
   // MFA handlers
   const handleMfaSuccess = () => {
-    setShowMfaVerification(false);
-    setMfaResolver(null);
-    // The auth state listener will handle the rest
+    const finalize = async () => {
+      setShowMfaVerification(false);
+      setMfaResolver(null);
+
+      const currentUser = await waitForCurrentUser();
+
+      if (pendingGoogleCredential && currentUser) {
+        try {
+          await completePendingGoogleLink(currentUser);
+        } catch (linkError) {
+          const { message } = handleAuthError(linkError);
+          setError(message);
+        }
+      }
+      // The auth state listener will handle the rest
+    };
+
+    void finalize();
   };
 
   const handleMfaError = (errorMessage: string) => {
@@ -853,6 +1031,43 @@ export const Login = () => {
                   </button>
                 </>
               )}
+
+              {isLogin && pendingGoogleCredential && pendingLinkEmail && (
+                <div className={styles.linkAccountSection}>
+                  <p className={styles.linkAccountTitle}>Link Existing Account</p>
+                  <p className={styles.linkAccountDescription}>
+                    Enter the password for {pendingLinkEmail} to link Google sign-in.
+                  </p>
+                  <input
+                    type="password"
+                    name="linkPassword"
+                    placeholder="Current password"
+                    autoComplete="current-password"
+                    className={styles.input}
+                    disabled={isLoading || isCheckingUser || isLinkingAccount}
+                    value={linkPassword}
+                    onChange={(e) => setLinkPassword(e.target.value)}
+                  />
+                  <div className={styles.linkAccountActions}>
+                    <button
+                      type="button"
+                      className={styles.button}
+                      onClick={handleLinkGoogleAccount}
+                      disabled={isLoading || isCheckingUser || isLinkingAccount}
+                    >
+                      {isLinkingAccount ? 'Linking...' : 'Link Google Sign-In'}
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.linkCancelButton}
+                      onClick={resetPendingGoogleLink}
+                      disabled={isLoading || isCheckingUser || isLinkingAccount}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </form>
             
             <p className={styles.toggle}>
@@ -868,6 +1083,7 @@ export const Login = () => {
                   setLastName('');
                   setCompany('');
                   setConfirmPasswordValue('');
+                  resetPendingGoogleLink();
                 }}
                 className={styles.toggleButton}
                 disabled={isLoading || isCheckingUser}
