@@ -6,7 +6,6 @@ interface PdfProxyContext {
 }
 
 const SUPPORTED_METHODS = new Set(['POST', 'OPTIONS']);
-const PDF_UPSTREAM_TIMEOUT_MS = 90_000;
 
 function textResponse(message: string, status: number): Response {
   return new Response(message, {
@@ -92,14 +91,9 @@ export const onRequest = async ({ request, env }: PdfProxyContext): Promise<Resp
     upstreamResponse = await fetch(upstreamUrl, {
       method: request.method,
       headers: upstreamHeaders,
-      body: request.body,
-      signal: AbortSignal.timeout(PDF_UPSTREAM_TIMEOUT_MS)
+      body: request.body
     });
-  } catch (error) {
-    if (error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError')) {
-      return textResponse('Upstream PDF service timed out', 504);
-    }
-
+  } catch {
     return textResponse('Upstream PDF service unavailable', 502);
   }
 
