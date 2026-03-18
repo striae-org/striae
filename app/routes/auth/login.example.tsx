@@ -209,8 +209,7 @@ export const Login = () => {
   const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
   const [showMfaVerification, setShowMfaVerification] = useState(false);
   const [showMfaEnrollment, setShowMfaEnrollment] = useState(false);
-  const [pendingOAuthCredential, setPendingOAuthCredential] = useState<AuthCredential | null>(null);
-  const [pendingOAuthProviderLabel, setPendingOAuthProviderLabel] = useState('');
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<AuthCredential | null>(null);
   const [pendingLinkEmail, setPendingLinkEmail] = useState('');
   const [linkPassword, setLinkPassword] = useState('');
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
@@ -220,9 +219,8 @@ export const Login = () => {
   const continueUrl = searchParams.get('continueUrl');
   const actionLang = searchParams.get('lang');
 
-  const resetPendingOAuthLink = () => {
-    setPendingOAuthCredential(null);
-    setPendingOAuthProviderLabel('');
+  const resetPendingGoogleLink = () => {
+    setPendingGoogleCredential(null);
     setPendingLinkEmail('');
     setLinkPassword('');
     setIsLinkingAccount(false);
@@ -308,17 +306,13 @@ export const Login = () => {
     }
   };
 
-  const tryStartOAuthAccountLink = async (
-    authError: unknown,
-    providerLabel: string,
-    credentialExtractor: (err: FirebaseError) => AuthCredential | null
-  ): Promise<boolean> => {
+  const tryStartGoogleAccountLink = async (authError: unknown): Promise<boolean> => {
     const errorCode = getAuthErrorCode(authError);
     if (errorCode !== 'auth/account-exists-with-different-credential') {
       return false;
     }
 
-    const pendingCredential = credentialExtractor(authError as FirebaseError);
+    const pendingCredential = GoogleAuthProvider.credentialFromError(authError as FirebaseError);
     const email = getAuthErrorEmail(authError);
 
     if (!pendingCredential || !email) {
@@ -329,16 +323,15 @@ export const Login = () => {
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
 
       if (signInMethods.includes(EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD)) {
-        setPendingOAuthCredential(pendingCredential);
-        setPendingOAuthProviderLabel(providerLabel);
+        setPendingGoogleCredential(pendingCredential);
         setPendingLinkEmail(email);
         setLinkPassword('');
         setError('');
-        setSuccess(`An account with this email already exists. Enter your password below to link ${providerLabel} sign-in.`);
+        setSuccess('An account with this email already exists. Enter your password below to link Google sign-in.');
         return true;
       }
 
-      setError(`This email is already linked to another provider. Sign in with that provider first, then link ${providerLabel} from your account settings.`);
+      setError('This email is already linked to another provider. Sign in with that provider first, then link Google from your account settings.');
       setSuccess('');
       return true;
     } catch (linkLookupError) {
@@ -349,18 +342,17 @@ export const Login = () => {
     }
   };
 
-  const completePendingOAuthLink = async (currentUser: User) => {
-    if (!pendingOAuthCredential) {
+  const completePendingGoogleLink = async (currentUser: User) => {
+    if (!pendingGoogleCredential) {
       return;
     }
 
-    const label = pendingOAuthProviderLabel;
-    await linkWithCredential(currentUser, pendingOAuthCredential);
-    resetPendingOAuthLink();
+    await linkWithCredential(currentUser, pendingGoogleCredential);
+    resetPendingGoogleLink();
     loginMethodRef.current = 'sso';
     shouldShowWelcomeToastRef.current = true;
     setError('');
-    setSuccess(`${label} sign-in linked successfully. You can now sign in with either method.`);
+    setSuccess('Google sign-in linked successfully. You can now sign in with either method.');
   };
 
   const ensureGoogleUserRecord = async (googleUser: User): Promise<void> => {
@@ -587,7 +579,7 @@ export const Login = () => {
     setSuccess('');
     shouldShowWelcomeToastRef.current = true;
     loginMethodRef.current = 'sso';
-    resetPendingOAuthLink();
+    resetPendingGoogleLink();
 
     try {
       const signInCredential = await signInWithPopup(auth, googleAuthProvider);
@@ -596,11 +588,7 @@ export const Login = () => {
         await ensureGoogleUserRecord(signInCredential.user);
       }
     } catch (err: unknown) {
-      const linkingStarted = await tryStartOAuthAccountLink(
-        err,
-        'Google',
-        (e) => GoogleAuthProvider.credentialFromError(e)
-      );
+      const linkingStarted = await tryStartGoogleAccountLink(err);
       if (linkingStarted) {
         shouldShowWelcomeToastRef.current = false;
         loginMethodRef.current = 'firebase';
@@ -630,13 +618,13 @@ export const Login = () => {
     }
   };
 
-  const handleLinkOAuthAccount = async () => {
-    if (!pendingOAuthCredential || !pendingLinkEmail) {
+  const handleLinkGoogleAccount = async () => {
+    if (!pendingGoogleCredential || !pendingLinkEmail) {
       return;
     }
 
     if (!linkPassword.trim()) {
-      setError(`Enter your password to link your ${pendingOAuthProviderLabel} sign-in.`);
+      setError('Enter your password to link your Google sign-in.');
       setSuccess('');
       return;
     }
@@ -648,7 +636,7 @@ export const Login = () => {
     try {
       loginMethodRef.current = 'firebase';
       const existingCredential = await signInWithEmailAndPassword(auth, pendingLinkEmail, linkPassword);
-      await completePendingOAuthLink(existingCredential.user);
+      await completePendingGoogleLink(existingCredential.user);
     } catch (err: unknown) {
       if (
         err &&
@@ -659,7 +647,7 @@ export const Login = () => {
         const resolver = getMultiFactorResolver(auth, err as MultiFactorError);
         setMfaResolver(resolver);
         setShowMfaVerification(true);
-        setSuccess(`Complete MFA to finish linking ${pendingOAuthProviderLabel} sign-in.`);
+        setSuccess('Complete MFA to finish linking Google sign-in.');
         return;
       }
 
@@ -828,9 +816,9 @@ export const Login = () => {
 
       const currentUser = await waitForCurrentUser();
 
-      if (pendingOAuthCredential && currentUser) {
+      if (pendingGoogleCredential && currentUser) {
         try {
-          await completePendingOAuthLink(currentUser);
+          await completePendingGoogleLink(currentUser);
         } catch (linkError) {
           const { message } = handleAuthError(linkError);
           setError(message);
@@ -1044,11 +1032,11 @@ export const Login = () => {
                 </>
               )}
 
-              {isLogin && pendingOAuthCredential && pendingLinkEmail && (
+              {isLogin && pendingGoogleCredential && pendingLinkEmail && (
                 <div className={styles.linkAccountSection}>
                   <p className={styles.linkAccountTitle}>Link Existing Account</p>
                   <p className={styles.linkAccountDescription}>
-                    Enter the password for {pendingLinkEmail} to link {pendingOAuthProviderLabel} sign-in.
+                    Enter the password for {pendingLinkEmail} to link Google sign-in.
                   </p>
                   <input
                     type="password"
@@ -1064,15 +1052,15 @@ export const Login = () => {
                     <button
                       type="button"
                       className={styles.button}
-                      onClick={handleLinkOAuthAccount}
+                      onClick={handleLinkGoogleAccount}
                       disabled={isLoading || isCheckingUser || isLinkingAccount}
                     >
-                      {isLinkingAccount ? 'Linking...' : `Link ${pendingOAuthProviderLabel} Sign-In`}
+                      {isLinkingAccount ? 'Linking...' : 'Link Google Sign-In'}
                     </button>
                     <button
                       type="button"
                       className={styles.linkCancelButton}
-                      onClick={resetPendingOAuthLink}
+                      onClick={resetPendingGoogleLink}
                       disabled={isLoading || isCheckingUser || isLinkingAccount}
                     >
                       Cancel
@@ -1095,7 +1083,7 @@ export const Login = () => {
                   setLastName('');
                   setCompany('');
                   setConfirmPasswordValue('');
-                  resetPendingOAuthLink();
+                  resetPendingGoogleLink();
                 }}
                 className={styles.toggleButton}
                 disabled={isLoading || isCheckingUser}
