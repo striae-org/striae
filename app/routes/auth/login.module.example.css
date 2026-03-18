@@ -184,60 +184,6 @@
   cursor: not-allowed;
 }
 
-.linkAccountSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceS);
-  margin-top: var(--spaceS);
-  padding: var(--spaceM);
-  border: 1px solid color-mix(in lab, var(--primary) 25%, transparent);
-  border-radius: var(--spaceXS);
-  background: color-mix(in lab, var(--primary) 8%, transparent);
-}
-
-.linkAccountTitle {
-  margin: 0;
-  color: var(--textTitle);
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightBold);
-}
-
-.linkAccountDescription {
-  margin: 0;
-  color: var(--textBody);
-  font-size: var(--fontSizeBodyXS);
-}
-
-.linkAccountActions {
-  display: flex;
-  gap: var(--spaceS);
-}
-
-.linkAccountActions .button {
-  flex: 1;
-}
-
-.linkCancelButton {
-  flex: 1;
-  padding: var(--spaceM) var(--spaceL);
-  border-radius: var(--spaceXS);
-  border: 1px solid color-mix(in lab, var(--text) 20%, transparent);
-  background: color-mix(in lab, var(--backgroundLight) 98%, transparent);
-  color: var(--textTitle);
-  font-size: var(--fontSizeBodyS);
-  cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-}
-
-.linkCancelButton:hover:not(:disabled) {
-  background: color-mix(in lab, var(--backgroundLight) 85%, transparent);
-}
-
-.linkCancelButton:disabled {
-  color: var(--textLight);
-  cursor: not-allowed;
-}
-
 .error {
   color: color-mix(in lab, var(--error) 90%, var(--black));
   text-align: left;
