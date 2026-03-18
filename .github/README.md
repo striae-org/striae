@@ -62,6 +62,16 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-17] - *[Patch Release v4.0.2](https://github.com/striae-org/striae/releases/tag/v4.0.2)*
+
+_Note: Summary is based on 18 non-merge commits since v4.0.1 (post-4.0.1 stabilization, dependency maintenance, and PDF worker deployment hardening window)._
+
+- **📄 PDF Worker Stabilization Cycle** - Applied PDF worker timeout/hardening changes and intentional follow-up reverts during the same release window to preserve stable runtime behavior.
+- **📦 Dependency and Type Maintenance** - Updated dependency surfaces including `isbot`, React type packages, and broader dependency refresh commits.
+- **🛠️ Error Boundary Reliability Fix** - Fixed an error-boundary loop condition to reduce fallback recursion risk in failure scenarios.
+- **🧭 Utilities and API Structure Cleanup** - Reorganized shared utils/API structure and refreshed compatibility-date metadata.
+- **🔐 Public Key and Deployment Metadata Hygiene** - Removed outdated key material, added `keybase.txt`, and aligned deploy-config/PDF worker operational metadata.
+
 ## [2026-03-15] - *[Patch Release v4.0.1](https://github.com/striae-org/striae/releases/tag/v4.0.1)*
 
 _Note: Summary is based on 7 non-merge commits since v4.0.0 (same-day patch release window)._
