@@ -3,11 +3,9 @@ import { Link, useSearchParams, type MetaFunction } from 'react-router';
 import { auth } from '~/services/firebase';
 import {
     signInWithEmailAndPassword, 
-    signInWithPopup,
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     sendEmailVerification,
-    GoogleAuthProvider,
   type User,
     updateProfile,
     getMultiFactorResolver,
@@ -33,22 +31,11 @@ const APP_CANONICAL_ORIGIN = 'PAGES_CUSTOM_DOMAIN';
 const SOCIAL_IMAGE_PATH = '/social-image.png';
 const SOCIAL_IMAGE_ALT = 'Striae forensic annotation and comparison workspace';
 const LOGIN_PATH_ALIASES = new Set(['/auth', '/auth/', '/auth/login', '/auth/login/']);
-const GOOGLE_PROVIDER_ID = 'google.com';
-
-const googleAuthProvider = new GoogleAuthProvider();
-googleAuthProvider.setCustomParameters({
-  prompt: 'select_account',
-});
 
 type AuthMetaContent = {
   title: string;
   description: string;
   robots: string;
-};
-
-type UserNameParts = {
-  firstName: string;
-  lastName: string;
 };
 
 const getCanonicalPath = (pathname: string): string => {
@@ -149,38 +136,9 @@ const getUserFirstName = (user: User): string => {
   return 'User';
 };
 
-const getUserNameParts = (user: User): UserNameParts => {
-  const displayName = user.displayName?.trim();
-  if (displayName) {
-    const [firstName = 'User', ...lastNameParts] = displayName.split(/\s+/);
-    return {
-      firstName,
-      lastName: lastNameParts.join(' '),
-    };
-  }
-
-  const emailPrefix = user.email?.split('@')[0]?.trim();
-  if (emailPrefix) {
-    return {
-      firstName: emailPrefix,
-      lastName: '',
-    };
-  }
-
-  return {
-    firstName: 'User',
-    lastName: '',
-  };
-};
-
-const isGoogleAuthUser = (user: User): boolean => {
-  return user.providerData.some((providerData) => providerData.providerId === GOOGLE_PROVIDER_ID);
-};
-
 export const Login = () => {
   const [searchParams] = useSearchParams();
   const shouldShowWelcomeToastRef = useRef(false);
-  const loginMethodRef = useRef<'firebase' | 'sso' | 'api-key' | 'manual'>('firebase');
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -209,69 +167,6 @@ export const Login = () => {
   const actionCode = searchParams.get('oobCode');
   const continueUrl = searchParams.get('continueUrl');
   const actionLang = searchParams.get('lang');
-
-  const logFailedAuthAttempt = async (authError: unknown, message: string): Promise<void> => {
-    try {
-      const errorCode = authError && typeof authError === 'object' && 'code' in authError
-        ? authError.code
-        : 'unknown';
-      const isAuthError = typeof errorCode === 'string' && errorCode.startsWith('auth/');
-
-      if (isAuthError) {
-        let severity: 'low' | 'medium' | 'high' | 'critical' = 'medium';
-        let incidentType: 'unauthorized-access' | 'brute-force' | 'privilege-escalation' = 'unauthorized-access';
-
-        if (errorCode === 'auth/too-many-requests') {
-          severity = 'high';
-          incidentType = 'brute-force';
-        } else if (errorCode === 'auth/user-disabled') {
-          severity = 'critical';
-        }
-
-        await auditService.logSecurityViolation(
-          null,
-          incidentType,
-          severity,
-          `Failed authentication attempt: ${errorCode} - ${message}`,
-          'authentication-endpoint',
-          true
-        );
-      }
-    } catch (auditError) {
-      console.error('Failed to log security violation audit:', auditError);
-    }
-  };
-
-  const ensureGoogleUserRecord = async (googleUser: User): Promise<void> => {
-    const userData = await getUserData(googleUser);
-    if (userData) {
-      return;
-    }
-
-    const { firstName: derivedFirstName, lastName: derivedLastName } = getUserNameParts(googleUser);
-    const derivedCompany = googleUser.email?.split('@')[1]?.trim() || '';
-
-    await createUser(
-      googleUser,
-      derivedFirstName,
-      derivedLastName,
-      derivedCompany,
-      true
-    );
-
-    try {
-      await auditService.logUserRegistration(
-        googleUser,
-        derivedFirstName,
-        derivedLastName,
-        derivedCompany,
-        'sso',
-        navigator.userAgent
-      );
-    } catch (auditError) {
-      console.error('Failed to log Google user registration audit:', auditError);
-    }
-  };
 
   const shouldHandleEmailAction = Boolean(
     actionMode &&
@@ -358,13 +253,7 @@ export const Login = () => {
       // Check if user exists in the USER_DB
       setIsCheckingUser(true);
       try {
-        let userExists = await checkUserExists(currentUser);
-
-        if (!userExists && isGoogleAuthUser(currentUser)) {
-          await ensureGoogleUserRecord(currentUser);
-          userExists = true;
-        }
-
+        const userExists = await checkUserExists(currentUser);
         setIsCheckingUser(false);
         
         if (!userExists) {
@@ -401,7 +290,7 @@ export const Login = () => {
         await auditService.logUserLogin(
           currentUser,
           sessionId,
-          loginMethodRef.current,
+          'firebase',
           navigator.userAgent
         );
       } catch (auditError) {
@@ -459,43 +348,6 @@ export const Login = () => {
       isMounted = false;
     };
   }, [shouldHandleEmailAction]);
-
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
-    shouldShowWelcomeToastRef.current = true;
-    loginMethodRef.current = 'sso';
-
-    try {
-      const signInCredential = await signInWithPopup(auth, googleAuthProvider);
-
-      if (isGoogleAuthUser(signInCredential.user)) {
-        await ensureGoogleUserRecord(signInCredential.user);
-      }
-    } catch (err: unknown) {
-      if (
-        err &&
-        typeof err === 'object' &&
-        'code' in err &&
-        err.code === 'auth/multi-factor-auth-required'
-      ) {
-        const resolver = getMultiFactorResolver(auth, err as MultiFactorError);
-        setMfaResolver(resolver);
-        setShowMfaVerification(true);
-        setIsLoading(false);
-        return;
-      }
-
-      shouldShowWelcomeToastRef.current = false;
-  loginMethodRef.current = 'firebase';
-      const { message } = handleAuthError(err);
-      setError(message);
-      await logFailedAuthAttempt(err, message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
   
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -593,7 +445,6 @@ export const Login = () => {
     } else {
       // Login
       shouldShowWelcomeToastRef.current = true;
-      loginMethodRef.current = 'firebase';
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (loginError: unknown) {
@@ -612,17 +463,45 @@ export const Login = () => {
           return;
         }
         shouldShowWelcomeToastRef.current = false;
-        loginMethodRef.current = 'firebase';
         throw loginError; // Re-throw non-MFA errors
       }
     }
   } catch (err) {
     shouldShowWelcomeToastRef.current = false;
-    loginMethodRef.current = 'firebase';
     const { message } = handleAuthError(err);
     setError(message);
-
-    await logFailedAuthAttempt(err, message);
+    
+    // Log security violation for failed authentication attempts
+    try {
+      // Extract error details for audit
+      const errorCode = err && typeof err === 'object' && 'code' in err ? err.code : 'unknown';
+      const isAuthError = typeof errorCode === 'string' && errorCode.startsWith('auth/');
+      
+      if (isAuthError) {
+        // Determine severity based on error type
+        let severity: 'low' | 'medium' | 'high' | 'critical' = 'medium';
+        let incidentType: 'unauthorized-access' | 'brute-force' | 'privilege-escalation' = 'unauthorized-access';
+        
+        if (errorCode === 'auth/too-many-requests') {
+          severity = 'high';
+          incidentType = 'brute-force';
+        } else if (errorCode === 'auth/user-disabled') {
+          severity = 'critical';
+        }
+        
+        await auditService.logSecurityViolation(
+          null, // No user object for failed auth
+          incidentType,
+          severity,
+          `Failed authentication attempt: ${errorCode} - ${message}`,
+          'authentication-endpoint',
+          true // Blocked by system
+        );
+      }
+    } catch (auditError) {
+      console.error('Failed to log security violation audit:', auditError);
+      // Continue with error flow even if audit logging fails
+    }
   } finally {
     setIsLoading(false);
   }
@@ -639,7 +518,6 @@ export const Login = () => {
       setMfaResolver(null);
       setIsWelcomeToastVisible(false);
       shouldShowWelcomeToastRef.current = false;
-      loginMethodRef.current = 'firebase';
     } catch (err) {
       console.error('Sign out error:', err);
     }
@@ -837,22 +715,6 @@ export const Login = () => {
                       ? 'Login'
                       : 'Register'}
               </button>
-
-              {isLogin && (
-                <>
-                  <div className={styles.socialDivider} role="separator" aria-label="or">
-                    <span>or</span>
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.googleButton}
-                    onClick={handleGoogleSignIn}
-                    disabled={isLoading || isCheckingUser}
-                  >
-                    Continue with Google
-                  </button>
-                </>
-              )}
             </form>
             
             <p className={styles.toggle}>
