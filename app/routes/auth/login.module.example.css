@@ -128,6 +128,62 @@
   cursor: not-allowed;
 }
 
+.socialDivider {
+  position: relative;
+  margin: var(--spaceXS) 0;
+  text-align: center;
+}
+
+.socialDivider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px solid color-mix(in lab, var(--text) 20%, transparent);
+  transform: translateY(-50%);
+}
+
+.socialDivider span {
+  position: relative;
+  z-index: 1;
+  padding: 0 var(--spaceM);
+  color: var(--textLight);
+  font-size: var(--fontSizeBodyXS);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: color-mix(in lab, var(--backgroundLight) 95%, transparent);
+}
+
+.googleButton {
+  width: 100%;
+  padding: var(--spaceM) var(--spaceL);
+  border-radius: var(--spaceXS);
+  border: 1px solid color-mix(in lab, var(--text) 20%, transparent);
+  background: color-mix(in lab, var(--white) 96%, var(--backgroundLight));
+  color: var(--textTitle);
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.googleButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--white) 90%, var(--backgroundLight));
+  border-color: color-mix(in lab, var(--primary) 30%, transparent);
+}
+
+.googleButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.googleButton:disabled {
+  background-color: color-mix(in lab, var(--background) 95%, transparent);
+  color: var(--textLight);
+  cursor: not-allowed;
+}
+
 .error {
   color: color-mix(in lab, var(--error) 90%, var(--black));
   text-align: left;
