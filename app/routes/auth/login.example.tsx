@@ -38,6 +38,7 @@ const APP_CANONICAL_ORIGIN = 'PAGES_CUSTOM_DOMAIN';
 const SOCIAL_IMAGE_PATH = '/social-image.png';
 const SOCIAL_IMAGE_ALT = 'Striae forensic annotation and comparison workspace';
 const LOGIN_PATH_ALIASES = new Set(['/auth', '/auth/', '/auth/login', '/auth/login/']);
+const GOOGLE_PROVIDER_ID = 'google.com';
 
 const googleAuthProvider = new GoogleAuthProvider();
 googleAuthProvider.setCustomParameters({
@@ -177,8 +178,8 @@ const getUserNameParts = (user: User): UserNameParts => {
   };
 };
 
-const isOAuthUser = (user: User): boolean => {
-  return user.providerData.some((p) => p.providerId !== EmailAuthProvider.PROVIDER_ID);
+const isGoogleAuthUser = (user: User): boolean => {
+  return user.providerData.some((providerData) => providerData.providerId === GOOGLE_PROVIDER_ID);
 };
 
 export const Login = () => {
@@ -186,7 +187,6 @@ export const Login = () => {
   const shouldShowWelcomeToastRef = useRef(false);
   const loginMethodRef = useRef<'firebase' | 'sso' | 'api-key' | 'manual'>('firebase');
 
-  // Login states
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [welcomeToastMessage, setWelcomeToastMessage] = useState('');
@@ -214,10 +214,7 @@ export const Login = () => {
   const [pendingLinkEmail, setPendingLinkEmail] = useState('');
   const [linkPassword, setLinkPassword] = useState('');
   const [isLinkingAccount, setIsLinkingAccount] = useState(false);
-  const [pendingOAuthOnboardingUser, setPendingOAuthOnboardingUser] = useState<User | null>(null);
-  const [oAuthOnboardingCompany, setOAuthOnboardingCompany] = useState('');
 
-  // Email action parameters
   const actionMode = searchParams.get('mode');
   const actionCode = searchParams.get('oobCode');
   const continueUrl = searchParams.get('continueUrl');
@@ -366,7 +363,36 @@ export const Login = () => {
     setSuccess(`${label} sign-in linked successfully. You can now sign in with either method.`);
   };
 
+  const ensureGoogleUserRecord = async (googleUser: User): Promise<void> => {
+    const userData = await getUserData(googleUser);
+    if (userData) {
+      return;
+    }
 
+    const { firstName: derivedFirstName, lastName: derivedLastName } = getUserNameParts(googleUser);
+    const derivedCompany = googleUser.email?.split('@')[1]?.trim() || '';
+
+    await createUser(
+      googleUser,
+      derivedFirstName,
+      derivedLastName,
+      derivedCompany,
+      true
+    );
+
+    try {
+      await auditService.logUserRegistration(
+        googleUser,
+        derivedFirstName,
+        derivedLastName,
+        derivedCompany,
+        'sso',
+        navigator.userAgent
+      );
+    } catch (auditError) {
+      console.error('Failed to log Google user registration audit:', auditError);
+    }
+  };
 
   const shouldHandleEmailAction = Boolean(
     actionMode &&
@@ -453,12 +479,11 @@ export const Login = () => {
       // Check if user exists in the USER_DB
       setIsCheckingUser(true);
       try {
-        const userExists = await checkUserExists(currentUser);
+        let userExists = await checkUserExists(currentUser);
 
-        if (!userExists && isOAuthUser(currentUser)) {
-          setPendingOAuthOnboardingUser(currentUser);
-          setIsCheckingUser(false);
-          return;
+        if (!userExists && isGoogleAuthUser(currentUser)) {
+          await ensureGoogleUserRecord(currentUser);
+          userExists = true;
         }
 
         setIsCheckingUser(false);
@@ -565,7 +590,11 @@ export const Login = () => {
     resetPendingOAuthLink();
 
     try {
-      await signInWithPopup(auth, googleAuthProvider);
+      const signInCredential = await signInWithPopup(auth, googleAuthProvider);
+
+      if (isGoogleAuthUser(signInCredential.user)) {
+        await ensureGoogleUserRecord(signInCredential.user);
+      }
     } catch (err: unknown) {
       const linkingStarted = await tryStartOAuthAccountLink(
         err,
@@ -786,68 +815,8 @@ export const Login = () => {
       setIsWelcomeToastVisible(false);
       shouldShowWelcomeToastRef.current = false;
       loginMethodRef.current = 'firebase';
-      setPendingOAuthOnboardingUser(null);
-      setOAuthOnboardingCompany('');
     } catch (err) {
       console.error('Sign out error:', err);
-    }
-  };
-
-  const handleCompleteOAuthOnboarding = async () => {
-    if (!pendingOAuthOnboardingUser) {
-      return;
-    }
-
-    const trimmedCompany = oAuthOnboardingCompany.trim();
-    if (!trimmedCompany) {
-      setError('Please enter your organization name to continue.');
-      return;
-    }
-
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const onboardingUser = pendingOAuthOnboardingUser;
-      const { firstName: derivedFirstName, lastName: derivedLastName } = getUserNameParts(onboardingUser);
-
-      await createUser(onboardingUser, derivedFirstName, derivedLastName, trimmedCompany, true);
-
-      try {
-        await auditService.logUserRegistration(
-          onboardingUser,
-          derivedFirstName,
-          derivedLastName,
-          trimmedCompany,
-          'sso',
-          navigator.userAgent
-        );
-      } catch (auditError) {
-        console.error('Failed to log SSO user registration audit:', auditError);
-      }
-
-      setPendingOAuthOnboardingUser(null);
-      setOAuthOnboardingCompany('');
-      loginMethodRef.current = 'sso';
-
-      if (!userHasMFA(onboardingUser)) {
-        setShowMfaEnrollment(true);
-      } else {
-        shouldShowWelcomeToastRef.current = true;
-        setWelcomeToastMessage(`Welcome to Striae, ${getUserFirstName(onboardingUser)}!`);
-        setIsWelcomeToastVisible(true);
-        try {
-          const sessionId = `session_${onboardingUser.uid}_${Date.now()}_${generateUniqueId(8)}`;
-          await auditService.logUserLogin(onboardingUser, sessionId, 'sso', navigator.userAgent);
-        } catch (auditError) {
-          console.error('Failed to log user login audit:', auditError);
-        }
-      }
-    } catch (err) {
-      const { message } = handleAuthError(err);
-      setError(message);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -904,44 +873,7 @@ export const Login = () => {
           lang={actionLang}
         />
       ) : user ? (
-        pendingOAuthOnboardingUser ? (
-          <div className={styles.container}>
-            <Link
-              viewTransition
-              prefetch="intent"
-              to="/"
-              className={styles.logoLink}>
-              <div className={styles.logo} />
-            </Link>
-            <div className={styles.formWrapper}>
-              <h1 className={styles.title}>One More Step</h1>
-              <p className={styles.linkAccountDescription}>
-                Welcome, {getUserFirstName(pendingOAuthOnboardingUser)}! Enter your organization name to complete sign-up.
-              </p>
-              {error && <p className={styles.error}>{error}</p>}
-              <input
-                type="text"
-                placeholder="Organization / Lab Name (required)"
-                autoComplete="organization"
-                className={styles.input}
-                value={oAuthOnboardingCompany}
-                onChange={(e) => setOAuthOnboardingCompany(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && void handleCompleteOAuthOnboarding()}
-                disabled={isLoading}
-                // eslint-disable-next-line jsx-a11y/no-autofocus
-                autoFocus
-              />
-              <button
-                type="button"
-                className={styles.button}
-                onClick={() => void handleCompleteOAuthOnboarding()}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Setting up...' : 'Continue'}
-              </button>
-            </div>
-          </div>
-        ) : user.emailVerified ? (
+        user.emailVerified ? (
           <Striae user={user} />
         ) : (
           <EmailVerification 
