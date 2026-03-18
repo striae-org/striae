@@ -241,7 +241,6 @@ export const LoginForm = ({
               type="button"
               className={styles.googleButton}
               onClick={onGoogleSignIn}
-              aria-label="Sign in with Google"
               disabled={isLoading || isCheckingUser}
             >
               <span className={styles.googleButtonMark}>
@@ -250,7 +249,6 @@ export const LoginForm = ({
               <span className={styles.googleButtonLabel}>Sign in with Google</span>
               <span className={styles.googleButtonSpacer} aria-hidden="true" />
             </button>
-            <p className={styles.googleAttribution}>Google is a trademark of Google LLC.</p>
           </>
         )}
 

@@ -216,63 +216,55 @@
 }
 
 .googleButton {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
   align-items: center;
   justify-content: center;
-  gap: 12px;
   width: 100%;
-  min-height: 40px;
-  padding: 0 12px;
-  border-radius: 4px;
-  border: 1px solid #747775;
+  min-height: 48px;
+  padding: 4px var(--spaceM) 4px 4px;
+  border-radius: var(--spaceXS);
+  border: 1px solid #dadce0;
   background: #ffffff;
-  color: #1f1f1f;
-  font-family: "Roboto", "Arial", sans-serif;
-  font-size: 14px;
+  color: #3c4043;
+  font-size: var(--fontSizeBodyS);
   font-weight: 500;
-  line-height: 20px;
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition:
-    box-shadow var(--durationS) var(--bezierFastoutSlowin),
-    background-color var(--durationS) var(--bezierFastoutSlowin),
-    border-color var(--durationS) var(--bezierFastoutSlowin);
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .googleButtonMark {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px #dadce0;
 }
 
 .googleButtonIcon {
   width: 18px;
   height: 18px;
+  flex-shrink: 0;
 }
 
 .googleButtonLabel {
-  line-height: 1;
-  white-space: nowrap;
+  justify-self: center;
+  line-height: 1.2;
 }
 
 .googleButtonSpacer {
-  display: none;
+  width: 40px;
+  height: 1px;
 }
 
 .googleButton:hover:not(:disabled) {
-  background: #f8fafd;
+  background: #f8fbff;
   border-color: #d2e3fc;
-  box-shadow:
-    0 1px 2px 0 rgba(60, 64, 67, 0.3),
-    0 1px 3px 1px rgba(60, 64, 67, 0.15);
-}
-
-.googleButton:active:not(:disabled) {
-  background: #f1f3f4;
-  border-color: #d2e3fc;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
 }
 
 .googleButton:focus-visible {
@@ -285,18 +277,6 @@
   border-color: #dadce0;
   color: #9aa0a6;
   cursor: not-allowed;
-}
-
-.googleButton:disabled .googleButtonIcon {
-  opacity: 0.5;
-}
-
-.googleAttribution {
-  margin: calc(var(--spaceS) * -0.25) 0 0;
-  color: var(--textLight);
-  font-size: var(--fontSizeBodyXS);
-  line-height: 1.4;
-  text-align: center;
 }
 
 .linkAccountSection {
