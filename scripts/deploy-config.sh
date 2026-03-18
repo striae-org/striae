@@ -697,6 +697,8 @@ validate_generated_configs() {
         "app/config/config.json"
         "app/config/firebase.ts"
         "app/config/admin-service.json"
+        "app/routes/auth/login.tsx"
+        "app/routes/auth/login.module.css"
         "workers/audit-worker/wrangler.jsonc"
         "workers/data-worker/wrangler.jsonc"
         "workers/image-worker/wrangler.jsonc"
@@ -741,6 +743,7 @@ validate_generated_configs() {
 
     assert_contains_literal "app/config/config.json" "https://$PAGES_CUSTOM_DOMAIN" "PAGES_CUSTOM_DOMAIN missing in app/config/config.json"
     assert_contains_literal "app/config/config.json" "$ACCOUNT_HASH" "ACCOUNT_HASH missing in app/config/config.json"
+    assert_contains_literal "app/routes/auth/login.tsx" "const APP_CANONICAL_ORIGIN = 'https://$PAGES_CUSTOM_DOMAIN';" "PAGES_CUSTOM_DOMAIN missing in app/routes/auth/login.tsx canonical origin"
 
     assert_contains_literal "app/config/firebase.ts" "$API_KEY" "API_KEY missing in app/config/firebase.ts"
     assert_contains_literal "app/config/firebase.ts" "$AUTH_DOMAIN" "AUTH_DOMAIN missing in app/config/firebase.ts"
@@ -776,6 +779,7 @@ validate_generated_configs() {
         "workers/user-worker/src/user-worker.ts"
         "app/config/config.json"
         "app/config/firebase.ts"
+        "app/routes/auth/login.tsx"
     )
 
     for file_path in "${files_to_scan[@]}"; do
@@ -861,6 +865,23 @@ copy_example_configs() {
         fi
 
         echo -e "${GREEN}    ✅ app: copied $copied_config_files config file(s) from config-example${NC}"
+    fi
+
+    # Copy auth route template files
+    echo -e "${YELLOW}  Copying auth route template files...${NC}"
+
+    if [ -f "app/routes/auth/login.example.tsx" ] && { [ "$update_env" = "true" ] || [ ! -f "app/routes/auth/login.tsx" ]; }; then
+        cp app/routes/auth/login.example.tsx app/routes/auth/login.tsx
+        echo -e "${GREEN}    ✅ auth: login.tsx created from example${NC}"
+    elif [ -f "app/routes/auth/login.tsx" ]; then
+        echo -e "${YELLOW}    ⚠️  auth: login.tsx already exists, skipping copy${NC}"
+    fi
+
+    if [ -f "app/routes/auth/login.module.example.css" ] && { [ "$update_env" = "true" ] || [ ! -f "app/routes/auth/login.module.css" ]; }; then
+        cp app/routes/auth/login.module.example.css app/routes/auth/login.module.css
+        echo -e "${GREEN}    ✅ auth: login.module.css created from example${NC}"
+    elif [ -f "app/routes/auth/login.module.css" ]; then
+        echo -e "${YELLOW}    ⚠️  auth: login.module.css already exists, skipping copy${NC}"
     fi
     
     # Navigate to each worker directory and copy the example file
@@ -1449,6 +1470,12 @@ update_wrangler_configs() {
         sed -i "s|\"YOUR_FIREBASE_APP_ID\"|\"$APP_ID\"|g" app/config/firebase.ts
         sed -i "s|\"YOUR_FIREBASE_MEASUREMENT_ID\"|\"$MEASUREMENT_ID\"|g" app/config/firebase.ts
         echo -e "${GREEN}      ✅ app firebase.ts updated${NC}"
+    fi
+
+    if [ -f "app/routes/auth/login.tsx" ]; then
+        echo -e "${YELLOW}    Updating app/routes/auth/login.tsx...${NC}"
+        sed -i "s|^const APP_CANONICAL_ORIGIN = .*;|const APP_CANONICAL_ORIGIN = 'https://$escaped_pages_custom_domain';|g" app/routes/auth/login.tsx
+        echo -e "${GREEN}      ✅ app login.tsx canonical origin updated${NC}"
     fi
     
     echo -e "${GREEN}✅ All configuration files updated${NC}"

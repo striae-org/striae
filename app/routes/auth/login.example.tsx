@@ -27,7 +27,7 @@ import { auditService } from '~/services/audit';
 import { generateUniqueId } from '~/utils/common';
 import { evaluatePasswordPolicy, buildActionCodeSettings, userHasMFA } from '~/utils/auth';
 
-const APP_CANONICAL_ORIGIN = 'https://striae.app';
+const APP_CANONICAL_ORIGIN = 'PAGES_CUSTOM_DOMAIN';
 const SOCIAL_IMAGE_PATH = '/social-image.png';
 const SOCIAL_IMAGE_ALT = 'Striae forensic annotation and comparison workspace';
 const LOGIN_PATH_ALIASES = new Set(['/auth', '/auth/', '/auth/login', '/auth/login/']);
@@ -580,7 +580,7 @@ export const Login = () => {
           <Link 
             viewTransition
             prefetch="intent"
-            to="https://striae.app" 
+            to="/" 
             className={styles.logoLink}>
             <div className={styles.logo} />
           </Link>

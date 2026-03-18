@@ -20,6 +20,10 @@ workers/pdf-worker/src/formats/*.ts
 workers/pdf-worker/src/assets/*
 !workers/pdf-worker/src/assets/generated-assets.ts
 
+# Unique Login Page
+app/routes/auth/login.tsx
+app/routes/auth/login.module.css
+
 # Logs and Miscellaneous
 .vscode
 .cache
