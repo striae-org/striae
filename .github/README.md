@@ -50,7 +50,7 @@ npm run deploy:all
 
 ## 💬 Contact & Support
 
-**[Striae Support](https://www.striae.org/support)**`
+**[Striae Support](https://www.striae.org/support)**
 
 **[Email Support](mailto:info@striae.org)**
 
@@ -61,6 +61,13 @@ npm run deploy:all
 ---
 
 ## 📋 Changelog
+
+## [2026-03-18] - *[Patch Release v4.0.3](https://github.com/striae-org/striae/releases/tag/v4.0.3)*
+
+_Note: Summary intentionally scopes this patch entry to login example and deployment-script updates._
+
+- **🔐 Login Route/Module Example Update** - Added a login route/module example to support implementation reference for authentication setup flows.
+- **⚙️ Deploy Script Login Variables Update** - Added login-related variables to the deploy-config script to improve deployment-time login configuration coverage.
 
 ## [2026-03-17] - *[Patch Release v4.0.2](https://github.com/striae-org/striae/releases/tag/v4.0.2)*
 
