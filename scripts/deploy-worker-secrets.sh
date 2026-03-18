@@ -197,10 +197,9 @@ if ! set_worker_secrets "Images Worker" "workers/image-worker" \
     echo -e "${YELLOW}⚠️  Skipping Images Worker (not configured)${NC}"
 fi
 
-# PDF Worker (no secrets needed)
 # PDF Worker
 if ! set_worker_secrets "PDF Worker" "workers/pdf-worker" \
-    "PDF_WORKER_AUTH"; then
+    "PDF_WORKER_AUTH" "ACCOUNT_ID" "BROWSER_API_TOKEN"; then
     echo -e "${YELLOW}⚠️  Skipping PDF Worker (not configured)${NC}"
 fi
 

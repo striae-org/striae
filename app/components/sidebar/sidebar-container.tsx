@@ -121,22 +121,7 @@ export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
                   Security Policy
                 </Link>                
               </div>
-              <div className={styles.badgeContainer}>                
-                <div className={styles.oinBadge}>
-                  <a
-                    href="https://openinventionnetwork.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.oinBadgeLink}
-                  >
-                    <img 
-                      src="/oin-badge.png" 
-                      alt="Open Invention Network Community Member" 
-                      className={styles.oinBadgeImage}
-                    />
-                  </a>
-                </div>
-              </div>
+
               <div className={styles.footerModalCopyright}>
                 <a href={`https://github.com/striae-org/striae/releases/tag/v${appVersion}`} className={styles.link} target="_blank" rel="noopener noreferrer">Striae v{appVersion}</a> © {year}.{' '}
                 Licensed under Apache 2.0.
