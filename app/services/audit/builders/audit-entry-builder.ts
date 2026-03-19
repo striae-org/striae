@@ -26,7 +26,8 @@ export const buildValidationAuditEntry = (
       fileDetails: params.fileDetails,
       annotationDetails: params.annotationDetails,
       sessionDetails: params.sessionDetails,
-      securityDetails: params.securityDetails
+      securityDetails: params.securityDetails,
+      userProfileDetails: params.userProfileDetails
     }
   };
 };

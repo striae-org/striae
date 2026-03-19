@@ -60,6 +60,7 @@ export class AuditService {
   private static instance: AuditService;
   private auditBuffer: ValidationAuditEntry[] = [];
   private workflowId: string | null = null;
+  private userBadgeIdByUserId = new Map<string, string>();
 
   private constructor() {}
 
@@ -97,7 +98,26 @@ export class AuditService {
     const startTime = Date.now();
 
     try {
-      const auditEntry = buildValidationAuditEntry(params);
+      const providedBadgeId = params.userProfileDetails?.badgeId?.trim();
+      if (providedBadgeId && params.userId) {
+        this.userBadgeIdByUserId.set(params.userId, providedBadgeId);
+      }
+
+      const resolvedBadgeId =
+        providedBadgeId ||
+        (params.userId ? this.userBadgeIdByUserId.get(params.userId) : undefined);
+
+      const paramsWithBadgeId: CreateAuditEntryParams = resolvedBadgeId
+        ? {
+            ...params,
+            userProfileDetails: {
+              ...(params.userProfileDetails || {}),
+              badgeId: resolvedBadgeId
+            }
+          }
+        : params;
+
+      const auditEntry = buildValidationAuditEntry(paramsWithBadgeId);
 
       // Add to buffer for batch processing
       this.auditBuffer.push(auditEntry);
@@ -196,13 +216,15 @@ export class AuditService {
     originalExaminerUid?: string,
     performanceMetrics?: PerformanceMetrics,
     imageFileId?: string,
-    originalImageFileName?: string
+    originalImageFileName?: string,
+    badgeId?: string
   ): Promise<void> {
     await this.logEvent(
       buildConfirmationCreationAuditParams({
         user,
         caseNumber,
         confirmationId,
+        badgeId,
         result,
         errors,
         originalExaminerUid,
@@ -550,12 +572,13 @@ export class AuditService {
    */
   public async logUserProfileUpdate(
     user: User,
-    profileField: 'displayName' | 'email' | 'organization' | 'role' | 'preferences' | 'avatar',
+    profileField: 'displayName' | 'email' | 'organization' | 'role' | 'preferences' | 'avatar' | 'badgeId',
     oldValue: string,
     newValue: string,
     result: AuditResult,
     sessionId?: string,
-    errors: string[] = []
+    errors: string[] = [],
+    badgeId?: string
   ): Promise<void> {
     await this.logEvent(
       buildUserProfileUpdateAuditParams({
@@ -565,7 +588,8 @@ export class AuditService {
         newValue,
         result,
         sessionId,
-        errors
+        errors,
+        badgeId
       })
     );
   }

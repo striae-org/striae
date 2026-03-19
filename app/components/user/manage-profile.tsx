@@ -20,6 +20,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   const { user } = useContext(AuthContext);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [badgeId, setBadgeId] = useState('');
+  const [initialBadgeId, setInitialBadgeId] = useState('');
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -54,10 +55,12 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
             setEmail(userData.email || '');
             const storedBadgeId = userData.badgeId || '';
             setBadgeId(storedBadgeId);
+            setInitialBadgeId(storedBadgeId);
 
             if (userData.badgeId === undefined) {
               try {
                 await updateUserData(user, { badgeId: '' });
+                setInitialBadgeId('');
               } catch (badgeInitError) {
                 console.error('Failed to initialize badge ID field:', badgeInitError);
               }
@@ -95,6 +98,8 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
     setSuccess('');
 
     const oldDisplayName = user?.displayName || '';
+    const oldBadgeId = initialBadgeId;
+    const normalizedBadgeId = badgeId.trim();
 
     try {
       if (!user) throw new Error(ERROR_MESSAGES.NO_USER);
@@ -109,7 +114,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         email: user.email,
         firstName: firstName || '',
         lastName: lastName || '',
-        badgeId: badgeId.trim(),
+        badgeId: normalizedBadgeId,
       });
 
       await auditService.logUserProfileUpdate(
@@ -117,8 +122,26 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         'displayName',
         oldDisplayName,
         displayName,
-        'success'
+        'success',
+        undefined,
+        [],
+        normalizedBadgeId
       );
+
+      if (oldBadgeId !== normalizedBadgeId) {
+        await auditService.logUserProfileUpdate(
+          user,
+          'badgeId',
+          oldBadgeId,
+          normalizedBadgeId,
+          'success',
+          undefined,
+          [],
+          normalizedBadgeId
+        );
+      }
+
+      setInitialBadgeId(normalizedBadgeId);
 
       setSuccess(ERROR_MESSAGES.PROFILE_UPDATED);
     } catch (err) {
@@ -131,8 +154,22 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         displayName,
         'failure',
         undefined,
-        [message]
+        [message],
+        normalizedBadgeId
       );
+
+      if (oldBadgeId !== normalizedBadgeId) {
+        await auditService.logUserProfileUpdate(
+          user!,
+          'badgeId',
+          oldBadgeId,
+          normalizedBadgeId,
+          'failure',
+          undefined,
+          [message],
+          normalizedBadgeId
+        );
+      }
 
       setError(message);
     } finally {
