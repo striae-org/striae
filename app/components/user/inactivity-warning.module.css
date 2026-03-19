@@ -10,6 +10,7 @@
   align-items: center;
   z-index: 9999;
   backdrop-filter: blur(2px);
+  cursor: default;
 }
 
 .modal {
@@ -21,6 +22,7 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   border: 1px solid #e0e0e0;
   animation: slideIn 0.3s ease-out;
+  cursor: default;
 }
 
 @keyframes slideIn {
@@ -62,7 +64,7 @@
   font-size: 2rem;
   font-weight: bold;
   color: #dc3545;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
   background: rgba(220, 53, 69, 0.1);
   padding: 1rem;
   border-radius: 8px;
@@ -118,25 +120,25 @@
   .overlay {
     background-color: rgba(0, 0, 0, 0.9);
   }
-  
+
   .modal {
     background: #2d2d2d;
     border-color: #404040;
   }
-  
+
   .header h3 {
     color: #ffffff;
   }
-  
+
   .content p {
     color: #cccccc;
   }
-  
+
   .signOutButton {
     color: #adb5bd;
     border-color: #6c757d;
   }
-  
+
   .signOutButton:hover {
     background: #404040;
     color: #ffffff;

@@ -6,6 +6,7 @@
   justify-content: center;
   align-items: center;
   z-index: var(--zIndex5);
+  cursor: default;
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
 }
 
@@ -15,7 +16,9 @@
   width: 90%;
   max-width: var(--maxWidthL);
   max-height: 80vh;
-  box-shadow: 0 var(--spaceXS) var(--spaceL) color-mix(in lab, var(--black) 10%, transparent);
+  box-shadow: 0 var(--spaceXS) var(--spaceL)
+    color-mix(in lab, var(--black) 10%, transparent);
+  cursor: default;
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
   display: flex;
   flex-direction: column;
@@ -177,33 +180,65 @@
 }
 /* Confirmation Status Indicators */
 .fileItemNotConfirmed {
-  background-color: color-mix(in lab, var(--warning) 15%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--warning) 15%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItemNotConfirmed:hover {
-  background-color: color-mix(in lab, var(--warning) 20%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--warning) 20%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItem.active.fileItemNotConfirmed {
-  background-color: color-mix(in lab, var(--warning) 15%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--warning) 15%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItem.active.fileItemNotConfirmed:hover {
-  background-color: color-mix(in lab, var(--warning) 20%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--warning) 20%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItemConfirmed {
-  background-color: color-mix(in lab, var(--success) 20%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--success) 20%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItemConfirmed:hover {
-  background-color: color-mix(in lab, var(--success) 28%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--success) 28%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItem.active.fileItemConfirmed {
-  background-color: color-mix(in lab, var(--success) 20%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--success) 20%,
+    var(--backgroundLight)
+  );
 }
 
 .fileItem.active.fileItemConfirmed:hover {
-  background-color: color-mix(in lab, var(--success) 28%, var(--backgroundLight));
+  background-color: color-mix(
+    in lab,
+    var(--success) 28%,
+    var(--backgroundLight)
+  );
 }

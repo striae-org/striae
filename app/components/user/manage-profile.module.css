@@ -7,6 +7,7 @@
   justify-content: center;
   align-items: center;
   z-index: var(--zIndex5);
+  cursor: default;
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
 }
 
@@ -22,6 +23,7 @@
   flex-direction: column;
   transition: background-color var(--durationM) var(--bezierFastoutSlowin);
   overflow: hidden;
+  cursor: default;
 }
 
 /* Modal Header */
