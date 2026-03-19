@@ -41,3 +41,4 @@ firebase-debug.log
 *.toml
 *.jsonc
 app/config
+primershear.emails

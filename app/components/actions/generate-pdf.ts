@@ -9,6 +9,7 @@ interface GeneratePDFParams {
   selectedFilename: string | undefined;
   userCompany: string;
   userFirstName: string;
+  userBadgeId: string;
   currentCase: string;
   annotationData: AnnotationData | null;
   activeAnnotations: Set<string>;
@@ -25,6 +26,7 @@ export const generatePDF = async ({
   selectedFilename,
   userCompany,
   userFirstName,
+  userBadgeId,
   currentCase,
   annotationData,
   activeAnnotations,
@@ -62,15 +64,18 @@ export const generatePDF = async ({
       filename: selectedFilename,
       userCompany: userCompany,
       firstName: userFirstName,
+      userName: userFirstName,
+      userBadgeId: userBadgeId || undefined,
       caseNumber: currentCase,
       annotationData,
       activeAnnotations: Array.from(activeAnnotations), // Convert Set to Array
       currentDate, // Pass formatted current date
-      notesUpdatedFormatted // Pass formatted notes updated date
+      notesUpdatedFormatted, // Pass formatted notes updated date
     };
 
+    // reportFormat is resolved server-side in the Pages Function based on the
+    // user's verified email address, so it is intentionally omitted here.
     const pdfRequest = {
-      reportFormat: 'striae',
       data: pdfData,
     };
 

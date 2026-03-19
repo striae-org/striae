@@ -27,6 +27,9 @@ const DEFAULT_PDF_OPTIONS = {
 const reportModuleLoaders: Record<string, () => Promise<ReportModule>> = {
   // Default Striae report format module
   striae: () => import('./formats/format-striae'),
+  // Additional formats can be added here
+  primershear: () => import('./formats/format-primer-shear'),
+
 };
 
 const corsHeaders: Record<string, string> = {

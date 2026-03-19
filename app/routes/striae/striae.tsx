@@ -169,6 +169,7 @@ export const Striae = ({ user }: StriaePage) => {
       selectedFilename,
       userCompany,
       userFirstName,
+      userBadgeId,
       currentCase,
       annotationData,
       activeAnnotations,

@@ -55,6 +55,8 @@ export interface PDFGenerationData {
   currentDate?: string;
   notesUpdatedFormatted?: string;
   userCompany?: string;
+  userName?: string;
+  userBadgeId?: string;
 }
 
 export interface PDFGenerationRequest {
