@@ -155,4 +155,12 @@ if [ "$deploy_preview" = "true" ]; then
     echo -e "${GREEN}✅ PRIMERSHEAR_EMAILS deployed to preview${NC}"
 fi
 
+# Deploy Pages so the new secret takes effect immediately
+echo -e "\n${YELLOW}🚀 Building and deploying Pages to activate new secret...${NC}"
+if ! npm run deploy; then
+    echo -e "${RED}❌ Pages deployment failed${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Pages deployment complete${NC}"
+
 echo -e "\n${GREEN}🎉 PrimerShear email list deployment complete!${NC}"
