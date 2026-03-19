@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import styles from './toast.module.css';
 
 interface ToastProps {
@@ -10,30 +11,34 @@ interface ToastProps {
 }
 
 export const Toast = ({ message, type, isVisible, onClose, duration = 4000 }: ToastProps) => {
+  const {
+    requestClose,
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen: isVisible,
+    onClose,
+    closeOnEscape: false
+  });
+
   useEffect(() => {
     if (isVisible && duration > 0) {
       const timer = setTimeout(() => {
-        onClose();
+        requestClose();
       }, duration);
 
       return () => clearTimeout(timer);
     }
-  }, [isVisible, onClose, duration]);
+  }, [isVisible, requestClose, duration]);
 
   if (!isVisible) return null;
-
-  const handleBackdropKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      onClose();
-    }
-  };
 
   return (
     <>
       <div 
         className={styles.backdrop} 
-        onClick={onClose}
-        onKeyDown={handleBackdropKeyDown}
+        onMouseDown={handleOverlayMouseDown}
+        onKeyDown={handleOverlayKeyDown}
         role="button"
         tabIndex={0}
         aria-label="Close notification"
@@ -45,7 +50,7 @@ export const Toast = ({ message, type, isVisible, onClose, duration = 4000 }: To
         <span className={styles.message}>{message}</span>
         <button 
           className={styles.closeButton}
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close notification"
         >
           ×
