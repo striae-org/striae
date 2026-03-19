@@ -62,6 +62,15 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-19] - *[Minor Release v4.1.0](https://github.com/striae-org/striae/releases/tag/v4.1.0)*
+
+- **📄 Customizable PDF Formats** - Added custom PDF report formats with server-side format routing driven by a verified-email allowlist (`PRIMERSHEAR_EMAILS` Pages secret), keeping email addresses out of the client bundle entirely.
+- **🪪 Badge/ID Field** - Added Badge/ID to the user profile, audit service, audit log entries, audit viewer, and PDF report headers.
+- **🔍 Audit Module Refactor** - Multi-phase refactor of audit internals: restructured the audit viewer, extracted a centralized audit utility module, and reduced duplication across audit call sites.
+- **🖱️ Modal and Toast UX Polish** - Centralized the modal close/escape hook, applied it consistently to toast and modal components, and corrected cursor states on non-interactive surfaces.
+- **⚙️ Primer Shear Deploy Script** - Added `scripts/deploy-primershear-emails.sh` (`npm run deploy-primershear`) to update the email list, push the secret, and redeploy Pages in one command. This script is specifically intended to manage the PDF format access list for Primer Shear members without requiring source code changes or redeploying the entire app.
+- **📦 npm Package File List Update** - Added `app/routes.ts`, `load-context.ts`, and `primershear.emails.example` to the published package file manifest, which were missing from previous iterations.
+
 ## [2026-03-18] - *[Patch Release v4.0.3](https://github.com/striae-org/striae/releases/tag/v4.0.3)*
 
 _Note: Summary intentionally scopes this patch entry to login example and deployment-script updates._
