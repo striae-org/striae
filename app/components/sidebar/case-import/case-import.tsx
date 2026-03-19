@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { 
   listReadOnlyCases, 
   deleteReadOnlyCase
@@ -49,6 +50,15 @@ export const CaseImport = ({
     resetImportState,
     setImportProgress
   } = useImportState();
+  const canDismissOverlay = !importState.isImporting && !importState.isClearing;
+  const {
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose,
+    canDismiss: canDismissOverlay
+  });
   
   const [existingReadOnlyCase, setExistingReadOnlyCase] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -229,46 +239,12 @@ export const CaseImport = ({
     onClose();
   }, [clearImportData, onClose]);
 
-  const handleOverlayMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && !importState.isImporting && !importState.isClearing) {
-      onClose();
-    }
-  }, [importState.isImporting, importState.isClearing, onClose]);
-
-  const handleOverlayKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.target !== e.currentTarget || importState.isImporting || importState.isClearing) {
-      return;
-    }
-
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onClose();
-    }
-  }, [importState.isImporting, importState.isClearing, onClose]);
-
   // Effects
   useEffect(() => {
     if (user && isOpen) {
       checkForExistingReadOnlyCase();
     }
   }, [user, isOpen, checkForExistingReadOnlyCase]);
-
-  // Handle keyboard events
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen && !importState.isImporting && !importState.isClearing) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscapeKey);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [isOpen, onClose, importState.isImporting, importState.isClearing]);
 
   // Reset state when modal closes
   useEffect(() => {

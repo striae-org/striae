@@ -6,7 +6,7 @@
   bottom: 0;
   background: color-mix(in lab, var(--black) 40%, transparent);
   z-index: 999;
-  cursor: pointer;
+  cursor: default;
 }
 
 .toast {
@@ -28,6 +28,7 @@
   max-width: 400px;
   min-width: 300px;
   backdrop-filter: blur(10px);
+  cursor: default;
 }
 
 .toast.show {

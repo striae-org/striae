@@ -10,6 +10,7 @@
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+  cursor: default;
 }
 
 .modal {
@@ -21,6 +22,7 @@
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  cursor: default;
 }
 
 .header {
@@ -149,7 +151,8 @@
 }
 
 .errorMessage {
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     color-mix(in lab, var(--error) 12%, transparent),
     color-mix(in lab, var(--error) 8%, transparent)
   );
@@ -169,13 +172,17 @@
 }
 
 .errorMessage::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--error), color-mix(in lab, var(--error) 60%, transparent));
+  background: linear-gradient(
+    90deg,
+    var(--error),
+    color-mix(in lab, var(--error) 60%, transparent)
+  );
   animation: shimmer 2s ease-in-out infinite;
 }
 
@@ -246,7 +253,8 @@
 }
 
 @keyframes shimmer {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.6;
     transform: translateX(-100%);
   }
@@ -261,7 +269,7 @@
   .errorMessage {
     animation: none;
   }
-  
+
   .errorMessage::before {
     animation: none;
   }

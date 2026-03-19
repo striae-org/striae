@@ -4,6 +4,7 @@ import { PasswordReset } from '~/routes/auth/passwordReset';
 import { DeleteAccount } from './delete-account';
 import { UserAuditViewer } from '../audit/user-audit-viewer';
 import { AuthContext } from '~/contexts/auth.context';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { getUserData, updateUserData } from '~/utils/data';
 import { auditService } from '~/services/audit';
 import { handleAuthError, ERROR_MESSAGES } from '~/services/firebase/errors';
@@ -19,6 +20,8 @@ interface ManageProfileProps {
 export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   const { user } = useContext(AuthContext);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [badgeId, setBadgeId] = useState('');
+  const [initialBadgeId, setInitialBadgeId] = useState('');
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,18 +32,19 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAuditViewer, setShowAuditViewer] = useState(false);
   const isCloseBlocked = isMfaBusy || isLoading;
+  const {
+    requestClose,
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose,
+    canDismiss: !isCloseBlocked
+  });
 
   const handleMfaBusyChange = useCallback((isBusy: boolean) => {
     setIsMfaBusy(isBusy);
   }, []);
-
-  const handleCloseRequest = () => {
-    if (isCloseBlocked) {
-      return;
-    }
-
-    onClose();
-  };
 
   useEffect(() => {
     if (isOpen && user) {
@@ -51,6 +55,18 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
           if (userData) {
             setCompany(userData.company || '');
             setEmail(userData.email || '');
+            const storedBadgeId = userData.badgeId || '';
+            setBadgeId(storedBadgeId);
+            setInitialBadgeId(storedBadgeId);
+
+            if (userData.badgeId === undefined) {
+              try {
+                await updateUserData(user, { badgeId: '' });
+                setInitialBadgeId('');
+              } catch (badgeInitError) {
+                console.error('Failed to initialize badge ID field:', badgeInitError);
+              }
+            }
           }
         } catch (err) {
           console.error('Failed to load user data:', err);
@@ -61,22 +77,6 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
     }
   }, [isOpen, user]);
 
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen && !isCloseBlocked) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, isCloseBlocked, onClose]);
-
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -84,6 +84,8 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
     setSuccess('');
 
     const oldDisplayName = user?.displayName || '';
+    const oldBadgeId = initialBadgeId;
+    const normalizedBadgeId = badgeId.trim();
 
     try {
       if (!user) throw new Error(ERROR_MESSAGES.NO_USER);
@@ -98,6 +100,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         email: user.email,
         firstName: firstName || '',
         lastName: lastName || '',
+        badgeId: normalizedBadgeId,
       });
 
       await auditService.logUserProfileUpdate(
@@ -105,8 +108,26 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         'displayName',
         oldDisplayName,
         displayName,
-        'success'
+        'success',
+        undefined,
+        [],
+        normalizedBadgeId
       );
+
+      if (oldBadgeId !== normalizedBadgeId) {
+        await auditService.logUserProfileUpdate(
+          user,
+          'badgeId',
+          oldBadgeId,
+          normalizedBadgeId,
+          'success',
+          undefined,
+          [],
+          normalizedBadgeId
+        );
+      }
+
+      setInitialBadgeId(normalizedBadgeId);
 
       setSuccess(ERROR_MESSAGES.PROFILE_UPDATED);
     } catch (err) {
@@ -119,8 +140,22 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         displayName,
         'failure',
         undefined,
-        [message]
+        [message],
+        normalizedBadgeId
       );
+
+      if (oldBadgeId !== normalizedBadgeId) {
+        await auditService.logUserProfileUpdate(
+          user!,
+          'badgeId',
+          oldBadgeId,
+          normalizedBadgeId,
+          'failure',
+          undefined,
+          [message],
+          normalizedBadgeId
+        );
+      }
 
       setError(message);
     } finally {
@@ -158,19 +193,24 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   }
 
   return (
-    <div className={styles.modalOverlay} onClick={handleCloseRequest} role="presentation">
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */}
+    <div
+      className={styles.modalOverlay}
+      onMouseDown={handleOverlayMouseDown}
+      onKeyDown={handleOverlayKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Close manage profile dialog"
+    >
       <div
         className={styles.modal}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        onClick={(e) => e.stopPropagation()}
       >
         <header className={styles.modalHeader}>
           <h1 id="modal-title">Manage Profile</h1>
           <button
-            onClick={handleCloseRequest}
+            onClick={requestClose}
             className={styles.closeButton}
             aria-label="Close modal"
             disabled={isCloseBlocked}
@@ -191,6 +231,21 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
             autoComplete="name"
             required
           />
+
+          <div className={styles.formGroup}>
+            <label htmlFor="badgeId">Badge/ID #</label>
+            <input
+              id="badgeId"
+              type="text"
+              value={badgeId}
+              onChange={(e) => setBadgeId(e.target.value)}
+              className={styles.input}
+              autoComplete="off"
+            />
+            <p className={styles.helpText}>
+              Enter your Badge/ID number for confirmations and reports. This can be updated as needed.
+            </p>
+          </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="company">Lab/Company Name</label>

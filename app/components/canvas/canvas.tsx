@@ -10,6 +10,7 @@ interface CanvasProps {
   imageUrl?: string;
   filename?: string;
   company?: string;
+  badgeId?: string;
   firstName?: string;
   error?: string;
   activeAnnotations?: Set<string>;
@@ -32,6 +33,7 @@ export const Canvas = ({
   imageUrl, 
   filename, 
   company, 
+  badgeId,
   firstName, 
   error, 
   activeAnnotations, 
@@ -453,6 +455,7 @@ export const Canvas = ({
         onClose={() => setIsConfirmationModalOpen(false)}
         onConfirm={handleConfirmation}
         company={company}
+        defaultBadgeId={badgeId}
         existingConfirmation={annotationData?.confirmationData || null}
       />
     </div>    

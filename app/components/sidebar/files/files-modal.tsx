@@ -1,6 +1,7 @@
 import type React from 'react';
 import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { deleteFile } from '~/components/actions/image-manage';
 import { getFileAnnotations } from '~/utils/data';
 import { type FileData } from '~/types';
@@ -33,6 +34,13 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
   const [currentPage, setCurrentPage] = useState(0);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
   const [fileConfirmationStatus, setFileConfirmationStatus] = useState<FileConfirmationStatus>({});
+  const {
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose
+  });
 
   const totalPages = Math.ceil(files.length / FILES_PER_PAGE);
   const startIndex = currentPage * FILES_PER_PAGE;
@@ -87,21 +95,6 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
 
     fetchConfirmationStatuses();
   }, [isOpen, currentCase, currentPage, files, user]);
-
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      return () => {
-        document.removeEventListener('keydown', handleEscape);
-      };
-    }
-  }, [isOpen, onClose]);
 
   const handleFileSelect = (file: FileData) => {
     onFileSelect?.(file);
@@ -166,7 +159,14 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay}>
+    <div
+      className={styles.modalOverlay}
+      onMouseDown={handleOverlayMouseDown}
+      onKeyDown={handleOverlayKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Close files dialog"
+    >
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h2>Files in Case {currentCase}</h2>

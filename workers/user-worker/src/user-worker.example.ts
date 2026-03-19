@@ -16,6 +16,7 @@ interface UserData {
   firstName: string;
   lastName: string;
   company: string;
+  badgeId?: string;
   permitted: boolean;
   cases: CaseItem[];
   readOnlyCases?: ReadOnlyCaseItem[];
@@ -40,6 +41,7 @@ interface UserRequestData {
   firstName?: string;
   lastName?: string;
   company?: string;
+  badgeId?: string;
   permitted?: boolean;
   readOnlyCases?: ReadOnlyCaseItem[];
 }
@@ -286,7 +288,8 @@ async function handleGetUser(env: Env, userUid: string): Promise<Response> {
 async function handleAddUser(request: Request, env: Env, userUid: string): Promise<Response> {
   try {
     const requestData: UserRequestData = await request.json();
-    const { email, firstName, lastName, company, permitted } = requestData;
+    const { email, firstName, lastName, company, badgeId, permitted } = requestData;
+    const normalizedBadgeId = typeof badgeId === 'string' ? badgeId.trim() : undefined;
     
     // Check for existing user
     const value = await env.USER_DB.get(userUid);
@@ -302,6 +305,7 @@ async function handleAddUser(request: Request, env: Env, userUid: string): Promi
         firstName: firstName || existing.firstName,
         lastName: lastName || existing.lastName,
         company: company || existing.company,
+        badgeId: normalizedBadgeId !== undefined ? normalizedBadgeId : (existing.badgeId ?? ''),
         permitted: permitted !== undefined ? permitted : existing.permitted,
         updatedAt: new Date().toISOString()
       };
@@ -316,6 +320,7 @@ async function handleAddUser(request: Request, env: Env, userUid: string): Promi
         firstName: firstName || '',
         lastName: lastName || '',
         company: company || '',
+        badgeId: normalizedBadgeId ?? '',
         permitted: permitted !== undefined ? permitted : true,
         cases: [],
         createdAt: new Date().toISOString()

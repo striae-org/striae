@@ -28,6 +28,8 @@ export const Striae = ({ user }: StriaePage) => {
   // User states
   const [userCompany, setUserCompany] = useState<string>('');
   const [userFirstName, setUserFirstName] = useState<string>('');
+  const [userLastName, setUserLastName] = useState<string>('');
+  const [userBadgeId, setUserBadgeId] = useState<string>('');
 
   // Case management states - All managed here
   const [currentCase, setCurrentCase] = useState<string>('');
@@ -80,9 +82,11 @@ export const Striae = ({ user }: StriaePage) => {
         });
         
         if (response.ok) {
-          const userData = await response.json() as { company?: string; firstName?: string };
+          const userData = await response.json() as { company?: string; firstName?: string; lastName?: string; badgeId?: string };
           setUserCompany(userData.company || '');
           setUserFirstName(userData.firstName || '');
+          setUserLastName(userData.lastName || '');
+          setUserBadgeId(userData.badgeId || '');
         }
       } catch (err) {
         console.error('Failed to load user company:', err);
@@ -167,6 +171,8 @@ export const Striae = ({ user }: StriaePage) => {
       selectedFilename,
       userCompany,
       userFirstName,
+      userLastName,
+      userBadgeId,
       currentCase,
       annotationData,
       activeAnnotations,
@@ -389,6 +395,7 @@ export const Striae = ({ user }: StriaePage) => {
             imageUrl={selectedImage} 
             filename={selectedFilename}
             company={userCompany}
+            badgeId={userBadgeId}
             firstName={userFirstName}
             error={error ?? ''}
             activeAnnotations={activeAnnotations}

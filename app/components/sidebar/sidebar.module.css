@@ -120,6 +120,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  cursor: default;
 }
 
 .footerModal {
@@ -131,6 +132,7 @@
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  cursor: default;
 }
 
 .footerModalHeader {
@@ -236,8 +238,6 @@
   text-decoration-style: dotted;
   text-underline-offset: 3px;
 }
-
-
 
 /* Import Section */
 .importSection {

@@ -125,6 +125,7 @@ interface BuildConfirmationCreationAuditParamsInput {
   user: User;
   caseNumber: string;
   confirmationId: string;
+  badgeId?: string;
   result: AuditResult;
   errors?: string[];
   originalExaminerUid?: string;
@@ -156,6 +157,11 @@ export const buildConfirmationCreationAuditParams = (
     performanceMetrics: input.performanceMetrics,
     originalExaminerUid: input.originalExaminerUid,
     reviewingExaminerUid: input.user.uid,
+    userProfileDetails: input.badgeId
+      ? {
+          badgeId: input.badgeId
+        }
+      : undefined,
     fileDetails: input.imageFileId && input.originalImageFileName
       ? {
           fileId: input.imageFileId,

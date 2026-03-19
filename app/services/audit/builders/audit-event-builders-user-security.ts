@@ -57,9 +57,10 @@ export const buildUserLogoutAuditParams = (
 
 interface BuildUserProfileUpdateAuditParamsInput {
   user: User;
-  profileField: 'displayName' | 'email' | 'organization' | 'role' | 'preferences' | 'avatar';
+  profileField: 'displayName' | 'email' | 'organization' | 'role' | 'preferences' | 'avatar' | 'badgeId';
   oldValue: string;
   newValue: string;
+  badgeId?: string;
   result: AuditResult;
   sessionId?: string;
   errors?: string[];
@@ -85,7 +86,8 @@ export const buildUserProfileUpdateAuditParams = (
     userProfileDetails: {
       profileField: input.profileField,
       oldValue: input.oldValue,
-      newValue: input.newValue
+      newValue: input.newValue,
+      badgeId: input.badgeId
     }
   };
 };

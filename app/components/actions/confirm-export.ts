@@ -79,7 +79,8 @@ export async function storeConfirmation(
         fileSizeBytes: 0 // Not applicable for confirmation creation
       },
       originalImageId,
-      originalImageFileName
+      originalImageFileName,
+      confirmationData.badgeId
     );
     
     auditService.endWorkflow();
@@ -103,7 +104,8 @@ export async function storeConfirmation(
         fileSizeBytes: 0
       },
       originalImageId || currentImageId, // Use originalImageId if available, fallback to currentImageId
-      originalImageFileName
+      originalImageFileName,
+      confirmationData?.badgeId
     );
     
     auditService.endWorkflow();

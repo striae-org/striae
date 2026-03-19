@@ -269,9 +269,10 @@ export interface SecurityAuditDetails {
  * User profile and authentication specific audit details
  */
 export interface UserProfileAuditDetails {
-  profileField?: 'displayName' | 'email' | 'organization' | 'role' | 'preferences' | 'avatar';
+  profileField?: 'displayName' | 'email' | 'organization' | 'role' | 'preferences' | 'avatar' | 'badgeId';
   oldValue?: string;
   newValue?: string;
+  badgeId?: string;
   resetMethod?: 'email' | 'sms' | 'security-questions' | 'admin-reset';
   resetToken?: string; // Partial token for tracking (last 4 chars)
   verificationMethod?: 'email-link' | 'sms-code' | 'totp' | 'backup-codes' | 'admin-verification';

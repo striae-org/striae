@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { listCases } from '~/components/actions/case-manage';
 import { getFileAnnotations } from '~/utils/data';
 import { fetchFiles } from '~/components/actions/image-manage';
@@ -18,6 +19,13 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(0);
+  const {
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose
+  });
   const [caseConfirmationStatus, setCaseConfirmationStatus] = useState<{
     [caseNum: string]: { includeConfirmation: boolean; isConfirmed: boolean }
   }>({});
@@ -27,19 +35,6 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
     setIsLoading(true);
     setError('');
   };
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      return () => document.removeEventListener('keydown', handleEscape);
-    }
-  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -144,7 +139,14 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay}>
+    <div
+      className={styles.modalOverlay}
+      onMouseDown={handleOverlayMouseDown}
+      onKeyDown={handleOverlayKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Close cases dialog"
+    >
       <div className={styles.modal}>
         <header className={styles.modalHeader}>
           <h2>All Cases</h2>

@@ -6,6 +6,8 @@ interface PdfProxyContext {
 }
 
 const SUPPORTED_METHODS = new Set(['POST', 'OPTIONS']);
+const PRIMERSHEAR_FORMAT = 'primershear';
+const DEFAULT_FORMAT = 'striae';
 
 function textResponse(message: string, status: number): Response {
   return new Response(message, {
@@ -38,6 +40,12 @@ function extractProxyPath(url: URL): string | null {
 
   const remainder = url.pathname.slice(routePrefix.length);
   return remainder.length > 0 ? remainder : '/';
+}
+
+function resolveReportFormat(email: string | null, primershearEmails: string): string {
+  if (!email) return DEFAULT_FORMAT;
+  const allowed = primershearEmails.split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+  return allowed.includes(email.toLowerCase()) ? PRIMERSHEAR_FORMAT : DEFAULT_FORMAT;
 }
 
 export const onRequest = async ({ request, env }: PdfProxyContext): Promise<Response> => {
@@ -86,12 +94,35 @@ export const onRequest = async ({ request, env }: PdfProxyContext): Promise<Resp
 
   upstreamHeaders.set('X-Custom-Auth-Key', env.PDF_WORKER_AUTH);
 
+  // Resolve the report format server-side based on the verified user email.
+  // This prevents email lists from ever being exposed in the client bundle.
+  const reportFormat = resolveReportFormat(
+    identity.email,
+    env.PRIMERSHEAR_EMAILS ?? ''
+  );
+
+  let upstreamBody: BodyInit;
+  try {
+    const payload = await request.json() as Record<string, unknown>;
+    // Inject the server-resolved format, overriding any client-supplied value.
+    if (payload.data && typeof payload.data === 'object') {
+      payload.reportFormat = reportFormat;
+    } else {
+      // Legacy flat payload shape
+      payload.reportFormat = reportFormat;
+    }
+    upstreamBody = JSON.stringify(payload);
+    upstreamHeaders.set('Content-Type', 'application/json');
+  } catch {
+    return textResponse('Invalid request body', 400);
+  }
+
   let upstreamResponse: Response;
   try {
     upstreamResponse = await fetch(upstreamUrl, {
       method: request.method,
       headers: upstreamHeaders,
-      body: request.body
+      body: upstreamBody
     });
   } catch {
     return textResponse('Upstream PDF service unavailable', 502);

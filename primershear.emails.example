@@ -1,0 +1,6 @@
+# PrimerShear PDF format - authorized email addresses
+# One email per line. Lines starting with # are ignored.
+# This file is untracked. Run: npm run deploy-primershear to push changes.
+#
+# Example:
+# analyst@organization.com

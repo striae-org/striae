@@ -521,6 +521,7 @@
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  cursor: default;
 }
 
 .confirmationModal {
@@ -530,6 +531,7 @@
   max-width: 400px;
   box-shadow: 0 var(--spaceM) var(--spaceXL)
     color-mix(in lab, var(--black) 20%, transparent);
+  cursor: default;
 }
 
 .confirmationContent {

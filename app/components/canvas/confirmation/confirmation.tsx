@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { type ConfirmationData } from '~/types/annotations';
 import { AuthContext } from '~/contexts/auth.context';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { generateConfirmationId } from '~/utils/common';
 import styles from './confirmation.module.css';
 
@@ -9,6 +10,7 @@ interface ConfirmationModalProps {
   onClose: () => void;
   onConfirm?: (confirmationData: ConfirmationData) => void;
   company?: string;
+  defaultBadgeId?: string;
   existingConfirmation?: ConfirmationData | null;
 }
 
@@ -26,7 +28,7 @@ const formatTimestamp = (): string => {
   });
 };
 
-export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, existingConfirmation }: ConfirmationModalProps) => {
+export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, defaultBadgeId, existingConfirmation }: ConfirmationModalProps) => {
   const { user } = useContext(AuthContext);
   const [badgeId, setBadgeId] = useState('');
   const [error, setError] = useState('');
@@ -38,25 +40,16 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, existin
   const timestamp = formatTimestamp();
   const confirmationId = generateConfirmationId();
 
+  const {
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose
+  });
+
   // Check if this is an existing confirmation
   const hasExistingConfirmation = !!existingConfirmation;
-
-  // Handle Escape key to close modal
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscapeKey);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [isOpen, onClose]);
 
   // Reset form when modal opens
   useEffect(() => {
@@ -64,12 +57,12 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, existin
       if (existingConfirmation) {
         setBadgeId(existingConfirmation.badgeId);
       } else {
-        setBadgeId('');
+        setBadgeId(defaultBadgeId || '');
       }
       setError('');
       setIsConfirming(false);
     }
-  }, [isOpen, existingConfirmation]);
+  }, [isOpen, defaultBadgeId, existingConfirmation]);
 
   if (!isOpen) return null;
 
@@ -101,23 +94,6 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, existin
       setError('Confirmation failed. Please try again.');
     } finally {
       setIsConfirming(false);
-    }
-  };
-
-  const handleOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleOverlayKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.target !== e.currentTarget) {
-      return;
-    }
-
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onClose();
     }
   };
 

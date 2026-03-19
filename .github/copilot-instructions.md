@@ -78,9 +78,11 @@ npm run publish:all
 When asked to bump to `vX.Y.Z`:
 
 1. Identify non-merge commits since the previous release tag.
-2. Bump version in `package.json` (for example `npm version patch|minor|major`).
+2. Bump version in `package.json` (for example `npm version patch|minor|major`) only if the version is not already at the desired version.
 3. Create release notes at `release-notes/RELEASE_NOTES_vX.Y.Z.md`.
-   - Include release date, covered period, non-merge commit count, and commit list.
+   - Include release date, covered period, and non-merge commit count. Use the previous release notes as a template.
+   - Summarize the release in a few sentences, then provide detailed sections for each major change.
+   - Include a release statistics section with commit range, commit count, and CI status.
 4. Update changelog in `.github/README.md`.
    - Add the newest release entry at the top of the Changelog section.
    - Link to the GitHub release tag URL.
@@ -89,7 +91,7 @@ When asked to bump to `vX.Y.Z`:
    - `npm run build`
    - `npm run typecheck`
    - `npm run lint`
-7. Publish with `npm run publish:all` when requested.
+7. Publish with `npm run publish:all` only when explicitly requested.
 
 ## Source-of-Truth Docs
 
