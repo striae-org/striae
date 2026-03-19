@@ -1,25 +1,18 @@
+import type { AuditViewerSummaryStats } from './audit-viewer-utils';
 import styles from '../user-audit.module.css';
 
 interface AuditActivitySummaryProps {
   caseNumber?: string;
   filterCaseNumber: string;
   dateRangeDisplay: string;
-  totalEntries: number;
-  successfulEntries: number;
-  failedEntries: number;
-  loginSessions: number;
-  securityIncidents: number;
+  summary: AuditViewerSummaryStats;
 }
 
 export const AuditActivitySummary = ({
   caseNumber,
   filterCaseNumber,
   dateRangeDisplay,
-  totalEntries,
-  successfulEntries,
-  failedEntries,
-  loginSessions,
-  securityIncidents,
+  summary,
 }: AuditActivitySummaryProps) => {
   const activeCaseNumber = caseNumber || filterCaseNumber.trim();
 
@@ -33,24 +26,24 @@ export const AuditActivitySummary = ({
       <div className={styles.summaryGrid}>
         <div className={styles.summaryItem}>
           <span className={styles.label}>Total Activities:</span>
-          <span className={styles.value}>{totalEntries}</span>
+          <span className={styles.value}>{summary.totalEntries}</span>
         </div>
         <div className={styles.summaryItem}>
           <span className={styles.label}>Successful:</span>
-          <span className={styles.value}>{successfulEntries}</span>
+          <span className={styles.value}>{summary.successfulEntries}</span>
         </div>
         <div className={styles.summaryItem}>
           <span className={styles.label}>Failed:</span>
-          <span className={styles.value}>{failedEntries}</span>
+          <span className={styles.value}>{summary.failedEntries}</span>
         </div>
         <div className={styles.summaryItem}>
           <span className={styles.label}>Login Sessions:</span>
-          <span className={styles.value}>{loginSessions}</span>
+          <span className={styles.value}>{summary.loginSessions}</span>
         </div>
         <div className={styles.summaryItem}>
           <span className={styles.label}>Security Incidents:</span>
-          <span className={`${styles.value} ${securityIncidents > 0 ? styles.warning : ''}`}>
-            {securityIncidents}
+          <span className={`${styles.value} ${summary.securityIncidents > 0 ? styles.warning : ''}`}>
+            {summary.securityIncidents}
           </span>
         </div>
       </div>

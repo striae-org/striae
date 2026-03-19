@@ -1,19 +1,12 @@
-import { type AuditAction, type AuditResult, type ValidationAuditEntry } from '~/types';
+import { type ValidationAuditEntry } from '~/types';
+import { formatAuditTimestamp, getAuditActionIcon, getAuditStatusIcon } from './audit-viewer-utils';
 import styles from '../user-audit.module.css';
 
 interface AuditEntriesListProps {
   entries: ValidationAuditEntry[];
-  getActionIcon: (action: AuditAction) => string;
-  getStatusIcon: (result: AuditResult) => string;
-  formatTimestamp: (timestamp: string) => string;
 }
 
-export const AuditEntriesList = ({
-  entries,
-  getActionIcon,
-  getStatusIcon,
-  formatTimestamp,
-}: AuditEntriesListProps) => {
+export const AuditEntriesList = ({ entries }: AuditEntriesListProps) => {
   return (
     <div className={styles.entriesList}>
       <h3>Activity Log ({entries.length} entries)</h3>
@@ -26,14 +19,14 @@ export const AuditEntriesList = ({
           <div key={index} className={`${styles.entry} ${styles[entry.result]}`}>
             <div className={styles.entryHeader}>
               <div className={styles.entryIcons}>
-                <span className={styles.actionIcon}>{getActionIcon(entry.action)}</span>
-                <span className={styles.statusIcon}>{getStatusIcon(entry.result)}</span>
+                <span className={styles.actionIcon}>{getAuditActionIcon(entry.action)}</span>
+                <span className={styles.statusIcon}>{getAuditStatusIcon(entry.result)}</span>
               </div>
               <div className={styles.entryTitle}>
                 <span className={styles.action}>{entry.action.toUpperCase().replace(/-/g, ' ')}</span>
                 <span className={styles.fileName}>{entry.details.fileName}</span>
               </div>
-              <div className={styles.entryTimestamp}>{formatTimestamp(entry.timestamp)}</div>
+              <div className={styles.entryTimestamp}>{formatAuditTimestamp(entry.timestamp)}</div>
             </div>
 
             <div className={styles.entryDetails}>

@@ -1,11 +1,11 @@
 import { useContext, useEffect, useMemo } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
-import { type AuditAction, type AuditResult } from '~/types';
 import { AuditViewerHeader } from './viewer/audit-viewer-header';
 import { AuditUserInfoCard } from './viewer/audit-user-info-card';
 import { AuditActivitySummary } from './viewer/audit-activity-summary';
 import { AuditFiltersPanel } from './viewer/audit-filters-panel';
 import { AuditEntriesList } from './viewer/audit-entries-list';
+import { summarizeAuditEntries } from './viewer/audit-viewer-utils';
 import { useAuditViewerData } from './viewer/use-audit-viewer-data';
 import { useAuditViewerFilters } from './viewer/use-audit-viewer-filters';
 import { useAuditViewerExport } from './viewer/use-audit-viewer-export';
@@ -68,6 +68,7 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
   });
 
   const filteredEntries = useMemo(() => getFilteredEntries(auditEntries), [auditEntries, getFilteredEntries]);
+  const auditSummary = useMemo(() => summarizeAuditEntries(auditEntries), [auditEntries]);
 
   const {
     handleExportCSV,
@@ -96,79 +97,6 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
     }
   }, [isOpen, onClose]);
 
-  const getActionIcon = (action: AuditAction): string => {
-    switch (action) {
-      // User & Session Management
-      case 'user-login': return '🔑';
-      case 'user-logout': return '🚪';
-      case 'user-profile-update': return '👤';
-      case 'user-password-reset': return '🔒';
-      // NEW: User Registration & Authentication
-      case 'user-registration': return '📝';
-      case 'email-verification': return '📧';
-      case 'mfa-enrollment': return '🔐';
-      case 'mfa-authentication': return '📱';
-      
-      // Case Management
-      case 'case-create': return '📂';
-      case 'case-rename': return '✏️';
-      case 'case-delete': return '🗑️';
-      
-      // Confirmation Workflow
-      case 'case-export': return '📤';
-      case 'case-import': return '📥';
-      case 'confirmation-create': return '✅';
-      case 'confirmation-export': return '📤';
-      case 'confirmation-import': return '📥';
-      
-      // File Operations
-      case 'file-upload': return '⬆️';
-      case 'file-delete': return '🗑️';
-      case 'file-access': return '👁️';
-      
-      // Annotation Operations
-      case 'annotation-create': return '✨';
-      case 'annotation-edit': return '✏️';
-      case 'annotation-delete': return '❌';
-      
-      // Document Generation
-      case 'pdf-generate': return '📄';
-      
-      // Security & Monitoring
-      case 'security-violation': return '🚨';
-      
-      // Legacy Actions
-      case 'export': return '📤';
-      case 'import': return '📥';
-      case 'confirm': return '✓';
-      
-      default: return '📄';
-    }
-  };
-
-  const getStatusIcon = (result: AuditResult): string => {
-    switch (result) {
-      case 'success': return '✅';
-      case 'failure': return '❌';
-      case 'warning': return '⚠️';
-      case 'blocked': return '🛑';
-      case 'pending': return '⏳';
-      default: return '❓';
-    }
-  };
-
-  const formatTimestamp = (timestamp: string): string => {
-    return new Date(timestamp).toLocaleString();
-  };
-
-  // Get summary statistics
-  const totalEntries = auditEntries.length;
-  const successfulEntries = auditEntries.filter(e => e.result === 'success').length;
-  const failedEntries = auditEntries.filter(e => e.result === 'failure').length;
-  const securityIncidents = auditEntries.filter(e => 
-    e.action === 'security-violation'
-  ).length;
-  const loginSessions = auditEntries.filter(e => e.action === 'user-login').length;
   const userBadgeId = userData?.badgeId?.trim() || '';
 
   const handleOverlayMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -238,11 +166,7 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
                 caseNumber={caseNumber}
                 filterCaseNumber={filterCaseNumber}
                 dateRangeDisplay={dateRangeDisplay}
-                totalEntries={totalEntries}
-                successfulEntries={successfulEntries}
-                failedEntries={failedEntries}
-                loginSessions={loginSessions}
-                securityIncidents={securityIncidents}
+                summary={auditSummary}
               />
 
               {/* Filters */}
@@ -275,12 +199,7 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
               />
 
               {/* Entries List */}
-              <AuditEntriesList
-                entries={filteredEntries}
-                getActionIcon={getActionIcon}
-                getStatusIcon={getStatusIcon}
-                formatTimestamp={formatTimestamp}
-              />
+              <AuditEntriesList entries={filteredEntries} />
 
             </>
           )}
