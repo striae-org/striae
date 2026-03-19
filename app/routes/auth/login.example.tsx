@@ -144,6 +144,7 @@ export const Login = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [welcomeToastMessage, setWelcomeToastMessage] = useState('');
+  const [welcomeToastType, setWelcomeToastType] = useState<'success' | 'warning'>('success');
   const [isWelcomeToastVisible, setIsWelcomeToastVisible] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -281,11 +282,13 @@ export const Login = () => {
       setShowMfaEnrollment(false);
 
       if (shouldShowWelcomeToastRef.current) {
-        setWelcomeToastMessage(
-          hasBadgeId
-            ? `Welcome to Striae, ${getUserFirstName(currentUser)}!`
-            : 'Your badge or ID number is not set. You can set one in Manage Profile.'
-        );
+        if (hasBadgeId) {
+          setWelcomeToastType('success');
+          setWelcomeToastMessage(`Welcome to Striae, ${getUserFirstName(currentUser)}!`);
+        } else {
+          setWelcomeToastType('warning');
+          setWelcomeToastMessage('Your badge or ID number is not set. You can set one in Manage Profile.');
+        }
         setIsWelcomeToastVisible(true);
         shouldShowWelcomeToastRef.current = false;
       }
@@ -308,6 +311,7 @@ export const Login = () => {
       setShowMfaEnrollment(false);
       setIsCheckingUser(false);
       setIsWelcomeToastVisible(false);
+      setWelcomeToastType('success');
       shouldShowWelcomeToastRef.current = false;
     }
   });
@@ -523,6 +527,7 @@ export const Login = () => {
       setShowMfaVerification(false);
       setMfaResolver(null);
       setIsWelcomeToastVisible(false);
+      setWelcomeToastType('success');
       shouldShowWelcomeToastRef.current = false;
     } catch (err) {
       console.error('Sign out error:', err);
@@ -768,7 +773,7 @@ export const Login = () => {
       {!shouldHandleEmailAction && (
         <Toast
           message={welcomeToastMessage}
-          type="success"
+          type={welcomeToastType}
           isVisible={isWelcomeToastVisible}
           onClose={() => setIsWelcomeToastVisible(false)}
         />
