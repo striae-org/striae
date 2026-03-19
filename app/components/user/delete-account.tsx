@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';
 import { fetchUserApi } from '~/utils/api';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { auditService } from '~/services/audit';
 import styles from './delete-account.module.css';
 
@@ -37,6 +38,13 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [deletionProgress, setDeletionProgress] = useState<DeletionProgress>(initialDeletionProgress);
+  const {
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose
+  });
 
   // Extract first and last name from display name
   const [firstName, lastName] = (user.displayName || '').split(' ');
@@ -170,26 +178,14 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
   };
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Reset form when modal opens
       setUidConfirmation('');
       setEmailConfirmation('');
       setError('');
       setSuccess(false);
       setDeletionProgress(initialDeletionProgress);
     }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   const handleDeleteAccount = async () => {
     if (!isConfirmationValid) return;
@@ -317,27 +313,10 @@ export const DeleteAccount = ({ isOpen, onClose, user, company }: DeleteAccountP
           ? `Deleting case ${deletionProgress.currentCaseNumber}...`
           : 'Preparing account deletion...');
 
-  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleOverlayKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget) {
-      return;
-    }
-
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onClose();
-    }
-  };
-
   return (
     <div 
       className={styles.modalOverlay} 
-      onClick={handleOverlayClick}
+      onMouseDown={handleOverlayMouseDown}
       onKeyDown={handleOverlayKeyDown}
       role="button"
       tabIndex={0}

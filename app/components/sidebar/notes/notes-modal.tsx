@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import styles from './notes.module.css';
 
 interface NotesModalProps {
@@ -10,19 +11,13 @@ interface NotesModalProps {
 
 export const NotesModal = ({ isOpen, onClose, notes, onSave }: NotesModalProps) => {
   const [tempNotes, setTempNotes] = useState(notes);
-
-  useEffect(() => {
-      const handleEscape = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          onClose();
-        }
-      };
-  
-      if (isOpen) {
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
-      }
-    }, [isOpen, onClose]);
+  const {
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose
+  });
 
   if (!isOpen) return null;  
 
@@ -32,7 +27,14 @@ export const NotesModal = ({ isOpen, onClose, notes, onSave }: NotesModalProps) 
   };
 
   return (
-    <div className={styles.modalOverlay}>
+    <div
+      className={styles.modalOverlay}
+      onMouseDown={handleOverlayMouseDown}
+      onKeyDown={handleOverlayKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Close notes dialog"
+    >
       <div className={styles.modal}>
         <h5 className={styles.modalTitle}>Additional Notes</h5>
         <textarea

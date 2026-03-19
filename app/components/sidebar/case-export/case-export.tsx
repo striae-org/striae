@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import styles from './case-export.module.css';
 import { AuthContext } from '~/contexts/auth.context';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { PublicSigningKeyModal } from '~/components/public-signing-key-modal/public-signing-key-modal';
 import { getCurrentPublicSigningKeyDetails } from '~/utils/forensics';
 import { getCaseConfirmations, exportConfirmationData } from '../../actions/confirm-export';
@@ -36,6 +37,14 @@ export const CaseExport = ({
   const [hasConfirmationData, setHasConfirmationData] = useState(false);
   const [isPublicKeyModalOpen, setIsPublicKeyModalOpen] = useState(false);
   const { keyId: publicSigningKeyId, publicKeyPem } = getCurrentPublicSigningKeyDetails();
+  const {
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose,
+    canDismiss: !isPublicKeyModalOpen
+  });
 
   // Update caseNumber when currentCaseNumber prop changes
   useEffect(() => {
@@ -100,23 +109,6 @@ export const CaseExport = ({
     }
   }, [isOpen]);
 
-  // Handle Escape key to close modal
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen && !isPublicKeyModalOpen) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscapeKey);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [isOpen, isPublicKeyModalOpen, onClose]);
-
   if (!isOpen) return null;
 
   const handleExport = async () => {
@@ -179,23 +171,6 @@ export const CaseExport = ({
       setError(error instanceof Error ? error.message : 'Confirmation export failed. Please try again.');
     } finally {
       setIsExportingConfirmations(false);
-    }
-  };
-
-  const handleOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleOverlayKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.target !== e.currentTarget) {
-      return;
-    }
-
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onClose();
     }
   };
 

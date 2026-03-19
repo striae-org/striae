@@ -5,10 +5,9 @@ import {
   useState,
   type ChangeEvent,
   type DragEvent,
-  type KeyboardEvent,
-  type MouseEvent
 } from 'react';
 import styles from './public-signing-key-modal.module.css';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { verifyExportFile } from '~/utils/forensics';
 
 const NO_PUBLIC_KEY_MESSAGE = 'No public signing key is configured for this environment.';
@@ -230,6 +229,13 @@ export const PublicSigningKeyModal = ({
   const publicSigningKeyTitleId = useId();
   const publicKeyInputId = useId();
   const exportFileInputId = useId();
+  const {
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose
+  });
 
   useEffect(() => {
     if (!isOpen) {
@@ -242,44 +248,9 @@ export const PublicSigningKeyModal = ({
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handleEscapeKey = (event: globalThis.KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEscapeKey);
-
-    return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [isOpen, onClose]);
-
   if (!isOpen) {
     return null;
   }
-
-  const handleOverlayMouseDown = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleOverlayKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget) {
-      return;
-    }
-
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onClose();
-    }
-  };
 
   const resetVerificationState = () => {
     setVerificationOutcome(null);

@@ -4,6 +4,7 @@ import { PasswordReset } from '~/routes/auth/passwordReset';
 import { DeleteAccount } from './delete-account';
 import { UserAuditViewer } from '../audit/user-audit-viewer';
 import { AuthContext } from '~/contexts/auth.context';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { getUserData, updateUserData } from '~/utils/data';
 import { auditService } from '~/services/audit';
 import { handleAuthError, ERROR_MESSAGES } from '~/services/firebase/errors';
@@ -31,18 +32,19 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAuditViewer, setShowAuditViewer] = useState(false);
   const isCloseBlocked = isMfaBusy || isLoading;
+  const {
+    requestClose,
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose,
+    canDismiss: !isCloseBlocked
+  });
 
   const handleMfaBusyChange = useCallback((isBusy: boolean) => {
     setIsMfaBusy(isBusy);
   }, []);
-
-  const handleCloseRequest = () => {
-    if (isCloseBlocked) {
-      return;
-    }
-
-    onClose();
-  };
 
   useEffect(() => {
     if (isOpen && user) {
@@ -74,22 +76,6 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
       void loadUserData();
     }
   }, [isOpen, user]);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen && !isCloseBlocked) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, isCloseBlocked, onClose]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,19 +193,24 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   }
 
   return (
-    <div className={styles.modalOverlay} onClick={handleCloseRequest} role="presentation">
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */}
+    <div
+      className={styles.modalOverlay}
+      onMouseDown={handleOverlayMouseDown}
+      onKeyDown={handleOverlayKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Close manage profile dialog"
+    >
       <div
         className={styles.modal}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        onClick={(e) => e.stopPropagation()}
       >
         <header className={styles.modalHeader}>
           <h1 id="modal-title">Manage Profile</h1>
           <button
-            onClick={handleCloseRequest}
+            onClick={requestClose}
             className={styles.closeButton}
             aria-label="Close modal"
             disabled={isCloseBlocked}

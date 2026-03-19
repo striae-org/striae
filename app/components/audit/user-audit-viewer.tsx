@@ -1,5 +1,6 @@
-import { useContext, useEffect, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { AuditViewerHeader } from './viewer/audit-viewer-header';
 import { AuditUserInfoCard } from './viewer/audit-user-info-card';
 import { AuditActivitySummary } from './viewer/audit-activity-summary';
@@ -82,39 +83,15 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
     setError
   });
 
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      return () => {
-        document.removeEventListener('keydown', handleEscape);
-      };
-    }
-  }, [isOpen, onClose]);
+  const {
+    handleOverlayMouseDown,
+    handleOverlayKeyDown
+  } = useOverlayDismiss({
+    isOpen,
+    onClose
+  });
 
   const userBadgeId = userData?.badgeId?.trim() || '';
-
-  const handleOverlayMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleOverlayKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget) {
-      return;
-    }
-
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onClose();
-    }
-  };
 
   if (!isOpen) return null;
 
