@@ -1,7 +1,6 @@
 import type { AuditAction, AuditResult } from '~/types';
+import type { DateRangeFilter } from './types';
 import styles from '../user-audit.module.css';
-
-type DateRangeFilter = '1d' | '7d' | '30d' | '90d' | 'custom';
 
 interface AuditFiltersPanelProps {
   dateRange: DateRangeFilter;
