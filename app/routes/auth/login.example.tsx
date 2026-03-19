@@ -26,6 +26,7 @@ import { getUserData, createUser } from '~/utils/data';
 import { auditService } from '~/services/audit';
 import { generateUniqueId } from '~/utils/common';
 import { evaluatePasswordPolicy, buildActionCodeSettings, userHasMFA } from '~/utils/auth';
+import type { UserData } from '~/types';
 
 const APP_CANONICAL_ORIGIN = 'PAGES_CUSTOM_DOMAIN';
 const SOCIAL_IMAGE_PATH = '/social-image.png';
@@ -212,11 +213,9 @@ export const Login = () => {
   };  
 
   // Check if user exists in the USER_DB using centralized function
-  const checkUserExists = async (currentUser: User): Promise<boolean> => {
+  const checkUserExists = async (currentUser: User): Promise<UserData | null> => {
     try {
-      const userData = await getUserData(currentUser);
-      
-      return userData !== null;
+      return await getUserData(currentUser);
     } catch (error) {
       console.error('Error checking user existence:', error);
       // On network/API errors, throw error to prevent login
@@ -251,16 +250,19 @@ export const Login = () => {
       }      
       
       // Check if user exists in the USER_DB
+      let hasBadgeId = true;
       setIsCheckingUser(true);
       try {
-        const userExists = await checkUserExists(currentUser);
+        const userData = await checkUserExists(currentUser);
         setIsCheckingUser(false);
         
-        if (!userExists) {
+        if (!userData) {
           handleSignOut();
           setError('This account does not exist or has been deleted');
           return;
         }
+
+        hasBadgeId = Boolean(userData.badgeId?.trim());
       } catch (error) {
         setIsCheckingUser(false);
         handleSignOut();
@@ -279,7 +281,11 @@ export const Login = () => {
       setShowMfaEnrollment(false);
 
       if (shouldShowWelcomeToastRef.current) {
-        setWelcomeToastMessage(`Welcome to Striae, ${getUserFirstName(currentUser)}!`);
+        setWelcomeToastMessage(
+          hasBadgeId
+            ? `Welcome to Striae, ${getUserFirstName(currentUser)}!`
+            : 'Your badge or ID number is not set. You can set one in Manage Profile.'
+        );
         setIsWelcomeToastVisible(true);
         shouldShowWelcomeToastRef.current = false;
       }
