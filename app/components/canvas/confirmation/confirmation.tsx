@@ -9,6 +9,7 @@ interface ConfirmationModalProps {
   onClose: () => void;
   onConfirm?: (confirmationData: ConfirmationData) => void;
   company?: string;
+  defaultBadgeId?: string;
   existingConfirmation?: ConfirmationData | null;
 }
 
@@ -26,7 +27,7 @@ const formatTimestamp = (): string => {
   });
 };
 
-export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, existingConfirmation }: ConfirmationModalProps) => {
+export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, defaultBadgeId, existingConfirmation }: ConfirmationModalProps) => {
   const { user } = useContext(AuthContext);
   const [badgeId, setBadgeId] = useState('');
   const [error, setError] = useState('');
@@ -64,12 +65,12 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, existin
       if (existingConfirmation) {
         setBadgeId(existingConfirmation.badgeId);
       } else {
-        setBadgeId('');
+        setBadgeId(defaultBadgeId || '');
       }
       setError('');
       setIsConfirming(false);
     }
-  }, [isOpen, existingConfirmation]);
+  }, [isOpen, defaultBadgeId, existingConfirmation]);
 
   if (!isOpen) return null;
 

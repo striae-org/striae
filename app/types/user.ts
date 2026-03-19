@@ -8,6 +8,7 @@ export interface UserData {
   firstName: string;
   lastName: string;
   company: string;
+  badgeId?: string;
   permitted: boolean;
   cases: Array<{
     caseNumber: string;

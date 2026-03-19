@@ -19,6 +19,7 @@ interface ManageProfileProps {
 export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   const { user } = useContext(AuthContext);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [badgeId, setBadgeId] = useState('');
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -51,6 +52,16 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
           if (userData) {
             setCompany(userData.company || '');
             setEmail(userData.email || '');
+            const storedBadgeId = userData.badgeId || '';
+            setBadgeId(storedBadgeId);
+
+            if (userData.badgeId === undefined) {
+              try {
+                await updateUserData(user, { badgeId: '' });
+              } catch (badgeInitError) {
+                console.error('Failed to initialize badge ID field:', badgeInitError);
+              }
+            }
           }
         } catch (err) {
           console.error('Failed to load user data:', err);
@@ -98,6 +109,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         email: user.email,
         firstName: firstName || '',
         lastName: lastName || '',
+        badgeId: badgeId.trim(),
       });
 
       await auditService.logUserProfileUpdate(
@@ -191,6 +203,21 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
             autoComplete="name"
             required
           />
+
+          <div className={styles.formGroup}>
+            <label htmlFor="badgeId">Badge/ID #</label>
+            <input
+              id="badgeId"
+              type="text"
+              value={badgeId}
+              onChange={(e) => setBadgeId(e.target.value)}
+              className={styles.input}
+              autoComplete="off"
+            />
+            <p className={styles.helpText}>
+              Enter your Badge/ID number for confirmations and reports. This can be updated as needed.
+            </p>
+          </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="company">Lab/Company Name</label>

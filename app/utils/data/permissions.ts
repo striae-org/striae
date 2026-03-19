@@ -110,6 +110,7 @@ export const createUser = async (
       firstName,
       lastName,
       company,
+      badgeId: '',
       permitted,
       cases: [],
       readOnlyCases: [],
