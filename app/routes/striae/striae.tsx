@@ -28,6 +28,7 @@ export const Striae = ({ user }: StriaePage) => {
   // User states
   const [userCompany, setUserCompany] = useState<string>('');
   const [userFirstName, setUserFirstName] = useState<string>('');
+  const [userLastName, setUserLastName] = useState<string>('');
   const [userBadgeId, setUserBadgeId] = useState<string>('');
 
   // Case management states - All managed here
@@ -81,9 +82,10 @@ export const Striae = ({ user }: StriaePage) => {
         });
         
         if (response.ok) {
-          const userData = await response.json() as { company?: string; firstName?: string; badgeId?: string };
+          const userData = await response.json() as { company?: string; firstName?: string; lastName?: string; badgeId?: string };
           setUserCompany(userData.company || '');
           setUserFirstName(userData.firstName || '');
+          setUserLastName(userData.lastName || '');
           setUserBadgeId(userData.badgeId || '');
         }
       } catch (err) {
@@ -169,6 +171,7 @@ export const Striae = ({ user }: StriaePage) => {
       selectedFilename,
       userCompany,
       userFirstName,
+      userLastName,
       userBadgeId,
       currentCase,
       annotationData,

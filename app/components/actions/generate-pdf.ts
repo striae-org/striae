@@ -9,6 +9,7 @@ interface GeneratePDFParams {
   selectedFilename: string | undefined;
   userCompany: string;
   userFirstName: string;
+  userLastName: string;
   userBadgeId: string;
   currentCase: string;
   annotationData: AnnotationData | null;
@@ -26,6 +27,7 @@ export const generatePDF = async ({
   selectedFilename,
   userCompany,
   userFirstName,
+  userLastName,
   userBadgeId,
   currentCase,
   annotationData,
@@ -64,7 +66,8 @@ export const generatePDF = async ({
       filename: selectedFilename,
       userCompany: userCompany,
       firstName: userFirstName,
-      userName: userFirstName,
+      userFirstName: userFirstName,
+      userLastName: userLastName,
       userBadgeId: userBadgeId || undefined,
       caseNumber: currentCase,
       annotationData,
