@@ -14,15 +14,41 @@
   gap: var(--spaceL);
 }
 
+.companyLabelContainer {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: calc(100% - 500px);
+  flex-shrink: 1;
+  min-width: 150px;
+  scroll-behavior: smooth;
+}
+
+.companyLabelContainer::-webkit-scrollbar {
+  height: 4px;
+}
+
+.companyLabelContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.companyLabelContainer::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 2px;
+}
+
+.companyLabelContainer::-webkit-scrollbar-thumb:hover {
+  background: #868e96;
+}
+
 .companyLabel {
   color: #495057;
   font-size: var(--fontSizeBodyM);
   font-weight: var(--fontWeightMedium);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 50%;
   flex-shrink: 0;
+  padding-right: var(--spaceM);
 }
 
 .navbar a {

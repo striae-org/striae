@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useContext } from 'react';
 import styles from './navbar.module.css';
 import { SignOut } from '../actions/signout';
 import { ManageProfile } from '../user/manage-profile';
 import { CaseImport } from '../sidebar/case-import/case-import';
 import { PublicSigningKeyModal } from '~/components/public-signing-key-modal/public-signing-key-modal';
 import { getCurrentPublicSigningKeyDetails } from '~/utils/forensics';
+import { AuthContext } from '~/contexts/auth.context';
 import { type ImportResult, type ConfirmationImportResult } from '~/types';
 
 interface NavbarProps {
@@ -16,6 +17,7 @@ interface NavbarProps {
   isCurrentImageConfirmed?: boolean;
   hasLoadedCase?: boolean;
   hasLoadedImage?: boolean;
+  userBadgeId?: string;
   onImportComplete?: (result: ImportResult | ConfirmationImportResult) => void;
   onOpenCase?: () => void;
   onOpenListAllCases?: () => void;
@@ -37,6 +39,7 @@ export const Navbar = ({
   isCurrentImageConfirmed = false,
   hasLoadedCase = false,
   hasLoadedImage = false,
+  userBadgeId,
   onImportComplete,
   onOpenCase,
   onOpenListAllCases,
@@ -48,6 +51,7 @@ export const Navbar = ({
   onDeleteCurrentFile,
   onOpenImageNotes,
 }: NavbarProps) => {
+  const { user } = useContext(AuthContext);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isPublicKeyModalOpen, setIsPublicKeyModalOpen] = useState(false);
@@ -92,8 +96,10 @@ export const Navbar = ({
   return (
     <>
       <header className={styles.navbar} aria-label="Canvas top navigation">
-        <div className={styles.companyLabel}>
-          {isReadOnly ? 'CASE REVIEW ONLY' : company}
+        <div className={styles.companyLabelContainer}>
+          <div className={styles.companyLabel}>
+            {isReadOnly ? 'CASE REVIEW ONLY' : `${company}${user?.displayName ? ` | ${user.displayName}` : ''}${userBadgeId ? `, ${userBadgeId}` : ''}`}
+          </div>
         </div>
         <div className={styles.navCenterTrack}>
           <div className={styles.navCentral}>
