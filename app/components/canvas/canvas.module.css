@@ -12,12 +12,13 @@
 }
 
 .imageContainer {
+  flex: 1;
+  min-width: 0;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 100%;
-  max-height: 100%;
+  overflow: hidden;
 }
 
 .toolbarWrapper {
@@ -265,33 +266,45 @@
 /* Image and Notes Container */
 .imageAndNotesContainer {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  max-width: 100%;
-  max-height: 100%;
+  flex-direction: row;
+  align-items: stretch;
+  align-self: stretch;
+  width: 100%;
 }
 
-/* Additional Notes Display */
-.additionalNotesContainer {
+/* Notes Panel - fixed-width right-side column */
+.notesPanel {
+  width: 260px;
+  flex-shrink: 0;
   display: flex;
-  justify-content: center;
-  width: 100%;
-  max-width: 600px;
+  flex-direction: column;
+  background: rgba(20, 20, 20, 0.55);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.notesPanelHeader {
+  padding: 0.625rem 1rem;
+  color: #adb5bd;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  font-family: "Inter", sans-serif;
 }
 
 .additionalNotesBox {
-  background: #ffffff;
-  color: #000000;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  border: 2px solid #d0d0d0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  overflow-y: auto;
+  background: transparent;
+  color: #e0e0e0;
+  padding: 1rem;
   font-family: "Inter", sans-serif;
-  font-size: 0.95rem;
-  line-height: 1.4;
+  font-size: 0.875rem;
+  line-height: 1.5;
   text-align: left;
   white-space: pre-wrap;
   word-wrap: break-word;
-  max-width: 100%;
 }

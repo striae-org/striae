@@ -397,13 +397,14 @@ export const Canvas = ({
           )}
         </div>
         
-        {/* Additional Notes - Below Image */}
+        {/* Additional Notes - Right Panel */}
         {activeAnnotations?.has('notes') && annotationData?.additionalNotes && (
-          <div className={styles.additionalNotesContainer}>
+          <aside className={styles.notesPanel} aria-label="Additional notes">
+            <div className={styles.notesPanelHeader}>Notes</div>
             <div className={styles.additionalNotesBox}>
               {annotationData.additionalNotes}
             </div>
-          </div>
+          </aside>
         )}
         </div>
       ) : (
