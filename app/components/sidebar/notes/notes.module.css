@@ -2,6 +2,52 @@
   padding: 0.3rem;
 }
 
+.compactLayout .caseNumbers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.compactLayout .inputGroup {
+  margin-bottom: 0;
+}
+
+.compactSectionGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.compactFullSection {
+  grid-column: 1 / -1;
+}
+
+.compactHalfSection {
+  margin-bottom: 1.25rem;
+}
+
+.compactLayout .notesActionBarSticky {
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 980px) {
+  .compactLayout .caseNumbers,
+  .compactSectionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .classCharacteristicsColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .compactFullSection,
+  .compactHalfSection {
+    grid-column: auto;
+  }
+}
+
 hr {
   padding-bottom: 0.5rem;
   margin: 0.5rem 0;
@@ -121,6 +167,39 @@ textarea:focus {
 
 .classCharacteristics {
   margin-bottom: 2rem;
+}
+
+.classCharacteristicsColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.classCharacteristicsMain {
+  min-width: 0;
+}
+
+.characteristicsPlaceholder {
+  border: 1px dashed #ced4da;
+  border-radius: 8px;
+  padding: 0.85rem;
+  background: #f8f9fa;
+  min-height: 150px;
+}
+
+.placeholderTitle {
+  margin: 0 0 0.5rem;
+  color: #495057;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.placeholderText {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .classCharacteristics input {

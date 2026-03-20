@@ -57,6 +57,7 @@ export const NotesEditorModal = ({
             isUploading={isUploading}
             showReturnButton={false}
             stickyActionBar={true}
+            compactLayout={true}
           />
         </div>
       </div>

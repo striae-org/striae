@@ -18,13 +18,14 @@ interface NotesSidebarProps {
   isUploading?: boolean;
   showReturnButton?: boolean;
   stickyActionBar?: boolean;
+  compactLayout?: boolean;
 }
 
 type SupportLevel = 'ID' | 'Exclusion' | 'Inconclusive';
 type ClassType = 'Bullet' | 'Cartridge Case' | 'Other';
 type IndexType = 'number' | 'color';
 
-export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotationRefresh, originalFileName, isUploading = false, showReturnButton = true, stickyActionBar = false }: NotesSidebarProps) => {
+export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotationRefresh, originalFileName, isUploading = false, showReturnButton = true, stickyActionBar = false, compactLayout = false }: NotesSidebarProps) => {
   // Loading/Saving Notes States
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string>();
@@ -233,7 +234,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
   };
 
   return (
-    <div className={styles.notesSidebar}>
+    <div className={`${styles.notesSidebar} ${compactLayout ? styles.compactLayout : ''}`}>
       {isLoading ? (
         <div className={styles.loading}>Loading notes...</div>
       ) : loadError ? (
@@ -295,9 +296,18 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
                 onChange={(e) => setLeftItem(e.target.value)}
                 disabled={areInputsDisabled}
               />
-            </div>            
+            </div>
+            {compactLayout && (
+              <div className={styles.caseInput}>
+                <label htmlFor="colorSelect">Font</label>
+                <ColorSelector
+                  selectedColor={caseFontColor}
+                  onColorSelect={setCaseFontColor}
+                />
+              </div>
+            )}
           </div>
-          <hr />
+          {!compactLayout && <hr />}
           {/* Right side inputs */}
           <div className={styles.inputGroup}>
             <div className={styles.caseInput}>
@@ -332,16 +342,21 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
             </div>            
           </div>
         </div>
-         <label htmlFor="colorSelect">Font</label>                  
-          <ColorSelector            
-            selectedColor={caseFontColor}
-            onColorSelect={setCaseFontColor}
-          />        
+        {!compactLayout && (
+          <>
+            <label htmlFor="colorSelect">Font</label>
+            <ColorSelector
+              selectedColor={caseFontColor}
+              onColorSelect={setCaseFontColor}
+            />
+          </>
+        )}
           </>
         )}
       </div>
 
-      <div className={styles.section}>
+      <div className={compactLayout ? styles.compactSectionGrid : undefined}>
+      <div className={`${styles.section} ${compactLayout ? styles.compactFullSection : ''}`}>
         <button
           type="button"
           className={styles.sectionToggle}
@@ -353,54 +368,65 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
         </button>
         {isClassOpen && (
           <>
-            <div className={styles.classCharacteristics}>
-              <select
-                id="classType"
-                aria-label="Class Type"
-                value={classType}
-                onChange={(e) => setClassType(e.target.value as ClassType)}
-                className={styles.select}
-                disabled={areInputsDisabled}
-              >
-                <option value="">Select class type...</option>
-                <option value="Bullet">Bullet</option>
-                <option value="Cartridge Case">Cartridge Case</option>
-                <option value="Other">Other</option>
-              </select>
+            <div className={compactLayout ? styles.classCharacteristicsColumns : undefined}>
+              <div className={styles.classCharacteristicsMain}>
+                <div className={styles.classCharacteristics}>
+                  <select
+                    id="classType"
+                    aria-label="Class Type"
+                    value={classType}
+                    onChange={(e) => setClassType(e.target.value as ClassType)}
+                    className={styles.select}
+                    disabled={areInputsDisabled}
+                  >
+                    <option value="">Select class type...</option>
+                    <option value="Bullet">Bullet</option>
+                    <option value="Cartridge Case">Cartridge Case</option>
+                    <option value="Other">Other</option>
+                  </select>
 
-              {classType === 'Other' && (
-                <input
-                  type="text"
-                  value={customClass}
-                  onChange={(e) => setCustomClass(e.target.value)}
-                  placeholder="Specify object type"
-                  disabled={areInputsDisabled}
-                />
-              )}
+                  {classType === 'Other' && (
+                    <input
+                      type="text"
+                      value={customClass}
+                      onChange={(e) => setCustomClass(e.target.value)}
+                      placeholder="Specify object type"
+                      disabled={areInputsDisabled}
+                    />
+                  )}
 
-              <textarea
-                value={classNote}
-                onChange={(e) => setClassNote(e.target.value)}
-                placeholder="Enter class characteristic details..."
-                className={styles.textarea}
-                disabled={areInputsDisabled}
-              />
+                  <textarea
+                    value={classNote}
+                    onChange={(e) => setClassNote(e.target.value)}
+                    placeholder="Enter class characteristic details..."
+                    className={styles.textarea}
+                    disabled={areInputsDisabled}
+                  />
+                </div>
+                <label className={`${styles.checkboxLabel} mb-4`}>
+                  <input
+                    type="checkbox"
+                    checked={hasSubclass}
+                    onChange={(e) => setHasSubclass(e.target.checked)}
+                    className={styles.checkbox}
+                    disabled={areInputsDisabled}
+                  />
+                  <span>Potential subclass?</span>
+                </label>
             </div>
-            <label className={`${styles.checkboxLabel} mb-4`}>
-              <input
-                type="checkbox"
-                checked={hasSubclass}
-                onChange={(e) => setHasSubclass(e.target.checked)}
-                className={styles.checkbox}
-                disabled={areInputsDisabled}
-              />
-              <span>Potential subclass?</span>
-            </label>
+
+              {compactLayout && (
+                <div className={styles.characteristicsPlaceholder}>
+                  <h6 className={styles.placeholderTitle}>Characteristics Details</h6>
+                  <p className={styles.placeholderText}>This section is reserved for future development.</p>
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>
 
-      <div className={styles.section}>
+      <div className={`${styles.section} ${compactLayout ? styles.compactHalfSection : ''}`}>
         <button
           type="button"
           className={styles.sectionToggle}
@@ -451,7 +477,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
         )}
       </div>
 
-      <div className={styles.section}>
+      <div className={`${styles.section} ${compactLayout ? styles.compactHalfSection : ''}`}>
         <button
           type="button"
           className={styles.sectionToggle}
@@ -507,6 +533,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
           </>
         )}
       </div>            
+      </div>
 
         <div className={`${styles.notesActionBar} ${stickyActionBar ? styles.notesActionBarSticky : ''}`}>
           <button 
