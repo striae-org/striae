@@ -32,7 +32,7 @@ type ImageLoadError = {
 export const Canvas = ({ 
   imageUrl, 
   filename, 
-  company, 
+  company,
   badgeId,
   firstName, 
   error, 
@@ -288,13 +288,6 @@ export const Canvas = ({
               )}
             </>
           )}
-        </div>
-      )}
-      
-      {/* Company Display - Upper Right */}
-      {company && (
-        <div className={styles.companyDisplay}>
-          {isReadOnly ? 'CASE REVIEW ONLY' : company}
         </div>
       )}
       

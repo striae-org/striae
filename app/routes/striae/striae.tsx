@@ -381,7 +381,11 @@ export const Striae = ({ user }: StriaePage) => {
         onUploadStatusChange={setIsUploading}
       />
       <main className={styles.mainContent}>
-        <Navbar isUploading={isUploading} />
+        <Navbar
+          isUploading={isUploading}
+          company={userCompany}
+          isReadOnly={isReadOnlyCase}
+        />
         <div className={styles.canvasArea}>
           <div className={styles.toolbarWrapper}>
             <Toolbar 

@@ -4,12 +4,21 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   padding: 0 var(--spaceL);
   box-sizing: border-box;
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
   z-index: 35;
+}
+
+.companyLabel {
+  color: #495057;
+  font-size: var(--fontSizeBodyM);
+  font-weight: var(--fontWeightMedium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50%;
 }
 
 .navbar a {

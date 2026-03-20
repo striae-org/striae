@@ -119,11 +119,6 @@ export const Sidebar = ({
 
   return (
     <div className={styles.sidebar}>
-      <div className={styles.userInfo}>
-        <h3 className={styles.userTitle}>
-          {`${user.displayName?.split(' ')[0] || 'User'}'s Striae`}
-        </h3>
-      </div>  
       <CaseImport 
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
