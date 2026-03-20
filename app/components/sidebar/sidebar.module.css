@@ -4,10 +4,12 @@
   width: 300px;
   min-width: 250px;
   height: calc(100% - 60px);
+  display: flex;
+  flex-direction: column;
   background-color: #f8f9fa;
   border-right: 1px solid #dee2e6;
-  padding: 0.5rem 1.5rem 1.5rem;
-  overflow-y: auto;
+  padding: 0.25rem 1rem 0.875rem;
+  overflow: hidden;
   flex-shrink: 0;
   box-sizing: border-box;
 }

@@ -302,7 +302,7 @@ return (
       />
       
         <div className={styles.filesSection}>
-      <div className={isReadOnly && currentCase ? styles.readOnlyContainer : styles.caseHeader}>
+        <div className={isReadOnly && currentCase ? styles.readOnlyContainer : styles.caseHeader}>
         <h4 className={`${styles.caseNumber} ${
           currentCase && caseConfirmationStatus.includeConfirmation 
             ? caseConfirmationStatus.isConfirmed 
@@ -312,9 +312,6 @@ return (
         }`}>
           {currentCase || 'No Case Selected'}
         </h4>
-        {isReadOnly && currentCase && (
-          <div className={styles.readOnlyBadge}>(Read-Only)</div>
-        )}
       </div>
       {currentCase && (
         <ImageUploadZone
@@ -345,25 +342,18 @@ return (
         </div>
       )}
       
-      {!currentCase ? (
-        <p className={styles.emptyState}>Create or select a case to view files</p>
-      ) : files.length === 0 ? (
-        <p className={styles.emptyState}>No files found for {currentCase}</p>
-      ) : (
-        <>
-          {!canUploadNewFile && (
-            <div className={styles.limitReached}>
-              <p>Upload limit reached for this case</p>
-            </div>
-          )}
-          <ul className={styles.fileList}>
-            {files.map((file) => {
+      {currentCase ? (
+        <ul className={styles.fileList}>
+          {files.length === 0 ? (
+            <li className={styles.fileListMessage}>No files found for {currentCase}</li>
+          ) : (
+            files.map((file) => {
               const confirmationStatus = fileConfirmationStatus[file.id];
               let confirmationClass = '';
-              
+
               if (confirmationStatus?.includeConfirmation) {
-                confirmationClass = confirmationStatus.isConfirmed 
-                  ? styles.fileItemConfirmed 
+                confirmationClass = confirmationStatus.isConfirmed
+                  ? styles.fileItemConfirmed
                   : styles.fileItemNotConfirmed;
               }
 
@@ -378,11 +368,11 @@ return (
                       title={isUploading ? "Cannot select files while uploading" : undefined}
                     >
                     <span className={styles.fileName}>{file.originalFilename}</span>
-                  </button>              
+                  </button>
                   <button
                     onClick={() => {
                       if (window.confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
-                        handleFileDelete(file.id);                                        
+                        handleFileDelete(file.id);
                       }
                     }}
                     className={styles.deleteButton}
@@ -395,12 +385,14 @@ return (
                   </button>
                 </li>
               );
-            })}
-          </ul>
-        </>
+            })
+          )}
+        </ul>
+      ) : (
+        <div className={styles.fileListPlaceholder}>Select a case to view files</div>
       )}
     </div>
-    <div className={`${styles.sidebarToggle} mb-4`}>
+    <div className={styles.sidebarToggle}>
     <button
           onClick={onNotesClick}
           disabled={isImageNotesDisabled}
