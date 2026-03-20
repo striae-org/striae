@@ -6,7 +6,7 @@
   align-items: center;
   padding: 0 var(--spaceL);
   box-sizing: border-box;
-  background: var(--backgroundLight);
-  border-bottom: 1px solid color-mix(in lab, var(--text) 12%, transparent);
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
   z-index: 35;
 }
