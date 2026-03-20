@@ -522,18 +522,21 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
                 <span>Include confirmation field</span>
               </label>
             </div>
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className={styles.notesButton}
-              disabled={areInputsDisabled}
-              title={isConfirmedImage ? "Cannot edit notes for confirmed images" : isUploading ? "Cannot add notes while uploading" : undefined}
-            >
-              Additional Notes
-            </button>
           </>
         )}
       </div>            
       </div>
+
+        <div className={styles.additionalNotesRow}>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className={styles.notesButton}
+            disabled={areInputsDisabled}
+            title={isConfirmedImage ? "Cannot edit notes for confirmed images" : isUploading ? "Cannot add notes while uploading" : undefined}
+          >
+            Additional Notes
+          </button>
+        </div>
 
         <div className={`${styles.notesActionBar} ${stickyActionBar ? styles.notesActionBarSticky : ''}`}>
           <button 

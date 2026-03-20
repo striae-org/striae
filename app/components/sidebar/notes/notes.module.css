@@ -346,6 +346,14 @@ textarea:focus {
   margin-top: 1rem;
 }
 
+.additionalNotesRow {
+  width: 100%;
+}
+
+.compactLayout .additionalNotesRow {
+  grid-column: 1 / -1;
+}
+
 .notesButton:hover {
   background-color: color-mix(in lab, var(--primary) 95%, transparent);
 }
