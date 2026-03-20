@@ -81,7 +81,8 @@ if [ ! -f "$EMAILS_FILE" ]; then
 fi
 
 # Strip comment lines and blank lines, then join with commas
-PRIMERSHEAR_EMAILS=$(grep -v '^\s*#' "$EMAILS_FILE" | grep -v '^\s*$' | paste -sd ',' -)
+# Use || true to avoid failure if paste gets no input (handles empty file gracefully)
+PRIMERSHEAR_EMAILS=$(grep -v '^\s*#' "$EMAILS_FILE" | grep -v '^\s*$' | paste -sd ',' - || true)
 
 if [ -z "$PRIMERSHEAR_EMAILS" ]; then
     echo -e "${YELLOW}⚠️  primershear.emails contains no active email addresses.${NC}"
