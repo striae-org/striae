@@ -13,19 +13,11 @@ interface SidebarContainerProps {
   user: User;
   onImageSelect: (file: FileData) => void;
   imageId?: string;
-  onCaseChange: (caseNumber: string) => void;
   currentCase: string;
-  setCurrentCase: (caseNumber: string) => void;
   files: FileData[];
   setFiles: React.Dispatch<React.SetStateAction<FileData[]>>;
   imageLoaded: boolean;
   setImageLoaded: (loaded: boolean) => void;
-  caseNumber: string;
-  setCaseNumber: (caseNumber: string) => void;
-  error: string;
-  setError: (error: string) => void;
-  successAction: 'loaded' | 'created' | 'deleted' | null;
-  setSuccessAction: (action: 'loaded' | 'created' | 'deleted' | null) => void;
   showNotes: boolean;
   setShowNotes: (show: boolean) => void;
   onAnnotationRefresh?: () => void;
@@ -58,7 +50,7 @@ export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
     }, [isFooterModalOpen]);
   
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Main Sidebar */}
       <Sidebar {...props} />
       

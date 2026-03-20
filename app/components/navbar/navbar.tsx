@@ -60,8 +60,8 @@ export const Navbar = ({
     };
   }, [isCaseMenuOpen]);
 
-  const caseActionsDisabled = isUploading;
-  const isCaseManagementActive = hasLoadedCase && activeSection === 'case-management';
+  const caseActionsDisabled = false;
+  const isCaseManagementActive = true;
   const isFileManagementActive = hasLoadedCase && activeSection === 'file-management';
   const isImageNotesActive = hasLoadedImage && activeSection === 'image-notes';
 

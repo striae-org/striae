@@ -1,7 +1,6 @@
 import type { User } from 'firebase/auth';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './cases.module.css';
-import { Toast } from '~/components/toast/toast';
 import { FilesModal } from '../files/files-modal';
 import { ImageUploadZone } from '../upload/image-upload-zone';
 import {
@@ -12,25 +11,17 @@ import {
   canUploadFile, 
   getFileAnnotations
 } from '~/utils/data';
-import { type FileData, type CaseActionType } from '~/types';
+import { type FileData } from '~/types';
 
 interface CaseSidebarProps {
   user: User;
   onImageSelect: (file: FileData) => void;
-  onCaseChange: (caseNumber: string) => void;
   imageLoaded: boolean;
   setImageLoaded: (loaded: boolean) => void;
   onNotesClick: () => void;
   files: FileData[];
   setFiles: React.Dispatch<React.SetStateAction<FileData[]>>;
-  caseNumber: string;
-  setCaseNumber: (caseNumber: string) => void;
   currentCase: string | null;
-  setCurrentCase: (caseNumber: string) => void;
-  error: string;
-  setError: (error: string) => void;
-  successAction: CaseActionType;
-  setSuccessAction: (action: CaseActionType) => void;
   isReadOnly?: boolean;
   isConfirmed?: boolean;
   confirmationSaveVersion?: number;
@@ -49,10 +40,6 @@ export const CaseSidebar = ({
   files,
   setFiles,
   currentCase,
-  error,
-  setError,
-  successAction,
-  setSuccessAction,
   isReadOnly = false,
   isConfirmed = false,
   confirmationSaveVersion = 0,
@@ -63,9 +50,6 @@ export const CaseSidebar = ({
 }: CaseSidebarProps) => {
   
   const [, setFileError] = useState('');
-  const [isToastVisible, setIsToastVisible] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'warning'>('success');
   const [canUploadNewFile, setCanUploadNewFile] = useState(true);
   const [uploadFileError, setUploadFileError] = useState('');
   const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
@@ -238,24 +222,6 @@ export const CaseSidebar = ({
     };
   }, [currentCase, fileIdsKey, user, selectedFileId, confirmationSaveVersion, files.length, calculateCaseConfirmationStatus]);
 
-  useEffect(() => {
-    if (error) {
-      setToastMessage(error);
-      setToastType('error');
-      setIsToastVisible(true);
-    }
-  }, [error]);
-
-  useEffect(() => {
-    if (successAction) {
-      setToastMessage(`Case ${currentCase} ${successAction} successfully!`);
-      setToastType('success');
-      setIsToastVisible(true);
-    }
-    // currentCase intentionally omitted: we capture its value at the time successAction changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [successAction]);
-  
   const handleFileDelete = async (fileId: string) => {
     // Don't allow file deletion for read-only cases
     if (isReadOnly) {
@@ -444,16 +410,6 @@ return (
         </button>
         </div>
       </div>
-    <Toast
-      message={toastMessage}
-      type={toastType}
-      isVisible={isToastVisible}
-      onClose={() => {
-        setIsToastVisible(false);
-        setError('');
-        setSuccessAction(null);
-      }}
-    />
     </>
   );
 };

@@ -10,19 +10,11 @@ interface SidebarProps {
   user: User;
   onImageSelect: (file: FileData) => void;
   imageId?: string;
-  onCaseChange: (caseNumber: string) => void;
   currentCase: string;
-  setCurrentCase: (caseNumber: string) => void;
   files: FileData[];
   setFiles: React.Dispatch<React.SetStateAction<FileData[]>>;
   imageLoaded: boolean;
   setImageLoaded: (loaded: boolean) => void;
-  caseNumber: string;
-  setCaseNumber: (caseNumber: string) => void;
-  error: string;
-  setError: (error: string) => void;
-  successAction: 'loaded' | 'created' | 'deleted' | null;
-  setSuccessAction: (action: 'loaded' | 'created' | 'deleted' | null) => void;
   showNotes: boolean;
   setShowNotes: (show: boolean) => void;
   onAnnotationRefresh?: () => void;
@@ -37,19 +29,11 @@ export const Sidebar = ({
   user, 
   onImageSelect,
   imageId, 
-  onCaseChange,
   currentCase,
-  setCurrentCase,
   imageLoaded,
   setImageLoaded,
   files,
   setFiles,
-  caseNumber,
-  setCaseNumber,
-  error,
-  setError,
-  successAction,
-  setSuccessAction,
   showNotes,
   setShowNotes,
   onAnnotationRefresh,
@@ -104,19 +88,11 @@ export const Sidebar = ({
         <CaseSidebar 
           user={user} 
           onImageSelect={onImageSelect}
-          onCaseChange={onCaseChange}
           currentCase={currentCase}
-          setCurrentCase={setCurrentCase}
           imageLoaded={imageLoaded}
           setImageLoaded={setImageLoaded}
           files={files}
           setFiles={setFiles}
-          caseNumber={caseNumber}
-          setCaseNumber={setCaseNumber}
-          error={error}
-          setError={setError}
-          successAction={successAction}
-          setSuccessAction={setSuccessAction}
           onNotesClick={() => setShowNotes(true)}
           isReadOnly={isReadOnly}
           isConfirmed={isConfirmed}

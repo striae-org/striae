@@ -55,8 +55,6 @@ export const Striae = ({ user }: StriaePage) => {
   // Case management states - All managed here
   const [currentCase, setCurrentCase] = useState<string>('');
   const [files, setFiles] = useState<FileData[]>([]);
-  const [caseNumber, setCaseNumber] = useState('');
-  const [successAction, setSuccessAction] = useState<'loaded' | 'created' | 'deleted' | null>(null);
   const [showNotes, setShowNotes] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isReadOnlyCase, setIsReadOnlyCase] = useState(false);
@@ -131,7 +129,6 @@ export const Striae = ({ user }: StriaePage) => {
 
   const handleCaseChange = (caseNumber: string) => {
     setCurrentCase(caseNumber);
-    setCaseNumber(caseNumber);
     setAnnotationData(null);
     setSelectedFilename(undefined);
     setImageId(undefined);    
@@ -308,7 +305,6 @@ export const Striae = ({ user }: StriaePage) => {
 
       await renameCase(user, currentCase, newCaseName);
       setCurrentCase(newCaseName);
-      setCaseNumber(newCaseName);
       setShowNotes(false);
       setIsRenameCaseModalOpen(false);
       showNotification(`Case renamed to ${newCaseName}.`, 'success');
@@ -337,7 +333,6 @@ export const Striae = ({ user }: StriaePage) => {
     try {
       await deleteCase(user, currentCase);
       setCurrentCase('');
-      setCaseNumber('');
       setFiles([]);
       setShowNotes(false);
       setIsAuditTrailOpen(false);
@@ -352,7 +347,6 @@ export const Striae = ({ user }: StriaePage) => {
 
   const loadCaseIntoWorkspace = async (caseToLoad: string) => {
     setCurrentCase(caseToLoad);
-    setCaseNumber(caseToLoad);
     setShowNotes(false);
     const loadedFiles = await fetchFiles(user, caseToLoad, { skipValidation: true });
     setFiles(loadedFiles);
@@ -388,7 +382,6 @@ export const Striae = ({ user }: StriaePage) => {
 
       const newCase = await createNewCase(user, nextCaseNumber);
       setCurrentCase(newCase.caseNumber);
-      setCaseNumber(newCase.caseNumber);
       setFiles([]);
       setShowNotes(false);
       setIsOpenCaseModalOpen(false);
@@ -429,7 +422,6 @@ export const Striae = ({ user }: StriaePage) => {
       } else if (!result.caseNumber && !result.isReadOnly) {
         // Read-only case cleared - reset all UI state
         setCurrentCase('');
-        setCaseNumber('');
         setFiles([]);
         handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
         setShowNotes(false);
@@ -596,53 +588,46 @@ export const Striae = ({ user }: StriaePage) => {
 
   return (
     <div className={styles.appContainer}>
-     <SidebarContainer 
-        user={user} 
-        onImageSelect={handleImageSelect}
-        imageId={imageId}
-        onCaseChange={handleCaseChange}
-        currentCase={currentCase}
-        setCurrentCase={setCurrentCase}
-        imageLoaded={imageLoaded}
-        setImageLoaded={setImageLoaded}
-        files={files}
-        setFiles={setFiles}
-        caseNumber={caseNumber}
-        setCaseNumber={setCaseNumber}
-        error={error ?? ''}
-        setError={setError}
-        successAction={successAction}
-        setSuccessAction={setSuccessAction}
-        showNotes={showNotes}
-        setShowNotes={setShowNotes}
-        onAnnotationRefresh={refreshAnnotationData}
-        isReadOnly={isReadOnlyCase}
-        isConfirmed={!!annotationData?.confirmationData}
-        confirmationSaveVersion={confirmationSaveVersion}
+      <Navbar
         isUploading={isUploading}
-        onUploadStatusChange={setIsUploading}
+        company={userCompany}
+        isReadOnly={isReadOnlyCase}
+        currentCase={currentCase}
+        hasLoadedCase={!!currentCase}
+        hasLoadedImage={!!(selectedImage && selectedImage !== '/clear.jpg' && imageLoaded)}
+        activeSection="case-management"
+        onImportComplete={handleImportComplete}
+        onOpenCase={() => {
+          void handleOpenCaseModal();
+        }}
+        onOpenListAllCases={() => setIsListCasesModalOpen(true)}
+        onOpenCaseExport={() => setIsCaseExportModalOpen(true)}
+        onOpenAuditTrail={() => setIsAuditTrailOpen(true)}
+        onOpenRenameCase={() => setIsRenameCaseModalOpen(true)}
+        onDeleteCase={() => {
+          void handleDeleteCaseAction();
+        }}
       />
-      <main className={styles.mainContent}>
-        <Navbar
-          isUploading={isUploading}
-          company={userCompany}
-          isReadOnly={isReadOnlyCase}
+      <div className={styles.contentRow}>
+        <SidebarContainer 
+          user={user} 
+          onImageSelect={handleImageSelect}
+          imageId={imageId}
           currentCase={currentCase}
-          hasLoadedCase={!!currentCase}
-          hasLoadedImage={!!(selectedImage && selectedImage !== '/clear.jpg' && imageLoaded)}
-          activeSection={showNotes ? 'image-notes' : 'case-management'}
-          onImportComplete={handleImportComplete}
-          onOpenCase={() => {
-            void handleOpenCaseModal();
-          }}
-          onOpenListAllCases={() => setIsListCasesModalOpen(true)}
-          onOpenCaseExport={() => setIsCaseExportModalOpen(true)}
-          onOpenAuditTrail={() => setIsAuditTrailOpen(true)}
-          onOpenRenameCase={() => setIsRenameCaseModalOpen(true)}
-          onDeleteCase={() => {
-            void handleDeleteCaseAction();
-          }}
+          imageLoaded={imageLoaded}
+          setImageLoaded={setImageLoaded}
+          files={files}
+          setFiles={setFiles}
+          showNotes={showNotes}
+          setShowNotes={setShowNotes}
+          onAnnotationRefresh={refreshAnnotationData}
+          isReadOnly={isReadOnlyCase}
+          isConfirmed={!!annotationData?.confirmationData}
+          confirmationSaveVersion={confirmationSaveVersion}
+          isUploading={isUploading}
+          onUploadStatusChange={setIsUploading}
         />
+        <main className={styles.mainContent}>
         <div className={styles.canvasArea}>
           <div className={styles.toolbarWrapper}>
             <Toolbar 
@@ -674,7 +659,8 @@ export const Striae = ({ user }: StriaePage) => {
             currentImageId={imageId}
           />
         </div>
-      </main>
+        </main>
+      </div>
       <OpenCaseModal
         isOpen={isOpenCaseModalOpen}
         isSubmitting={isOpeningCase}
