@@ -60,8 +60,8 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [additionalNotes, setAdditionalNotes] = useState('');
   const [isCaseInfoOpen, setIsCaseInfoOpen] = useState(true);
-  const [isClassOpen, setIsClassOpen] = useState(false);
-  const [isIndexOpen, setIsIndexOpen] = useState(false);
+  const [isClassOpen, setIsClassOpen] = useState(true);
+  const [isIndexOpen, setIsIndexOpen] = useState(true);
   const [isSupportOpen, setIsSupportOpen] = useState(true);
   const areInputsDisabled = isUploading || isConfirmedImage;
 
