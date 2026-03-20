@@ -8,7 +8,8 @@ import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { getUserData, updateUserData } from '~/utils/data';
 import { auditService } from '~/services/audit';
 import { handleAuthError, ERROR_MESSAGES } from '~/services/firebase/errors';
-import { FormField, FormButton, FormMessage } from '../form';
+import { FormField, FormButton } from '../form';
+import { Toast } from '~/components/toast/toast';
 import { MfaPhoneUpdateSection } from './mfa-phone-update';
 import styles from './manage-profile.module.css';
 
@@ -26,8 +27,9 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMfaBusy, setIsMfaBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [showResetForm, setShowResetForm] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAuditViewer, setShowAuditViewer] = useState(false);
@@ -80,8 +82,7 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-    setSuccess('');
+    setShowToast(false);
 
     const oldDisplayName = user?.displayName || '';
     const oldBadgeId = initialBadgeId;
@@ -129,7 +130,12 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
 
       setInitialBadgeId(normalizedBadgeId);
 
-      setSuccess(ERROR_MESSAGES.PROFILE_UPDATED);
+      setToastType('success');
+      setToastMessage(ERROR_MESSAGES.PROFILE_UPDATED);
+      setShowToast(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (err) {
       const { message } = handleAuthError(err);
 
@@ -157,7 +163,9 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         );
       }
 
-      setError(message);
+      setToastType('error');
+      setToastMessage(message);
+      setShowToast(true);
     } finally {
       setIsLoading(false);
     }
@@ -193,6 +201,13 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
   }
 
   return (
+    <>
+    <Toast
+      message={toastMessage}
+      type={toastType}
+      isVisible={showToast}
+      onClose={() => setShowToast(false)}
+    />
     <div
       className={styles.modalOverlay}
       onMouseDown={handleOverlayMouseDown}
@@ -282,9 +297,6 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
 
           <MfaPhoneUpdateSection user={user} isOpen={isOpen} onBusyChange={handleMfaBusyChange} />
 
-          {error && <FormMessage type="error" message={error} />}
-          {success && <FormMessage type="success" message={success} />}
-
           <div className={styles.buttonGroup}>
             <FormButton variant="primary" type="submit" isLoading={isLoading} loadingText="Updating...">
               Update Profile
@@ -302,5 +314,6 @@ export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
         </form>
       </div>
     </div>
+    </>
   );
 };
