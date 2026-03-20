@@ -146,7 +146,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
       .left-annotation,
       .right-annotation {
         position: absolute;
-        padding: 12px 16px;
+        padding: 1rem 1.4rem;
         background: rgba(0, 0, 0, 0.7);
         border-radius: 6px;
         backdrop-filter: blur(4px);
@@ -154,16 +154,16 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
       .left-annotation {
-        top: 2%;
-        left: 4%;
+        top: 1rem;
+        left: 1rem;
       }
       .right-annotation {
-        top: 2%;
-        right: 4%;
+        top: 1rem;
+        right: 1rem;
       }
       .case-text {
         font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        font-size: 18px;
+        font-size: 1.1rem;
         font-weight: 700;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         white-space: nowrap;
