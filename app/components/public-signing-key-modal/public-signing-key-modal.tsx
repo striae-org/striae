@@ -368,7 +368,7 @@ export const PublicSigningKeyModal = ({
       >
         <div className={styles.header}>
           <h3 id={publicSigningKeyTitleId} className={styles.title}>
-            Striae Public Signing Key
+            Striae Verification Utility
           </h3>
           <button
             className={styles.closeButton}

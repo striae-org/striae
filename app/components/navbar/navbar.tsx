@@ -3,6 +3,8 @@ import styles from './navbar.module.css';
 import { SignOut } from '../actions/signout';
 import { ManageProfile } from '../user/manage-profile';
 import { CaseImport } from '../sidebar/case-import/case-import';
+import { PublicSigningKeyModal } from '~/components/public-signing-key-modal/public-signing-key-modal';
+import { getCurrentPublicSigningKeyDetails } from '~/utils/forensics';
 import { type ImportResult, type ConfirmationImportResult } from '~/types';
 
 interface NavbarProps {
@@ -14,7 +16,6 @@ interface NavbarProps {
   isCurrentImageConfirmed?: boolean;
   hasLoadedCase?: boolean;
   hasLoadedImage?: boolean;
-  activeSection?: 'case-management' | 'file-management' | 'image-notes';
   onImportComplete?: (result: ImportResult | ConfirmationImportResult) => void;
   onOpenCase?: () => void;
   onOpenListAllCases?: () => void;
@@ -36,7 +37,6 @@ export const Navbar = ({
   isCurrentImageConfirmed = false,
   hasLoadedCase = false,
   hasLoadedImage = false,
-  activeSection = 'case-management',
   onImportComplete,
   onOpenCase,
   onOpenListAllCases,
@@ -50,8 +50,10 @@ export const Navbar = ({
 }: NavbarProps) => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isPublicKeyModalOpen, setIsPublicKeyModalOpen] = useState(false);
   const [isCaseMenuOpen, setIsCaseMenuOpen] = useState(false);
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
+  const { keyId: publicSigningKeyId, publicKeyPem } = getCurrentPublicSigningKeyDetails();
   const caseMenuRef = useRef<HTMLDivElement>(null);
   const fileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -193,6 +195,18 @@ export const Navbar = ({
                     Delete Case
                   </button>
                 )}
+                <div className={styles.caseMenuSectionLabel}>Verification</div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={`${styles.caseMenuItem} ${styles.caseMenuItemKey}`}
+                  onClick={() => {
+                    setIsPublicKeyModalOpen(true);
+                    setIsCaseMenuOpen(false);
+                  }}
+                >
+                  Verify Exports
+                </button>
                 {currentCase && (
                   <div className={styles.caseMenuCaption}>Case: {currentCase}</div>
                 )}
@@ -292,6 +306,12 @@ export const Navbar = ({
       <ManageProfile
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
+      />
+      <PublicSigningKeyModal
+        isOpen={isPublicKeyModalOpen}
+        onClose={() => setIsPublicKeyModalOpen(false)}
+        publicSigningKeyId={publicSigningKeyId}
+        publicKeyPem={publicKeyPem}
       />
     </>
   );
