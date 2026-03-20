@@ -302,7 +302,7 @@ return (
       />
       
         <div className={styles.filesSection}>
-        <div className={isReadOnly && currentCase ? styles.readOnlyContainer : styles.caseHeader}>
+        <div className={currentCase ? (isReadOnly ? styles.readOnlyContainer : styles.caseHeader) : styles.emptyCaseHeader}>
         <h4 className={`${styles.caseNumber} ${
           currentCase && caseConfirmationStatus.includeConfirmation 
             ? caseConfirmationStatus.isConfirmed 
