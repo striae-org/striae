@@ -13,6 +13,26 @@ hr {
   margin-bottom: 2rem;
 }
 
+.sectionToggle {
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sectionToggleIcon {
+  color: #6c757d;
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: 500;
+}
+
 .sectionTitle {
   font-size: 1.3rem;
   font-weight: 600;
@@ -331,6 +351,19 @@ textarea:focus {
   margin-top: 1rem;
   margin-bottom: 1rem;
   box-sizing: border-box;
+}
+
+.notesActionBar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notesActionBarSticky {
+  position: sticky;
+  bottom: 0;
+  padding: 0.75rem 0 0.25rem;
+  background: linear-gradient(to top, white 72%, rgba(255, 255, 255, 0));
 }
 
 .saveButton:hover {

@@ -1,0 +1,49 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: color-mix(in lab, var(--background) 56%, transparent);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--zIndex5);
+}
+
+.modal {
+  position: relative;
+  width: min(900px, calc(100vw - 2rem));
+  max-height: calc(100vh - 4rem);
+  background: var(--backgroundLight);
+  border-radius: var(--spaceXS);
+  box-shadow: 0 var(--spaceXS) var(--spaceL)
+    color-mix(in lab, var(--black) 16%, transparent);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spaceM) var(--spaceL);
+  border-bottom: 1px solid color-mix(in lab, var(--text) 12%, transparent);
+}
+
+.title {
+  margin: 0;
+  color: var(--textTitle);
+  font-size: var(--fontSizeBodyM);
+  font-weight: var(--fontWeightMedium);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--textLight);
+}
+
+.content {
+  padding: var(--spaceM) var(--spaceL);
+  overflow-y: auto;
+  max-height: calc(100vh - 11rem);
+}

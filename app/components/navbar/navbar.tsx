@@ -11,6 +11,7 @@ interface NavbarProps {
   isReadOnly?: boolean;
   currentCase?: string;
   currentFileName?: string;
+  isCurrentImageConfirmed?: boolean;
   hasLoadedCase?: boolean;
   hasLoadedImage?: boolean;
   activeSection?: 'case-management' | 'file-management' | 'image-notes';
@@ -23,6 +24,7 @@ interface NavbarProps {
   onDeleteCase?: () => void;
   onOpenViewAllFiles?: () => void;
   onDeleteCurrentFile?: () => void;
+  onOpenImageNotes?: () => void;
 }
 
 export const Navbar = ({
@@ -31,6 +33,7 @@ export const Navbar = ({
   isReadOnly = false,
   currentCase,
   currentFileName,
+  isCurrentImageConfirmed = false,
   hasLoadedCase = false,
   hasLoadedImage = false,
   activeSection = 'case-management',
@@ -43,6 +46,7 @@ export const Navbar = ({
   onDeleteCase,
   onOpenViewAllFiles,
   onDeleteCurrentFile,
+  onOpenImageNotes,
 }: NavbarProps) => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -79,7 +83,8 @@ export const Navbar = ({
   const caseActionsDisabled = false;
   const isCaseManagementActive = true;
   const isFileManagementActive = isFileMenuOpen || hasLoadedImage;
-  const isImageNotesActive = hasLoadedImage && activeSection === 'image-notes';
+  const canOpenImageNotes = hasLoadedImage && !isCurrentImageConfirmed;
+  const isImageNotesActive = canOpenImageNotes;
   const canDeleteCurrentFile = hasLoadedImage && !isReadOnly;
 
   return (
@@ -246,9 +251,12 @@ export const Navbar = ({
           <button
             type="button"
             className={`${styles.navSectionButton} ${isImageNotesActive ? styles.navSectionButtonActive : ''}`}
-            disabled={!hasLoadedImage}
+            disabled={!canOpenImageNotes}
             aria-pressed={isImageNotesActive}
-            title={!hasLoadedImage ? 'Load an image to enable image notes' : undefined}
+            title={!hasLoadedImage ? 'Load an image to enable image notes' : isCurrentImageConfirmed ? 'Confirmed images are read-only and viewable via toolbar only' : undefined}
+            onClick={() => {
+              onOpenImageNotes?.();
+            }}
           >
             Image Notes
           </button>

@@ -2,7 +2,6 @@ import type { User } from 'firebase/auth';
 import { useState, useCallback } from 'react';
 import styles from './sidebar.module.css';
 import { CaseSidebar } from './cases/case-sidebar';
-import { NotesSidebar } from './notes/notes-sidebar';
 import { Toast } from '../toast/toast';
 import { type FileData } from '~/types';
 
@@ -74,35 +73,23 @@ export const Sidebar = ({
 
   return (
     <div className={styles.sidebar}>
-      {showNotes ? (
-        <NotesSidebar 
-          currentCase={currentCase}
-          onReturn={() => setShowNotes(false)}
-          user={user}
-          imageId={imageId || ''}
-          onAnnotationRefresh={onAnnotationRefresh}
-          originalFileName={files.find(file => file.id === imageId)?.originalFilename}
-          isUploading={isUploading}
-        />
-      ) : (
-        <CaseSidebar 
-          user={user} 
-          onImageSelect={onImageSelect}
-          currentCase={currentCase}
-          imageLoaded={imageLoaded}
-          setImageLoaded={setImageLoaded}
-          files={files}
-          setFiles={setFiles}
-          onNotesClick={() => setShowNotes(true)}
-          isReadOnly={isReadOnly}
-          isConfirmed={isConfirmed}
-          confirmationSaveVersion={confirmationSaveVersion}
-          selectedFileId={imageId}
-          isUploading={isUploading}
-          onUploadStatusChange={handleUploadStatusChange}
-          onUploadComplete={handleUploadComplete}
-        />
-      )}
+      <CaseSidebar 
+        user={user} 
+        onImageSelect={onImageSelect}
+        currentCase={currentCase}
+        imageLoaded={imageLoaded}
+        setImageLoaded={setImageLoaded}
+        files={files}
+        setFiles={setFiles}
+        onNotesClick={() => setShowNotes(true)}
+        isReadOnly={isReadOnly}
+        isConfirmed={isConfirmed}
+        confirmationSaveVersion={confirmationSaveVersion}
+        selectedFileId={imageId}
+        isUploading={isUploading}
+        onUploadStatusChange={handleUploadStatusChange}
+        onUploadComplete={handleUploadComplete}
+      />
       <Toast 
         message={toastMessage}
         type={toastType}

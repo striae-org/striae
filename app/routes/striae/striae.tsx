@@ -13,6 +13,7 @@ import { generatePDF } from '~/components/actions/generate-pdf';
 import { CaseExport, type ExportFormat } from '~/components/sidebar/case-export/case-export';
 import { CasesModal } from '~/components/sidebar/cases/cases-modal';
 import { FilesModal } from '~/components/sidebar/files/files-modal';
+import { NotesEditorModal } from '~/components/sidebar/notes/notes-editor-modal';
 import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import { fetchUserApi } from '~/utils/api';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
@@ -562,6 +563,15 @@ export const Striae = ({ user }: StriaePage) => {
   }
 };
 
+  const hasLoadedImage = !!(selectedImage && selectedImage !== '/clear.jpg' && imageLoaded);
+  const isCurrentImageConfirmed = hasLoadedImage && !!annotationData?.confirmationData;
+
+  useEffect(() => {
+    if (showNotes && (!hasLoadedImage || isCurrentImageConfirmed)) {
+      setShowNotes(false);
+    }
+  }, [showNotes, hasLoadedImage, isCurrentImageConfirmed]);
+
   // Automatic save handler for annotation updates
   const handleAnnotationUpdate = async (data: AnnotationData) => {
     if (annotationData?.confirmationData) {
@@ -633,8 +643,9 @@ export const Striae = ({ user }: StriaePage) => {
         isReadOnly={isReadOnlyCase}
         currentCase={currentCase}
         currentFileName={selectedFilename}
+        isCurrentImageConfirmed={isCurrentImageConfirmed}
         hasLoadedCase={!!currentCase}
-        hasLoadedImage={!!(selectedImage && selectedImage !== '/clear.jpg' && imageLoaded)}
+        hasLoadedImage={hasLoadedImage}
         activeSection="case-management"
         onImportComplete={handleImportComplete}
         onOpenCase={() => {
@@ -651,6 +662,7 @@ export const Striae = ({ user }: StriaePage) => {
         onDeleteCurrentFile={() => {
           void handleDeleteCurrentFileAction();
         }}
+        onOpenImageNotes={() => setShowNotes(true)}
       />
       <div className={styles.contentRow}>
         <SidebarContainer 
@@ -732,6 +744,16 @@ export const Striae = ({ user }: StriaePage) => {
         setFiles={setFiles}
         isReadOnly={isReadOnlyCase}
         selectedFileId={imageId}
+      />
+      <NotesEditorModal
+        isOpen={showNotes}
+        onClose={() => setShowNotes(false)}
+        currentCase={currentCase}
+        user={user}
+        imageId={imageId || ''}
+        onAnnotationRefresh={refreshAnnotationData}
+        originalFileName={files.find(file => file.id === imageId)?.originalFilename}
+        isUploading={isUploading}
       />
       <CaseExport
         isOpen={isCaseExportModalOpen}
