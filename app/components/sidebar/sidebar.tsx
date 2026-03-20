@@ -3,9 +3,8 @@ import { useState, useCallback } from 'react';
 import styles from './sidebar.module.css';
 import { CaseSidebar } from './cases/case-sidebar';
 import { NotesSidebar } from './notes/notes-sidebar';
-import { CaseImport } from './case-import/case-import';
 import { Toast } from '../toast/toast';
-import { type FileData, type ImportResult, type ConfirmationImportResult } from '~/types';
+import { type FileData } from '~/types';
 
 interface SidebarProps {
   user: User;
@@ -60,7 +59,6 @@ export const Sidebar = ({
   isUploading: initialIsUploading = false,
   onUploadStatusChange,
 }: SidebarProps) => {
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(initialIsUploading);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error' | 'warning'>('success');
@@ -70,33 +68,6 @@ export const Sidebar = ({
     setIsUploading(uploading);
     onUploadStatusChange?.(uploading);
   }, [onUploadStatusChange]);
-
-  const handleImportComplete = useCallback((result: ImportResult | ConfirmationImportResult) => {
-    if (result.success) {
-      // For case imports, load the imported case automatically
-      if ('isReadOnly' in result) {
-        // This is an ImportResult (case import)
-        if (result.caseNumber && result.isReadOnly) {
-          // Successful read-only case import - load the case
-          onCaseChange(result.caseNumber);
-          setCurrentCase(result.caseNumber);
-          setCaseNumber(result.caseNumber);
-          setSuccessAction('loaded');
-        } else if (!result.caseNumber && !result.isReadOnly) {
-          // Read-only case cleared - reset all UI state
-          setCurrentCase('');
-          setCaseNumber('');
-          setFiles([]);
-          onImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
-          setImageLoaded(false);
-          onCaseChange(''); // This will trigger canvas/annotation state reset in main component
-          setShowNotes(false); // Close notes sidebar
-          setSuccessAction(null);
-        }
-      }
-      // For confirmation imports, no action needed - the confirmations are already loaded
-    }
-  }, [onCaseChange, setCurrentCase, setCaseNumber, setSuccessAction, setFiles, onImageSelect, setImageLoaded, setShowNotes]);
 
   const handleUploadComplete = useCallback((result: { successCount: number; failedFiles: string[] }) => {
     if (result.successCount === 0 && result.failedFiles.length > 0) {
@@ -119,11 +90,6 @@ export const Sidebar = ({
 
   return (
     <div className={styles.sidebar}>
-      <CaseImport 
-        isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
-        onImportComplete={handleImportComplete}
-      />
       {showNotes ? (
         <NotesSidebar 
           currentCase={currentCase}
@@ -135,43 +101,31 @@ export const Sidebar = ({
           isUploading={isUploading}
         />
       ) : (
-        <>
-          <CaseSidebar 
-            user={user} 
-            onImageSelect={onImageSelect}
-            onCaseChange={onCaseChange}
-            currentCase={currentCase}
-            setCurrentCase={setCurrentCase}
-            imageLoaded={imageLoaded}
-            setImageLoaded={setImageLoaded}
-            files={files}
-            setFiles={setFiles}
-            caseNumber={caseNumber}
-            setCaseNumber={setCaseNumber}
-            error={error}
-            setError={setError}
-            successAction={successAction}
-            setSuccessAction={setSuccessAction}
-            onNotesClick={() => setShowNotes(true)}
-            isReadOnly={isReadOnly}
-            isConfirmed={isConfirmed}
-            confirmationSaveVersion={confirmationSaveVersion}
-            selectedFileId={imageId}
-            isUploading={isUploading}
-            onUploadStatusChange={handleUploadStatusChange}
-            onUploadComplete={handleUploadComplete}
-          />
-          <div className={styles.importSection}>
-            <button 
-              onClick={() => setIsImportModalOpen(true)}
-              className={styles.importButton}
-              disabled={isUploading}
-              title={isUploading ? 'Cannot import while uploading files' : undefined}
-            >
-              Import/Clear RO Case
-            </button>
-          </div>
-        </>
+        <CaseSidebar 
+          user={user} 
+          onImageSelect={onImageSelect}
+          onCaseChange={onCaseChange}
+          currentCase={currentCase}
+          setCurrentCase={setCurrentCase}
+          imageLoaded={imageLoaded}
+          setImageLoaded={setImageLoaded}
+          files={files}
+          setFiles={setFiles}
+          caseNumber={caseNumber}
+          setCaseNumber={setCaseNumber}
+          error={error}
+          setError={setError}
+          successAction={successAction}
+          setSuccessAction={setSuccessAction}
+          onNotesClick={() => setShowNotes(true)}
+          isReadOnly={isReadOnly}
+          isConfirmed={isConfirmed}
+          confirmationSaveVersion={confirmationSaveVersion}
+          selectedFileId={imageId}
+          isUploading={isUploading}
+          onUploadStatusChange={handleUploadStatusChange}
+          onUploadComplete={handleUploadComplete}
+        />
       )}
       <Toast 
         message={toastMessage}

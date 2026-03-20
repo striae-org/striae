@@ -195,6 +195,23 @@ export const Striae = ({ user }: StriaePage) => {
     setAnnotationRefreshTrigger(prev => prev + 1);
   };
 
+  // Handle import/clear read-only case
+  const handleImportComplete = (result: { success: boolean; caseNumber?: string; isReadOnly?: boolean }) => {
+    if (result.success) {
+      if (result.caseNumber && result.isReadOnly) {
+        // Successful read-only case import - load the case
+        handleCaseChange(result.caseNumber);
+      } else if (!result.caseNumber && !result.isReadOnly) {
+        // Read-only case cleared - reset all UI state
+        setCurrentCase('');
+        setCaseNumber('');
+        setFiles([]);
+        handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
+        setShowNotes(false);
+      }
+    }
+  };
+
   useEffect(() => {
     // Cleanup function to clear image when component unmounts
     return () => {
@@ -385,6 +402,7 @@ export const Striae = ({ user }: StriaePage) => {
           isUploading={isUploading}
           company={userCompany}
           isReadOnly={isReadOnlyCase}
+          onImportComplete={handleImportComplete}
         />
         <div className={styles.canvasArea}>
           <div className={styles.toolbarWrapper}>

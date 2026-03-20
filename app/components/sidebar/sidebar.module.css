@@ -200,33 +200,6 @@
   text-underline-offset: 3px;
 }
 
-/* Import Section */
-.importSection {
-  margin-top: auto;
-  padding: 1rem 0;
-  border-top: 1px solid var(--divider);
-}
-
-.importButton {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: var(--success);
-  color: white;
-  border: none;
-  border-radius: var(--spaceXS);
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
-  cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  box-shadow: 0 1px 3px color-mix(in lab, var(--success) 30%, transparent);
-  box-sizing: border-box;
-}
-
-.importButton:hover {
-  background: color-mix(in lab, var(--success) 85%, var(--black));
-  box-shadow: 0 2px 6px color-mix(in lab, var(--success) 40%, transparent);
-}
-
 /* Hash Button */
 .hashButton {
   width: 100%;

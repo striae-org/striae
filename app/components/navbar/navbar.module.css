@@ -9,6 +9,7 @@
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
   z-index: 35;
+  gap: var(--spaceL);
 }
 
 .companyLabel {
@@ -19,6 +20,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 50%;
+  flex-shrink: 0;
 }
 
 .navbar a {
@@ -32,11 +34,48 @@
   text-decoration: none;
 }
 
+.navCentral {
+  display: flex;
+  align-items: center;
+  gap: var(--spaceL);
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
 .navActions {
   display: flex;
   align-items: center;
   gap: var(--spaceM);
-  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.navTextButton {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  color: #495057;
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.navTextButton:hover {
+  color: #212529;
+  text-decoration: none;
+}
+
+.navTextButton:focus,
+.navTextButton:active,
+.navTextButton:visited {
+  text-decoration: none;
+}
+
+.navTextButton:disabled {
+  color: #adb5bd;
+  cursor: not-allowed;
+  text-decoration: none;
 }
 
 .profileTextButton {
