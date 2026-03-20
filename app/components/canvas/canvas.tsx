@@ -298,6 +298,7 @@ export const Canvas = ({
       ) : imageUrl && imageUrl !== '/clear.jpg' ? (
         <div className={styles.imageAndNotesContainer}>
           <div className={styles.imageContainer}>
+            <div className={styles.imageWrapper}>
             {/* Class Characteristics - Above Image */}
             {activeAnnotations?.has('class') && annotationData && (annotationData.customClass || annotationData.classType) && (
               <div className={styles.classCharacteristics}>
@@ -326,7 +327,7 @@ export const Canvas = ({
             draggable={false}
           />
           
-          {/* Box Annotations Component - Show when box tool is active for visibility */}
+          {/* Box Annotations Component - contained within imageWrapper */}
           {activeAnnotations?.has('box') && (
             <BoxAnnotations
               imageRef={imageRef}
@@ -343,7 +344,7 @@ export const Canvas = ({
             />
           )}
           
-          {/* Annotations Overlay */}
+          {/* Annotations Overlay - contained within imageWrapper */}
           {activeAnnotations?.has('number') && annotationData && (
             <div className={styles.annotationsOverlay}>
               {/* Left side case and item numbers */}
@@ -378,7 +379,7 @@ export const Canvas = ({
             </div>
           )}
           
-          {/* Index Number Overlay */}
+          {/* Index Number Overlay - contained within imageWrapper */}
           {activeAnnotations?.has('index') && annotationData?.indexType === 'number' && annotationData?.indexNumber && (
             <div className={styles.annotationsOverlay}>
               <div 
@@ -395,7 +396,8 @@ export const Canvas = ({
               </div>
             </div>
           )}
-        </div>
+            </div>{/* end imageWrapper */}
+        </div>{/* end imageContainer */}
         
         {/* Additional Notes - Right Panel */}
         {activeAnnotations?.has('notes') && annotationData?.additionalNotes && (
