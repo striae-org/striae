@@ -72,6 +72,7 @@ export function generateMetadataRows(exportData: CaseExportData): TabularCell[][
     ['Exported By (UID)', exportData.metadata.exportedByUid || 'N/A'],
     ['Exported By (Name)', exportData.metadata.exportedByName || 'N/A'],
     ['Exported By (Company)', exportData.metadata.exportedByCompany || 'N/A'],
+    ['Exported By (Badge/ID)', exportData.metadata.exportedByBadgeId || 'N/A'],
     ['Striae Export Schema Version', exportData.metadata.striaeExportSchemaVersion],
     ['Total Files', exportData.metadata.totalFiles.toString()],
     [''],

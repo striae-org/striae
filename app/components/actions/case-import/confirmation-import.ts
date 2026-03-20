@@ -307,7 +307,8 @@ export async function importConfirmationData(
         present: signaturePresent,
         valid: signatureValid,
         keyId: signatureKeyId
-      }
+      },
+      confirmationData.metadata.exportedByBadgeId // Reviewer's badge/ID number
     );
     
     auditService.endWorkflow();
@@ -326,6 +327,7 @@ export async function importConfirmationData(
     let hashValidForAudit = hashValid;
     let exporterUidValidatedForAudit = true;
     let reviewingExaminerUidForAudit: string | undefined = undefined;
+    let reviewerBadgeIdForAudit: string | undefined = undefined;
     let totalConfirmationsForAudit = 0; // Default to 0 for failed imports
     let signaturePresentForAudit = signaturePresent;
     let signatureValidForAudit = signatureValid;
@@ -336,6 +338,7 @@ export async function importConfirmationData(
     // First, try to extract basic metadata for audit purposes (if file is parseable)
     if (auditConfirmationData) {
       reviewingExaminerUidForAudit = auditConfirmationData.metadata?.exportedByUid;
+      reviewerBadgeIdForAudit = auditConfirmationData.metadata?.exportedByBadgeId;
       totalConfirmationsForAudit = auditConfirmationData.metadata?.totalConfirmations || 0;
       if (auditConfirmationData.metadata?.signature) {
         signaturePresentForAudit = true;
@@ -345,6 +348,7 @@ export async function importConfirmationData(
       try {
         const extracted = await extractConfirmationImportPackage(confirmationFile);
         reviewingExaminerUidForAudit = extracted.confirmationData.metadata?.exportedByUid;
+        reviewerBadgeIdForAudit = extracted.confirmationData.metadata?.exportedByBadgeId;
         totalConfirmationsForAudit = extracted.confirmationData.metadata?.totalConfirmations || 0;
         confirmationJsonFileNameForAudit = extracted.confirmationFileName;
         if (extracted.confirmationData.metadata?.signature) {
@@ -393,7 +397,8 @@ export async function importConfirmationData(
         present: signaturePresentForAudit,
         valid: signatureValidForAudit,
         keyId: signatureKeyIdForAudit
-      }
+      },
+      reviewerBadgeIdForAudit // Reviewer's badge/ID number (when extractable)
     );
     
     auditService.endWorkflow();

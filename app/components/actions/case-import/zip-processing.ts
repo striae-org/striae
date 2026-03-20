@@ -281,6 +281,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
       exportedBy: caseData.metadata.exportedBy || null,
       exportedByName: caseData.metadata.exportedByName || null,
       exportedByCompany: caseData.metadata.exportedByCompany || null,
+      exportedByBadgeId: caseData.metadata.exportedByBadgeId || null,
       exportDate: caseData.metadata.exportDate,
       totalFiles,
       caseCreatedDate: caseData.metadata.caseCreatedDate,

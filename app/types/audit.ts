@@ -59,6 +59,7 @@ export interface AuditDetails {
   // Context & Workflow
   originalExaminerUid?: string;
   reviewingExaminerUid?: string;
+  reviewerBadgeId?: string;
   workflowPhase?: WorkflowPhase;
   
   // Performance & Metrics
@@ -160,6 +161,7 @@ export interface CreateAuditEntryParams {
   performanceMetrics?: PerformanceMetrics;
   originalExaminerUid?: string;
   reviewingExaminerUid?: string;
+  reviewerBadgeId?: string;
   // Extended detail fields
   caseDetails?: CaseAuditDetails;
   fileDetails?: FileAuditDetails;

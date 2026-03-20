@@ -220,6 +220,7 @@ interface BuildConfirmationImportAuditParamsInput {
   confirmationsImported: number;
   errors?: string[];
   reviewingExaminerUid?: string;
+  reviewerBadgeId?: string;
   performanceMetrics?: PerformanceMetrics;
   exporterUidValidated?: boolean;
   totalConfirmationsInFile?: number;
@@ -269,6 +270,7 @@ export const buildConfirmationImportAuditParams = (
         },
     originalExaminerUid: input.user.uid,
     reviewingExaminerUid: input.reviewingExaminerUid,
+    reviewerBadgeId: input.reviewerBadgeId,
     caseDetails: input.totalConfirmationsInFile !== undefined
       ? {
           totalAnnotations: input.totalConfirmationsInFile

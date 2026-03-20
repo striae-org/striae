@@ -12,7 +12,8 @@ export async function getUserExportMetadata(user: User) {
         exportedBy: user.email,
         exportedByUid: userData.uid,
         exportedByName: `${userData.firstName} ${userData.lastName}`.trim(),
-        exportedByCompany: userData.company
+        exportedByCompany: userData.company,
+        ...(userData.badgeId ? { exportedByBadgeId: userData.badgeId } : {})
       };
     }
   } catch (error) {

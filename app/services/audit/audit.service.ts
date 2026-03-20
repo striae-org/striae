@@ -286,7 +286,8 @@ export class AuditService {
       present: boolean;
       valid: boolean;
       keyId?: string;
-    }
+    },
+    reviewerBadgeId?: string // Badge/ID number of the reviewing examiner who exported the file
   ): Promise<void> {
     await this.logEvent(
       buildConfirmationImportAuditParams({
@@ -298,6 +299,7 @@ export class AuditService {
         confirmationsImported,
         errors,
         reviewingExaminerUid,
+        reviewerBadgeId,
         performanceMetrics,
         exporterUidValidated,
         totalConfirmationsInFile,

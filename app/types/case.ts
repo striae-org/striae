@@ -28,6 +28,7 @@ export interface CaseExportData {
     exportedByUid: string;
     exportedByName: string;
     exportedByCompany: string;
+    exportedByBadgeId?: string;
     striaeExportSchemaVersion: string;
     totalFiles: number;
   };
@@ -56,6 +57,7 @@ export interface AllCasesExportData {
     exportedByUid: string;
     exportedByName: string;
     exportedByCompany: string;
+    exportedByBadgeId?: string;
     striaeExportSchemaVersion: string;
     totalCases: number;
     totalFiles: number;
