@@ -148,7 +148,7 @@
 .leftAnnotation,
 .rightAnnotation {
   position: absolute;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.4rem;
   background: rgba(0, 0, 0, 0.7);
   border-radius: 6px;
   backdrop-filter: blur(4px);
@@ -170,7 +170,7 @@
   position: absolute;
   bottom: 1rem;
   left: 1rem;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.4rem;
   background: rgba(0, 0, 0, 0.7);
   border-radius: 6px;
   backdrop-filter: blur(4px);
@@ -198,7 +198,7 @@
 }
 
 .classText {
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
   background: rgba(0, 0, 0, 0.8);
   color: #ffffff;
   border-radius: 8px;
@@ -285,14 +285,16 @@
 .notesPanel {
   width: 260px;
   flex-shrink: 0;
+  /* Opt out of stretch so the explicit height takes effect, stopping the panel
+     before the Subclass badge (bottom:1rem, ~2.5rem tall = 3.5rem from canvas bottom).
+     calc(100% - 3rem) lands ~4rem from the canvas bottom, clearing the badge. */
+  align-self: flex-start;
+  height: calc(100% - 3rem);
   display: flex;
   flex-direction: column;
   background: rgba(20, 20, 20, 0.55);
   border-left: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
-  /* Reserve space at the bottom so the Subclass indicator never overlaps content.
-     Subclass badge: ~2.5rem tall at bottom:1rem  → 3.5rem occupied + a small gap. */
-  padding-bottom: 4rem;
 }
 
 .notesPanelHeader {
