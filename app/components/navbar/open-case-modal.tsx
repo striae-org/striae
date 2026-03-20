@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import styles from './open-case-modal.module.css';
 
 interface OpenCaseModalProps {
@@ -20,6 +21,7 @@ export const OpenCaseModal = ({
 }: OpenCaseModalProps) => {
   const [caseNumber, setCaseNumber] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const isCloseBlocked = isSubmitting;
 
   useEffect(() => {
     if (!isOpen) {
@@ -36,13 +38,23 @@ export const OpenCaseModal = ({
   }, [isOpen]);
 
   const handleClose = () => {
-    if (isSubmitting) {
+    if (isCloseBlocked) {
       return;
     }
 
     setCaseNumber('');
     onClose();
   };
+
+  const {
+    requestClose,
+    handleOverlayMouseDown,
+    handleOverlayKeyDown,
+  } = useOverlayDismiss({
+    isOpen,
+    onClose: handleClose,
+    canDismiss: !isCloseBlocked,
+  });
 
   const handleSubmit = async () => {
     const trimmedCaseNumber = caseNumber.trim();
@@ -59,12 +71,11 @@ export const OpenCaseModal = ({
   return (
     <div
       className={styles.overlay}
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          handleClose();
-        }
-      }}
+      role="button"
+      tabIndex={0}
+      aria-label="Close open case dialog"
+      onMouseDown={handleOverlayMouseDown}
+      onKeyDown={handleOverlayKeyDown}
     >
       <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Open Case">
         <h3 className={styles.title}>{title}</h3>
@@ -87,8 +98,8 @@ export const OpenCaseModal = ({
           <button
             type="button"
             className={styles.cancelButton}
-            onClick={handleClose}
-            disabled={isSubmitting}
+            onClick={requestClose}
+            disabled={isCloseBlocked}
           >
             Cancel
           </button>

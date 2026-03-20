@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import styles from './rename-case-modal.module.css';
 
 interface RenameCaseModalProps {
@@ -18,11 +19,22 @@ export const RenameCaseModal = ({
 }: RenameCaseModalProps) => {
   const [newCaseName, setNewCaseName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const isCloseBlocked = isSubmitting;
 
   const handleClose = () => {
     setNewCaseName('');
     onClose();
   };
+
+  const {
+    requestClose,
+    handleOverlayMouseDown,
+    handleOverlayKeyDown,
+  } = useOverlayDismiss({
+    isOpen,
+    onClose: handleClose,
+    canDismiss: !isCloseBlocked,
+  });
 
   useEffect(() => {
     if (!isOpen) {
@@ -46,11 +58,14 @@ export const RenameCaseModal = ({
   };
 
   return (
-    <div className={styles.overlay} role="presentation" onMouseDown={(event) => {
-      if (event.target === event.currentTarget && !isSubmitting) {
-        handleClose();
-      }
-    }}>
+    <div
+      className={styles.overlay}
+      role="button"
+      tabIndex={0}
+      aria-label="Close rename case dialog"
+      onMouseDown={handleOverlayMouseDown}
+      onKeyDown={handleOverlayKeyDown}
+    >
       <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Rename Case">
         <h3 className={styles.title}>Rename Case</h3>
         <p className={styles.subtitle}>Current case: {currentCase}</p>
@@ -72,8 +87,8 @@ export const RenameCaseModal = ({
           <button
             type="button"
             className={styles.cancelButton}
-            onClick={handleClose}
-            disabled={isSubmitting}
+            onClick={requestClose}
+            disabled={isCloseBlocked}
           >
             Cancel
           </button>

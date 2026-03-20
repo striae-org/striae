@@ -30,7 +30,8 @@ export const useOverlayDismiss = ({
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        event.preventDefault();
+        requestClose();
       }
     };
 
@@ -39,7 +40,7 @@ export const useOverlayDismiss = ({
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, closeOnEscape, canDismiss, onClose]);
+  }, [isOpen, closeOnEscape, canDismiss, requestClose]);
 
   const handleOverlayMouseDown = useCallback<MouseEventHandler<HTMLDivElement>>((event) => {
     if (!closeOnBackdrop || event.target !== event.currentTarget) {
