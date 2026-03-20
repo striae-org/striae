@@ -192,6 +192,33 @@
   border-color: #d6dce2;
 }
 
+.caseMenuItem:disabled {
+  color: #adb5bd;
+  background: rgba(173, 181, 189, 0.14);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+.caseMenuItemOpen {
+  background: color-mix(in lab, #4a90e2 16%, #ffffff);
+  color: #1f5fa7;
+  border-color: color-mix(in lab, #4a90e2 30%, transparent);
+}
+
+.caseMenuItemOpen:hover {
+  background: color-mix(in lab, #4a90e2 22%, #ffffff);
+}
+
+.caseMenuItemList {
+  background: color-mix(in lab, #0d6efd 20%, #ffffff);
+  color: #0a4fad;
+  border-color: color-mix(in lab, #0d6efd 34%, transparent);
+}
+
+.caseMenuItemList:hover {
+  background: color-mix(in lab, #0d6efd 26%, #ffffff);
+}
+
 .caseMenuItemExport {
   background: color-mix(in lab, #198754 16%, #ffffff);
   color: #146c43;
@@ -213,14 +240,14 @@
 }
 
 .caseMenuItemRename {
-  background: #ffc107;
-  color: #3f2f00;
-  border-color: #e8b103;
+  background: color-mix(in lab, #ffc107 16%, #ffffff);
+  color: #7a5a00;
+  border-color: color-mix(in lab, #ffc107 30%, transparent);
 }
 
 .caseMenuItemRename:hover {
-  background: #ffca2c;
-  border-color: #e8b103;
+  background: color-mix(in lab, #ffc107 22%, #ffffff);
+  border-color: color-mix(in lab, #ffc107 36%, transparent);
 }
 
 .caseMenuItemDelete {

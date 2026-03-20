@@ -14,6 +14,8 @@ interface NavbarProps {
   hasLoadedImage?: boolean;
   activeSection?: 'case-management' | 'file-management' | 'image-notes';
   onImportComplete?: (result: ImportResult | ConfirmationImportResult) => void;
+  onOpenCase?: () => void;
+  onOpenListAllCases?: () => void;
   onOpenCaseExport?: () => void;
   onOpenAuditTrail?: () => void;
   onOpenRenameCase?: () => void;
@@ -29,6 +31,8 @@ export const Navbar = ({
   hasLoadedImage = false,
   activeSection = 'case-management',
   onImportComplete,
+  onOpenCase,
+  onOpenListAllCases,
   onOpenCaseExport,
   onOpenAuditTrail,
   onOpenRenameCase,
@@ -56,7 +60,7 @@ export const Navbar = ({
     };
   }, [isCaseMenuOpen]);
 
-  const caseActionsDisabled = !hasLoadedCase || isUploading;
+  const caseActionsDisabled = isUploading;
   const isCaseManagementActive = hasLoadedCase && activeSection === 'case-management';
   const isFileManagementActive = hasLoadedCase && activeSection === 'file-management';
   const isImageNotesActive = hasLoadedImage && activeSection === 'image-notes';
@@ -77,7 +81,7 @@ export const Navbar = ({
               aria-haspopup="menu"
               disabled={caseActionsDisabled}
               onClick={() => setIsCaseMenuOpen((prev) => !prev)}
-              title={!hasLoadedCase ? 'Load a case to access case actions' : (isUploading ? 'Cannot access case actions while uploading' : undefined)}
+              title={isUploading ? 'Cannot access case actions while uploading' : undefined}
             >
               Case Management
             </button>
@@ -86,7 +90,31 @@ export const Navbar = ({
                 <button
                   type="button"
                   role="menuitem"
+                  className={`${styles.caseMenuItem} ${styles.caseMenuItemOpen}`}
+                  onClick={() => {
+                    onOpenCase?.();
+                    setIsCaseMenuOpen(false);
+                  }}
+                >
+                  Open Case
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={`${styles.caseMenuItem} ${styles.caseMenuItemList}`}
+                  onClick={() => {
+                    onOpenListAllCases?.();
+                    setIsCaseMenuOpen(false);
+                  }}
+                >
+                  List All Cases
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
                   className={`${styles.caseMenuItem} ${styles.caseMenuItemExport}`}
+                  disabled={!hasLoadedCase}
+                  title={!hasLoadedCase ? 'Load a case to export case data' : undefined}
                   onClick={() => {
                     onOpenCaseExport?.();
                     setIsCaseMenuOpen(false);
@@ -98,6 +126,8 @@ export const Navbar = ({
                   type="button"
                   role="menuitem"
                   className={`${styles.caseMenuItem} ${styles.caseMenuItemAudit}`}
+                  disabled={!hasLoadedCase}
+                  title={!hasLoadedCase ? 'Load a case to view audit trail' : undefined}
                   onClick={() => {
                     onOpenAuditTrail?.();
                     setIsCaseMenuOpen(false);
@@ -110,6 +140,8 @@ export const Navbar = ({
                     type="button"
                     role="menuitem"
                     className={`${styles.caseMenuItem} ${styles.caseMenuItemRename}`}
+                    disabled={!hasLoadedCase}
+                    title={!hasLoadedCase ? 'Load a case to rename it' : undefined}
                     onClick={() => {
                       onOpenRenameCase?.();
                       setIsCaseMenuOpen(false);
@@ -123,6 +155,8 @@ export const Navbar = ({
                     type="button"
                     role="menuitem"
                     className={`${styles.caseMenuItem} ${styles.caseMenuItemDelete}`}
+                    disabled={!hasLoadedCase}
+                    title={!hasLoadedCase ? 'Load a case to delete it' : undefined}
                     onClick={() => {
                       onDeleteCase?.();
                       setIsCaseMenuOpen(false);

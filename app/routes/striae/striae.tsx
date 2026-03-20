@@ -3,20 +3,23 @@ import { useState, useEffect } from 'react';
 import { SidebarContainer } from '~/components/sidebar/sidebar-container';
 import { Navbar } from '~/components/navbar/navbar';
 import { RenameCaseModal } from '~/components/navbar/rename-case-modal';
+import { OpenCaseModal } from '~/components/navbar/open-case-modal';
 import { Toolbar } from '~/components/toolbar/toolbar';
 import { Canvas } from '~/components/canvas/canvas';
 import { Toast } from '~/components/toast/toast';
-import { getImageUrl } from '~/components/actions/image-manage';
+import { getImageUrl, fetchFiles } from '~/components/actions/image-manage';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
 import { CaseExport, type ExportFormat } from '~/components/sidebar/case-export/case-export';
+import { CasesModal } from '~/components/sidebar/cases/cases-modal';
 import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import { fetchUserApi } from '~/utils/api';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { type AnnotationData, type FileData } from '~/types';
 import type * as CaseExportActions from '~/components/actions/case-export';
-import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase } from '~/components/actions/case-manage';
+import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase } from '~/components/actions/case-manage';
 import { checkReadOnlyCaseExists } from '~/components/actions/case-review';
+import { canCreateCase, getLimitsDescription, getUserData } from '~/utils/data';
 import styles from './striae.module.css';
 
 interface StriaePage {
@@ -76,8 +79,12 @@ export const Striae = ({ user }: StriaePage) => {
   const [isCaseExportModalOpen, setIsCaseExportModalOpen] = useState(false);
   const [isAuditTrailOpen, setIsAuditTrailOpen] = useState(false);
   const [isRenameCaseModalOpen, setIsRenameCaseModalOpen] = useState(false);
+  const [isOpenCaseModalOpen, setIsOpenCaseModalOpen] = useState(false);
+  const [isListCasesModalOpen, setIsListCasesModalOpen] = useState(false);
   const [isRenamingCase, setIsRenamingCase] = useState(false);
   const [isDeletingCase, setIsDeletingCase] = useState(false);
+  const [isOpeningCase, setIsOpeningCase] = useState(false);
+  const [openCaseHelperText, setOpenCaseHelperText] = useState('');
 
 
    useEffect(() => {
@@ -343,6 +350,71 @@ export const Striae = ({ user }: StriaePage) => {
     }
   };
 
+  const loadCaseIntoWorkspace = async (caseToLoad: string) => {
+    setCurrentCase(caseToLoad);
+    setCaseNumber(caseToLoad);
+    setShowNotes(false);
+    const loadedFiles = await fetchFiles(user, caseToLoad, { skipValidation: true });
+    setFiles(loadedFiles);
+    showNotification(`Case ${caseToLoad} loaded successfully.`, 'success');
+  };
+
+  const handleOpenCaseSubmit = async (nextCaseNumber: string) => {
+    if (!validateCaseNumber(nextCaseNumber)) {
+      showNotification('Invalid case number format.', 'error');
+      return;
+    }
+
+    setIsOpeningCase(true);
+    try {
+      const existingCase = await checkExistingCase(user, nextCaseNumber);
+      if (existingCase) {
+        await loadCaseIntoWorkspace(nextCaseNumber);
+        setIsOpenCaseModalOpen(false);
+        return;
+      }
+
+      const existingReadOnlyCase = await checkReadOnlyCaseExists(user, nextCaseNumber);
+      if (existingReadOnlyCase) {
+        showNotification(`Case "${nextCaseNumber}" already exists as a read-only review case.`, 'error');
+        return;
+      }
+
+      const permission = await canCreateCase(user);
+      if (!permission.canCreate) {
+        showNotification(permission.reason || 'You cannot create more cases.', 'error');
+        return;
+      }
+
+      const newCase = await createNewCase(user, nextCaseNumber);
+      setCurrentCase(newCase.caseNumber);
+      setCaseNumber(newCase.caseNumber);
+      setFiles([]);
+      setShowNotes(false);
+      setIsOpenCaseModalOpen(false);
+      showNotification(`Case ${newCase.caseNumber} created successfully.`, 'success');
+    } catch (openCaseError) {
+      showNotification(openCaseError instanceof Error ? openCaseError.message : 'Failed to load/create case.', 'error');
+    } finally {
+      setIsOpeningCase(false);
+    }
+  };
+
+  const handleOpenCaseModal = async () => {
+    setIsOpenCaseModalOpen(true);
+    try {
+      const userData = await getUserData(user);
+      if (userData && !userData.permitted) {
+        const limitsDescription = await getLimitsDescription(user);
+        setOpenCaseHelperText(limitsDescription || 'Load an existing case or create a new one.');
+      } else {
+        setOpenCaseHelperText('Load an existing case or create a new one.');
+      }
+    } catch {
+      setOpenCaseHelperText('Load an existing case or create a new one.');
+    }
+  };
+
   // Function to refresh annotation data (called when notes are saved)
   const refreshAnnotationData = () => {
     setAnnotationRefreshTrigger(prev => prev + 1);
@@ -560,6 +632,10 @@ export const Striae = ({ user }: StriaePage) => {
           hasLoadedImage={!!(selectedImage && selectedImage !== '/clear.jpg' && imageLoaded)}
           activeSection={showNotes ? 'image-notes' : 'case-management'}
           onImportComplete={handleImportComplete}
+          onOpenCase={() => {
+            void handleOpenCaseModal();
+          }}
+          onOpenListAllCases={() => setIsListCasesModalOpen(true)}
           onOpenCaseExport={() => setIsCaseExportModalOpen(true)}
           onOpenAuditTrail={() => setIsAuditTrailOpen(true)}
           onOpenRenameCase={() => setIsRenameCaseModalOpen(true)}
@@ -599,6 +675,22 @@ export const Striae = ({ user }: StriaePage) => {
           />
         </div>
       </main>
+      <OpenCaseModal
+        isOpen={isOpenCaseModalOpen}
+        isSubmitting={isOpeningCase}
+        helperText={openCaseHelperText}
+        onClose={() => setIsOpenCaseModalOpen(false)}
+        onSubmit={handleOpenCaseSubmit}
+      />
+      <CasesModal
+        isOpen={isListCasesModalOpen}
+        onClose={() => setIsListCasesModalOpen(false)}
+        onSelectCase={(selectedCase) => {
+          void loadCaseIntoWorkspace(selectedCase);
+        }}
+        currentCase={currentCase || ''}
+        user={user}
+      />
       <CaseExport
         isOpen={isCaseExportModalOpen}
         onClose={() => setIsCaseExportModalOpen(false)}

@@ -2,26 +2,14 @@ import type { User } from 'firebase/auth';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './cases.module.css';
 import { Toast } from '~/components/toast/toast';
-import { CasesModal } from './cases-modal';
 import { FilesModal } from '../files/files-modal';
 import { ImageUploadZone } from '../upload/image-upload-zone';
-import {
-  validateCaseNumber,
-  checkExistingCase,
-  createNewCase,
-} from '../../actions/case-manage';
 import {
   fetchFiles,
   deleteFile,
 } from '../../actions/image-manage';
 import { 
-  checkReadOnlyCaseExists 
-} from '../../actions/case-review';
-import { 
-  canCreateCase, 
   canUploadFile, 
-  getLimitsDescription,
-  getUserData,
   getFileAnnotations
 } from '~/utils/data';
 import { type FileData, type CaseActionType } from '~/types';
@@ -52,21 +40,15 @@ interface CaseSidebarProps {
   onUploadComplete?: (result: { successCount: number; failedFiles: string[] }) => void;
 }
 
-const SUCCESS_MESSAGE_TIMEOUT = 3000;
-
 export const CaseSidebar = ({ 
   user, 
   onImageSelect, 
-  onCaseChange,
   imageLoaded,
   setImageLoaded,
   onNotesClick,
   files,
   setFiles,
-  caseNumber,
-  setCaseNumber,
   currentCase,
-  setCurrentCase,
   error,
   setError,
   successAction,
@@ -80,19 +62,12 @@ export const CaseSidebar = ({
   onUploadComplete
 }: CaseSidebarProps) => {
   
-  const [isLoading, setIsLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [, setFileError] = useState('');
-  const [showCaseManagement, setShowCaseManagement] = useState(false);
-  const [canCreateNewCase, setCanCreateNewCase] = useState(true);
   const [isToastVisible, setIsToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error' | 'warning'>('success');
   const [canUploadNewFile, setCanUploadNewFile] = useState(true);
-  const [createCaseError, setCreateCaseError] = useState('');
   const [uploadFileError, setUploadFileError] = useState('');
-  const [limitsDescription, setLimitsDescription] = useState('');
-  const [permissionChecking, setPermissionChecking] = useState(false);
   const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
   const [fileConfirmationStatus, setFileConfirmationStatus] = useState<{
@@ -123,30 +98,6 @@ export const CaseSidebar = ({
     };
   }, [files]);
 
-  // Function to check user permissions (extracted for reuse)
-  const checkUserPermissions = useCallback(async () => {
-    setPermissionChecking(true);
-    try {
-      const casePermission = await canCreateCase(user);
-      setCanCreateNewCase(casePermission.canCreate);
-      setCreateCaseError(casePermission.reason || '');
-
-      // Only show limits description for restricted accounts
-      const userData = await getUserData(user);
-      if (userData && !userData.permitted) {
-        const description = await getLimitsDescription(user);
-        setLimitsDescription(description);
-      } else {
-        setLimitsDescription(''); // Clear the description for permitted users
-      }
-    } catch (error) {
-      console.error('Error checking user permissions:', error);
-      setCreateCaseError('Unable to verify account permissions');
-    } finally {
-      setPermissionChecking(false);
-    }
-  }, [user]);
-
   // Function to check file upload permissions (extracted for reuse)
   const checkFileUploadPermissions = useCallback(async (fileCount?: number) => {
     if (currentCase) {
@@ -167,11 +118,6 @@ export const CaseSidebar = ({
     }
   }, [currentCase, files.length, user]);
 
-  // Check user permissions on mount and when user changes
-  useEffect(() => {
-    checkUserPermissions();
-  }, [checkUserPermissions]);
-
   // Check file upload permissions when currentCase or files change
   useEffect(() => {
     checkFileUploadPermissions();
@@ -179,7 +125,6 @@ export const CaseSidebar = ({
    
   useEffect(() => {
     if (currentCase) {
-      setIsLoading(true);
       fetchFiles(user, currentCase, { skipValidation: true })
         .then(loadedFiles => {
           setFiles(loadedFiles);
@@ -187,9 +132,6 @@ export const CaseSidebar = ({
         .catch(err => {
           console.error('Failed to load files:', err);
           setFileError(err instanceof Error ? err.message : 'Failed to load files');
-        })
-        .finally(() => {
-          setIsLoading(false);
         });
     } else {
       setFiles([]);
@@ -314,71 +256,6 @@ export const CaseSidebar = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [successAction]);
   
-  const handleCase = async () => {
-    setIsLoading(true);
-    setError('');
-    setCreateCaseError(''); // Clear permission errors when starting new operation
-    
-    if (!validateCaseNumber(caseNumber)) {
-      setError('Invalid case number format');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const existingCase = await checkExistingCase(user, caseNumber);
-      
-      if (existingCase) {
-        // Loading existing case - always allowed
-        setCurrentCase(caseNumber);
-        onCaseChange(caseNumber);
-        const files = await fetchFiles(user, caseNumber, { skipValidation: true });
-        setFiles(files);
-        setCaseNumber('');
-        setSuccessAction('loaded');
-        setShowCaseManagement(false);
-        setTimeout(() => setSuccessAction(null), SUCCESS_MESSAGE_TIMEOUT);
-        return;
-      }
-
-      // Check if a read-only case with this number exists
-      const existingReadOnlyCase = await checkReadOnlyCaseExists(user, caseNumber);
-      if (existingReadOnlyCase) {
-        setError(`Case "${caseNumber}" already exists as a read-only review case. You cannot create a case with the same number.`);
-        setIsLoading(false);
-        return;
-      }
-
-      // Creating new case - check permissions
-      if (!canCreateNewCase) {
-        setError(createCaseError || 'You cannot create more cases.');
-        setCreateCaseError(''); // Clear duplicate error
-        setIsLoading(false);
-        return;
-      }
-
-      const newCase = await createNewCase(user, caseNumber);
-      setCurrentCase(newCase.caseNumber);
-      onCaseChange(newCase.caseNumber);
-      setFiles([]);
-      setCaseNumber('');
-      setSuccessAction('created');
-      setShowCaseManagement(false);
-      setTimeout(() => setSuccessAction(null), SUCCESS_MESSAGE_TIMEOUT);
-      
-      // Refresh permissions after successful case creation
-      // This updates the UI for users with limited permissions
-      await checkUserPermissions();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load/create case');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
-
   const handleFileDelete = async (fileId: string) => {
     // Don't allow file deletion for read-only cases
     if (isReadOnly) {
@@ -446,79 +323,7 @@ const handleImageSelect = (file: FileData) => {
 return (
     <>
     <div className={styles.caseSection}>
-        {currentCase && !showCaseManagement ? (
-          <div className={`${styles.caseLoad} mb-4`}>
-            <button
-              className={styles.switchCaseButton}
-              onClick={() => setShowCaseManagement(true)}
-              disabled={isUploading}
-              title={isUploading ? "Cannot switch cases while uploading files" : undefined}
-            >
-              Switch Case
-            </button>
-          </div>
-        ) : (
-          <>
-            <h4>Load/Create Case</h4>
-            {limitsDescription && (
-              <p className={styles.limitsInfo}>
-                {limitsDescription}
-              </p>
-            )}
-            <div className={`${styles.caseInput} mb-4`}>
-              <input
-                type="text"
-                value={caseNumber}
-                onChange={(e) => setCaseNumber(e.target.value)}
-                placeholder="Case #"
-              />
-            </div>
-            <div className={`${styles.caseLoad} mb-4`}>
-              <button
-                onClick={handleCase}
-                disabled={isLoading || !caseNumber || permissionChecking || (isReadOnly && !!currentCase) || isUploading}
-                title={
-                  isUploading
-                    ? "Cannot load/create cases while uploading files"
-                    : (isReadOnly && currentCase)
-                    ? "Cannot load/create cases while reviewing a read-only case. Clear the current case first."
-                    : (!canCreateNewCase ? createCaseError : undefined)
-                }
-              >
-                {isLoading ? 'Loading...' : permissionChecking ? 'Checking permissions...' : 'Load/Create Case'}
-              </button>
-            </div>
-            <div className={styles.caseInput}>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className={styles.listButton}
-                disabled={isUploading}
-                title={isUploading ? "Cannot list cases while uploading files" : undefined}
-              >
-                List All Cases
-              </button>
-            </div>
-            {currentCase && (
-              <div className="mb-4">
-                <button
-                  className={styles.cancelSwitchButton}
-                  onClick={() => setShowCaseManagement(false)}
-                  disabled={isUploading}
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-          </>
-        )}
-    <CasesModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSelectCase={setCaseNumber}
-        currentCase={currentCase || ''}
-        user={user}
-      />
-      
+
       <FilesModal
         isOpen={isFilesModalOpen}
         onClose={() => setIsFilesModalOpen(false)}
