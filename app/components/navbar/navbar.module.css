@@ -152,3 +152,81 @@
   background: rgba(173, 181, 189, 0.12);
   border-color: transparent;
 }
+
+.caseMenuContainer {
+  position: relative;
+}
+
+.caseMenu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.45rem;
+  background: #ffffff;
+  border: 1px solid #dde3e9;
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14);
+  z-index: 60;
+}
+
+.caseMenuItem {
+  width: 100%;
+  border: 1px solid transparent;
+  background: #f8f9fa;
+  color: #343a40;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.caseMenuItem:hover {
+  background: #eef1f4;
+  border-color: #d6dce2;
+}
+
+.caseMenuItemExport {
+  background: color-mix(in lab, #198754 16%, #ffffff);
+  color: #146c43;
+  border-color: color-mix(in lab, #198754 30%, transparent);
+}
+
+.caseMenuItemExport:hover {
+  background: color-mix(in lab, #198754 22%, #ffffff);
+}
+
+.caseMenuItemAudit {
+  background: color-mix(in lab, #6f42c1 16%, #ffffff);
+  color: #5a359a;
+  border-color: color-mix(in lab, #6f42c1 30%, transparent);
+}
+
+.caseMenuItemAudit:hover {
+  background: color-mix(in lab, #6f42c1 22%, #ffffff);
+}
+
+.caseMenuItemDelete {
+  background: color-mix(in lab, #dc3545 15%, #ffffff);
+  color: #b02a37;
+  border-color: color-mix(in lab, #dc3545 28%, transparent);
+}
+
+.caseMenuItemDelete:hover {
+  background: color-mix(in lab, #dc3545 21%, #ffffff);
+}
+
+.caseMenuCaption {
+  margin-top: 0.25rem;
+  padding: 0.3rem 0.45rem 0.1rem;
+  border-top: 1px solid #e9ecef;
+  color: #6c757d;
+  font-size: 0.72rem;
+  font-weight: 500;
+}

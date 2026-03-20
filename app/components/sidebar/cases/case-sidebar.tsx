@@ -1,19 +1,14 @@
 import type { User } from 'firebase/auth';
-import type * as CaseExportActions from '../../actions/case-export';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './cases.module.css';
 import { Toast } from '~/components/toast/toast';
 import { CasesModal } from './cases-modal';
 import { FilesModal } from '../files/files-modal';
-import { CaseExport, type ExportFormat } from '../case-export/case-export';
 import { ImageUploadZone } from '../upload/image-upload-zone';
-import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import {
   validateCaseNumber,
   checkExistingCase,
   createNewCase,
-  renameCase,
-  deleteCase,
 } from '../../actions/case-manage';
 import {
   fetchFiles,
@@ -59,18 +54,6 @@ interface CaseSidebarProps {
 
 const SUCCESS_MESSAGE_TIMEOUT = 3000;
 
-type CaseExportActionsModule = typeof CaseExportActions;
-
-let caseExportActionsPromise: Promise<CaseExportActionsModule> | null = null;
-
-const loadCaseExportActions = (): Promise<CaseExportActionsModule> => {
-  if (!caseExportActionsPromise) {
-    caseExportActionsPromise = import('../../actions/case-export');
-  }
-
-  return caseExportActionsPromise;
-};
-
 export const CaseSidebar = ({ 
   user, 
   onImageSelect, 
@@ -97,13 +80,9 @@ export const CaseSidebar = ({
   onUploadComplete
 }: CaseSidebarProps) => {
   
-  const [isDeletingCase, setIsDeletingCase] = useState(false);
-  const [isRenaming, setIsRenaming] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [, setFileError] = useState('');
-  const [newCaseName, setNewCaseName] = useState('');
-  const [showCaseActions, setShowCaseActions] = useState(false);
   const [showCaseManagement, setShowCaseManagement] = useState(false);
   const [canCreateNewCase, setCanCreateNewCase] = useState(true);
   const [isToastVisible, setIsToastVisible] = useState(false);
@@ -114,10 +93,8 @@ export const CaseSidebar = ({
   const [uploadFileError, setUploadFileError] = useState('');
   const [limitsDescription, setLimitsDescription] = useState('');
   const [permissionChecking, setPermissionChecking] = useState(false);
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
-  const [isAuditTrailOpen, setIsAuditTrailOpen] = useState(false);
   const [fileConfirmationStatus, setFileConfirmationStatus] = useState<{
     [fileId: string]: { includeConfirmation: boolean; isConfirmed: boolean }
   }>({});
@@ -430,79 +407,6 @@ export const CaseSidebar = ({
     }
   };
 
-  const handleRenameCase = async () => {
-  // Don't allow renaming read-only cases
-  if (isReadOnly) {
-    return;
-  }
-
-  if (!currentCase || !newCaseName) return;
-  
-  if (!validateCaseNumber(newCaseName)) {
-    setError('Invalid new case number format');
-    return;
-  }
-  
-  setIsRenaming(true);
-  setError('');
-  
-  try {
-    // Check if a read-only case with the new name exists
-    const existingReadOnlyCase = await checkReadOnlyCaseExists(user, newCaseName);
-    if (existingReadOnlyCase) {
-      setError(`Case "${newCaseName}" already exists as a read-only review case. You cannot rename to this case number.`);
-      setIsRenaming(false);
-      return;
-    }
-
-    await renameCase(user, currentCase, newCaseName);
-    setCurrentCase(newCaseName);
-    onCaseChange(newCaseName);
-    setNewCaseName('');
-    setSuccessAction('loaded');
-    setTimeout(() => setSuccessAction(null), SUCCESS_MESSAGE_TIMEOUT);
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Failed to rename case');
-  } finally {
-    setIsRenaming(false);
-  }
-};
-
-  const handleDeleteCase = async () => {
-  // Don't allow deleting read-only cases
-  if (isReadOnly) {
-    return;
-  }
-
-  if (!currentCase) return;
-  
-  const confirmed = window.confirm(
-    `Are you sure you want to delete case ${currentCase}? This will permanently delete all associated files and cannot be undone.`
-  );
-  
-  if (!confirmed) return;
-  
-  setIsDeletingCase(true);
-  setError('');
-  
-  try {
-    await deleteCase(user, currentCase);
-    setCurrentCase('');
-    onCaseChange('');
-    setFiles([]);
-    setSuccessAction('deleted');
-    setTimeout(() => setSuccessAction(null), SUCCESS_MESSAGE_TIMEOUT);
-    
-    // Refresh permissions after successful case deletion
-    // This allows users with limited permissions to create a new case
-    await checkUserPermissions();
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Failed to delete case');
-  } finally {
-    setIsDeletingCase(false);
-  }
-};
-
 const handleImageSelect = (file: FileData) => {
     onImageSelect(file);
     // Prevent notes from opening against stale image state while selection loads.
@@ -538,70 +442,6 @@ const handleImageSelect = (file: FileData) => {
     : !imageLoaded
     ? 'Select an image first'
     : undefined;
-
-  const handleExport = async (exportCaseNumber: string, format: ExportFormat, includeImages?: boolean, onProgress?: (progress: number, label: string) => void) => {
-    try {
-      const caseExportActions = await loadCaseExportActions();
-
-      if (includeImages) {
-        // ZIP export with images - only available for single case exports
-        await caseExportActions.downloadCaseAsZip(user, exportCaseNumber, format, (progress) => {
-          const label = progress < 30 ? 'Loading case data' :
-                        progress < 50 ? 'Preparing archive' :
-                        progress < 80 ? 'Adding images' :
-                        progress < 96 ? 'Finalizing' : 'Downloading';
-          onProgress?.(Math.round(progress), label);
-        });
-      } else {
-        // Standard data-only export
-        onProgress?.(5, 'Loading case data');
-        const exportData = await caseExportActions.exportCaseData(
-          user,
-          exportCaseNumber,
-          { includeMetadata: true },
-          (current, total, label) => {
-            const p = total > 0 ? Math.round(10 + (current / total) * 60) : 10;
-            onProgress?.(p, label);
-          }
-        );
-        onProgress?.(75, 'Preparing download');
-
-        // Download the exported data in the selected format
-        if (format === 'json') {
-          await caseExportActions.downloadCaseAsJSON(user, exportData);
-        } else {
-          await caseExportActions.downloadCaseAsCSV(user, exportData);
-        }
-        onProgress?.(100, 'Complete');
-      }
-      
-    } catch (error) {
-      console.error('Export failed:', error);
-      throw error; // Re-throw to be handled by the modal
-    }
-  };
-
-  const handleExportAll = async (onProgress: (current: number, total: number, caseName: string) => void, format: ExportFormat) => {
-    try {
-      const caseExportActions = await loadCaseExportActions();
-
-      // Export all cases with progress callback
-      const exportData = await caseExportActions.exportAllCases(user, {
-        includeMetadata: true
-      }, onProgress);
-      
-      // Download the exported data in the selected format
-      if (format === 'json') {
-        await caseExportActions.downloadAllCasesAsJSON(user, exportData);
-      } else {
-        await caseExportActions.downloadAllCasesAsCSV(user, exportData);
-      }
-      
-    } catch (error) {
-      console.error('Export all failed:', error);
-      throw error; // Re-throw to be handled by the modal
-    }
-  };
 
 return (
     <>
@@ -677,15 +517,6 @@ return (
         onSelectCase={setCaseNumber}
         currentCase={currentCase || ''}
         user={user}
-      />
-      
-      <CaseExport
-        isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-        onExport={handleExport}
-        onExportAll={handleExportAll}
-        currentCaseNumber={currentCase || ''}
-        isReadOnly={isReadOnly}
       />
       
       <FilesModal
@@ -807,88 +638,6 @@ return (
           Image Notes
         </button>
         </div>
-          {currentCase && (
-        <div className={styles.caseActionsSection}>
-          <button
-            onClick={() => setShowCaseActions(!showCaseActions)}
-            className={styles.caseActionsButton}
-            disabled={isUploading}
-            title={isUploading ? "Cannot access case actions while uploading" : undefined}
-          >
-            {showCaseActions ? 'Hide Case Actions' : 'Case Actions'}
-          </button>
-          
-          {showCaseActions && !isUploading && (
-            <div className={styles.caseActionsContent}>
-              {/* Export Case Data Section */}
-              <div className={styles.exportSection}>
-                <button 
-                  onClick={() => setIsExportModalOpen(true)}
-                  className={styles.exportButton}
-                  disabled={isUploading}
-                  title={isUploading ? "Cannot export while uploading" : undefined}
-                >
-                  Export Case Data
-                </button>
-              </div>
-              
-              {/* Audit Trail Section - Available for all cases */}
-              <div className={styles.auditTrailSection}>
-                <button
-                  onClick={() => setIsAuditTrailOpen(true)}
-                  className={styles.auditTrailButton}
-                  disabled={isUploading}
-                  title={isUploading ? "Cannot view audit trail while uploading" : undefined}
-                >
-                  Audit Trail
-                </button>
-              </div>
-              
-              {/* Rename/Delete Section - Only for owned cases */}
-              {!isReadOnly && (
-                <div className={styles.renameDeleteSection}>
-                  <div className={`${styles.caseRename} mb-4`}>
-                    <input
-                      type="text"
-                      value={newCaseName}
-                      onChange={(e) => setNewCaseName(e.target.value)}
-                      placeholder="New Case Number"
-                      disabled={isUploading}
-                    />
-                    <button
-                      onClick={handleRenameCase}
-                      disabled={isRenaming || !newCaseName || isUploading}
-                      title={isUploading ? "Cannot rename while uploading" : undefined}
-                    >
-                      {isRenaming ? 'Renaming...' : 'Rename Case'}
-                    </button>
-                  </div>
-                  
-                  <div className={styles.deleteCaseSection}>
-                    <button
-                      onClick={handleDeleteCase}
-                      disabled={isDeletingCase || isUploading}
-                      className={styles.deleteWarningButton}
-                      title={isUploading ? "Cannot delete while uploading" : undefined}
-                    >
-                        {isDeletingCase ? 'Deleting...' : 'Delete Case'}
-                      </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Unified Audit Viewer */}
-      <UserAuditViewer 
-        caseNumber={currentCase || ''}
-        isOpen={isAuditTrailOpen}
-        onClose={() => setIsAuditTrailOpen(false)}
-        title={`Audit Trail - Case ${currentCase}`}
-      />
-      
       </div>
     <Toast
       message={toastMessage}

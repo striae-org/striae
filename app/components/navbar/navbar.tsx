@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './navbar.module.css';
 import { SignOut } from '../actions/signout';
 import { ManageProfile } from '../user/manage-profile';
@@ -9,23 +9,54 @@ interface NavbarProps {
   isUploading?: boolean;
   company?: string;
   isReadOnly?: boolean;
+  currentCase?: string;
   hasLoadedCase?: boolean;
   hasLoadedImage?: boolean;
   activeSection?: 'case-management' | 'file-management' | 'image-notes';
   onImportComplete?: (result: ImportResult | ConfirmationImportResult) => void;
+  onOpenCaseExport?: () => void;
+  onOpenAuditTrail?: () => void;
+  onOpenRenameCase?: () => void;
+  onDeleteCase?: () => void;
 }
 
 export const Navbar = ({
   isUploading = false,
   company,
   isReadOnly = false,
+  currentCase,
   hasLoadedCase = false,
   hasLoadedImage = false,
   activeSection = 'case-management',
   onImportComplete,
+  onOpenCaseExport,
+  onOpenAuditTrail,
+  onOpenRenameCase,
+  onDeleteCase,
 }: NavbarProps) => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isCaseMenuOpen, setIsCaseMenuOpen] = useState(false);
+  const caseMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isCaseMenuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!caseMenuRef.current?.contains(event.target as Node)) {
+        setIsCaseMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+    };
+  }, [isCaseMenuOpen]);
+
+  const caseActionsDisabled = !hasLoadedCase || isUploading;
 
   return (
     <>
@@ -34,13 +65,75 @@ export const Navbar = ({
           {isReadOnly ? 'CASE REVIEW ONLY' : company}
         </div>
         <div className={styles.navCentral}>
-          <button
-            type="button"
-            className={`${styles.navSectionButton} ${activeSection === 'case-management' ? styles.navSectionButtonActive : ''}`}
-            aria-pressed={activeSection === 'case-management'}
-          >
-            Case Management
-          </button>
+          <div className={styles.caseMenuContainer} ref={caseMenuRef}>
+            <button
+              type="button"
+              className={`${styles.navSectionButton} ${activeSection === 'case-management' ? styles.navSectionButtonActive : ''}`}
+              aria-pressed={activeSection === 'case-management'}
+              aria-expanded={isCaseMenuOpen}
+              aria-haspopup="menu"
+              disabled={caseActionsDisabled}
+              onClick={() => setIsCaseMenuOpen((prev) => !prev)}
+              title={!hasLoadedCase ? 'Load a case to access case actions' : (isUploading ? 'Cannot access case actions while uploading' : undefined)}
+            >
+              Case Management
+            </button>
+            {isCaseMenuOpen && (
+              <div className={styles.caseMenu} role="menu" aria-label="Case Management actions">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={`${styles.caseMenuItem} ${styles.caseMenuItemExport}`}
+                  onClick={() => {
+                    onOpenCaseExport?.();
+                    setIsCaseMenuOpen(false);
+                  }}
+                >
+                  Export Case Data
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={`${styles.caseMenuItem} ${styles.caseMenuItemAudit}`}
+                  onClick={() => {
+                    onOpenAuditTrail?.();
+                    setIsCaseMenuOpen(false);
+                  }}
+                >
+                  Case Audit Trail
+                </button>
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={styles.caseMenuItem}
+                    onClick={() => {
+                      onOpenRenameCase?.();
+                      setIsCaseMenuOpen(false);
+                    }}
+                  >
+                    Rename Case
+                  </button>
+                )}
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={`${styles.caseMenuItem} ${styles.caseMenuItemDelete}`}
+                    onClick={() => {
+                      onDeleteCase?.();
+                      setIsCaseMenuOpen(false);
+                    }}
+                  >
+                    Delete Case
+                  </button>
+                )}
+                {currentCase && (
+                  <div className={styles.caseMenuCaption}>Case: {currentCase}</div>
+                )}
+              </div>
+            )}
+          </div>
           <button
             type="button"
             className={`${styles.navSectionButton} ${activeSection === 'file-management' ? styles.navSectionButtonActive : ''}`}

@@ -2,21 +2,38 @@ import type { User } from 'firebase/auth';
 import { useState, useEffect } from 'react';
 import { SidebarContainer } from '~/components/sidebar/sidebar-container';
 import { Navbar } from '~/components/navbar/navbar';
+import { RenameCaseModal } from '~/components/navbar/rename-case-modal';
 import { Toolbar } from '~/components/toolbar/toolbar';
 import { Canvas } from '~/components/canvas/canvas';
 import { Toast } from '~/components/toast/toast';
 import { getImageUrl } from '~/components/actions/image-manage';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
+import { CaseExport, type ExportFormat } from '~/components/sidebar/case-export/case-export';
+import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import { fetchUserApi } from '~/utils/api';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { type AnnotationData, type FileData } from '~/types';
-import { checkCaseIsReadOnly } from '~/components/actions/case-manage';
+import type * as CaseExportActions from '~/components/actions/case-export';
+import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase } from '~/components/actions/case-manage';
+import { checkReadOnlyCaseExists } from '~/components/actions/case-review';
 import styles from './striae.module.css';
 
 interface StriaePage {
   user: User;
 }
+
+type CaseExportActionsModule = typeof CaseExportActions;
+
+let caseExportActionsPromise: Promise<CaseExportActionsModule> | null = null;
+
+const loadCaseExportActions = (): Promise<CaseExportActionsModule> => {
+  if (!caseExportActionsPromise) {
+    caseExportActionsPromise = import('~/components/actions/case-export');
+  }
+
+  return caseExportActionsPromise;
+};
 
 export const Striae = ({ user }: StriaePage) => {
   // Image and error states
@@ -56,6 +73,11 @@ export const Striae = ({ user }: StriaePage) => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [isCaseExportModalOpen, setIsCaseExportModalOpen] = useState(false);
+  const [isAuditTrailOpen, setIsAuditTrailOpen] = useState(false);
+  const [isRenameCaseModalOpen, setIsRenameCaseModalOpen] = useState(false);
+  const [isRenamingCase, setIsRenamingCase] = useState(false);
+  const [isDeletingCase, setIsDeletingCase] = useState(false);
 
 
    useEffect(() => {
@@ -185,9 +207,140 @@ export const Striae = ({ user }: StriaePage) => {
     });
   };
 
+  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastType(type);
+    setToastMessage(message);
+    setShowToast(true);
+  };
+
   // Close toast notification
   const closeToast = () => {
     setShowToast(false);
+  };
+
+  const handleExport = async (
+    exportCaseNumber: string,
+    format: ExportFormat,
+    includeImages?: boolean,
+    onProgress?: (progress: number, label: string) => void
+  ) => {
+    const caseExportActions = await loadCaseExportActions();
+
+    if (includeImages) {
+      await caseExportActions.downloadCaseAsZip(user, exportCaseNumber, format, (progress) => {
+        const label = progress < 30 ? 'Loading case data'
+          : progress < 50 ? 'Preparing archive'
+          : progress < 80 ? 'Adding images'
+          : progress < 96 ? 'Finalizing'
+          : 'Downloading';
+        onProgress?.(Math.round(progress), label);
+      });
+      showNotification(`Case ${exportCaseNumber} exported successfully.`, 'success');
+      return;
+    }
+
+    onProgress?.(5, 'Loading case data');
+    const exportData = await caseExportActions.exportCaseData(
+      user,
+      exportCaseNumber,
+      { includeMetadata: true },
+      (current, total, label) => {
+        const progress = total > 0 ? Math.round(10 + (current / total) * 60) : 10;
+        onProgress?.(progress, label);
+      }
+    );
+
+    onProgress?.(75, 'Preparing download');
+    if (format === 'json') {
+      await caseExportActions.downloadCaseAsJSON(user, exportData);
+    } else {
+      await caseExportActions.downloadCaseAsCSV(user, exportData);
+    }
+    onProgress?.(100, 'Complete');
+    showNotification(`Case ${exportCaseNumber} exported successfully.`, 'success');
+  };
+
+  const handleExportAll = async (
+    onProgress: (current: number, total: number, caseName: string) => void,
+    format: ExportFormat
+  ) => {
+    const caseExportActions = await loadCaseExportActions();
+    const exportData = await caseExportActions.exportAllCases(
+      user,
+      { includeMetadata: true },
+      onProgress
+    );
+
+    if (format === 'json') {
+      await caseExportActions.downloadAllCasesAsJSON(user, exportData);
+    } else {
+      await caseExportActions.downloadAllCasesAsCSV(user, exportData);
+    }
+
+    showNotification('All cases exported successfully.', 'success');
+  };
+
+  const handleRenameCaseSubmit = async (newCaseName: string) => {
+    if (!currentCase) {
+      showNotification('Select a case before renaming.', 'error');
+      return;
+    }
+
+    if (!validateCaseNumber(newCaseName)) {
+      showNotification('Invalid case number format.', 'error');
+      return;
+    }
+
+    setIsRenamingCase(true);
+    try {
+      const existingReadOnlyCase = await checkReadOnlyCaseExists(user, newCaseName);
+      if (existingReadOnlyCase) {
+        showNotification(`Case "${newCaseName}" already exists as a read-only review case.`, 'error');
+        return;
+      }
+
+      await renameCase(user, currentCase, newCaseName);
+      setCurrentCase(newCaseName);
+      setCaseNumber(newCaseName);
+      setShowNotes(false);
+      setIsRenameCaseModalOpen(false);
+      showNotification(`Case renamed to ${newCaseName}.`, 'success');
+    } catch (renameError) {
+      showNotification(renameError instanceof Error ? renameError.message : 'Failed to rename case.', 'error');
+    } finally {
+      setIsRenamingCase(false);
+    }
+  };
+
+  const handleDeleteCaseAction = async () => {
+    if (!currentCase) {
+      showNotification('Select a case before deleting.', 'error');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete case ${currentCase}? This will permanently delete all associated files and cannot be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeletingCase(true);
+    try {
+      await deleteCase(user, currentCase);
+      setCurrentCase('');
+      setCaseNumber('');
+      setFiles([]);
+      setShowNotes(false);
+      setIsAuditTrailOpen(false);
+      setIsRenameCaseModalOpen(false);
+      showNotification('Case deleted successfully.', 'success');
+    } catch (deleteError) {
+      showNotification(deleteError instanceof Error ? deleteError.message : 'Failed to delete case.', 'error');
+    } finally {
+      setIsDeletingCase(false);
+    }
   };
 
   // Function to refresh annotation data (called when notes are saved)
@@ -402,10 +555,17 @@ export const Striae = ({ user }: StriaePage) => {
           isUploading={isUploading}
           company={userCompany}
           isReadOnly={isReadOnlyCase}
+          currentCase={currentCase}
           hasLoadedCase={!!currentCase}
           hasLoadedImage={!!(selectedImage && selectedImage !== '/clear.jpg' && imageLoaded)}
           activeSection={showNotes ? 'image-notes' : 'case-management'}
           onImportComplete={handleImportComplete}
+          onOpenCaseExport={() => setIsCaseExportModalOpen(true)}
+          onOpenAuditTrail={() => setIsAuditTrailOpen(true)}
+          onOpenRenameCase={() => setIsRenameCaseModalOpen(true)}
+          onDeleteCase={() => {
+            void handleDeleteCaseAction();
+          }}
         />
         <div className={styles.canvasArea}>
           <div className={styles.toolbarWrapper}>
@@ -439,6 +599,27 @@ export const Striae = ({ user }: StriaePage) => {
           />
         </div>
       </main>
+      <CaseExport
+        isOpen={isCaseExportModalOpen}
+        onClose={() => setIsCaseExportModalOpen(false)}
+        onExport={handleExport}
+        onExportAll={handleExportAll}
+        currentCaseNumber={currentCase}
+        isReadOnly={isReadOnlyCase}
+      />
+      <UserAuditViewer
+        caseNumber={currentCase || ''}
+        isOpen={isAuditTrailOpen}
+        onClose={() => setIsAuditTrailOpen(false)}
+        title={`Audit Trail - Case ${currentCase}`}
+      />
+      <RenameCaseModal
+        isOpen={isRenameCaseModalOpen}
+        currentCase={currentCase}
+        isSubmitting={isRenamingCase || isDeletingCase}
+        onClose={() => setIsRenameCaseModalOpen(false)}
+        onSubmit={handleRenameCaseSubmit}
+      />
       <Toast
         message={toastMessage}
         type={toastType}
