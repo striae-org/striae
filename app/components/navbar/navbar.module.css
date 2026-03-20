@@ -37,9 +37,14 @@
 .navCentral {
   display: flex;
   align-items: center;
-  gap: var(--spaceL);
+  gap: var(--spaceS);
   margin: 0 auto;
   flex-shrink: 0;
+  padding: 0.4rem;
+  border: 1px solid #dde3e9;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 1px 3px rgba(33, 37, 41, 0.06);
 }
 
 .navActions {
@@ -76,4 +81,74 @@
   color: #adb5bd;
   cursor: not-allowed;
   text-decoration: none;
+}
+
+.navSectionButton {
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0.5rem 0.9rem;
+  margin: 0;
+  color: #495057;
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  line-height: 1;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    color var(--durationS) var(--bezierFastoutSlowin),
+    background-color var(--durationS) var(--bezierFastoutSlowin),
+    border-color var(--durationS) var(--bezierFastoutSlowin),
+    box-shadow var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.navSectionButton:hover {
+  color: #212529;
+  background: rgba(73, 80, 87, 0.08);
+  border-color: rgba(73, 80, 87, 0.12);
+}
+
+.navSectionButtonActive {
+  color: #0f5132;
+  background: rgba(25, 135, 84, 0.16);
+  border-color: rgba(25, 135, 84, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(25, 135, 84, 0.08);
+}
+
+.navSectionButtonActive:hover {
+  color: #0b3d28;
+  background: rgba(25, 135, 84, 0.22);
+  border-color: rgba(25, 135, 84, 0.34);
+}
+
+.navSectionButton:focus,
+.navSectionButton:active,
+.navSectionButton:visited {
+  text-decoration: none;
+}
+
+.navSectionButton:disabled {
+  color: #adb5bd;
+  background: rgba(173, 181, 189, 0.12);
+  border-color: transparent;
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.navPrimaryButton {
+  background: rgba(25, 135, 84, 0.12);
+  border-color: rgba(25, 135, 84, 0.2);
+  color: #146c43;
+}
+
+.navPrimaryButton:hover {
+  background: rgba(25, 135, 84, 0.18);
+  border-color: rgba(25, 135, 84, 0.3);
+  color: #0f5132;
+}
+
+.navPrimaryButton:disabled {
+  color: #adb5bd;
+  background: rgba(173, 181, 189, 0.12);
+  border-color: transparent;
 }

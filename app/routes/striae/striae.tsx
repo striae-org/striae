@@ -402,6 +402,9 @@ export const Striae = ({ user }: StriaePage) => {
           isUploading={isUploading}
           company={userCompany}
           isReadOnly={isReadOnlyCase}
+          hasLoadedCase={!!currentCase}
+          hasLoadedImage={!!(selectedImage && selectedImage !== '/clear.jpg' && imageLoaded)}
+          activeSection={showNotes ? 'image-notes' : 'case-management'}
           onImportComplete={handleImportComplete}
         />
         <div className={styles.canvasArea}>

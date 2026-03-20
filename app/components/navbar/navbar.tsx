@@ -9,10 +9,21 @@ interface NavbarProps {
   isUploading?: boolean;
   company?: string;
   isReadOnly?: boolean;
+  hasLoadedCase?: boolean;
+  hasLoadedImage?: boolean;
+  activeSection?: 'case-management' | 'file-management' | 'image-notes';
   onImportComplete?: (result: ImportResult | ConfirmationImportResult) => void;
 }
 
-export const Navbar = ({ isUploading = false, company, isReadOnly = false, onImportComplete }: NavbarProps) => {
+export const Navbar = ({
+  isUploading = false,
+  company,
+  isReadOnly = false,
+  hasLoadedCase = false,
+  hasLoadedImage = false,
+  activeSection = 'case-management',
+  onImportComplete,
+}: NavbarProps) => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
@@ -25,8 +36,33 @@ export const Navbar = ({ isUploading = false, company, isReadOnly = false, onImp
         <div className={styles.navCentral}>
           <button
             type="button"
+            className={`${styles.navSectionButton} ${activeSection === 'case-management' ? styles.navSectionButtonActive : ''}`}
+            aria-pressed={activeSection === 'case-management'}
+          >
+            Case Management
+          </button>
+          <button
+            type="button"
+            className={`${styles.navSectionButton} ${activeSection === 'file-management' ? styles.navSectionButtonActive : ''}`}
+            disabled={!hasLoadedCase}
+            aria-pressed={activeSection === 'file-management'}
+            title={!hasLoadedCase ? 'Load a case to enable file management' : undefined}
+          >
+            File Management
+          </button>
+          <button
+            type="button"
+            className={`${styles.navSectionButton} ${activeSection === 'image-notes' ? styles.navSectionButtonActive : ''}`}
+            disabled={!hasLoadedImage}
+            aria-pressed={activeSection === 'image-notes'}
+            title={!hasLoadedImage ? 'Load an image to enable image notes' : undefined}
+          >
+            Image Notes
+          </button>
+          <button
+            type="button"
             onClick={() => setIsImportModalOpen(true)}
-            className={styles.navTextButton}
+            className={`${styles.navSectionButton} ${styles.navPrimaryButton}`}
             disabled={isUploading}
             title={isUploading ? 'Cannot import while uploading files' : undefined}
           >

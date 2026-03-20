@@ -619,7 +619,7 @@ return (
           </div>
         ) : (
           <>
-            <h4>Case Management</h4>
+            <h4>Load/Create Case</h4>
             {limitsDescription && (
               <p className={styles.limitsInfo}>
                 {limitsDescription}
