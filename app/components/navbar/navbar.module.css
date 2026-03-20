@@ -212,6 +212,17 @@
   background: color-mix(in lab, #6f42c1 22%, #ffffff);
 }
 
+.caseMenuItemRename {
+  background: #ffc107;
+  color: #3f2f00;
+  border-color: #e8b103;
+}
+
+.caseMenuItemRename:hover {
+  background: #ffca2c;
+  border-color: #e8b103;
+}
+
 .caseMenuItemDelete {
   background: color-mix(in lab, #dc3545 15%, #ffffff);
   color: #b02a37;

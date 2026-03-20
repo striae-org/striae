@@ -57,6 +57,9 @@ export const Navbar = ({
   }, [isCaseMenuOpen]);
 
   const caseActionsDisabled = !hasLoadedCase || isUploading;
+  const isCaseManagementActive = hasLoadedCase && activeSection === 'case-management';
+  const isFileManagementActive = hasLoadedCase && activeSection === 'file-management';
+  const isImageNotesActive = hasLoadedImage && activeSection === 'image-notes';
 
   return (
     <>
@@ -68,8 +71,8 @@ export const Navbar = ({
           <div className={styles.caseMenuContainer} ref={caseMenuRef}>
             <button
               type="button"
-              className={`${styles.navSectionButton} ${activeSection === 'case-management' ? styles.navSectionButtonActive : ''}`}
-              aria-pressed={activeSection === 'case-management'}
+              className={`${styles.navSectionButton} ${isCaseManagementActive ? styles.navSectionButtonActive : ''}`}
+              aria-pressed={isCaseManagementActive}
               aria-expanded={isCaseMenuOpen}
               aria-haspopup="menu"
               disabled={caseActionsDisabled}
@@ -106,7 +109,7 @@ export const Navbar = ({
                   <button
                     type="button"
                     role="menuitem"
-                    className={styles.caseMenuItem}
+                    className={`${styles.caseMenuItem} ${styles.caseMenuItemRename}`}
                     onClick={() => {
                       onOpenRenameCase?.();
                       setIsCaseMenuOpen(false);
@@ -136,18 +139,18 @@ export const Navbar = ({
           </div>
           <button
             type="button"
-            className={`${styles.navSectionButton} ${activeSection === 'file-management' ? styles.navSectionButtonActive : ''}`}
+            className={`${styles.navSectionButton} ${isFileManagementActive ? styles.navSectionButtonActive : ''}`}
             disabled={!hasLoadedCase}
-            aria-pressed={activeSection === 'file-management'}
+            aria-pressed={isFileManagementActive}
             title={!hasLoadedCase ? 'Load a case to enable file management' : undefined}
           >
             File Management
           </button>
           <button
             type="button"
-            className={`${styles.navSectionButton} ${activeSection === 'image-notes' ? styles.navSectionButtonActive : ''}`}
+            className={`${styles.navSectionButton} ${isImageNotesActive ? styles.navSectionButtonActive : ''}`}
             disabled={!hasLoadedImage}
-            aria-pressed={activeSection === 'image-notes'}
+            aria-pressed={isImageNotesActive}
             title={!hasLoadedImage ? 'Load an image to enable image notes' : undefined}
           >
             Image Notes
