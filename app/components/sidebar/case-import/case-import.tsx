@@ -271,7 +271,7 @@ export const CaseImport = ({
       >
         <div className={styles.modal}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Import RO Case or Confirmations</h2>
+          <h2 className={styles.title}>Import Case or Confirmations</h2>
           <button
             className={styles.closeButton}
             {...getCloseButtonProps({ ariaLabel: 'Close case import dialog' })}
