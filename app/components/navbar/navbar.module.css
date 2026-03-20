@@ -1,0 +1,12 @@
+.navbar {
+  height: 60px;
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spaceL);
+  box-sizing: border-box;
+  background: var(--backgroundLight);
+  border-bottom: 1px solid color-mix(in lab, var(--text) 12%, transparent);
+  z-index: 35;
+}

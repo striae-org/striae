@@ -1,6 +1,7 @@
 import type { User } from 'firebase/auth';
 import { useState, useEffect } from 'react';
 import { SidebarContainer } from '~/components/sidebar/sidebar-container';
+import { Navbar } from '~/components/navbar/navbar';
 import { Toolbar } from '~/components/toolbar/toolbar';
 import { Canvas } from '~/components/canvas/canvas';
 import { Toast } from '~/components/toast/toast';
@@ -377,6 +378,7 @@ export const Striae = ({ user }: StriaePage) => {
         confirmationSaveVersion={confirmationSaveVersion}
       />
       <main className={styles.mainContent}>
+        <Navbar />
         <div className={styles.canvasArea}>
           <div className={styles.toolbarWrapper}>
             <Toolbar 
