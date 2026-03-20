@@ -103,6 +103,7 @@ export const Navbar = ({
             </button>
             {isCaseMenuOpen && (
               <div className={styles.caseMenu} role="menu" aria-label="Case Management actions">
+                <div className={styles.caseMenuSectionLabel}>Case Access</div>
                 <button
                   type="button"
                   role="menuitem"
@@ -125,6 +126,7 @@ export const Navbar = ({
                 >
                   List All Cases
                 </button>
+                <div className={styles.caseMenuSectionLabel}>Case Operations</div>
                 <button
                   type="button"
                   role="menuitem"
@@ -151,6 +153,9 @@ export const Navbar = ({
                 >
                   Case Audit Trail
                 </button>
+                {!isReadOnly && (
+                  <div className={styles.caseMenuSectionLabel}>Maintenance</div>
+                )}
                 {!isReadOnly && (
                   <button
                     type="button"
