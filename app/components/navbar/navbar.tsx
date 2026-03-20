@@ -6,6 +6,7 @@ import { CaseImport } from '../sidebar/case-import/case-import';
 import { PublicSigningKeyModal } from '~/components/public-signing-key-modal/public-signing-key-modal';
 import { getCurrentPublicSigningKeyDetails } from '~/utils/forensics';
 import { AuthContext } from '~/contexts/auth.context';
+import { getUserData } from '~/utils/data';
 import { type ImportResult, type ConfirmationImportResult } from '~/types';
 
 interface NavbarProps {
@@ -17,7 +18,6 @@ interface NavbarProps {
   isCurrentImageConfirmed?: boolean;
   hasLoadedCase?: boolean;
   hasLoadedImage?: boolean;
-  userBadgeId?: string;
   onImportComplete?: (result: ImportResult | ConfirmationImportResult) => void;
   onOpenCase?: () => void;
   onOpenListAllCases?: () => void;
@@ -39,7 +39,6 @@ export const Navbar = ({
   isCurrentImageConfirmed = false,
   hasLoadedCase = false,
   hasLoadedImage = false,
-  userBadgeId,
   onImportComplete,
   onOpenCase,
   onOpenListAllCases,
@@ -52,6 +51,7 @@ export const Navbar = ({
   onOpenImageNotes,
 }: NavbarProps) => {
   const { user } = useContext(AuthContext);
+  const [userBadgeId, setUserBadgeId] = useState<string>('');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isPublicKeyModalOpen, setIsPublicKeyModalOpen] = useState(false);
@@ -60,6 +60,23 @@ export const Navbar = ({
   const { keyId: publicSigningKeyId, publicKeyPem } = getCurrentPublicSigningKeyDetails();
   const caseMenuRef = useRef<HTMLDivElement>(null);
   const fileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const loadUserBadgeId = async () => {
+      if (user) {
+        try {
+          const userData = await getUserData(user);
+          if (userData?.badgeId) {
+            setUserBadgeId(userData.badgeId);
+          }
+        } catch (err) {
+          console.error('Failed to load user badge ID:', err);
+        }
+      }
+    };
+
+    loadUserBadgeId();
+  }, [user]);
 
   useEffect(() => {
     if (!isCaseMenuOpen && !isFileMenuOpen) {
