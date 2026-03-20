@@ -2,7 +2,6 @@ import type { User } from 'firebase/auth';
 import { useState, useCallback } from 'react';
 import styles from './sidebar.module.css';
 import { ManageProfile } from '../user/manage-profile';
-import { SignOut } from '../actions/signout';
 import { CaseSidebar } from './cases/case-sidebar';
 import { NotesSidebar } from './notes/notes-sidebar';
 import { CaseImport } from './case-import/case-import';
@@ -33,6 +32,7 @@ interface SidebarProps {
   isConfirmed?: boolean;
   confirmationSaveVersion?: number;
   isUploading?: boolean;
+  onUploadStatusChange?: (isUploading: boolean) => void;
 }
 
 export const Sidebar = ({ 
@@ -58,7 +58,8 @@ export const Sidebar = ({
   isReadOnly = false,
   isConfirmed = false,
   confirmationSaveVersion = 0,
-  isUploading: initialIsUploading = false,  
+  isUploading: initialIsUploading = false,
+  onUploadStatusChange,
 }: SidebarProps) => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -66,6 +67,11 @@ export const Sidebar = ({
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error' | 'warning'>('success');
   const [isToastVisible, setIsToastVisible] = useState(false);
+
+  const handleUploadStatusChange = useCallback((uploading: boolean) => {
+    setIsUploading(uploading);
+    onUploadStatusChange?.(uploading);
+  }, [onUploadStatusChange]);
 
   const handleImportComplete = useCallback((result: ImportResult | ConfirmationImportResult) => {
     if (result.success) {
@@ -128,7 +134,6 @@ export const Sidebar = ({
           >
             Manage Profile
           </button>
-          <SignOut disabled={isUploading} />
         </div>
       </div>  
       <ManageProfile 
@@ -174,7 +179,7 @@ export const Sidebar = ({
             confirmationSaveVersion={confirmationSaveVersion}
             selectedFileId={imageId}
             isUploading={isUploading}
-            onUploadStatusChange={setIsUploading}
+            onUploadStatusChange={handleUploadStatusChange}
             onUploadComplete={handleUploadComplete}
           />
           <div className={styles.importSection}>

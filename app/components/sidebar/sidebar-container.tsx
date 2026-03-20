@@ -32,6 +32,8 @@ interface SidebarContainerProps {
   isReadOnly?: boolean;
   isConfirmed?: boolean;
   confirmationSaveVersion?: number;
+  isUploading?: boolean;
+  onUploadStatusChange?: (isUploading: boolean) => void;
 }
 
 export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {

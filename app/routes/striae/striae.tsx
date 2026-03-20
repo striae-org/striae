@@ -38,6 +38,7 @@ export const Striae = ({ user }: StriaePage) => {
   const [caseNumber, setCaseNumber] = useState('');
   const [successAction, setSuccessAction] = useState<'loaded' | 'created' | 'deleted' | null>(null);
   const [showNotes, setShowNotes] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [isReadOnlyCase, setIsReadOnlyCase] = useState(false);
 
   // Annotation states
@@ -376,9 +377,11 @@ export const Striae = ({ user }: StriaePage) => {
         isReadOnly={isReadOnlyCase}
         isConfirmed={!!annotationData?.confirmationData}
         confirmationSaveVersion={confirmationSaveVersion}
+        isUploading={isUploading}
+        onUploadStatusChange={setIsUploading}
       />
       <main className={styles.mainContent}>
-        <Navbar />
+        <Navbar isUploading={isUploading} />
         <div className={styles.canvasArea}>
           <div className={styles.toolbarWrapper}>
             <Toolbar 
