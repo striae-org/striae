@@ -1,7 +1,6 @@
 import type { User } from 'firebase/auth';
 import { useState, useCallback } from 'react';
 import styles from './sidebar.module.css';
-import { ManageProfile } from '../user/manage-profile';
 import { CaseSidebar } from './cases/case-sidebar';
 import { NotesSidebar } from './notes/notes-sidebar';
 import { CaseImport } from './case-import/case-import';
@@ -61,7 +60,6 @@ export const Sidebar = ({
   isUploading: initialIsUploading = false,
   onUploadStatusChange,
 }: SidebarProps) => {
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(initialIsUploading);
   const [toastMessage, setToastMessage] = useState('');
@@ -125,21 +123,7 @@ export const Sidebar = ({
         <h3 className={styles.userTitle}>
           {`${user.displayName?.split(' ')[0] || 'User'}'s Striae`}
         </h3>
-        <div className={styles.userActions}>
-          <button 
-            onClick={() => setIsProfileModalOpen(true)}
-            className={styles.profileButton}
-            disabled={isUploading}
-            title={isUploading ? 'Cannot manage profile while uploading files' : undefined}
-          >
-            Manage Profile
-          </button>
-        </div>
       </div>  
-      <ManageProfile 
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
-      />
       <CaseImport 
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
