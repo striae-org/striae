@@ -304,7 +304,7 @@ export const Navbar = ({
             disabled={isUploading}
             title={isUploading ? 'Cannot import while uploading files' : undefined}
           >
-            Import/Clear RO Case
+            Import Case/Confirmations
           </button>
           </div>
         </div>
