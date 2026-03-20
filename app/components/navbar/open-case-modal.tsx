@@ -48,8 +48,8 @@ export const OpenCaseModal = ({
 
   const {
     requestClose,
-    handleOverlayMouseDown,
-    handleOverlayKeyDown,
+    overlayProps,
+    getCloseButtonProps,
   } = useOverlayDismiss({
     isOpen,
     onClose: handleClose,
@@ -71,13 +71,13 @@ export const OpenCaseModal = ({
   return (
     <div
       className={styles.overlay}
-      role="button"
-      tabIndex={0}
       aria-label="Close open case dialog"
-      onMouseDown={handleOverlayMouseDown}
-      onKeyDown={handleOverlayKeyDown}
+      {...overlayProps}
     >
       <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Open Case">
+        <button {...getCloseButtonProps({ ariaLabel: 'Close open case dialog' })}>
+          ×
+        </button>
         <h3 className={styles.title}>{title}</h3>
         {helperText ? <p className={styles.helperText}>{helperText}</p> : null}
         <input

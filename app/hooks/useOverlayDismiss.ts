@@ -1,4 +1,4 @@
-import { useCallback, useEffect, type KeyboardEventHandler, type MouseEventHandler } from 'react';
+import { useCallback, useEffect, type CSSProperties, type KeyboardEventHandler, type MouseEventHandler } from 'react';
 
 interface UseOverlayDismissOptions {
   isOpen: boolean;
@@ -7,6 +7,30 @@ interface UseOverlayDismissOptions {
   closeOnEscape?: boolean;
   closeOnBackdrop?: boolean;
 }
+
+interface CloseButtonOptions {
+  ariaLabel?: string;
+  title?: string;
+}
+
+const sharedCloseButtonStyle: CSSProperties = {
+  position: 'absolute',
+  top: '0.6rem',
+  right: '0.6rem',
+  width: '1.9rem',
+  height: '1.9rem',
+  borderRadius: '999px',
+  border: '1px solid #d6dce2',
+  background: '#f8f9fa',
+  color: '#495057',
+  fontSize: '1.2rem',
+  lineHeight: 1,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  zIndex: 1,
+};
 
 export const useOverlayDismiss = ({
   isOpen,
@@ -61,9 +85,32 @@ export const useOverlayDismiss = ({
     }
   }, [closeOnBackdrop, requestClose]);
 
+  const overlayProps = {
+    role: 'button' as const,
+    tabIndex: 0,
+    onMouseDown: handleOverlayMouseDown,
+    onKeyDown: handleOverlayKeyDown,
+    style: { cursor: 'default' as const },
+  };
+
+  const getCloseButtonProps = useCallback((options?: CloseButtonOptions) => {
+    const ariaLabel = options?.ariaLabel || 'Close modal';
+
+    return {
+      type: 'button' as const,
+      onClick: requestClose,
+      disabled: !canDismiss,
+      'aria-label': ariaLabel,
+      title: options?.title || ariaLabel,
+      style: sharedCloseButtonStyle,
+    };
+  }, [requestClose, canDismiss]);
+
   return {
     requestClose,
     handleOverlayMouseDown,
-    handleOverlayKeyDown
+    handleOverlayKeyDown,
+    overlayProps,
+    getCloseButtonProps,
   };
 };

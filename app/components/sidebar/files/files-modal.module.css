@@ -11,6 +11,7 @@
 }
 
 .modal {
+  position: relative;
   background: var(--backgroundLight);
   border-radius: var(--spaceXS);
   width: 90%;

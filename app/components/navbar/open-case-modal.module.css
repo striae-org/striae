@@ -9,6 +9,7 @@
 }
 
 .modal {
+  position: relative;
   width: min(460px, calc(100vw - 2rem));
   background: #ffffff;
   border-radius: 12px;

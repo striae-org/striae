@@ -84,8 +84,8 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
   });
 
   const {
-    handleOverlayMouseDown,
-    handleOverlayKeyDown
+    requestClose,
+    overlayProps
   } = useOverlayDismiss({
     isOpen,
     onClose
@@ -98,11 +98,8 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
   return (
     <div
       className={styles.overlay}
-      onMouseDown={handleOverlayMouseDown}
-      onKeyDown={handleOverlayKeyDown}
-      role="button"
-      tabIndex={0}
       aria-label="Close audit trail dialog"
+      {...overlayProps}
     >
       <div className={styles.modal}>
         <AuditViewerHeader
@@ -111,7 +108,7 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
           onExportCSV={handleExportCSV}
           onExportJSON={handleExportJSON}
           onGenerateReport={handleGenerateReport}
-          onClose={onClose}
+          onClose={requestClose}
         />
 
         <div className={styles.content}>

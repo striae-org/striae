@@ -41,8 +41,9 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, default
   const confirmationId = generateConfirmationId();
 
   const {
-    handleOverlayMouseDown,
-    handleOverlayKeyDown
+    requestClose,
+    overlayProps,
+    getCloseButtonProps
   } = useOverlayDismiss({
     isOpen,
     onClose
@@ -100,22 +101,15 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, default
   return (
     <div
       className={styles.overlay}
-      onMouseDown={handleOverlayMouseDown}
-      onKeyDown={handleOverlayKeyDown}
-      role="button"
-      tabIndex={0}
       aria-label="Close confirmation dialog"
+      {...overlayProps}
     >
       <div className={styles.modal}>
         <div className={styles.header}>
           <h2 className={styles.title}>
             {hasExistingConfirmation ? 'Confirmation Details' : 'Confirm Identification'}
           </h2>
-          <button 
-            className={styles.closeButton}
-            onClick={onClose}
-            aria-label="Close modal"
-          >
+          <button {...getCloseButtonProps({ ariaLabel: 'Close confirmation dialog' })}>
             ×
           </button>
         </div>
@@ -186,7 +180,7 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, default
         <div className={styles.footer}>
           <button
             className={styles.cancelButton}
-            onClick={onClose}
+            onClick={requestClose}
             disabled={isConfirming}
           >
             {hasExistingConfirmation ? 'Close' : 'Cancel'}

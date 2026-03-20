@@ -52,8 +52,9 @@ export const CaseImport = ({
   } = useImportState();
   const canDismissOverlay = !importState.isImporting && !importState.isClearing;
   const {
-    handleOverlayMouseDown,
-    handleOverlayKeyDown
+    requestClose,
+    overlayProps,
+    getCloseButtonProps
   } = useOverlayDismiss({
     isOpen,
     onClose,
@@ -236,8 +237,8 @@ export const CaseImport = ({
 
   const handleModalCancel = useCallback(() => {
     clearImportData();
-    onClose();
-  }, [clearImportData, onClose]);
+    requestClose();
+  }, [clearImportData, requestClose]);
 
   // Effects
   useEffect(() => {
@@ -265,20 +266,15 @@ export const CaseImport = ({
     <>
       <div
         className={styles.overlay}
-        onMouseDown={handleOverlayMouseDown}
-        onKeyDown={handleOverlayKeyDown}
-        role="button"
-        tabIndex={0}
         aria-label="Close case import dialog"
+        {...overlayProps}
       >
         <div className={styles.modal}>
         <div className={styles.header}>
           <h2 className={styles.title}>Import RO Case or Confirmations</h2>
-          <button 
+          <button
             className={styles.closeButton}
-            onClick={onClose}
-            aria-label="Close modal"
-            disabled={importState.isImporting || importState.isClearing}
+            {...getCloseButtonProps({ ariaLabel: 'Close case import dialog' })}
           >
             ×
           </button>

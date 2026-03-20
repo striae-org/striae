@@ -28,8 +28,8 @@ export const RenameCaseModal = ({
 
   const {
     requestClose,
-    handleOverlayMouseDown,
-    handleOverlayKeyDown,
+    overlayProps,
+    getCloseButtonProps,
   } = useOverlayDismiss({
     isOpen,
     onClose: handleClose,
@@ -60,13 +60,13 @@ export const RenameCaseModal = ({
   return (
     <div
       className={styles.overlay}
-      role="button"
-      tabIndex={0}
       aria-label="Close rename case dialog"
-      onMouseDown={handleOverlayMouseDown}
-      onKeyDown={handleOverlayKeyDown}
+      {...overlayProps}
     >
       <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Rename Case">
+        <button {...getCloseButtonProps({ ariaLabel: 'Close rename case dialog' })}>
+          ×
+        </button>
         <h3 className={styles.title}>Rename Case</h3>
         <p className={styles.subtitle}>Current case: {currentCase}</p>
         <input

@@ -230,8 +230,8 @@ export const PublicSigningKeyModal = ({
   const publicKeyInputId = useId();
   const exportFileInputId = useId();
   const {
-    handleOverlayMouseDown,
-    handleOverlayKeyDown
+    overlayProps,
+    getCloseButtonProps
   } = useOverlayDismiss({
     isOpen,
     onClose
@@ -357,11 +357,8 @@ export const PublicSigningKeyModal = ({
   return (
     <div
       className={styles.overlay}
-      onMouseDown={handleOverlayMouseDown}
-      onKeyDown={handleOverlayKeyDown}
-      role="button"
-      tabIndex={0}
       aria-label="Close public signing key dialog"
+      {...overlayProps}
     >
       <div
         className={styles.modal}
@@ -374,10 +371,8 @@ export const PublicSigningKeyModal = ({
             Striae Public Signing Key
           </h3>
           <button
-            type="button"
             className={styles.closeButton}
-            onClick={onClose}
-            aria-label="Close public signing key dialog"
+            {...getCloseButtonProps({ ariaLabel: 'Close public signing key dialog' })}
           >
             &times;
           </button>

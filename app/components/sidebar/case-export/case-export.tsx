@@ -38,8 +38,9 @@ export const CaseExport = ({
   const [isPublicKeyModalOpen, setIsPublicKeyModalOpen] = useState(false);
   const { keyId: publicSigningKeyId, publicKeyPem } = getCurrentPublicSigningKeyDetails();
   const {
-    handleOverlayMouseDown,
-    handleOverlayKeyDown
+    requestClose,
+    overlayProps,
+    getCloseButtonProps
   } = useOverlayDismiss({
     isOpen,
     onClose,
@@ -125,7 +126,7 @@ export const CaseExport = ({
       await onExport(caseNumber.trim(), selectedFormat, includeImages, (progress, label) => {
         setExportProgress({ current: progress, total: 100, caseName: label, mode: 'single' });
       });
-      onClose();
+      requestClose();
     } catch (error) {
       console.error('Export failed:', error);
       setError(error instanceof Error ? error.message : 'Export failed. Please try again.');
@@ -144,7 +145,7 @@ export const CaseExport = ({
       await onExportAll((current: number, total: number, caseName: string) => {
         setExportProgress({ current, total, caseName });
       }, selectedFormat);
-      onClose();
+      requestClose();
     } catch (error) {
       console.error('Export all failed:', error);
       setError(error instanceof Error ? error.message : 'Export all cases failed. Please try again.');
@@ -165,7 +166,7 @@ export const CaseExport = ({
     
     try {
       await exportConfirmationData(user, caseNumber.trim());
-      onClose();
+      requestClose();
     } catch (error) {
       console.error('Confirmation export failed:', error);
       setError(error instanceof Error ? error.message : 'Confirmation export failed. Please try again.');
@@ -177,20 +178,13 @@ export const CaseExport = ({
   return (
     <div
       className={styles.overlay}
-      onMouseDown={handleOverlayMouseDown}
-      onKeyDown={handleOverlayKeyDown}
-      role="button"
-      tabIndex={0}
       aria-label="Close case export dialog"
+      {...overlayProps}
     >
       <div className={styles.modal}>
         <div className={styles.header}>
           <h2 className={styles.title}>Export Case Data</h2>
-          <button 
-            className={styles.closeButton}
-            onClick={onClose}
-            aria-label="Close modal"
-          >
+          <button className={styles.closeButton} {...getCloseButtonProps({ ariaLabel: 'Close case export dialog' })}>
             ×
           </button>
         </div>

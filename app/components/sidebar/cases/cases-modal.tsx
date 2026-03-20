@@ -20,8 +20,9 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
   const [error, setError] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(0);
   const {
-    handleOverlayMouseDown,
-    handleOverlayKeyDown
+    requestClose,
+    overlayProps,
+    getCloseButtonProps
   } = useOverlayDismiss({
     isOpen,
     onClose
@@ -141,16 +142,13 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
   return (
     <div
       className={styles.modalOverlay}
-      onMouseDown={handleOverlayMouseDown}
-      onKeyDown={handleOverlayKeyDown}
-      role="button"
-      tabIndex={0}
       aria-label="Close cases dialog"
+      {...overlayProps}
     >
       <div className={styles.modal}>
         <header className={styles.modalHeader}>
           <h2>All Cases</h2>
-          <button onClick={onClose} className={styles.closeButton}>&times;</button>
+          <button className={styles.closeButton} {...getCloseButtonProps({ ariaLabel: 'Close cases dialog' })}>&times;</button>
         </header>
         
         <div className={styles.modalContent}>
@@ -178,7 +176,7 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
                       className={`${styles.caseItem} ${currentCase === caseNum ? styles.active : ''} ${confirmationClass}`}
                       onClick={() => {
                         onSelectCase(caseNum);
-                        onClose();
+                        requestClose();
                       }}
                     >
                       {caseNum}
