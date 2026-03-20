@@ -365,6 +365,10 @@
   color: #6c757d;
   font-size: 0.72rem;
   font-weight: 500;
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fileMenuSectionLabel {

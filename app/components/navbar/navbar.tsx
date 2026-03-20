@@ -10,6 +10,7 @@ interface NavbarProps {
   company?: string;
   isReadOnly?: boolean;
   currentCase?: string;
+  currentFileName?: string;
   hasLoadedCase?: boolean;
   hasLoadedImage?: boolean;
   activeSection?: 'case-management' | 'file-management' | 'image-notes';
@@ -29,6 +30,7 @@ export const Navbar = ({
   company,
   isReadOnly = false,
   currentCase,
+  currentFileName,
   hasLoadedCase = false,
   hasLoadedImage = false,
   activeSection = 'case-management',
@@ -76,7 +78,7 @@ export const Navbar = ({
 
   const caseActionsDisabled = false;
   const isCaseManagementActive = true;
-  const isFileManagementActive = isFileMenuOpen || (hasLoadedCase && activeSection === 'file-management');
+  const isFileManagementActive = isFileMenuOpen || hasLoadedImage;
   const isImageNotesActive = hasLoadedImage && activeSection === 'image-notes';
   const canDeleteCurrentFile = hasLoadedImage && !isReadOnly;
 
@@ -232,9 +234,12 @@ export const Navbar = ({
                 >
                   Delete File
                 </button>
-                {currentCase && (
-                  <div className={styles.fileMenuCaption}>Case: {currentCase}</div>
-                )}
+                <div
+                  className={styles.fileMenuCaption}
+                  title={hasLoadedImage && currentFileName ? currentFileName : 'No file loaded'}
+                >
+                  File: {hasLoadedImage && currentFileName ? currentFileName : 'No file loaded'}
+                </div>
               </div>
             )}
           </div>

@@ -632,6 +632,7 @@ export const Striae = ({ user }: StriaePage) => {
         company={userCompany}
         isReadOnly={isReadOnlyCase}
         currentCase={currentCase}
+        currentFileName={selectedFilename}
         hasLoadedCase={!!currentCase}
         hasLoadedImage={!!(selectedImage && selectedImage !== '/clear.jpg' && imageLoaded)}
         activeSection="case-management"
