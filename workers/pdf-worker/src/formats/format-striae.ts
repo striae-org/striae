@@ -146,7 +146,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
       .left-annotation,
       .right-annotation {
         position: absolute;
-        padding: 1rem 1.4rem;
+        padding: 0.75rem 1rem;
         background: rgba(0, 0, 0, 0.7);
         border-radius: 6px;
         backdrop-filter: blur(4px);
@@ -163,7 +163,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
       }
       .case-text {
         font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 700;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         white-space: nowrap;
@@ -242,8 +242,9 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
       .confirmation-section {
         margin-top: 20px;
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: flex-start;
+        gap: 20px;
       }
       .confirmation-box {
         background: #ffffff;
