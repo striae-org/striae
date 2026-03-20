@@ -7,11 +7,12 @@ import { OpenCaseModal } from '~/components/navbar/open-case-modal';
 import { Toolbar } from '~/components/toolbar/toolbar';
 import { Canvas } from '~/components/canvas/canvas';
 import { Toast } from '~/components/toast/toast';
-import { getImageUrl, fetchFiles } from '~/components/actions/image-manage';
+import { getImageUrl, fetchFiles, deleteFile } from '~/components/actions/image-manage';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
 import { CaseExport, type ExportFormat } from '~/components/sidebar/case-export/case-export';
 import { CasesModal } from '~/components/sidebar/cases/cases-modal';
+import { FilesModal } from '~/components/sidebar/files/files-modal';
 import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import { fetchUserApi } from '~/utils/api';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
@@ -79,8 +80,10 @@ export const Striae = ({ user }: StriaePage) => {
   const [isRenameCaseModalOpen, setIsRenameCaseModalOpen] = useState(false);
   const [isOpenCaseModalOpen, setIsOpenCaseModalOpen] = useState(false);
   const [isListCasesModalOpen, setIsListCasesModalOpen] = useState(false);
+  const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
   const [isRenamingCase, setIsRenamingCase] = useState(false);
   const [isDeletingCase, setIsDeletingCase] = useState(false);
+  const [isDeletingFile, setIsDeletingFile] = useState(false);
   const [isOpeningCase, setIsOpeningCase] = useState(false);
   const [openCaseHelperText, setOpenCaseHelperText] = useState('');
 
@@ -342,6 +345,42 @@ export const Striae = ({ user }: StriaePage) => {
       showNotification(deleteError instanceof Error ? deleteError.message : 'Failed to delete case.', 'error');
     } finally {
       setIsDeletingCase(false);
+    }
+  };
+
+  const handleDeleteCurrentFileAction = async () => {
+    if (!currentCase || !imageId) {
+      showNotification('Load an image before deleting a file.', 'error');
+      return;
+    }
+
+    if (isReadOnlyCase) {
+      showNotification('Cannot delete files for read-only cases.', 'error');
+      return;
+    }
+
+    const selectedFile = files.find((file) => file.id === imageId);
+    const selectedFileName = selectedFile?.originalFilename || imageId;
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${selectedFileName}? This action cannot be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeletingFile(true);
+    try {
+      await deleteFile(user, currentCase, imageId, 'User-requested deletion via navbar file management');
+      const updatedFiles = files.filter((file) => file.id !== imageId);
+      setFiles(updatedFiles);
+      handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
+      setShowNotes(false);
+      showNotification('File deleted successfully.', 'success');
+    } catch (deleteError) {
+      showNotification(deleteError instanceof Error ? deleteError.message : 'Failed to delete file.', 'error');
+    } finally {
+      setIsDeletingFile(false);
     }
   };
 
@@ -607,6 +646,10 @@ export const Striae = ({ user }: StriaePage) => {
         onDeleteCase={() => {
           void handleDeleteCaseAction();
         }}
+        onOpenViewAllFiles={() => setIsFilesModalOpen(true)}
+        onDeleteCurrentFile={() => {
+          void handleDeleteCurrentFileAction();
+        }}
       />
       <div className={styles.contentRow}>
         <SidebarContainer 
@@ -677,6 +720,18 @@ export const Striae = ({ user }: StriaePage) => {
         currentCase={currentCase || ''}
         user={user}
       />
+      <FilesModal
+        isOpen={isFilesModalOpen}
+        onClose={() => setIsFilesModalOpen(false)}
+        onFileSelect={(file) => {
+          void handleImageSelect(file);
+        }}
+        currentCase={currentCase || null}
+        files={files}
+        setFiles={setFiles}
+        isReadOnly={isReadOnlyCase}
+        selectedFileId={imageId}
+      />
       <CaseExport
         isOpen={isCaseExportModalOpen}
         onClose={() => setIsCaseExportModalOpen(false)}
@@ -694,7 +749,7 @@ export const Striae = ({ user }: StriaePage) => {
       <RenameCaseModal
         isOpen={isRenameCaseModalOpen}
         currentCase={currentCase}
-        isSubmitting={isRenamingCase || isDeletingCase}
+        isSubmitting={isRenamingCase || isDeletingCase || isDeletingFile}
         onClose={() => setIsRenameCaseModalOpen(false)}
         onSubmit={handleRenameCaseSubmit}
       />

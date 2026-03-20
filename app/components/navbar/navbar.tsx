@@ -20,6 +20,8 @@ interface NavbarProps {
   onOpenAuditTrail?: () => void;
   onOpenRenameCase?: () => void;
   onDeleteCase?: () => void;
+  onOpenViewAllFiles?: () => void;
+  onDeleteCurrentFile?: () => void;
 }
 
 export const Navbar = ({
@@ -37,20 +39,32 @@ export const Navbar = ({
   onOpenAuditTrail,
   onOpenRenameCase,
   onDeleteCase,
+  onOpenViewAllFiles,
+  onDeleteCurrentFile,
 }: NavbarProps) => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isCaseMenuOpen, setIsCaseMenuOpen] = useState(false);
+  const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
   const caseMenuRef = useRef<HTMLDivElement>(null);
+  const fileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isCaseMenuOpen) {
+    if (!isCaseMenuOpen && !isFileMenuOpen) {
       return;
     }
 
     const handlePointerDown = (event: MouseEvent) => {
-      if (!caseMenuRef.current?.contains(event.target as Node)) {
+      const targetNode = event.target as Node;
+      const clickedOutsideCaseMenu = !caseMenuRef.current?.contains(targetNode);
+      const clickedOutsideFileMenu = !fileMenuRef.current?.contains(targetNode);
+
+      if (clickedOutsideCaseMenu) {
         setIsCaseMenuOpen(false);
+      }
+
+      if (clickedOutsideFileMenu) {
+        setIsFileMenuOpen(false);
       }
     };
 
@@ -58,12 +72,13 @@ export const Navbar = ({
     return () => {
       document.removeEventListener('mousedown', handlePointerDown);
     };
-  }, [isCaseMenuOpen]);
+  }, [isCaseMenuOpen, isFileMenuOpen]);
 
   const caseActionsDisabled = false;
   const isCaseManagementActive = true;
-  const isFileManagementActive = hasLoadedCase && activeSection === 'file-management';
+  const isFileManagementActive = isFileMenuOpen || (hasLoadedCase && activeSection === 'file-management');
   const isImageNotesActive = hasLoadedImage && activeSection === 'image-notes';
+  const canDeleteCurrentFile = hasLoadedImage && !isReadOnly;
 
   return (
     <>
@@ -71,7 +86,8 @@ export const Navbar = ({
         <div className={styles.companyLabel}>
           {isReadOnly ? 'CASE REVIEW ONLY' : company}
         </div>
-        <div className={styles.navCentral}>
+        <div className={styles.navCenterTrack}>
+          <div className={styles.navCentral}>
           <div className={styles.caseMenuContainer} ref={caseMenuRef}>
             <button
               type="button"
@@ -171,15 +187,52 @@ export const Navbar = ({
               </div>
             )}
           </div>
-          <button
-            type="button"
-            className={`${styles.navSectionButton} ${isFileManagementActive ? styles.navSectionButtonActive : ''}`}
-            disabled={!hasLoadedCase}
-            aria-pressed={isFileManagementActive}
-            title={!hasLoadedCase ? 'Load a case to enable file management' : undefined}
-          >
-            File Management
-          </button>
+          <div className={styles.fileMenuContainer} ref={fileMenuRef}>
+            <button
+              type="button"
+              className={`${styles.navSectionButton} ${isFileManagementActive ? styles.navSectionButtonActive : ''}`}
+              disabled={!hasLoadedCase}
+              aria-pressed={isFileManagementActive}
+              aria-expanded={isFileMenuOpen}
+              aria-haspopup="menu"
+              onClick={() => setIsFileMenuOpen((prev) => !prev)}
+              title={!hasLoadedCase ? 'Load a case to enable file management' : undefined}
+            >
+              File Management
+            </button>
+            {isFileMenuOpen && (
+              <div className={styles.fileMenu} role="menu" aria-label="File Management actions">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={`${styles.fileMenuItem} ${styles.fileMenuItemViewAll}`}
+                  onClick={() => {
+                    onOpenViewAllFiles?.();
+                    setIsFileMenuOpen(false);
+                  }}
+                >
+                  View All Files
+                </button>
+                <div className={styles.fileMenuSectionLabel}>Selected File</div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={`${styles.fileMenuItem} ${styles.fileMenuItemDelete}`}
+                  disabled={!canDeleteCurrentFile}
+                  title={!hasLoadedImage ? 'Load an image to delete the selected file' : isReadOnly ? 'Cannot delete files for read-only cases' : undefined}
+                  onClick={() => {
+                    onDeleteCurrentFile?.();
+                    setIsFileMenuOpen(false);
+                  }}
+                >
+                  Delete File
+                </button>
+                {currentCase && (
+                  <div className={styles.fileMenuCaption}>Case: {currentCase}</div>
+                )}
+              </div>
+            )}
+          </div>
           <button
             type="button"
             className={`${styles.navSectionButton} ${isImageNotesActive ? styles.navSectionButtonActive : ''}`}
@@ -198,6 +251,7 @@ export const Navbar = ({
           >
             Import/Clear RO Case
           </button>
+          </div>
         </div>
         <div className={styles.navActions}>
           <button
