@@ -89,12 +89,26 @@ export const BoxAnnotations = ({
 
   // Ref to track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
+  const labelInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!labelDialog.isVisible) return;
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      labelInputRef.current?.focus();
+      labelInputRef.current?.select();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+    };
+  }, [labelDialog.isVisible]);
 
   // Memoized function to get relative coordinates (more stable reference)
   const getRelativeCoordinates = useCallback((e: React.MouseEvent): { x: number; y: number } => {
@@ -602,6 +616,7 @@ export const BoxAnnotations = ({
             }
           </div>
           <input
+            ref={labelInputRef}
             type="text"
             value={labelDialog.label}
             onChange={handleLabelChange}

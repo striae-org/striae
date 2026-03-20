@@ -77,32 +77,3 @@
   cursor: not-allowed;
   text-decoration: none;
 }
-
-.profileTextButton {
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  color: #495057;
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.profileTextButton:hover {
-  color: #212529;
-  text-decoration: none;
-}
-
-.profileTextButton:focus,
-.profileTextButton:active,
-.profileTextButton:visited {
-  text-decoration: none;
-}
-
-.profileTextButton:disabled {
-  color: #adb5bd;
-  cursor: not-allowed;
-  text-decoration: none;
-}

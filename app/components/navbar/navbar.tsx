@@ -32,6 +32,8 @@ export const Navbar = ({ isUploading = false, company, isReadOnly = false, onImp
           >
             Import/Clear RO Case
           </button>
+        </div>
+        <div className={styles.navActions}>
           <button
             type="button"
             onClick={() => setIsProfileModalOpen(true)}
@@ -41,8 +43,6 @@ export const Navbar = ({ isUploading = false, company, isReadOnly = false, onImp
           >
             Manage Profile
           </button>
-        </div>
-        <div className={styles.navActions}>
           <SignOut disabled={isUploading} />
         </div>
       </header>
