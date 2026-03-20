@@ -287,9 +287,9 @@
   flex-shrink: 0;
   /* Opt out of stretch so the explicit height takes effect, stopping the panel
      before the Subclass badge (bottom:1rem, ~2.5rem tall = 3.5rem from canvas bottom).
-     calc(100% - 3rem) lands ~4rem from the canvas bottom, clearing the badge. */
+     calc(100% - 4rem) lands ~4rem from the canvas bottom, clearing the badge. */
   align-self: flex-start;
-  height: calc(100% - 3rem);
+  height: calc(100% - 4rem);
   display: flex;
   flex-direction: column;
   background: rgba(20, 20, 20, 0.55);
