@@ -141,11 +141,11 @@ export async function importCaseForReview(
       caseData,
       imageFiles,
       imageIdMapping,
+      isArchivedExport,
       metadata,
       cleanedContent,
       verificationPublicKeyPem
     } = await parseImportZip(zipFile, user);
-    const isArchivedExport = caseData.metadata.archived === true;
     parsedForensicManifest = metadata?.forensicManifest as SignedForensicManifest | undefined;
     result.caseNumber = caseData.metadata.caseNumber;
     importState.caseNumber = result.caseNumber;
@@ -319,7 +319,8 @@ export async function importCaseForReview(
       caseData,
       importedFiles,
       originalImageIdMapping,
-      parsedForensicManifest
+      parsedForensicManifest,
+      isArchivedExport
     );
     importState.caseDataStored = true;
     

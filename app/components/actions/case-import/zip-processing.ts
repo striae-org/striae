@@ -378,6 +378,7 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
   caseData: CaseExportData;
   imageFiles: { [filename: string]: Blob };
   imageIdMapping: { [exportFilename: string]: string }; // exportFilename -> originalImageId
+  isArchivedExport: boolean;
   metadata?: Record<string, unknown>;
   cleanedContent?: string; // Add cleaned content for hash validation
   verificationPublicKeyPem?: string;
@@ -489,6 +490,7 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
       caseData,
       imageFiles,
       imageIdMapping,
+      isArchivedExport,
       metadata,
       cleanedContent,
       verificationPublicKeyPem

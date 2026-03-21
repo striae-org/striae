@@ -80,7 +80,8 @@ export async function storeCaseDataInR2(
   caseData: CaseExportData,
   importedFiles: FileData[],
   originalImageIdMapping?: Map<string, string>,
-  forensicManifest?: SignedForensicManifest
+  forensicManifest?: SignedForensicManifest,
+  isArchivedExport?: boolean
 ): Promise<void> {
   try {
     // Convert the mapping to a plain object for JSON serialization
@@ -94,6 +95,8 @@ export async function storeCaseDataInR2(
       manifestHash: forensicManifest.manifestHash,
       signature: forensicManifest.signature
     } : undefined;
+
+    const archived = isArchivedExport === true || caseData.metadata.archived === true;
     
     // Create the case data structure that matches normal cases
     const r2CaseData = {
@@ -102,6 +105,13 @@ export async function storeCaseDataInR2(
       files: importedFiles,
       // Add read-only metadata
       isReadOnly: true,
+      ...(archived && {
+        archived: true,
+        archivedAt: caseData.metadata.archivedAt,
+        archivedBy: caseData.metadata.archivedBy,
+        archivedByDisplay: caseData.metadata.archivedByDisplay,
+        archiveReason: caseData.metadata.archiveReason,
+      }),
       importedAt: new Date().toISOString(),
       // Add original image ID mapping for confirmation linking
       originalImageIds: originalImageIds,
