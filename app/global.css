@@ -1,5 +1,4 @@
-@config "../tailwind.config.ts";
-@import "tailwindcss";
+@import "modern-normalize";
 
 @layer base {
   :root {
