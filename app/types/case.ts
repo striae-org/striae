@@ -12,6 +12,7 @@ export interface CaseData {
   archived?: boolean;
   archivedAt?: string;
   archivedBy?: string;
+  archivedByDisplay?: string;
   archiveReason?: string;
 }
 
@@ -93,6 +94,7 @@ export interface CaseDataWithConfirmations {
   archived?: boolean;
   archivedAt?: string;
   archivedBy?: string;
+  archivedByDisplay?: string;
   archiveReason?: string;
   importedAt?: string;
   originalImageIds?: { [originalId: string]: string };

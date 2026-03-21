@@ -88,6 +88,49 @@ export const buildCaseDeletionAuditParams = (
   };
 };
 
+interface BuildCaseArchiveAuditParamsInput {
+  user: User;
+  caseNumber: string;
+  caseName: string;
+  archiveReason: string;
+  result?: AuditResult;
+  errors?: string[];
+  totalFiles?: number;
+  archivedAt?: string;
+  processingTimeMs?: number;
+}
+
+export const buildCaseArchiveAuditParams = (
+  input: BuildCaseArchiveAuditParamsInput
+): CreateAuditEntryParams => {
+  const result = input.result || 'success';
+  const archivedAt = input.archivedAt || new Date().toISOString();
+
+  return {
+    userId: input.user.uid,
+    userEmail: input.user.email || '',
+    action: 'case-archive',
+    result,
+    fileName: `${input.caseNumber}.case`,
+    fileType: 'case-package',
+    validationErrors: input.errors || [],
+    caseNumber: input.caseNumber,
+    workflowPhase: 'casework',
+    caseDetails: {
+      newCaseName: input.caseName,
+      deleteReason: input.archiveReason,
+      totalFiles: input.totalFiles,
+      lastModified: archivedAt,
+    },
+    performanceMetrics: input.processingTimeMs
+      ? {
+          processingTimeMs: input.processingTimeMs,
+          fileSizeBytes: 0,
+        }
+      : undefined,
+  };
+};
+
 interface BuildFileUploadAuditParamsInput {
   user: User;
   fileName: string;

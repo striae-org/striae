@@ -170,6 +170,34 @@ export const checkCaseIsReadOnly = async (user: User, caseNumber: string): Promi
   }
 };
 
+export interface CaseArchiveDetails {
+  archived: boolean;
+  archivedAt?: string;
+  archivedBy?: string;
+  archivedByDisplay?: string;
+  archiveReason?: string;
+}
+
+export const getCaseArchiveDetails = async (user: User, caseNumber: string): Promise<CaseArchiveDetails> => {
+  try {
+    const caseData = await getCaseData(user, caseNumber);
+    if (!caseData || !caseData.archived) {
+      return { archived: false };
+    }
+
+    return {
+      archived: true,
+      archivedAt: caseData.archivedAt,
+      archivedBy: caseData.archivedBy,
+      archivedByDisplay: caseData.archivedByDisplay,
+      archiveReason: caseData.archiveReason,
+    };
+  } catch (error) {
+    console.error('Error checking case archive details:', error);
+    return { archived: false };
+  }
+};
+
 export const createNewCase = async (user: User, caseNumber: string): Promise<CaseData> => {
   const startTime = Date.now();
   
@@ -588,37 +616,30 @@ export const archiveCase = async (
     }
 
     const archivedAt = new Date().toISOString();
+    const archivedByDisplay = user.displayName?.trim() || user.email || user.uid;
     const archiveData: CaseData = {
       ...caseData,
       archived: true,
       archivedAt,
       archivedBy: user.uid,
+      archivedByDisplay,
       archiveReason: archiveReason?.trim() || undefined,
       isReadOnly: true,
     } as CaseData;
 
     await updateCaseData(user, caseNumber, archiveData);
 
-    await auditService.logEvent({
-      userId: user.uid,
-      userEmail: user.email || '',
-      action: 'case-archive',
-      result: 'success',
-      fileName: `${caseNumber}.case`,
-      fileType: 'case-package',
+    await auditService.logCaseArchive(
+      user,
       caseNumber,
-      workflowPhase: 'casework',
-      caseDetails: {
-        newCaseName: caseNumber,
-        totalFiles: archiveData.files?.length || 0,
-        lastModified: archivedAt,
-        deleteReason: archiveReason?.trim() || 'No reason provided',
-      },
-      performanceMetrics: {
-        processingTimeMs: Date.now() - startTime,
-        fileSizeBytes: 0,
-      },
-    });
+      caseNumber,
+      archiveReason?.trim() || 'No reason provided',
+      'success',
+      [],
+      archiveData.files?.length || 0,
+      archivedAt,
+      Date.now() - startTime
+    );
 
     const exportData = await exportCaseData(user, caseNumber, { includeMetadata: true });
     const caseJsonContent = JSON.stringify(exportData, null, 2);
@@ -781,27 +802,17 @@ export const archiveCase = async (
       },
     });
   } catch (error) {
-    await auditService.logEvent({
-      userId: user.uid,
-      userEmail: user.email || '',
-      action: 'case-archive',
-      result: 'failure',
-      fileName: `${caseNumber}.case`,
-      fileType: 'case-package',
+    await auditService.logCaseArchive(
+      user,
       caseNumber,
-      workflowPhase: 'casework',
-      validationErrors: [error instanceof Error ? error.message : 'Unknown archive error'],
-      caseDetails: {
-        newCaseName: caseNumber,
-        deleteReason: archiveReason?.trim() || 'No reason provided',
-      },
-      performanceMetrics: {
-        processingTimeMs: Date.now() - startTime,
-        fileSizeBytes: 0,
-        validationStepsCompleted: 0,
-        validationStepsFailed: 1,
-      },
-    });
+      caseNumber,
+      archiveReason?.trim() || 'No reason provided',
+      'failure',
+      [error instanceof Error ? error.message : 'Unknown archive error'],
+      undefined,
+      undefined,
+      Date.now() - startTime
+    );
 
     throw error;
   }

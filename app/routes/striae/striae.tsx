@@ -20,7 +20,7 @@ import { fetchUserApi } from '~/utils/api';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { type AnnotationData, type FileData } from '~/types';
 import type * as CaseExportActions from '~/components/actions/case-export';
-import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase } from '~/components/actions/case-manage';
+import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, getCaseArchiveDetails } from '~/components/actions/case-manage';
 import { checkReadOnlyCaseExists } from '~/components/actions/case-review';
 import { canCreateCase, getLimitsDescription, getUserData } from '~/utils/data';
 import styles from './striae.module.css';
@@ -90,6 +90,13 @@ export const Striae = ({ user }: StriaePage) => {
   const [isOpeningCase, setIsOpeningCase] = useState(false);
   const [openCaseHelperText, setOpenCaseHelperText] = useState('');
   const [isArchiveCaseModalOpen, setIsArchiveCaseModalOpen] = useState(false);
+  const [archiveDetails, setArchiveDetails] = useState<{
+    archived: boolean;
+    archivedAt?: string;
+    archivedBy?: string;
+    archivedByDisplay?: string;
+    archiveReason?: string;
+  }>({ archived: false });
 
 
    useEffect(() => {
@@ -106,6 +113,7 @@ export const Striae = ({ user }: StriaePage) => {
       setActiveAnnotations(new Set());
       setIsBoxAnnotationMode(false);
       setIsReadOnlyCase(false);
+      setArchiveDetails({ archived: false });
     }
   }, [currentCase]);
 
@@ -153,9 +161,12 @@ export const Striae = ({ user }: StriaePage) => {
         // Check if the case data itself has isReadOnly: true
         const isReadOnly = await checkCaseIsReadOnly(user, currentCase);
         setIsReadOnlyCase(isReadOnly);
+        const details = await getCaseArchiveDetails(user, currentCase);
+        setArchiveDetails(details);
       } catch (error) {
         console.error('Error checking read-only status:', error);
         setIsReadOnlyCase(false);
+        setArchiveDetails({ archived: false });
       }
     };
 
@@ -403,6 +414,13 @@ export const Striae = ({ user }: StriaePage) => {
     try {
       await archiveCase(user, currentCase, archiveReason);
       setIsReadOnlyCase(true);
+      setArchiveDetails({
+        archived: true,
+        archivedAt: new Date().toISOString(),
+        archivedBy: user.uid,
+        archivedByDisplay: user.displayName?.trim() || user.email || user.uid,
+        archiveReason: archiveReason.trim() || undefined,
+      });
       setShowNotes(false);
       setIsArchiveCaseModalOpen(false);
       showNotification('Case archived successfully. The archive package download has started.', 'success');
@@ -674,6 +692,7 @@ export const Striae = ({ user }: StriaePage) => {
         isCurrentImageConfirmed={isCurrentImageConfirmed}
         hasLoadedCase={!!currentCase}
         hasLoadedImage={hasLoadedImage}
+        archiveDetails={archiveDetails}
         onImportComplete={handleImportComplete}
         onOpenCase={() => {
           void handleOpenCaseModal();

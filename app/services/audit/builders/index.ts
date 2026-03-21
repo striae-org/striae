@@ -9,6 +9,7 @@ export {
 } from './audit-event-builders-workflow';
 
 export {
+  buildCaseArchiveAuditParams,
   buildCaseCreationAuditParams,
   buildCaseDeletionAuditParams,
   buildCaseRenameAuditParams,

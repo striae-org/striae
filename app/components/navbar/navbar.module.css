@@ -393,6 +393,24 @@
   font-weight: 500;
 }
 
+.caseArchiveDetails {
+  margin-top: 0.3rem;
+  padding: 0.45rem;
+  border-top: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: color-mix(in lab, #0d9488 8%, #ffffff);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  color: #0f766e;
+  font-size: 0.72rem;
+}
+
+.caseArchiveDetails strong {
+  font-size: 0.74rem;
+  color: #0b5f59;
+}
+
 .caseMenuSectionLabel {
   margin-top: 0.2rem;
   padding: 0.32rem 0.45rem 0.15rem;

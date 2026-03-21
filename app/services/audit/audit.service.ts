@@ -26,6 +26,7 @@ import {
   buildAnnotationCreateAuditParams,
   buildAnnotationDeleteAuditParams,
   buildAnnotationEditAuditParams,
+  buildCaseArchiveAuditParams,
   buildCaseCreationAuditParams,
   buildCaseDeletionAuditParams,
   buildCaseExportAuditParams,
@@ -365,6 +366,35 @@ export class AuditService {
         caseName,
         deleteReason,
         backupCreated
+      })
+    );
+  }
+
+  /**
+   * Log case archive event
+   */
+  public async logCaseArchive(
+    user: User,
+    caseNumber: string,
+    caseName: string,
+    archiveReason: string,
+    result: AuditResult = 'success',
+    errors: string[] = [],
+    totalFiles?: number,
+    archivedAt?: string,
+    processingTimeMs?: number
+  ): Promise<void> {
+    await this.logEvent(
+      buildCaseArchiveAuditParams({
+        user,
+        caseNumber,
+        caseName,
+        archiveReason,
+        result,
+        errors,
+        totalFiles,
+        archivedAt,
+        processingTimeMs
       })
     );
   }

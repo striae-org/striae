@@ -29,6 +29,13 @@ interface NavbarProps {
   onOpenViewAllFiles?: () => void;
   onDeleteCurrentFile?: () => void;
   onOpenImageNotes?: () => void;
+  archiveDetails?: {
+    archived: boolean;
+    archivedAt?: string;
+    archivedBy?: string;
+    archivedByDisplay?: string;
+    archiveReason?: string;
+  };
 }
 
 export const Navbar = ({
@@ -51,6 +58,7 @@ export const Navbar = ({
   onOpenViewAllFiles,
   onDeleteCurrentFile,
   onOpenImageNotes,
+  archiveDetails,
 }: NavbarProps) => {
   const { user } = useContext(AuthContext);
   const [userBadgeId, setUserBadgeId] = useState<string>('');
@@ -249,6 +257,17 @@ export const Navbar = ({
                 </button>
                 {currentCase && (
                   <div className={styles.caseMenuCaption}>Case: {currentCase}</div>
+                )}
+                {archiveDetails?.archived && (
+                  <div className={styles.caseArchiveDetails}>
+                    <strong>Archived Case</strong>
+                    <span>Archived At: {archiveDetails.archivedAt ? new Date(archiveDetails.archivedAt).toLocaleString() : 'Unknown'}</span>
+                    <span>
+                      Archived By: {archiveDetails.archivedByDisplay || archiveDetails.archivedBy || 'Unknown'}
+                      {archiveDetails.archivedByDisplay && archiveDetails.archivedBy ? ` (${archiveDetails.archivedBy})` : ''}
+                    </span>
+                    <span>Reason: {archiveDetails.archiveReason || 'Not provided'}</span>
+                  </div>
                 )}
               </div>
             )}
