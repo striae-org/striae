@@ -1,0 +1,447 @@
+.navbar {
+  height: 60px;
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spaceL);
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  z-index: 35;
+  position: relative;
+  gap: var(--spaceL);
+}
+
+.companyLabelContainer {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: calc(100% - 500px);
+  flex-shrink: 1;
+  min-width: 150px;
+  scroll-behavior: smooth;
+}
+
+.companyLabelContainer::-webkit-scrollbar {
+  height: 4px;
+}
+
+.companyLabelContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.companyLabelContainer::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 2px;
+}
+
+.companyLabelContainer::-webkit-scrollbar-thumb:hover {
+  background: #868e96;
+}
+
+.companyLabel {
+  color: #495057;
+  font-size: var(--fontSizeBodyM);
+  font-weight: var(--fontWeightMedium);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-right: var(--spaceM);
+}
+
+.navbar a {
+  text-decoration: none;
+}
+
+.navbar a:hover,
+.navbar a:focus,
+.navbar a:active,
+.navbar a:visited {
+  text-decoration: none;
+}
+
+.navCenterTrack {
+  position: absolute;
+  left: calc(var(--spaceL) + 300px);
+  right: var(--spaceL);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.navCentral {
+  display: flex;
+  align-items: center;
+  gap: var(--spaceS);
+  margin: 0;
+  flex-shrink: 0;
+  padding: 0.4rem;
+  border: 1px solid #dde3e9;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 1px 3px rgba(33, 37, 41, 0.06);
+  pointer-events: auto;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spaceM);
+  flex-shrink: 0;
+}
+
+.navTextButton {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  color: #495057;
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.navTextButton:hover {
+  color: #212529;
+  text-decoration: none;
+}
+
+.navTextButton:focus,
+.navTextButton:active,
+.navTextButton:visited {
+  text-decoration: none;
+}
+
+.navTextButton:disabled {
+  color: #adb5bd;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.navSectionButton {
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0.5rem 0.9rem;
+  margin: 0;
+  color: #495057;
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  line-height: 1;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    color var(--durationS) var(--bezierFastoutSlowin),
+    background-color var(--durationS) var(--bezierFastoutSlowin),
+    border-color var(--durationS) var(--bezierFastoutSlowin),
+    box-shadow var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.navSectionButton:hover {
+  color: #212529;
+  background: rgba(73, 80, 87, 0.08);
+  border-color: rgba(73, 80, 87, 0.12);
+}
+
+.navSectionButtonActive {
+  color: #0f5132;
+  background: rgba(25, 135, 84, 0.16);
+  border-color: rgba(25, 135, 84, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(25, 135, 84, 0.08);
+}
+
+.navSectionButtonActive:hover {
+  color: #0b3d28;
+  background: rgba(25, 135, 84, 0.22);
+  border-color: rgba(25, 135, 84, 0.34);
+}
+
+.navSectionButton:focus,
+.navSectionButton:active,
+.navSectionButton:visited {
+  text-decoration: none;
+}
+
+.navSectionButton:disabled {
+  color: #adb5bd;
+  background: rgba(173, 181, 189, 0.12);
+  border-color: transparent;
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.navPrimaryButton {
+  background: rgba(25, 135, 84, 0.12);
+  border-color: rgba(25, 135, 84, 0.2);
+  color: #146c43;
+}
+
+.navPrimaryButton:hover {
+  background: rgba(25, 135, 84, 0.18);
+  border-color: rgba(25, 135, 84, 0.3);
+  color: #0f5132;
+}
+
+.navPrimaryButton:disabled {
+  color: #adb5bd;
+  background: rgba(173, 181, 189, 0.12);
+  border-color: transparent;
+}
+
+.caseMenuContainer {
+  position: relative;
+}
+
+.fileMenuContainer {
+  position: relative;
+}
+
+.caseMenu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.45rem;
+  background: #ffffff;
+  border: 1px solid #dde3e9;
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14);
+  z-index: 60;
+}
+
+.fileMenu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.45rem;
+  background: #ffffff;
+  border: 1px solid #dde3e9;
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14);
+  z-index: 60;
+}
+
+.caseMenuItem {
+  width: 100%;
+  border: 1px solid transparent;
+  background: #f8f9fa;
+  color: #343a40;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.fileMenuItem {
+  width: 100%;
+  border: 1px solid transparent;
+  background: #f8f9fa;
+  color: #343a40;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.caseMenuItem:hover {
+  background: #eef1f4;
+  border-color: #d6dce2;
+}
+
+.fileMenuItem:hover {
+  background: #eef1f4;
+  border-color: #d6dce2;
+}
+
+.caseMenuItem:disabled {
+  color: #adb5bd;
+  background: rgba(173, 181, 189, 0.14);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+.fileMenuItem:disabled {
+  color: #adb5bd;
+  background: rgba(173, 181, 189, 0.14);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+.fileMenuItemViewAll {
+  background: color-mix(in lab, #4a90e2 16%, #ffffff);
+  color: #1f5fa7;
+  border-color: color-mix(in lab, #4a90e2 30%, transparent);
+}
+
+.fileMenuItemViewAll:hover {
+  background: color-mix(in lab, #4a90e2 22%, #ffffff);
+}
+
+.fileMenuItemDelete {
+  background: color-mix(in lab, #dc3545 15%, #ffffff);
+  color: #b02a37;
+  border-color: color-mix(in lab, #dc3545 28%, transparent);
+}
+
+.fileMenuItemDelete:hover {
+  background: color-mix(in lab, #dc3545 21%, #ffffff);
+}
+
+.caseMenuItemOpen {
+  background: color-mix(in lab, #4a90e2 16%, #ffffff);
+  color: #1f5fa7;
+  border-color: color-mix(in lab, #4a90e2 30%, transparent);
+}
+
+.caseMenuItemOpen:hover {
+  background: color-mix(in lab, #4a90e2 22%, #ffffff);
+}
+
+.caseMenuItemList {
+  background: color-mix(in lab, #0d6efd 20%, #ffffff);
+  color: #0a4fad;
+  border-color: color-mix(in lab, #0d6efd 34%, transparent);
+}
+
+.caseMenuItemList:hover {
+  background: color-mix(in lab, #0d6efd 26%, #ffffff);
+}
+
+.caseMenuItemExport {
+  background: color-mix(in lab, #198754 16%, #ffffff);
+  color: #146c43;
+  border-color: color-mix(in lab, #198754 30%, transparent);
+}
+
+.caseMenuItemExport:hover {
+  background: color-mix(in lab, #198754 22%, #ffffff);
+}
+
+.caseMenuItemAudit {
+  background: color-mix(in lab, #6f42c1 16%, #ffffff);
+  color: #5a359a;
+  border-color: color-mix(in lab, #6f42c1 30%, transparent);
+}
+
+.caseMenuItemAudit:hover {
+  background: color-mix(in lab, #6f42c1 22%, #ffffff);
+}
+
+.caseMenuItemRename {
+  background: color-mix(in lab, #ffc107 16%, #ffffff);
+  color: #7a5a00;
+  border-color: color-mix(in lab, #ffc107 30%, transparent);
+}
+
+.caseMenuItemRename:hover {
+  background: color-mix(in lab, #ffc107 22%, #ffffff);
+  border-color: color-mix(in lab, #ffc107 36%, transparent);
+}
+
+.caseMenuItemDelete {
+  background: color-mix(in lab, #dc3545 15%, #ffffff);
+  color: #b02a37;
+  border-color: color-mix(in lab, #dc3545 28%, transparent);
+}
+
+.caseMenuItemDelete:hover {
+  background: color-mix(in lab, #dc3545 21%, #ffffff);
+}
+
+.caseMenuItemArchive {
+  background: color-mix(in lab, #6c757d 15%, #ffffff);
+  color: #495057;
+  border-color: color-mix(in lab, #6c757d 28%, transparent);
+}
+
+.caseMenuItemArchive:hover {
+  background: color-mix(in lab, #6c757d 21%, #ffffff);
+}
+
+.caseMenuItemKey {
+  background: color-mix(in lab, #0d9488 14%, #ffffff);
+  color: #0f766e;
+  border-color: color-mix(in lab, #0d9488 28%, transparent);
+}
+
+.caseMenuItemKey:hover {
+  background: color-mix(in lab, #0d9488 20%, #ffffff);
+}
+
+.caseMenuCaption {
+  margin-top: 0.25rem;
+  padding: 0.3rem 0.45rem 0.1rem;
+  border-top: 1px solid #e9ecef;
+  color: #6c757d;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.caseArchiveDetails {
+  margin-top: 0.3rem;
+  padding: 0.45rem;
+  border-top: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: color-mix(in lab, #0d9488 8%, #ffffff);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  color: #0f766e;
+  font-size: 0.72rem;
+}
+
+.caseArchiveDetails strong {
+  font-size: 0.74rem;
+  color: #0b5f59;
+}
+
+.caseMenuSectionLabel {
+  margin-top: 0.2rem;
+  padding: 0.32rem 0.45rem 0.15rem;
+  border-top: 1px solid #e9ecef;
+  color: #6c757d;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.fileMenuCaption {
+  margin-top: 0.25rem;
+  padding: 0.3rem 0.45rem 0.1rem;
+  border-top: 1px solid #e9ecef;
+  color: #6c757d;
+  font-size: 0.72rem;
+  font-weight: 500;
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fileMenuSectionLabel {
+  margin-top: 0.2rem;
+  padding: 0.32rem 0.45rem 0.15rem;
+  border-top: 1px solid #e9ecef;
+  color: #6c757d;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}

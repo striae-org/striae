@@ -51,6 +51,7 @@ export interface ConfirmationImportData {
     exportedByUid: string;
     exportedByName: string;
     exportedByCompany: string;
+    exportedByBadgeId?: string;
     totalConfirmations: number;
     version: string;
     hash: string;
@@ -79,9 +80,11 @@ export interface ConfirmationImportData {
 
 export interface CaseImportPreview {
   caseNumber: string;
+  archived?: boolean;
   exportedBy: string | null;
   exportedByName: string | null;
   exportedByCompany: string | null;
+  exportedByBadgeId?: string | null;
   exportDate: string;
   totalFiles: number;
   caseCreatedDate?: string;

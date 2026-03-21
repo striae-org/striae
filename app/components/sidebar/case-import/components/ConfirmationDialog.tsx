@@ -4,6 +4,7 @@ import styles from '../case-import.module.css';
 interface ConfirmationDialogProps {
   showConfirmation: boolean;
   casePreview: CaseImportPreview | null;
+  showArchivedRegularCaseRiskWarning?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -11,6 +12,7 @@ interface ConfirmationDialogProps {
 export const ConfirmationDialog = ({ 
   showConfirmation, 
   casePreview, 
+  showArchivedRegularCaseRiskWarning = false,
   onConfirm, 
   onCancel 
 }: ConfirmationDialogProps) => {
@@ -41,6 +43,19 @@ export const ConfirmationDialog = ({
             <div className={styles.confirmationItem}>
               <strong>Total Images:</strong> {casePreview.totalFiles}
             </div>
+            <div className={styles.confirmationItem}>
+              <strong>Archived Export:</strong> {casePreview.archived ? 'Yes' : 'No'}
+            </div>
+            {casePreview.archived && (
+              <div className={styles.archivedImportNote}>
+                Archived export detected. Original exporter imports are allowed for archived cases.
+              </div>
+            )}
+            {showArchivedRegularCaseRiskWarning && (
+              <div className={styles.archivedRegularCaseRiskNote}>
+                Warning: This archived import matches a case in your regular case list. If you clear the imported read-only case later, the regular case images will be deleted and inaccessible.
+              </div>
+            )}
             {casePreview.hashValid !== undefined && (
               <div className={`${styles.confirmationItem} ${casePreview.hashValid ? styles.confirmationItemValid : styles.confirmationItemInvalid}`}>
                 <strong>Data Integrity:</strong> 

@@ -83,7 +83,8 @@ export function createAuditExportSigningPayload(payload: AuditExportSigningPaylo
 
 export async function verifyAuditExportSignature(
   payload: Partial<AuditExportSigningPayload>,
-  signature?: ForensicManifestSignature
+  signature?: ForensicManifestSignature,
+  verificationPublicKeyPem?: string
 ): Promise<ManifestSignatureVerificationResult> {
   if (!signature) {
     return {
@@ -112,6 +113,9 @@ export async function verifyAuditExportSignature(
       noVerificationKeyPrefix: 'No verification key configured for key ID',
       invalidPublicKeyError: 'Audit export signature verification failed: invalid public key',
       verificationFailedError: 'Audit export signature verification failed'
+    },
+    {
+      verificationPublicKeyPem
     }
   );
 }

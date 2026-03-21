@@ -101,6 +101,27 @@
   padding: 20px;
 }
 
+.archivedNotice,
+.archivedWarning {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid;
+  font-size: 0.9rem;
+}
+
+.archivedNotice {
+  background: color-mix(in lab, var(--primary) 8%, transparent);
+  border-color: color-mix(in lab, var(--primary) 35%, transparent);
+  color: var(--textBody);
+}
+
+.archivedWarning {
+  background: color-mix(in lab, var(--warning) 12%, transparent);
+  border-color: color-mix(in lab, var(--warning) 40%, transparent);
+  color: var(--text);
+}
+
 /* Loading & Error States */
 .loading,
 .error {

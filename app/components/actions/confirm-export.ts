@@ -202,7 +202,13 @@ export async function exportConfirmationData(
     }
 
     // Get user metadata for export (same as case exports)
-    let userMetadata = {
+    let userMetadata: {
+      exportedBy: string;
+      exportedByUid: string;
+      exportedByName: string;
+      exportedByCompany: string;
+      exportedByBadgeId?: string;
+    } = {
       exportedBy: user.email || 'Unknown User',
       exportedByUid: user.uid,
       exportedByName: user.displayName || 'N/A',
@@ -216,7 +222,8 @@ export async function exportConfirmationData(
           exportedBy: user.email || 'Unknown User',
           exportedByUid: userData.uid,
           exportedByName: `${userData.firstName} ${userData.lastName}`.trim(),
-          exportedByCompany: userData.company
+          exportedByCompany: userData.company,
+          ...(userData.badgeId ? { exportedByBadgeId: userData.badgeId } : {})
         };
       }
     } catch (error) {

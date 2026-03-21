@@ -5,6 +5,7 @@ import {
   listReadOnlyCases, 
   deleteReadOnlyCase
 } from '~/components/actions/case-review';
+import { listCases } from '~/components/actions/case-manage';
 import {
   type ImportResult,  
   type ConfirmationImportResult
@@ -52,8 +53,9 @@ export const CaseImport = ({
   } = useImportState();
   const canDismissOverlay = !importState.isImporting && !importState.isClearing;
   const {
-    handleOverlayMouseDown,
-    handleOverlayKeyDown
+    requestClose,
+    overlayProps,
+    getCloseButtonProps
   } = useOverlayDismiss({
     isOpen,
     onClose,
@@ -61,11 +63,13 @@ export const CaseImport = ({
   });
   
   const [existingReadOnlyCase, setExistingReadOnlyCase] = useState<string | null>(null);
+  const [showArchivedRegularCaseRiskWarning, setShowArchivedRegularCaseRiskWarning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Clear import selection state (used by preview hook on validation failure)
   const clearImportSelection = useCallback(() => {
     updateImportState({ selectedFile: null, importType: null });
+    setShowArchivedRegularCaseRiskWarning(false);
     resetFileInput(fileInputRef);
   }, [updateImportState]);
 
@@ -123,10 +127,21 @@ export const CaseImport = ({
     updateImportState({ isClearing: true });
     
     try {
-      await deleteReadOnlyCase(user, existingReadOnlyCase);
-      
       const clearedCaseName = existingReadOnlyCase;
-      setExistingReadOnlyCase(null);
+      const deleteSuccess = await deleteReadOnlyCase(user, clearedCaseName);
+      const remainingReadOnlyCases = await listReadOnlyCases(user);
+      const stillExists = remainingReadOnlyCases.some((caseMeta) => caseMeta.caseNumber === clearedCaseName);
+
+      setExistingReadOnlyCase(remainingReadOnlyCases.length > 0 ? remainingReadOnlyCases[0].caseNumber : null);
+
+      if (!deleteSuccess || stillExists) {
+        setError(
+          `Failed to fully clear read-only case "${clearedCaseName}". ` +
+          'Please try again. If this was an archived import that overlaps a regular case, verify that all case images are accessible before retrying.'
+        );
+        return;
+      }
+
       setSuccess(`Removed read-only case "${clearedCaseName}"`);
       
       onImportComplete?.({ 
@@ -236,8 +251,8 @@ export const CaseImport = ({
 
   const handleModalCancel = useCallback(() => {
     clearImportData();
-    onClose();
-  }, [clearImportData, onClose]);
+    requestClose();
+  }, [clearImportData, requestClose]);
 
   // Effects
   useEffect(() => {
@@ -245,6 +260,42 @@ export const CaseImport = ({
       checkForExistingReadOnlyCase();
     }
   }, [user, isOpen, checkForExistingReadOnlyCase]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkArchivedRegularCaseRisk = async () => {
+      if (
+        !user ||
+        !isOpen ||
+        importState.importType !== 'case' ||
+        !casePreview?.archived ||
+        !casePreview.caseNumber
+      ) {
+        if (isMounted) {
+          setShowArchivedRegularCaseRiskWarning(false);
+        }
+        return;
+      }
+
+      try {
+        const regularCases = await listCases(user);
+        if (isMounted) {
+          setShowArchivedRegularCaseRiskWarning(regularCases.includes(casePreview.caseNumber));
+        }
+      } catch {
+        if (isMounted) {
+          setShowArchivedRegularCaseRiskWarning(false);
+        }
+      }
+    };
+
+    void checkArchivedRegularCaseRisk();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, isOpen, importState.importType, casePreview?.archived, casePreview?.caseNumber]);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -265,20 +316,15 @@ export const CaseImport = ({
     <>
       <div
         className={styles.overlay}
-        onMouseDown={handleOverlayMouseDown}
-        onKeyDown={handleOverlayKeyDown}
-        role="button"
-        tabIndex={0}
         aria-label="Close case import dialog"
+        {...overlayProps}
       >
         <div className={styles.modal}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Import RO Case or Confirmations</h2>
-          <button 
+          <h2 className={styles.title}>Import Case or Confirmations</h2>
+          <button
             className={styles.closeButton}
-            onClick={onClose}
-            aria-label="Close modal"
-            disabled={importState.isImporting || importState.isClearing}
+            {...getCloseButtonProps({ ariaLabel: 'Close case import dialog' })}
           >
             ×
           </button>
@@ -316,6 +362,7 @@ export const CaseImport = ({
                   <CasePreviewSection 
                     casePreview={casePreview} 
                     isLoadingPreview={importState.isLoadingPreview} 
+                    showArchivedRegularCaseRiskWarning={showArchivedRegularCaseRiskWarning}
                   />
                 )}
                 
@@ -407,6 +454,7 @@ export const CaseImport = ({
     <ConfirmationDialog 
       showConfirmation={importState.showConfirmation}
       casePreview={casePreview}
+      showArchivedRegularCaseRiskWarning={showArchivedRegularCaseRiskWarning}
       onConfirm={handleConfirmImport}
       onCancel={handleCancelImport}
     />

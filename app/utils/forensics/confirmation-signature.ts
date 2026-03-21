@@ -134,6 +134,9 @@ export function createConfirmationSigningPayload(
       exportedByUid: confirmationData.metadata.exportedByUid,
       exportedByName: confirmationData.metadata.exportedByName,
       exportedByCompany: confirmationData.metadata.exportedByCompany,
+      ...(confirmationData.metadata.exportedByBadgeId
+        ? { exportedByBadgeId: confirmationData.metadata.exportedByBadgeId }
+        : {}),
       totalConfirmations: confirmationData.metadata.totalConfirmations,
       version: confirmationData.metadata.version,
       hash: confirmationData.metadata.hash.toUpperCase(),

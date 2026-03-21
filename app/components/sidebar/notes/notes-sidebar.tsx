@@ -16,13 +16,16 @@ interface NotesSidebarProps {
   onAnnotationRefresh?: () => void;
   originalFileName?: string;
   isUploading?: boolean;
+  showReturnButton?: boolean;
+  stickyActionBar?: boolean;
+  compactLayout?: boolean;
 }
 
 type SupportLevel = 'ID' | 'Exclusion' | 'Inconclusive';
 type ClassType = 'Bullet' | 'Cartridge Case' | 'Other';
 type IndexType = 'number' | 'color';
 
-export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotationRefresh, originalFileName, isUploading = false }: NotesSidebarProps) => {
+export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotationRefresh, originalFileName, isUploading = false, showReturnButton = true, stickyActionBar = false, compactLayout = false }: NotesSidebarProps) => {
   // Loading/Saving Notes States
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string>();
@@ -56,6 +59,10 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
   // Additional Notes Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [additionalNotes, setAdditionalNotes] = useState('');
+  const [isCaseInfoOpen, setIsCaseInfoOpen] = useState(true);
+  const [isClassOpen, setIsClassOpen] = useState(true);
+  const [isIndexOpen, setIsIndexOpen] = useState(true);
+  const [isSupportOpen, setIsSupportOpen] = useState(true);
   const areInputsDisabled = isUploading || isConfirmedImage;
 
   useEffect(() => {
@@ -227,7 +234,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
   };
 
   return (
-    <div className={styles.notesSidebar}>
+    <div className={`${styles.notesSidebar} ${compactLayout ? styles.compactLayout : ''}`}>
       {isLoading ? (
         <div className={styles.loading}>Loading notes...</div>
       ) : loadError ? (
@@ -245,7 +252,17 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
       )}
 
       <div className={styles.section}>
-        <h5 className={styles.sectionTitle}>Case Information</h5>
+        <button
+          type="button"
+          className={styles.sectionToggle}
+          onClick={() => setIsCaseInfoOpen((prev) => !prev)}
+          aria-expanded={isCaseInfoOpen}
+        >
+          <span className={styles.sectionTitle}>Case Information</span>
+          <span className={styles.sectionToggleIcon}>{isCaseInfoOpen ? '−' : '+'}</span>
+        </button>
+        {isCaseInfoOpen && (
+          <>
         <hr />
         <div className={styles.caseNumbers}>
           {/* Left side inputs */}
@@ -279,9 +296,18 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
                 onChange={(e) => setLeftItem(e.target.value)}
                 disabled={areInputsDisabled}
               />
-            </div>            
+            </div>
+            {compactLayout && (
+              <div className={styles.caseInput}>
+                <label htmlFor="colorSelect">Font</label>
+                <ColorSelector
+                  selectedColor={caseFontColor}
+                  onColorSelect={setCaseFontColor}
+                />
+              </div>
+            )}
           </div>
-          <hr />
+          {!compactLayout && <hr />}
           {/* Right side inputs */}
           <div className={styles.inputGroup}>
             <div className={styles.caseInput}>
@@ -316,63 +342,102 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
             </div>            
           </div>
         </div>
-         <label htmlFor="colorSelect">Font</label>                  
-          <ColorSelector            
-            selectedColor={caseFontColor}
-            onColorSelect={setCaseFontColor}
-          />        
-      </div>
-
-      <div className={styles.section}>
-        <h5 className={styles.sectionTitle}>Class Characteristics</h5>
-        <div className={styles.classCharacteristics}>
-          <select
-            id="classType"
-            aria-label="Class Type"
-            value={classType}
-            onChange={(e) => setClassType(e.target.value as ClassType)}
-            className={styles.select}
-            disabled={areInputsDisabled}
-          >
-            <option value="">Select class type...</option>
-            <option value="Bullet">Bullet</option>
-            <option value="Cartridge Case">Cartridge Case</option>
-            <option value="Other">Other</option>
-          </select>
-
-          {classType === 'Other' && (
-            <input
-              type="text"
-              value={customClass}
-              onChange={(e) => setCustomClass(e.target.value)}
-              placeholder="Specify object type"
-              disabled={areInputsDisabled}
+        {!compactLayout && (
+          <>
+            <label htmlFor="colorSelect">Font</label>
+            <ColorSelector
+              selectedColor={caseFontColor}
+              onColorSelect={setCaseFontColor}
             />
-          )}
-
-          <textarea
-            value={classNote}
-            onChange={(e) => setClassNote(e.target.value)}
-            placeholder="Enter class characteristic details..."
-            className={styles.textarea}
-            disabled={areInputsDisabled}
-          />          
-        </div>
-        <label className={`${styles.checkboxLabel} mb-4`}>
-          <input
-            type="checkbox"
-            checked={hasSubclass}
-            onChange={(e) => setHasSubclass(e.target.checked)}
-            className={styles.checkbox}
-            disabled={areInputsDisabled}
-          />
-          <span>Potential subclass?</span>
-        </label>
+          </>
+        )}
+          </>
+        )}
       </div>
 
-      <div className={styles.section}>
-        <h5 className={styles.sectionTitle}>Index Type</h5>
-        <div className={styles.indexing}>
+      <div className={compactLayout ? styles.compactSectionGrid : undefined}>
+      <div className={`${styles.section} ${compactLayout ? styles.compactFullSection : ''}`}>
+        <button
+          type="button"
+          className={styles.sectionToggle}
+          onClick={() => setIsClassOpen((prev) => !prev)}
+          aria-expanded={isClassOpen}
+        >
+          <span className={styles.sectionTitle}>Class Characteristics</span>
+          <span className={styles.sectionToggleIcon}>{isClassOpen ? '−' : '+'}</span>
+        </button>
+        {isClassOpen && (
+          <>
+            <div className={compactLayout ? styles.classCharacteristicsColumns : undefined}>
+              <div className={styles.classCharacteristicsMain}>
+                <div className={styles.classCharacteristics}>
+                  <select
+                    id="classType"
+                    aria-label="Class Type"
+                    value={classType}
+                    onChange={(e) => setClassType(e.target.value as ClassType)}
+                    className={styles.select}
+                    disabled={areInputsDisabled}
+                  >
+                    <option value="">Select class type...</option>
+                    <option value="Bullet">Bullet</option>
+                    <option value="Cartridge Case">Cartridge Case</option>
+                    <option value="Other">Other</option>
+                  </select>
+
+                  {classType === 'Other' && (
+                    <input
+                      type="text"
+                      value={customClass}
+                      onChange={(e) => setCustomClass(e.target.value)}
+                      placeholder="Specify object type"
+                      disabled={areInputsDisabled}
+                    />
+                  )}
+
+                  <textarea
+                    value={classNote}
+                    onChange={(e) => setClassNote(e.target.value)}
+                    placeholder="Enter class characteristic details..."
+                    className={styles.textarea}
+                    disabled={areInputsDisabled}
+                  />
+                </div>
+                <label className={`${styles.checkboxLabel} mb-4`}>
+                  <input
+                    type="checkbox"
+                    checked={hasSubclass}
+                    onChange={(e) => setHasSubclass(e.target.checked)}
+                    className={styles.checkbox}
+                    disabled={areInputsDisabled}
+                  />
+                  <span>Potential subclass?</span>
+                </label>
+            </div>
+
+              {compactLayout && (
+                <div className={styles.characteristicsPlaceholder}>
+                  <h6 className={styles.placeholderTitle}>Characteristics Details</h6>
+                  <p className={styles.placeholderText}>This section is reserved for future development.</p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className={`${styles.section} ${compactLayout ? styles.compactHalfSection : ''}`}>
+        <button
+          type="button"
+          className={styles.sectionToggle}
+          onClick={() => setIsIndexOpen((prev) => !prev)}
+          aria-expanded={isIndexOpen}
+        >
+          <span className={styles.sectionTitle}>Index Type</span>
+          <span className={styles.sectionToggleIcon}>{isIndexOpen ? '−' : '+'}</span>
+        </button>
+        {isIndexOpen && (
+          <div className={styles.indexing}>
           <div className={styles.radioGroup}>
             <label className={styles.radioLabel}>
               <input
@@ -409,75 +474,96 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
             />            
           ) : null}
         </div>
+        )}
       </div>
 
-      <div className={styles.section}>
-        <h5 className={styles.sectionTitle}>Support Level</h5>
-        <div className={styles.support}>
-          <select
-            id="supportLevel"
-            aria-label="Support Level"
-            value={supportLevel}
-            onChange={(e) => {
-              const newSupportLevel = e.target.value as SupportLevel;
-              setSupportLevel(newSupportLevel);
-              
-              // Automatically check confirmation field when ID is selected
-              if (newSupportLevel === 'ID') {
-                setIncludeConfirmation(true);
-              }
-            }}
-            className={styles.select}
-            disabled={areInputsDisabled}
-          >
-            <option value="">Select support level...</option>
-            <option value="ID">Identification</option>
-            <option value="Exclusion">Exclusion</option>
-            <option value="Inconclusive">Inconclusive</option>
-          </select>
-          <label className={`${styles.checkboxLabel} mb-4`}>
-          <input
-            type="checkbox"
-            checked={includeConfirmation}
-            onChange={(e) => setIncludeConfirmation(e.target.checked)}
-            className={styles.checkbox}
-            disabled={areInputsDisabled}
-          />
-          <span>Include confirmation field</span>
-        </label>
-        </div>
-        <button 
-        onClick={() => setIsModalOpen(true)}
-        className={styles.notesButton}
-        disabled={areInputsDisabled}
-        title={isConfirmedImage ? "Cannot edit notes for confirmed images" : isUploading ? "Cannot add notes while uploading" : undefined}
-      >
-        Additional Notes
-      </button>
+      <div className={`${styles.section} ${compactLayout ? styles.compactHalfSection : ''}`}>
+        <button
+          type="button"
+          className={styles.sectionToggle}
+          onClick={() => setIsSupportOpen((prev) => !prev)}
+          aria-expanded={isSupportOpen}
+        >
+          <span className={styles.sectionTitle}>Support Level</span>
+          <span className={styles.sectionToggleIcon}>{isSupportOpen ? '−' : '+'}</span>
+        </button>
+        {isSupportOpen && (
+          <>
+            <div className={styles.support}>
+              <select
+                id="supportLevel"
+                aria-label="Support Level"
+                value={supportLevel}
+                onChange={(e) => {
+                  const newSupportLevel = e.target.value as SupportLevel;
+                  setSupportLevel(newSupportLevel);
+                  
+                  // Automatically check confirmation field when ID is selected
+                  if (newSupportLevel === 'ID') {
+                    setIncludeConfirmation(true);
+                  }
+                }}
+                className={styles.select}
+                disabled={areInputsDisabled}
+              >
+                <option value="">Select support level...</option>
+                <option value="ID">Identification</option>
+                <option value="Exclusion">Exclusion</option>
+                <option value="Inconclusive">Inconclusive</option>
+              </select>
+              <label className={`${styles.checkboxLabel} mb-4`}>
+                <input
+                  type="checkbox"
+                  checked={includeConfirmation}
+                  onChange={(e) => setIncludeConfirmation(e.target.checked)}
+                  className={styles.checkbox}
+                  disabled={areInputsDisabled}
+                />
+                <span>Include confirmation field</span>
+              </label>
+            </div>
+          </>
+        )}
       </div>            
-        <button 
-            onClick={handleSave}
-            className={styles.saveButton}
+      </div>
+
+        <div className={styles.additionalNotesRow}>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className={styles.notesButton}
             disabled={areInputsDisabled}
-            title={isConfirmedImage ? "Cannot save notes for confirmed images" : isUploading ? "Cannot save notes while uploading" : undefined}
+            title={isConfirmedImage ? "Cannot edit notes for confirmed images" : isUploading ? "Cannot add notes while uploading" : undefined}
           >
-            Save Notes
+            Additional Notes
           </button>
+        </div>
+
+        <div className={`${styles.notesActionBar} ${stickyActionBar ? styles.notesActionBarSticky : ''}`}>
+          <button 
+              onClick={handleSave}
+              className={styles.saveButton}
+              disabled={areInputsDisabled}
+              title={isConfirmedImage ? "Cannot save notes for confirmed images" : isUploading ? "Cannot save notes while uploading" : undefined}
+            >
+              Save Notes
+            </button>
+          {showReturnButton && (
+            <button 
+              onClick={onReturn}
+              className={styles.returnButton}
+              disabled={isUploading}
+              title={isUploading ? "Cannot return while uploading" : undefined}
+            >
+              Return to Case Management
+            </button>
+          )}
+        </div>
           
           {saveSuccess && (
             <div className={styles.successMessage}>
               Notes saved successfully!
             </div>
           )}
-
-        <button 
-          onClick={onReturn}
-          className={styles.returnButton}
-          disabled={isUploading}
-          title={isUploading ? "Cannot return while uploading" : undefined}
-        >
-          Return to Case Management
-        </button>            
       <NotesModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

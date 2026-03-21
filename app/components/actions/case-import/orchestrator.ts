@@ -1,11 +1,16 @@
 import type { User } from 'firebase/auth';
-import { type ImportOptions, type ImportResult, type ReadOnlyCaseMetadata, type FileData } from '~/types';
+import {
+  type ImportOptions,
+  type ImportResult,
+  type ReadOnlyCaseMetadata,
+  type FileData,
+  type BundledAuditTrailData,
+  type ValidationAuditEntry
+} from '~/types';
 import { checkExistingCase } from '../case-manage';
 import {
-  extractForensicManifestData,
   type SignedForensicManifest,
-  validateCaseIntegritySecure as validateForensicIntegrity,
-  verifyForensicManifestSignature
+  verifyCasePackageIntegrity
 } from '~/utils/forensics';
 import { deleteFile } from '../image-manage';
 import { parseImportZip } from './zip-processing';
@@ -29,6 +34,48 @@ interface ImportState {
   caseDataStored: boolean;
   userProfileUpdated: boolean;
   caseNumber: string;
+}
+
+interface BundledAuditTrailFile {
+  metadata?: {
+    exportTimestamp?: string;
+    totalEntries?: number;
+  };
+  auditTrail?: {
+    entries?: ValidationAuditEntry[];
+  };
+}
+
+function extractBundledAuditTrailData(
+  bundledAuditFiles: {
+    auditTrailContent?: string;
+    auditSignatureContent?: string;
+  } | undefined
+): BundledAuditTrailData | undefined {
+  if (!bundledAuditFiles?.auditTrailContent) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(bundledAuditFiles.auditTrailContent) as BundledAuditTrailFile;
+    const entries = parsed.auditTrail?.entries;
+
+    if (!Array.isArray(entries)) {
+      return undefined;
+    }
+
+    return {
+      source: 'archive-bundle',
+      importedAt: new Date().toISOString(),
+      exportTimestamp: parsed.metadata?.exportTimestamp,
+      totalEntries: typeof parsed.metadata?.totalEntries === 'number'
+        ? parsed.metadata.totalEntries
+        : entries.length,
+      entries
+    };
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -141,6 +188,8 @@ export async function importCaseForReview(
       caseData,
       imageFiles,
       imageIdMapping,
+      isArchivedExport,
+      bundledAuditFiles,
       metadata,
       cleanedContent,
       verificationPublicKeyPem
@@ -181,40 +230,35 @@ export async function importCaseForReview(
     if (parsedForensicManifest && cleanedContent) {
       onProgress?.('Validating comprehensive integrity', 15, 'Checking all file hashes...');
 
-      const manifestForValidation = extractForensicManifestData(parsedForensicManifest);
-      if (!manifestForValidation) {
-        throw new Error(
-          'Forensic manifest structure is invalid. Import cannot proceed.'
-        );
-      }
-
-      const signatureResult = await verifyForensicManifestSignature(
-        parsedForensicManifest,
-        verificationPublicKeyPem
-      );
-      signatureValidationPassed = signatureResult.isValid;
-      signatureKeyId = signatureResult.keyId;
-
-      if (!signatureResult.isValid) {
-        throw new Error(
-          'Manifest signature validation failed. Import cannot proceed.'
-        );
-      }
-      
-      // Extract image files for comprehensive validation
       const imageBlobs: { [filename: string]: Blob } = {};
       for (const [filename, blob] of Object.entries(imageFiles)) {
         imageBlobs[filename] = blob;
       }
-      
-      // Perform comprehensive validation
-      const validation = await validateForensicIntegrity(
-        cleanedContent, 
-        imageBlobs, 
-        manifestForValidation
-      );
-      
-      if (!validation.isValid) {
+
+      const casePackageResult = await verifyCasePackageIntegrity({
+        cleanedContent,
+        imageFiles: imageBlobs,
+        forensicManifest: parsedForensicManifest,
+        verificationPublicKeyPem,
+        bundledAuditFiles
+      });
+
+      signatureValidationPassed = casePackageResult.signatureResult.isValid;
+      signatureKeyId = casePackageResult.signatureResult.keyId;
+
+      if (!casePackageResult.signatureResult.isValid) {
+        throw new Error(
+          'Manifest signature validation failed. Import cannot proceed.'
+        );
+      }
+
+      if (casePackageResult.bundledAuditVerification) {
+        throw new Error(
+          `${casePackageResult.bundledAuditVerification.message} Import cannot proceed.`
+        );
+      }
+
+      if (!casePackageResult.integrityResult.isValid) {
         throw new Error(
           'Comprehensive integrity validation failed. Import cannot proceed.'
         );
@@ -239,7 +283,7 @@ export async function importCaseForReview(
     
     // Step 2a: Check if case already exists in user's regular cases (original analyst)
     const existingRegularCase = await checkExistingCase(user, result.caseNumber);
-    if (existingRegularCase) {
+    if (existingRegularCase && !isArchivedExport) {
       throw new Error(`Case "${result.caseNumber}" already exists in your case list. You cannot import a case for review if you were the original analyst.`);
     }
     
@@ -318,7 +362,9 @@ export async function importCaseForReview(
       caseData,
       importedFiles,
       originalImageIdMapping,
-      parsedForensicManifest
+      parsedForensicManifest,
+      isArchivedExport,
+      isArchivedExport ? extractBundledAuditTrailData(bundledAuditFiles) : undefined
     );
     importState.caseDataStored = true;
     

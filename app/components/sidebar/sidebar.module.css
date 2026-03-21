@@ -3,52 +3,15 @@
   position: relative;
   width: 300px;
   min-width: 250px;
-  height: calc(100vh - 60px);
-  background-color: #f8f9fa;
-  border-right: 1px solid #dee2e6;
-  padding: 1.5rem;
-  overflow-y: auto;
-  flex-shrink: 0;
-  box-sizing: border-box;
-}
-
-/* User Section */
-.userInfo {
+  height: calc(100% - 60px);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e9ecef;
-  margin-bottom: 1rem;
-}
-
-.userTitle {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #212529;
-  margin: 0;
-}
-
-.userActions {
-  display: flex;
-  gap: 0.5rem;
-  width: 100%;
-}
-
-.profileButton {
-  padding: 0.5rem 1rem;
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.profileButton:hover {
-  background-color: #5c636a;
+  background-color: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+  padding: 0.25rem 1rem 0.875rem;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 /* Footer Button */
@@ -237,33 +200,6 @@
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: 3px;
-}
-
-/* Import Section */
-.importSection {
-  margin-top: auto;
-  padding: 1rem 0;
-  border-top: 1px solid var(--divider);
-}
-
-.importButton {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: var(--success);
-  color: white;
-  border: none;
-  border-radius: var(--spaceXS);
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
-  cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  box-shadow: 0 1px 3px color-mix(in lab, var(--success) 30%, transparent);
-  box-sizing: border-box;
-}
-
-.importButton:hover {
-  background: color-mix(in lab, var(--success) 85%, var(--black));
-  box-shadow: 0 2px 6px color-mix(in lab, var(--success) 40%, transparent);
 }
 
 /* Hash Button */

@@ -2,8 +2,6 @@ import { useState, useEffect, useContext } from 'react';
 import styles from './case-export.module.css';
 import { AuthContext } from '~/contexts/auth.context';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
-import { PublicSigningKeyModal } from '~/components/public-signing-key-modal/public-signing-key-modal';
-import { getCurrentPublicSigningKeyDetails } from '~/utils/forensics';
 import { getCaseConfirmations, exportConfirmationData } from '../../actions/confirm-export';
 
 export type ExportFormat = 'json' | 'csv';
@@ -35,15 +33,13 @@ export const CaseExport = ({
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('json');
   const [includeImages, setIncludeImages] = useState(false);
   const [hasConfirmationData, setHasConfirmationData] = useState(false);
-  const [isPublicKeyModalOpen, setIsPublicKeyModalOpen] = useState(false);
-  const { keyId: publicSigningKeyId, publicKeyPem } = getCurrentPublicSigningKeyDetails();
   const {
-    handleOverlayMouseDown,
-    handleOverlayKeyDown
+    requestClose,
+    overlayProps,
+    getCloseButtonProps
   } = useOverlayDismiss({
     isOpen,
     onClose,
-    canDismiss: !isPublicKeyModalOpen
   });
 
   // Update caseNumber when currentCaseNumber prop changes
@@ -103,12 +99,6 @@ export const CaseExport = ({
     }
   }, [isReadOnly]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setIsPublicKeyModalOpen(false);
-    }
-  }, [isOpen]);
-
   if (!isOpen) return null;
 
   const handleExport = async () => {
@@ -125,7 +115,7 @@ export const CaseExport = ({
       await onExport(caseNumber.trim(), selectedFormat, includeImages, (progress, label) => {
         setExportProgress({ current: progress, total: 100, caseName: label, mode: 'single' });
       });
-      onClose();
+      requestClose();
     } catch (error) {
       console.error('Export failed:', error);
       setError(error instanceof Error ? error.message : 'Export failed. Please try again.');
@@ -144,7 +134,7 @@ export const CaseExport = ({
       await onExportAll((current: number, total: number, caseName: string) => {
         setExportProgress({ current, total, caseName });
       }, selectedFormat);
-      onClose();
+      requestClose();
     } catch (error) {
       console.error('Export all failed:', error);
       setError(error instanceof Error ? error.message : 'Export all cases failed. Please try again.');
@@ -165,7 +155,7 @@ export const CaseExport = ({
     
     try {
       await exportConfirmationData(user, caseNumber.trim());
-      onClose();
+      requestClose();
     } catch (error) {
       console.error('Confirmation export failed:', error);
       setError(error instanceof Error ? error.message : 'Confirmation export failed. Please try again.');
@@ -177,20 +167,13 @@ export const CaseExport = ({
   return (
     <div
       className={styles.overlay}
-      onMouseDown={handleOverlayMouseDown}
-      onKeyDown={handleOverlayKeyDown}
-      role="button"
-      tabIndex={0}
       aria-label="Close case export dialog"
+      {...overlayProps}
     >
       <div className={styles.modal}>
         <div className={styles.header}>
           <h2 className={styles.title}>Export Case Data</h2>
-          <button 
-            className={styles.closeButton}
-            onClick={onClose}
-            aria-label="Close modal"
-          >
+          <button className={styles.closeButton} {...getCloseButtonProps({ ariaLabel: 'Close case export dialog' })}>
             ×
           </button>
         </div>
@@ -313,20 +296,6 @@ export const CaseExport = ({
                 </div>
               </div>
             )}
-
-            <div className={styles.divider}>
-              <span>Verification</span>
-            </div>
-
-            <div className={styles.publicKeySection}>
-              <button
-                type="button"
-                className={styles.publicKeyButton}
-                onClick={() => setIsPublicKeyModalOpen(true)}
-              >
-                View Public Signing Key
-              </button>
-            </div>
             
             {error && (
               <div className={styles.error}>
@@ -336,13 +305,6 @@ export const CaseExport = ({
           </div>
         </div>
       </div>
-
-      <PublicSigningKeyModal
-        isOpen={isPublicKeyModalOpen}
-        onClose={() => setIsPublicKeyModalOpen(false)}
-        publicSigningKeyId={publicSigningKeyId}
-        publicKeyPem={publicKeyPem}
-      />
     </div>
   );
 };

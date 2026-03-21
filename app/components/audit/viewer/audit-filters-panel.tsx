@@ -259,6 +259,7 @@ export const AuditFiltersPanel = ({
             <option value="case-create">Case Create</option>
             <option value="case-rename">Case Rename</option>
             <option value="case-delete">Case Delete</option>
+            <option value="case-archive">Case Archive</option>
             <option value="case-export">Case Export</option>
             <option value="case-import">Case Import</option>
           </optgroup>

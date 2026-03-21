@@ -9,7 +9,8 @@ import {
   type CaseExportData,   
   type FileData,
   type CaseData,
-  type ReadOnlyCaseMetadata
+  type ReadOnlyCaseMetadata,
+  type BundledAuditTrailData
 } from '~/types';
 import { deleteFile } from '../image-manage';
 import { type SignedForensicManifest } from '~/utils/forensics';
@@ -80,7 +81,9 @@ export async function storeCaseDataInR2(
   caseData: CaseExportData,
   importedFiles: FileData[],
   originalImageIdMapping?: Map<string, string>,
-  forensicManifest?: SignedForensicManifest
+  forensicManifest?: SignedForensicManifest,
+  isArchivedExport?: boolean,
+  bundledAuditTrail?: BundledAuditTrailData
 ): Promise<void> {
   try {
     // Convert the mapping to a plain object for JSON serialization
@@ -94,6 +97,8 @@ export async function storeCaseDataInR2(
       manifestHash: forensicManifest.manifestHash,
       signature: forensicManifest.signature
     } : undefined;
+
+    const archived = isArchivedExport === true || caseData.metadata.archived === true;
     
     // Create the case data structure that matches normal cases
     const r2CaseData = {
@@ -102,7 +107,15 @@ export async function storeCaseDataInR2(
       files: importedFiles,
       // Add read-only metadata
       isReadOnly: true,
+      ...(archived && {
+        archived: true,
+        archivedAt: caseData.metadata.archivedAt,
+        archivedBy: caseData.metadata.archivedBy,
+        archivedByDisplay: caseData.metadata.archivedByDisplay,
+        archiveReason: caseData.metadata.archiveReason,
+      }),
       importedAt: new Date().toISOString(),
+      ...(bundledAuditTrail && { bundledAuditTrail }),
       // Add original image ID mapping for confirmation linking
       originalImageIds: originalImageIds,
       // Add forensic manifest timestamp if available for confirmation exports
@@ -179,6 +192,20 @@ export async function removeReadOnlyCase(user: User, caseNumber: string): Promis
  * Completely delete a read-only case including all associated data (R2, Images, user references)
  */
 export async function deleteReadOnlyCase(user: User, caseNumber: string): Promise<boolean> {
+  const isBenignCleanupError = (reason: unknown): boolean => {
+    if (!(reason instanceof Error)) {
+      return false;
+    }
+
+    const normalizedMessage = reason.message.toLowerCase();
+    return (
+      normalizedMessage.includes('404') ||
+      normalizedMessage.includes('not found')
+    );
+  };
+
+  let caseDataDeleteHadFailure = false;
+
   try {
     // Get case data first to get file IDs for deletion
     const caseResponse = await fetchDataApi(
@@ -201,13 +228,48 @@ export async function deleteReadOnlyCase(user: User, caseNumber: string): Promis
 
     const caseData = await caseResponse.json() as CaseData;
 
-    // Delete all files using data worker
+    // Delete all files using data worker (best-effort, keep going on individual failures)
     if (caseData.files && caseData.files.length > 0) {
-      await Promise.all(
+      const deleteResults = await Promise.allSettled(
         caseData.files.map((file: FileData) => 
-          deleteFile(user, caseNumber, file.id, 'Read-only case clearing - API operation')
+          deleteFile(
+            user,
+            caseNumber,
+            file.id,
+            'Read-only case clearing - API operation',
+            {
+              skipValidation: true,
+              skipCaseDataUpdate: true,
+              suppressAudit: true
+            }
+          )
         )
       );
+
+      const failedDeletes = deleteResults.filter(
+        (result): result is PromiseRejectedResult =>
+          result.status === 'rejected' && !isBenignCleanupError(result.reason)
+      );
+
+      const benignNotFoundDeletes = deleteResults.filter(
+        (result): result is PromiseRejectedResult =>
+          result.status === 'rejected' && isBenignCleanupError(result.reason)
+      );
+
+      if (failedDeletes.length > 0) {
+        caseDataDeleteHadFailure = true;
+        console.warn(
+          `Partial read-only file cleanup for case ${caseNumber}: ` +
+          `${failedDeletes.length}/${caseData.files.length} file deletions failed.`
+        );
+      }
+
+      if (benignNotFoundDeletes.length > 0) {
+        console.info(
+          `Read-only cleanup for case ${caseNumber}: ` +
+          `${benignNotFoundDeletes.length} file deletions were already missing (404/not found) and treated as successful cleanup.`
+        );
+      }
     }
 
     // Delete case file using data worker
@@ -220,16 +282,43 @@ export async function deleteReadOnlyCase(user: User, caseNumber: string): Promis
     );
 
     if (!deleteCaseResponse.ok && deleteCaseResponse.status !== 404) {
-      throw new Error(`Failed to delete read-only case data: ${deleteCaseResponse.status}`);
+      caseDataDeleteHadFailure = true;
+      console.error(`Failed to delete read-only case data: ${deleteCaseResponse.status}`);
     }
     
-    // Remove from user's read-only case list (separate from regular cases)
-    await removeReadOnlyCase(user, caseNumber);
+    // Remove from user's read-only case list (separate from regular cases).
+    // This is the source of truth for import modal visibility and should be attempted even when storage cleanup is partial.
+    const removedFromMetadata = await removeReadOnlyCase(user, caseNumber);
+
+    if (!removedFromMetadata) {
+      return false;
+    }
+
+    if (caseDataDeleteHadFailure) {
+      console.warn(
+        `Read-only case ${caseNumber} removed from metadata with partial storage cleanup failures.`
+      );
+    }
     
     return true;
     
   } catch (error) {
     console.error('Error deleting read-only case:', error);
+
+    // Fallback: still try to clear read-only metadata so stale entries do not persist in the UI.
+    try {
+      const removedFromMetadata = await removeReadOnlyCase(user, caseNumber);
+      if (removedFromMetadata) {
+        console.warn(
+          `Read-only case ${caseNumber} removed from metadata during error fallback. ` +
+          'Some backing storage may require manual cleanup.'
+        );
+        return true;
+      }
+    } catch (removeError) {
+      console.error('Error removing read-only case metadata during fallback cleanup:', removeError);
+    }
+
     return false;
   }
 }

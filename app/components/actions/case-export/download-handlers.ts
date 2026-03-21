@@ -264,6 +264,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
       ['Exported By (UID)', exportData.metadata.exportedByUid || 'N/A'],
       ['Exported By (Name)', exportData.metadata.exportedByName || 'N/A'],
       ['Exported By (Company)', exportData.metadata.exportedByCompany || 'N/A'],
+      ['Exported By (Badge/ID)', exportData.metadata.exportedByBadgeId || 'N/A'],
       ['Striae Export Schema Version', '1.0'],
       ['Total Cases', exportData.cases.length],
       ['Successful Exports', exportData.cases.filter(c => !c.summary?.exportError).length],
@@ -291,6 +292,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
         'Exported By (UID)',
         'Exported By (Name)',
         'Exported By (Company)',
+        'Exported By (Badge/ID)',
         'Schema Version',
         'Total Files', 
         'Files with Annotations', 
@@ -312,6 +314,7 @@ export async function downloadAllCasesAsCSV(user: User, exportData: AllCasesExpo
         caseData.metadata.exportedByUid || 'N/A',
         caseData.metadata.exportedByName || 'N/A',
         caseData.metadata.exportedByCompany || 'N/A',
+        caseData.metadata.exportedByBadgeId || 'N/A',
         caseData.metadata.striaeExportSchemaVersion,
         caseData.metadata.totalFiles,
         caseData.summary?.filesWithAnnotations || 0,
@@ -944,6 +947,7 @@ Exported By (Email): ${exportData.metadata.exportedBy || 'N/A'}
 Exported By (UID): ${exportData.metadata.exportedByUid || 'N/A'}
 Exported By (Name): ${exportData.metadata.exportedByName || 'N/A'}
 Exported By (Company): ${exportData.metadata.exportedByCompany || 'N/A'}
+Exported By (Badge/ID): ${exportData.metadata.exportedByBadgeId || 'N/A'}
 Striae Export Schema Version: ${exportData.metadata.striaeExportSchemaVersion}
 
 Summary:
@@ -1004,6 +1008,9 @@ async function generateJSONContent(
     }
     if (jsonData.metadata.exportedByCompany) {
       jsonData.metadata.exportedByCompany = '[User Info Excluded]';
+    }
+    if (jsonData.metadata.exportedByBadgeId) {
+      jsonData.metadata.exportedByBadgeId = '[User Info Excluded]';
     }
   }
   

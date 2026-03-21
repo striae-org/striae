@@ -1,14 +1,30 @@
 import { type FileData } from './file';
 import { type AnnotationData, type ConfirmationData } from './annotations';
+import { type ValidationAuditEntry } from './audit';
 
 // Case-related types and interfaces
 
 export type CaseActionType = 'loaded' | 'created' | 'deleted' | null;
 
+export interface BundledAuditTrailData {
+  source: 'archive-bundle';
+  importedAt: string;
+  exportTimestamp?: string;
+  totalEntries?: number;
+  entries: ValidationAuditEntry[];
+}
+
 export interface CaseData {
   createdAt: string;
   caseNumber: string;
   files: FileData[];
+  isReadOnly?: boolean;
+  archived?: boolean;
+  archivedAt?: string;
+  archivedBy?: string;
+  archivedByDisplay?: string;
+  archiveReason?: string;
+  bundledAuditTrail?: BundledAuditTrailData;
 }
 
 export interface ReadOnlyCaseData extends CaseData {
@@ -23,11 +39,17 @@ export interface CaseExportData {
   metadata: {
     caseNumber: string;
     caseCreatedDate: string;
+    archived?: boolean;
+    archivedAt?: string;
+    archivedBy?: string;
+    archivedByDisplay?: string;
+    archiveReason?: string;
     exportDate: string;
     exportedBy: string | null;
     exportedByUid: string;
     exportedByName: string;
     exportedByCompany: string;
+    exportedByBadgeId?: string;
     striaeExportSchemaVersion: string;
     totalFiles: number;
   };
@@ -56,6 +78,7 @@ export interface AllCasesExportData {
     exportedByUid: string;
     exportedByName: string;
     exportedByCompany: string;
+    exportedByBadgeId?: string;
     striaeExportSchemaVersion: string;
     totalCases: number;
     totalFiles: number;
@@ -84,7 +107,13 @@ export interface CaseDataWithConfirmations {
   caseNumber: string;
   files: FileData[];
   isReadOnly?: boolean;
+  archived?: boolean;
+  archivedAt?: string;
+  archivedBy?: string;
+  archivedByDisplay?: string;
+  archiveReason?: string;
   importedAt?: string;
   originalImageIds?: { [originalId: string]: string };
   confirmations?: CaseConfirmations;
+  bundledAuditTrail?: BundledAuditTrailData;
 }

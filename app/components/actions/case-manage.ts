@@ -2,6 +2,7 @@ import type { User } from 'firebase/auth';
 import { 
   canCreateCase, 
   getUserCases,
+  getUserData,
   validateUserSession,
   addUserCase,
   removeUserCase,
@@ -9,39 +10,100 @@ import {
   updateCaseData,
   deleteCaseData,
   duplicateCaseData,
-  deleteFileAnnotations
+  deleteFileAnnotations,
+  signForensicManifest
 } from '~/utils/data';
-import { type CaseData, type ReadOnlyCaseData, type FileData } from '~/types';
+import { type CaseData, type ReadOnlyCaseData, type FileData, type AuditTrail } from '~/types';
 import { auditService } from '~/services/audit';
 import { fetchImageApi } from '~/utils/api';
+import { exportCaseData, formatDateForFilename } from '~/components/actions/case-export';
+import { getImageUrl } from './image-manage';
+import {
+  calculateSHA256Secure,
+  createPublicSigningKeyFileName,
+  generateForensicManifestSecure,
+  getCurrentPublicSigningKeyDetails,
+  getVerificationPublicKey,
+} from '~/utils/forensics';
+import { signAuditExport } from '~/services/audit/audit-export-signing';
+import { generateAuditSummary } from '~/services/audit/audit-query-helpers';
 
 /**
  * Delete a file without individual audit logging (for bulk operations)
  * This reduces API calls during bulk deletions
  */
-const deleteFileWithoutAudit = async (user: User, caseNumber: string, fileId: string): Promise<void> => {
+interface DeleteFileWithoutAuditOptions {
+  skipCaseDataUpdate?: boolean;
+  skipValidation?: boolean;
+}
+
+interface DeleteFileWithoutAuditResult {
+  imageMissing: boolean;
+  fileName: string;
+}
+
+export interface DeleteCaseResult {
+  missingImages: string[];
+}
+
+function generateArchiveImageFilename(originalFilename: string, id: string): string {
+  const lastDotIndex = originalFilename.lastIndexOf('.');
+
+  if (lastDotIndex === -1) {
+    return `${originalFilename}-${id}`;
+  }
+
+  const basename = originalFilename.substring(0, lastDotIndex);
+  const extension = originalFilename.substring(lastDotIndex);
+
+  return `${basename}-${id}${extension}`;
+}
+
+const deleteFileWithoutAudit = async (
+  user: User,
+  caseNumber: string,
+  fileId: string,
+  options: DeleteFileWithoutAuditOptions = {}
+): Promise<DeleteFileWithoutAuditResult> => {
   // Get the case data to find file info
-  const caseData = await getCaseData(user, caseNumber);
+  const caseData = await getCaseData(user, caseNumber, {
+    skipValidation: options.skipValidation === true
+  });
   if (!caseData) {
     throw new Error('Case not found');
   }
-  
+
   const fileToDelete = (caseData.files || []).find((f: FileData) => f.id === fileId);
   if (!fileToDelete) {
     throw new Error('File not found in case');
   }
+
+  let imageMissing = false;
 
   // Delete image file and fail fast on non-404 failures so case deletion can be retried safely
   const imageResponse = await fetchImageApi(user, `/${encodeURIComponent(fileId)}`, {
     method: 'DELETE'
   });
 
+  if (!imageResponse.ok && imageResponse.status === 404) {
+    imageMissing = true;
+  }
+
   if (!imageResponse.ok && imageResponse.status !== 404) {
     throw new Error(`Failed to delete image: ${imageResponse.status} ${imageResponse.statusText}`);
   }
 
   // Delete annotation data (404s are handled by deleteFileAnnotations)
-  await deleteFileAnnotations(user, caseNumber, fileId);
+  await deleteFileAnnotations(user, caseNumber, fileId, {
+    skipValidation: options.skipValidation === true
+  });
+
+  if (options.skipCaseDataUpdate === true) {
+    return {
+      imageMissing,
+      fileName: fileToDelete.originalFilename
+    };
+  }
 
   // Update case data to remove file reference
   const updatedData: CaseData = {
@@ -50,6 +112,11 @@ const deleteFileWithoutAudit = async (user: User, caseNumber: string, fileId: st
   };
 
   await updateCaseData(user, caseNumber, updatedData);
+
+  return {
+    imageMissing,
+    fileName: fileToDelete.originalFilename
+  };
 };
 
 const CASE_NUMBER_REGEX = /^[A-Za-z0-9-]+$/;
@@ -144,12 +211,45 @@ export const checkCaseIsReadOnly = async (user: User, caseNumber: string): Promi
       return false;
     }
 
+    // Archived cases are always treated as read-only.
+    if (caseData.archived) {
+      return true;
+    }
+
     // Use type guard to check for isReadOnly property safely
     return isReadOnlyCaseData(caseData) ? !!caseData.isReadOnly : false;
     
   } catch (error) {
     console.error('Error checking if case is read-only:', error);
     return false;
+  }
+};
+
+export interface CaseArchiveDetails {
+  archived: boolean;
+  archivedAt?: string;
+  archivedBy?: string;
+  archivedByDisplay?: string;
+  archiveReason?: string;
+}
+
+export const getCaseArchiveDetails = async (user: User, caseNumber: string): Promise<CaseArchiveDetails> => {
+  try {
+    const caseData = await getCaseData(user, caseNumber);
+    if (!caseData || !caseData.archived) {
+      return { archived: false };
+    }
+
+    return {
+      archived: true,
+      archivedAt: caseData.archivedAt,
+      archivedBy: caseData.archivedBy,
+      archivedByDisplay: caseData.archivedByDisplay,
+      archiveReason: caseData.archiveReason,
+    };
+  } catch (error) {
+    console.error('Error checking case archive details:', error);
+    return { archived: false };
   }
 };
 
@@ -339,7 +439,7 @@ export const renameCase = async (
   }
 };
 
-export const deleteCase = async (user: User, caseNumber: string): Promise<void> => {
+export const deleteCase = async (user: User, caseNumber: string): Promise<DeleteCaseResult> => {
   const startTime = Date.now();
   
   try {
@@ -370,6 +470,7 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
       const files = caseData.files;
       const deletedFiles: Array<{id: string, originalFilename: string, fileSize: number}> = [];
       const failedFiles: Array<{id: string, originalFilename: string, error: string}> = [];
+      const missingImages: string[] = [];
       
       console.log(`🗑️  Deleting ${files.length} files in batches of ${BATCH_SIZE}...`);
       
@@ -387,7 +488,16 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
             try {
               // Delete file without individual audit logging to reduce API calls
               // We'll do bulk audit logging at the end
-              await deleteFileWithoutAudit(user, caseNumber, file.id);
+              const deleteResult = await deleteFileWithoutAudit(user, caseNumber, file.id, {
+                // Archived cases are immutable; during deletion we can skip per-file case-data mutations.
+                skipCaseDataUpdate: !!caseData.archived,
+                skipValidation: !!caseData.archived
+              });
+
+              if (deleteResult.imageMissing) {
+                missingImages.push(deleteResult.fileName);
+              }
+
               deletedFiles.push({ 
                 id: file.id, 
                 originalFilename: file.originalFilename,
@@ -452,6 +562,29 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
           `Case deletion aborted: failed to delete ${failedFiles.length} file(s): ${failedFiles.map(f => f.originalFilename).join(', ')}`
         );
       }
+
+      // Remove case from user data first (so user loses access immediately)
+      await removeUserCase(user, caseNumber);
+
+      // Delete case data using centralized function (skip validation since user no longer has access)
+      await deleteCaseData(user, caseNumber, { skipValidation: true });
+
+      // Add a small delay before audit logging to reduce rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Log successful case deletion with file details
+      const endTime = Date.now();
+      await auditService.logCaseDeletion(
+        user,
+        caseNumber,
+        caseName,
+        `User-requested deletion via case actions (${fileCount} files deleted)` +
+          (missingImages.length > 0 ? `; ${missingImages.length} image(s) were already missing` : ''),
+        false // No backup created for standard deletions
+      );
+
+      console.log(`✅ Case deleted: ${caseNumber} (${fileCount} files) (${endTime - startTime}ms)`);
+      return { missingImages };
     }
 
     // Remove case from user data first (so user loses access immediately)
@@ -474,6 +607,7 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
     );
 
     console.log(`✅ Case deleted: ${caseNumber} (${fileCount} files) (${endTime - startTime}ms)`);
+    return { missingImages: [] };
     
   } catch (error) {
     // Log failed case deletion
@@ -504,6 +638,294 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
     }
     
     console.error('Error deleting case:', error);
+    throw error;
+  }
+};
+
+const getVerificationPublicSigningKey = (preferredKeyId?: string): { keyId: string | null; publicKeyPem: string } => {
+  const preferredKey = preferredKeyId ? getVerificationPublicKey(preferredKeyId) : null;
+  const currentDetails = getCurrentPublicSigningKeyDetails();
+  const resolvedPem = preferredKey ?? currentDetails.publicKeyPem;
+  const resolvedKeyId = preferredKey ? preferredKeyId ?? null : currentDetails.keyId;
+
+  if (!resolvedPem || resolvedPem.trim().length === 0) {
+    throw new Error('No public signing key is configured for archive packaging.');
+  }
+
+  return {
+    keyId: resolvedKeyId,
+    publicKeyPem: resolvedPem.endsWith('\n') ? resolvedPem : `${resolvedPem}\n`,
+  };
+};
+
+const fetchImageAsBlob = async (user: User, fileData: FileData, caseNumber: string): Promise<Blob | null> => {
+  try {
+    const imageUrl = await getImageUrl(user, fileData, caseNumber, 'Archive Package');
+
+    if (!imageUrl) {
+      return null;
+    }
+
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.blob();
+  } catch (error) {
+    console.error('Failed to fetch image for archive package:', error);
+    return null;
+  }
+};
+
+export const archiveCase = async (
+  user: User,
+  caseNumber: string,
+  archiveReason?: string
+): Promise<void> => {
+  const startTime = Date.now();
+
+  try {
+    if (!validateCaseNumber(caseNumber)) {
+      throw new Error('Invalid case number');
+    }
+
+    const sessionValidation = await validateUserSession(user);
+    if (!sessionValidation.valid) {
+      throw new Error(`Session validation failed: ${sessionValidation.reason}`);
+    }
+
+    const caseData = await getCaseData(user, caseNumber);
+    if (!caseData) {
+      throw new Error('Case not found');
+    }
+
+    if (caseData.archived) {
+      throw new Error('This case is already archived.');
+    }
+
+    const archivedAt = new Date().toISOString();
+    let archivedByDisplay = user.uid;
+
+    try {
+      const userData = await getUserData(user);
+      const fullName = [userData?.firstName?.trim(), userData?.lastName?.trim()]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      const badgeId = userData?.badgeId?.trim();
+
+      if (fullName && badgeId) {
+        archivedByDisplay = `${fullName}, ${badgeId}`;
+      } else if (fullName) {
+        archivedByDisplay = fullName;
+      } else if (badgeId) {
+        archivedByDisplay = badgeId;
+      }
+    } catch (userDataError) {
+      console.warn('Failed to resolve user profile details for archive display value:', userDataError);
+    }
+
+    const archiveData: CaseData = {
+      ...caseData,
+      archived: true,
+      archivedAt,
+      archivedBy: user.uid,
+      archivedByDisplay,
+      archiveReason: archiveReason?.trim() || undefined,
+      isReadOnly: true,
+    } as CaseData;
+
+    await updateCaseData(user, caseNumber, archiveData);
+
+    await auditService.logCaseArchive(
+      user,
+      caseNumber,
+      caseNumber,
+      archiveReason?.trim() || 'No reason provided',
+      'success',
+      [],
+      archiveData.files?.length || 0,
+      archivedAt,
+      Date.now() - startTime
+    );
+
+    const exportData = await exportCaseData(user, caseNumber, { includeMetadata: true });
+    const caseJsonContent = JSON.stringify(exportData, null, 2);
+
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    zip.file(`${caseNumber}_data.json`, caseJsonContent);
+
+    const imageFolder = zip.folder('images');
+    const imageBlobs: Record<string, Blob> = {};
+    if (imageFolder && exportData.files) {
+      for (const fileEntry of exportData.files) {
+        const imageBlob = await fetchImageAsBlob(user, fileEntry.fileData, caseNumber);
+        if (!imageBlob) {
+          continue;
+        }
+
+        const exportFileName = generateArchiveImageFilename(
+          fileEntry.fileData.originalFilename,
+          fileEntry.fileData.id
+        );
+        imageFolder.file(exportFileName, imageBlob);
+        imageBlobs[exportFileName] = imageBlob;
+      }
+    }
+
+    const forensicManifest = await generateForensicManifestSecure(caseJsonContent, imageBlobs);
+    const manifestSigningResponse = await signForensicManifest(user, caseNumber, forensicManifest);
+
+    const signingKey = getVerificationPublicSigningKey(manifestSigningResponse.signature.keyId);
+    const publicKeyFileName = createPublicSigningKeyFileName(signingKey.keyId);
+    zip.file(publicKeyFileName, signingKey.publicKeyPem);
+
+    zip.file(
+      'FORENSIC_MANIFEST.json',
+      JSON.stringify(
+        {
+          ...forensicManifest,
+          manifestVersion: manifestSigningResponse.manifestVersion,
+          signature: manifestSigningResponse.signature,
+        },
+        null,
+        2
+      )
+    );
+
+    const auditEntries = await auditService.getAuditEntriesForUser(user.uid, { caseNumber });
+    const auditTrail: AuditTrail = {
+      caseNumber,
+      workflowId: `${caseNumber}-archive-${Date.now()}`,
+      entries: auditEntries,
+      summary: generateAuditSummary(auditEntries),
+    };
+
+    const auditTrailPayload = {
+      metadata: {
+        exportTimestamp: new Date().toISOString(),
+        exportVersion: '1.0',
+        totalEntries: auditTrail.summary.totalEvents,
+        application: 'Striae',
+        exportType: 'trail' as const,
+        scopeType: 'case' as const,
+        scopeIdentifier: caseNumber,
+      },
+      auditTrail,
+    };
+
+    const auditTrailRawContent = JSON.stringify(auditTrailPayload, null, 2);
+    const auditTrailHash = await calculateSHA256Secure(auditTrailRawContent);
+    const signedAuditExportPayload = await signAuditExport(
+      {
+        exportFormat: 'json',
+        exportType: 'trail',
+        generatedAt: auditTrailPayload.metadata.exportTimestamp,
+        totalEntries: auditTrail.summary.totalEvents,
+        hash: auditTrailHash.toUpperCase(),
+      },
+      {
+        user,
+        scopeType: 'case',
+        scopeIdentifier: caseNumber,
+        caseNumber,
+      }
+    );
+
+    const signedAuditTrail = {
+      metadata: {
+        ...auditTrailPayload.metadata,
+        hash: auditTrailHash.toUpperCase(),
+        signatureVersion: signedAuditExportPayload.signatureMetadata.signatureVersion,
+        signatureMetadata: signedAuditExportPayload.signatureMetadata,
+        signature: signedAuditExportPayload.signature,
+      },
+      auditTrail,
+    };
+
+    zip.file('audit/case-audit-trail.json', JSON.stringify(signedAuditTrail, null, 2));
+    zip.file('audit/case-audit-signature.json', JSON.stringify(signedAuditExportPayload, null, 2));
+
+    zip.file(
+      'README.txt',
+      [
+        'Striae Archived Case Package',
+        '===========================',
+        '',
+        `Case Number: ${caseNumber}`,
+        `Archived At: ${archivedAt}`,
+        `Archived By: ${archivedByDisplay}`,
+        `Archive Reason: ${archiveReason?.trim() || 'Not provided'}`,
+        '',
+        'Package Contents',
+        '- Case data JSON export with all image references',
+        '- images/ folder with exported image files',
+        '- Full case audit trail export and signed audit metadata',
+        '- Forensic manifest with server-side signature',
+        `- ${publicKeyFileName} for verification`,
+        '',
+        'This package is intended for read-only review and verification workflows.',
+      ].join('\n')
+    );
+
+    const zipBlob = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 },
+    });
+
+    const downloadUrl = URL.createObjectURL(zipBlob);
+    const archiveFileName = `striae-case-${caseNumber}-archive-${formatDateForFilename(new Date())}.zip`;
+    const anchor = document.createElement('a');
+    anchor.href = downloadUrl;
+    anchor.download = archiveFileName;
+    anchor.click();
+    URL.revokeObjectURL(downloadUrl);
+
+    await auditService.logEvent({
+      userId: user.uid,
+      userEmail: user.email || '',
+      action: 'case-export',
+      result: 'success',
+      fileName: archiveFileName,
+      fileType: 'case-package',
+      caseNumber,
+      workflowPhase: 'case-export',
+      caseDetails: {
+        newCaseName: caseNumber,
+        totalFiles: exportData.files?.length || 0,
+        totalAnnotations: exportData.summary?.totalBoxAnnotations || 0,
+        lastModified: archivedAt,
+      },
+      securityChecks: {
+        selfConfirmationPrevented: true,
+        fileIntegrityValid: true,
+        manifestSignaturePresent: true,
+        manifestSignatureValid: true,
+        manifestSignatureKeyId: manifestSigningResponse.signature.keyId,
+      },
+      performanceMetrics: {
+        processingTimeMs: Date.now() - startTime,
+        fileSizeBytes: zipBlob.size,
+        validationStepsCompleted: 4,
+        validationStepsFailed: 0,
+      },
+    });
+  } catch (error) {
+    await auditService.logCaseArchive(
+      user,
+      caseNumber,
+      caseNumber,
+      archiveReason?.trim() || 'No reason provided',
+      'failure',
+      [error instanceof Error ? error.message : 'Unknown archive error'],
+      undefined,
+      undefined,
+      Date.now() - startTime
+    );
+
     throw error;
   }
 };

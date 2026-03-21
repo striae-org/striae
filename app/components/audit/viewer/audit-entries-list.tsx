@@ -44,6 +44,13 @@ export const AuditEntriesList = ({ entries }: AuditEntriesListProps) => {
                 </div>
               )}
 
+              {entry.action === 'confirmation-import' && entry.details.reviewerBadgeId && (
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Reviewer Badge/ID:</span>
+                  <span className={styles.badgeTag}>{entry.details.reviewerBadgeId}</span>
+                </div>
+              )}
+
               {entry.result === 'failure' && entry.details.validationErrors.length > 0 && (
                 <div className={styles.detailRow}>
                   <span className={styles.detailLabel}>Error:</span>

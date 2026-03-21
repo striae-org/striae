@@ -1,12 +1,19 @@
 .appContainer {
   display: flex;
-  width: 100vw;
-  height: 100vh;  
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
   overflow: hidden;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 10;
+}
+
+.contentRow {
+  display: flex;
+  flex: 1;
+  min-height: 0;
 }
 
 .mainContent {

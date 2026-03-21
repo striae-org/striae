@@ -12,8 +12,9 @@ interface NotesModalProps {
 export const NotesModal = ({ isOpen, onClose, notes, onSave }: NotesModalProps) => {
   const [tempNotes, setTempNotes] = useState(notes);
   const {
-    handleOverlayMouseDown,
-    handleOverlayKeyDown
+    requestClose,
+    overlayProps,
+    getCloseButtonProps
   } = useOverlayDismiss({
     isOpen,
     onClose
@@ -23,19 +24,17 @@ export const NotesModal = ({ isOpen, onClose, notes, onSave }: NotesModalProps) 
 
   const handleSave = () => {
     onSave(tempNotes);
-    onClose();
+    requestClose();
   };
 
   return (
     <div
       className={styles.modalOverlay}
-      onMouseDown={handleOverlayMouseDown}
-      onKeyDown={handleOverlayKeyDown}
-      role="button"
-      tabIndex={0}
       aria-label="Close notes dialog"
+      {...overlayProps}
     >
       <div className={styles.modal}>
+        <button {...getCloseButtonProps({ ariaLabel: 'Close notes dialog' })}>×</button>
         <h5 className={styles.modalTitle}>Additional Notes</h5>
         <textarea
           value={tempNotes}
@@ -45,7 +44,7 @@ export const NotesModal = ({ isOpen, onClose, notes, onSave }: NotesModalProps) 
         />
         <div className={styles.modalButtons}>
           <button onClick={handleSave} className={styles.saveButton}>Save</button>
-          <button onClick={onClose} className={styles.cancelButton}>Cancel</button>
+          <button onClick={requestClose} className={styles.cancelButton}>Cancel</button>
         </div>
       </div>
     </div>

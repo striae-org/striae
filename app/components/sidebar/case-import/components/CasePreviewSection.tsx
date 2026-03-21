@@ -4,9 +4,14 @@ import styles from '../case-import.module.css';
 interface CasePreviewSectionProps {
   casePreview: CaseImportPreview | null;
   isLoadingPreview: boolean;
+  showArchivedRegularCaseRiskWarning?: boolean;
 }
 
-export const CasePreviewSection = ({ casePreview, isLoadingPreview }: CasePreviewSectionProps) => {
+export const CasePreviewSection = ({
+  casePreview,
+  isLoadingPreview,
+  showArchivedRegularCaseRiskWarning = false
+}: CasePreviewSectionProps) => {
   if (isLoadingPreview) {
     return (
       <div className={styles.previewSection}>
@@ -24,6 +29,16 @@ export const CasePreviewSection = ({ casePreview, isLoadingPreview }: CasePrevie
       {/* Case Information - Always Blue */}
       <div className={styles.previewSection}>
         <h3 className={styles.previewTitle}>Case Information</h3>
+        {casePreview.archived && (
+          <div className={styles.archivedImportNote}>
+            Archived export detected. Original exporter imports are allowed for archived cases.
+          </div>
+        )}
+        {showArchivedRegularCaseRiskWarning && (
+          <div className={styles.archivedRegularCaseRiskNote}>
+            Warning: This archived import matches a case already in your regular case list. If you later clear the imported read-only case, the regular case images will be deleted and become inaccessible.
+          </div>
+        )}
         <div className={styles.previewGrid}>
           <div className={styles.previewItem}>
             <span className={styles.previewLabel}>Case Number:</span>
@@ -48,6 +63,10 @@ export const CasePreviewSection = ({ casePreview, isLoadingPreview }: CasePrevie
           <div className={styles.previewItem}>
             <span className={styles.previewLabel}>Total Images:</span>
             <span className={styles.previewValue}>{casePreview.totalFiles}</span>
+          </div>
+          <div className={styles.previewItem}>
+            <span className={styles.previewLabel}>Archived Export:</span>
+            <span className={styles.previewValue}>{casePreview.archived ? 'Yes' : 'No'}</span>
           </div>
         </div>
       </div>

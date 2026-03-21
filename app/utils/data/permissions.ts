@@ -1,7 +1,7 @@
 import type { User } from 'firebase/auth';
 import type { UserData, ExtendedUserData, UserLimits, ReadOnlyCaseMetadata } from '~/types';
 import paths from '~/config/config.json';
-import { fetchUserApi } from '../api';
+import { fetchDataApi, fetchUserApi } from '../api';
 
 const MAX_CASES_REVIEW = paths.max_cases_review;
 const MAX_FILES_PER_CASE_REVIEW = paths.max_files_per_case_review;
@@ -401,6 +401,21 @@ export const canModifyCase = async (user: User, caseNumber: string): Promise<Per
     const userData = await getUserData(user) as ExtendedUserData;
     if (!userData) {
       return { allowed: false, reason: 'User data not found' };
+    }
+
+    const archiveCheckResponse = await fetchDataApi(
+      user,
+      `/${encodeURIComponent(user.uid)}/${encodeURIComponent(caseNumber)}/data.json`,
+      {
+        method: 'GET'
+      }
+    );
+
+    if (archiveCheckResponse.ok) {
+      const caseData = await archiveCheckResponse.json() as { archived?: boolean };
+      if (caseData.archived) {
+        return { allowed: false, reason: 'Archived cases are immutable and read-only' };
+      }
     }
 
     // Check if user owns the case (regular cases)

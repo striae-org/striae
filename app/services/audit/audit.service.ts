@@ -9,6 +9,7 @@ import type {
   AuditResult,
   PerformanceMetrics
 } from '~/types';
+import { getCaseData, getUserData } from '~/utils/data';
 import { generateWorkflowId } from '~/utils/common';
 import {
   fetchAuditEntriesForUser,
@@ -26,6 +27,7 @@ import {
   buildAnnotationCreateAuditParams,
   buildAnnotationDeleteAuditParams,
   buildAnnotationEditAuditParams,
+  buildCaseArchiveAuditParams,
   buildCaseCreationAuditParams,
   buildCaseDeletionAuditParams,
   buildCaseExportAuditParams,
@@ -137,6 +139,67 @@ export class AuditService {
     }
   }
 
+  private normalizeBadgeId(badgeId?: string): string | undefined {
+    const normalized = badgeId?.trim();
+    return normalized ? normalized : undefined;
+  }
+
+  private applyBadgeIdToParams(
+    params: CreateAuditEntryParams,
+    badgeId?: string
+  ): CreateAuditEntryParams {
+    const normalizedBadgeId = this.normalizeBadgeId(badgeId);
+    if (!normalizedBadgeId) {
+      return params;
+    }
+
+    return {
+      ...params,
+      userProfileDetails: {
+        ...(params.userProfileDetails || {}),
+        badgeId: normalizedBadgeId
+      }
+    };
+  }
+
+  private async resolveBadgeIdForUser(user: User): Promise<string | undefined> {
+    const cachedBadgeId = this.userBadgeIdByUserId.get(user.uid);
+    if (cachedBadgeId) {
+      return cachedBadgeId;
+    }
+
+    try {
+      const userData = await getUserData(user);
+      const resolvedBadgeId = this.normalizeBadgeId(userData?.badgeId);
+
+      if (resolvedBadgeId) {
+        this.userBadgeIdByUserId.set(user.uid, resolvedBadgeId);
+      }
+
+      return resolvedBadgeId;
+    } catch (error) {
+      console.error('🚨 Audit: Failed to resolve badge ID for user:', error);
+      return undefined;
+    }
+  }
+
+  private async logEventForUser(user: User, params: CreateAuditEntryParams): Promise<void> {
+    const resolvedBadgeId = await this.resolveBadgeIdForUser(user);
+    await this.logEvent(this.applyBadgeIdToParams(params, resolvedBadgeId));
+  }
+
+  private async logEventForOptionalUser(
+    user: User | null,
+    params: CreateAuditEntryParams
+  ): Promise<void> {
+    if (!user) {
+      await this.logEvent(params);
+      return;
+    }
+
+    await this.logEventForUser(user, params);
+  }
+
   /**
    * Log case export event
    */
@@ -155,7 +218,7 @@ export class AuditService {
       keyId?: string;
     }
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseExportAuditParams({
         user,
         caseNumber,
@@ -188,7 +251,7 @@ export class AuditService {
       keyId?: string;
     }
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseImportAuditParams({
         user,
         caseNumber,
@@ -219,7 +282,7 @@ export class AuditService {
     originalImageFileName?: string,
     badgeId?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildConfirmationCreationAuditParams({
         user,
         caseNumber,
@@ -253,7 +316,7 @@ export class AuditService {
       keyId?: string;
     }
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildConfirmationExportAuditParams({
         user,
         caseNumber,
@@ -286,9 +349,10 @@ export class AuditService {
       present: boolean;
       valid: boolean;
       keyId?: string;
-    }
+    },
+    reviewerBadgeId?: string // Badge/ID number of the reviewing examiner who exported the file
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildConfirmationImportAuditParams({
         user,
         caseNumber,
@@ -298,6 +362,7 @@ export class AuditService {
         confirmationsImported,
         errors,
         reviewingExaminerUid,
+        reviewerBadgeId,
         performanceMetrics,
         exporterUidValidated,
         totalConfirmationsInFile,
@@ -318,7 +383,7 @@ export class AuditService {
     caseNumber: string,
     caseName: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseCreationAuditParams({
         user,
         caseNumber,
@@ -336,7 +401,7 @@ export class AuditService {
     oldName: string,
     newName: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseRenameAuditParams({
         user,
         caseNumber,
@@ -356,13 +421,42 @@ export class AuditService {
     deleteReason: string,
     backupCreated: boolean = false
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseDeletionAuditParams({
         user,
         caseNumber,
         caseName,
         deleteReason,
         backupCreated
+      })
+    );
+  }
+
+  /**
+   * Log case archive event
+   */
+  public async logCaseArchive(
+    user: User,
+    caseNumber: string,
+    caseName: string,
+    archiveReason: string,
+    result: AuditResult = 'success',
+    errors: string[] = [],
+    totalFiles?: number,
+    archivedAt?: string,
+    processingTimeMs?: number
+  ): Promise<void> {
+    await this.logEventForUser(user,
+      buildCaseArchiveAuditParams({
+        user,
+        caseNumber,
+        caseName,
+        archiveReason,
+        result,
+        errors,
+        totalFiles,
+        archivedAt,
+        processingTimeMs
       })
     );
   }
@@ -381,7 +475,7 @@ export class AuditService {
     processingTime?: number,
     fileId?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildFileUploadAuditParams({
         user,
         fileName,
@@ -408,7 +502,7 @@ export class AuditService {
     fileId?: string,
     originalFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildFileDeletionAuditParams({
         user,
         fileName,
@@ -435,7 +529,7 @@ export class AuditService {
     accessReason?: string,
     originalFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildFileAccessAuditParams({
         user,
         fileName,
@@ -463,7 +557,7 @@ export class AuditService {
     imageFileId?: string,
     originalImageFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildAnnotationCreateAuditParams({
         user,
         annotationId,
@@ -490,7 +584,7 @@ export class AuditService {
     imageFileId?: string,
     originalImageFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildAnnotationEditAuditParams({
         user,
         annotationId,
@@ -516,7 +610,7 @@ export class AuditService {
     imageFileId?: string,
     originalImageFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildAnnotationDeleteAuditParams({
         user,
         annotationId,
@@ -538,7 +632,7 @@ export class AuditService {
     loginMethod: 'firebase' | 'sso' | 'api-key' | 'manual',
     userAgent?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildUserLoginAuditParams({
         user,
         sessionId,
@@ -557,7 +651,7 @@ export class AuditService {
     sessionDuration: number,
     logoutReason: 'user-initiated' | 'timeout' | 'security' | 'error'
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildUserLogoutAuditParams({
         user,
         sessionId,
@@ -580,7 +674,7 @@ export class AuditService {
     errors: string[] = [],
     badgeId?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildUserProfileUpdateAuditParams({
         user,
         profileField,
@@ -701,7 +795,7 @@ export class AuditService {
     userAgent?: string,
     sessionId?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildUserRegistrationAuditParams({
         user,
         firstName,
@@ -727,7 +821,7 @@ export class AuditService {
     userAgent?: string,
     errors: string[] = []
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildMfaEnrollmentAuditParams({
         user,
         phoneNumber,
@@ -753,7 +847,7 @@ export class AuditService {
     userAgent?: string,
     errors: string[] = []
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildMfaAuthenticationAuditParams({
         user,
         mfaMethod,
@@ -778,7 +872,7 @@ export class AuditService {
     userAgent?: string,
     errors: string[] = []
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildEmailVerificationAuditParams({
         user,
         result,
@@ -828,7 +922,7 @@ export class AuditService {
     sessionId?: string,
     userAgent?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildMarkEmailVerificationSuccessfulAuditParams({
         user,
         reason,
@@ -852,7 +946,7 @@ export class AuditService {
     sourceFileId?: string,
     sourceFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildPDFGenerationAuditParams({
         user,
         fileName,
@@ -878,7 +972,7 @@ export class AuditService {
     targetResource?: string,
     blockedBySystem: boolean = true
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForOptionalUser(user,
       buildSecurityViolationAuditParams({
         user,
         incidentType,
@@ -898,6 +992,7 @@ export class AuditService {
    * Get audit entries for display (public method for components)
    */
   public async getAuditEntriesForUser(userId: string, params?: {
+    requestingUser?: User;
     startDate?: string;
     endDate?: string;
     caseNumber?: string;
@@ -911,7 +1006,7 @@ export class AuditService {
       userId,
       ...params
     };
-    return await this.getAuditEntries(queryParams);
+    return await this.getAuditEntries(queryParams, params?.requestingUser);
   }
 
   /**
@@ -943,8 +1038,59 @@ export class AuditService {
   /**
    * Get audit entries based on query parameters
    */
-  private async getAuditEntries(params: AuditQueryParams): Promise<ValidationAuditEntry[]> {
+  private applyDateRangeFilter(
+    entries: ValidationAuditEntry[],
+    startDate?: string,
+    endDate?: string
+  ): ValidationAuditEntry[] {
+    const startMs = startDate ? new Date(startDate).getTime() : Number.NEGATIVE_INFINITY;
+    const endMs = endDate ? new Date(endDate).getTime() : Number.POSITIVE_INFINITY;
+
+    return entries.filter((entry) => {
+      const timestampMs = new Date(entry.timestamp).getTime();
+      return timestampMs >= startMs && timestampMs <= endMs;
+    });
+  }
+
+  private async getBundledArchivedCaseAuditEntries(
+    params: AuditQueryParams,
+    requestingUser?: User
+  ): Promise<ValidationAuditEntry[] | null> {
+    if (!requestingUser || !params.caseNumber) {
+      return null;
+    }
+
+    const caseData = await getCaseData(requestingUser, params.caseNumber);
+    if (!caseData?.isReadOnly || caseData.archived !== true) {
+      return null;
+    }
+
+    const bundledEntries = caseData.bundledAuditTrail?.entries;
+    if (!Array.isArray(bundledEntries)) {
+      return [];
+    }
+
+    const sortedEntries = sortAuditEntriesNewestFirst(bundledEntries);
+    const dateFilteredEntries = this.applyDateRangeFilter(
+      sortedEntries,
+      params.startDate,
+      params.endDate
+    );
+    const filteredEntries = applyAuditEntryFilters(dateFilteredEntries, {
+      ...params,
+      userId: undefined
+    });
+
+    return applyAuditPagination(filteredEntries, params);
+  }
+
+  private async getAuditEntries(params: AuditQueryParams, requestingUser?: User): Promise<ValidationAuditEntry[]> {
     try {
+      const bundledArchivedEntries = await this.getBundledArchivedCaseAuditEntries(params, requestingUser);
+      if (bundledArchivedEntries) {
+        return bundledArchivedEntries;
+      }
+
       // If userId is provided, fetch from server
       if (params.userId) {
         const serverEntries = await fetchAuditEntriesForUser({

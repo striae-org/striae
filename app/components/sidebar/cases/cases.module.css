@@ -1,6 +1,11 @@
 /* Case Management */
 .caseSection {
-  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 0;
+  margin-bottom: 0;
 }
 
 .caseSection h4 {
@@ -141,17 +146,18 @@
 }
 
 .filesModalSection {
-  margin: 1rem 0;
+  margin: 0.25rem 0 0;
 }
 
 .filesModalButton {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.625rem 0.75rem;
   background-color: #17a2b8;
   color: white;
   border: none;
   border-radius: 6px;
   font-weight: 500;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s;
   box-sizing: border-box;
@@ -179,13 +185,36 @@
 
 /* Files Section */
 .filesSection {
-  margin-top: 2rem;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.625rem;
+  min-height: 0;
+  margin-top: 0.25rem;
 }
 
 .filesSection h4 {
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
+  margin-bottom: 0;
+  font-size: 1.1rem;
   font-weight: 900;
+  text-align: center;
+}
+
+.emptyCaseHeader {
+  margin-top: 0.75rem;
+}
+
+.fileListPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 5rem;
+  padding: 0.875rem;
+  border: 1px dashed #dee2e6;
+  border-radius: 6px;
+  background: #f8f9fa;
+  color: #6c757d;
+  font-size: 0.875rem;
   text-align: center;
 }
 
@@ -207,8 +236,18 @@
   border: 1px solid #dee2e6;
   border-radius: 6px;
   overflow: hidden;
-  max-height: calc(5 * 3.5rem);
+  flex: 1;
+  min-height: 0;
+  max-height: none;
   overflow-y: auto;
+}
+
+.fileListMessage {
+  padding: 0.875rem;
+  color: #6c757d;
+  font-size: 0.875rem;
+  text-align: center;
+  background: #f8f9fa;
 }
 
 .fileList::-webkit-scrollbar {
@@ -231,7 +270,7 @@
 .fileItem {
   display: flex;
   align-items: center;
-  padding: 0.5rem 1rem;
+  padding: 0.375rem 0.625rem;
   border-bottom: 1px solid #dee2e6;
   background: white;
   transition: background-color 0.2s;
@@ -240,13 +279,14 @@
 .fileButton {
   flex: 1;
   text-align: left;
-  padding: 0.5rem;
+  padding: 0.375rem;
   background: none;
   border: none;
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.875rem;
 }
 
 .fileItem:last-child {
@@ -335,14 +375,14 @@
   background: none;
   border: none;
   color: #dc3545;
-  font-size: 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.375rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  height: 32px;
+  min-width: 28px;
+  height: 28px;
 }
 
 .deleteButton:hover {
@@ -404,18 +444,19 @@
 /* Notes Toggle */
 
 .sidebarToggle {
-  margin-bottom: 1rem;
-  padding: 1rem 1rem;
+  margin-top: 0;
+  padding: 0;
 }
 
 .sidebarToggle button {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.625rem 0.75rem;
   background-color: var(--primary);
   color: white;
   border: none;
   border-radius: 6px;
   font-weight: 500;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -643,27 +684,27 @@
   background: #fff3cd;
   border: 1px solid #ffeaa7;
   border-radius: 4px;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
+  padding: 0.625rem 0.75rem;
+  margin-bottom: 0;
 }
 
 .caseNumber {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 
 /* Case Confirmation Status Indicators */
 .caseNumber.caseNotConfirmed {
   background-color: #fffacd;
-  padding: 0.75rem;
+  padding: 0.625rem 0.75rem;
   border-radius: 4px;
   margin: 0;
 }
 
 .caseNumber.caseConfirmed {
   background-color: #c8e6c9;
-  padding: 0.75rem;
+  padding: 0.625rem 0.75rem;
   border-radius: 4px;
   margin: 0;
 }
