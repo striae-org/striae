@@ -46,6 +46,19 @@ export interface DeleteCaseResult {
   missingImages: string[];
 }
 
+function generateArchiveImageFilename(originalFilename: string, id: string): string {
+  const lastDotIndex = originalFilename.lastIndexOf('.');
+
+  if (lastDotIndex === -1) {
+    return `${originalFilename}-${id}`;
+  }
+
+  const basename = originalFilename.substring(0, lastDotIndex);
+  const extension = originalFilename.substring(lastDotIndex);
+
+  return `${basename}-${id}${extension}`;
+}
+
 const deleteFileWithoutAudit = async (
   user: User,
   caseNumber: string,
@@ -753,7 +766,10 @@ export const archiveCase = async (
           continue;
         }
 
-        const exportFileName = `${fileEntry.fileData.originalFilename}-${fileEntry.fileData.id}`;
+        const exportFileName = generateArchiveImageFilename(
+          fileEntry.fileData.originalFilename,
+          fileEntry.fileData.id
+        );
         imageFolder.file(exportFileName, imageBlob);
         imageBlobs[exportFileName] = imageBlob;
       }
