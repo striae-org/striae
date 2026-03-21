@@ -3,11 +3,8 @@ import { type CaseExportData, type CaseImportPreview } from '~/types';
 import { getCaseData } from '~/utils/data';
 import { validateCaseNumber } from '../case-manage';
 import {
-  extractForensicManifestData,
   type SignedForensicManifest,
-  validateCaseIntegritySecure as validateForensicIntegrity,
-  verifyBundledAuditExport,
-  verifyForensicManifestSignature
+  verifyCasePackageIntegrity
 } from '~/utils/forensics';
 import { validateExporterUid, removeForensicWarning } from './validation';
 
@@ -188,90 +185,72 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
         forensicManifest = JSON.parse(manifestContent) as SignedForensicManifest;
         
         if (forensicManifest) {
-          const manifestForValidation = extractForensicManifestData(forensicManifest);
-          if (!manifestForValidation) {
-            hashValid = false;
-            hashError = 'Validation failed.';
-
-            validationDetails = {
-              hasForensicManifest: true,
-              dataValid: false,
-              manifestValid: false,
-              signatureValid: false,
-              validationSummary: 'Manifest schema validation failed',
-              integrityErrors: [hashError]
-            };
-          } else {
-            // Extract image files for comprehensive validation
-            const imageFiles: { [filename: string]: Blob } = {};
-            const imagesFolder = zip.folder('images');
-            if (imagesFolder) {
-              await Promise.all(Object.keys(imagesFolder.files).map(async (path) => {
-                if (path.startsWith('images/') && !path.endsWith('/')) {
-                  const filename = path.replace('images/', '');
-                  const file = zip.file(path);
-                  if (file) {
-                    const blob = await file.async('blob');
-                    imageFiles[filename] = blob;
-                  }
+          // Extract image files for comprehensive validation
+          const imageFiles: { [filename: string]: Blob } = {};
+          const imagesFolder = zip.folder('images');
+          if (imagesFolder) {
+            await Promise.all(Object.keys(imagesFolder.files).map(async (path) => {
+              if (path.startsWith('images/') && !path.endsWith('/')) {
+                const filename = path.replace('images/', '');
+                const file = zip.file(path);
+                if (file) {
+                  const blob = await file.async('blob');
+                  imageFiles[filename] = blob;
                 }
-              }));
+              }
+            }));
+          }
+
+          const casePackageResult = await verifyCasePackageIntegrity({
+            cleanedContent,
+            imageFiles,
+            forensicManifest,
+            verificationPublicKeyPem,
+            bundledAuditFiles: {
+              auditTrailContent: await zip.file('audit/case-audit-trail.json')?.async('text'),
+              auditSignatureContent: await zip.file('audit/case-audit-signature.json')?.async('text')
             }
+          });
 
-            const signatureResult = await verifyForensicManifestSignature(
-              forensicManifest,
-              verificationPublicKeyPem
-            );
+          const signatureResult = casePackageResult.signatureResult;
+          const validation = casePackageResult.integrityResult;
+          const bundledAuditVerification = casePackageResult.bundledAuditVerification;
 
-            const bundledAuditVerification = await verifyBundledAuditExport(
-              zip,
-              verificationPublicKeyPem ?? ''
-            );
-          
-            // Perform comprehensive validation
-            const validation = await validateForensicIntegrity(
-              cleanedContent, 
-              imageFiles, 
-              manifestForValidation
-            );
-          
-            hashValid = validation.isValid && signatureResult.isValid && !bundledAuditVerification;
+          hashValid = casePackageResult.isValid;
 
-            if (!hashValid) {
-              const errorParts: string[] = [];
-              if (!signatureResult.isValid) {
-                errorParts.push('Signature validation failed.');
-              }
-              if (!validation.isValid) {
-                errorParts.push('Integrity validation failed.');
-              }
-              if (bundledAuditVerification) {
-                errorParts.push(bundledAuditVerification.message);
-              }
-              hashError = errorParts.length > 0 ? errorParts.join(' ') : 'Validation failed.';
-            }
-
-            // Capture detailed validation information
-            const integrityErrors = [...validation.errors];
+          if (!hashValid) {
+            const errorParts: string[] = [];
             if (!signatureResult.isValid) {
-              integrityErrors.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+              errorParts.push('Signature validation failed.');
+            }
+            if (!validation.isValid) {
+              errorParts.push('Integrity validation failed.');
             }
             if (bundledAuditVerification) {
-              integrityErrors.push(bundledAuditVerification.message);
+              errorParts.push(bundledAuditVerification.message);
             }
-
-            validationDetails = {
-              hasForensicManifest: true,
-              dataValid: validation.dataValid,
-              imageValidation: validation.imageValidation,
-              manifestValid: validation.manifestValid,
-              signatureValid: signatureResult.isValid,
-              signatureKeyId: signatureResult.keyId,
-              signatureError: signatureResult.error,
-              validationSummary: validation.summary,
-              integrityErrors
-            };
+            hashError = errorParts.length > 0 ? errorParts.join(' ') : 'Validation failed.';
           }
+
+          const integrityErrors = [...validation.errors];
+          if (!signatureResult.isValid) {
+            integrityErrors.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+          }
+          if (bundledAuditVerification) {
+            integrityErrors.push(bundledAuditVerification.message);
+          }
+
+          validationDetails = {
+            hasForensicManifest: true,
+            dataValid: validation.dataValid,
+            imageValidation: validation.imageValidation,
+            manifestValid: validation.manifestValid,
+            signatureValid: signatureResult.isValid,
+            signatureKeyId: signatureResult.keyId,
+            signatureError: signatureResult.error,
+            validationSummary: validation.summary,
+            integrityErrors
+          };
           
         } else {
           // No forensic manifest found - cannot validate
@@ -379,6 +358,10 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
   imageFiles: { [filename: string]: Blob };
   imageIdMapping: { [exportFilename: string]: string }; // exportFilename -> originalImageId
   isArchivedExport: boolean;
+  bundledAuditFiles?: {
+    auditTrailContent?: string;
+    auditSignatureContent?: string;
+  };
   metadata?: Record<string, unknown>;
   cleanedContent?: string; // Add cleaned content for hash validation
   verificationPublicKeyPem?: string;
@@ -480,6 +463,8 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
     // Extract forensic manifest if present
     let metadata: Record<string, unknown> | undefined;
     const manifestFile = zip.file('FORENSIC_MANIFEST.json');
+    const auditTrailContent = await zip.file('audit/case-audit-trail.json')?.async('text');
+    const auditSignatureContent = await zip.file('audit/case-audit-signature.json')?.async('text');
     
     if (manifestFile) {
       const manifestContent = await manifestFile.async('text');
@@ -491,6 +476,10 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
       imageFiles,
       imageIdMapping,
       isArchivedExport,
+      bundledAuditFiles: {
+        auditTrailContent,
+        auditSignatureContent
+      },
       metadata,
       cleanedContent,
       verificationPublicKeyPem
