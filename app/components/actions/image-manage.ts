@@ -12,6 +12,12 @@ export interface DeleteFileResult {
   fileName: string;
 }
 
+export interface DeleteFileOptions {
+  skipValidation?: boolean;
+  skipCaseDataUpdate?: boolean;
+  suppressAudit?: boolean;
+}
+
 export const fetchFiles = async (
   user: User, 
   caseNumber: string, 
@@ -119,7 +125,13 @@ export const uploadFile = async (
   }
 };
 
-export const deleteFile = async (user: User, caseNumber: string, fileId: string, deleteReason: string = 'User-requested deletion via file list'): Promise<DeleteFileResult> => {
+export const deleteFile = async (
+  user: User,
+  caseNumber: string,
+  fileId: string,
+  deleteReason: string = 'User-requested deletion via file list',
+  options: DeleteFileOptions = {}
+): Promise<DeleteFileResult> => {
   const startTime = Date.now();
   
   // Get file info for audit logging (outside try block so it's available in catch)
@@ -128,7 +140,9 @@ export const deleteFile = async (user: User, caseNumber: string, fileId: string,
   
   try {
     // Get the case data using centralized function
-    const caseData = await getCaseData(user, caseNumber);
+    const caseData = await getCaseData(user, caseNumber, {
+      skipValidation: options.skipValidation === true
+    });
     if (!caseData) {
       throw new Error('Case not found');
     }
@@ -167,34 +181,40 @@ export const deleteFile = async (user: User, caseNumber: string, fileId: string,
     // Clean up data files regardless of image deletion success/404
     // Try to delete notes file using centralized function
     try {
-      await deleteFileAnnotations(user, caseNumber, fileId);
+      await deleteFileAnnotations(user, caseNumber, fileId, {
+        skipValidation: options.skipValidation === true
+      });
     } catch (error) {
       // Ignore 404 errors - notes file might not exist
       console.log('Notes file deletion result:', error);
     }
 
-    // Update case data.json to remove file reference using centralized function
-    const updatedData: CaseData = {
-      ...caseData,
-      files: (caseData.files || []).filter((f: FileData) => f.id !== fileId)
-    };
+    if (options.skipCaseDataUpdate !== true) {
+      // Update case data.json to remove file reference using centralized function
+      const updatedData: CaseData = {
+        ...caseData,
+        files: (caseData.files || []).filter((f: FileData) => f.id !== fileId)
+      };
 
-    await updateCaseData(user, caseNumber, updatedData);
+      await updateCaseData(user, caseNumber, updatedData);
+    }
 
     // Log successful file deletion
     const endTime = Date.now();
-    try {
-      await auditService.logFileDeletion(
-        user,
-        fileName,
-        fileSize,
-        deleteReason,
-        caseNumber,
-        fileId,
-        fileToDelete?.originalFilename
-      );
-    } catch (auditError) {
-      console.error('Failed to log file deletion:', auditError);
+    if (options.suppressAudit !== true) {
+      try {
+        await auditService.logFileDeletion(
+          user,
+          fileName,
+          fileSize,
+          deleteReason,
+          caseNumber,
+          fileId,
+          fileToDelete?.originalFilename
+        );
+      } catch (auditError) {
+        console.error('Failed to log file deletion:', auditError);
+      }
     }
 
     console.log(`✅ File deleted: ${fileName} (${endTime - startTime}ms)`);
@@ -206,29 +226,31 @@ export const deleteFile = async (user: User, caseNumber: string, fileId: string,
   } catch (error) {
     // Log failed file deletion
     const endTime = Date.now();
-    try {
-      await auditService.logEvent({
-        userId: user.uid,
-        userEmail: user.email || '',
-        action: 'file-delete',
-        result: 'failure',
-        fileName: fileName, // Now uses the original filename
-        fileType: 'unknown',
-        validationErrors: [error instanceof Error ? error.message : 'Unknown error'],
-        caseNumber,
-        fileDetails: {
-          fileId: fileId,
-          fileSize: 0,
-          deleteReason: 'Failed deletion attempt',
-          originalFileName: fileToDelete?.originalFilename
-        },
-        performanceMetrics: {
-          processingTimeMs: endTime - startTime,
-          fileSizeBytes: 0
-        }
-      });
-    } catch (auditError) {
-      console.error('Failed to log file deletion failure:', auditError);
+    if (options.suppressAudit !== true) {
+      try {
+        await auditService.logEvent({
+          userId: user.uid,
+          userEmail: user.email || '',
+          action: 'file-delete',
+          result: 'failure',
+          fileName: fileName, // Now uses the original filename
+          fileType: 'unknown',
+          validationErrors: [error instanceof Error ? error.message : 'Unknown error'],
+          caseNumber,
+          fileDetails: {
+            fileId: fileId,
+            fileSize: 0,
+            deleteReason: 'Failed deletion attempt',
+            originalFileName: fileToDelete?.originalFilename
+          },
+          performanceMetrics: {
+            processingTimeMs: endTime - startTime,
+            fileSizeBytes: 0
+          }
+        });
+      } catch (auditError) {
+        console.error('Failed to log file deletion failure:', auditError);
+      }
     }
     
     console.error('Error in deleteFile:', error);
