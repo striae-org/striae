@@ -41,6 +41,14 @@ export const ConfirmationDialog = ({
             <div className={styles.confirmationItem}>
               <strong>Total Images:</strong> {casePreview.totalFiles}
             </div>
+            <div className={styles.confirmationItem}>
+              <strong>Archived Export:</strong> {casePreview.archived ? 'Yes' : 'No'}
+            </div>
+            {casePreview.archived && (
+              <div className={styles.archivedImportNote}>
+                Archived export detected. Original exporter imports are allowed for archived cases.
+              </div>
+            )}
             {casePreview.hashValid !== undefined && (
               <div className={`${styles.confirmationItem} ${casePreview.hashValid ? styles.confirmationItemValid : styles.confirmationItemInvalid}`}>
                 <strong>Data Integrity:</strong> 

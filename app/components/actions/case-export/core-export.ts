@@ -298,6 +298,11 @@ export async function exportCaseData(
       metadata: {
         caseNumber,
         caseCreatedDate: caseData.createdAt,
+        archived: caseData.archived,
+        archivedAt: caseData.archivedAt,
+        archivedBy: caseData.archivedBy,
+        archivedByDisplay: caseData.archivedByDisplay,
+        archiveReason: caseData.archiveReason,
         exportDate: new Date().toISOString(),
         ...userMetadata,
         striaeExportSchemaVersion: '1.0',

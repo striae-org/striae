@@ -145,6 +145,7 @@ export async function importCaseForReview(
       cleanedContent,
       verificationPublicKeyPem
     } = await parseImportZip(zipFile, user);
+    const isArchivedExport = caseData.metadata.archived === true;
     parsedForensicManifest = metadata?.forensicManifest as SignedForensicManifest | undefined;
     result.caseNumber = caseData.metadata.caseNumber;
     importState.caseNumber = result.caseNumber;
@@ -239,7 +240,7 @@ export async function importCaseForReview(
     
     // Step 2a: Check if case already exists in user's regular cases (original analyst)
     const existingRegularCase = await checkExistingCase(user, result.caseNumber);
-    if (existingRegularCase) {
+    if (existingRegularCase && !isArchivedExport) {
       throw new Error(`Case "${result.caseNumber}" already exists in your case list. You cannot import a case for review if you were the original analyst.`);
     }
     

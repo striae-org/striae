@@ -250,6 +250,8 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
       throw new Error(`Invalid case number format: ${caseData.metadata.caseNumber}`);
     }
     
+    const isArchivedExport = caseData.metadata.archived === true;
+
     // Validate exporter UID exists in user database and is not current user
     if (caseData.metadata.exportedByUid) {
       const validation = await validateExporterUid(caseData.metadata.exportedByUid, currentUser);
@@ -258,7 +260,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
         throw new Error(`The original exporter is not a valid Striae user. This case cannot be imported.`);
       }
       
-      if (validation.isSelf) {
+      if (validation.isSelf && !isArchivedExport) {
         throw new Error(`You cannot import a case that you originally exported. Original analysts cannot review their own cases.`);
       }
     } else {
@@ -278,6 +280,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
     
     return {
       caseNumber: caseData.metadata.caseNumber,
+      archived: caseData.metadata.archived === true,
       exportedBy: caseData.metadata.exportedBy || null,
       exportedByName: caseData.metadata.exportedByName || null,
       exportedByCompany: caseData.metadata.exportedByCompany || null,
@@ -357,6 +360,8 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
       throw new Error(`Invalid case number format: ${caseData.metadata.caseNumber}`);
     }
     
+    const isArchivedExport = caseData.metadata.archived === true;
+
     // Validate exporter UID exists in user database and is not current user
     if (caseData.metadata.exportedByUid) {
       const validation = await validateExporterUid(caseData.metadata.exportedByUid, currentUser);
@@ -365,7 +370,7 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
         throw new Error(`The original exporter is not a valid Striae user. This case cannot be imported.`);
       }
       
-      if (validation.isSelf) {
+      if (validation.isSelf && !isArchivedExport) {
         throw new Error(`You cannot import a case that you originally exported. Original analysts cannot review their own cases.`);
       }
     } else {

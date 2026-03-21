@@ -24,6 +24,11 @@ export const CasePreviewSection = ({ casePreview, isLoadingPreview }: CasePrevie
       {/* Case Information - Always Blue */}
       <div className={styles.previewSection}>
         <h3 className={styles.previewTitle}>Case Information</h3>
+        {casePreview.archived && (
+          <div className={styles.archivedImportNote}>
+            Archived export detected. Original exporter imports are allowed for archived cases.
+          </div>
+        )}
         <div className={styles.previewGrid}>
           <div className={styles.previewItem}>
             <span className={styles.previewLabel}>Case Number:</span>
@@ -48,6 +53,10 @@ export const CasePreviewSection = ({ casePreview, isLoadingPreview }: CasePrevie
           <div className={styles.previewItem}>
             <span className={styles.previewLabel}>Total Images:</span>
             <span className={styles.previewValue}>{casePreview.totalFiles}</span>
+          </div>
+          <div className={styles.previewItem}>
+            <span className={styles.previewLabel}>Archived Export:</span>
+            <span className={styles.previewValue}>{casePreview.archived ? 'Yes' : 'No'}</span>
           </div>
         </div>
       </div>

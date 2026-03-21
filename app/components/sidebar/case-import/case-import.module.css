@@ -425,6 +425,17 @@
   color: var(--textTitle);
 }
 
+.archivedImportNote {
+  margin-bottom: var(--spaceM);
+  padding: var(--spaceS) var(--spaceM);
+  border-radius: var(--spaceXS);
+  background: color-mix(in lab, var(--success) 10%, transparent);
+  border: 1px solid color-mix(in lab, var(--success) 25%, transparent);
+  color: color-mix(in lab, var(--success) 80%, var(--black));
+  font-size: var(--fontSizeBodyXS);
+  font-weight: var(--fontWeightMedium);
+}
+
 /* Validation Section - Green/Red Based on Status */
 .validationSection {
   border-radius: var(--spaceXS);

@@ -80,6 +80,7 @@ export interface ConfirmationImportData {
 
 export interface CaseImportPreview {
   caseNumber: string;
+  archived?: boolean;
   exportedBy: string | null;
   exportedByName: string | null;
   exportedByCompany: string | null;

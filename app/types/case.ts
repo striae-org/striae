@@ -28,6 +28,11 @@ export interface CaseExportData {
   metadata: {
     caseNumber: string;
     caseCreatedDate: string;
+    archived?: boolean;
+    archivedAt?: string;
+    archivedBy?: string;
+    archivedByDisplay?: string;
+    archiveReason?: string;
     exportDate: string;
     exportedBy: string | null;
     exportedByUid: string;
