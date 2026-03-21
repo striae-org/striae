@@ -32,13 +32,25 @@ import { generateAuditSummary } from '~/services/audit/audit-query-helpers';
  * Delete a file without individual audit logging (for bulk operations)
  * This reduces API calls during bulk deletions
  */
-const deleteFileWithoutAudit = async (user: User, caseNumber: string, fileId: string): Promise<void> => {
+interface DeleteFileWithoutAuditOptions {
+  skipCaseDataUpdate?: boolean;
+  skipValidation?: boolean;
+}
+
+const deleteFileWithoutAudit = async (
+  user: User,
+  caseNumber: string,
+  fileId: string,
+  options: DeleteFileWithoutAuditOptions = {}
+): Promise<void> => {
   // Get the case data to find file info
-  const caseData = await getCaseData(user, caseNumber);
+  const caseData = await getCaseData(user, caseNumber, {
+    skipValidation: options.skipValidation === true
+  });
   if (!caseData) {
     throw new Error('Case not found');
   }
-  
+
   const fileToDelete = (caseData.files || []).find((f: FileData) => f.id === fileId);
   if (!fileToDelete) {
     throw new Error('File not found in case');
@@ -54,7 +66,13 @@ const deleteFileWithoutAudit = async (user: User, caseNumber: string, fileId: st
   }
 
   // Delete annotation data (404s are handled by deleteFileAnnotations)
-  await deleteFileAnnotations(user, caseNumber, fileId);
+  await deleteFileAnnotations(user, caseNumber, fileId, {
+    skipValidation: options.skipValidation === true
+  });
+
+  if (options.skipCaseDataUpdate === true) {
+    return;
+  }
 
   // Update case data to remove file reference
   const updatedData: CaseData = {
@@ -434,6 +452,11 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
               // Delete file without individual audit logging to reduce API calls
               // We'll do bulk audit logging at the end
               await deleteFileWithoutAudit(user, caseNumber, file.id);
+              await deleteFileWithoutAudit(user, caseNumber, file.id, {
+                // Archived cases are immutable; during deletion we can skip per-file case-data mutations.
+                skipCaseDataUpdate: !!caseData.archived,
+                skipValidation: !!caseData.archived
+              });
               deletedFiles.push({ 
                 id: file.id, 
                 originalFilename: file.originalFilename,

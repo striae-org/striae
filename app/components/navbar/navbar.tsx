@@ -195,7 +195,7 @@ export const Navbar = ({
                 >
                   Case Audit Trail
                 </button>
-                {!isReadOnly && (
+                {(!isReadOnly || archiveDetails?.archived) && (
                   <div className={styles.caseMenuSectionLabel}>Maintenance</div>
                 )}
                 {!isReadOnly && (
@@ -213,7 +213,7 @@ export const Navbar = ({
                     Rename Case
                   </button>
                 )}
-                {!isReadOnly && (
+                {(!isReadOnly || archiveDetails?.archived) && (
                   <button
                     type="button"
                     role="menuitem"
