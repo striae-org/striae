@@ -9,6 +9,10 @@ export interface CaseData {
   createdAt: string;
   caseNumber: string;
   files: FileData[];
+  archived?: boolean;
+  archivedAt?: string;
+  archivedBy?: string;
+  archiveReason?: string;
 }
 
 export interface ReadOnlyCaseData extends CaseData {
@@ -86,6 +90,10 @@ export interface CaseDataWithConfirmations {
   caseNumber: string;
   files: FileData[];
   isReadOnly?: boolean;
+  archived?: boolean;
+  archivedAt?: string;
+  archivedBy?: string;
+  archiveReason?: string;
   importedAt?: string;
   originalImageIds?: { [originalId: string]: string };
   confirmations?: CaseConfirmations;

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { SidebarContainer } from '~/components/sidebar/sidebar-container';
 import { Navbar } from '~/components/navbar/navbar';
 import { RenameCaseModal } from '~/components/navbar/rename-case-modal';
+import { ArchiveCaseModal } from '~/components/navbar/archive-case-modal';
 import { OpenCaseModal } from '~/components/navbar/open-case-modal';
 import { Toolbar } from '~/components/toolbar/toolbar';
 import { Canvas } from '~/components/canvas/canvas';
@@ -19,7 +20,7 @@ import { fetchUserApi } from '~/utils/api';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { type AnnotationData, type FileData } from '~/types';
 import type * as CaseExportActions from '~/components/actions/case-export';
-import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase } from '~/components/actions/case-manage';
+import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase } from '~/components/actions/case-manage';
 import { checkReadOnlyCaseExists } from '~/components/actions/case-review';
 import { canCreateCase, getLimitsDescription, getUserData } from '~/utils/data';
 import styles from './striae.module.css';
@@ -84,9 +85,11 @@ export const Striae = ({ user }: StriaePage) => {
   const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
   const [isRenamingCase, setIsRenamingCase] = useState(false);
   const [isDeletingCase, setIsDeletingCase] = useState(false);
+  const [isArchivingCase, setIsArchivingCase] = useState(false);
   const [isDeletingFile, setIsDeletingFile] = useState(false);
   const [isOpeningCase, setIsOpeningCase] = useState(false);
   const [openCaseHelperText, setOpenCaseHelperText] = useState('');
+  const [isArchiveCaseModalOpen, setIsArchiveCaseModalOpen] = useState(false);
 
 
    useEffect(() => {
@@ -385,6 +388,31 @@ export const Striae = ({ user }: StriaePage) => {
     }
   };
 
+  const handleArchiveCaseSubmit = async (archiveReason: string) => {
+    if (!currentCase) {
+      showNotification('Select a case before archiving.', 'error');
+      return;
+    }
+
+    if (isReadOnlyCase) {
+      showNotification('This case is already read-only and cannot be archived again.', 'error');
+      return;
+    }
+
+    setIsArchivingCase(true);
+    try {
+      await archiveCase(user, currentCase, archiveReason);
+      setIsReadOnlyCase(true);
+      setShowNotes(false);
+      setIsArchiveCaseModalOpen(false);
+      showNotification('Case archived successfully. The archive package download has started.', 'success');
+    } catch (archiveError) {
+      showNotification(archiveError instanceof Error ? archiveError.message : 'Failed to archive case.', 'error');
+    } finally {
+      setIsArchivingCase(false);
+    }
+  };
+
   const loadCaseIntoWorkspace = async (caseToLoad: string) => {
     setCurrentCase(caseToLoad);
     setShowNotes(false);
@@ -646,7 +674,6 @@ export const Striae = ({ user }: StriaePage) => {
         isCurrentImageConfirmed={isCurrentImageConfirmed}
         hasLoadedCase={!!currentCase}
         hasLoadedImage={hasLoadedImage}
-        activeSection="case-management"
         onImportComplete={handleImportComplete}
         onOpenCase={() => {
           void handleOpenCaseModal();
@@ -658,6 +685,7 @@ export const Striae = ({ user }: StriaePage) => {
         onDeleteCase={() => {
           void handleDeleteCaseAction();
         }}
+        onArchiveCase={() => setIsArchiveCaseModalOpen(true)}
         onOpenViewAllFiles={() => setIsFilesModalOpen(true)}
         onDeleteCurrentFile={() => {
           void handleDeleteCurrentFileAction();
@@ -772,9 +800,16 @@ export const Striae = ({ user }: StriaePage) => {
       <RenameCaseModal
         isOpen={isRenameCaseModalOpen}
         currentCase={currentCase}
-        isSubmitting={isRenamingCase || isDeletingCase || isDeletingFile}
+        isSubmitting={isRenamingCase || isDeletingCase || isDeletingFile || isArchivingCase}
         onClose={() => setIsRenameCaseModalOpen(false)}
         onSubmit={handleRenameCaseSubmit}
+      />
+      <ArchiveCaseModal
+        isOpen={isArchiveCaseModalOpen}
+        currentCase={currentCase}
+        isSubmitting={isArchivingCase}
+        onClose={() => setIsArchiveCaseModalOpen(false)}
+        onSubmit={handleArchiveCaseSubmit}
       />
       <Toast
         message={toastMessage}

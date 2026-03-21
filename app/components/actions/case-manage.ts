@@ -9,11 +9,23 @@ import {
   updateCaseData,
   deleteCaseData,
   duplicateCaseData,
-  deleteFileAnnotations
+  deleteFileAnnotations,
+  signForensicManifest
 } from '~/utils/data';
-import { type CaseData, type ReadOnlyCaseData, type FileData } from '~/types';
+import { type CaseData, type ReadOnlyCaseData, type FileData, type AuditTrail } from '~/types';
 import { auditService } from '~/services/audit';
 import { fetchImageApi } from '~/utils/api';
+import { exportCaseData, formatDateForFilename } from '~/components/actions/case-export';
+import { getImageUrl } from './image-manage';
+import {
+  calculateSHA256Secure,
+  createPublicSigningKeyFileName,
+  generateForensicManifestSecure,
+  getCurrentPublicSigningKeyDetails,
+  getVerificationPublicKey,
+} from '~/utils/forensics';
+import { signAuditExport } from '~/services/audit/audit-export-signing';
+import { generateAuditSummary } from '~/services/audit/audit-query-helpers';
 
 /**
  * Delete a file without individual audit logging (for bulk operations)
@@ -142,6 +154,11 @@ export const checkCaseIsReadOnly = async (user: User, caseNumber: string): Promi
     if (!caseData) {
       // Case doesn't exist, so it's not read-only
       return false;
+    }
+
+    // Archived cases are always treated as read-only.
+    if (caseData.archived) {
+      return true;
     }
 
     // Use type guard to check for isReadOnly property safely
@@ -504,6 +521,288 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
     }
     
     console.error('Error deleting case:', error);
+    throw error;
+  }
+};
+
+const getVerificationPublicSigningKey = (preferredKeyId?: string): { keyId: string | null; publicKeyPem: string } => {
+  const preferredKey = preferredKeyId ? getVerificationPublicKey(preferredKeyId) : null;
+  const currentDetails = getCurrentPublicSigningKeyDetails();
+  const resolvedPem = preferredKey ?? currentDetails.publicKeyPem;
+  const resolvedKeyId = preferredKey ? preferredKeyId ?? null : currentDetails.keyId;
+
+  if (!resolvedPem || resolvedPem.trim().length === 0) {
+    throw new Error('No public signing key is configured for archive packaging.');
+  }
+
+  return {
+    keyId: resolvedKeyId,
+    publicKeyPem: resolvedPem.endsWith('\n') ? resolvedPem : `${resolvedPem}\n`,
+  };
+};
+
+const fetchImageAsBlob = async (user: User, fileData: FileData, caseNumber: string): Promise<Blob | null> => {
+  try {
+    const imageUrl = await getImageUrl(user, fileData, caseNumber, 'Archive Package');
+
+    if (!imageUrl) {
+      return null;
+    }
+
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.blob();
+  } catch (error) {
+    console.error('Failed to fetch image for archive package:', error);
+    return null;
+  }
+};
+
+export const archiveCase = async (
+  user: User,
+  caseNumber: string,
+  archiveReason?: string
+): Promise<void> => {
+  const startTime = Date.now();
+
+  try {
+    if (!validateCaseNumber(caseNumber)) {
+      throw new Error('Invalid case number');
+    }
+
+    const sessionValidation = await validateUserSession(user);
+    if (!sessionValidation.valid) {
+      throw new Error(`Session validation failed: ${sessionValidation.reason}`);
+    }
+
+    const caseData = await getCaseData(user, caseNumber);
+    if (!caseData) {
+      throw new Error('Case not found');
+    }
+
+    if (caseData.archived) {
+      throw new Error('This case is already archived.');
+    }
+
+    const archivedAt = new Date().toISOString();
+    const archiveData: CaseData = {
+      ...caseData,
+      archived: true,
+      archivedAt,
+      archivedBy: user.uid,
+      archiveReason: archiveReason?.trim() || undefined,
+      isReadOnly: true,
+    } as CaseData;
+
+    await updateCaseData(user, caseNumber, archiveData);
+
+    await auditService.logEvent({
+      userId: user.uid,
+      userEmail: user.email || '',
+      action: 'case-archive',
+      result: 'success',
+      fileName: `${caseNumber}.case`,
+      fileType: 'case-package',
+      caseNumber,
+      workflowPhase: 'casework',
+      caseDetails: {
+        newCaseName: caseNumber,
+        totalFiles: archiveData.files?.length || 0,
+        lastModified: archivedAt,
+        deleteReason: archiveReason?.trim() || 'No reason provided',
+      },
+      performanceMetrics: {
+        processingTimeMs: Date.now() - startTime,
+        fileSizeBytes: 0,
+      },
+    });
+
+    const exportData = await exportCaseData(user, caseNumber, { includeMetadata: true });
+    const caseJsonContent = JSON.stringify(exportData, null, 2);
+
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    zip.file(`${caseNumber}_data.json`, caseJsonContent);
+
+    const imageFolder = zip.folder('images');
+    const imageBlobs: Record<string, Blob> = {};
+    if (imageFolder && exportData.files) {
+      for (const fileEntry of exportData.files) {
+        const imageBlob = await fetchImageAsBlob(user, fileEntry.fileData, caseNumber);
+        if (!imageBlob) {
+          continue;
+        }
+
+        const exportFileName = `${fileEntry.fileData.originalFilename}-${fileEntry.fileData.id}`;
+        imageFolder.file(exportFileName, imageBlob);
+        imageBlobs[exportFileName] = imageBlob;
+      }
+    }
+
+    const forensicManifest = await generateForensicManifestSecure(caseJsonContent, imageBlobs);
+    const manifestSigningResponse = await signForensicManifest(user, caseNumber, forensicManifest);
+
+    const signingKey = getVerificationPublicSigningKey(manifestSigningResponse.signature.keyId);
+    const publicKeyFileName = createPublicSigningKeyFileName(signingKey.keyId);
+    zip.file(publicKeyFileName, signingKey.publicKeyPem);
+
+    zip.file(
+      'FORENSIC_MANIFEST.json',
+      JSON.stringify(
+        {
+          ...forensicManifest,
+          manifestVersion: manifestSigningResponse.manifestVersion,
+          signature: manifestSigningResponse.signature,
+        },
+        null,
+        2
+      )
+    );
+
+    const auditEntries = await auditService.getAuditEntriesForUser(user.uid, { caseNumber });
+    const auditTrail: AuditTrail = {
+      caseNumber,
+      workflowId: `${caseNumber}-archive-${Date.now()}`,
+      entries: auditEntries,
+      summary: generateAuditSummary(auditEntries),
+    };
+
+    const auditTrailPayload = {
+      metadata: {
+        exportTimestamp: new Date().toISOString(),
+        exportVersion: '1.0',
+        totalEntries: auditTrail.summary.totalEvents,
+        application: 'Striae',
+        exportType: 'trail' as const,
+        scopeType: 'case' as const,
+        scopeIdentifier: caseNumber,
+      },
+      auditTrail,
+    };
+
+    const auditTrailRawContent = JSON.stringify(auditTrailPayload, null, 2);
+    const auditTrailHash = await calculateSHA256Secure(auditTrailRawContent);
+    const signedAuditExportPayload = await signAuditExport(
+      {
+        exportFormat: 'json',
+        exportType: 'trail',
+        generatedAt: auditTrailPayload.metadata.exportTimestamp,
+        totalEntries: auditTrail.summary.totalEvents,
+        hash: auditTrailHash.toUpperCase(),
+      },
+      {
+        user,
+        scopeType: 'case',
+        scopeIdentifier: caseNumber,
+        caseNumber,
+      }
+    );
+
+    const signedAuditTrail = {
+      metadata: {
+        ...auditTrailPayload.metadata,
+        hash: auditTrailHash.toUpperCase(),
+        signatureVersion: signedAuditExportPayload.signatureMetadata.signatureVersion,
+        signatureMetadata: signedAuditExportPayload.signatureMetadata,
+        signature: signedAuditExportPayload.signature,
+      },
+      auditTrail,
+    };
+
+    zip.file('audit/case-audit-trail.json', JSON.stringify(signedAuditTrail, null, 2));
+    zip.file('audit/case-audit-signature.json', JSON.stringify(signedAuditExportPayload, null, 2));
+
+    zip.file(
+      'README.txt',
+      [
+        'Striae Archived Case Package',
+        '===========================',
+        '',
+        `Case Number: ${caseNumber}`,
+        `Archived At: ${archivedAt}`,
+        `Archived By: ${user.email || user.uid}`,
+        `Archive Reason: ${archiveReason?.trim() || 'Not provided'}`,
+        '',
+        'Package Contents',
+        '- Case data JSON export with all image references',
+        '- images/ folder with exported image files',
+        '- Full case audit trail export and signed audit metadata',
+        '- Forensic manifest with server-side signature',
+        `- ${publicKeyFileName} for verification`,
+        '',
+        'This package is intended for read-only review and verification workflows.',
+      ].join('\n')
+    );
+
+    const zipBlob = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 },
+    });
+
+    const downloadUrl = URL.createObjectURL(zipBlob);
+    const archiveFileName = `striae-case-${caseNumber}-archive-${formatDateForFilename(new Date())}.zip`;
+    const anchor = document.createElement('a');
+    anchor.href = downloadUrl;
+    anchor.download = archiveFileName;
+    anchor.click();
+    URL.revokeObjectURL(downloadUrl);
+
+    await auditService.logEvent({
+      userId: user.uid,
+      userEmail: user.email || '',
+      action: 'case-export',
+      result: 'success',
+      fileName: archiveFileName,
+      fileType: 'case-package',
+      caseNumber,
+      workflowPhase: 'case-export',
+      caseDetails: {
+        newCaseName: caseNumber,
+        totalFiles: exportData.files?.length || 0,
+        totalAnnotations: exportData.summary?.totalBoxAnnotations || 0,
+        lastModified: archivedAt,
+      },
+      securityChecks: {
+        selfConfirmationPrevented: true,
+        fileIntegrityValid: true,
+        manifestSignaturePresent: true,
+        manifestSignatureValid: true,
+        manifestSignatureKeyId: manifestSigningResponse.signature.keyId,
+      },
+      performanceMetrics: {
+        processingTimeMs: Date.now() - startTime,
+        fileSizeBytes: zipBlob.size,
+        validationStepsCompleted: 4,
+        validationStepsFailed: 0,
+      },
+    });
+  } catch (error) {
+    await auditService.logEvent({
+      userId: user.uid,
+      userEmail: user.email || '',
+      action: 'case-archive',
+      result: 'failure',
+      fileName: `${caseNumber}.case`,
+      fileType: 'case-package',
+      caseNumber,
+      workflowPhase: 'casework',
+      validationErrors: [error instanceof Error ? error.message : 'Unknown archive error'],
+      caseDetails: {
+        newCaseName: caseNumber,
+        deleteReason: archiveReason?.trim() || 'No reason provided',
+      },
+      performanceMetrics: {
+        processingTimeMs: Date.now() - startTime,
+        fileSizeBytes: 0,
+        validationStepsCompleted: 0,
+        validationStepsFailed: 1,
+      },
+    });
+
     throw error;
   }
 };

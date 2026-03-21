@@ -32,6 +32,8 @@ export const getAuditActionIcon = (action: AuditAction): string => {
       return '✏️';
     case 'case-delete':
       return '🗑️';
+    case 'case-archive':
+      return '📦';
     case 'case-export':
       return '📤';
     case 'case-import':

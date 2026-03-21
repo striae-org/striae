@@ -14,6 +14,7 @@ interface CaseDataFile {
 interface CaseDataResponse {
   files?: CaseDataFile[];
   originalImageIds?: Record<string, string>;
+  archived?: boolean;
 }
 
 type AnnotationImportData = Record<string, unknown> & {
@@ -123,6 +124,10 @@ export async function importConfirmationData(
     }
 
     const caseData = await caseResponse.json() as CaseDataResponse;
+
+    if (caseData.archived) {
+      throw new Error('Cannot import confirmations into an archived case.');
+    }
     
     // Build mapping from original image IDs to current image IDs
     const imageIdMapping = new Map<string, string>();

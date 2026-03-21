@@ -25,6 +25,7 @@ interface NavbarProps {
   onOpenAuditTrail?: () => void;
   onOpenRenameCase?: () => void;
   onDeleteCase?: () => void;
+  onArchiveCase?: () => void;
   onOpenViewAllFiles?: () => void;
   onDeleteCurrentFile?: () => void;
   onOpenImageNotes?: () => void;
@@ -46,6 +47,7 @@ export const Navbar = ({
   onOpenAuditTrail,
   onOpenRenameCase,
   onDeleteCase,
+  onArchiveCase,
   onOpenViewAllFiles,
   onDeleteCurrentFile,
   onOpenImageNotes,
@@ -216,6 +218,21 @@ export const Navbar = ({
                     }}
                   >
                     Delete Case
+                  </button>
+                )}
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={`${styles.caseMenuItem} ${styles.caseMenuItemArchive}`}
+                    disabled={!hasLoadedCase}
+                    title={!hasLoadedCase ? 'Load a case to archive it' : undefined}
+                    onClick={() => {
+                      onArchiveCase?.();
+                      setIsCaseMenuOpen(false);
+                    }}
+                  >
+                    Archive Case
                   </button>
                 )}
                 <div className={styles.caseMenuSectionLabel}>Verification</div>

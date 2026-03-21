@@ -3,7 +3,7 @@
 
 export type AuditAction = 
   // Case Management Actions
-  | 'case-create' | 'case-rename' | 'case-delete'
+  | 'case-create' | 'case-rename' | 'case-delete' | 'case-archive'
   // Confirmation Workflow Actions  
   | 'case-export' | 'case-import' | 'confirmation-create' | 'confirmation-export' | 'confirmation-import'
   // File Operations
