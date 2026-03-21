@@ -220,7 +220,7 @@ async function verifyAuditExportContent(
   }
 }
 
-async function verifyBundledAuditExport(
+export async function verifyBundledAuditExport(
   zip: {
     file: (path: string) => { async: (type: 'text') => Promise<string> } | null;
   },

@@ -6,6 +6,7 @@ import {
   extractForensicManifestData,
   type SignedForensicManifest,
   validateCaseIntegritySecure as validateForensicIntegrity,
+  verifyBundledAuditExport,
   verifyForensicManifestSignature
 } from '~/utils/forensics';
 import { validateExporterUid, removeForensicWarning } from './validation';
@@ -219,6 +220,11 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
               forensicManifest,
               verificationPublicKeyPem
             );
+
+            const bundledAuditVerification = await verifyBundledAuditExport(
+              zip,
+              verificationPublicKeyPem ?? ''
+            );
           
             // Perform comprehensive validation
             const validation = await validateForensicIntegrity(
@@ -227,7 +233,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
               manifestForValidation
             );
           
-            hashValid = validation.isValid && signatureResult.isValid;
+            hashValid = validation.isValid && signatureResult.isValid && !bundledAuditVerification;
 
             if (!hashValid) {
               const errorParts: string[] = [];
@@ -237,6 +243,9 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
               if (!validation.isValid) {
                 errorParts.push('Integrity validation failed.');
               }
+              if (bundledAuditVerification) {
+                errorParts.push(bundledAuditVerification.message);
+              }
               hashError = errorParts.length > 0 ? errorParts.join(' ') : 'Validation failed.';
             }
 
@@ -244,6 +253,9 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
             const integrityErrors = [...validation.errors];
             if (!signatureResult.isValid) {
               integrityErrors.push(`Signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+            }
+            if (bundledAuditVerification) {
+              integrityErrors.push(bundledAuditVerification.message);
             }
 
             validationDetails = {
