@@ -9,6 +9,39 @@ import {
 } from '~/utils/forensics';
 import { validateExporterUid, removeForensicWarning } from './validation';
 
+function isArchivedExportData(parsedData: unknown): boolean {
+  if (!parsedData || typeof parsedData !== 'object') {
+    return false;
+  }
+
+  const root = parsedData as Record<string, unknown>;
+
+  if (root.archived === true) {
+    return true;
+  }
+
+  if (typeof root.archivedAt === 'string' && root.archivedAt.trim().length > 0) {
+    return true;
+  }
+
+  const metadata = root.metadata;
+  if (!metadata || typeof metadata !== 'object') {
+    return false;
+  }
+
+  const metadataRecord = metadata as Record<string, unknown>;
+
+  if (metadataRecord.archived === true) {
+    return true;
+  }
+
+  if (typeof metadataRecord.archivedAt === 'string' && metadataRecord.archivedAt.trim().length > 0) {
+    return true;
+  }
+
+  return false;
+}
+
 function getLeafFileName(path: string): string {
   const segments = path.split('/').filter(Boolean);
   return segments.length > 0 ? segments[segments.length - 1] : path;
@@ -239,7 +272,8 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
       };
     }
     
-    const caseData: CaseExportData = JSON.parse(cleanedContent);
+    const parsedCaseData = JSON.parse(cleanedContent) as unknown;
+    const caseData: CaseExportData = parsedCaseData as CaseExportData;
     
     // Validate case data structure
     if (!caseData.metadata?.caseNumber) {
@@ -250,7 +284,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
       throw new Error(`Invalid case number format: ${caseData.metadata.caseNumber}`);
     }
     
-    const isArchivedExport = caseData.metadata.archived === true;
+    const isArchivedExport = isArchivedExportData(parsedCaseData);
 
     // Validate exporter UID exists in user database and is not current user
     if (caseData.metadata.exportedByUid) {
@@ -280,7 +314,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
     
     return {
       caseNumber: caseData.metadata.caseNumber,
-      archived: caseData.metadata.archived === true,
+      archived: isArchivedExport,
       exportedBy: caseData.metadata.exportedBy || null,
       exportedByName: caseData.metadata.exportedByName || null,
       exportedByCompany: caseData.metadata.exportedByCompany || null,
@@ -337,6 +371,7 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
     
     // Extract and parse case data
     let caseData: CaseExportData;
+    let parsedCaseData: unknown;
     let cleanedContent: string = '';
     if (isJsonFormat) {
       const dataContent = await zip.file(dataFileName)?.async('text');
@@ -346,7 +381,8 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
       
       // Handle forensic protection warnings in JSON
       cleanedContent = removeForensicWarning(dataContent);
-      caseData = JSON.parse(cleanedContent);
+      parsedCaseData = JSON.parse(cleanedContent) as unknown;
+      caseData = parsedCaseData as CaseExportData;
     } else {
       throw new Error('CSV import not yet supported. Please use JSON format.');
     }
@@ -360,7 +396,7 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
       throw new Error(`Invalid case number format: ${caseData.metadata.caseNumber}`);
     }
     
-    const isArchivedExport = caseData.metadata.archived === true;
+    const isArchivedExport = isArchivedExportData(parsedCaseData);
 
     // Validate exporter UID exists in user database and is not current user
     if (caseData.metadata.exportedByUid) {
