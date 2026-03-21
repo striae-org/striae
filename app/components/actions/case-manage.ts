@@ -13,7 +13,7 @@ import {
   deleteFileAnnotations,
   signForensicManifest
 } from '~/utils/data';
-import { type CaseData, type ReadOnlyCaseData, type FileData, type AuditTrail } from '~/types';
+import { type CaseData, type ReadOnlyCaseData, type FileData, type AuditTrail, type CaseExportData } from '~/types';
 import { auditService } from '~/services/audit';
 import { fetchImageApi } from '~/utils/api';
 import { exportCaseData, formatDateForFilename } from '~/components/actions/case-export';
@@ -736,22 +736,19 @@ export const archiveCase = async (
       isReadOnly: true,
     } as CaseData;
 
-    await updateCaseData(user, caseNumber, archiveData);
-
-    await auditService.logCaseArchive(
-      user,
-      caseNumber,
-      caseNumber,
-      archiveReason?.trim() || 'No reason provided',
-      'success',
-      [],
-      archiveData.files?.length || 0,
-      archivedAt,
-      Date.now() - startTime
-    );
-
     const exportData = await exportCaseData(user, caseNumber, { includeMetadata: true });
-    const caseJsonContent = JSON.stringify(exportData, null, 2);
+    const archivedExportData: CaseExportData = {
+      ...exportData,
+      metadata: {
+        ...exportData.metadata,
+        archived: true,
+        archivedAt,
+        archivedBy: user.uid,
+        archivedByDisplay,
+        archiveReason: archiveReason?.trim() || undefined,
+      },
+    };
+    const caseJsonContent = JSON.stringify(archivedExportData, null, 2);
 
     const JSZip = (await import('jszip')).default;
     const zip = new JSZip();
@@ -875,6 +872,20 @@ export const archiveCase = async (
       compression: 'DEFLATE',
       compressionOptions: { level: 6 },
     });
+
+    await updateCaseData(user, caseNumber, archiveData);
+
+    await auditService.logCaseArchive(
+      user,
+      caseNumber,
+      caseNumber,
+      archiveReason?.trim() || 'No reason provided',
+      'success',
+      [],
+      archiveData.files?.length || 0,
+      archivedAt,
+      Date.now() - startTime
+    );
 
     const downloadUrl = URL.createObjectURL(zipBlob);
     const archiveFileName = `striae-case-${caseNumber}-archive-${formatDateForFilename(new Date())}.zip`;

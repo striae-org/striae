@@ -16,7 +16,7 @@ import {
 import { AuthProvider } from '~/components/auth/auth-provider';
 import { auth } from '~/services/firebase';
 import styles from '~/styles/root.module.css';
-import './tailwind.css';
+import './global.css';
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

@@ -118,7 +118,7 @@ export const buildCaseArchiveAuditParams = (
     workflowPhase: 'casework',
     caseDetails: {
       newCaseName: input.caseName,
-      deleteReason: input.archiveReason,
+      archiveReason: input.archiveReason,
       totalFiles: input.totalFiles,
       lastModified: archivedAt,
     },

@@ -48,7 +48,7 @@ export const useAuditViewerExport = ({
     const filename = auditExportService.generateFilename(
       exportContextData.scopeType,
       exportContextData.identifier,
-      'csv'
+      'json'
     );
 
     try {
