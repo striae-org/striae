@@ -234,11 +234,15 @@ export const CaseSidebar = ({
     setDeletingFileId(fileId);
     
     try {
-      await deleteFile(user, currentCase, fileId);
+      const deleteResult = await deleteFile(user, currentCase, fileId);
       const updatedFiles = files.filter(f => f.id !== fileId);
       setFiles(updatedFiles);      
       onImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
       setImageLoaded(false);
+
+      if (deleteResult.imageMissing) {
+        setFileError(`File record deleted. Image asset "${deleteResult.fileName}" was not found and was skipped.`);
+      }
       
       // Refresh file upload permissions after successful file deletion
       // Pass the new file count directly to avoid state update timing issues

@@ -76,7 +76,7 @@ export const Striae = ({ user }: StriaePage) => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'warning'>('success');
   const [isCaseExportModalOpen, setIsCaseExportModalOpen] = useState(false);
   const [isAuditTrailOpen, setIsAuditTrailOpen] = useState(false);
   const [isRenameCaseModalOpen, setIsRenameCaseModalOpen] = useState(false);
@@ -229,7 +229,7 @@ export const Striae = ({ user }: StriaePage) => {
     });
   };
 
-  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+  const showNotification = (message: string, type: 'success' | 'error' | 'warning' = 'success') => {
     setToastType(type);
     setToastMessage(message);
     setShowToast(true);
@@ -340,7 +340,7 @@ export const Striae = ({ user }: StriaePage) => {
     }
 
     const confirmed = window.confirm(
-      `Are you sure you want to delete case ${currentCase}? This will permanently delete all associated files and cannot be undone.`
+      `Are you sure you want to delete case ${currentCase}? This will permanently delete all associated files and cannot be undone. If any image assets are already missing (404), they will be skipped and the case deletion will continue.`
     );
 
     if (!confirmed) {
@@ -349,13 +349,20 @@ export const Striae = ({ user }: StriaePage) => {
 
     setIsDeletingCase(true);
     try {
-      await deleteCase(user, currentCase);
+      const deleteResult = await deleteCase(user, currentCase);
       setCurrentCase('');
       setFiles([]);
       setShowNotes(false);
       setIsAuditTrailOpen(false);
       setIsRenameCaseModalOpen(false);
-      showNotification('Case deleted successfully.', 'success');
+      if (deleteResult.missingImages.length > 0) {
+        showNotification(
+          `Case deleted. ${deleteResult.missingImages.length} image(s) were not found and were skipped during deletion.`,
+          'warning'
+        );
+      } else {
+        showNotification('Case deleted successfully.', 'success');
+      }
     } catch (deleteError) {
       showNotification(deleteError instanceof Error ? deleteError.message : 'Failed to delete case.', 'error');
     } finally {
@@ -386,12 +393,19 @@ export const Striae = ({ user }: StriaePage) => {
 
     setIsDeletingFile(true);
     try {
-      await deleteFile(user, currentCase, imageId, 'User-requested deletion via navbar file management');
+      const deleteResult = await deleteFile(user, currentCase, imageId, 'User-requested deletion via navbar file management');
       const updatedFiles = files.filter((file) => file.id !== imageId);
       setFiles(updatedFiles);
       handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
       setShowNotes(false);
-      showNotification('File deleted successfully.', 'success');
+      if (deleteResult.imageMissing) {
+        showNotification(
+          `File record deleted. Image asset "${deleteResult.fileName}" was not found and was skipped.`,
+          'warning'
+        );
+      } else {
+        showNotification('File deleted successfully.', 'success');
+      }
     } catch (deleteError) {
       showNotification(deleteError instanceof Error ? deleteError.message : 'Failed to delete file.', 'error');
     } finally {

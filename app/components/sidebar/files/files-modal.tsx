@@ -117,10 +117,15 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
     setDeletingFileId(fileId);
     
     try {
-      await deleteFile(user, currentCase, fileId);
+      const deleteResult = await deleteFile(user, currentCase, fileId);
       // Remove the deleted file from the list
       const updatedFiles = files.filter(f => f.id !== fileId);
       setFiles(updatedFiles);
+
+      if (deleteResult.imageMissing) {
+        setError(`File record deleted. Image asset "${deleteResult.fileName}" was not found and was skipped.`);
+        setTimeout(() => setError(null), 4000);
+      }
       
       // Adjust page if needed
       const newTotalPages = Math.ceil(updatedFiles.length / FILES_PER_PAGE);

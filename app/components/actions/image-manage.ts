@@ -7,6 +7,11 @@ import { canUploadFile, getCaseData, updateCaseData, deleteFileAnnotations } fro
 import type { CaseData, FileData, ImageUploadResponse } from '~/types';
 import { auditService } from '~/services/audit';
 
+export interface DeleteFileResult {
+  imageMissing: boolean;
+  fileName: string;
+}
+
 export const fetchFiles = async (
   user: User, 
   caseNumber: string, 
@@ -114,7 +119,7 @@ export const uploadFile = async (
   }
 };
 
-export const deleteFile = async (user: User, caseNumber: string, fileId: string, deleteReason: string = 'User-requested deletion via file list'): Promise<void> => {
+export const deleteFile = async (user: User, caseNumber: string, fileId: string, deleteReason: string = 'User-requested deletion via file list'): Promise<DeleteFileResult> => {
   const startTime = Date.now();
   
   // Get file info for audit logging (outside try block so it's available in catch)
@@ -133,6 +138,7 @@ export const deleteFile = async (user: User, caseNumber: string, fileId: string,
     const fileSize = 0; // We don't store file size, so use 0
 
     let imageDeleteFailed = false;
+    let imageMissing = false;
     let imageDeleteError = '';
 
     // Attempt to delete image file
@@ -145,6 +151,7 @@ export const deleteFile = async (user: User, caseNumber: string, fileId: string,
       if (imageResponse.status === 404) {
         // Image already doesn't exist - proceed with data cleanup
         console.warn(`Image ${fileId} not found (404) - proceeding with data cleanup`);
+        imageMissing = true;
       } else {
         // Other errors should still fail the operation
         imageDeleteFailed = true;
@@ -191,6 +198,10 @@ export const deleteFile = async (user: User, caseNumber: string, fileId: string,
     }
 
     console.log(`✅ File deleted: ${fileName} (${endTime - startTime}ms)`);
+    return {
+      imageMissing,
+      fileName
+    };
     
   } catch (error) {
     // Log failed file deletion

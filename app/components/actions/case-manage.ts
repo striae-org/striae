@@ -37,12 +37,21 @@ interface DeleteFileWithoutAuditOptions {
   skipValidation?: boolean;
 }
 
+interface DeleteFileWithoutAuditResult {
+  imageMissing: boolean;
+  fileName: string;
+}
+
+export interface DeleteCaseResult {
+  missingImages: string[];
+}
+
 const deleteFileWithoutAudit = async (
   user: User,
   caseNumber: string,
   fileId: string,
   options: DeleteFileWithoutAuditOptions = {}
-): Promise<void> => {
+): Promise<DeleteFileWithoutAuditResult> => {
   // Get the case data to find file info
   const caseData = await getCaseData(user, caseNumber, {
     skipValidation: options.skipValidation === true
@@ -56,10 +65,16 @@ const deleteFileWithoutAudit = async (
     throw new Error('File not found in case');
   }
 
+  let imageMissing = false;
+
   // Delete image file and fail fast on non-404 failures so case deletion can be retried safely
   const imageResponse = await fetchImageApi(user, `/${encodeURIComponent(fileId)}`, {
     method: 'DELETE'
   });
+
+  if (!imageResponse.ok && imageResponse.status === 404) {
+    imageMissing = true;
+  }
 
   if (!imageResponse.ok && imageResponse.status !== 404) {
     throw new Error(`Failed to delete image: ${imageResponse.status} ${imageResponse.statusText}`);
@@ -71,7 +86,10 @@ const deleteFileWithoutAudit = async (
   });
 
   if (options.skipCaseDataUpdate === true) {
-    return;
+    return {
+      imageMissing,
+      fileName: fileToDelete.originalFilename
+    };
   }
 
   // Update case data to remove file reference
@@ -81,6 +99,11 @@ const deleteFileWithoutAudit = async (
   };
 
   await updateCaseData(user, caseNumber, updatedData);
+
+  return {
+    imageMissing,
+    fileName: fileToDelete.originalFilename
+  };
 };
 
 const CASE_NUMBER_REGEX = /^[A-Za-z0-9-]+$/;
@@ -403,7 +426,7 @@ export const renameCase = async (
   }
 };
 
-export const deleteCase = async (user: User, caseNumber: string): Promise<void> => {
+export const deleteCase = async (user: User, caseNumber: string): Promise<DeleteCaseResult> => {
   const startTime = Date.now();
   
   try {
@@ -434,6 +457,7 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
       const files = caseData.files;
       const deletedFiles: Array<{id: string, originalFilename: string, fileSize: number}> = [];
       const failedFiles: Array<{id: string, originalFilename: string, error: string}> = [];
+      const missingImages: string[] = [];
       
       console.log(`🗑️  Deleting ${files.length} files in batches of ${BATCH_SIZE}...`);
       
@@ -451,12 +475,16 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
             try {
               // Delete file without individual audit logging to reduce API calls
               // We'll do bulk audit logging at the end
-              await deleteFileWithoutAudit(user, caseNumber, file.id);
-              await deleteFileWithoutAudit(user, caseNumber, file.id, {
+              const deleteResult = await deleteFileWithoutAudit(user, caseNumber, file.id, {
                 // Archived cases are immutable; during deletion we can skip per-file case-data mutations.
                 skipCaseDataUpdate: !!caseData.archived,
                 skipValidation: !!caseData.archived
               });
+
+              if (deleteResult.imageMissing) {
+                missingImages.push(deleteResult.fileName);
+              }
+
               deletedFiles.push({ 
                 id: file.id, 
                 originalFilename: file.originalFilename,
@@ -521,6 +549,29 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
           `Case deletion aborted: failed to delete ${failedFiles.length} file(s): ${failedFiles.map(f => f.originalFilename).join(', ')}`
         );
       }
+
+      // Remove case from user data first (so user loses access immediately)
+      await removeUserCase(user, caseNumber);
+
+      // Delete case data using centralized function (skip validation since user no longer has access)
+      await deleteCaseData(user, caseNumber, { skipValidation: true });
+
+      // Add a small delay before audit logging to reduce rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Log successful case deletion with file details
+      const endTime = Date.now();
+      await auditService.logCaseDeletion(
+        user,
+        caseNumber,
+        caseName,
+        `User-requested deletion via case actions (${fileCount} files deleted)` +
+          (missingImages.length > 0 ? `; ${missingImages.length} image(s) were already missing` : ''),
+        false // No backup created for standard deletions
+      );
+
+      console.log(`✅ Case deleted: ${caseNumber} (${fileCount} files) (${endTime - startTime}ms)`);
+      return { missingImages };
     }
 
     // Remove case from user data first (so user loses access immediately)
@@ -543,6 +594,7 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<void> 
     );
 
     console.log(`✅ Case deleted: ${caseNumber} (${fileCount} files) (${endTime - startTime}ms)`);
+    return { missingImages: [] };
     
   } catch (error) {
     // Log failed case deletion
