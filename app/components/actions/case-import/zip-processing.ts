@@ -1,5 +1,6 @@
 import type { User } from 'firebase/auth';
 import { type CaseExportData, type CaseImportPreview } from '~/types';
+import { getCaseData } from '~/utils/data';
 import { validateCaseNumber } from '../case-manage';
 import {
   extractForensicManifestData,
@@ -40,6 +41,23 @@ function isArchivedExportData(parsedData: unknown): boolean {
   }
 
   return false;
+}
+
+async function allowSelfImportForArchivedCase(
+  currentUser: User,
+  caseNumber: string,
+  parsedData: unknown
+): Promise<boolean> {
+  if (isArchivedExportData(parsedData)) {
+    return true;
+  }
+
+  try {
+    const existingCase = await getCaseData(currentUser, caseNumber);
+    return existingCase?.archived === true;
+  } catch {
+    return false;
+  }
 }
 
 function getLeafFileName(path: string): string {
@@ -284,7 +302,11 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
       throw new Error(`Invalid case number format: ${caseData.metadata.caseNumber}`);
     }
     
-    const isArchivedExport = isArchivedExportData(parsedCaseData);
+    const isArchivedExport = await allowSelfImportForArchivedCase(
+      currentUser,
+      caseData.metadata.caseNumber,
+      parsedCaseData
+    );
 
     // Validate exporter UID exists in user database and is not current user
     if (caseData.metadata.exportedByUid) {
@@ -396,7 +418,11 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
       throw new Error(`Invalid case number format: ${caseData.metadata.caseNumber}`);
     }
     
-    const isArchivedExport = isArchivedExportData(parsedCaseData);
+    const isArchivedExport = await allowSelfImportForArchivedCase(
+      currentUser,
+      caseData.metadata.caseNumber,
+      parsedCaseData
+    );
 
     // Validate exporter UID exists in user database and is not current user
     if (caseData.metadata.exportedByUid) {
