@@ -418,7 +418,10 @@ export const Striae = ({ user }: StriaePage) => {
         archived: true,
         archivedAt: new Date().toISOString(),
         archivedBy: user.uid,
-        archivedByDisplay: user.displayName?.trim() || user.email || user.uid,
+        archivedByDisplay: [
+          [userFirstName.trim(), userLastName.trim()].filter(Boolean).join(' ').trim(),
+          userBadgeId.trim(),
+        ].filter(Boolean).join(', ') || user.uid,
         archiveReason: archiveReason.trim() || undefined,
       });
       setShowNotes(false);

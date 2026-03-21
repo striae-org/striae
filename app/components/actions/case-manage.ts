@@ -2,6 +2,7 @@ import type { User } from 'firebase/auth';
 import { 
   canCreateCase, 
   getUserCases,
+  getUserData,
   validateUserSession,
   addUserCase,
   removeUserCase,
@@ -616,7 +617,27 @@ export const archiveCase = async (
     }
 
     const archivedAt = new Date().toISOString();
-    const archivedByDisplay = user.displayName?.trim() || user.email || user.uid;
+    let archivedByDisplay = user.uid;
+
+    try {
+      const userData = await getUserData(user);
+      const fullName = [userData?.firstName?.trim(), userData?.lastName?.trim()]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      const badgeId = userData?.badgeId?.trim();
+
+      if (fullName && badgeId) {
+        archivedByDisplay = `${fullName}, ${badgeId}`;
+      } else if (fullName) {
+        archivedByDisplay = fullName;
+      } else if (badgeId) {
+        archivedByDisplay = badgeId;
+      }
+    } catch (userDataError) {
+      console.warn('Failed to resolve user profile details for archive display value:', userDataError);
+    }
+
     const archiveData: CaseData = {
       ...caseData,
       archived: true,
@@ -744,7 +765,7 @@ export const archiveCase = async (
         '',
         `Case Number: ${caseNumber}`,
         `Archived At: ${archivedAt}`,
-        `Archived By: ${user.email || user.uid}`,
+        `Archived By: ${archivedByDisplay}`,
         `Archive Reason: ${archiveReason?.trim() || 'Not provided'}`,
         '',
         'Package Contents',

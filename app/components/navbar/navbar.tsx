@@ -263,7 +263,7 @@ export const Navbar = ({
                     <strong>Archived Case</strong>
                     <span>Archived At: {archiveDetails.archivedAt ? new Date(archiveDetails.archivedAt).toLocaleString() : 'Unknown'}</span>
                     <span>
-                      Archived By: {archiveDetails.archivedByDisplay || archiveDetails.archivedBy || 'Unknown'}
+                      Archived By (Name, ID): {archiveDetails.archivedByDisplay || archiveDetails.archivedBy || 'Unknown'}
                       {archiveDetails.archivedByDisplay && archiveDetails.archivedBy ? ` (${archiveDetails.archivedBy})` : ''}
                     </span>
                     <span>Reason: {archiveDetails.archiveReason || 'Not provided'}</span>
