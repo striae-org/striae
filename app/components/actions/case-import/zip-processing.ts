@@ -106,9 +106,11 @@ async function extractVerificationPublicKeyFromZip(
  * a reasonable portion from the end.
  */
 function extractImageIdFromFilename(exportFilename: string): string | null {
+  const leafFilename = getLeafFileName(exportFilename);
+
   // Remove extension first
-  const lastDotIndex = exportFilename.lastIndexOf('.');
-  const filenameWithoutExt = lastDotIndex === -1 ? exportFilename : exportFilename.substring(0, lastDotIndex);
+  const lastDotIndex = leafFilename.lastIndexOf('.');
+  const filenameWithoutExt = lastDotIndex === -1 ? leafFilename : leafFilename.substring(0, lastDotIndex);
   
   // UUID pattern: 8-4-4-4-12 (36 chars including hyphens)
   // Look for a pattern that matches this at the end
@@ -457,19 +459,19 @@ export async function parseImportZip(zipFile: File, currentUser: User): Promise<
     const imagesFolder = zip.folder('images');
     
     if (imagesFolder) {
-      for (const [, file] of Object.entries(imagesFolder.files)) {
-        if (!file.dir && file.name.includes('/')) {
-          const exportFilename = file.name.split('/').pop();
-          if (exportFilename) {
-            const blob = await file.async('blob');
-            imageFiles[exportFilename] = blob;
-            
-            // Extract original image ID from filename
-            const originalImageId = extractImageIdFromFilename(exportFilename);
-            if (originalImageId) {
-              imageIdMapping[exportFilename] = originalImageId;
-            }
-          }
+      for (const [path, file] of Object.entries(imagesFolder.files)) {
+        if (!path.startsWith('images/') || path.endsWith('/') || file.dir) {
+          continue;
+        }
+
+        const exportFilename = path.replace('images/', '');
+        const blob = await file.async('blob');
+        imageFiles[exportFilename] = blob;
+
+        // Extract original image ID from filename
+        const originalImageId = extractImageIdFromFilename(exportFilename);
+        if (originalImageId) {
+          imageIdMapping[exportFilename] = originalImageId;
         }
       }
     }
