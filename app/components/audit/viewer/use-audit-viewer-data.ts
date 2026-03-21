@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { User } from 'firebase/auth';
 import { auditService } from '~/services/audit';
 import { type AuditTrail, type UserData, type ValidationAuditEntry, type WorkflowPhase } from '~/types';
-import { getUserData } from '~/utils/data';
+import { getCaseData, getUserData } from '~/utils/data';
 import type { DateRangeFilter } from './types';
 
 const isWorkflowPhase = (phase: unknown): phase is WorkflowPhase =>
@@ -82,6 +82,8 @@ export const useAuditViewerData = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [auditTrail, setAuditTrail] = useState<AuditTrail | null>(null);
+  const [isArchivedReadOnlyCase, setIsArchivedReadOnlyCase] = useState(false);
+  const [bundledAuditWarning, setBundledAuditWarning] = useState<string>('');
 
   const loadUserData = useCallback(async () => {
     if (!user) {
@@ -103,11 +105,27 @@ export const useAuditViewerData = ({
 
     setLoading(true);
     setError('');
+    setBundledAuditWarning('');
 
     try {
       const { startDate, endDate } = buildAuditDateQuery(dateRange, customStartDate, customEndDate);
 
+      if (effectiveCaseNumber) {
+        const caseData = await getCaseData(user, effectiveCaseNumber);
+        const archivedReadOnlyCase = Boolean(caseData?.isReadOnly && caseData.archived === true);
+        setIsArchivedReadOnlyCase(archivedReadOnlyCase);
+
+        if (archivedReadOnlyCase && !caseData?.bundledAuditTrail?.entries?.length) {
+          setBundledAuditWarning(
+            'This imported archived case does not include bundled audit trail data. No audit entries are available for this case.'
+          );
+        }
+      } else {
+        setIsArchivedReadOnlyCase(false);
+      }
+
       const entries = await auditService.getAuditEntriesForUser(user.uid, {
+        requestingUser: user,
         caseNumber: effectiveCaseNumber,
         startDate,
         endDate,
@@ -161,6 +179,8 @@ export const useAuditViewerData = ({
     error,
     setError,
     auditTrail,
+    isArchivedReadOnlyCase,
+    bundledAuditWarning,
     loadAuditData
   };
 };

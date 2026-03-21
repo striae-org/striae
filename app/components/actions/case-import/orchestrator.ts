@@ -1,5 +1,12 @@
 import type { User } from 'firebase/auth';
-import { type ImportOptions, type ImportResult, type ReadOnlyCaseMetadata, type FileData } from '~/types';
+import {
+  type ImportOptions,
+  type ImportResult,
+  type ReadOnlyCaseMetadata,
+  type FileData,
+  type BundledAuditTrailData,
+  type ValidationAuditEntry
+} from '~/types';
 import { checkExistingCase } from '../case-manage';
 import {
   type SignedForensicManifest,
@@ -27,6 +34,48 @@ interface ImportState {
   caseDataStored: boolean;
   userProfileUpdated: boolean;
   caseNumber: string;
+}
+
+interface BundledAuditTrailFile {
+  metadata?: {
+    exportTimestamp?: string;
+    totalEntries?: number;
+  };
+  auditTrail?: {
+    entries?: ValidationAuditEntry[];
+  };
+}
+
+function extractBundledAuditTrailData(
+  bundledAuditFiles: {
+    auditTrailContent?: string;
+    auditSignatureContent?: string;
+  } | undefined
+): BundledAuditTrailData | undefined {
+  if (!bundledAuditFiles?.auditTrailContent) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(bundledAuditFiles.auditTrailContent) as BundledAuditTrailFile;
+    const entries = parsed.auditTrail?.entries;
+
+    if (!Array.isArray(entries)) {
+      return undefined;
+    }
+
+    return {
+      source: 'archive-bundle',
+      importedAt: new Date().toISOString(),
+      exportTimestamp: parsed.metadata?.exportTimestamp,
+      totalEntries: typeof parsed.metadata?.totalEntries === 'number'
+        ? parsed.metadata.totalEntries
+        : entries.length,
+      entries
+    };
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -314,7 +363,8 @@ export async function importCaseForReview(
       importedFiles,
       originalImageIdMapping,
       parsedForensicManifest,
-      isArchivedExport
+      isArchivedExport,
+      isArchivedExport ? extractBundledAuditTrailData(bundledAuditFiles) : undefined
     );
     importState.caseDataStored = true;
     

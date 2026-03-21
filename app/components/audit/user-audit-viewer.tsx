@@ -58,6 +58,8 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
     error,
     setError,
     auditTrail,
+    isArchivedReadOnlyCase,
+    bundledAuditWarning,
     loadAuditData
   } = useAuditViewerData({
     isOpen,
@@ -130,6 +132,14 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
 
           {!loading && !error && (
             <>
+              {isArchivedReadOnlyCase && (
+                <div className={bundledAuditWarning ? styles.archivedWarning : styles.archivedNotice}>
+                  <p>
+                    {bundledAuditWarning || 'Viewing bundled audit trail data from this imported archived case package.'}
+                  </p>
+                </div>
+              )}
+
               {/* User Information Section */}
               {user && (
                 <AuditUserInfoCard user={user} userData={userData} userBadgeId={userBadgeId} />
@@ -180,7 +190,11 @@ export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAudi
 
           {auditEntries.length === 0 && !loading && !error && (
             <div className={styles.noData}>
-              <p>No audit trail available. Your activities will appear here as you use Striae.</p>
+              <p>
+                {isArchivedReadOnlyCase
+                  ? 'No bundled audit trail entries are available for this imported archived case.'
+                  : 'No audit trail available. Your activities will appear here as you use Striae.'}
+              </p>
             </div>
           )}
         </div>

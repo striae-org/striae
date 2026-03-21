@@ -1,19 +1,30 @@
 import { type FileData } from './file';
 import { type AnnotationData, type ConfirmationData } from './annotations';
+import { type ValidationAuditEntry } from './audit';
 
 // Case-related types and interfaces
 
 export type CaseActionType = 'loaded' | 'created' | 'deleted' | null;
 
+export interface BundledAuditTrailData {
+  source: 'archive-bundle';
+  importedAt: string;
+  exportTimestamp?: string;
+  totalEntries?: number;
+  entries: ValidationAuditEntry[];
+}
+
 export interface CaseData {
   createdAt: string;
   caseNumber: string;
   files: FileData[];
+  isReadOnly?: boolean;
   archived?: boolean;
   archivedAt?: string;
   archivedBy?: string;
   archivedByDisplay?: string;
   archiveReason?: string;
+  bundledAuditTrail?: BundledAuditTrailData;
 }
 
 export interface ReadOnlyCaseData extends CaseData {
@@ -104,4 +115,5 @@ export interface CaseDataWithConfirmations {
   importedAt?: string;
   originalImageIds?: { [originalId: string]: string };
   confirmations?: CaseConfirmations;
+  bundledAuditTrail?: BundledAuditTrailData;
 }

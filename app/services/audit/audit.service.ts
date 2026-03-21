@@ -9,7 +9,7 @@ import type {
   AuditResult,
   PerformanceMetrics
 } from '~/types';
-import { getUserData } from '~/utils/data';
+import { getCaseData, getUserData } from '~/utils/data';
 import { generateWorkflowId } from '~/utils/common';
 import {
   fetchAuditEntriesForUser,
@@ -992,6 +992,7 @@ export class AuditService {
    * Get audit entries for display (public method for components)
    */
   public async getAuditEntriesForUser(userId: string, params?: {
+    requestingUser?: User;
     startDate?: string;
     endDate?: string;
     caseNumber?: string;
@@ -1005,7 +1006,7 @@ export class AuditService {
       userId,
       ...params
     };
-    return await this.getAuditEntries(queryParams);
+    return await this.getAuditEntries(queryParams, params?.requestingUser);
   }
 
   /**
@@ -1037,8 +1038,59 @@ export class AuditService {
   /**
    * Get audit entries based on query parameters
    */
-  private async getAuditEntries(params: AuditQueryParams): Promise<ValidationAuditEntry[]> {
+  private applyDateRangeFilter(
+    entries: ValidationAuditEntry[],
+    startDate?: string,
+    endDate?: string
+  ): ValidationAuditEntry[] {
+    const startMs = startDate ? new Date(startDate).getTime() : Number.NEGATIVE_INFINITY;
+    const endMs = endDate ? new Date(endDate).getTime() : Number.POSITIVE_INFINITY;
+
+    return entries.filter((entry) => {
+      const timestampMs = new Date(entry.timestamp).getTime();
+      return timestampMs >= startMs && timestampMs <= endMs;
+    });
+  }
+
+  private async getBundledArchivedCaseAuditEntries(
+    params: AuditQueryParams,
+    requestingUser?: User
+  ): Promise<ValidationAuditEntry[] | null> {
+    if (!requestingUser || !params.caseNumber) {
+      return null;
+    }
+
+    const caseData = await getCaseData(requestingUser, params.caseNumber);
+    if (!caseData?.isReadOnly || caseData.archived !== true) {
+      return null;
+    }
+
+    const bundledEntries = caseData.bundledAuditTrail?.entries;
+    if (!Array.isArray(bundledEntries)) {
+      return [];
+    }
+
+    const sortedEntries = sortAuditEntriesNewestFirst(bundledEntries);
+    const dateFilteredEntries = this.applyDateRangeFilter(
+      sortedEntries,
+      params.startDate,
+      params.endDate
+    );
+    const filteredEntries = applyAuditEntryFilters(dateFilteredEntries, {
+      ...params,
+      userId: undefined
+    });
+
+    return applyAuditPagination(filteredEntries, params);
+  }
+
+  private async getAuditEntries(params: AuditQueryParams, requestingUser?: User): Promise<ValidationAuditEntry[]> {
     try {
+      const bundledArchivedEntries = await this.getBundledArchivedCaseAuditEntries(params, requestingUser);
+      if (bundledArchivedEntries) {
+        return bundledArchivedEntries;
+      }
+
       // If userId is provided, fetch from server
       if (params.userId) {
         const serverEntries = await fetchAuditEntriesForUser({

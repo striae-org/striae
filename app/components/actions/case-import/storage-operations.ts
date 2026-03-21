@@ -9,7 +9,8 @@ import {
   type CaseExportData,   
   type FileData,
   type CaseData,
-  type ReadOnlyCaseMetadata
+  type ReadOnlyCaseMetadata,
+  type BundledAuditTrailData
 } from '~/types';
 import { deleteFile } from '../image-manage';
 import { type SignedForensicManifest } from '~/utils/forensics';
@@ -81,7 +82,8 @@ export async function storeCaseDataInR2(
   importedFiles: FileData[],
   originalImageIdMapping?: Map<string, string>,
   forensicManifest?: SignedForensicManifest,
-  isArchivedExport?: boolean
+  isArchivedExport?: boolean,
+  bundledAuditTrail?: BundledAuditTrailData
 ): Promise<void> {
   try {
     // Convert the mapping to a plain object for JSON serialization
@@ -113,6 +115,7 @@ export async function storeCaseDataInR2(
         archiveReason: caseData.metadata.archiveReason,
       }),
       importedAt: new Date().toISOString(),
+      ...(bundledAuditTrail && { bundledAuditTrail }),
       // Add original image ID mapping for confirmation linking
       originalImageIds: originalImageIds,
       // Add forensic manifest timestamp if available for confirmation exports
