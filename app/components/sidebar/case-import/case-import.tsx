@@ -127,10 +127,21 @@ export const CaseImport = ({
     updateImportState({ isClearing: true });
     
     try {
-      await deleteReadOnlyCase(user, existingReadOnlyCase);
-      
       const clearedCaseName = existingReadOnlyCase;
-      setExistingReadOnlyCase(null);
+      const deleteSuccess = await deleteReadOnlyCase(user, clearedCaseName);
+      const remainingReadOnlyCases = await listReadOnlyCases(user);
+      const stillExists = remainingReadOnlyCases.some((caseMeta) => caseMeta.caseNumber === clearedCaseName);
+
+      setExistingReadOnlyCase(remainingReadOnlyCases.length > 0 ? remainingReadOnlyCases[0].caseNumber : null);
+
+      if (!deleteSuccess || stillExists) {
+        setError(
+          `Failed to fully clear read-only case "${clearedCaseName}". ` +
+          'Please try again. If this was an archived import that overlaps a regular case, verify that all case images are accessible before retrying.'
+        );
+        return;
+      }
+
       setSuccess(`Removed read-only case "${clearedCaseName}"`);
       
       onImportComplete?.({ 
