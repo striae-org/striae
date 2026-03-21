@@ -5,6 +5,7 @@ import {
   listReadOnlyCases, 
   deleteReadOnlyCase
 } from '~/components/actions/case-review';
+import { listCases } from '~/components/actions/case-manage';
 import {
   type ImportResult,  
   type ConfirmationImportResult
@@ -62,11 +63,13 @@ export const CaseImport = ({
   });
   
   const [existingReadOnlyCase, setExistingReadOnlyCase] = useState<string | null>(null);
+  const [showArchivedRegularCaseRiskWarning, setShowArchivedRegularCaseRiskWarning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Clear import selection state (used by preview hook on validation failure)
   const clearImportSelection = useCallback(() => {
     updateImportState({ selectedFile: null, importType: null });
+    setShowArchivedRegularCaseRiskWarning(false);
     resetFileInput(fileInputRef);
   }, [updateImportState]);
 
@@ -247,6 +250,42 @@ export const CaseImport = ({
     }
   }, [user, isOpen, checkForExistingReadOnlyCase]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkArchivedRegularCaseRisk = async () => {
+      if (
+        !user ||
+        !isOpen ||
+        importState.importType !== 'case' ||
+        !casePreview?.archived ||
+        !casePreview.caseNumber
+      ) {
+        if (isMounted) {
+          setShowArchivedRegularCaseRiskWarning(false);
+        }
+        return;
+      }
+
+      try {
+        const regularCases = await listCases(user);
+        if (isMounted) {
+          setShowArchivedRegularCaseRiskWarning(regularCases.includes(casePreview.caseNumber));
+        }
+      } catch {
+        if (isMounted) {
+          setShowArchivedRegularCaseRiskWarning(false);
+        }
+      }
+    };
+
+    void checkArchivedRegularCaseRisk();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, isOpen, importState.importType, casePreview?.archived, casePreview?.caseNumber]);
+
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -312,6 +351,7 @@ export const CaseImport = ({
                   <CasePreviewSection 
                     casePreview={casePreview} 
                     isLoadingPreview={importState.isLoadingPreview} 
+                    showArchivedRegularCaseRiskWarning={showArchivedRegularCaseRiskWarning}
                   />
                 )}
                 
@@ -403,6 +443,7 @@ export const CaseImport = ({
     <ConfirmationDialog 
       showConfirmation={importState.showConfirmation}
       casePreview={casePreview}
+      showArchivedRegularCaseRiskWarning={showArchivedRegularCaseRiskWarning}
       onConfirm={handleConfirmImport}
       onCancel={handleCancelImport}
     />
