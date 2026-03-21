@@ -1,8 +1,9 @@
 import type { User } from 'firebase/auth';
 import { type AnnotationData, type CaseExportData, type AllCasesExportData, type ExportOptions } from '~/types';
+import { getCaseData } from '~/utils/data';
 import { fetchFiles } from '../image-manage';
 import { getNotes } from '../notes-manage';
-import { checkExistingCase, validateCaseNumber, listCases } from '../case-manage';
+import { validateCaseNumber, listCases } from '../case-manage';
 import { getUserExportMetadata } from './metadata-helpers';
 
 /**
@@ -104,9 +105,9 @@ export async function exportAllCases(
         // Get case creation date even for failed exports
         let caseCreatedDate = new Date().toISOString(); // fallback
         try {
-          const existingCase = await checkExistingCase(user, caseNumber);
-          if (existingCase?.createdAt) {
-            caseCreatedDate = existingCase.createdAt;
+          const caseData = await getCaseData(user, caseNumber);
+          if (caseData?.createdAt) {
+            caseCreatedDate = caseData.createdAt;
           }
         } catch {
           // Use fallback date if case lookup fails
@@ -200,9 +201,9 @@ export async function exportCaseData(
     throw new Error('Invalid case number format');
   }
 
-  // Check if case exists
-  const existingCase = await checkExistingCase(user, caseNumber);
-  if (!existingCase) {
+  // Check if case exists and is accessible (supports regular and read-only/archived cases)
+  const caseData = await getCaseData(user, caseNumber);
+  if (!caseData) {
     throw new Error(`Case "${caseNumber}" does not exist`);
   }
 
@@ -296,7 +297,7 @@ export async function exportCaseData(
     const exportData: CaseExportData = {
       metadata: {
         caseNumber,
-        caseCreatedDate: existingCase.createdAt,
+        caseCreatedDate: caseData.createdAt,
         exportDate: new Date().toISOString(),
         ...userMetadata,
         striaeExportSchemaVersion: '1.0',
