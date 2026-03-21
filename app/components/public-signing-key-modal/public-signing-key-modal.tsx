@@ -303,7 +303,7 @@ export const PublicSigningKeyModal = ({
     const lowerName = file.name.toLowerCase();
 
     if (!lowerName.endsWith('.zip') && !lowerName.endsWith('.json')) {
-      setExportFileError('Select a confirmation JSON/ZIP file or a case export ZIP file.');
+      setExportFileError('Select a confirmation JSON/ZIP file, standalone audit JSON export, or a case export ZIP file.');
       return;
     }
 
@@ -317,7 +317,7 @@ export const PublicSigningKeyModal = ({
     const hasExportFile = !!selectedExportFile;
 
     setKeyError(hasPublicKey ? '' : 'Select or download a public key PEM file first.');
-    setExportFileError(hasExportFile ? '' : 'Select a confirmation JSON/ZIP file or a case export ZIP file.');
+    setExportFileError(hasExportFile ? '' : 'Select a confirmation JSON/ZIP file, standalone audit JSON export, or a case export ZIP file.');
 
     if (!hasPublicKey || !hasExportFile || !selectedPublicKey || !selectedExportFile) {
       return;
@@ -350,7 +350,11 @@ export const PublicSigningKeyModal = ({
           return lowerName.includes('confirmation-data-') ? 'Confirmation ZIP' : 'Case export ZIP';
         }
 
-        return 'Confirmation JSON';
+        if (lowerName.includes('audit')) {
+          return 'Audit JSON';
+        }
+
+        return 'JSON export';
       })()} • ${formatFileSize(selectedExportFile.size)}`
     : undefined;
 
@@ -380,7 +384,7 @@ export const PublicSigningKeyModal = ({
 
         <div className={styles.content}>
           <p className={styles.description}>
-            Drop a public key PEM file and a Striae confirmation JSON/ZIP or case export ZIP, then run
+            Drop a public key PEM file and a Striae confirmation JSON/ZIP, standalone audit JSON export, or case export ZIP, then run
             verification directly in the browser.
           </p>
 
@@ -417,8 +421,8 @@ export const PublicSigningKeyModal = ({
               inputId={exportFileInputId}
               label="2. Confirmation File or Export ZIP"
               accept=".json,.zip"
-              emptyText="Drop a confirmation JSON/ZIP or case export ZIP here"
-              helperText="Case exports use .zip. Confirmation exports can be .json or .zip."
+              emptyText="Drop a confirmation JSON/ZIP, audit JSON, or case export ZIP here"
+              helperText="Case exports use .zip. Confirmation exports can be .json or .zip. Audit exports are supported as standalone .json files."
               selectedFileName={selectedExportFile?.name}
               selectedDescription={selectedExportDescription}
               errorMessage={exportFileError}
