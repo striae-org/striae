@@ -19,6 +19,7 @@ interface CanvasProps {
   isBoxAnnotationMode?: boolean;
   boxAnnotationColor?: string;
   isReadOnly?: boolean;
+  isArchivedCase?: boolean;
   // Confirmation data for storing case-level confirmations
   caseNumber: string; // Required for audit logging
   currentImageId?: string;
@@ -42,6 +43,7 @@ export const Canvas = ({
   isBoxAnnotationMode = false,
   boxAnnotationColor = '#FF0000',
   isReadOnly = false,
+  isArchivedCase = false,
   caseNumber,
   currentImageId
 }: CanvasProps) => {
@@ -276,7 +278,7 @@ export const Canvas = ({
                   <div className={styles.confirmationIncluded}>
                     {isReadOnly ? 'Confirmation Requested' : 'Confirmation Field Included'}
                   </div>
-                  {isReadOnly && (
+                  {isReadOnly && !isArchivedCase && (
                     <button 
                       className={styles.confirmButton}
                       onClick={() => setIsConfirmationModalOpen(true)}

@@ -775,6 +775,7 @@ export const Striae = ({ user }: StriaePage) => {
             boxAnnotationColor={boxAnnotationColor}
             onAnnotationUpdate={handleAnnotationUpdate}
             isReadOnly={isReadOnlyCase}
+            isArchivedCase={archiveDetails.archived}
             caseNumber={currentCase}
             currentImageId={imageId}
           />

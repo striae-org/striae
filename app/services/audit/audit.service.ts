@@ -9,6 +9,7 @@ import type {
   AuditResult,
   PerformanceMetrics
 } from '~/types';
+import { getUserData } from '~/utils/data';
 import { generateWorkflowId } from '~/utils/common';
 import {
   fetchAuditEntriesForUser,
@@ -138,6 +139,67 @@ export class AuditService {
     }
   }
 
+  private normalizeBadgeId(badgeId?: string): string | undefined {
+    const normalized = badgeId?.trim();
+    return normalized ? normalized : undefined;
+  }
+
+  private applyBadgeIdToParams(
+    params: CreateAuditEntryParams,
+    badgeId?: string
+  ): CreateAuditEntryParams {
+    const normalizedBadgeId = this.normalizeBadgeId(badgeId);
+    if (!normalizedBadgeId) {
+      return params;
+    }
+
+    return {
+      ...params,
+      userProfileDetails: {
+        ...(params.userProfileDetails || {}),
+        badgeId: normalizedBadgeId
+      }
+    };
+  }
+
+  private async resolveBadgeIdForUser(user: User): Promise<string | undefined> {
+    const cachedBadgeId = this.userBadgeIdByUserId.get(user.uid);
+    if (cachedBadgeId) {
+      return cachedBadgeId;
+    }
+
+    try {
+      const userData = await getUserData(user);
+      const resolvedBadgeId = this.normalizeBadgeId(userData?.badgeId);
+
+      if (resolvedBadgeId) {
+        this.userBadgeIdByUserId.set(user.uid, resolvedBadgeId);
+      }
+
+      return resolvedBadgeId;
+    } catch (error) {
+      console.error('🚨 Audit: Failed to resolve badge ID for user:', error);
+      return undefined;
+    }
+  }
+
+  private async logEventForUser(user: User, params: CreateAuditEntryParams): Promise<void> {
+    const resolvedBadgeId = await this.resolveBadgeIdForUser(user);
+    await this.logEvent(this.applyBadgeIdToParams(params, resolvedBadgeId));
+  }
+
+  private async logEventForOptionalUser(
+    user: User | null,
+    params: CreateAuditEntryParams
+  ): Promise<void> {
+    if (!user) {
+      await this.logEvent(params);
+      return;
+    }
+
+    await this.logEventForUser(user, params);
+  }
+
   /**
    * Log case export event
    */
@@ -156,7 +218,7 @@ export class AuditService {
       keyId?: string;
     }
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseExportAuditParams({
         user,
         caseNumber,
@@ -189,7 +251,7 @@ export class AuditService {
       keyId?: string;
     }
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseImportAuditParams({
         user,
         caseNumber,
@@ -220,7 +282,7 @@ export class AuditService {
     originalImageFileName?: string,
     badgeId?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildConfirmationCreationAuditParams({
         user,
         caseNumber,
@@ -254,7 +316,7 @@ export class AuditService {
       keyId?: string;
     }
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildConfirmationExportAuditParams({
         user,
         caseNumber,
@@ -290,7 +352,7 @@ export class AuditService {
     },
     reviewerBadgeId?: string // Badge/ID number of the reviewing examiner who exported the file
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildConfirmationImportAuditParams({
         user,
         caseNumber,
@@ -321,7 +383,7 @@ export class AuditService {
     caseNumber: string,
     caseName: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseCreationAuditParams({
         user,
         caseNumber,
@@ -339,7 +401,7 @@ export class AuditService {
     oldName: string,
     newName: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseRenameAuditParams({
         user,
         caseNumber,
@@ -359,7 +421,7 @@ export class AuditService {
     deleteReason: string,
     backupCreated: boolean = false
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseDeletionAuditParams({
         user,
         caseNumber,
@@ -384,7 +446,7 @@ export class AuditService {
     archivedAt?: string,
     processingTimeMs?: number
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildCaseArchiveAuditParams({
         user,
         caseNumber,
@@ -413,7 +475,7 @@ export class AuditService {
     processingTime?: number,
     fileId?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildFileUploadAuditParams({
         user,
         fileName,
@@ -440,7 +502,7 @@ export class AuditService {
     fileId?: string,
     originalFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildFileDeletionAuditParams({
         user,
         fileName,
@@ -467,7 +529,7 @@ export class AuditService {
     accessReason?: string,
     originalFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildFileAccessAuditParams({
         user,
         fileName,
@@ -495,7 +557,7 @@ export class AuditService {
     imageFileId?: string,
     originalImageFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildAnnotationCreateAuditParams({
         user,
         annotationId,
@@ -522,7 +584,7 @@ export class AuditService {
     imageFileId?: string,
     originalImageFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildAnnotationEditAuditParams({
         user,
         annotationId,
@@ -548,7 +610,7 @@ export class AuditService {
     imageFileId?: string,
     originalImageFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildAnnotationDeleteAuditParams({
         user,
         annotationId,
@@ -570,7 +632,7 @@ export class AuditService {
     loginMethod: 'firebase' | 'sso' | 'api-key' | 'manual',
     userAgent?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildUserLoginAuditParams({
         user,
         sessionId,
@@ -589,7 +651,7 @@ export class AuditService {
     sessionDuration: number,
     logoutReason: 'user-initiated' | 'timeout' | 'security' | 'error'
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildUserLogoutAuditParams({
         user,
         sessionId,
@@ -612,7 +674,7 @@ export class AuditService {
     errors: string[] = [],
     badgeId?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildUserProfileUpdateAuditParams({
         user,
         profileField,
@@ -733,7 +795,7 @@ export class AuditService {
     userAgent?: string,
     sessionId?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildUserRegistrationAuditParams({
         user,
         firstName,
@@ -759,7 +821,7 @@ export class AuditService {
     userAgent?: string,
     errors: string[] = []
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildMfaEnrollmentAuditParams({
         user,
         phoneNumber,
@@ -785,7 +847,7 @@ export class AuditService {
     userAgent?: string,
     errors: string[] = []
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildMfaAuthenticationAuditParams({
         user,
         mfaMethod,
@@ -810,7 +872,7 @@ export class AuditService {
     userAgent?: string,
     errors: string[] = []
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildEmailVerificationAuditParams({
         user,
         result,
@@ -860,7 +922,7 @@ export class AuditService {
     sessionId?: string,
     userAgent?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildMarkEmailVerificationSuccessfulAuditParams({
         user,
         reason,
@@ -884,7 +946,7 @@ export class AuditService {
     sourceFileId?: string,
     sourceFileName?: string
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForUser(user,
       buildPDFGenerationAuditParams({
         user,
         fileName,
@@ -910,7 +972,7 @@ export class AuditService {
     targetResource?: string,
     blockedBySystem: boolean = true
   ): Promise<void> {
-    await this.logEvent(
+    await this.logEventForOptionalUser(user,
       buildSecurityViolationAuditParams({
         user,
         incidentType,
