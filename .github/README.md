@@ -62,6 +62,15 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-20] - *[Minor Release v4.2.0](https://github.com/striae-org/striae/releases/tag/v4.2.0)*
+
+- **🗃️ Case Archival Workflow Expansion** - Added multi-phase case archival implementation and follow-up refinements across archival IDs, operation cleanup, and archived-case lifecycle handling.
+- **🛡️ Archive Integrity and Signature Hardening** - Introduced a shared integrity verification utility, closed audit signature verification gaps, improved tamper detection in archive import preview, and fixed archive image bundling for import reliability.
+- **📥 Archived Import/Delete Guardrails** - Added archival import support while tightening operation gates and edge-case handling for archived-case confirmation and deletion paths.
+- **🧾 Audit Metadata and Viewer Improvements** - Expanded Badge/ID and user metadata coverage in audit pathways and improved bundled audit trail viewing behavior.
+- **🧭 Navbar and Modal Refactor** - Moved key case actions into the navbar, reorganized modal/notes surfaces, and standardized close/Escape behavior across interaction flows.
+- **⚙️ Compatibility and Repository Hygiene** - Updated compatibility-date metadata and removed stale keybase artifact during release-window cleanup.
+
 ## [2026-03-19] - *[Minor Release v4.1.0](https://github.com/striae-org/striae/releases/tag/v4.1.0)*
 
 - **📄 Customizable PDF Formats** - Added custom PDF report formats with server-side format routing driven by a verified-email allowlist (`PRIMERSHEAR_EMAILS` Pages secret), keeping email addresses out of the client bundle entirely.
