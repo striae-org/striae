@@ -68,8 +68,7 @@
     "vite.config.ts",
     "worker-configuration.d.ts",
     "wrangler.toml.example",
-    "LICENSE",
-    "NOTICE"
+    "LICENSE"    
   ],
   "sideEffects": false,
   "type": "module",
