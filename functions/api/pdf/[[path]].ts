@@ -105,12 +105,8 @@ export const onRequest = async ({ request, env }: PdfProxyContext): Promise<Resp
   try {
     const payload = await request.json() as Record<string, unknown>;
     // Inject the server-resolved format, overriding any client-supplied value.
-    if (payload.data && typeof payload.data === 'object') {
-      payload.reportFormat = reportFormat;
-    } else {
-      // Legacy flat payload shape
-      payload.reportFormat = reportFormat;
-    }
+    // Supports both nested and legacy flat payload shapes.
+    payload.reportFormat = reportFormat;
     upstreamBody = JSON.stringify(payload);
     upstreamHeaders.set('Content-Type', 'application/json');
   } catch {

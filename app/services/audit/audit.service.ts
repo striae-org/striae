@@ -1067,7 +1067,7 @@ export class AuditService {
 
     const bundledEntries = caseData.bundledAuditTrail?.entries;
     if (!Array.isArray(bundledEntries)) {
-      return [];
+      return null;
     }
 
     const sortedEntries = sortAuditEntriesNewestFirst(bundledEntries);
@@ -1087,7 +1087,7 @@ export class AuditService {
   private async getAuditEntries(params: AuditQueryParams, requestingUser?: User): Promise<ValidationAuditEntry[]> {
     try {
       const bundledArchivedEntries = await this.getBundledArchivedCaseAuditEntries(params, requestingUser);
-      if (bundledArchivedEntries) {
+      if (bundledArchivedEntries !== null) {
         return bundledArchivedEntries;
       }
 

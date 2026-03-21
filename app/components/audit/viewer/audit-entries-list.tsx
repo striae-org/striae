@@ -15,8 +15,11 @@ export const AuditEntriesList = ({ entries }: AuditEntriesListProps) => {
           <p>No activities match the current filters.</p>
         </div>
       ) : (
-        entries.map((entry, index) => (
-          <div key={index} className={`${styles.entry} ${styles[entry.result]}`}>
+        entries.map((entry) => (
+          <div
+            key={`${entry.timestamp}-${entry.userId}-${entry.action}-${entry.details.fileName || ''}`}
+            className={`${styles.entry} ${styles[entry.result]}`}
+          >
             <div className={styles.entryHeader}>
               <div className={styles.entryIcons}>
                 <span className={styles.actionIcon}>{getAuditActionIcon(entry.action)}</span>

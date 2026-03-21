@@ -706,117 +706,26 @@ export async function verifyCasePackageIntegrity(
   );
 
   const bundledAuditVerification = input.bundledAuditFiles
-    ? await (async () => {
-        const { auditTrailContent, auditSignatureContent } = input.bundledAuditFiles ?? {};
+    ? await verifyBundledAuditExport(
+        {
+          file: (path: string) => {
+            const content = path === 'audit/case-audit-trail.json'
+              ? input.bundledAuditFiles?.auditTrailContent
+              : path === 'audit/case-audit-signature.json'
+                ? input.bundledAuditFiles?.auditSignatureContent
+                : undefined;
 
-        if (!auditTrailContent && !auditSignatureContent) {
-          return null;
-        }
+            if (content === undefined) {
+              return null;
+            }
 
-        if (!auditTrailContent || !auditSignatureContent) {
-          return createVerificationResult(
-            false,
-            'The archive ZIP contains incomplete bundled audit verification files.',
-            'case-zip'
-          );
-        }
-
-        try {
-          const auditTrailExport = JSON.parse(auditTrailContent) as BundledAuditExportFile;
-          const auditSignatureExport = JSON.parse(auditSignatureContent) as {
-            signatureMetadata?: Partial<AuditExportSigningPayload>;
-            signature?: NonNullable<BundledAuditExportFile['metadata']>['signature'];
-          };
-
-          const metadata = auditTrailExport.metadata;
-          if (!metadata?.signature || typeof metadata.hash !== 'string') {
-            return createVerificationResult(
-              false,
-              'The bundled audit export is missing required hash or signature metadata.',
-              'case-zip'
-            );
+            return {
+              async: async (_type: 'text') => content,
+            };
           }
-
-          const unsignedAuditExport = auditTrailExport.auditTrail !== undefined
-            ? {
-                metadata: {
-                  exportTimestamp: metadata.exportTimestamp,
-                  exportVersion: metadata.exportVersion,
-                  totalEntries: metadata.totalEntries,
-                  application: metadata.application,
-                  exportType: metadata.exportType,
-                  scopeType: metadata.scopeType,
-                  scopeIdentifier: metadata.scopeIdentifier,
-                },
-                auditTrail: auditTrailExport.auditTrail,
-              }
-            : {
-                metadata: {
-                  exportTimestamp: metadata.exportTimestamp,
-                  exportVersion: metadata.exportVersion,
-                  totalEntries: metadata.totalEntries,
-                  application: metadata.application,
-                  exportType: metadata.exportType,
-                  scopeType: metadata.scopeType,
-                  scopeIdentifier: metadata.scopeIdentifier,
-                },
-                auditEntries: auditTrailExport.auditEntries,
-              };
-
-          const recalculatedHash = await calculateSHA256Secure(JSON.stringify(unsignedAuditExport, null, 2));
-          if (recalculatedHash.toUpperCase() !== metadata.hash.toUpperCase()) {
-            return createVerificationResult(
-              false,
-              'The bundled audit export failed integrity verification.',
-              'case-zip'
-            );
-          }
-
-          const embeddedSignaturePayload: Partial<AuditExportSigningPayload> = metadata.signatureMetadata ?? {
-            signatureVersion: metadata.signatureVersion,
-            exportFormat: 'json',
-            exportType: metadata.exportType,
-            scopeType: metadata.scopeType,
-            scopeIdentifier: metadata.scopeIdentifier,
-            generatedAt: metadata.exportTimestamp,
-            totalEntries: metadata.totalEntries,
-            hash: metadata.hash,
-          };
-
-          const signatureVerification = await verifyAuditExportSignature(
-            embeddedSignaturePayload,
-            metadata.signature,
-            input.verificationPublicKeyPem
-          );
-
-          if (!signatureVerification.isValid) {
-            return createVerificationResult(
-              false,
-              getSignatureFailureMessage(signatureVerification.error, 'export ZIP'),
-              'case-zip'
-            );
-          }
-
-          if (
-            JSON.stringify(auditSignatureExport.signatureMetadata ?? null) !== JSON.stringify(metadata.signatureMetadata ?? null) ||
-            JSON.stringify(auditSignatureExport.signature ?? null) !== JSON.stringify(metadata.signature ?? null)
-          ) {
-            return createVerificationResult(
-              false,
-              'The bundled audit signature artifact does not match the signed audit export.',
-              'case-zip'
-            );
-          }
-
-          return null;
-        } catch {
-          return createVerificationResult(
-            false,
-            'The bundled audit export could not be parsed for verification.',
-            'case-zip'
-          );
-        }
-      })()
+        },
+        input.verificationPublicKeyPem
+      )
     : null;
 
   return {

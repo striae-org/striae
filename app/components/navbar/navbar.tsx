@@ -114,6 +114,7 @@ export const Navbar = ({
   }, [isCaseMenuOpen, isFileMenuOpen]);
 
   const caseActionsDisabled = false;
+  const disableLongRunningCaseActions = isUploading;
   const isCaseManagementActive = true;
   const isFileManagementActive = isFileMenuOpen || hasLoadedImage;
   const canOpenImageNotes = hasLoadedImage && !isCurrentImageConfirmed;
@@ -139,7 +140,7 @@ export const Navbar = ({
               aria-haspopup="menu"
               disabled={caseActionsDisabled}
               onClick={() => setIsCaseMenuOpen((prev) => !prev)}
-              title={isUploading ? 'Cannot access case actions while uploading' : undefined}
+              title={isUploading ? 'Some case actions are unavailable while files are uploading' : undefined}
             >
               Case Management
             </button>
@@ -173,8 +174,14 @@ export const Navbar = ({
                   type="button"
                   role="menuitem"
                   className={`${styles.caseMenuItem} ${styles.caseMenuItemExport}`}
-                  disabled={!hasLoadedCase}
-                  title={!hasLoadedCase ? 'Load a case to export case data' : undefined}
+                  disabled={!hasLoadedCase || disableLongRunningCaseActions}
+                  title={
+                    !hasLoadedCase
+                      ? 'Load a case to export case data'
+                      : disableLongRunningCaseActions
+                        ? 'Export is unavailable while files are uploading'
+                        : undefined
+                  }
                   onClick={() => {
                     onOpenCaseExport?.();
                     setIsCaseMenuOpen(false);
@@ -203,8 +210,14 @@ export const Navbar = ({
                     type="button"
                     role="menuitem"
                     className={`${styles.caseMenuItem} ${styles.caseMenuItemRename}`}
-                    disabled={!hasLoadedCase}
-                    title={!hasLoadedCase ? 'Load a case to rename it' : undefined}
+                    disabled={!hasLoadedCase || disableLongRunningCaseActions}
+                    title={
+                      !hasLoadedCase
+                        ? 'Load a case to rename it'
+                        : disableLongRunningCaseActions
+                          ? 'Rename is unavailable while files are uploading'
+                          : undefined
+                    }
                     onClick={() => {
                       onOpenRenameCase?.();
                       setIsCaseMenuOpen(false);
@@ -218,8 +231,14 @@ export const Navbar = ({
                     type="button"
                     role="menuitem"
                     className={`${styles.caseMenuItem} ${styles.caseMenuItemDelete}`}
-                    disabled={!hasLoadedCase}
-                    title={!hasLoadedCase ? 'Load a case to delete it' : undefined}
+                    disabled={!hasLoadedCase || disableLongRunningCaseActions}
+                    title={
+                      !hasLoadedCase
+                        ? 'Load a case to delete it'
+                        : disableLongRunningCaseActions
+                          ? 'Delete is unavailable while files are uploading'
+                          : undefined
+                    }
                     onClick={() => {
                       onDeleteCase?.();
                       setIsCaseMenuOpen(false);
@@ -233,8 +252,14 @@ export const Navbar = ({
                     type="button"
                     role="menuitem"
                     className={`${styles.caseMenuItem} ${styles.caseMenuItemArchive}`}
-                    disabled={!hasLoadedCase}
-                    title={!hasLoadedCase ? 'Load a case to archive it' : undefined}
+                    disabled={!hasLoadedCase || disableLongRunningCaseActions}
+                    title={
+                      !hasLoadedCase
+                        ? 'Load a case to archive it'
+                        : disableLongRunningCaseActions
+                          ? 'Archive is unavailable while files are uploading'
+                          : undefined
+                    }
                     onClick={() => {
                       onArchiveCase?.();
                       setIsCaseMenuOpen(false);

@@ -85,11 +85,13 @@ export const useOverlayDismiss = ({
     }
   }, [closeOnBackdrop, requestClose]);
 
+  const isBackdropDismissInteractive = closeOnBackdrop && canDismiss;
+
   const overlayProps = {
-    role: 'button' as const,
-    tabIndex: 0,
-    onMouseDown: handleOverlayMouseDown,
-    onKeyDown: handleOverlayKeyDown,
+    role: (isBackdropDismissInteractive ? 'button' : 'presentation') as const,
+    tabIndex: isBackdropDismissInteractive ? 0 : undefined,
+    onMouseDown: isBackdropDismissInteractive ? handleOverlayMouseDown : undefined,
+    onKeyDown: isBackdropDismissInteractive ? handleOverlayKeyDown : undefined,
     style: { cursor: 'default' as const },
   };
 

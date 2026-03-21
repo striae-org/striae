@@ -202,6 +202,7 @@ export interface CaseAuditDetails {
   createdDate?: string;
   lastModified?: string;
   deleteReason?: string;
+  archiveReason?: string;
   backupCreated?: boolean;
 }
 

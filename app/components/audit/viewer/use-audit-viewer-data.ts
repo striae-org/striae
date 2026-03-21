@@ -112,10 +112,13 @@ export const useAuditViewerData = ({
 
       if (effectiveCaseNumber) {
         const caseData = await getCaseData(user, effectiveCaseNumber);
-        const archivedReadOnlyCase = Boolean(caseData?.isReadOnly && caseData.archived === true);
-        setIsArchivedReadOnlyCase(archivedReadOnlyCase);
+        const isArchiveBundleCase = Boolean(
+          caseData?.archived === true &&
+          caseData?.bundledAuditTrail?.source === 'archive-bundle'
+        );
+        setIsArchivedReadOnlyCase(isArchiveBundleCase);
 
-        if (archivedReadOnlyCase && !caseData?.bundledAuditTrail?.entries?.length) {
+        if (isArchiveBundleCase && !Array.isArray(caseData?.bundledAuditTrail?.entries)) {
           setBundledAuditWarning(
             'This imported archived case does not include bundled audit trail data. No audit entries are available for this case.'
           );

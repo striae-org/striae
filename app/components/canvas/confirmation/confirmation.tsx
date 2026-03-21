@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { type ConfirmationData } from '~/types/annotations';
 import { AuthContext } from '~/contexts/auth.context';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
@@ -33,6 +33,7 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, default
   const [badgeId, setBadgeId] = useState('');
   const [error, setError] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);
+  const wasOpenRef = useRef(false);
   
   const fullName = user?.displayName || user?.email || 'Unknown User';
   const userEmail = user?.email || 'No email available';
@@ -54,7 +55,10 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, default
 
   // Reset form when modal opens
   useEffect(() => {
-    if (isOpen) {
+    const justOpened = isOpen && !wasOpenRef.current;
+    wasOpenRef.current = isOpen;
+
+    if (justOpened) {
       if (existingConfirmation) {
         setBadgeId(existingConfirmation.badgeId);
       } else {
