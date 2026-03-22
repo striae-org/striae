@@ -220,10 +220,46 @@ export const ClassDetailsModal = ({
     else { setCustom(false); setVal(val); }
   };
 
+  const parseMeasurementValue = (value: string): number | null => {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    const parsed = Number.parseFloat(trimmed);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  const formatCalculatedDiameter = (value: number): string =>
+    value.toFixed(4).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1');
+
   const showBullet = classType === 'Bullet' || classType === 'Other' || classType === '';
   const showCartridge = classType === 'Cartridge Case' || classType === 'Other' || classType === '';
   const showShotshell = classType === 'Shotshell' || classType === 'Other' || classType === '';
   const showHeaders = classType === 'Other' || classType === '';
+
+  const lWidthValues =
+    lgCount > 0
+      ? bLWidths.slice(0, lgCount).map(parseMeasurementValue)
+      : [];
+  const gWidthValues =
+    lgCount > 0
+      ? bGWidths.slice(0, lgCount).map(parseMeasurementValue)
+      : [];
+  const hasAllLgMeasurements =
+    lgCount > 0
+    && lWidthValues.length === lgCount
+    && gWidthValues.length === lgCount
+    && lWidthValues.every((value) => value !== null)
+    && gWidthValues.every((value) => value !== null);
+
+  const calculatedDiameter = hasAllLgMeasurements
+    ? (() => {
+      const lAverage = lWidthValues.reduce((sum, value) => sum + (value ?? 0), 0) / lgCount;
+      const gAverage = gWidthValues.reduce((sum, value) => sum + (value ?? 0), 0) / lgCount;
+      const circumference = (lAverage + gAverage) * lgCount;
+
+      return circumference / Math.PI;
+    })()
+    : null;
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -232,6 +268,7 @@ export const ClassDetailsModal = ({
         caliber: bCaliber || undefined,
         mass: bMass || undefined,
         diameter: bDiameter || undefined,
+        calcDiameter: calculatedDiameter !== null ? formatCalculatedDiameter(calculatedDiameter) : undefined,
         lgNumber: bLgNumber ? Number(bLgNumber) : undefined,
         lgDirection: bLgDirection || undefined,
         lWidths: bLWidths.some(Boolean) ? bLWidths : undefined,
@@ -508,6 +545,12 @@ export const ClassDetailsModal = ({
                       ))}
                     </div>
                   </div>
+                  {calculatedDiameter !== null && (
+                    <div className={styles.calculatedDiameterDisplay}>
+                      <span className={styles.classDetailsLabel}>Calculated Diameter</span>
+                      <span className={styles.calculatedDiameterValue}>{formatCalculatedDiameter(calculatedDiameter)}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

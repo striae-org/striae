@@ -26,6 +26,7 @@ export interface BulletAnnotationData {
   caliber?: string;
   mass?: string;
   diameter?: string;
+  calcDiameter?: string;
   lgNumber?: number;
   lgDirection?: string;
   barrelType?: string;
