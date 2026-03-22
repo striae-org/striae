@@ -7,7 +7,7 @@ import {
   type CasesModalSortBy,
   type CasesModalConfirmationFilter,
   getCasesForModal,
-} from '~/utils/case-filters';
+} from '~/utils/data/case-filters';
 import {
   archiveCase,
   deleteCase,

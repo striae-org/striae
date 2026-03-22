@@ -3,7 +3,7 @@ import {
   type CasesModalPreferences,
   type CasesModalSortBy,
   type CasesModalConfirmationFilter,
-} from '~/utils/case-filters';
+} from '~/utils/data/case-filters';
 
 const CASES_MODAL_PREFERENCES_STORAGE_KEY = 'striae.casesModal.preferences';
 
