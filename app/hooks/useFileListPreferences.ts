@@ -41,10 +41,12 @@ function parseStoredPreferences(value: string | null): FilesModalPreferences {
     const classTypeFilter: FilesModalClassTypeFilter =
       parsed.classTypeFilter === 'Bullet' ||
       parsed.classTypeFilter === 'Cartridge Case' ||
+      parsed.classTypeFilter === 'Shotshell' ||
       parsed.classTypeFilter === 'Other' ||
-      parsed.classTypeFilter === 'unset' ||
       parsed.classTypeFilter === 'all'
         ? parsed.classTypeFilter
+        : parsed.classTypeFilter === 'unset'
+          ? 'Other'
         : DEFAULT_FILES_MODAL_PREFERENCES.classTypeFilter;
 
     return {

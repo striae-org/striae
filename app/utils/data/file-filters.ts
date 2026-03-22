@@ -13,8 +13,8 @@ export type FilesModalClassTypeFilter =
   | 'all'
   | 'Bullet'
   | 'Cartridge Case'
-  | 'Other'
-  | 'unset';
+  | 'Shotshell'
+  | 'Other';
 
 export interface FilesModalPreferences {
   sortBy: FilesModalSortBy;
@@ -55,11 +55,15 @@ function getClassTypeRank(classType: FileConfirmationSummary['classType']): numb
     return 1;
   }
 
-  if (classType === 'Other') {
+  if (classType === 'Shotshell') {
     return 2;
   }
 
-  return 3;
+  if (classType === 'Other') {
+    return 3;
+  }
+
+  return 4;
 }
 
 function parseTimestamp(value: string): number {
@@ -94,8 +98,9 @@ function matchesClassTypeFilter(
     return true;
   }
 
-  if (classTypeFilter === 'unset') {
-    return !summary.classType;
+  if (classTypeFilter === 'Other') {
+    // Treat legacy/unset class types as Other for filtering.
+    return summary.classType === 'Other' || !summary.classType;
   }
 
   return summary.classType === classTypeFilter;

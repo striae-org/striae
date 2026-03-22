@@ -336,7 +336,7 @@ export const FilesModal = ({
                       setCurrentPage(0);
                     }}
                   >
-                    <option value="recent">Recency Uploaded</option>
+                    <option value="recent">Date Uploaded</option>
                     <option value="filename">File Name</option>
                     <option value="confirmation">Confirmation Status</option>
                     <option value="classType">Class Type</option>
@@ -344,7 +344,7 @@ export const FilesModal = ({
                 </div>
 
                 <div className={styles.controlGroup}>
-                  <label htmlFor="files-confirmation-filter">Confirmation</label>
+                  <label htmlFor="files-confirmation-filter">Confirmation Status</label>
                   <select
                     id="files-confirmation-filter"
                     value={preferences.confirmationFilter}
@@ -373,8 +373,8 @@ export const FilesModal = ({
                     <option value="all">All</option>
                     <option value="Bullet">Bullet</option>
                     <option value="Cartridge Case">Cartridge Case</option>
+                    <option value="Shotshell">Shotshell</option>
                     <option value="Other">Other</option>
-                    <option value="unset">Unset</option>
                   </select>
                 </div>
 
