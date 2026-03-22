@@ -62,6 +62,13 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-22] - *[Minor Release v4.3.0](https://github.com/striae-org/striae/releases/tag/v4.3.0)*
+
+- **🗂️ Case and Notes Management Expansion** - Added and iterated file/case management modal workflows, continued notes feature/styling refinement, unified modal presentation behavior, and expanded sidebar confirmation-export flow support.
+- **🧾 Annotation Detail and Metadata Enhancements** - Expanded annotation model/detail handling with class-type metadata propagation, class-details modularization, additional calculation explanation coverage, diameter-calculation updates, and new annotation types including shotshell characteristics.
+- **📄 PDF Formatting Evolution** - Continued modular PDF report format work (including multi-page support progression), refreshed generated-assets examples, and applied related worker/report integration refinements.
+- **🛡️ Stabilization and Maintenance Window** - Captured follow-up code-review hardening plus release-window compatibility/dependency maintenance in the post-v4.2.1 development window.
+
 ## [2026-03-21] - *[Patch Release v4.2.1](https://github.com/striae-org/striae/releases/tag/v4.2.1)*
 
 - **📝 Notes and Case UI Polish** - Refined notes modal naming, spacing, and message delivery behavior while improving case information spacing and sidebar open-case action presentation.
