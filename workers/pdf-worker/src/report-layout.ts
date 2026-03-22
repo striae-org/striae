@@ -8,6 +8,7 @@ interface ReportChromeTemplateConfig {
   footerCenter?: string;
   footerRight?: string;
   footerLeftImageSrc?: string;
+  includePageNumbers?: boolean;
 }
 
 const HEADER_TEMPLATE_STYLES = `
@@ -89,6 +90,16 @@ const FOOTER_TEMPLATE_STYLES = `
       text-align: right;
       font-style: italic;
     }
+    .report-footer__page-count {
+      font-style: normal;
+      font-weight: 600;
+      color: #333333;
+    }
+    .report-footer__separator {
+      margin: 0 6px;
+      color: #999999;
+      font-style: normal;
+    }
     .report-footer__icon {
       width: 12px;
       height: 12px;
@@ -136,13 +147,25 @@ export function buildRepeatedChromePdfOptions(config: ReportChromeTemplateConfig
     ? `<img class="report-footer__icon" src="${escapeHtml(config.footerLeftImageSrc)}" alt="" />`
     : '';
 
+  const footerRightText = config.footerRight && config.footerRight.trim().length > 0
+    ? `<span>${escapeHtml(config.footerRight.trim())}</span>`
+    : '';
+
+  const footerPageCount = config.includePageNumbers === false
+    ? ''
+    : `<span class="report-footer__page-count">Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>`;
+
+  const footerRightContent = footerRightText && footerPageCount
+    ? `${footerRightText}<span class="report-footer__separator">|</span>${footerPageCount}`
+    : footerRightText || footerPageCount || '&nbsp;';
+
   const footerTemplate = `
     ${FOOTER_TEMPLATE_STYLES}
     <div class="report-footer">
       <div class="report-footer__content">
         <div class="report-footer__cell report-footer__cell--left">${footerLeftContent}${footerIcon}</div>
         ${renderTemplateCell(config.footerCenter, 'report-footer__cell report-footer__cell--center')}
-        ${renderTemplateCell(config.footerRight, 'report-footer__cell report-footer__cell--right')}
+        <div class="report-footer__cell report-footer__cell--right">${footerRightContent}</div>
       </div>
     </div>
   `;
