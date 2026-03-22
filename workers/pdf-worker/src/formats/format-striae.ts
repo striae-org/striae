@@ -6,9 +6,6 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
   const { imageUrl, annotationData, activeAnnotations } = data;
   const annotationsSet = new Set(activeAnnotations);
   const hasImage = Boolean(imageUrl && imageUrl !== '/clear.jpg');
-  const leftCaseSummary = [annotationData?.leftCase, annotationData?.leftItem].filter(Boolean).join(' / ');
-  const rightCaseSummary = [annotationData?.rightCase, annotationData?.rightItem].filter(Boolean).join(' / ');
-  const shouldShowNotesCaseSummary = Boolean((leftCaseSummary || rightCaseSummary) && annotationData?.additionalNotes?.trim());
 
   // Programmatically determine if a color is dark and needs a light background
   const needsLightBackground = (color: string | undefined): boolean => {
@@ -238,37 +235,6 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         gap: 20px;
         page-break-inside: avoid;
         break-inside: avoid;
-      }
-      .notes-case-summary {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-        page-break-inside: avoid;
-        break-inside: avoid;
-      }
-      .notes-case-card {
-        border: 1px solid #d7dbe0;
-        border-radius: 8px;
-        background: #ffffff;
-        padding: 14px 16px;
-        box-sizing: border-box;
-      }
-      .notes-case-label {
-        margin: 0 0 6px;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #666;
-      }
-      .notes-case-value {
-        margin: 0;
-        font-size: 15px;
-        line-height: 1.5;
-        font-weight: 600;
-        color: #222;
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
       }
       .confirmation-box {
         background: #ffffff;
@@ -500,22 +466,6 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
 
       ${annotationData && annotationsSet?.has('notes') && annotationData.additionalNotes && annotationData.additionalNotes.trim() ? `
       <section class="additional-notes-section ${hasImage || annotationData.includeConfirmation === true ? 'notes-page' : ''}">
-        ${shouldShowNotesCaseSummary ? `
-        <div class="notes-case-summary">
-          ${leftCaseSummary ? `
-          <div class="notes-case-card">
-            <h3 class="notes-case-label">Left Case / Item</h3>
-            <p class="notes-case-value">${escapeHtml(leftCaseSummary)}</p>
-          </div>
-          ` : ''}
-          ${rightCaseSummary ? `
-          <div class="notes-case-card">
-            <h3 class="notes-case-label">Right Case / Item</h3>
-            <p class="notes-case-value">${escapeHtml(rightCaseSummary)}</p>
-          </div>
-          ` : ''}
-        </div>
-        ` : ''}
         <h2 class="additional-notes-title">Additional Notes</h2>
         <p class="additional-notes-body">${escapeHtml(annotationData.additionalNotes.trim())}</p>
       </section>
@@ -532,6 +482,12 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
 export const getPdfOptions: ReportPdfOptionsBuilder = (data: PDFGenerationData) => buildRepeatedChromePdfOptions({
   headerLeft: data.currentDate,
   headerRight: data.caseNumber,
+  headerDetailLeft: [data.annotationData?.leftCase, data.annotationData?.leftItem].filter(Boolean).join(' / ')
+    ? `Left Case / Item: ${[data.annotationData?.leftCase, data.annotationData?.leftItem].filter(Boolean).join(' / ')}`
+    : undefined,
+  headerDetailRight: [data.annotationData?.rightCase, data.annotationData?.rightItem].filter(Boolean).join(' / ')
+    ? `Right Case / Item: ${[data.annotationData?.rightCase, data.annotationData?.rightItem].filter(Boolean).join(' / ')}`
+    : undefined,
   footerLeft: 'Notes formatted by Striae',
   footerCenter: data.userCompany,
   footerRight: data.notesUpdatedFormatted ? `Notes updated ${data.notesUpdatedFormatted}` : undefined,
