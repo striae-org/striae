@@ -1,6 +1,6 @@
 import type { User } from 'firebase/auth';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
-import { NotesSidebar } from './notes-sidebar';
+import { NotesEditorForm } from './notes-editor-form';
 import styles from './notes-editor-modal.module.css';
 
 interface NotesEditorModalProps {
@@ -27,7 +27,6 @@ export const NotesEditorModal = ({
   showNotification,
 }: NotesEditorModalProps) => {
   const {
-    requestClose,
     overlayProps,
     getCloseButtonProps,
   } = useOverlayDismiss({
@@ -49,17 +48,13 @@ export const NotesEditorModal = ({
           </button>
         </div>
         <div className={styles.content}>
-          <NotesSidebar
+          <NotesEditorForm
             currentCase={currentCase}
-            onReturn={requestClose}
             user={user}
             imageId={imageId}
             onAnnotationRefresh={onAnnotationRefresh}
             originalFileName={originalFileName}
             isUploading={isUploading}
-            showReturnButton={false}
-            stickyActionBar={true}
-            compactLayout={true}
             showNotification={showNotification}
           />
         </div>

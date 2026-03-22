@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import styles from './notes.module.css';
 
-interface NotesModalProps {
+interface AddlNotesModalProps {
   isOpen: boolean;
   onClose: () => void;
   notes: string;
@@ -10,7 +10,7 @@ interface NotesModalProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'warning') => void;
 }
 
-export const NotesModal = ({ isOpen, onClose, notes, onSave, showNotification }: NotesModalProps) => {
+export const AddlNotesModal = ({ isOpen, onClose, notes, onSave, showNotification }: AddlNotesModalProps) => {
   const [tempNotes, setTempNotes] = useState(notes);
   const [isSaving, setIsSaving] = useState(false);
   const {
