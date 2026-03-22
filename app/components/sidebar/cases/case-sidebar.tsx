@@ -391,7 +391,7 @@ return (
           disabled={isUploading || !currentCase}
           title={exportCaseTitle}
         >
-          Export Case Data
+          Export Confirmations
         </button>
       ) : (
         <button
