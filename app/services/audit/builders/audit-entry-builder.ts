@@ -19,6 +19,7 @@ export const buildValidationAuditEntry = (
       confirmationId: params.confirmationId,
       originalExaminerUid: params.originalExaminerUid,
       reviewingExaminerUid: params.reviewingExaminerUid,
+      reviewerBadgeId: params.reviewerBadgeId,
       workflowPhase: params.workflowPhase,
       securityChecks: params.securityChecks,
       performanceMetrics: params.performanceMetrics,

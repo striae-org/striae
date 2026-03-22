@@ -56,7 +56,7 @@ export const AuditEntriesList = ({ entries }: AuditEntriesListProps) => {
 
               {isConfirmationImportEntry(entry) && entry.details.reviewerBadgeId && (
                 <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Reviewer Badge/ID:</span>
+                  <span className={styles.detailLabel}>Confirming Examiner Badge/ID:</span>
                   <span className={styles.badgeTag}>{entry.details.reviewerBadgeId}</span>
                 </div>
               )}
