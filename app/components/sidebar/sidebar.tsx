@@ -8,6 +8,7 @@ import { type FileData } from '~/types';
 interface SidebarProps {
   user: User;
   onImageSelect: (file: FileData) => void;
+  onOpenCase: () => void;
   imageId?: string;
   currentCase: string;
   files: FileData[];
@@ -27,6 +28,7 @@ interface SidebarProps {
 export const Sidebar = ({ 
   user, 
   onImageSelect,
+  onOpenCase,
   imageId, 
   currentCase,
   imageLoaded,
@@ -74,6 +76,7 @@ export const Sidebar = ({
       <CaseSidebar 
         user={user} 
         onImageSelect={onImageSelect}
+        onOpenCase={onOpenCase}
         currentCase={currentCase}
         imageLoaded={imageLoaded}
         setImageLoaded={setImageLoaded}

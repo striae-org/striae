@@ -16,6 +16,7 @@ import { type FileData } from '~/types';
 interface CaseSidebarProps {
   user: User;
   onImageSelect: (file: FileData) => void;
+  onOpenCase: () => void;
   imageLoaded: boolean;
   setImageLoaded: (loaded: boolean) => void;
   onNotesClick: () => void;
@@ -34,6 +35,7 @@ interface CaseSidebarProps {
 export const CaseSidebar = ({ 
   user, 
   onImageSelect, 
+  onOpenCase,
   imageLoaded,
   setImageLoaded,
   onNotesClick,
@@ -307,15 +309,25 @@ return (
       
         <div className={styles.filesSection}>
         <div className={currentCase ? (isReadOnly ? styles.readOnlyContainer : styles.caseHeader) : styles.emptyCaseHeader}>
-        <h4 className={`${styles.caseNumber} ${
-          currentCase && caseConfirmationStatus.includeConfirmation 
-            ? caseConfirmationStatus.isConfirmed 
-              ? styles.caseConfirmed 
-              : styles.caseNotConfirmed
-            : ''
-        }`}>
-          {currentCase || 'No Case Selected'}
-        </h4>
+        {currentCase ? (
+          <h4 className={`${styles.caseNumber} ${
+            caseConfirmationStatus.includeConfirmation 
+              ? caseConfirmationStatus.isConfirmed 
+                ? styles.caseConfirmed 
+                : styles.caseNotConfirmed
+              : ''
+          }`}>
+            {currentCase}
+          </h4>
+        ) : (
+          <button
+            type="button"
+            className={styles.openCaseButton}
+            onClick={onOpenCase}
+          >
+            Open Case
+          </button>
+        )}
       </div>
       {currentCase && (
         <ImageUploadZone

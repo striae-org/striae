@@ -732,6 +732,9 @@ export const Striae = ({ user }: StriaePage) => {
         <SidebarContainer 
           user={user} 
           onImageSelect={handleImageSelect}
+          onOpenCase={() => {
+            void handleOpenCaseModal();
+          }}
           imageId={imageId}
           currentCase={currentCase}
           imageLoaded={imageLoaded}

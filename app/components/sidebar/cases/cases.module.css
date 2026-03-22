@@ -204,6 +204,24 @@
   margin-top: 0.75rem;
 }
 
+.openCaseButton {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.openCaseButton:hover {
+  background-color: color-mix(in lab, var(--primary) 85%, var(--black));
+}
+
 .fileListPlaceholder {
   display: flex;
   align-items: center;
@@ -678,6 +696,7 @@
 /* Case Header Container */
 .caseHeader {
   /* Normal case header styling (no background) */
+  margin-top: 0.75rem;
 }
 
 .readOnlyContainer {
@@ -685,6 +704,7 @@
   border: 1px solid #ffeaa7;
   border-radius: 4px;
   padding: 0.625rem 0.75rem;
+  margin-top: 0.75rem;
   margin-bottom: 0;
 }
 
