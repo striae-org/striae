@@ -53,6 +53,10 @@ function extractProxyPath(url: URL): ProxyPathResult {
 
   try {
     const decodedPath = decodeURIComponent(encodedPath);
+    if (decodedPath.includes('?') || decodedPath.includes('#')) {
+      return { ok: false, reason: 'bad-encoding' };
+    }
+
     return { ok: true, path: decodedPath.startsWith('/') ? decodedPath : `/${decodedPath}` };
   } catch {
     return { ok: false, reason: 'bad-encoding' };

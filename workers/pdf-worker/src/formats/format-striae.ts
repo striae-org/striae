@@ -1,9 +1,11 @@
-import type { PDFGenerationData, ReportRenderer } from '../report-types';
+import type { PDFGenerationData, ReportPdfOptionsBuilder, ReportRenderer } from '../report-types';
 import { ICON_256 } from '../assets/generated-assets';
+import { buildRepeatedChromePdfOptions, escapeHtml } from '../report-layout';
 
 export const renderReport: ReportRenderer = (data: PDFGenerationData): string => {
-  const { imageUrl, caseNumber, annotationData, activeAnnotations, currentDate, notesUpdatedFormatted, userCompany } = data;
+  const { imageUrl, annotationData, activeAnnotations } = data;
   const annotationsSet = new Set(activeAnnotations);
+  const hasImage = Boolean(imageUrl && imageUrl !== '/clear.jpg');
 
   // Programmatically determine if a color is dark and needs a light background
   const needsLightBackground = (color: string | undefined): boolean => {
@@ -71,42 +73,23 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
     <style>
       html, body {
         width: 100%;
-        height: 100%;
         margin: 0;
         font-family: Arial, sans-serif;
         background-color: white;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
       }
-      .header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 15px;
-        border-bottom: 2px solid #333;
-        padding-bottom: 8px;
-        position: relative;
-      }
-      .header-content {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      .date {
-        font-size: 16px;
-        font-weight: bold;
-      }
-      .case-number {
-        font-size: 16px;
-        font-weight: bold;
+      body {
         color: #333;
-        text-align: right;
-      }      
+      }
+      .report-body {
+        width: 100%;
+        box-sizing: border-box;
+      }
       .image-container {
         width: 100%;
-        margin: 10px 0;
+        margin: 0 0 10px;
         position: relative;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
       .image-wrapper {
         display: flex;
@@ -170,6 +153,8 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         width: 100%;
         margin-top: 12px;
         min-height: 50px;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
       .support-level-annotation {
         flex: 1;
@@ -236,9 +221,20 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
       .confirmation-section {
         margin-top: 20px;
         display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .notes-page {
+        page-break-before: always;
+        break-before: page;
+      }
+      .confirmation-summary {
+        display: flex;
         justify-content: flex-start;
         align-items: flex-start;
         gap: 20px;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
       .confirmation-box {
         background: #ffffff;
@@ -247,6 +243,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         padding: 15px;
         width: 280px;
         font-family: 'Inter', Arial, sans-serif;
+        box-sizing: border-box;
       }
       .confirmation-label {
         font-size: 14px;
@@ -274,6 +271,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         padding: 15px;
         width: 280px;
         font-family: 'Inter', Arial, sans-serif;
+        box-sizing: border-box;
       }
       .confirmation-title {
         font-size: 14px;
@@ -316,64 +314,32 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         letter-spacing: 1px;
       }
       .additional-notes-section {
-        max-width: 400px;
+        border: 1px solid #d7dbe0;
+        border-radius: 8px;
+        background: #fafbfc;
+        padding: 16px 18px;
+        box-sizing: border-box;
         font-family: 'Inter', Arial, sans-serif;
-        font-size: 14px;
-        line-height: 1.6;
         color: #333;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        text-indent: 0 !important;
-        padding: 0;
-        margin: 0;
-        margin-left: 20px;
-        flex-shrink: 0;
-        text-align: left;
-        display: block;
       }
-      .footer {
-        margin-top: auto;
-        padding-top: 15px;
-        border-top: 1px solid #ccc;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-family: 'Inter', Arial, sans-serif;
-        font-size: 11px;
+      .additional-notes-title {
+        margin: 0 0 10px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
         color: #666;
       }
-      .main-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-      .content-wrapper {
-        flex-grow: 0;
-        flex-shrink: 0;
-      }
-      .footer-left {
-        font-weight: 500;
-        flex: 1;
-        text-align: left;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .footer-brand-icon {
-        width: 14px;
-        height: 14px;
-        object-fit: contain;
-      }
-      .footer-center {
-        font-weight: 600;
-        flex: 1;
-        text-align: center;
-        color: #333;
-      }
-      .footer-right {
-        font-style: italic;
-        flex: 1;
-        text-align: right;
+      .additional-notes-body {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        text-indent: 0 !important;
+        orphans: 3;
+        widows: 3;
       }
       .index-section {
         text-align: center;
@@ -395,16 +361,9 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
     </style>
   </head>
   <body>
-    <div class="main-content">
-    <div class="content-wrapper">
-    <div class="header">
-      <div class="header-content">
-        <div class="date">${currentDate}</div>
-        ${caseNumber ? `<div class="case-number">${caseNumber}</div>` : '<div class="case-number"></div>'}
-      </div>
-    </div>
+    <div class="report-body">
     
-    ${imageUrl && imageUrl !== '/clear.jpg' ? `
+    ${hasImage ? `
     ${annotationData && annotationsSet?.has('index') && annotationData.indexType === 'number' && annotationData.indexNumber ? `
     <div class="index-section">
       Index: ${annotationData.indexNumber}
@@ -477,6 +436,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
     ${annotationData && ((annotationData.includeConfirmation === true) || annotationData.additionalNotes) ? `
     <div class="confirmation-section">
       ${annotationData && (annotationData.includeConfirmation === true) ? `
+        <div class="confirmation-summary">
         ${annotationData.confirmationData ? `
         <div class="confirmation-data">
           <div class="confirmation-title">IDENTIFICATION CONFIRMED</div>
@@ -501,30 +461,35 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
           <div class="confirmation-line"></div>
         </div>
         `}
-      ` : '<div></div>'}
+        </div>
+      ` : ''}
 
       ${annotationData && annotationsSet?.has('notes') && annotationData.additionalNotes && annotationData.additionalNotes.trim() ? `
-      <div class="additional-notes-section">${annotationData.additionalNotes.trim()}</div>
-      ` : '<div></div>'}
+      <section class="additional-notes-section ${hasImage || annotationData.includeConfirmation === true ? 'notes-page' : ''}">
+        <h2 class="additional-notes-title">Additional Notes</h2>
+        <p class="additional-notes-body">${escapeHtml(annotationData.additionalNotes.trim())}</p>
+      </section>
+      ` : ''}
     </div>
     ` : ''}
     
-    </div>
-    </div>
-    
-    <div class="footer">
-      <div class="footer-left">
-        <span>Notes formatted by Striae</span>
-          <img class="footer-brand-icon" src="${ICON_256}" alt="Striae icon" />
-      </div>
-      <div class="footer-center">
-        ${userCompany ? userCompany : ''}
-      </div>
-      <div class="footer-right">
-        ${notesUpdatedFormatted ? `Notes updated ${notesUpdatedFormatted}` : ''}
-      </div>
     </div>
   </body>
 </html>
 `;
 };
+
+export const getPdfOptions: ReportPdfOptionsBuilder = (data: PDFGenerationData) => buildRepeatedChromePdfOptions({
+  headerLeft: data.currentDate,
+  headerRight: data.caseNumber,
+  headerDetailLeft: [data.annotationData?.leftCase, data.annotationData?.leftItem].filter(Boolean).join(' / ')
+    ? `Left Case / Item: ${[data.annotationData?.leftCase, data.annotationData?.leftItem].filter(Boolean).join(' / ')}`
+    : undefined,
+  headerDetailRight: [data.annotationData?.rightCase, data.annotationData?.rightItem].filter(Boolean).join(' / ')
+    ? `Right Case / Item: ${[data.annotationData?.rightCase, data.annotationData?.rightItem].filter(Boolean).join(' / ')}`
+    : undefined,
+  footerLeft: 'Notes formatted by Striae',
+  footerCenter: data.userCompany,
+  footerRight: data.notesUpdatedFormatted ? `Notes updated ${data.notesUpdatedFormatted}` : undefined,
+  footerLeftImageSrc: ICON_256,
+});

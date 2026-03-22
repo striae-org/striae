@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import { ColorSelector } from '~/components/colors/colors';
 import { AddlNotesModal } from './addl-notes-modal';
+import { ClassDetailsModal } from './class-details-modal';
+import { buildClassDetailsSummary } from './class-details-shared';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
-import { type AnnotationData } from '~/types/annotations';
+import { type AnnotationData, type BulletAnnotationData, type CartridgeCaseAnnotationData, type ShotshellAnnotationData } from '~/types/annotations';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { auditService } from '~/services/audit';
 import styles from './notes.module.css';
@@ -19,7 +21,7 @@ interface NotesEditorFormProps {
 }
 
 type SupportLevel = 'ID' | 'Exclusion' | 'Inconclusive';
-type ClassType = 'Bullet' | 'Cartridge Case' | 'Other';
+type ClassType = 'Bullet' | 'Cartridge Case' | 'Shotshell' | 'Other';
 type IndexType = 'number' | 'color';
 
 export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefresh, originalFileName, isUploading = false, showNotification: externalShowNotification }: NotesEditorFormProps) => {
@@ -41,6 +43,10 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
   const [customClass, setCustomClass] = useState('');
   const [classNote, setClassNote] = useState('');
   const [hasSubclass, setHasSubclass] = useState(false);
+  const [bulletData, setBulletData] = useState<BulletAnnotationData | undefined>(undefined);
+  const [cartridgeCaseData, setCartridgeCaseData] = useState<CartridgeCaseAnnotationData | undefined>(undefined);
+  const [shotshellData, setShotshellData] = useState<ShotshellAnnotationData | undefined>(undefined);
+  const [isClassDetailsOpen, setIsClassDetailsOpen] = useState(false);
 
   // Index state
   const [indexType, setIndexType] = useState<IndexType>('color');
@@ -91,6 +97,9 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
           setCustomClass(existingNotes.customClass || '');
           setClassNote(existingNotes.classNote || '');
           setHasSubclass(existingNotes.hasSubclass ?? false);
+          setBulletData(existingNotes.bulletData);
+          setCartridgeCaseData(existingNotes.cartridgeCaseData);
+          setShotshellData(existingNotes.shotshellData);
           setIndexType(existingNotes.indexType || 'color');
           setIndexNumber(existingNotes.indexNumber || '');
           setIndexColor(existingNotes.indexColor || '');
@@ -154,6 +163,9 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
         customClass: customClass,
         classNote: classNote || undefined,
         hasSubclass: hasSubclass,
+        bulletData: bulletData,
+        cartridgeCaseData: cartridgeCaseData,
+        shotshellData: shotshellData,
         
         // Index Information
         indexType: indexType,
@@ -362,6 +374,7 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
                     <option value="">Select class type...</option>
                     <option value="Bullet">Bullet</option>
                     <option value="Cartridge Case">Cartridge Case</option>
+                    <option value="Shotshell">Shotshell</option>
                     <option value="Other">Other</option>
                   </select>
 
@@ -395,9 +408,15 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
                 </label>
             </div>
 
-              <div className={styles.characteristicsPlaceholder}>
-                <h6 className={styles.placeholderTitle}>Characteristics Details</h6>
-                <p className={styles.placeholderText}>This section is reserved for future development.</p>
+              <div className={styles.classDetailsPanel}>
+                <button
+                  type="button"
+                  onClick={() => setIsClassDetailsOpen(true)}
+                  className={styles.classDetailsButton}
+                  disabled={areInputsDisabled}
+                >
+                  Enter Class Characteristic Details
+                </button>
               </div>
             </div>
           </>
@@ -532,6 +551,25 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
         notes={additionalNotes}
         onSave={setAdditionalNotes}
         showNotification={notificationHandler}
+      />
+      <ClassDetailsModal
+        isOpen={isClassDetailsOpen}
+        onClose={() => setIsClassDetailsOpen(false)}
+        classType={classType}
+        bulletData={bulletData}
+        cartridgeCaseData={cartridgeCaseData}
+        shotshellData={shotshellData}
+        onSave={(b, c, s) => {
+          if (b !== undefined) setBulletData(b);
+          if (c !== undefined) setCartridgeCaseData(c);
+          if (s !== undefined) setShotshellData(s);
+          const summary = buildClassDetailsSummary(b, c, s, classType);
+          if (summary) {
+            setAdditionalNotes((prev) => prev ? `${prev}\n${summary}` : summary);
+          }
+        }}
+        showNotification={notificationHandler}
+        isReadOnly={areInputsDisabled}
       />
       </>
         )}

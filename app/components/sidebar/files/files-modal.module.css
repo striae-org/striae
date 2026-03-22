@@ -14,9 +14,10 @@
   position: relative;
   background: var(--backgroundLight);
   border-radius: var(--spaceXS);
+  overflow: hidden;
   width: 90%;
   max-width: var(--maxWidthL);
-  max-height: 80vh;
+  max-height: 84vh;
   box-shadow: 0 var(--spaceXS) var(--spaceL)
     color-mix(in lab, var(--black) 10%, transparent);
   cursor: default;
@@ -41,6 +42,9 @@
   overflow-y: auto;
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceM);
 }
 
 .closeButton {
@@ -57,6 +61,114 @@
   color: var(--text);
 }
 
+.controlsSection {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spaceM);
+  align-items: end;
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceXS);
+}
+
+.controlGroup label {
+  color: var(--textTitle);
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+}
+
+.controlGroup select {
+  width: 100%;
+  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+  border-radius: var(--spaceXS);
+  background: var(--backgroundLight);
+  color: var(--textBody);
+  padding: var(--spaceS) var(--spaceM);
+  font-size: var(--fontSizeBodyS);
+}
+
+.controlGroup select:focus {
+  outline: 2px solid color-mix(in lab, var(--primary) 30%, transparent);
+  outline-offset: 1px;
+}
+
+.resetButton {
+  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+  border-radius: var(--spaceXS);
+  background: var(--backgroundLight);
+  color: var(--textBody);
+  padding: var(--spaceS) var(--spaceM);
+  font-size: var(--fontSizeBodyS);
+  cursor: pointer;
+}
+
+.resetButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.searchSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceXS);
+}
+
+.searchSection label {
+  color: var(--textTitle);
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+}
+
+.searchInput {
+  width: 100%;
+  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+  border-radius: var(--spaceXS);
+  background: var(--backgroundLight);
+  color: var(--textBody);
+  padding: var(--spaceS) var(--spaceM);
+  font-size: var(--fontSizeBodyS);
+}
+
+.searchInput:focus {
+  outline: 2px solid color-mix(in lab, var(--primary) 30%, transparent);
+  outline-offset: 1px;
+}
+
+.fileCount {
+  margin: 0;
+  font-size: var(--fontSizeBodyS);
+  color: var(--textLight);
+}
+
+.actionNotice {
+  margin: 0;
+  border-radius: var(--spaceXS);
+  padding: var(--spaceS) var(--spaceM);
+  font-size: var(--fontSizeBodyS);
+  border: 1px solid transparent;
+}
+
+.actionNoticeSuccess {
+  background: color-mix(in lab, var(--success) 15%, var(--backgroundLight));
+  color: var(--textBody);
+  border-color: color-mix(in lab, var(--success) 35%, transparent);
+}
+
+.actionNoticeWarning {
+  background: color-mix(in lab, var(--warning) 18%, var(--backgroundLight));
+  color: var(--textBody);
+  border-color: color-mix(in lab, var(--warning) 40%, transparent);
+}
+
+.actionNoticeError {
+  background: color-mix(in lab, var(--error) 16%, var(--backgroundLight));
+  color: var(--error);
+  border-color: color-mix(in lab, var(--error) 30%, transparent);
+}
+
 .filesList {
   list-style: none;
   padding: 0;
@@ -67,36 +179,70 @@
 }
 
 .fileItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spaceM) var(--spaceL);
-  border: 1px solid #e9ecef;
+  width: 100%;
+  padding: var(--spaceM);
+  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
   border-radius: var(--spaceXS);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--spaceM);
   background: var(--backgroundLight);
   cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
+  color: var(--textBody);
+  transition:
+    border-color var(--durationS) var(--bezierFastoutSlowin),
+    background-color var(--durationS) var(--bezierFastoutSlowin),
+    box-shadow var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .fileItem:hover {
   background-color: color-mix(in lab, var(--background) 95%, transparent);
 }
 
+.fileItem:focus {
+  outline: none;
+  border-color: color-mix(in lab, var(--primary) 60%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 18%, transparent);
+}
+
 .fileItem.active {
-  background-color: color-mix(in lab, var(--background) 90%, transparent);
-  font-weight: var(--fontWeightMedium);
+  border-color: color-mix(in lab, var(--primary) 55%, transparent);
+  box-shadow:
+    inset 4px 0 0 color-mix(in lab, var(--primary) 55%, transparent),
+    0 0 0 1px color-mix(in lab, var(--primary) 16%, transparent);
+}
+
+.deleteSelector {
+  margin: 0;
+  width: var(--spaceL);
+  height: var(--spaceL);
+  cursor: pointer;
+}
+
+.deleteSelector {
+  accent-color: var(--error);
 }
 
 .fileInfo {
-  flex: 1;
-  min-width: 0; /* Allow text truncation */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spaceXS);
 }
 
 .fileName {
   font-weight: var(--fontWeightMedium);
   color: var(--textBody);
-  margin-bottom: var(--spaceXS);
-  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileMetaRow {
+  display: flex;
+  gap: var(--spaceM);
+  flex-wrap: wrap;
 }
 
 .fileDate {
@@ -104,53 +250,98 @@
   color: var(--textLight);
 }
 
-.deleteButton {
-  background: none;
-  border: none;
-  color: #dc3545;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.5rem;
+.classTypeBadge {
   border-radius: var(--spaceXS);
-  margin-left: var(--spaceM);
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 32px;
+  border: 1px solid color-mix(in lab, var(--text) 14%, transparent);
+  padding: 0.1rem 0.45rem;
+  font-size: var(--fontSizeBodyS);
+  color: var(--textBody);
+  background: color-mix(in lab, var(--background) 94%, transparent);
 }
 
-.deleteButton:hover:not(:disabled) {
-  color: #bd2130;
-  background-color: rgba(220, 53, 69, 0.1);
+.confirmationBadge {
+  justify-self: end;
+  border-radius: var(--spaceXS);
+  padding: var(--spaceXS) var(--spaceS);
+  font-size: var(--fontSizeBodyS);
+  font-weight: var(--fontWeightMedium);
+  color: var(--textBody);
+  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+  white-space: nowrap;
 }
 
-.deleteButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.errorState,
-.emptyState {
-  text-align: center;
-  padding: var(--space2XL);
-  color: var(--textLight);
-}
-
-.errorState {
-  color: var(--error);
-}
-
-.pagination {
+.footerActions {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--spaceM);
   padding: var(--spaceL);
   border-top: 1px solid color-mix(in lab, var(--text) 10%, transparent);
   background: var(--backgroundLight);
   flex-shrink: 0;
+}
+
+.maintenanceActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spaceS);
+}
+
+.secondaryActionButton {
+  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+  border-radius: var(--spaceXS);
+  background: var(--backgroundLight);
+  color: var(--textBody);
+  padding: var(--spaceS) var(--spaceM);
+  font-size: var(--fontSizeBodyS);
+  cursor: pointer;
+  transition: background-color var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.secondaryActionButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--background) 94%, transparent);
+}
+
+.secondaryActionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.deleteActionButton {
+  border-color: color-mix(in lab, var(--error) 25%, transparent);
+  color: var(--error);
+}
+
+.deleteActionButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--error) 12%, var(--backgroundLight));
+}
+
+.openSelectedButton {
+  background: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--spaceXS);
+  padding: var(--spaceS) var(--spaceL);
+  font-size: var(--fontSizeBodyS);
+  cursor: pointer;
+  transition: background-color var(--durationS) var(--bezierFastoutSlowin);
+}
+
+.openSelectedButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--primary) 85%, var(--black));
+}
+
+.openSelectedButton:disabled {
+  background: color-mix(in lab, var(--text) 20%, transparent);
+  color: var(--textLight);
+  cursor: not-allowed;
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--spaceM);
 }
 
 .pagination button {
@@ -179,7 +370,13 @@
   color: var(--textBody);
   font-weight: var(--fontWeightMedium);
 }
-/* Confirmation Status Indicators */
+
+.emptyState {
+  text-align: center;
+  padding: var(--spaceXL);
+  color: var(--textLight);
+}
+
 .fileItemNotConfirmed {
   background-color: color-mix(
     in lab,
@@ -208,6 +405,14 @@
   background-color: color-mix(
     in lab,
     var(--warning) 20%,
+    var(--backgroundLight)
+  );
+}
+
+.confirmationBadge.fileItemNotConfirmed {
+  background-color: color-mix(
+    in lab,
+    var(--warning) 22%,
     var(--backgroundLight)
   );
 }
@@ -242,4 +447,40 @@
     var(--success) 28%,
     var(--backgroundLight)
   );
+}
+
+.confirmationBadge.fileItemConfirmed {
+  background-color: color-mix(
+    in lab,
+    var(--success) 28%,
+    var(--backgroundLight)
+  );
+}
+
+@media (max-width: 980px) {
+  .controlsSection {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fileItem {
+    grid-template-columns: auto 1fr;
+  }
+
+  .confirmationBadge {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .footerActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .maintenanceActions {
+    width: 100%;
+  }
+
+  .pagination {
+    justify-content: space-between;
+  }
 }

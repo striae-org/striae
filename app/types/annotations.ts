@@ -22,19 +22,66 @@ export interface ConfirmationData {
   confirmedAt: string;        // ISO timestamp of confirmation
 }
 
+export interface BulletAnnotationData {
+  caliber?: string;
+  mass?: string;
+  diameter?: string;
+  calcDiameter?: string;
+  lgNumber?: number;
+  lgDirection?: string;
+  barrelType?: string;
+  // Width arrays should align with lgNumber:
+  // L1..Ln stored in order at lWidths[0..n-1], G1..Gn at gWidths[0..n-1].
+  lWidths?: string[];
+  gWidths?: string[];
+  jacketMetal?: string;
+  coreMetal?: string;
+  bulletType?: string;
+}
+
+export interface CartridgeCaseAnnotationData {
+  caliber?: string;
+  brand?: string;
+  metal?: string;
+  primerType?: string;
+  fpiShape?: string;
+  apertureShape?: string;
+  hasFpDrag?: boolean;
+  hasExtractorMarks?: boolean;
+  hasEjectorMarks?: boolean;
+  hasChamberMarks?: boolean;
+  hasMagazineLipMarks?: boolean;
+  hasPrimerShear?: boolean;
+  hasEjectionPortMarks?: boolean;
+}
+
+export interface ShotshellAnnotationData {
+  gauge?: string;
+  shotSize?: string;
+  metal?: string;
+  brand?: string;
+  fpiShape?: string;
+  hasExtractorMarks?: boolean;
+  hasEjectorMarks?: boolean;
+  hasChamberMarks?: boolean;
+}
+
 export interface AnnotationData {
   leftCase: string;
   rightCase: string;
   leftItem: string;
   rightItem: string;
   caseFontColor?: string;
-  classType?: 'Bullet' | 'Cartridge Case' | 'Other';
+  classType?: 'Bullet' | 'Cartridge Case' | 'Shotshell' | 'Other';
   customClass?: string;
   classNote?: string;
   indexType?: 'number' | 'color';
   indexNumber?: string;
   indexColor?: string;
   supportLevel?: 'ID' | 'Exclusion' | 'Inconclusive';
+  bulletData?: BulletAnnotationData;
+  cartridgeCaseData?: CartridgeCaseAnnotationData;
+  shotshellData?: ShotshellAnnotationData;
   hasSubclass?: boolean;
   includeConfirmation: boolean;
   confirmationData?: ConfirmationData;

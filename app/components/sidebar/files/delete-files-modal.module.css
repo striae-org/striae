@@ -1,0 +1,26 @@
+.modal {
+  width: min(620px, calc(100vw - 2rem));
+}
+
+.filePreviewList {
+  margin: 0.6rem 0 0;
+  padding-left: 1.1rem;
+  color: #3f2a2e;
+  font-size: 0.86rem;
+}
+
+.filePreviewList li + li {
+  margin-top: 0.3rem;
+}
+
+.remainingNote {
+  margin-top: 0.5rem;
+  font-size: 0.84rem;
+  color: #6b2f35;
+}
+
+.confirmButton {
+  background: #dc3545;
+  color: #ffffff;
+  border-color: #c82333;
+}

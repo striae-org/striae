@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
+import sharedStyles from './case-modal-shared.module.css';
 import styles from './archive-case-modal.module.css';
 
 interface ArchiveCaseModalProps {
@@ -65,18 +66,18 @@ export const ArchiveCaseModal = ({
 
   return (
     <div
-      className={styles.overlay}
+      className={sharedStyles.overlay}
       aria-label="Close archive case dialog"
       {...overlayProps}
     >
-      <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Archive Case">
+      <div className={`${sharedStyles.modal} ${styles.modal}`} role="dialog" aria-modal="true" aria-label="Archive Case">
         <button {...getCloseButtonProps({ ariaLabel: 'Close archive case dialog' })}>
           ×
         </button>
-        <h3 className={styles.title}>Archive Case</h3>
-        <p className={styles.subtitle}>Case: {currentCase}</p>
+        <h3 className={sharedStyles.title}>Archive Case</h3>
+        <p className={sharedStyles.subtitle}>Case: {currentCase}</p>
 
-        <div className={styles.warningPanel}>
+        <div className={sharedStyles.warningPanel}>
           <p>
             Archiving a case permanently renders it read-only.
           </p>
@@ -103,10 +104,10 @@ export const ArchiveCaseModal = ({
           rows={3}
         />
 
-        <div className={styles.actions}>
+        <div className={sharedStyles.actions}>
           <button
             type="button"
-            className={styles.cancelButton}
+            className={sharedStyles.cancelButton}
             onClick={requestClose}
             disabled={isCloseBlocked}
           >
@@ -114,7 +115,7 @@ export const ArchiveCaseModal = ({
           </button>
           <button
             type="button"
-            className={styles.confirmButton}
+            className={`${sharedStyles.confirmButton} ${styles.confirmButton}`}
             onClick={() => {
               void handleSubmit();
             }}

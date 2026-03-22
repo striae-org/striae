@@ -5,6 +5,7 @@ export interface FileConfirmationSummary {
   includeConfirmation: boolean;
   isConfirmed: boolean;
   updatedAt: string;
+  classType?: 'Bullet' | 'Cartridge Case' | 'Shotshell' | 'Other';
 }
 
 export interface CaseConfirmationSummary {
@@ -194,11 +195,20 @@ function normalizeFileConfirmationSummary(value: unknown): FileConfirmationSumma
     };
   }
 
-  return {
+  const classType = value.classType;
+  const normalizedClassType = typeof classType === 'string' && ['Bullet', 'Cartridge Case', 'Shotshell', 'Other'].includes(classType) ? (classType as 'Bullet' | 'Cartridge Case' | 'Shotshell' | 'Other') : undefined;
+
+  const summary: FileConfirmationSummary = {
     includeConfirmation: value.includeConfirmation === true,
     isConfirmed: value.isConfirmed === true,
     updatedAt: typeof value.updatedAt === 'string' && value.updatedAt.length > 0 ? value.updatedAt : getIsoNow()
   };
+
+  if (normalizedClassType) {
+    summary.classType = normalizedClassType;
+  }
+
+  return summary;
 }
 
 export function isStaleTimestamp(timestamp: string, maxAgeMs: number): boolean {
@@ -228,11 +238,17 @@ export function computeCaseConfirmationAggregate(filesById: Record<string, FileC
 export function toFileConfirmationSummary(annotationData: AnnotationData | null): FileConfirmationSummary {
   const includeConfirmation = annotationData?.includeConfirmation === true;
 
-  return {
+  const summary: FileConfirmationSummary = {
     includeConfirmation,
     isConfirmed: includeConfirmation && !!annotationData?.confirmationData,
     updatedAt: getIsoNow()
   };
+
+  if (annotationData?.classType) {
+    summary.classType = annotationData.classType;
+  }
+
+  return summary;
 }
 
 export function normalizeConfirmationSummaryDocument(payload: unknown): UserConfirmationSummaryDocument {

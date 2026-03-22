@@ -10,7 +10,6 @@
 
 .modal {
   position: relative;
-  width: min(460px, calc(100vw - 2rem));
   background: #ffffff;
   border-radius: var(--spaceXS);
   overflow: hidden;
@@ -25,7 +24,7 @@
   font-size: 1.02rem;
 }
 
-.helperText {
+.subtitle {
   margin: 0.4rem 0 0.9rem;
   color: #6c757d;
   font-size: 0.85rem;
@@ -44,6 +43,25 @@
   outline: none;
   border-color: #1f6feb;
   box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.2);
+}
+
+.warningPanel {
+  border: 1px solid color-mix(in lab, #dc3545 25%, transparent);
+  background: color-mix(in lab, #dc3545 7%, #ffffff);
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+
+.warningPanel p {
+  margin: 0;
+  color: #3f2a2e;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.warningPanel p + p {
+  margin-top: 0.45rem;
 }
 
 .actions {
@@ -67,12 +85,6 @@
   background: #f3f4f6;
   color: #3c4651;
   border-color: #d6dce2;
-}
-
-.confirmButton {
-  background: #198754;
-  color: #ffffff;
-  border-color: #157347;
 }
 
 .cancelButton:disabled,
