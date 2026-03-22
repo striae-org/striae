@@ -11,7 +11,8 @@ import {
   deleteCaseData,
   duplicateCaseData,
   deleteFileAnnotations,
-  signForensicManifest
+  signForensicManifest,
+  removeCaseConfirmationSummary
 } from '~/utils/data';
 import { type CaseData, type ReadOnlyCaseData, type FileData, type AuditTrail, type CaseExportData } from '~/types';
 import { auditService } from '~/services/audit';
@@ -569,6 +570,13 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
       // Delete case data using centralized function (skip validation since user no longer has access)
       await deleteCaseData(user, caseNumber, { skipValidation: true });
 
+      // Clean up confirmation status metadata for this case
+      try {
+        await removeCaseConfirmationSummary(user, caseNumber);
+      } catch (summaryError) {
+        console.warn(`Failed to remove confirmation summary for case ${caseNumber}:`, summaryError);
+      }
+
       // Add a small delay before audit logging to reduce rate limiting
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -592,6 +600,13 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 
     // Delete case data using centralized function (skip validation since user no longer has access)
     await deleteCaseData(user, caseNumber, { skipValidation: true });
+
+    // Clean up confirmation status metadata for this case
+    try {
+      await removeCaseConfirmationSummary(user, caseNumber);
+    } catch (summaryError) {
+      console.warn(`Failed to remove confirmation summary for case ${caseNumber}:`, summaryError);
+    }
 
     // Add a small delay before audit logging to reduce rate limiting
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -874,6 +889,13 @@ export const archiveCase = async (
     });
 
     await updateCaseData(user, caseNumber, archiveData);
+
+    // Clean up confirmation status metadata for this archived case
+    try {
+      await removeCaseConfirmationSummary(user, caseNumber);
+    } catch (summaryError) {
+      console.warn(`Failed to remove confirmation summary for case ${caseNumber}:`, summaryError);
+    }
 
     await auditService.logCaseArchive(
       user,

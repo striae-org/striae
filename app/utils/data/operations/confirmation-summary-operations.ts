@@ -284,3 +284,18 @@ export const removeFileConfirmationSummary = async (
 
   await saveConfirmationSummaryDocument(user, summary);
 };
+
+export const removeCaseConfirmationSummary = async (
+  user: User,
+  caseNumber: string
+): Promise<void> => {
+  const summary = await getConfirmationSummaryDocument(user);
+  if (!summary.cases[caseNumber]) {
+    return;
+  }
+
+  delete summary.cases[caseNumber];
+  summary.updatedAt = getIsoNow();
+
+  await saveConfirmationSummaryDocument(user, summary);
+};
