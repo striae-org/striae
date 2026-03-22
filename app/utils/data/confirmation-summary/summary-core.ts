@@ -5,7 +5,7 @@ export interface FileConfirmationSummary {
   includeConfirmation: boolean;
   isConfirmed: boolean;
   updatedAt: string;
-  classType?: 'Bullet' | 'Cartridge Case' | 'Other';
+  classType?: 'Bullet' | 'Cartridge Case' | 'Shotshell' | 'Other';
 }
 
 export interface CaseConfirmationSummary {
@@ -196,7 +196,7 @@ function normalizeFileConfirmationSummary(value: unknown): FileConfirmationSumma
   }
 
   const classType = value.classType;
-  const normalizedClassType = typeof classType === 'string' && ['Bullet', 'Cartridge Case', 'Other'].includes(classType) ? (classType as 'Bullet' | 'Cartridge Case' | 'Other') : undefined;
+  const normalizedClassType = typeof classType === 'string' && ['Bullet', 'Cartridge Case', 'Shotshell', 'Other'].includes(classType) ? (classType as 'Bullet' | 'Cartridge Case' | 'Shotshell' | 'Other') : undefined;
 
   const summary: FileConfirmationSummary = {
     includeConfirmation: value.includeConfirmation === true,

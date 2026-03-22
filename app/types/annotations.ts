@@ -25,6 +25,7 @@ export interface ConfirmationData {
 export interface BulletAnnotationData {
   caliber?: string;
   mass?: string;
+  radius?: string;
   lgNumber?: number;
   lgDirection?: string;
   // Width arrays should align with lgNumber:
@@ -38,6 +39,7 @@ export interface BulletAnnotationData {
 
 export interface CartridgeCaseAnnotationData {
   caliber?: string;
+  brand?: string;
   metal?: string;
   primerType?: string;
   fpiShape?: string;
@@ -51,13 +53,24 @@ export interface CartridgeCaseAnnotationData {
   hasEjectionPortMarks?: boolean;
 }
 
+export interface ShotshellAnnotationData {
+  gauge?: string;
+  shotSize?: string;
+  metal?: string;
+  brand?: string;
+  fpiShape?: string;
+  hasExtractorMarks?: boolean;
+  hasEjectorMarks?: boolean;
+  hasChamberMarks?: boolean;
+}
+
 export interface AnnotationData {
   leftCase: string;
   rightCase: string;
   leftItem: string;
   rightItem: string;
   caseFontColor?: string;
-  classType?: 'Bullet' | 'Cartridge Case' | 'Other';
+  classType?: 'Bullet' | 'Cartridge Case' | 'Shotshell' | 'Other';
   customClass?: string;
   classNote?: string;
   indexType?: 'number' | 'color';
@@ -66,6 +79,7 @@ export interface AnnotationData {
   supportLevel?: 'ID' | 'Exclusion' | 'Inconclusive';
   bulletData?: BulletAnnotationData;
   cartridgeCaseData?: CartridgeCaseAnnotationData;
+  shotshellData?: ShotshellAnnotationData;
   hasSubclass?: boolean;
   includeConfirmation: boolean;
   confirmationData?: ConfirmationData;
