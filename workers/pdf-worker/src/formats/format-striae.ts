@@ -223,6 +223,10 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         flex-direction: column;
         gap: 16px;
       }
+      .notes-page {
+        page-break-before: always;
+        break-before: page;
+      }
       .confirmation-summary {
         display: flex;
         justify-content: flex-start;
@@ -460,7 +464,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
       ` : ''}
 
       ${annotationData && annotationsSet?.has('notes') && annotationData.additionalNotes && annotationData.additionalNotes.trim() ? `
-      <section class="additional-notes-section">
+      <section class="additional-notes-section ${(imageUrl && imageUrl !== '/clear.jpg') || annotationData.includeConfirmation === true ? 'notes-page' : ''}">
         <h2 class="additional-notes-title">Additional Notes</h2>
         <p class="additional-notes-body">${escapeHtml(annotationData.additionalNotes.trim())}</p>
       </section>

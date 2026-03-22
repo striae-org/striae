@@ -19,7 +19,7 @@ const HEADER_TEMPLATE_STYLES = `
       border-bottom: 2px solid #333333;
       color: #333333;
       font-family: Arial, sans-serif;
-      font-size: 11px;
+      font-size: 18px;
       font-weight: 700;
     }
     .report-header__content {
@@ -152,7 +152,7 @@ export function buildRepeatedChromePdfOptions(config: ReportChromeTemplateConfig
     headerTemplate,
     footerTemplate,
     margin: {
-      top: '0.95in',
+      top: '1.15in',
       bottom: '0.8in',
     },
   };
