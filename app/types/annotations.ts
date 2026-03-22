@@ -22,6 +22,35 @@ export interface ConfirmationData {
   confirmedAt: string;        // ISO timestamp of confirmation
 }
 
+export interface BulletAnnotationData {
+  caliber?: string;
+  mass?: string;
+  lgNumber?: number;
+  lgDirection?: string;
+  // Width arrays should align with lgNumber:
+  // L1..Ln stored in order at lWidths[0..n-1], G1..Gn at gWidths[0..n-1].
+  lWidths?: string[];
+  gWidths?: string[];
+  jacketMetal?: string;
+  coreMetal?: string;
+  bulletType?: string;
+}
+
+export interface CartridgeCaseAnnotationData {
+  caliber?: string;
+  metal?: string;
+  primerType?: string;
+  fpiShape?: string;
+  apertureShape?: string;
+  hasFpDrag?: boolean;
+  hasExtractorMarks?: boolean;
+  hasEjectorMarks?: boolean;
+  hasChamberMarks?: boolean;
+  hasMagazineLipMarks?: boolean;
+  hasPrimerShear?: boolean;
+  hasEjectionPortMarks?: boolean;
+}
+
 export interface AnnotationData {
   leftCase: string;
   rightCase: string;
@@ -35,6 +64,8 @@ export interface AnnotationData {
   indexNumber?: string;
   indexColor?: string;
   supportLevel?: 'ID' | 'Exclusion' | 'Inconclusive';
+  bulletData?: BulletAnnotationData;
+  cartridgeCaseData?: CartridgeCaseAnnotationData;
   hasSubclass?: boolean;
   includeConfirmation: boolean;
   confirmationData?: ConfirmationData;
