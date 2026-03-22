@@ -3,13 +3,10 @@ import type { PDFGenerationData, PDFGenerationRequest, ReportModule } from './re
 interface Env {
   BROWSER: Fetcher;
   PDF_WORKER_AUTH: string;
-  ACCOUNT_ID?: string;
-  CLOUDFLARE_ACCOUNT_ID?: string;
-  BROWSER_API_TOKEN?: string;
-  API_TOKEN?: string;
+  ACCOUNT_ID: string;
+  BROWSER_API_TOKEN: string;
 }
 
-const DEFAULT_REPORT_FORMAT = 'striae';
 const BROWSER_PDF_TIMEOUT_MS = 90_000;
 const BROWSER_RENDERING_API_BASE = 'https://api.cloudflare.com/client/v4/accounts';
 
@@ -56,62 +53,37 @@ function jsonResponse(body: unknown, status: number): Response {
   });
 }
 
-function resolveBrowserApiToken(env: Env): string {
-  const candidates = [env.BROWSER_API_TOKEN, env.API_TOKEN];
-
-  for (const candidate of candidates) {
-    if (typeof candidate === 'string' && candidate.trim().length > 0) {
-      return candidate.trim();
-    }
+function getRequiredSecret(value: string, name: string): string {
+  const normalized = value.trim();
+  if (!normalized) {
+    throw new Error(`Missing required secret: ${name}`);
   }
 
-  return '';
+  return normalized;
 }
 
-function resolveAccountId(env: Env): string {
-  const candidates = [env.ACCOUNT_ID, env.CLOUDFLARE_ACCOUNT_ID];
-
-  for (const candidate of candidates) {
-    if (typeof candidate === 'string' && candidate.trim().length > 0) {
-      return candidate.trim();
-    }
-  }
-
-  return '';
-}
-
-function normalizeReportFormat(format: unknown): string {
-  if (typeof format !== 'string') {
-    return DEFAULT_REPORT_FORMAT;
-  }
-
-  const normalized = format.trim().toLowerCase();
-  return normalized || DEFAULT_REPORT_FORMAT;
-}
-
-function resolveReportRequest(payload: unknown): { reportFormat: string; data: PDFGenerationData } {
-  if (!payload || typeof payload !== 'object') {
+function resolveReportRequest(payload: unknown): PDFGenerationRequest {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
     throw new Error('Request body must be a JSON object');
   }
 
   const record = payload as Record<string, unknown>;
-  const reportFormat = normalizeReportFormat(record.reportFormat);
-
-  if (record.data && typeof record.data === 'object') {
-    return {
-      reportFormat,
-      data: record.data as PDFGenerationData,
-    };
+  if (typeof record.reportFormat !== 'string' || record.reportFormat.trim().length === 0) {
+    throw new Error('Request body must include a non-empty reportFormat');
   }
 
-  // Backward compatibility: accept legacy top-level payload shape.
-  const legacyData: Record<string, unknown> = { ...record };
-  delete legacyData.reportFormat;
-  delete legacyData.data;
+  if (!record.data || typeof record.data !== 'object' || Array.isArray(record.data)) {
+    throw new Error('Request body must include a data object');
+  }
+
+  const data = record.data as Record<string, unknown>;
+  if (typeof data.currentDate !== 'string' || data.currentDate.trim().length === 0) {
+    throw new Error('Request body data must include a non-empty currentDate');
+  }
 
   return {
-    reportFormat,
-    data: legacyData as PDFGenerationData,
+    reportFormat: record.reportFormat.trim().toLowerCase(),
+    data: record.data as PDFGenerationData,
   };
 }
 
@@ -128,19 +100,8 @@ async function renderReport(reportFormat: string, data: PDFGenerationData): Prom
 }
 
 async function renderPdfViaRestEndpoint(env: Env, html: string): Promise<Response> {
-  const accountId = resolveAccountId(env);
-  const browserApiToken = resolveBrowserApiToken(env);
-
-  if (!accountId || !browserApiToken) {
-    return jsonResponse(
-      {
-        error: 'Missing required Browser Rendering credentials',
-        requiredSecrets: ['ACCOUNT_ID', 'BROWSER_API_TOKEN'],
-        note: 'Set ACCOUNT_ID and a Browser Rendering - Edit token (BROWSER_API_TOKEN) on this worker.',
-      },
-      502
-    );
-  }
+  const accountId = getRequiredSecret(env.ACCOUNT_ID, 'ACCOUNT_ID');
+  const browserApiToken = getRequiredSecret(env.BROWSER_API_TOKEN, 'BROWSER_API_TOKEN');
 
   const endpoint = `${BROWSER_RENDERING_API_BASE}/${accountId}/browser-rendering/pdf`;
   const requestBody = JSON.stringify({
@@ -217,7 +178,7 @@ export default {
 
     if (request.method === 'POST') {
       try {
-        const payload = await request.json() as PDFGenerationData | PDFGenerationRequest;
+        const payload = await request.json() as unknown;
         const { reportFormat, data } = resolveReportRequest(payload);
         const document = await renderReport(reportFormat, data);
 

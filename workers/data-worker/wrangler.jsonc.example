@@ -3,7 +3,7 @@
   "name": "DATA_WORKER_NAME",
   "account_id": "ACCOUNT_ID",
   "main": "src/data-worker.ts",
-  "compatibility_date": "2026-03-20",
+  "compatibility_date": "2026-03-21",
   "compatibility_flags": [
     "nodejs_compat"
   ], 

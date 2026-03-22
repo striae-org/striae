@@ -433,6 +433,22 @@ async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): 
   }
 }
 
+async function deleteUserConfirmationSummary(env: Env, userUid: string): Promise<void> {
+  const dataApiKey = env.R2_KEY_SECRET;
+  const dataWorkerBaseUrl = resolveDataWorkerBaseUrl(env);
+  const encodedUserId = encodeURIComponent(userUid);
+  const confirmationSummaryPath = `${dataWorkerBaseUrl}/${encodedUserId}/meta/confirmation-status.json`;
+
+  const response = await fetch(confirmationSummaryPath, {
+    method: 'DELETE',
+    headers: { 'X-Custom-Auth-Key': dataApiKey }
+  });
+
+  if (!response.ok && response.status !== 404) {
+    throw new Error(`Failed to delete confirmation summary metadata: ${response.status}`);
+  }
+}
+
 async function executeUserDeletion(
   env: Env,
   userUid: string,
@@ -490,6 +506,7 @@ async function executeUserDeletion(
     throw new Error(`Failed to fully delete all case data: ${caseCleanupErrors.join(' | ')}`);
   }
 
+  await deleteUserConfirmationSummary(env, userUid);
   await deleteFirebaseAuthUser(env, userUid);
 
   // Delete the user account from the database

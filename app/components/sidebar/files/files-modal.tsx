@@ -3,7 +3,7 @@ import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { deleteFile } from '~/components/actions/image-manage';
-import { getFileAnnotations } from '~/utils/data';
+import { ensureCaseConfirmationSummary } from '~/utils/data';
 import { type FileData } from '~/types';
 import styles from './files-modal.module.css';
 
@@ -16,6 +16,7 @@ interface FilesModalProps {
   setFiles: React.Dispatch<React.SetStateAction<FileData[]>>;
   isReadOnly?: boolean;
   selectedFileId?: string;
+  confirmationSaveVersion?: number;
 }
 
 const FILES_PER_PAGE = 10;
@@ -28,7 +29,17 @@ interface FileConfirmationStatus {
   };
 }
 
-export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, setFiles, isReadOnly = false, selectedFileId }: FilesModalProps) => {
+export const FilesModal = ({
+  isOpen,
+  onClose,
+  onFileSelect,
+  currentCase,
+  files,
+  setFiles,
+  isReadOnly = false,
+  selectedFileId,
+  confirmationSaveVersion = 0
+}: FilesModalProps) => {
   const { user } = useContext(AuthContext);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -48,54 +59,36 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
   const endIndex = startIndex + FILES_PER_PAGE;
   const currentFiles = files.slice(startIndex, endIndex);
 
-  // Fetch confirmation status only for currently visible paginated files
+  // Hydrate confirmation status from shared summary document.
   useEffect(() => {
-    const fetchConfirmationStatuses = async () => {
-      const visibleFiles = files.slice(
-        currentPage * FILES_PER_PAGE,
-        currentPage * FILES_PER_PAGE + FILES_PER_PAGE
-      );
+    let isCancelled = false;
 
-      if (!isOpen || !currentCase || !user || visibleFiles.length === 0) {
+    const fetchConfirmationStatuses = async () => {
+      if (!isOpen || !currentCase || !user || files.length === 0) {
+        if (!isCancelled) {
+          setFileConfirmationStatus({});
+        }
         return;
       }
 
-      // Fetch annotations in parallel for only visible files
-      const annotationPromises = visibleFiles.map(async (file) => {
-        try {
-          const annotations = await getFileAnnotations(user, currentCase, file.id);
-          return {
-            fileId: file.id,
-            includeConfirmation: annotations?.includeConfirmation ?? false,
-            isConfirmed: !!(annotations?.includeConfirmation && annotations?.confirmationData),
-          };
-        } catch (err) {
-          console.error(`Error fetching annotations for file ${file.id}:`, err);
-          return {
-            fileId: file.id,
-            includeConfirmation: false,
-            isConfirmed: false,
-          };
-        }
+      const caseSummary = await ensureCaseConfirmationSummary(user, currentCase, files).catch((err) => {
+        console.error(`Error fetching confirmation summary for case ${currentCase}:`, err);
+        return null;
       });
 
-      // Wait for all fetches to complete
-      const results = await Promise.all(annotationPromises);
+      if (!caseSummary || isCancelled) {
+        return;
+      }
 
-      // Build the statuses map from results
-      const statuses: FileConfirmationStatus = {};
-      results.forEach((result) => {
-        statuses[result.fileId] = {
-          includeConfirmation: result.includeConfirmation,
-          isConfirmed: result.isConfirmed,
-        };
-      });
-
-      setFileConfirmationStatus(statuses);
+      setFileConfirmationStatus(caseSummary.filesById);
     };
 
     fetchConfirmationStatuses();
-  }, [isOpen, currentCase, currentPage, files, user]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isOpen, currentCase, files, user, confirmationSaveVersion]);
 
   const handleFileSelect = (file: FileData) => {
     onFileSelect?.(file);
@@ -121,6 +114,11 @@ export const FilesModal = ({ isOpen, onClose, onFileSelect, currentCase, files, 
       // Remove the deleted file from the list
       const updatedFiles = files.filter(f => f.id !== fileId);
       setFiles(updatedFiles);
+      setFileConfirmationStatus((previous) => {
+        const next = { ...previous };
+        delete next[fileId];
+        return next;
+      });
 
       if (deleteResult.imageMissing) {
         setError(`File record deleted. Image asset "${deleteResult.fileName}" was not found and was skipped.`);

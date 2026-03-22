@@ -145,17 +145,28 @@ async function handleImageServing(request: Request, env: Env): Promise<Response>
 
   const url = new URL(request.url);
   const encodedPath = url.pathname.slice(1);
-  let decodedPath = encodedPath;
+  if (!encodedPath) {
+    return createResponse({ error: 'Image delivery URL is required' }, 400);
+  }
+
+  let decodedPath: string;
 
   try {
     decodedPath = decodeURIComponent(encodedPath);
   } catch {
-    decodedPath = encodedPath;
+    return createResponse({ error: 'Image delivery URL must be URL-encoded' }, 400);
   }
 
-  const imageDeliveryURL = new URL(
-    decodedPath.replace('https:/imagedelivery.net', 'https://imagedelivery.net')
-  );
+  let imageDeliveryURL: URL;
+  try {
+    imageDeliveryURL = new URL(decodedPath);
+  } catch {
+    return createResponse({ error: 'Image delivery URL is invalid' }, 400);
+  }
+
+  if (imageDeliveryURL.protocol !== 'https:' || imageDeliveryURL.hostname !== 'imagedelivery.net') {
+    return createResponse({ error: 'Image delivery URL must target imagedelivery.net over HTTPS' }, 400);
+  }
   
   return generateSignedUrl(imageDeliveryURL, env);
 }

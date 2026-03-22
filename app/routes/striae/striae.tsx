@@ -732,6 +732,9 @@ export const Striae = ({ user }: StriaePage) => {
         <SidebarContainer 
           user={user} 
           onImageSelect={handleImageSelect}
+          onOpenCase={() => {
+            void handleOpenCaseModal();
+          }}
           imageId={imageId}
           currentCase={currentCase}
           imageLoaded={imageLoaded}
@@ -797,6 +800,7 @@ export const Striae = ({ user }: StriaePage) => {
         }}
         currentCase={currentCase || ''}
         user={user}
+        confirmationSaveVersion={confirmationSaveVersion}
       />
       <FilesModal
         isOpen={isFilesModalOpen}
@@ -809,6 +813,7 @@ export const Striae = ({ user }: StriaePage) => {
         setFiles={setFiles}
         isReadOnly={isReadOnlyCase}
         selectedFileId={imageId}
+        confirmationSaveVersion={confirmationSaveVersion}
       />
       <NotesEditorModal
         isOpen={showNotes}
@@ -819,6 +824,7 @@ export const Striae = ({ user }: StriaePage) => {
         onAnnotationRefresh={refreshAnnotationData}
         originalFileName={files.find(file => file.id === imageId)?.originalFilename}
         isUploading={isUploading}
+        showNotification={showNotification}
       />
       <CaseExport
         isOpen={isCaseExportModalOpen}

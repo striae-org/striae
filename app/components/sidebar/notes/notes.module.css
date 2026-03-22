@@ -1,20 +1,20 @@
-.notesSidebar {
+.notesEditorForm {
   padding: 0.3rem;
 }
 
-.compactLayout .caseNumbers {
+.editorLayout .caseNumbers {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.25rem;
   align-items: start;
 }
 
-.compactLayout .caseNumbers > .inputGroup + .inputGroup {
+.editorLayout .caseNumbers > .inputGroup + .inputGroup {
   border-left: 1px solid #dee2e6;
   padding-left: 1.25rem;
 }
 
-.compactLayout .inputGroup {
+.editorLayout .inputGroup {
   margin-bottom: 0;
 }
 
@@ -35,11 +35,11 @@
   margin-bottom: 1.5rem;
 }
 
-.compactLayout .notesActionBarSticky {
+.editorLayout .notesActionBarSticky {
   margin-top: 0.25rem;
 }
 
-.compactLayout .compactSectionGrid > .compactHalfSection + .compactHalfSection {
+.editorLayout .compactSectionGrid > .compactHalfSection + .compactHalfSection {
   border-left: 1px solid #dee2e6;
   padding-left: 1.25rem;
 }
@@ -49,19 +49,19 @@
   padding-left: 1.25rem;
 }
 
-.compactLayout .additionalNotesRow {
+.editorLayout .additionalNotesRow {
   border-top: 1px solid #dee2e6;
   padding-top: 1.25rem;
 }
 
 @media (max-width: 980px) {
-  .compactLayout .caseNumbers,
+  .editorLayout .caseNumbers,
   .compactSectionGrid {
     grid-template-columns: 1fr;
   }
 
-  .compactLayout .caseNumbers > .inputGroup + .inputGroup,
-  .compactLayout
+  .editorLayout .caseNumbers > .inputGroup + .inputGroup,
+  .editorLayout
     .compactSectionGrid
     > .compactHalfSection
     + .compactHalfSection,
@@ -152,7 +152,23 @@ textarea:focus {
 }
 
 .caseNumbers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
   margin-bottom: 2rem;
+}
+
+.fontColorRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.fontColorRow label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #212529;
 }
 
 .caseInput {
@@ -382,7 +398,7 @@ textarea:focus {
   width: 100%;
 }
 
-.compactLayout .additionalNotesRow {
+.editorLayout .additionalNotesRow {
   grid-column: 1 / -1;
 }
 

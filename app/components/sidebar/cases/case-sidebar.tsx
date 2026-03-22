@@ -9,13 +9,15 @@ import {
 } from '../../actions/image-manage';
 import { 
   canUploadFile, 
-  getFileAnnotations
+  ensureCaseConfirmationSummary,
+  getCaseConfirmationSummary
 } from '~/utils/data';
 import { type FileData } from '~/types';
 
 interface CaseSidebarProps {
   user: User;
   onImageSelect: (file: FileData) => void;
+  onOpenCase: () => void;
   imageLoaded: boolean;
   setImageLoaded: (loaded: boolean) => void;
   onNotesClick: () => void;
@@ -34,6 +36,7 @@ interface CaseSidebarProps {
 export const CaseSidebar = ({ 
   user, 
   onImageSelect, 
+  onOpenCase,
   imageLoaded,
   setImageLoaded,
   onNotesClick,
@@ -66,21 +69,6 @@ export const CaseSidebar = ({
     () => files.map((file) => file.id).sort().join('|'),
     [files]
   );
-
-  const calculateCaseConfirmationStatus = useCallback((
-    statuses: { [fileId: string]: { includeConfirmation: boolean; isConfirmed: boolean } }
-  ) => {
-    const filesRequiringConfirmation = files
-      .map((file) => statuses[file.id] || { includeConfirmation: false, isConfirmed: false })
-      .filter((status) => status.includeConfirmation);
-
-    const allConfirmedFiles = filesRequiringConfirmation.every((status) => status.isConfirmed);
-
-    return {
-      includeConfirmation: filesRequiringConfirmation.length > 0,
-      isConfirmed: filesRequiringConfirmation.length > 0 ? allConfirmedFiles : false,
-    };
-  }, [files]);
 
   // Function to check file upload permissions (extracted for reuse)
   const checkFileUploadPermissions = useCallback(async (fileCount?: number) => {
@@ -135,43 +123,24 @@ export const CaseSidebar = ({
         return;
       }
 
-      // Fetch all annotations in parallel
-      const annotationPromises = files.map(async (file) => {
-        try {
-          const annotations = await getFileAnnotations(user, currentCase, file.id);
-          return {
-            fileId: file.id,
-            includeConfirmation: annotations?.includeConfirmation ?? false,
-            isConfirmed: !!annotations?.confirmationData,
-          };
-        } catch (err) {
-          console.error(`Error fetching annotations for file ${file.id}:`, err);
-          return {
-            fileId: file.id,
-            includeConfirmation: false,
-            isConfirmed: false,
-          };
-        }
+      const caseSummary = await ensureCaseConfirmationSummary(user, currentCase, files).catch((error) => {
+        console.error(`Error fetching confirmation summary for case ${currentCase}:`, error);
+        return null;
       });
 
-      // Wait for all fetches to complete
-      const results = await Promise.all(annotationPromises);
-
-      // Build the statuses map from results
-      const statuses: { [fileId: string]: { includeConfirmation: boolean; isConfirmed: boolean } } = {};
-      results.forEach((result) => {
-        statuses[result.fileId] = {
-          includeConfirmation: result.includeConfirmation,
-          isConfirmed: result.isConfirmed,
-        };
-      });
+      if (!caseSummary) {
+        return;
+      }
 
       if (isCancelled) {
         return;
       }
 
-      setFileConfirmationStatus(statuses);
-      setCaseConfirmationStatus(calculateCaseConfirmationStatus(statuses));
+      setFileConfirmationStatus(caseSummary.filesById);
+      setCaseConfirmationStatus({
+        includeConfirmation: caseSummary.includeConfirmation,
+        isConfirmed: caseSummary.isConfirmed
+      });
     };
 
     fetchConfirmationStatuses();
@@ -179,7 +148,7 @@ export const CaseSidebar = ({
     return () => {
       isCancelled = true;
     };
-  }, [currentCase, fileIdsKey, user, files, calculateCaseConfirmationStatus]);
+  }, [currentCase, fileIdsKey, user, files]);
 
   // Refresh only selected file confirmation status after confirmation-related data is persisted
   useEffect(() => {
@@ -191,24 +160,18 @@ export const CaseSidebar = ({
       }
 
       try {
-        const annotations = await getFileAnnotations(user, currentCase, selectedFileId);
-        const selectedStatus = {
-          includeConfirmation: annotations?.includeConfirmation ?? false,
-          isConfirmed: !!annotations?.confirmationData,
-        };
+        const caseSummary =
+          await getCaseConfirmationSummary(user, currentCase) ||
+          await ensureCaseConfirmationSummary(user, currentCase, files);
 
         if (isCancelled) {
           return;
         }
 
-        setFileConfirmationStatus((previous) => {
-          const next = {
-            ...previous,
-            [selectedFileId]: selectedStatus,
-          };
-
-          setCaseConfirmationStatus(calculateCaseConfirmationStatus(next));
-          return next;
+        setFileConfirmationStatus(caseSummary.filesById);
+        setCaseConfirmationStatus({
+          includeConfirmation: caseSummary.includeConfirmation,
+          isConfirmed: caseSummary.isConfirmed
         });
       } catch (err) {
         console.error(`Error refreshing confirmation status for file ${selectedFileId}:`, err);
@@ -220,7 +183,7 @@ export const CaseSidebar = ({
     return () => {
       isCancelled = true;
     };
-  }, [currentCase, fileIdsKey, user, selectedFileId, confirmationSaveVersion, files.length, calculateCaseConfirmationStatus]);
+  }, [currentCase, fileIdsKey, user, selectedFileId, confirmationSaveVersion, files]);
 
   const handleFileDelete = async (fileId: string) => {
     // Don't allow file deletion for read-only cases
@@ -303,19 +266,30 @@ return (
         setFiles={setFiles}
         isReadOnly={isReadOnly}
         selectedFileId={selectedFileId}
+        confirmationSaveVersion={confirmationSaveVersion}
       />
       
         <div className={styles.filesSection}>
         <div className={currentCase ? (isReadOnly ? styles.readOnlyContainer : styles.caseHeader) : styles.emptyCaseHeader}>
-        <h4 className={`${styles.caseNumber} ${
-          currentCase && caseConfirmationStatus.includeConfirmation 
-            ? caseConfirmationStatus.isConfirmed 
-              ? styles.caseConfirmed 
-              : styles.caseNotConfirmed
-            : ''
-        }`}>
-          {currentCase || 'No Case Selected'}
-        </h4>
+        {currentCase ? (
+          <h4 className={`${styles.caseNumber} ${
+            caseConfirmationStatus.includeConfirmation 
+              ? caseConfirmationStatus.isConfirmed 
+                ? styles.caseConfirmed 
+                : styles.caseNotConfirmed
+              : ''
+          }`}>
+            {currentCase}
+          </h4>
+        ) : (
+          <button
+            type="button"
+            className={styles.openCaseButton}
+            onClick={onOpenCase}
+          >
+            Open Case
+          </button>
+        )}
       </div>
       {currentCase && (
         <ImageUploadZone

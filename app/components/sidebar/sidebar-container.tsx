@@ -13,6 +13,7 @@ import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 interface SidebarContainerProps {
   user: User;
   onImageSelect: (file: FileData) => void;
+  onOpenCase: () => void;
   imageId?: string;
   currentCase: string;
   files: FileData[];

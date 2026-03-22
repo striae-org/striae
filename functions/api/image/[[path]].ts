@@ -43,31 +43,20 @@ function extractProxyPath(url: URL): string | null {
 
   const normalizedRemainder = remainder.startsWith('/') ? remainder : `/${remainder}`;
   const encodedPath = normalizedRemainder.slice(1);
+  if (encodedPath.length === 0) {
+    return normalizedRemainder;
+  }
 
   try {
     const decodedPath = decodeURIComponent(encodedPath);
-    if (decodedPath.length > 0) {
-      return decodedPath.startsWith('/') ? decodedPath : `/${decodedPath}`;
-    }
+    return decodedPath.startsWith('/') ? decodedPath : `/${decodedPath}`;
   } catch {
-    // Keep legacy behavior for non-encoded paths.
+    return null;
   }
-
-  return normalizedRemainder;
 }
 
 function resolveImageWorkerToken(env: Env): string {
-  const imageToken = typeof env.IMAGES_API_TOKEN === 'string' ? env.IMAGES_API_TOKEN.trim() : '';
-  if (imageToken.length > 0) {
-    return imageToken;
-  }
-
-  const apiToken = typeof env.API_TOKEN === 'string' ? env.API_TOKEN.trim() : '';
-  if (apiToken.length > 0) {
-    return apiToken;
-  }
-
-  return '';
+  return typeof env.IMAGES_API_TOKEN === 'string' ? env.IMAGES_API_TOKEN.trim() : '';
 }
 
 export const onRequest = async ({ request, env }: ImageProxyContext): Promise<Response> => {

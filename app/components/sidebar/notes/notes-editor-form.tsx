@@ -1,36 +1,31 @@
 import { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import { ColorSelector } from '~/components/colors/colors';
-import { NotesModal } from './notes-modal';
+import { AddlNotesModal } from './addl-notes-modal';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { type AnnotationData } from '~/types/annotations';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { auditService } from '~/services/audit';
 import styles from './notes.module.css';
 
-interface NotesSidebarProps {
+interface NotesEditorFormProps {
   currentCase: string;
-  onReturn: () => void;
   user: User;
   imageId: string;
   onAnnotationRefresh?: () => void;
   originalFileName?: string;
   isUploading?: boolean;
-  showReturnButton?: boolean;
-  stickyActionBar?: boolean;
-  compactLayout?: boolean;
+  showNotification?: (message: string, type: 'success' | 'error' | 'warning') => void;
 }
 
 type SupportLevel = 'ID' | 'Exclusion' | 'Inconclusive';
 type ClassType = 'Bullet' | 'Cartridge Case' | 'Other';
 type IndexType = 'number' | 'color';
 
-export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotationRefresh, originalFileName, isUploading = false, showReturnButton = true, stickyActionBar = false, compactLayout = false }: NotesSidebarProps) => {
+export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefresh, originalFileName, isUploading = false, showNotification: externalShowNotification }: NotesEditorFormProps) => {
   // Loading/Saving Notes States
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string>();
-  const [saveError, setSaveError] = useState<string>();
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [isConfirmedImage, setIsConfirmedImage] = useState(false);
   // Case numbers state
   const [leftCase, setLeftCase] = useState('');
@@ -65,14 +60,18 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
   const [isSupportOpen, setIsSupportOpen] = useState(true);
   const areInputsDisabled = isUploading || isConfirmedImage;
 
+  const notificationHandler = (message: string, type: 'success' | 'error' | 'warning' = 'success') => {
+    if (externalShowNotification) {
+      externalShowNotification(message, type);
+    }
+  };
+
   useEffect(() => {
     const loadExistingNotes = async () => {
       if (!imageId || !currentCase) return;
       
       setIsLoading(true);
       setLoadError(undefined);
-      setSaveError(undefined);
-      setSaveSuccess(false);
       setIsConfirmedImage(false);
       
       try {
@@ -128,9 +127,6 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
       return;
     }
 
-    setSaveError(undefined);
-    setSaveSuccess(false);
-
     let existingData: AnnotationData | null = null;
     
     try {
@@ -139,7 +135,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
 
       if (existingData?.confirmationData) {
         setIsConfirmedImage(true);
-        setSaveError('This image is confirmed. Notes cannot be modified.');
+        notificationHandler('This image is confirmed. Notes cannot be modified.', 'error');
         return;
       }
       
@@ -193,13 +189,12 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
         existingData,
         annotationData,
         currentCase,
-        'notes-sidebar',
+        'notes-editor-form',
         imageId,
         originalFileName
       );
       
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      notificationHandler('Notes saved successfully.', 'success');
       
       // Refresh annotation data after saving notes
       if (onAnnotationRefresh) {
@@ -210,9 +205,9 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
       const errorMessage = error instanceof Error ? error.message : '';
       if (errorMessage.toLowerCase().includes('confirmed image')) {
         setIsConfirmedImage(true);
-        setSaveError('This image is confirmed. Notes cannot be modified.');
+        notificationHandler('This image is confirmed. Notes cannot be modified.', 'error');
       } else {
-        setSaveError('Failed to save notes. Please try again.');
+        notificationHandler('Failed to save notes. Please try again.', 'error');
       }
       
       // Audit logging for failed annotation save
@@ -223,7 +218,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
           existingData,
           null, // Failed save, no new value
           currentCase,
-          'notes-sidebar',
+          'notes-editor-form',
           imageId,
           originalFileName
         );
@@ -234,7 +229,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
   };
 
   return (
-    <div className={`${styles.notesSidebar} ${compactLayout ? styles.compactLayout : ''}`}>
+    <div className={`${styles.notesEditorForm} ${styles.editorLayout}`}>
       {isLoading ? (
         <div className={styles.loading}>Loading notes...</div>
       ) : loadError ? (
@@ -245,10 +240,6 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
         <div className={styles.immutableNotice}>
           This image is confirmed. Notes are read-only.
         </div>
-      )}
-
-      {saveError && (
-        <div className={styles.errorMessage}>{saveError}</div>
       )}
 
       <div className={styles.section}>
@@ -297,17 +288,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
                 disabled={areInputsDisabled}
               />
             </div>
-            {compactLayout && (
-              <div className={styles.caseInput}>
-                <label htmlFor="colorSelect">Font</label>
-                <ColorSelector
-                  selectedColor={caseFontColor}
-                  onColorSelect={setCaseFontColor}
-                />
-              </div>
-            )}
           </div>
-          {!compactLayout && <hr />}
           {/* Right side inputs */}
           <div className={styles.inputGroup}>
             <div className={styles.caseInput}>
@@ -342,21 +323,20 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
             </div>            
           </div>
         </div>
-        {!compactLayout && (
-          <>
-            <label htmlFor="colorSelect">Font</label>
-            <ColorSelector
-              selectedColor={caseFontColor}
-              onColorSelect={setCaseFontColor}
-            />
-          </>
-        )}
+        <hr />
+        <div className={styles.fontColorRow}>
+          <label htmlFor="colorSelect">Font</label>
+          <ColorSelector
+            selectedColor={caseFontColor}
+            onColorSelect={setCaseFontColor}
+          />
+        </div>
           </>
         )}
       </div>
 
-      <div className={compactLayout ? styles.compactSectionGrid : undefined}>
-      <div className={`${styles.section} ${compactLayout ? styles.compactFullSection : ''}`}>
+      <div className={styles.compactSectionGrid}>
+      <div className={`${styles.section} ${styles.compactFullSection}`}>
         <button
           type="button"
           className={styles.sectionToggle}
@@ -368,7 +348,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
         </button>
         {isClassOpen && (
           <>
-            <div className={compactLayout ? styles.classCharacteristicsColumns : undefined}>
+            <div className={styles.classCharacteristicsColumns}>
               <div className={styles.classCharacteristicsMain}>
                 <div className={styles.classCharacteristics}>
                   <select
@@ -415,18 +395,16 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
                 </label>
             </div>
 
-              {compactLayout && (
-                <div className={styles.characteristicsPlaceholder}>
-                  <h6 className={styles.placeholderTitle}>Characteristics Details</h6>
-                  <p className={styles.placeholderText}>This section is reserved for future development.</p>
-                </div>
-              )}
+              <div className={styles.characteristicsPlaceholder}>
+                <h6 className={styles.placeholderTitle}>Characteristics Details</h6>
+                <p className={styles.placeholderText}>This section is reserved for future development.</p>
+              </div>
             </div>
           </>
         )}
       </div>
 
-      <div className={`${styles.section} ${compactLayout ? styles.compactHalfSection : ''}`}>
+      <div className={`${styles.section} ${styles.compactHalfSection}`}>
         <button
           type="button"
           className={styles.sectionToggle}
@@ -477,7 +455,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
         )}
       </div>
 
-      <div className={`${styles.section} ${compactLayout ? styles.compactHalfSection : ''}`}>
+      <div className={`${styles.section} ${styles.compactHalfSection}`}>
         <button
           type="button"
           className={styles.sectionToggle}
@@ -538,7 +516,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
           </button>
         </div>
 
-        <div className={`${styles.notesActionBar} ${stickyActionBar ? styles.notesActionBarSticky : ''}`}>
+        <div className={`${styles.notesActionBar} ${styles.notesActionBarSticky}`}>
           <button 
               onClick={handleSave}
               className={styles.saveButton}
@@ -547,28 +525,13 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
             >
               Save Notes
             </button>
-          {showReturnButton && (
-            <button 
-              onClick={onReturn}
-              className={styles.returnButton}
-              disabled={isUploading}
-              title={isUploading ? "Cannot return while uploading" : undefined}
-            >
-              Return to Case Management
-            </button>
-          )}
         </div>
-          
-          {saveSuccess && (
-            <div className={styles.successMessage}>
-              Notes saved successfully!
-            </div>
-          )}
-      <NotesModal
+      <AddlNotesModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         notes={additionalNotes}
         onSave={setAdditionalNotes}
+        showNotification={notificationHandler}
       />
       </>
         )}
