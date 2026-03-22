@@ -514,6 +514,7 @@ export const Striae = ({ user }: StriaePage) => {
   // Function to refresh annotation data (called when notes are saved)
   const refreshAnnotationData = () => {
     setAnnotationRefreshTrigger(prev => prev + 1);
+    setConfirmationSaveVersion(prev => prev + 1);
   };
 
   // Handle import/clear read-only case
@@ -522,6 +523,11 @@ export const Striae = ({ user }: StriaePage) => {
       if (result.caseNumber && result.isReadOnly) {
         // Successful read-only case import - load the case
         handleCaseChange(result.caseNumber);
+      } else if (result.caseNumber) {
+        setConfirmationSaveVersion(prev => prev + 1);
+        if (result.caseNumber === currentCase) {
+          refreshAnnotationData();
+        }
       } else if (!result.caseNumber && !result.isReadOnly) {
         // Read-only case cleared - reset all UI state
         setCurrentCase('');

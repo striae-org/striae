@@ -1,5 +1,6 @@
 import type { User } from 'firebase/auth';
 import { fetchDataApi } from '~/utils/api';
+import { upsertFileConfirmationSummary } from '~/utils/data';
 import { type ConfirmationImportResult, type ConfirmationImportData } from '~/types';
 import { checkExistingCase } from '../case-manage';
 import { extractConfirmationImportPackage } from './confirmation-package';
@@ -234,6 +235,20 @@ export async function importConfirmationData(
       if (saveResponse.ok) {
         result.imagesUpdated++;
         result.confirmationsImported += confirmations.length;
+
+        try {
+          await upsertFileConfirmationSummary(
+            user,
+            result.caseNumber,
+            currentImageId,
+            updatedAnnotationData
+          );
+        } catch (summaryError) {
+          console.warn(
+            `Failed to update confirmation summary for imported confirmation ${result.caseNumber}/${currentImageId}:`,
+            summaryError
+          );
+        }
         
         // Audit log successful confirmation import
         try {
