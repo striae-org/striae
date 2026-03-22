@@ -745,6 +745,7 @@ export const Striae = ({ user }: StriaePage) => {
           setShowNotes={setShowNotes}
           onAnnotationRefresh={refreshAnnotationData}
           isReadOnly={isReadOnlyCase}
+          isArchivedCase={archiveDetails.archived}
           isConfirmed={!!annotationData?.confirmationData}
           confirmationSaveVersion={confirmationSaveVersion}
           isUploading={isUploading}

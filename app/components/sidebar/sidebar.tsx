@@ -19,6 +19,7 @@ interface SidebarProps {
   setShowNotes: (show: boolean) => void;
   onAnnotationRefresh?: () => void;
   isReadOnly?: boolean;
+  isArchivedCase?: boolean;
   isConfirmed?: boolean;
   confirmationSaveVersion?: number;
   isUploading?: boolean;
@@ -37,6 +38,7 @@ export const Sidebar = ({
   setFiles,
   setShowNotes,
   isReadOnly = false,
+  isArchivedCase = false,
   isConfirmed = false,
   confirmationSaveVersion = 0,
   isUploading: initialIsUploading = false,
@@ -69,7 +71,13 @@ export const Sidebar = ({
       setToastMessage(`${result.successCount} file${result.successCount !== 1 ? 's' : ''} uploaded!`);
     }
     setIsToastVisible(true);
-  }, []);  
+  }, []);
+
+  const handleExportNotification = useCallback((message: string, type: 'success' | 'error') => {
+    setToastType(type);
+    setToastMessage(message);
+    setIsToastVisible(true);
+  }, []);
 
   return (
     <div className={styles.sidebar}>
@@ -84,12 +92,14 @@ export const Sidebar = ({
         setFiles={setFiles}
         onNotesClick={() => setShowNotes(true)}
         isReadOnly={isReadOnly}
+        isArchivedCase={isArchivedCase}
         isConfirmed={isConfirmed}
         confirmationSaveVersion={confirmationSaveVersion}
         selectedFileId={imageId}
         isUploading={isUploading}
         onUploadStatusChange={handleUploadStatusChange}
         onUploadComplete={handleUploadComplete}
+        onExportNotification={handleExportNotification}
       />
       <Toast 
         message={toastMessage}

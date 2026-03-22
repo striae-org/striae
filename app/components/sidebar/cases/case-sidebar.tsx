@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './cases.module.css';
 import { FilesModal } from '../files/files-modal';
 import { ImageUploadZone } from '../upload/image-upload-zone';
+import { exportConfirmationData } from '../../actions/confirm-export';
 import {
   fetchFiles,
   deleteFile,
@@ -25,12 +26,14 @@ interface CaseSidebarProps {
   setFiles: React.Dispatch<React.SetStateAction<FileData[]>>;
   currentCase: string | null;
   isReadOnly?: boolean;
+  isArchivedCase?: boolean;
   isConfirmed?: boolean;
   confirmationSaveVersion?: number;
   selectedFileId?: string;
   isUploading?: boolean;
   onUploadStatusChange?: (isUploading: boolean) => void;
   onUploadComplete?: (result: { successCount: number; failedFiles: string[] }) => void;
+  onExportNotification?: (message: string, type: 'success' | 'error') => void;
 }
 
 export const CaseSidebar = ({ 
@@ -44,18 +47,21 @@ export const CaseSidebar = ({
   setFiles,
   currentCase,
   isReadOnly = false,
+  isArchivedCase = false,
   isConfirmed = false,
   confirmationSaveVersion = 0,
   selectedFileId,
   isUploading = false,
   onUploadStatusChange,
-  onUploadComplete
+  onUploadComplete,
+  onExportNotification
 }: CaseSidebarProps) => {
   
   const [, setFileError] = useState('');
   const [canUploadNewFile, setCanUploadNewFile] = useState(true);
   const [uploadFileError, setUploadFileError] = useState('');
   const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
+  const [isExportingConfirmations, setIsExportingConfirmations] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
   const [fileConfirmationStatus, setFileConfirmationStatus] = useState<{
     [fileId: string]: { includeConfirmation: boolean; isConfirmed: boolean }
@@ -223,6 +229,26 @@ const handleImageSelect = (file: FileData) => {
     setImageLoaded(false);
   };
 
+  const handleExportConfirmations = useCallback(async () => {
+    if (!currentCase || !isReadOnly || !isArchivedCase) {
+      return;
+    }
+
+    try {
+      setIsExportingConfirmations(true);
+      await exportConfirmationData(user, currentCase);
+      onExportNotification?.(`Confirmation export for case ${currentCase} downloaded successfully.`, 'success');
+    } catch (error) {
+      console.error('Failed to export confirmations:', error);
+      onExportNotification?.(
+        error instanceof Error ? error.message : 'Failed to export confirmation data.',
+        'error'
+      );
+    } finally {
+      setIsExportingConfirmations(false);
+    }
+  }, [currentCase, isArchivedCase, isReadOnly, onExportNotification, user]);
+
   const selectedFileConfirmationState = selectedFileId
     ? fileConfirmationStatus[selectedFileId]
     : undefined;
@@ -251,6 +277,14 @@ const handleImageSelect = (file: FileData) => {
     ? 'Cannot edit notes for read-only cases'
     : !imageLoaded
     ? 'Select an image first'
+    : undefined;
+
+  const showExportConfirmationsButton = Boolean(currentCase && isReadOnly && isArchivedCase);
+
+  const exportConfirmationsTitle = isUploading
+    ? 'Cannot export confirmations while uploading'
+    : !currentCase
+    ? 'Load a case first'
     : undefined;
 
 return (
@@ -371,14 +405,25 @@ return (
       )}
     </div>
     <div className={styles.sidebarToggle}>
-    <button
+      {showExportConfirmationsButton ? (
+        <button
+          className={styles.confirmationExportButton}
+          onClick={() => void handleExportConfirmations()}
+          disabled={isUploading || !currentCase || isExportingConfirmations}
+          title={exportConfirmationsTitle}
+        >
+          {isExportingConfirmations ? 'Exporting...' : 'Export Confirmations'}
+        </button>
+      ) : (
+        <button
           onClick={onNotesClick}
           disabled={isImageNotesDisabled}
           title={imageNotesTitle}
         >
           Image Notes
         </button>
-        </div>
+      )}
+    </div>
       </div>
     </>
   );

@@ -489,6 +489,29 @@
   cursor: not-allowed;
 }
 
+.confirmationExportButton {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background-color: #198754;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.confirmationExportButton:hover:not(:disabled) {
+  background-color: #146c43;
+}
+
+.confirmationExportButton:disabled {
+  background-color: var(--backgroundLight);
+  color: var(--textLight);
+  cursor: not-allowed;
+}
+
 /* Case Actions Section */
 .caseActionsSection {
   margin-top: 1.5rem;
