@@ -88,7 +88,7 @@ export const useOverlayDismiss = ({
   const isBackdropDismissInteractive = closeOnBackdrop && canDismiss;
 
   const overlayProps = {
-    role: (isBackdropDismissInteractive ? 'button' : 'presentation') as const,
+    role: isBackdropDismissInteractive ? 'button' : 'presentation',
     tabIndex: isBackdropDismissInteractive ? 0 : undefined,
     onMouseDown: isBackdropDismissInteractive ? handleOverlayMouseDown : undefined,
     onKeyDown: isBackdropDismissInteractive ? handleOverlayKeyDown : undefined,

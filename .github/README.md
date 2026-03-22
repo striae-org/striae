@@ -62,6 +62,14 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-21] - *[Patch Release v4.2.1](https://github.com/striae-org/striae/releases/tag/v4.2.1)*
+
+- **📝 Notes and Case UI Polish** - Refined notes modal naming, spacing, and message delivery behavior while improving case information spacing and sidebar open-case action presentation.
+- **🧹 Confirmation Status Cleanup Hardening** - Added confirmation status utility updates and strengthened cleanup behavior for account deletion plus deletion/archival case lifecycle paths.
+- **🧩 Data/Worker Flow Tightening** - Continued data-operations modular refactor work, tightened worker flow behavior, and removed API gateway fallback paths for clearer runtime handling.
+- **📦 Dependency and Runtime Maintenance** - Bumped Firebase to `12.11.0`, bumped Wrangler to `4.76.0`, refreshed compatibility-date metadata, and completed targeted Tailwind/PostCSS cleanup.
+- **🛠️ Release-Window Stabilization** - Included follow-up code-review and repository hygiene refinements as part of this patch cycle.
+
 ## [2026-03-20] - *[Minor Release v4.2.0](https://github.com/striae-org/striae/releases/tag/v4.2.0)*
 
 - **🗃️ Case Archival Workflow Expansion** - Added multi-phase case archival implementation and follow-up refinements across archival IDs, operation cleanup, and archived-case lifecycle handling.

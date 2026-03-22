@@ -674,6 +674,7 @@ export async function verifyCasePackageIntegrity(
   input: CasePackageIntegrityInput
 ): Promise<CasePackageIntegrityResult> {
   const manifestData = extractForensicManifestData(input.forensicManifest);
+  const verificationPublicKeyPem = input.verificationPublicKeyPem;
 
   if (!manifestData) {
     return {
@@ -694,9 +695,28 @@ export async function verifyCasePackageIntegrity(
     };
   }
 
+  if (!verificationPublicKeyPem) {
+    return {
+      isValid: false,
+      signatureResult: {
+        isValid: false,
+        error: 'Missing verification public key'
+      },
+      integrityResult: {
+        isValid: false,
+        dataValid: false,
+        imageValidation: {},
+        manifestValid: false,
+        errors: ['Missing verification public key'],
+        summary: 'Manifest validation failed'
+      },
+      bundledAuditVerification: null
+    };
+  }
+
   const signatureResult = await verifyForensicManifestSignature(
     input.forensicManifest,
-    input.verificationPublicKeyPem
+    verificationPublicKeyPem
   );
 
   const integrityResult = await validateCaseIntegritySecure(
@@ -720,11 +740,11 @@ export async function verifyCasePackageIntegrity(
             }
 
             return {
-              async: async (_type: 'text') => content,
+              async: async () => content,
             };
           }
         },
-        input.verificationPublicKeyPem
+        verificationPublicKeyPem
       )
     : null;
 
