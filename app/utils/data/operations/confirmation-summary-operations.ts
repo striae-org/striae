@@ -182,7 +182,7 @@ export const ensureCaseConfirmationSummary = async (
 
       return null;
     })
-    .filter((entry) => entry !== null);
+    .filter((entry): entry is { fileId: string; reason: 'missing' | 'stale' } => entry !== null);
 
   for (const entry of filesToRefresh) {
     if (entry.reason === 'missing') {
