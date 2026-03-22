@@ -312,17 +312,8 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
                 disabled={areInputsDisabled}
               />
             </div>
-            {compactLayout && (
-              <div className={styles.caseInput}>
-                <label htmlFor="colorSelect">Font</label>
-                <ColorSelector
-                  selectedColor={caseFontColor}
-                  onColorSelect={setCaseFontColor}
-                />
-              </div>
-            )}
           </div>
-          {!compactLayout && <hr />}
+          <hr />
           {/* Right side inputs */}
           <div className={styles.inputGroup}>
             <div className={styles.caseInput}>
@@ -357,15 +348,14 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
             </div>            
           </div>
         </div>
-        {!compactLayout && (
-          <>
-            <label htmlFor="colorSelect">Font</label>
-            <ColorSelector
-              selectedColor={caseFontColor}
-              onColorSelect={setCaseFontColor}
-            />
-          </>
-        )}
+        <hr />
+        <div className={styles.fontColorRow}>
+          <label htmlFor="colorSelect">Font</label>
+          <ColorSelector
+            selectedColor={caseFontColor}
+            onColorSelect={setCaseFontColor}
+          />
+        </div>
           </>
         )}
       </div>
