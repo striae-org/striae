@@ -1,4 +1,4 @@
-import type { PDFGenerationData, PDFGenerationRequest, ReportModule } from './report-types';
+import type { PDFGenerationData, PDFGenerationRequest, ReportModule, ReportPdfOptions } from './report-types';
 
 interface Env {
   BROWSER: Fetcher;
@@ -10,7 +10,7 @@ interface Env {
 const BROWSER_PDF_TIMEOUT_MS = 90_000;
 const BROWSER_RENDERING_API_BASE = 'https://api.cloudflare.com/client/v4/accounts';
 
-const DEFAULT_PDF_OPTIONS = {
+const DEFAULT_PDF_OPTIONS: ReportPdfOptions = {
   printBackground: true,
   format: 'letter',
   margin: {
@@ -20,6 +20,17 @@ const DEFAULT_PDF_OPTIONS = {
     right: '0.5in',
   },
 };
+
+function resolvePdfOptions(overrides?: Partial<ReportPdfOptions>): ReportPdfOptions {
+  return {
+    ...DEFAULT_PDF_OPTIONS,
+    ...overrides,
+    margin: {
+      ...DEFAULT_PDF_OPTIONS.margin,
+      ...overrides?.margin,
+    },
+  };
+}
 
 const reportModuleLoaders: Record<string, () => Promise<ReportModule>> = {
   // Default Striae report format module
@@ -101,7 +112,7 @@ function resolveReportRequest(payload: unknown): PDFGenerationRequest {
   };
 }
 
-async function renderReport(reportFormat: string, data: PDFGenerationData): Promise<string> {
+async function renderReport(reportFormat: string, data: PDFGenerationData): Promise<{ html: string; pdfOptions: ReportPdfOptions }> {
   const loader = reportModuleLoaders[reportFormat];
 
   if (!loader) {
@@ -110,17 +121,20 @@ async function renderReport(reportFormat: string, data: PDFGenerationData): Prom
   }
 
   const reportModule = await loader();
-  return reportModule.renderReport(data);
+  return {
+    html: reportModule.renderReport(data),
+    pdfOptions: resolvePdfOptions(reportModule.getPdfOptions?.(data)),
+  };
 }
 
-async function renderPdfViaRestEndpoint(env: Env, html: string): Promise<Response> {
+async function renderPdfViaRestEndpoint(env: Env, html: string, pdfOptions: ReportPdfOptions): Promise<Response> {
   const accountId = getRequiredSecret(env.ACCOUNT_ID, 'ACCOUNT_ID');
   const browserApiToken = getRequiredSecret(env.BROWSER_API_TOKEN, 'BROWSER_API_TOKEN');
 
   const endpoint = `${BROWSER_RENDERING_API_BASE}/${accountId}/browser-rendering/pdf`;
   const requestBody = JSON.stringify({
     html,
-    pdfOptions: DEFAULT_PDF_OPTIONS,
+    pdfOptions,
   });
 
   let endpointResponse: Response;
@@ -196,7 +210,7 @@ export default {
         const { reportFormat, data } = resolveReportRequest(payload);
         const document = await renderReport(reportFormat, data);
 
-        return await renderPdfViaRestEndpoint(env, document);
+        return await renderPdfViaRestEndpoint(env, document.html, document.pdfOptions);
       } catch (error) {
         if (error instanceof MissingSecretError) {
           console.error(`[pdf-worker] Configuration error: ${error.message}`);

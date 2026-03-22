@@ -65,8 +65,28 @@ export interface PDFGenerationRequest {
   data: PDFGenerationData;
 }
 
+export interface PDFMarginOptions {
+  top: string;
+  bottom: string;
+  left: string;
+  right: string;
+}
+
+export interface ReportPdfOptions {
+  printBackground?: boolean;
+  format?: string;
+  margin?: Partial<PDFMarginOptions>;
+  displayHeaderFooter?: boolean;
+  headerTemplate?: string;
+  footerTemplate?: string;
+  preferCSSPageSize?: boolean;
+}
+
 export type ReportRenderer = (data: PDFGenerationData) => string;
+
+export type ReportPdfOptionsBuilder = (data: PDFGenerationData) => Partial<ReportPdfOptions>;
 
 export interface ReportModule {
   renderReport: ReportRenderer;
+  getPdfOptions?: ReportPdfOptionsBuilder;
 }
