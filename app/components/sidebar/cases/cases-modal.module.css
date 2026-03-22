@@ -302,6 +302,27 @@
   opacity: 0.5;
 }
 
+.renameActionButton {
+  background: color-mix(in lab, #ffc107 16%, #ffffff);
+  color: #7a5a00;
+  border-color: color-mix(in lab, #ffc107 30%, transparent);
+}
+
+.renameActionButton:hover:not(:disabled) {
+  background: color-mix(in lab, #ffc107 22%, #ffffff);
+  border-color: color-mix(in lab, #ffc107 36%, transparent);
+}
+
+.archiveActionButton {
+  background: color-mix(in lab, #6c757d 15%, #ffffff);
+  color: #495057;
+  border-color: color-mix(in lab, #6c757d 28%, transparent);
+}
+
+.archiveActionButton:hover:not(:disabled) {
+  background: color-mix(in lab, #6c757d 21%, #ffffff);
+}
+
 .deleteActionButton {
   border-color: color-mix(in lab, var(--error) 25%, transparent);
   color: var(--error);

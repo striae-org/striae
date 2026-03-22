@@ -245,14 +245,6 @@ export const CasesModal = ({
     }
   }, [allCases, selectedCaseNumber]);
 
-  useEffect(() => {
-    if (!isOpen || paginatedCases.length === 0) {
-      return;
-    }
-
-    caseRowRefs.current[focusedIndex]?.focus();
-  }, [isOpen, paginatedCases, focusedIndex]);
-
   const hydrateCaseConfirmationStatuses = useCallback(async (caseNumbers: string[]) => {
     const missingCaseNumbers = caseNumbers.filter(
       (caseNum) => !caseConfirmationStatusRef.current[caseNum]
@@ -548,6 +540,9 @@ export const CasesModal = ({
       event.preventDefault();
       const nextIndex = Math.min(index + 1, paginatedCases.length - 1);
       setFocusedIndex(nextIndex);
+      window.requestAnimationFrame(() => {
+        caseRowRefs.current[nextIndex]?.focus();
+      });
       return;
     }
 
@@ -555,6 +550,9 @@ export const CasesModal = ({
       event.preventDefault();
       const nextIndex = Math.max(index - 1, 0);
       setFocusedIndex(nextIndex);
+      window.requestAnimationFrame(() => {
+        caseRowRefs.current[nextIndex]?.focus();
+      });
       return;
     }
 
@@ -762,7 +760,7 @@ export const CasesModal = ({
             </button>
             <button
               type="button"
-              className={styles.secondaryActionButton}
+              className={`${styles.secondaryActionButton} ${styles.renameActionButton}`}
               onClick={handleRenameSelectedCase}
               disabled={!canRenameSelectedCase || isRunningAction}
             >
@@ -770,7 +768,7 @@ export const CasesModal = ({
             </button>
             <button
               type="button"
-              className={styles.secondaryActionButton}
+              className={`${styles.secondaryActionButton} ${styles.archiveActionButton}`}
               onClick={handleArchiveSelectedCase}
               disabled={!canArchiveSelectedCase || isRunningAction}
             >
