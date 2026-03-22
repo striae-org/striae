@@ -605,7 +605,7 @@ export const CasesModal = ({
                 </div>
 
                 <div className={styles.controlGroup}>
-                  <label htmlFor="cases-confirmation-filter">Confirmation</label>
+                  <label htmlFor="cases-confirmation-filter">Confirmation Status</label>
                   <select
                     id="cases-confirmation-filter"
                     value={preferences.confirmationFilter}
