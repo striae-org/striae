@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import styles from './notes.module.css';
 
@@ -13,6 +13,12 @@ interface AddlNotesModalProps {
 export const AddlNotesModal = ({ isOpen, onClose, notes, onSave, showNotification }: AddlNotesModalProps) => {
   const [tempNotes, setTempNotes] = useState(notes);
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTempNotes(notes);
+    }
+  }, [isOpen, notes]);
   const {
     requestClose,
     overlayProps,

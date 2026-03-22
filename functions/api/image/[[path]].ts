@@ -30,28 +30,32 @@ function normalizeWorkerBaseUrl(workerDomain: string): string {
   return `https://${trimmedDomain}`;
 }
 
-function extractProxyPath(url: URL): string | null {
+type ProxyPathResult =
+  | { ok: true; path: string }
+  | { ok: false; reason: 'not-found' | 'bad-encoding' };
+
+function extractProxyPath(url: URL): ProxyPathResult {
   const routePrefix = '/api/image';
   if (!url.pathname.startsWith(routePrefix)) {
-    return null;
+    return { ok: false, reason: 'not-found' };
   }
 
   const remainder = url.pathname.slice(routePrefix.length);
   if (remainder.length === 0) {
-    return '/';
+    return { ok: true, path: '/' };
   }
 
   const normalizedRemainder = remainder.startsWith('/') ? remainder : `/${remainder}`;
   const encodedPath = normalizedRemainder.slice(1);
   if (encodedPath.length === 0) {
-    return normalizedRemainder;
+    return { ok: true, path: normalizedRemainder };
   }
 
   try {
     const decodedPath = decodeURIComponent(encodedPath);
-    return decodedPath.startsWith('/') ? decodedPath : `/${decodedPath}`;
+    return { ok: true, path: decodedPath.startsWith('/') ? decodedPath : `/${decodedPath}` };
   } catch {
-    return null;
+    return { ok: false, reason: 'bad-encoding' };
   }
 }
 
@@ -80,10 +84,14 @@ export const onRequest = async ({ request, env }: ImageProxyContext): Promise<Re
   }
 
   const requestUrl = new URL(request.url);
-  const proxyPath = extractProxyPath(requestUrl);
-  if (!proxyPath) {
-    return textResponse('Not Found', 404);
+  const proxyPathResult = extractProxyPath(requestUrl);
+  if (!proxyPathResult.ok) {
+    return proxyPathResult.reason === 'bad-encoding'
+      ? textResponse('Bad Request: malformed image path encoding', 400)
+      : textResponse('Not Found', 404);
   }
+
+  const proxyPath = proxyPathResult.path;
 
   const imageWorkerToken = resolveImageWorkerToken(env);
   if (!env.IMAGES_WORKER_DOMAIN || !imageWorkerToken) {

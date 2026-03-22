@@ -53,10 +53,20 @@ function jsonResponse(body: unknown, status: number): Response {
   });
 }
 
+class MissingSecretError extends Error {
+  readonly secretKey: string;
+
+  constructor(key: string) {
+    super(`Worker is missing required secret: ${key}`);
+    this.name = 'MissingSecretError';
+    this.secretKey = key;
+  }
+}
+
 function getRequiredSecret(value: string, name: string): string {
   const normalized = value.trim();
   if (!normalized) {
-    throw new Error(`Missing required secret: ${name}`);
+    throw new MissingSecretError(name);
   }
 
   return normalized;
@@ -184,6 +194,14 @@ export default {
 
         return await renderPdfViaRestEndpoint(env, document);
       } catch (error) {
+        if (error instanceof MissingSecretError) {
+          console.error(`[pdf-worker] Configuration error: ${error.message}`);
+          return jsonResponse(
+            { error: 'Worker configuration error', missing_secret: error.secretKey },
+            502
+          );
+        }
+
         if (isTimeoutError(error)) {
           const timeoutMessage = error instanceof Error ? error.message : 'PDF generation timed out';
           return jsonResponse({ error: timeoutMessage }, 504);
