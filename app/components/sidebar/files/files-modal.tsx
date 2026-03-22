@@ -97,6 +97,15 @@ export const FilesModal = ({
   const [isDeletingSelected, setIsDeletingSelected] = useState(false);
   const [actionNotice, setActionNotice] = useState<ActionNotice | null>(null);
   const [fileConfirmationStatus, setFileConfirmationStatus] = useState<Record<string, FileConfirmationSummary>>({});
+
+  useEffect(() => {
+    if (!actionNotice) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setActionNotice(null), 5000);
+    return () => window.clearTimeout(timer);
+  }, [actionNotice]);
   const {
     preferences,
     setSortBy,
