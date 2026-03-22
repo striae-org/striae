@@ -386,6 +386,14 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
                       disabled={areInputsDisabled}
                     />
                   )}
+
+                  <textarea
+                    value={classNote}
+                    onChange={(e) => setClassNote(e.target.value)}
+                    placeholder="Enter class characteristic details..."
+                    className={styles.textarea}
+                    disabled={areInputsDisabled}
+                  />
                 </div>
                 <label className={`${styles.checkboxLabel} mb-4`}>
                   <input
@@ -408,13 +416,6 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
                 >
                   Enter Class Characteristic Details
                 </button>
-                <textarea
-                  value={classNote}
-                  onChange={(e) => setClassNote(e.target.value)}
-                  placeholder="Class notes..."
-                  className={styles.textarea}
-                  disabled={areInputsDisabled}
-                />
               </div>
             </div>
           </>
