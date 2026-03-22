@@ -12,6 +12,7 @@ interface NotesEditorModalProps {
   originalFileName?: string;
   onAnnotationRefresh?: () => void;
   isUploading?: boolean;
+  showNotification?: (message: string, type: 'success' | 'error' | 'warning') => void;
 }
 
 export const NotesEditorModal = ({
@@ -23,6 +24,7 @@ export const NotesEditorModal = ({
   originalFileName,
   onAnnotationRefresh,
   isUploading = false,
+  showNotification,
 }: NotesEditorModalProps) => {
   const {
     requestClose,
@@ -58,6 +60,7 @@ export const NotesEditorModal = ({
             showReturnButton={false}
             stickyActionBar={true}
             compactLayout={true}
+            showNotification={showNotification}
           />
         </div>
       </div>

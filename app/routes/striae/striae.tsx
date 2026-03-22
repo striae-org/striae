@@ -824,6 +824,7 @@ export const Striae = ({ user }: StriaePage) => {
         onAnnotationRefresh={refreshAnnotationData}
         originalFileName={files.find(file => file.id === imageId)?.originalFilename}
         isUploading={isUploading}
+        showNotification={showNotification}
       />
       <CaseExport
         isOpen={isCaseExportModalOpen}

@@ -19,13 +19,14 @@ interface NotesSidebarProps {
   showReturnButton?: boolean;
   stickyActionBar?: boolean;
   compactLayout?: boolean;
+  showNotification?: (message: string, type: 'success' | 'error' | 'warning') => void;
 }
 
 type SupportLevel = 'ID' | 'Exclusion' | 'Inconclusive';
 type ClassType = 'Bullet' | 'Cartridge Case' | 'Other';
 type IndexType = 'number' | 'color';
 
-export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotationRefresh, originalFileName, isUploading = false, showReturnButton = true, stickyActionBar = false, compactLayout = false }: NotesSidebarProps) => {
+export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotationRefresh, originalFileName, isUploading = false, showReturnButton = true, stickyActionBar = false, compactLayout = false, showNotification: externalShowNotification }: NotesSidebarProps) => {
   // Loading/Saving Notes States
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string>();
@@ -64,6 +65,20 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
   const [isIndexOpen, setIsIndexOpen] = useState(true);
   const [isSupportOpen, setIsSupportOpen] = useState(true);
   const areInputsDisabled = isUploading || isConfirmedImage;
+
+  const notificationHandler = (message: string, type: 'success' | 'error' | 'warning' = 'success') => {
+    if (externalShowNotification) {
+      externalShowNotification(message, type);
+    } else {
+      // Fallback to state-based notifications if no callback provided
+      if (type === 'error') {
+        setSaveError(message);
+      } else if (type === 'success') {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    }
+  };
 
   useEffect(() => {
     const loadExistingNotes = async () => {
@@ -569,6 +584,7 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
         onClose={() => setIsModalOpen(false)}
         notes={additionalNotes}
         onSave={setAdditionalNotes}
+        showNotification={notificationHandler}
       />
       </>
         )}

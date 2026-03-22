@@ -7,10 +7,12 @@ interface NotesModalProps {
   onClose: () => void;
   notes: string;
   onSave: (notes: string) => void;
+  showNotification?: (message: string, type: 'success' | 'error' | 'warning') => void;
 }
 
-export const NotesModal = ({ isOpen, onClose, notes, onSave }: NotesModalProps) => {
+export const NotesModal = ({ isOpen, onClose, notes, onSave, showNotification }: NotesModalProps) => {
   const [tempNotes, setTempNotes] = useState(notes);
+  const [isSaving, setIsSaving] = useState(false);
   const {
     requestClose,
     overlayProps,
@@ -22,9 +24,18 @@ export const NotesModal = ({ isOpen, onClose, notes, onSave }: NotesModalProps) 
 
   if (!isOpen) return null;  
 
-  const handleSave = () => {
-    onSave(tempNotes);
-    requestClose();
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await Promise.resolve(onSave(tempNotes));
+      showNotification?.('Notes saved successfully.', 'success');
+      requestClose();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save notes.';
+      showNotification?.(message, 'error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -43,8 +54,21 @@ export const NotesModal = ({ isOpen, onClose, notes, onSave }: NotesModalProps) 
           placeholder="Enter additional notes..."
         />
         <div className={styles.modalButtons}>
-          <button onClick={handleSave} className={styles.saveButton}>Save</button>
-          <button onClick={requestClose} className={styles.cancelButton}>Cancel</button>
+          <button 
+            onClick={handleSave} 
+            className={styles.saveButton}
+            disabled={isSaving}
+            aria-busy={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save'}
+          </button>
+          <button 
+            onClick={requestClose} 
+            className={styles.cancelButton}
+            disabled={isSaving}
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>
