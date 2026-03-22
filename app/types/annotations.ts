@@ -25,7 +25,7 @@ export interface ConfirmationData {
 export interface BulletAnnotationData {
   caliber?: string;
   mass?: string;
-  radius?: string;
+  diameter?: string;
   lgNumber?: number;
   lgDirection?: string;
   // Width arrays should align with lgNumber:

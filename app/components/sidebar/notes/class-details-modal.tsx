@@ -25,6 +25,59 @@ interface ClassDetailsModalProps {
   isReadOnly?: boolean;
 }
 
+const PISTOL_CALIBERS: string[] = [
+  '.22 LR',
+  '.25 ACP',
+  '.32 ACP',
+  '.380 ACP (9 mm Kurz, 9×17)',
+  '9 mm Luger / 9×19 (9 mm Parabellum, 9 mm NATO)',
+  '.38 Special',
+  '.357 Magnum',
+  '.40 S&W',
+  '10 mm Auto',
+  '.44 Special',
+  '.44 Magnum',
+  '.45 ACP',
+  '.45 Colt (.45 Long Colt)',
+  '.454 Casull',
+  '.50 AE',
+];
+
+const RIFLE_CALIBERS: string[] = [
+  '.22 LR',
+  '.17 HMR',
+  '.22 WMR (.22 Magnum)',
+  '.223 Remington / 5.56×45 NATO',
+  '.243 Winchester',
+  '6 mm Creedmoor / .243 class',
+  '6.5×55 Swedish',
+  '6.5 Creedmoor',
+  '.270 Winchester',
+  '7 mm-08 Remington / 7 mm Remington Magnum',
+  '.30-30 Winchester',
+  '.308 Winchester / 7.62×51 NATO',
+  '.30-06 Springfield',
+  '7.62×39 (AK family)',
+  '7.62×54R',
+  '.300 Winchester Magnum',
+  '.300 AAC Blackout',
+  '.338 Winchester Magnum',
+  '.45-70 Government',
+  '.50 BMG (12.7×99)',
+];
+
+const SHOTSHELL_GAUGES: string[] = [
+  '10 gauge',
+  '12 gauge',
+  '16 gauge',
+  '20 gauge',
+  '28 gauge',
+  '.410 bore',
+];
+
+const ALL_CALIBERS: string[] = [...PISTOL_CALIBERS, ...RIFLE_CALIBERS];
+const CUSTOM = '__custom__';
+
 export const ClassDetailsModal = ({
   isOpen,
   onClose,
@@ -38,7 +91,9 @@ export const ClassDetailsModal = ({
 }: ClassDetailsModalProps) => {
   // Bullet local state
   const [bCaliber, setBCaliber] = useState('');
+  const [bCaliberIsCustom, setBCaliberIsCustom] = useState(false);
   const [bMass, setBMass] = useState('');
+  const [bDiameter, setBDiameter] = useState('');
   const [bLgNumber, setBLgNumber] = useState('');
   const [bLgDirection, setBLgDirection] = useState('');
   const [bLWidths, setBLWidths] = useState<string[]>([]);
@@ -49,6 +104,7 @@ export const ClassDetailsModal = ({
 
   // Cartridge Case local state
   const [cCaliber, setCCaliber] = useState('');
+  const [cCaliberIsCustom, setCCaliberIsCustom] = useState(false);
   const [cBrand, setCBrand] = useState('');
   const [cMetal, setCMetal] = useState('');
   const [cPrimerType, setCPrimerType] = useState('');
@@ -64,6 +120,7 @@ export const ClassDetailsModal = ({
 
   // Shotshell local state
   const [sGauge, setSGauge] = useState('');
+  const [sGaugeIsCustom, setSGaugeIsCustom] = useState(false);
   const [sShotSize, setSShotSize] = useState('');
   const [sMetal, setSMetal] = useState('');
   const [sBrand, setSBrand] = useState('');
@@ -77,7 +134,9 @@ export const ClassDetailsModal = ({
   useEffect(() => {
     if (isOpen) {
       setBCaliber(bulletData?.caliber || '');
+      setBCaliberIsCustom(!!bulletData?.caliber && !ALL_CALIBERS.includes(bulletData.caliber));
       setBMass(bulletData?.mass || '');
+      setBDiameter(bulletData?.diameter || '');
       setBLgNumber(bulletData?.lgNumber !== undefined ? String(bulletData.lgNumber) : '');
       setBLgDirection(bulletData?.lgDirection || '');
       setBLWidths(bulletData?.lWidths || []);
@@ -87,6 +146,7 @@ export const ClassDetailsModal = ({
       setBBulletType(bulletData?.bulletType || '');
 
       setCCaliber(cartridgeCaseData?.caliber || '');
+      setCCaliberIsCustom(!!cartridgeCaseData?.caliber && !ALL_CALIBERS.includes(cartridgeCaseData.caliber));
       setCBrand(cartridgeCaseData?.brand || '');
       setCMetal(cartridgeCaseData?.metal || '');
       setCPrimerType(cartridgeCaseData?.primerType || '');
@@ -101,6 +161,7 @@ export const ClassDetailsModal = ({
       setCHasEjectionPortMarks(cartridgeCaseData?.hasEjectionPortMarks ?? false);
 
       setSGauge(shotshellData?.gauge || '');
+      setSGaugeIsCustom(!!shotshellData?.gauge && !SHOTSHELL_GAUGES.includes(shotshellData.gauge));
       setSShotSize(shotshellData?.shotSize || '');
       setSMetal(shotshellData?.metal || '');
       setSBrand(shotshellData?.brand || '');
@@ -123,6 +184,15 @@ export const ClassDetailsModal = ({
   const handleGWidth = (i: number, val: string) =>
     setBGWidths(prev => { const next = [...prev]; next[i] = val; return next; });
 
+  const handleCaliberSelect = (
+    val: string,
+    setVal: (v: string) => void,
+    setCustom: (v: boolean) => void,
+  ) => {
+    if (val === CUSTOM) { setCustom(true); setVal(''); }
+    else { setCustom(false); setVal(val); }
+  };
+
   const showBullet = classType === 'Bullet' || classType === 'Other' || classType === '';
   const showCartridge = classType === 'Cartridge Case' || classType === 'Other' || classType === '';
   const showShotshell = classType === 'Shotshell' || classType === 'Other' || classType === '';
@@ -134,6 +204,7 @@ export const ClassDetailsModal = ({
       const newBulletData: BulletAnnotationData | undefined = showBullet ? {
         caliber: bCaliber || undefined,
         mass: bMass || undefined,
+        diameter: bDiameter || undefined,
         lgNumber: bLgNumber ? Number(bLgNumber) : undefined,
         lgDirection: bLgDirection || undefined,
         lWidths: bLWidths.some(Boolean) ? bLWidths : undefined,
@@ -198,14 +269,31 @@ export const ClassDetailsModal = ({
               <div className={styles.classDetailsFieldGrid}>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Caliber</span>
-                  <input
-                    type="text"
-                    value={bCaliber}
-                    onChange={(e) => setBCaliber(e.target.value)}
+                  <select
+                    value={bCaliberIsCustom ? CUSTOM : bCaliber}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setBCaliber, setBCaliberIsCustom)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. .38 Special"
-                  />
+                  >
+                    <option value="">Select caliber...</option>
+                    <optgroup label="Pistol">
+                      {PISTOL_CALIBERS.map((c) => <option key={`p-${c}`} value={c}>{c}</option>)}
+                    </optgroup>
+                    <optgroup label="Rifle">
+                      {RIFLE_CALIBERS.map((c) => <option key={`r-${c}`} value={c}>{c}</option>)}
+                    </optgroup>
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {bCaliberIsCustom && (
+                    <input
+                      type="text"
+                      value={bCaliber}
+                      onChange={(e) => setBCaliber(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter caliber..."
+                    />
+                  )}
                 </div>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Mass</span>
@@ -216,6 +304,17 @@ export const ClassDetailsModal = ({
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
                     placeholder="e.g. 158 gr"
+                  />
+                </div>
+                <div className={styles.classDetailsField}>
+                  <span className={styles.classDetailsLabel}>Diameter</span>
+                  <input
+                    type="text"
+                    value={bDiameter}
+                    onChange={(e) => setBDiameter(e.target.value)}
+                    className={styles.classDetailsInput}
+                    disabled={isReadOnly}
+                    placeholder="e.g. 0.357 in"
                   />
                 </div>
                 <div className={styles.classDetailsField}>
@@ -310,14 +409,31 @@ export const ClassDetailsModal = ({
               <div className={styles.classDetailsFieldGrid}>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Caliber</span>
-                  <input
-                    type="text"
-                    value={cCaliber}
-                    onChange={(e) => setCCaliber(e.target.value)}
+                  <select
+                    value={cCaliberIsCustom ? CUSTOM : cCaliber}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setCCaliber, setCCaliberIsCustom)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. 9mm"
-                  />
+                  >
+                    <option value="">Select caliber...</option>
+                    <optgroup label="Pistol">
+                      {PISTOL_CALIBERS.map((c) => <option key={`p-${c}`} value={c}>{c}</option>)}
+                    </optgroup>
+                    <optgroup label="Rifle">
+                      {RIFLE_CALIBERS.map((c) => <option key={`r-${c}`} value={c}>{c}</option>)}
+                    </optgroup>
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {cCaliberIsCustom && (
+                    <input
+                      type="text"
+                      value={cCaliber}
+                      onChange={(e) => setCCaliber(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter caliber..."
+                    />
+                  )}
                 </div>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Brand</span>
@@ -414,14 +530,26 @@ export const ClassDetailsModal = ({
               <div className={styles.classDetailsFieldGrid}>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Gauge</span>
-                  <input
-                    type="text"
-                    value={sGauge}
-                    onChange={(e) => setSGauge(e.target.value)}
+                  <select
+                    value={sGaugeIsCustom ? CUSTOM : sGauge}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setSGauge, setSGaugeIsCustom)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. 12"
-                  />
+                  >
+                    <option value="">Select gauge...</option>
+                    {SHOTSHELL_GAUGES.map((g) => <option key={g} value={g}>{g}</option>)}
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {sGaugeIsCustom && (
+                    <input
+                      type="text"
+                      value={sGauge}
+                      onChange={(e) => setSGauge(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter gauge..."
+                    />
+                  )}
                 </div>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Shot Size</span>
