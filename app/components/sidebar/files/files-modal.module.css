@@ -14,6 +14,7 @@
   position: relative;
   background: var(--backgroundLight);
   border-radius: var(--spaceXS);
+  overflow: hidden;
   width: 90%;
   max-width: var(--maxWidthL);
   max-height: 84vh;

@@ -11,7 +11,8 @@
 .modal {
   position: relative;
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: var(--spaceXS);
+  overflow: hidden;
   border: 1px solid #d9e0e7;
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
   padding: 1.1rem;
