@@ -183,7 +183,7 @@
   border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
   border-radius: var(--spaceXS);
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--spaceM);
   background: var(--backgroundLight);
@@ -206,12 +206,13 @@
 }
 
 .fileItem.active {
-  background-color: color-mix(in lab, var(--background) 90%, transparent);
-  font-weight: var(--fontWeightMedium);
+  border-color: color-mix(in lab, var(--primary) 55%, transparent);
+  box-shadow:
+    inset 4px 0 0 color-mix(in lab, var(--primary) 55%, transparent),
+    0 0 0 1px color-mix(in lab, var(--primary) 16%, transparent);
 }
 
-.deleteSelector,
-.openSelector {
+.deleteSelector {
   margin: 0;
   width: var(--spaceL);
   height: var(--spaceL);
@@ -220,10 +221,6 @@
 
 .deleteSelector {
   accent-color: var(--error);
-}
-
-.openSelector {
-  accent-color: var(--primary);
 }
 
 .fileInfo {
@@ -465,7 +462,7 @@
   }
 
   .fileItem {
-    grid-template-columns: auto auto 1fr;
+    grid-template-columns: auto 1fr;
   }
 
   .confirmationBadge {

@@ -672,7 +672,7 @@ export const CasesModal = ({
               {visibleCases.length === 0 ? (
                 <p className={styles.emptyState}>No cases match your filters</p>
               ) : (
-                <ul className={styles.casesList} role="radiogroup" aria-label="Cases list">
+                <ul className={styles.casesList} role="listbox" aria-label="Cases list">
                   {paginatedCases.map((caseEntry, index) => {
                     const caseNum = caseEntry.caseNumber;
                     const confirmationStatus = caseConfirmationStatus[caseNum] || DEFAULT_CONFIRMATION_STATUS;
@@ -697,24 +697,14 @@ export const CasesModal = ({
                           ref={(node) => {
                             caseRowRefs.current[index] = node;
                           }}
-                          role="radio"
-                          aria-checked={isSelected}
+                          role="option"
+                          aria-selected={isSelected}
                           tabIndex={focusedIndex === index ? 0 : -1}
-                          className={`${styles.caseItem} ${isSelected ? styles.active : ''} ${confirmationClass}`}
+                          className={`${styles.caseItem} ${isSelected ? styles.active : ''}`}
                           onClick={() => handleSelectCase(caseNum, index)}
                           onFocus={() => setFocusedIndex(index)}
                           onKeyDown={(event) => handleRowKeyDown(event, caseNum, index)}
                         >
-                          <input
-                            type="radio"
-                            name="case-selection"
-                            checked={isSelected}
-                            onChange={() => handleSelectCase(caseNum, index)}
-                            onClick={(event) => event.stopPropagation()}
-                            className={styles.caseSelector}
-                            aria-label={`Select case ${caseNum}`}
-                          />
-
                           <div className={styles.caseDetails}>
                             <input
                               type="text"

@@ -446,7 +446,7 @@ export const FilesModal = ({
                     return (
                       <li key={file.id}>
                         <div
-                          className={`${styles.fileItem} ${isOpenSelected ? styles.active : ''} ${confirmationClass}`}
+                          className={`${styles.fileItem} ${isOpenSelected ? styles.active : ''}`}
                           onClick={() => setOpenSelectedFileId(file.id)}
                           onKeyDown={(event) => {
                             if (event.key === 'Enter' || event.key === ' ') {
@@ -464,16 +464,6 @@ export const FilesModal = ({
                             onChange={() => toggleDeleteSelection(file.id)}
                             onClick={(event) => event.stopPropagation()}
                             aria-label={`Select ${file.originalFilename} for delete`}
-                          />
-
-                          <input
-                            type="radio"
-                            name="file-open-selection"
-                            checked={isOpenSelected}
-                            className={styles.openSelector}
-                            onChange={() => setOpenSelectedFileId(file.id)}
-                            onClick={(event) => event.stopPropagation()}
-                            aria-label={`Select ${file.originalFilename} to open`}
                           />
 
                           <div className={styles.fileInfo}>
