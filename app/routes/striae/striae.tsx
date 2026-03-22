@@ -735,6 +735,7 @@ export const Striae = ({ user }: StriaePage) => {
           onOpenCase={() => {
             void handleOpenCaseModal();
           }}
+          onOpenCaseExport={() => setIsCaseExportModalOpen(true)}
           imageId={imageId}
           currentCase={currentCase}
           imageLoaded={imageLoaded}
