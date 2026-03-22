@@ -99,8 +99,11 @@ export const ClassDetailsModal = ({
   const [bLWidths, setBLWidths] = useState<string[]>([]);
   const [bGWidths, setBGWidths] = useState<string[]>([]);
   const [bJacketMetal, setBJacketMetal] = useState('');
+  const [bJacketMetalIsCustom, setBJacketMetalIsCustom] = useState(false);
   const [bCoreMetal, setBCoreMetal] = useState('');
+  const [bCoreMetalIsCustom, setBCoreMetalIsCustom] = useState(false);
   const [bBulletType, setBBulletType] = useState('');
+  const [bBulletTypeIsCustom, setBBulletTypeIsCustom] = useState(false);
   const [bBarrelType, setBBarrelType] = useState('');
   const [bBarrelTypeIsCustom, setBBarrelTypeIsCustom] = useState(false);
 
@@ -109,9 +112,13 @@ export const ClassDetailsModal = ({
   const [cCaliberIsCustom, setCCaliberIsCustom] = useState(false);
   const [cBrand, setCBrand] = useState('');
   const [cMetal, setCMetal] = useState('');
+  const [cMetalIsCustom, setCMetalIsCustom] = useState(false);
   const [cPrimerType, setCPrimerType] = useState('');
+  const [cPrimerTypeIsCustom, setCPrimerTypeIsCustom] = useState(false);
   const [cFpiShape, setCFpiShape] = useState('');
+  const [cFpiShapeIsCustom, setCFpiShapeIsCustom] = useState(false);
   const [cApertureShape, setCApertureShape] = useState('');
+  const [cApertureShapeIsCustom, setCApertureShapeIsCustom] = useState(false);
   const [cHasFpDrag, setCHasFpDrag] = useState(false);
   const [cHasExtractorMarks, setCHasExtractorMarks] = useState(false);
   const [cHasEjectorMarks, setCHasEjectorMarks] = useState(false);
@@ -143,9 +150,15 @@ export const ClassDetailsModal = ({
       setBLgDirection(bulletData?.lgDirection || '');
       setBLWidths(bulletData?.lWidths || []);
       setBGWidths(bulletData?.gWidths || []);
-      setBJacketMetal(bulletData?.jacketMetal || '');
-      setBCoreMetal(bulletData?.coreMetal || '');
-      setBBulletType(bulletData?.bulletType || '');
+      const storedJacketMetal = bulletData?.jacketMetal || '';
+      setBJacketMetal(storedJacketMetal);
+      setBJacketMetalIsCustom(!!storedJacketMetal && !['Cu', 'Brass', 'Ni-plated', 'Al', 'Steel'].includes(storedJacketMetal));
+      const storedCoreMetal = bulletData?.coreMetal || '';
+      setBCoreMetal(storedCoreMetal);
+      setBCoreMetalIsCustom(!!storedCoreMetal && !['Pb', 'Steel'].includes(storedCoreMetal));
+      const storedBulletType = bulletData?.bulletType || '';
+      setBBulletType(storedBulletType);
+      setBBulletTypeIsCustom(!!storedBulletType && !['FMJ', 'TMJ', 'HP', 'WC'].includes(storedBulletType));
       const storedBarrelType = bulletData?.barrelType || '';
       const knownBarrelTypes = ['Conventional', 'Polygonal'];
       setBBarrelType(storedBarrelType);
@@ -154,10 +167,18 @@ export const ClassDetailsModal = ({
       setCCaliber(cartridgeCaseData?.caliber || '');
       setCCaliberIsCustom(!!cartridgeCaseData?.caliber && !ALL_CALIBERS.includes(cartridgeCaseData.caliber));
       setCBrand(cartridgeCaseData?.brand || '');
-      setCMetal(cartridgeCaseData?.metal || '');
-      setCPrimerType(cartridgeCaseData?.primerType || '');
-      setCFpiShape(cartridgeCaseData?.fpiShape || '');
-      setCApertureShape(cartridgeCaseData?.apertureShape || '');
+      const storedCMetal = cartridgeCaseData?.metal || '';
+      setCMetal(storedCMetal);
+      setCMetalIsCustom(!!storedCMetal && !['Brass', 'Ni-plated', 'Al', 'Steel'].includes(storedCMetal));
+      const storedCPrimerType = cartridgeCaseData?.primerType || '';
+      setCPrimerType(storedCPrimerType);
+      setCPrimerTypeIsCustom(!!storedCPrimerType && !['CF', 'RF'].includes(storedCPrimerType));
+      const storedCFpiShape = cartridgeCaseData?.fpiShape || '';
+      setCFpiShape(storedCFpiShape);
+      setCFpiShapeIsCustom(!!storedCFpiShape && !['Circular', 'Elliptical', 'Rectangular/Square', 'Tear-drop'].includes(storedCFpiShape));
+      const storedCApertureShape = cartridgeCaseData?.apertureShape || '';
+      setCApertureShape(storedCApertureShape);
+      setCApertureShapeIsCustom(!!storedCApertureShape && !['Circular', 'Rectangular'].includes(storedCApertureShape));
       setCHasFpDrag(cartridgeCaseData?.hasFpDrag ?? false);
       setCHasExtractorMarks(cartridgeCaseData?.hasExtractorMarks ?? false);
       setCHasEjectorMarks(cartridgeCaseData?.hasEjectorMarks ?? false);
@@ -377,36 +398,80 @@ export const ClassDetailsModal = ({
                 ))}
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Jacket Metal</span>
-                  <input
-                    type="text"
-                    value={bJacketMetal}
-                    onChange={(e) => setBJacketMetal(e.target.value)}
+                  <select
+                    value={bJacketMetalIsCustom ? CUSTOM : bJacketMetal}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setBJacketMetal, setBJacketMetalIsCustom)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. Copper"
-                  />
+                  >
+                    <option value="">Select jacket metal...</option>
+                    <option value="Cu">Cu</option>
+                    <option value="Brass">Brass</option>
+                    <option value="Ni-plated">Ni-plated</option>
+                    <option value="Al">Al</option>
+                    <option value="Steel">Steel</option>
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {bJacketMetalIsCustom && (
+                    <input
+                      type="text"
+                      value={bJacketMetal}
+                      onChange={(e) => setBJacketMetal(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter jacket metal..."
+                    />
+                  )}
                 </div>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Core Metal</span>
-                  <input
-                    type="text"
-                    value={bCoreMetal}
-                    onChange={(e) => setBCoreMetal(e.target.value)}
+                  <select
+                    value={bCoreMetalIsCustom ? CUSTOM : bCoreMetal}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setBCoreMetal, setBCoreMetalIsCustom)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. Lead"
-                  />
+                  >
+                    <option value="">Select core metal...</option>
+                    <option value="Pb">Pb</option>
+                    <option value="Steel">Steel</option>
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {bCoreMetalIsCustom && (
+                    <input
+                      type="text"
+                      value={bCoreMetal}
+                      onChange={(e) => setBCoreMetal(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter core metal..."
+                    />
+                  )}
                 </div>
                 <div className={`${styles.classDetailsField} ${styles.classDetailsFieldFull}`}>
                   <span className={styles.classDetailsLabel}>Bullet Type</span>
-                  <input
-                    type="text"
-                    value={bBulletType}
-                    onChange={(e) => setBBulletType(e.target.value)}
+                  <select
+                    value={bBulletTypeIsCustom ? CUSTOM : bBulletType}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setBBulletType, setBBulletTypeIsCustom)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. FMJ"
-                  />
+                  >
+                    <option value="">Select bullet type...</option>
+                    <option value="FMJ">FMJ</option>
+                    <option value="TMJ">TMJ</option>
+                    <option value="HP">HP</option>
+                    <option value="WC">WC</option>
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {bBulletTypeIsCustom && (
+                    <input
+                      type="text"
+                      value={bBulletType}
+                      onChange={(e) => setBBulletType(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter bullet type..."
+                    />
+                  )}
                 </div>
                 <div className={`${styles.classDetailsField} ${styles.classDetailsFieldFull}`}>
                   <span className={styles.classDetailsLabel}>Barrel Type</span>
@@ -481,47 +546,103 @@ export const ClassDetailsModal = ({
                 </div>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Metal</span>
-                  <input
-                    type="text"
-                    value={cMetal}
-                    onChange={(e) => setCMetal(e.target.value)}
+                  <select
+                    value={cMetalIsCustom ? CUSTOM : cMetal}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setCMetal, setCMetalIsCustom)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. Brass"
-                  />
+                  >
+                    <option value="">Select metal...</option>
+                    <option value="Brass">Brass</option>
+                    <option value="Ni-plated">Ni-plated</option>
+                    <option value="Al">Al</option>
+                    <option value="Steel">Steel</option>
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {cMetalIsCustom && (
+                    <input
+                      type="text"
+                      value={cMetal}
+                      onChange={(e) => setCMetal(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter metal..."
+                    />
+                  )}
                 </div>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Primer Type</span>
-                  <input
-                    type="text"
-                    value={cPrimerType}
-                    onChange={(e) => setCPrimerType(e.target.value)}
+                  <select
+                    value={cPrimerTypeIsCustom ? CUSTOM : cPrimerType}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setCPrimerType, setCPrimerTypeIsCustom)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. Boxer"
-                  />
+                  >
+                    <option value="">Select primer type...</option>
+                    <option value="CF">CF</option>
+                    <option value="RF">RF</option>
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {cPrimerTypeIsCustom && (
+                    <input
+                      type="text"
+                      value={cPrimerType}
+                      onChange={(e) => setCPrimerType(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter primer type..."
+                    />
+                  )}
                 </div>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>FPI Shape</span>
-                  <input
-                    type="text"
-                    value={cFpiShape}
-                    onChange={(e) => setCFpiShape(e.target.value)}
+                  <select
+                    value={cFpiShapeIsCustom ? CUSTOM : cFpiShape}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setCFpiShape, setCFpiShapeIsCustom)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. Circular"
-                  />
+                  >
+                    <option value="">Select FPI shape...</option>
+                    <option value="Circular">Circular</option>
+                    <option value="Elliptical">Elliptical</option>
+                    <option value="Rectangular/Square">Rectangular/Square</option>
+                    <option value="Tear-drop">Tear-drop</option>
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {cFpiShapeIsCustom && (
+                    <input
+                      type="text"
+                      value={cFpiShape}
+                      onChange={(e) => setCFpiShape(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter FPI shape..."
+                    />
+                  )}
                 </div>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Aperture Shape</span>
-                  <input
-                    type="text"
-                    value={cApertureShape}
-                    onChange={(e) => setCApertureShape(e.target.value)}
+                  <select
+                    value={cApertureShapeIsCustom ? CUSTOM : cApertureShape}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setCApertureShape, setCApertureShapeIsCustom)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. Round"
-                  />
+                  >
+                    <option value="">Select aperture shape...</option>
+                    <option value="Circular">Circular</option>
+                    <option value="Rectangular">Rectangular</option>
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {cApertureShapeIsCustom && (
+                    <input
+                      type="text"
+                      value={cApertureShape}
+                      onChange={(e) => setCApertureShape(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter aperture shape..."
+                    />
+                  )}
                 </div>
               </div>
               <div className={styles.classDetailsCheckboxGroup}>
