@@ -42,8 +42,8 @@ v4.2.1 delivers focused patch-level refinements across the case notes workflow, 
 - **Commit Range**: `v4.2.0..v4.2.1`
 - **Commits Included**: 18 (non-merge)
 - **Build Status**: Succeeded (npm run build)
-- **Typecheck Status**: Failed (npm run typecheck)
-- **Lint Status**: Failed (npm run lint)
+- **Typecheck Status**: Passed (npm run typecheck)
+- **Lint Status**: Passed with warnings — 0 errors, 12 warnings (npm run lint)
 
 ## Closing Note
 
