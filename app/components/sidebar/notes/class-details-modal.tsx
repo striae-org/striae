@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import type {
   BulletAnnotationData,
@@ -370,32 +370,6 @@ export const ClassDetailsModal = ({
                     <option value="Right">Right</option>
                   </select>
                 </div>
-                {lgCount > 0 && Array.from({ length: lgCount }, (_, i) => (
-                  <Fragment key={i}>
-                    <div className={styles.classDetailsField}>
-                      <span className={styles.classDetailsLabel}>L{i + 1} Width</span>
-                      <input
-                        type="text"
-                        value={bLWidths[i] || ''}
-                        onChange={(e) => handleLWidth(i, e.target.value)}
-                        className={styles.classDetailsInput}
-                        disabled={isReadOnly}
-                        placeholder="e.g. 1.2"
-                      />
-                    </div>
-                    <div className={styles.classDetailsField}>
-                      <span className={styles.classDetailsLabel}>G{i + 1} Width</span>
-                      <input
-                        type="text"
-                        value={bGWidths[i] || ''}
-                        onChange={(e) => handleGWidth(i, e.target.value)}
-                        className={styles.classDetailsInput}
-                        disabled={isReadOnly}
-                        placeholder="e.g. 0.9"
-                      />
-                    </div>
-                  </Fragment>
-                ))}
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>Jacket Metal</span>
                   <select
@@ -498,6 +472,43 @@ export const ClassDetailsModal = ({
                   )}
                 </div>
               </div>
+              {lgCount > 0 && (
+                <div className={styles.lgWidthsSection}>
+                  <h6 className={styles.classDetailsSectionHeader}>L / G Widths</h6>
+                  <div className={styles.lgWidthsLayout}>
+                    <div className={styles.lgWidthsColumn}>
+                      {Array.from({ length: lgCount }, (_, i) => (
+                        <div key={i} className={styles.classDetailsField}>
+                          <span className={styles.classDetailsLabel}>L{i + 1}</span>
+                          <input
+                            type="text"
+                            value={bLWidths[i] || ''}
+                            onChange={(e) => handleLWidth(i, e.target.value)}
+                            className={styles.classDetailsInput}
+                            disabled={isReadOnly}
+                            placeholder="e.g. 1.2"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className={styles.lgWidthsColumn}>
+                      {Array.from({ length: lgCount }, (_, i) => (
+                        <div key={i} className={styles.classDetailsField}>
+                          <span className={styles.classDetailsLabel}>G{i + 1}</span>
+                          <input
+                            type="text"
+                            value={bGWidths[i] || ''}
+                            onChange={(e) => handleGWidth(i, e.target.value)}
+                            className={styles.classDetailsInput}
+                            disabled={isReadOnly}
+                            placeholder="e.g. 0.9"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
