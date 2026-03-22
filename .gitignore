@@ -18,7 +18,8 @@ workers/pdf-worker/src/formats/*.ts
 
 # PDF Report Assets (Proprietary/Sensitive)
 workers/pdf-worker/src/assets/*
-!workers/pdf-worker/src/assets/generated-assets.ts
+!workers/pdf-worker/src/assets/generated-assets.example.ts
+workers/pdf-worker/src/assets/generated-assets.ts
 
 # Unique Login Page
 app/routes/auth/login.tsx
