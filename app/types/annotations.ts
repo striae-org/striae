@@ -28,6 +28,7 @@ export interface BulletAnnotationData {
   diameter?: string;
   lgNumber?: number;
   lgDirection?: string;
+  barrelType?: string;
   // Width arrays should align with lgNumber:
   // L1..Ln stored in order at lWidths[0..n-1], G1..Gn at gWidths[0..n-1].
   lWidths?: string[];

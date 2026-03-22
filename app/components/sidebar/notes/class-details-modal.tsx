@@ -101,6 +101,8 @@ export const ClassDetailsModal = ({
   const [bJacketMetal, setBJacketMetal] = useState('');
   const [bCoreMetal, setBCoreMetal] = useState('');
   const [bBulletType, setBBulletType] = useState('');
+  const [bBarrelType, setBBarrelType] = useState('');
+  const [bBarrelTypeIsCustom, setBBarrelTypeIsCustom] = useState(false);
 
   // Cartridge Case local state
   const [cCaliber, setCCaliber] = useState('');
@@ -144,6 +146,10 @@ export const ClassDetailsModal = ({
       setBJacketMetal(bulletData?.jacketMetal || '');
       setBCoreMetal(bulletData?.coreMetal || '');
       setBBulletType(bulletData?.bulletType || '');
+      const storedBarrelType = bulletData?.barrelType || '';
+      const knownBarrelTypes = ['Conventional', 'Polygonal'];
+      setBBarrelType(storedBarrelType);
+      setBBarrelTypeIsCustom(!!storedBarrelType && !knownBarrelTypes.includes(storedBarrelType));
 
       setCCaliber(cartridgeCaseData?.caliber || '');
       setCCaliberIsCustom(!!cartridgeCaseData?.caliber && !ALL_CALIBERS.includes(cartridgeCaseData.caliber));
@@ -212,6 +218,7 @@ export const ClassDetailsModal = ({
         jacketMetal: bJacketMetal || undefined,
         coreMetal: bCoreMetal || undefined,
         bulletType: bBulletType || undefined,
+        barrelType: bBarrelType || undefined,
       } : undefined;
 
       const newCartridgeCaseData: CartridgeCaseAnnotationData | undefined = showCartridge ? {
@@ -331,14 +338,16 @@ export const ClassDetailsModal = ({
                 </div>
                 <div className={styles.classDetailsField}>
                   <span className={styles.classDetailsLabel}>L/G Direction</span>
-                  <input
-                    type="text"
+                  <select
                     value={bLgDirection}
                     onChange={(e) => setBLgDirection(e.target.value)}
                     className={styles.classDetailsInput}
                     disabled={isReadOnly}
-                    placeholder="e.g. Right"
-                  />
+                  >
+                    <option value="">Select direction...</option>
+                    <option value="Left">Left</option>
+                    <option value="Right">Right</option>
+                  </select>
                 </div>
                 {lgCount > 0 && Array.from({ length: lgCount }, (_, i) => (
                   <Fragment key={i}>
@@ -398,6 +407,30 @@ export const ClassDetailsModal = ({
                     disabled={isReadOnly}
                     placeholder="e.g. FMJ"
                   />
+                </div>
+                <div className={`${styles.classDetailsField} ${styles.classDetailsFieldFull}`}>
+                  <span className={styles.classDetailsLabel}>Barrel Type</span>
+                  <select
+                    value={bBarrelTypeIsCustom ? CUSTOM : bBarrelType}
+                    onChange={(e) => handleCaliberSelect(e.target.value, setBBarrelType, setBBarrelTypeIsCustom)}
+                    className={styles.classDetailsInput}
+                    disabled={isReadOnly}
+                  >
+                    <option value="">Select barrel type...</option>
+                    <option value="Conventional">Conventional</option>
+                    <option value="Polygonal">Polygonal</option>
+                    <option value={CUSTOM}>Other / Custom...</option>
+                  </select>
+                  {bBarrelTypeIsCustom && (
+                    <input
+                      type="text"
+                      value={bBarrelType}
+                      onChange={(e) => setBBarrelType(e.target.value)}
+                      className={styles.classDetailsInput}
+                      disabled={isReadOnly}
+                      placeholder="Enter barrel type..."
+                    />
+                  )}
                 </div>
               </div>
             </div>
