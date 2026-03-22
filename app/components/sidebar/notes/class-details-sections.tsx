@@ -9,9 +9,12 @@ import {
   CARTRIDGE_FPI_SHAPE_OPTIONS,
   CARTRIDGE_METAL_OPTIONS,
   CARTRIDGE_PRIMER_TYPE_OPTIONS,
+  SHOTSHELL_BIRDSHOT_OPTIONS,
+  SHOTSHELL_BUCKSHOT_OPTIONS,
   PISTOL_CALIBERS,
   RIFLE_CALIBERS,
   SHOTSHELL_GAUGES,
+  SHOTSHELL_STEEL_WATERFOWL_OPTIONS,
   formatCalculatedDiameter,
 } from './class-details-shared';
 import { CheckboxField, SelectField, SelectWithCustomField, TextField } from './class-details-fields';
@@ -485,19 +488,37 @@ export const ShotshellSection = ({
         },
         {
           key: 'shotSize',
-          kind: 'text',
+          kind: 'select',
           label: 'Shot Size',
           value: shotshell.shotSize,
           onChange: shotshell.setShotSize,
-          placeholder: 'e.g. #4',
+          placeholder: 'Select shot size...',
+          options: [
+            {
+              groupLabel: 'Birdshot',
+              options: SHOTSHELL_BIRDSHOT_OPTIONS.map((option) => ({ value: option })),
+            },
+            {
+              groupLabel: 'Steel/Waterfowl Shot',
+              options: SHOTSHELL_STEEL_WATERFOWL_OPTIONS.map((option) => ({ value: option })),
+            },
+            {
+              groupLabel: 'Buckshot',
+              options: SHOTSHELL_BUCKSHOT_OPTIONS.map((option) => ({ value: option })),
+            },
+          ],
         },
         {
           key: 'metal',
-          kind: 'text',
+          kind: 'select-custom',
           label: 'Metal',
           value: shotshell.metal,
+          isCustom: shotshell.metalIsCustom,
           onChange: shotshell.setMetal,
-          placeholder: 'e.g. Steel',
+          onCustomChange: shotshell.setMetalIsCustom,
+          placeholder: 'Select metal...',
+          customPlaceholder: 'Enter metal...',
+          options: CARTRIDGE_METAL_OPTIONS.map((option) => ({ value: option })),
         },
         {
           key: 'brand',
@@ -509,11 +530,15 @@ export const ShotshellSection = ({
         },
         {
           key: 'fpiShape',
-          kind: 'text',
+          kind: 'select-custom',
           label: 'FPI Shape',
           value: shotshell.fpiShape,
+          isCustom: shotshell.fpiShapeIsCustom,
           onChange: shotshell.setFpiShape,
-          placeholder: 'e.g. Circular',
+          onCustomChange: shotshell.setFpiShapeIsCustom,
+          placeholder: 'Select FPI shape...',
+          customPlaceholder: 'Enter FPI shape...',
+          options: CARTRIDGE_FPI_SHAPE_OPTIONS.map((option) => ({ value: option })),
           fullWidth: true,
         },
       ];

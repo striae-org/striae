@@ -119,8 +119,10 @@ export interface ShotshellDetailsState {
   gaugeIsCustom: boolean;
   shotSize: string;
   metal: string;
+  metalIsCustom: boolean;
   brand: string;
   fpiShape: string;
+  fpiShapeIsCustom: boolean;
   hasExtractorMarks: boolean;
   hasEjectorMarks: boolean;
   hasChamberMarks: boolean;
@@ -128,8 +130,10 @@ export interface ShotshellDetailsState {
   setGaugeIsCustom: (value: boolean) => void;
   setShotSize: (value: string) => void;
   setMetal: (value: string) => void;
+  setMetalIsCustom: (value: boolean) => void;
   setBrand: (value: string) => void;
   setFpiShape: (value: string) => void;
+  setFpiShapeIsCustom: (value: boolean) => void;
   setHasExtractorMarks: (value: boolean) => void;
   setHasEjectorMarks: (value: boolean) => void;
   setHasChamberMarks: (value: boolean) => void;
@@ -180,8 +184,10 @@ export const useClassDetailsState = ({
   const [sGaugeIsCustom, setSGaugeIsCustom] = useState(() => isCustomValue(shotshellData?.gauge, SHOTSHELL_GAUGES));
   const [sShotSize, setSShotSize] = useState(() => shotshellData?.shotSize || '');
   const [sMetal, setSMetal] = useState(() => shotshellData?.metal || '');
+  const [sMetalIsCustom, setSMetalIsCustom] = useState(() => isCustomValue(shotshellData?.metal, CARTRIDGE_METAL_OPTIONS));
   const [sBrand, setSBrand] = useState(() => shotshellData?.brand || '');
   const [sFpiShape, setSFpiShape] = useState(() => shotshellData?.fpiShape || '');
+  const [sFpiShapeIsCustom, setSFpiShapeIsCustom] = useState(() => isCustomValue(shotshellData?.fpiShape, CARTRIDGE_FPI_SHAPE_OPTIONS));
   const [sHasExtractorMarks, setSHasExtractorMarks] = useState(() => shotshellData?.hasExtractorMarks ?? false);
   const [sHasEjectorMarks, setSHasEjectorMarks] = useState(() => shotshellData?.hasEjectorMarks ?? false);
   const [sHasChamberMarks, setSHasChamberMarks] = useState(() => shotshellData?.hasChamberMarks ?? false);
@@ -334,8 +340,10 @@ export const useClassDetailsState = ({
     gaugeIsCustom: sGaugeIsCustom,
     shotSize: sShotSize,
     metal: sMetal,
+    metalIsCustom: sMetalIsCustom,
     brand: sBrand,
     fpiShape: sFpiShape,
+    fpiShapeIsCustom: sFpiShapeIsCustom,
     hasExtractorMarks: sHasExtractorMarks,
     hasEjectorMarks: sHasEjectorMarks,
     hasChamberMarks: sHasChamberMarks,
@@ -343,8 +351,10 @@ export const useClassDetailsState = ({
     setGaugeIsCustom: setSGaugeIsCustom,
     setShotSize: setSShotSize,
     setMetal: setSMetal,
+    setMetalIsCustom: setSMetalIsCustom,
     setBrand: setSBrand,
     setFpiShape: setSFpiShape,
+    setFpiShapeIsCustom: setSFpiShapeIsCustom,
     setHasExtractorMarks: setSHasExtractorMarks,
     setHasEjectorMarks: setSHasEjectorMarks,
     setHasChamberMarks: setSHasChamberMarks,

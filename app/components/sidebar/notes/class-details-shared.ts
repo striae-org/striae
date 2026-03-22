@@ -54,6 +54,39 @@ export const SHOTSHELL_GAUGES: string[] = [
   '.410 bore',
 ];
 
+export const SHOTSHELL_BIRDSHOT_OPTIONS = [
+  '#9',
+  '#8 1/2',
+  '#8',
+  '#7 1/2',
+  '#7',
+  '#6',
+  '#5',
+  '#4',
+  '#3',
+  '#2',
+  '#1',
+] as const;
+
+export const SHOTSHELL_STEEL_WATERFOWL_OPTIONS = [
+  '#4',
+  '#3',
+  '#2',
+  '#1',
+  'B',
+  'BB',
+  'BBB',
+  'T',
+] as const;
+
+export const SHOTSHELL_BUCKSHOT_OPTIONS = [
+  '#4 buck',
+  '#1 buck',
+  '0 buck',
+  '00 buck',
+  '000 buck',
+] as const;
+
 export const ALL_CALIBERS: string[] = [...PISTOL_CALIBERS, ...RIFLE_CALIBERS];
 export const BULLET_JACKET_METAL_OPTIONS = ['Cu', 'Brass', 'Ni-plated', 'Al', 'Steel', 'None'] as const;
 export const BULLET_CORE_METAL_OPTIONS = ['Pb', 'Steel'] as const;
