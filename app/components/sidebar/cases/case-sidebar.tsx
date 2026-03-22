@@ -1,4 +1,5 @@
 import type { User } from 'firebase/auth';
+import type React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './cases.module.css';
 import { FilesModal } from '../files/files-modal';

@@ -6,6 +6,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
   const { imageUrl, annotationData, activeAnnotations } = data;
   const annotationsSet = new Set(activeAnnotations);
   const hasImage = Boolean(imageUrl && imageUrl !== '/clear.jpg');
+  const safeText = (value: unknown): string => escapeHtml(String(value ?? ''));
 
   // Programmatically determine if a color is dark and needs a light background
   const needsLightBackground = (color: string | undefined): boolean => {
@@ -366,7 +367,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
     ${hasImage ? `
     ${annotationData && annotationsSet?.has('index') && annotationData.indexType === 'number' && annotationData.indexNumber ? `
     <div class="index-section">
-      Index: ${annotationData.indexNumber}
+      Index: ${safeText(annotationData.indexNumber)}
     </div>
     ` : ''}
     
@@ -378,12 +379,12 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         <div class="annotations-overlay">
           <div class="left-annotation" style="${needsLightBackground(annotationData.caseFontColor || '#FFDE21') ? 'background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(0, 0, 0, 0.2); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);' : ''}">
             <div class="case-text" style="color: ${annotationData.caseFontColor || '#FFDE21'};">
-              ${annotationData.leftCase}${annotationData.leftItem ? ` ${annotationData.leftItem}` : ''}
+              ${safeText(annotationData.leftCase)}${annotationData.leftItem ? ` ${safeText(annotationData.leftItem)}` : ''}
             </div>
           </div>
           <div class="right-annotation" style="${needsLightBackground(annotationData.caseFontColor || '#FFDE21') ? 'background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(0, 0, 0, 0.2); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);' : ''}">
             <div class="case-text" style="color: ${annotationData.caseFontColor || '#FFDE21'};">
-              ${annotationData.rightCase}${annotationData.rightItem ? ` ${annotationData.rightItem}` : ''}
+              ${safeText(annotationData.rightCase)}${annotationData.rightItem ? ` ${safeText(annotationData.rightItem)}` : ''}
             </div>
           </div>
         </div>
@@ -409,7 +410,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         ${annotationData && annotationsSet?.has('id') ? `
         <div class="support-level-annotation">
           <div class="support-level-text" style="color: ${annotationData.supportLevel === 'ID' ? '#28a745' : annotationData.supportLevel === 'Exclusion' ? '#dc3545' : '#ffc107'}; background: ${annotationData.supportLevel === 'Inconclusive' ? 'rgba(120, 120, 120, 0.95)' : 'rgba(240, 240, 240, 0.95)'};">
-            ${annotationData.supportLevel === 'ID' ? 'Identification' : annotationData.supportLevel}
+            ${safeText(annotationData.supportLevel === 'ID' ? 'Identification' : annotationData.supportLevel)}
           </div>
         </div>
         ` : '<div class="support-level-annotation"></div>'}
@@ -417,7 +418,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         ${annotationData && annotationsSet?.has('class') ? `
         <div class="class-annotation">
           <div class="class-text-annotation">
-            ${annotationData.customClass || annotationData.classType}${annotationData.classNote ? ` (${annotationData.classNote})` : ''}
+            ${safeText(annotationData.customClass || annotationData.classType)}${annotationData.classNote ? ` (${safeText(annotationData.classNote)})` : ''}
           </div>
         </div>
         ` : '<div class="class-annotation"></div>'}
@@ -441,16 +442,16 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         <div class="confirmation-data">
           <div class="confirmation-title">IDENTIFICATION CONFIRMED</div>
           <div class="confirmation-field">
-            <div class="confirmation-name">${annotationData.confirmationData.fullName}, ${annotationData.confirmationData.badgeId}</div>
+            <div class="confirmation-name">${safeText(annotationData.confirmationData.fullName)}, ${safeText(annotationData.confirmationData.badgeId)}</div>
           </div>
           <div class="confirmation-field">
-            <div class="confirmation-company">${annotationData.confirmationData.confirmedByCompany || 'N/A'}</div>
+            <div class="confirmation-company">${safeText(annotationData.confirmationData.confirmedByCompany || 'N/A')}</div>
           </div>
           <div class="confirmation-field">
-            <div class="confirmation-timestamp">${annotationData.confirmationData.timestamp}</div>
+            <div class="confirmation-timestamp">${safeText(annotationData.confirmationData.timestamp)}</div>
           </div>
           <div class="confirmation-field">
-            <div class="confirmation-id">ID: ${annotationData.confirmationData.confirmationId}</div>
+            <div class="confirmation-id">ID: ${safeText(annotationData.confirmationData.confirmationId)}</div>
           </div>
         </div>
         ` : `

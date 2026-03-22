@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type React from 'react';
 import type { User } from 'firebase/auth';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { useCaseListPreferences, DEFAULT_CASES_MODAL_PREFERENCES } from '~/hooks/useCaseListPreferences';

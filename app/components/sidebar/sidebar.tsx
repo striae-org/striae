@@ -1,4 +1,5 @@
 import type { User } from 'firebase/auth';
+import type React from 'react';
 import { useState, useCallback } from 'react';
 import styles from './sidebar.module.css';
 import { CaseSidebar } from './cases/case-sidebar';
