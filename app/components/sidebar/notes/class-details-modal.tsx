@@ -384,6 +384,7 @@ export const ClassDetailsModal = ({
                     <option value="Ni-plated">Ni-plated</option>
                     <option value="Al">Al</option>
                     <option value="Steel">Steel</option>
+                    <option value="None">None</option>
                     <option value={CUSTOM}>Other / Custom...</option>
                   </select>
                   {bJacketMetalIsCustom && (
