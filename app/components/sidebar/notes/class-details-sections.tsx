@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import styles from './notes.module.css';
 import {
   BULLET_BARREL_TYPE_OPTIONS,
@@ -188,6 +189,7 @@ export const BulletSection = ({
   isReadOnly,
   bullet,
 }: BulletSectionProps) => {
+  const [showCalcExplanation, setShowCalcExplanation] = useState(false);
   const bulletFields: ConfiguredField[] = [
         {
           key: 'caliber',
@@ -306,7 +308,7 @@ export const BulletSection = ({
                   value={bullet.lWidths[index] || ''}
                   onChange={(value) => bullet.updateLWidth(index, value)}
                   disabled={isReadOnly}
-                  placeholder="e.g. 1.2"
+                  placeholder="e.g. 0.075"
                 />
               ))}
             </div>
@@ -318,15 +320,46 @@ export const BulletSection = ({
                   value={bullet.gWidths[index] || ''}
                   onChange={(value) => bullet.updateGWidth(index, value)}
                   disabled={isReadOnly}
-                  placeholder="e.g. 0.9"
+                  placeholder="e.g. 0.111"
                 />
               ))}
             </div>
           </div>
           {bullet.calculatedDiameter !== null && (
-            <div className={styles.calculatedDiameterDisplay}>
-              <span className={styles.classDetailsLabel}>Calculated Diameter</span>
-              <span className={styles.calculatedDiameterValue}>{formatCalculatedDiameter(bullet.calculatedDiameter)}</span>
+            <div className={styles.calculatedDiameterWrapper}>
+              <div className={styles.calculatedDiameterDisplay}>
+                <span className={styles.classDetailsLabel}>Calculated Diameter</span>
+                <span className={styles.calculatedDiameterValue}>{formatCalculatedDiameter(bullet.calculatedDiameter)}</span>
+              </div>
+              <button
+                type="button"
+                className={styles.calcExplanationToggle}
+                onClick={() => setShowCalcExplanation((prev) => !prev)}
+                aria-expanded={showCalcExplanation}
+              >
+                {showCalcExplanation ? 'Hide explanation' : 'How is this calculated?'}
+              </button>
+              {showCalcExplanation && (
+                <div className={styles.calcExplanationPanel}>
+                  <p className={styles.calcExplanationFormula}>
+                    diameter&nbsp;=&nbsp;(L&#772;&nbsp;+&nbsp;G&#772;)&nbsp;&times;&nbsp;n&nbsp;&divide;&nbsp;&pi;
+                  </p>
+                  <ul className={styles.calcExplanationList}>
+                    <li><strong>L&#772;</strong> — average land width</li>
+                    <li><strong>G&#772;</strong> — average groove width</li>
+                    <li><strong>n</strong> — L/G count</li>
+                    <li><strong>&pi;</strong> — 3.14159&hellip;</li>
+                  </ul>
+                  <p className={styles.calcExplanationNote}>
+                    The bullet&rsquo;s circumference approximates the sum of all land and groove
+                    widths. Dividing by &pi; converts circumference to diameter.
+                  </p>
+                  <p className={styles.calcExplanationExample}>
+                    <strong>Example:</strong> 6 L/G with L&#772;&nbsp;=&nbsp;0.076&Prime; and
+                    G&#772;&nbsp;=&nbsp;0.111&Prime;&nbsp;&rarr;&nbsp;(0.076&nbsp;+&nbsp;0.111)&nbsp;&times;&nbsp;6&nbsp;&divide;&nbsp;&pi;&nbsp;&asymp;&nbsp;0.357&Prime;
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
