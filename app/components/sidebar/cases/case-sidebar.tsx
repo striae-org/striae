@@ -280,7 +280,7 @@ const handleImageSelect = (file: FileData) => {
     ? 'Select an image first'
     : undefined;
 
-  const showExportConfirmationsButton = Boolean(currentCase && isReadOnly && isArchivedCase);
+  const showExportConfirmationsButton = Boolean(currentCase && isReadOnly && !isArchivedCase);
 
   const exportConfirmationsTitle = isUploading
     ? 'Cannot export confirmations while uploading'
