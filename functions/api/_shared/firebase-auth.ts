@@ -1,5 +1,3 @@
-import firebaseConfig from '../../../app/config/firebase';
-
 interface FirebaseJwtHeader {
   alg?: string;
   kid?: string;
@@ -31,8 +29,6 @@ const GOOGLE_SECURETOKEN_JWKS_URL =
   'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
 const DEFAULT_JWKS_CACHE_SECONDS = 300;
 const CLOCK_SKEW_SECONDS = 300;
-const FALLBACK_PROJECT_ID =
-  typeof firebaseConfig.projectId === 'string' ? firebaseConfig.projectId.trim() : '';
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -156,12 +152,11 @@ async function verifyTokenSignature(
 
 function validateTokenClaims(payload: FirebaseJwtPayload, env: Env): boolean {
   const configuredProjectId = typeof env.PROJECT_ID === 'string' ? env.PROJECT_ID.trim() : '';
-  const allowedProjectIds = new Set([configuredProjectId, FALLBACK_PROJECT_ID].filter(Boolean));
-  if (allowedProjectIds.size === 0) {
+  if (configuredProjectId.length === 0) {
     return false;
   }
 
-  if (typeof payload.aud !== 'string' || !allowedProjectIds.has(payload.aud)) {
+  if (typeof payload.aud !== 'string' || payload.aud !== configuredProjectId) {
     return false;
   }
 

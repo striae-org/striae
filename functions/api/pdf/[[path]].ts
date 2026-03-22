@@ -9,6 +9,10 @@ const SUPPORTED_METHODS = new Set(['POST', 'OPTIONS']);
 const PRIMERSHEAR_FORMAT = 'primershear';
 const DEFAULT_FORMAT = 'striae';
 
+interface PdfProxyRequestBody {
+  data: Record<string, unknown>;
+}
+
 function textResponse(message: string, status: number): Response {
   return new Response(message, {
     status,
@@ -46,6 +50,21 @@ function resolveReportFormat(email: string | null, primershearEmails: string): s
   if (!email) return DEFAULT_FORMAT;
   const allowed = primershearEmails.split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
   return allowed.includes(email.toLowerCase()) ? PRIMERSHEAR_FORMAT : DEFAULT_FORMAT;
+}
+
+function parsePdfProxyRequestBody(payload: unknown): PdfProxyRequestBody | null {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return null;
+  }
+
+  const record = payload as Record<string, unknown>;
+  if (!record.data || typeof record.data !== 'object' || Array.isArray(record.data)) {
+    return null;
+  }
+
+  return {
+    data: record.data as Record<string, unknown>
+  };
 }
 
 export const onRequest = async ({ request, env }: PdfProxyContext): Promise<Response> => {
@@ -103,11 +122,15 @@ export const onRequest = async ({ request, env }: PdfProxyContext): Promise<Resp
 
   let upstreamBody: BodyInit;
   try {
-    const payload = await request.json() as Record<string, unknown>;
-    // Inject the server-resolved format, overriding any client-supplied value.
-    // Supports both nested and legacy flat payload shapes.
-    payload.reportFormat = reportFormat;
-    upstreamBody = JSON.stringify(payload);
+    const payload = parsePdfProxyRequestBody(await request.json());
+    if (!payload) {
+      return textResponse('Invalid PDF request body', 400);
+    }
+
+    upstreamBody = JSON.stringify({
+      data: payload.data,
+      reportFormat
+    });
     upstreamHeaders.set('Content-Type', 'application/json');
   } catch {
     return textResponse('Invalid request body', 400);
