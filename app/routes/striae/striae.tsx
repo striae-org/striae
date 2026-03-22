@@ -800,6 +800,7 @@ export const Striae = ({ user }: StriaePage) => {
         }}
         currentCase={currentCase || ''}
         user={user}
+        confirmationSaveVersion={confirmationSaveVersion}
       />
       <FilesModal
         isOpen={isFilesModalOpen}
@@ -812,6 +813,7 @@ export const Striae = ({ user }: StriaePage) => {
         setFiles={setFiles}
         isReadOnly={isReadOnlyCase}
         selectedFileId={imageId}
+        confirmationSaveVersion={confirmationSaveVersion}
       />
       <NotesEditorModal
         isOpen={showNotes}

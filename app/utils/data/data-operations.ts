@@ -60,6 +60,470 @@ export interface AuditExportSigningResponse {
   signature: ForensicManifestSignature;
 }
 
+export interface FileConfirmationSummary {
+  includeConfirmation: boolean;
+  isConfirmed: boolean;
+  updatedAt: string;
+}
+
+export interface CaseConfirmationSummary {
+  includeConfirmation: boolean;
+  isConfirmed: boolean;
+  updatedAt: string;
+  filesById: Record<string, FileConfirmationSummary>;
+}
+
+export interface UserConfirmationSummaryDocument {
+  version: number;
+  updatedAt: string;
+  cases: Record<string, CaseConfirmationSummary>;
+}
+
+export interface ConfirmationSummaryEnsureOptions {
+  forceRefresh?: boolean;
+  maxAgeMs?: number;
+}
+
+export interface ConfirmationSummaryTelemetry {
+  ensureCalls: number;
+  caseCacheHits: number;
+  caseMisses: number;
+  forceRefreshCalls: number;
+  staleCaseRefreshes: number;
+  staleFileRefreshes: number;
+  missingFileRefreshes: number;
+  removedFileEntries: number;
+  refreshedFileEntries: number;
+  summaryWrites: number;
+}
+
+const CONFIRMATION_SUMMARY_VERSION = 1;
+const DEFAULT_CONFIRMATION_SUMMARY_MAX_AGE_MS = 5 * 60 * 1000;
+const CONFIRMATION_SUMMARY_LOG_INTERVAL = 25;
+const confirmationSummaryTelemetry: ConfirmationSummaryTelemetry = {
+  ensureCalls: 0,
+  caseCacheHits: 0,
+  caseMisses: 0,
+  forceRefreshCalls: 0,
+  staleCaseRefreshes: 0,
+  staleFileRefreshes: 0,
+  missingFileRefreshes: 0,
+  removedFileEntries: 0,
+  refreshedFileEntries: 0,
+  summaryWrites: 0
+};
+
+export function getConfirmationSummaryTelemetry(): ConfirmationSummaryTelemetry {
+  return { ...confirmationSummaryTelemetry };
+}
+
+export function resetConfirmationSummaryTelemetry(): void {
+  for (const key of Object.keys(confirmationSummaryTelemetry) as Array<keyof ConfirmationSummaryTelemetry>) {
+    confirmationSummaryTelemetry[key] = 0;
+  }
+}
+
+function getGlobalDebugFlag(): boolean {
+  const globalScope = globalThis as unknown as {
+    __STRIAE_DEBUG_CONFIRMATION_CACHE__?: boolean;
+  };
+
+  return globalScope.__STRIAE_DEBUG_CONFIRMATION_CACHE__ === true;
+}
+
+function getLocalStorageDebugFlag(): boolean {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return false;
+  }
+
+  try {
+    return window.localStorage.getItem('striae.debug.confirmationCache') === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function shouldLogConfirmationSummaryTelemetry(): boolean {
+  return getGlobalDebugFlag() || getLocalStorageDebugFlag();
+}
+
+function maybeLogConfirmationSummaryTelemetrySnapshot(): void {
+  if (!shouldLogConfirmationSummaryTelemetry()) {
+    return;
+  }
+
+  if (
+    confirmationSummaryTelemetry.ensureCalls === 0 ||
+    confirmationSummaryTelemetry.ensureCalls % CONFIRMATION_SUMMARY_LOG_INTERVAL !== 0
+  ) {
+    return;
+  }
+
+  const totalCaseLookups =
+    confirmationSummaryTelemetry.caseCacheHits + confirmationSummaryTelemetry.caseMisses;
+  const caseCacheHitRate =
+    totalCaseLookups > 0
+      ? Math.round((confirmationSummaryTelemetry.caseCacheHits / totalCaseLookups) * 100)
+      : 0;
+
+  console.info('[confirmation-cache] summary', {
+    ensureCalls: confirmationSummaryTelemetry.ensureCalls,
+    caseCacheHitRate,
+    caseCacheHits: confirmationSummaryTelemetry.caseCacheHits,
+    caseMisses: confirmationSummaryTelemetry.caseMisses,
+    forceRefreshCalls: confirmationSummaryTelemetry.forceRefreshCalls,
+    staleCaseRefreshes: confirmationSummaryTelemetry.staleCaseRefreshes,
+    missingFileRefreshes: confirmationSummaryTelemetry.missingFileRefreshes,
+    staleFileRefreshes: confirmationSummaryTelemetry.staleFileRefreshes,
+    refreshedFileEntries: confirmationSummaryTelemetry.refreshedFileEntries,
+    removedFileEntries: confirmationSummaryTelemetry.removedFileEntries,
+    summaryWrites: confirmationSummaryTelemetry.summaryWrites
+  });
+}
+
+function getIsoNow(): string {
+  return new Date().toISOString();
+}
+
+function createEmptyConfirmationSummary(): UserConfirmationSummaryDocument {
+  return {
+    version: CONFIRMATION_SUMMARY_VERSION,
+    updatedAt: getIsoNow(),
+    cases: {}
+  };
+}
+
+function buildConfirmationSummaryPath(user: User): string {
+  return `/${encodeURIComponent(user.uid)}/meta/confirmation-status.json`;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function normalizeFileConfirmationSummary(value: unknown): FileConfirmationSummary {
+  if (!isPlainObject(value)) {
+    return {
+      includeConfirmation: false,
+      isConfirmed: false,
+      updatedAt: getIsoNow()
+    };
+  }
+
+  return {
+    includeConfirmation: value.includeConfirmation === true,
+    isConfirmed: value.isConfirmed === true,
+    updatedAt: typeof value.updatedAt === 'string' && value.updatedAt.length > 0 ? value.updatedAt : getIsoNow()
+  };
+}
+
+function isStaleTimestamp(timestamp: string, maxAgeMs: number): boolean {
+  const parsed = Date.parse(timestamp);
+  if (Number.isNaN(parsed)) {
+    return true;
+  }
+
+  return Date.now() - parsed > maxAgeMs;
+}
+
+function computeCaseConfirmationAggregate(filesById: Record<string, FileConfirmationSummary>): {
+  includeConfirmation: boolean;
+  isConfirmed: boolean;
+} {
+  const statuses = Object.values(filesById);
+  const filesRequiringConfirmation = statuses.filter((entry) => entry.includeConfirmation);
+  const includeConfirmation = filesRequiringConfirmation.length > 0;
+  const isConfirmed = includeConfirmation ? filesRequiringConfirmation.every((entry) => entry.isConfirmed) : false;
+
+  return {
+    includeConfirmation,
+    isConfirmed
+  };
+}
+
+function toFileConfirmationSummary(annotationData: AnnotationData | null): FileConfirmationSummary {
+  const includeConfirmation = annotationData?.includeConfirmation === true;
+
+  return {
+    includeConfirmation,
+    isConfirmed: includeConfirmation && !!annotationData?.confirmationData,
+    updatedAt: getIsoNow()
+  };
+}
+
+function normalizeConfirmationSummaryDocument(payload: unknown): UserConfirmationSummaryDocument {
+  if (!isPlainObject(payload) || !isPlainObject(payload.cases)) {
+    return createEmptyConfirmationSummary();
+  }
+
+  const normalizedCases: Record<string, CaseConfirmationSummary> = {};
+
+  for (const [caseNumber, rawCaseEntry] of Object.entries(payload.cases)) {
+    if (!isPlainObject(rawCaseEntry) || !isPlainObject(rawCaseEntry.filesById)) {
+      continue;
+    }
+
+    const filesById: Record<string, FileConfirmationSummary> = {};
+    for (const [fileId, rawFileEntry] of Object.entries(rawCaseEntry.filesById)) {
+      filesById[fileId] = normalizeFileConfirmationSummary(rawFileEntry);
+    }
+
+    const aggregate = computeCaseConfirmationAggregate(filesById);
+
+    normalizedCases[caseNumber] = {
+      includeConfirmation: aggregate.includeConfirmation,
+      isConfirmed: aggregate.isConfirmed,
+      updatedAt:
+        typeof rawCaseEntry.updatedAt === 'string' && rawCaseEntry.updatedAt.length > 0
+          ? rawCaseEntry.updatedAt
+          : getIsoNow(),
+      filesById
+    };
+  }
+
+  return {
+    version:
+      typeof payload.version === 'number' && Number.isFinite(payload.version)
+        ? payload.version
+        : CONFIRMATION_SUMMARY_VERSION,
+    updatedAt:
+      typeof payload.updatedAt === 'string' && payload.updatedAt.length > 0
+        ? payload.updatedAt
+        : getIsoNow(),
+    cases: normalizedCases
+  };
+}
+
+async function saveConfirmationSummaryDocument(
+  user: User,
+  summary: UserConfirmationSummaryDocument
+): Promise<void> {
+  const response = await fetchDataApi(user, buildConfirmationSummaryPath(user), {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(summary)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to save confirmation summary: ${response.status} ${response.statusText}`);
+  }
+}
+
+export const getConfirmationSummaryDocument = async (
+  user: User
+): Promise<UserConfirmationSummaryDocument> => {
+  const sessionValidation = await validateUserSession(user);
+  if (!sessionValidation.valid) {
+    throw new Error(`Session validation failed: ${sessionValidation.reason}`);
+  }
+
+  const response = await fetchDataApi(user, buildConfirmationSummaryPath(user), {
+    method: 'GET'
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch confirmation summary: ${response.status} ${response.statusText}`);
+  }
+
+  const payload = await response.json().catch(() => null) as unknown;
+  return normalizeConfirmationSummaryDocument(payload);
+};
+
+export const getCaseConfirmationSummary = async (
+  user: User,
+  caseNumber: string
+): Promise<CaseConfirmationSummary | null> => {
+  const summary = await getConfirmationSummaryDocument(user);
+  return summary.cases[caseNumber] ?? null;
+};
+
+export const ensureCaseConfirmationSummary = async (
+  user: User,
+  caseNumber: string,
+  files: Array<{ id: string }>,
+  options: ConfirmationSummaryEnsureOptions = {}
+): Promise<CaseConfirmationSummary> => {
+  confirmationSummaryTelemetry.ensureCalls += 1;
+  maybeLogConfirmationSummaryTelemetrySnapshot();
+
+  const sessionValidation = await validateUserSession(user);
+  if (!sessionValidation.valid) {
+    throw new Error(`Session validation failed: ${sessionValidation.reason}`);
+  }
+
+  const accessCheck = await canAccessCase(user, caseNumber);
+  if (!accessCheck.allowed) {
+    throw new Error(`Access denied: ${accessCheck.reason}`);
+  }
+
+  const summary = await getConfirmationSummaryDocument(user);
+  const existingCase = summary.cases[caseNumber];
+  const filesById: Record<string, FileConfirmationSummary> = existingCase ? { ...existingCase.filesById } : {};
+  const fileIds = new Set(files.map((file) => file.id));
+  const maxAgeMs =
+    typeof options.maxAgeMs === 'number' && Number.isFinite(options.maxAgeMs) && options.maxAgeMs > 0
+      ? options.maxAgeMs
+      : DEFAULT_CONFIRMATION_SUMMARY_MAX_AGE_MS;
+  const caseIsStale =
+    options.forceRefresh === true ||
+    !existingCase ||
+    isStaleTimestamp(existingCase.updatedAt, maxAgeMs);
+
+  if (!existingCase) {
+    confirmationSummaryTelemetry.caseMisses += 1;
+  } else {
+    confirmationSummaryTelemetry.caseCacheHits += 1;
+  }
+
+  if (options.forceRefresh === true) {
+    confirmationSummaryTelemetry.forceRefreshCalls += 1;
+  }
+
+  if (caseIsStale) {
+    confirmationSummaryTelemetry.staleCaseRefreshes += 1;
+  }
+
+  let changed = !existingCase;
+
+  for (const fileId of Object.keys(filesById)) {
+    if (!fileIds.has(fileId)) {
+      delete filesById[fileId];
+      confirmationSummaryTelemetry.removedFileEntries += 1;
+      changed = true;
+    }
+  }
+
+  const filesToRefresh = files
+    .map((file) => {
+      const existingFileSummary = filesById[file.id];
+      if (!existingFileSummary) {
+        return {
+          fileId: file.id,
+          reason: 'missing' as const
+        };
+      }
+
+      if (caseIsStale) {
+        return {
+          fileId: file.id,
+          reason: 'stale' as const
+        };
+      }
+
+      if (isStaleTimestamp(existingFileSummary.updatedAt, maxAgeMs)) {
+        return {
+          fileId: file.id,
+          reason: 'stale' as const
+        };
+      }
+
+      return null;
+    })
+    .filter((entry) => entry !== null);
+
+  for (const entry of filesToRefresh) {
+    if (entry.reason === 'missing') {
+      confirmationSummaryTelemetry.missingFileRefreshes += 1;
+    } else {
+      confirmationSummaryTelemetry.staleFileRefreshes += 1;
+    }
+  }
+
+  if (filesToRefresh.length > 0) {
+    const refreshedFiles = await Promise.all(
+      filesToRefresh.map(async (entry) => {
+        const annotations = await getFileAnnotations(user, caseNumber, entry.fileId);
+        return {
+          fileId: entry.fileId,
+          summary: toFileConfirmationSummary(annotations)
+        };
+      })
+    );
+
+    for (const refreshedFile of refreshedFiles) {
+      filesById[refreshedFile.fileId] = refreshedFile.summary;
+      confirmationSummaryTelemetry.refreshedFileEntries += 1;
+      changed = true;
+    }
+  }
+
+  const aggregate = computeCaseConfirmationAggregate(filesById);
+  const updatedCaseSummary: CaseConfirmationSummary = {
+    includeConfirmation: aggregate.includeConfirmation,
+    isConfirmed: aggregate.isConfirmed,
+    updatedAt: getIsoNow(),
+    filesById
+  };
+
+  const aggregateChanged =
+    !existingCase ||
+    existingCase.includeConfirmation !== updatedCaseSummary.includeConfirmation ||
+    existingCase.isConfirmed !== updatedCaseSummary.isConfirmed;
+
+  if (changed || aggregateChanged || caseIsStale) {
+    summary.updatedAt = getIsoNow();
+    summary.cases[caseNumber] = updatedCaseSummary;
+    await saveConfirmationSummaryDocument(user, summary);
+    confirmationSummaryTelemetry.summaryWrites += 1;
+    return updatedCaseSummary;
+  }
+
+  return existingCase as CaseConfirmationSummary;
+};
+
+export const upsertFileConfirmationSummary = async (
+  user: User,
+  caseNumber: string,
+  fileId: string,
+  annotationData: AnnotationData | null
+): Promise<void> => {
+  const summary = await getConfirmationSummaryDocument(user);
+  const caseSummary = summary.cases[caseNumber] ?? {
+    includeConfirmation: false,
+    isConfirmed: false,
+    updatedAt: getIsoNow(),
+    filesById: {}
+  };
+
+  caseSummary.filesById[fileId] = toFileConfirmationSummary(annotationData);
+
+  const aggregate = computeCaseConfirmationAggregate(caseSummary.filesById);
+  caseSummary.includeConfirmation = aggregate.includeConfirmation;
+  caseSummary.isConfirmed = aggregate.isConfirmed;
+  caseSummary.updatedAt = getIsoNow();
+
+  summary.cases[caseNumber] = caseSummary;
+  summary.updatedAt = getIsoNow();
+
+  await saveConfirmationSummaryDocument(user, summary);
+};
+
+export const removeFileConfirmationSummary = async (
+  user: User,
+  caseNumber: string,
+  fileId: string
+): Promise<void> => {
+  const summary = await getConfirmationSummaryDocument(user);
+  const caseSummary = summary.cases[caseNumber];
+  if (!caseSummary || !caseSummary.filesById[fileId]) {
+    return;
+  }
+
+  delete caseSummary.filesById[fileId];
+
+  const aggregate = computeCaseConfirmationAggregate(caseSummary.filesById);
+  caseSummary.includeConfirmation = aggregate.includeConfirmation;
+  caseSummary.isConfirmed = aggregate.isConfirmed;
+  caseSummary.updatedAt = getIsoNow();
+
+  summary.cases[caseNumber] = caseSummary;
+  summary.updatedAt = getIsoNow();
+
+  await saveConfirmationSummaryDocument(user, summary);
+};
+
 // Higher-order function type for data operations
 export type DataOperation<T> = (user: User, ...args: unknown[]) => Promise<T>;
 
@@ -365,6 +829,12 @@ export const saveFileAnnotations = async (
       throw new Error(`Failed to save file annotations: ${response.status} ${response.statusText}`);
     }
 
+    try {
+      await upsertFileConfirmationSummary(user, caseNumber, fileId, dataToSave);
+    } catch (summaryError) {
+      console.warn(`Failed to update confirmation summary for ${caseNumber}/${fileId}:`, summaryError);
+    }
+
   } catch (error) {
     console.error(`Error saving annotations for ${caseNumber}/${fileId}:`, error);
     throw error;
@@ -409,6 +879,12 @@ export const deleteFileAnnotations = async (
 
     if (!response.ok && response.status !== 404) {
       throw new Error(`Failed to delete file annotations: ${response.status} ${response.statusText}`);
+    }
+
+    try {
+      await removeFileConfirmationSummary(user, caseNumber, fileId);
+    } catch (summaryError) {
+      console.warn(`Failed to update confirmation summary after delete for ${caseNumber}/${fileId}:`, summaryError);
     }
 
   } catch (error) {

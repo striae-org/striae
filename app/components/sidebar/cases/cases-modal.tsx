@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { listCases } from '~/components/actions/case-manage';
-import { getFileAnnotations } from '~/utils/data';
+import { ensureCaseConfirmationSummary, getConfirmationSummaryDocument } from '~/utils/data';
 import { fetchFiles } from '~/components/actions/image-manage';
 import styles from './cases-modal.module.css';
 
@@ -12,9 +12,17 @@ interface CasesModalProps {
   onSelectCase: (caseNum: string) => void;
   currentCase: string;
   user: User;
+  confirmationSaveVersion?: number;
 }
 
-export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }: CasesModalProps) => {
+export const CasesModal = ({
+  isOpen,
+  onClose,
+  onSelectCase,
+  currentCase,
+  user,
+  confirmationSaveVersion = 0
+}: CasesModalProps) => {
   const [cases, setCases] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
@@ -70,6 +78,43 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
 
   // Fetch confirmation status only for currently visible paginated cases
   useEffect(() => {
+    let isCancelled = false;
+
+    const loadConfirmationSummary = async () => {
+      if (!isOpen) {
+        return;
+      }
+
+      const summary = await getConfirmationSummaryDocument(user).catch((err) => {
+        console.error('Failed to load confirmation summary:', err);
+        return null;
+      });
+
+      if (!summary || isCancelled) {
+        return;
+      }
+
+      const statuses: { [caseNum: string]: { includeConfirmation: boolean; isConfirmed: boolean } } = {};
+      for (const [caseNum, entry] of Object.entries(summary.cases)) {
+        statuses[caseNum] = {
+          includeConfirmation: entry.includeConfirmation,
+          isConfirmed: entry.isConfirmed
+        };
+      }
+
+      setCaseConfirmationStatus(statuses);
+    };
+
+    loadConfirmationSummary();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isOpen, user, confirmationSaveVersion]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
     const fetchCaseConfirmationStatuses = async () => {
       const visibleCases = cases.slice(
         currentPage * CASES_PER_PAGE,
@@ -80,34 +125,21 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
         return;
       }
 
-      // Fetch case statuses in parallel for only visible cases
-      const caseStatusPromises = visibleCases.map(async (caseNum) => {
+      const missingCaseNumbers = visibleCases.filter((caseNum) => !caseConfirmationStatus[caseNum]);
+      if (missingCaseNumbers.length === 0) {
+        return;
+      }
+
+      const caseStatusPromises = missingCaseNumbers.map(async (caseNum) => {
         try {
           const files = await fetchFiles(user, caseNum, { skipValidation: true });
-          
-          // Fetch annotations for each file in the case (in parallel)
-          const fileStatuses = await Promise.all(
-            files.map(async (file) => {
-              try {
-                const annotations = await getFileAnnotations(user, caseNum, file.id);
-                return {
-                  includeConfirmation: annotations?.includeConfirmation ?? false,
-                  isConfirmed: !!(annotations?.includeConfirmation && annotations?.confirmationData),
-                };
-              } catch {
-                return { includeConfirmation: false, isConfirmed: false };
-              }
-            })
-          );
 
-          // Calculate case status
-          const filesRequiringConfirmation = fileStatuses.filter(s => s.includeConfirmation);
-          const allConfirmedFiles = filesRequiringConfirmation.every(s => s.isConfirmed);
+          const caseSummary = await ensureCaseConfirmationSummary(user, caseNum, files);
 
           return {
             caseNum,
-            includeConfirmation: filesRequiringConfirmation.length > 0,
-            isConfirmed: filesRequiringConfirmation.length > 0 ? allConfirmedFiles : false,
+            includeConfirmation: caseSummary.includeConfirmation,
+            isConfirmed: caseSummary.isConfirmed,
           };
         } catch (err) {
           console.error(`Error fetching confirmation status for case ${caseNum}:`, err);
@@ -122,20 +154,29 @@ export const CasesModal = ({ isOpen, onClose, onSelectCase, currentCase, user }:
       // Wait for all case status fetches to complete
       const results = await Promise.all(caseStatusPromises);
 
-      // Build the statuses map from results
-      const statuses: { [caseNum: string]: { includeConfirmation: boolean; isConfirmed: boolean } } = {};
-      results.forEach((result) => {
-        statuses[result.caseNum] = {
-          includeConfirmation: result.includeConfirmation,
-          isConfirmed: result.isConfirmed,
-        };
-      });
+      if (isCancelled) {
+        return;
+      }
 
-      setCaseConfirmationStatus(statuses);
+      setCaseConfirmationStatus((previous) => {
+        const next = { ...previous };
+        results.forEach((result) => {
+          next[result.caseNum] = {
+            includeConfirmation: result.includeConfirmation,
+            isConfirmed: result.isConfirmed,
+          };
+        });
+
+        return next;
+      });
     };
 
     fetchCaseConfirmationStatuses();
-  }, [isOpen, currentPage, cases, user]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isOpen, currentPage, cases, user, caseConfirmationStatus]);
 
   if (!isOpen) return null;
 
