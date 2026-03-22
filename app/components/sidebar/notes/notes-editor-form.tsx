@@ -3,6 +3,7 @@ import type { User } from 'firebase/auth';
 import { ColorSelector } from '~/components/colors/colors';
 import { AddlNotesModal } from './addl-notes-modal';
 import { ClassDetailsModal } from './class-details-modal';
+import { buildClassDetailsSummary } from './class-details-shared';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { type AnnotationData, type BulletAnnotationData, type CartridgeCaseAnnotationData, type ShotshellAnnotationData } from '~/types/annotations';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
@@ -562,6 +563,10 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
           if (b !== undefined) setBulletData(b);
           if (c !== undefined) setCartridgeCaseData(c);
           if (s !== undefined) setShotshellData(s);
+          const summary = buildClassDetailsSummary(b, c, s, classType);
+          if (summary) {
+            setAdditionalNotes((prev) => prev ? `${prev}\n${summary}` : summary);
+          }
         }}
         showNotification={notificationHandler}
         isReadOnly={areInputsDisabled}
