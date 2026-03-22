@@ -3,8 +3,8 @@ import type { PDFGenerationData, PDFGenerationRequest, ReportModule } from './re
 interface Env {
   BROWSER: Fetcher;
   PDF_WORKER_AUTH: string;
-  ACCOUNT_ID: string;
-  BROWSER_API_TOKEN: string;
+  ACCOUNT_ID?: string;
+  BROWSER_API_TOKEN?: string;
 }
 
 const BROWSER_PDF_TIMEOUT_MS = 90_000;
@@ -63,7 +63,11 @@ class MissingSecretError extends Error {
   }
 }
 
-function getRequiredSecret(value: string, name: string): string {
+function getRequiredSecret(value: string | undefined, name: string): string {
+  if (typeof value !== 'string') {
+    throw new MissingSecretError(name);
+  }
+
   const normalized = value.trim();
   if (!normalized) {
     throw new MissingSecretError(name);
