@@ -313,7 +313,6 @@ export const NotesSidebar = ({ currentCase, onReturn, user, imageId, onAnnotatio
               />
             </div>
           </div>
-          <hr />
           {/* Right side inputs */}
           <div className={styles.inputGroup}>
             <div className={styles.caseInput}>
