@@ -63,12 +63,6 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
     return luminance < 0.5;
   };
   
-  // Use passed currentDate or generate fallback
-  const displayDate = currentDate || (() => {
-    const now = new Date();
-    return `${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getDate().toString().padStart(2, '0')}/${now.getFullYear()}`;
-  })();
-  
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -405,7 +399,7 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
     <div class="content-wrapper">
     <div class="header">
       <div class="header-content">
-        <div class="date">${displayDate}</div>
+        <div class="date">${currentDate}</div>
         ${caseNumber ? `<div class="case-number">${caseNumber}</div>` : '<div class="case-number"></div>'}
       </div>
     </div>

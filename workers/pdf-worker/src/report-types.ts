@@ -52,7 +52,7 @@ export interface PDFGenerationData {
   caseNumber?: string;
   annotationData?: AnnotationData;
   activeAnnotations?: string[];
-  currentDate?: string;
+  currentDate: string;
   notesUpdatedFormatted?: string;
   userCompany?: string;
   userFirstName?: string;
@@ -61,8 +61,8 @@ export interface PDFGenerationData {
 }
 
 export interface PDFGenerationRequest {
-  reportFormat?: string;
-  data?: PDFGenerationData;
+  reportFormat: string;
+  data: PDFGenerationData;
 }
 
 export type ReportRenderer = (data: PDFGenerationData) => string;
