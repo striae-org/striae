@@ -1,7 +1,7 @@
 import type { User } from 'firebase/auth';
 import { fetchDataApi } from '~/utils/api';
 import { upsertFileConfirmationSummary } from '~/utils/data';
-import { type ConfirmationImportResult, type ConfirmationImportData } from '~/types';
+import { type AnnotationData, type ConfirmationImportResult, type ConfirmationImportData } from '~/types';
 import { checkExistingCase } from '../case-manage';
 import { extractConfirmationImportPackage } from './confirmation-package';
 import { validateExporterUid, validateConfirmationHash, validateConfirmationSignatureFile } from './validation';
@@ -38,6 +38,7 @@ export async function importConfirmationData(
   let signatureKeyId: string | undefined;
   let confirmationDataForAudit: ConfirmationImportData | null = null;
   let confirmationJsonFileNameForAudit = confirmationFile.name;
+  const confirmedFileNames = new Set<string>();
   
   const result: ConfirmationImportResult = {
     success: false,
@@ -235,13 +236,14 @@ export async function importConfirmationData(
       if (saveResponse.ok) {
         result.imagesUpdated++;
         result.confirmationsImported += confirmations.length;
+        confirmedFileNames.add(displayFilename);
 
         try {
           await upsertFileConfirmationSummary(
             user,
             result.caseNumber,
             currentImageId,
-            updatedAnnotationData
+            updatedAnnotationData as AnnotationData
           );
         } catch (summaryError) {
           console.warn(
@@ -313,6 +315,7 @@ export async function importConfirmationData(
       result.success ? (result.errors && result.errors.length > 0 ? 'warning' : 'success') : 'failure',
       hashValid,
       result.confirmationsImported, // Successfully imported confirmations
+      Array.from(confirmedFileNames).sort((left, right) => left.localeCompare(right)),
       result.errors || [],
       confirmationData.metadata.exportedByUid,
       {
@@ -405,6 +408,7 @@ export async function importConfirmationData(
       'failure',
       hashValidForAudit,
       0, // No confirmations successfully imported for failures
+      [],
       result.errors || [],
       reviewingExaminerUidForAudit,
       {

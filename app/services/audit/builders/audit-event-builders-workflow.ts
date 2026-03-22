@@ -218,6 +218,7 @@ interface BuildConfirmationImportAuditParamsInput {
   result: AuditResult;
   hashValid: boolean;
   confirmationsImported: number;
+  confirmedFileNames?: string[];
   errors?: string[];
   reviewingExaminerUid?: string;
   reviewerBadgeId?: string;
@@ -273,8 +274,13 @@ export const buildConfirmationImportAuditParams = (
     reviewerBadgeId: input.reviewerBadgeId,
     caseDetails: input.totalConfirmationsInFile !== undefined
       ? {
-          totalAnnotations: input.totalConfirmationsInFile
+          totalAnnotations: input.totalConfirmationsInFile,
+          confirmedFileNames: input.confirmedFileNames
         }
-      : undefined
+      : input.confirmedFileNames
+        ? {
+            confirmedFileNames: input.confirmedFileNames
+          }
+        : undefined
   };
 };
