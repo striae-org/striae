@@ -807,7 +807,11 @@ export const archiveCase = async (
       )
     );
 
-    const auditEntries = await auditService.getAuditEntriesForUser(user.uid, { caseNumber });
+    const auditEntries = await auditService.getAuditEntriesForUser(user.uid, {
+      caseNumber,
+      startDate: caseData.createdAt,
+      endDate: archivedAt,
+    });
     const auditTrail: AuditTrail = {
       caseNumber,
       workflowId: `${caseNumber}-archive-${Date.now()}`,
