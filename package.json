@@ -109,18 +109,18 @@
     "deploy-workers:user": "cd workers/user-worker && npm run deploy"
   },
   "dependencies": {
-    "@react-router/cloudflare": "^7.13.1",
+    "@react-router/cloudflare": "^7.13.2",
     "exceljs": "^4.4.0",
     "firebase": "^12.10.0",
     "isbot": "^5.1.36",
     "jszip": "^3.10.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router": "^7.13.1"
+    "react-router": "^7.13.2"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.13.1",
-    "@react-router/fs-routes": "^7.13.1",
+    "@react-router/dev": "^7.13.2",
+    "@react-router/fs-routes": "^7.13.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.57.1",
