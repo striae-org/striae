@@ -62,6 +62,12 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-22] - *[Patch Release v4.3.2](https://github.com/striae-org/striae/releases/tag/v4.3.2)*
+
+- **🧭 Confirmation Import Audit Filter Alignment** - Updated audit viewer confirmation-import filtering to include both dedicated `confirmation-import` actions and legacy confirmation-phase import entries for accurate query coverage.
+- **🔄 Case Refresh Version-Bump Guardrail** - Refined import result handling so the active case performs a full annotation refresh while different-case updates only increment confirmation save version state.
+- **🪪 Reviewer Badge Mapping Correction** - Corrected confirmation import audit export summary badge resolution by using the canonical `reviewerBadgeId` field.
+
 ## [2026-03-22] - *[Patch Release v4.3.1](https://github.com/striae-org/striae/releases/tag/v4.3.1)*
 
 - **🔐 Confirmation Import Signature Verification** - Fixed confirmation import signature verification logic to ensure accurate validation of imported confirmation signatures and enhanced confirmation import audit refinements.
