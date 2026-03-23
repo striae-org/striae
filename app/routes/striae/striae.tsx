@@ -21,7 +21,7 @@ import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { type AnnotationData, type FileData } from '~/types';
 import type * as CaseExportActions from '~/components/actions/case-export';
 import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, getCaseArchiveDetails } from '~/components/actions/case-manage';
-import { checkReadOnlyCaseExists } from '~/components/actions/case-review';
+import { checkReadOnlyCaseExists, deleteReadOnlyCase } from '~/components/actions/case-review';
 import { canCreateCase, getLimitsDescription, getUserData } from '~/utils/data';
 import styles from './striae.module.css';
 
@@ -413,6 +413,39 @@ export const Striae = ({ user }: StriaePage) => {
     }
   };
 
+  const handleClearROCase = async () => {
+    if (!currentCase) {
+      showNotification('No read-only case is currently loaded.', 'error');
+      return;
+    }
+
+    const caseToRemove = currentCase;
+    const confirmed = window.confirm(
+      `Clear the read-only case "${caseToRemove}" from the workspace? This will remove the imported review data. The original exported case is not affected.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const success = await deleteReadOnlyCase(user, caseToRemove);
+      if (!success) {
+        showNotification(`Failed to fully clear read-only case "${caseToRemove}". Please try again.`, 'error');
+        return;
+      }
+      setCurrentCase('');
+      setFiles([]);
+      handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
+      setShowNotes(false);
+      setIsAuditTrailOpen(false);
+      setIsRenameCaseModalOpen(false);
+      showNotification(`Read-only case "${caseToRemove}" cleared.`, 'success');
+    } catch (clearError) {
+      showNotification(clearError instanceof Error ? clearError.message : 'Failed to clear read-only case.', 'error');
+    }
+  };
+
   const handleArchiveCaseSubmit = async (archiveReason: string) => {
     if (!currentCase) {
       showNotification('Select a case before archiving.', 'error');
@@ -514,6 +547,7 @@ export const Striae = ({ user }: StriaePage) => {
   // Function to refresh annotation data (called when notes are saved)
   const refreshAnnotationData = () => {
     setAnnotationRefreshTrigger(prev => prev + 1);
+    setConfirmationSaveVersion(prev => prev + 1);
   };
 
   // Handle import/clear read-only case
@@ -522,6 +556,11 @@ export const Striae = ({ user }: StriaePage) => {
       if (result.caseNumber && result.isReadOnly) {
         // Successful read-only case import - load the case
         handleCaseChange(result.caseNumber);
+      } else if (result.caseNumber) {
+        setConfirmationSaveVersion(prev => prev + 1);
+        if (result.caseNumber === currentCase) {
+          refreshAnnotationData();
+        }
       } else if (!result.caseNumber && !result.isReadOnly) {
         // Read-only case cleared - reset all UI state
         setCurrentCase('');
@@ -722,6 +761,9 @@ export const Striae = ({ user }: StriaePage) => {
           void handleDeleteCaseAction();
         }}
         onArchiveCase={() => setIsArchiveCaseModalOpen(true)}
+        onClearROCase={() => {
+          void handleClearROCase();
+        }}
         onOpenViewAllFiles={() => setIsFilesModalOpen(true)}
         onDeleteCurrentFile={() => {
           void handleDeleteCurrentFileAction();
@@ -735,6 +777,7 @@ export const Striae = ({ user }: StriaePage) => {
           onOpenCase={() => {
             void handleOpenCaseModal();
           }}
+          onOpenCaseExport={() => setIsCaseExportModalOpen(true)}
           imageId={imageId}
           currentCase={currentCase}
           imageLoaded={imageLoaded}

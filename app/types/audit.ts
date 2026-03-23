@@ -199,6 +199,7 @@ export interface CaseAuditDetails {
   newCaseName?: string;
   totalFiles?: number;
   totalAnnotations?: number;
+  confirmedFileNames?: string[];
   createdDate?: string;
   lastModified?: string;
   deleteReason?: string;

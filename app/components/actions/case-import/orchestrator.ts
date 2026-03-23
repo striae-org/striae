@@ -286,6 +286,9 @@ export async function importCaseForReview(
     if (existingRegularCase && !isArchivedExport) {
       throw new Error(`Case "${result.caseNumber}" already exists in your case list. You cannot import a case for review if you were the original analyst.`);
     }
+    if (existingRegularCase && isArchivedExport) {
+      throw new Error(`Cannot import this archive because case "${result.caseNumber}" already exists in your case list (active or archived). To import this archive, the existing case must first be deleted.`);
+    }
     
     // Step 2b: Check if read-only case already exists
     const existingCase = await checkReadOnlyCaseExists(user, result.caseNumber);

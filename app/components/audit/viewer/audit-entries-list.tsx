@@ -6,6 +6,13 @@ interface AuditEntriesListProps {
   entries: ValidationAuditEntry[];
 }
 
+const isConfirmationImportEntry = (entry: ValidationAuditEntry): boolean => {
+  return (
+    entry.action === 'confirmation-import' ||
+    (entry.action === 'import' && entry.details.workflowPhase === 'confirmation')
+  );
+};
+
 export const AuditEntriesList = ({ entries }: AuditEntriesListProps) => {
   return (
     <div className={styles.entriesList}>
@@ -47,12 +54,23 @@ export const AuditEntriesList = ({ entries }: AuditEntriesListProps) => {
                 </div>
               )}
 
-              {entry.action === 'confirmation-import' && entry.details.reviewerBadgeId && (
+              {isConfirmationImportEntry(entry) && entry.details.reviewerBadgeId && (
                 <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Reviewer Badge/ID:</span>
+                  <span className={styles.detailLabel}>Confirming Examiner Badge/ID:</span>
                   <span className={styles.badgeTag}>{entry.details.reviewerBadgeId}</span>
                 </div>
               )}
+
+              {isConfirmationImportEntry(entry) &&
+                entry.details.caseDetails?.confirmedFileNames &&
+                entry.details.caseDetails.confirmedFileNames.length > 0 && (
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Confirmed Files:</span>
+                    <span className={styles.detailValue}>
+                      {entry.details.caseDetails.confirmedFileNames.join(', ')}
+                    </span>
+                  </div>
+                )}
 
               {entry.result === 'failure' && entry.details.validationErrors.length > 0 && (
                 <div className={styles.detailRow}>

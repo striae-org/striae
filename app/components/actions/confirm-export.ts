@@ -5,8 +5,8 @@ import {
   getCurrentPublicSigningKeyDetails,
   getVerificationPublicKey
 } from '~/utils/forensics';
-import { getUserData, getCaseData, updateCaseData, signConfirmationData } from '~/utils/data';
-import { type ConfirmationData, type CaseConfirmations, type CaseDataWithConfirmations, type ConfirmationImportData } from '~/types';
+import { getUserData, getCaseData, updateCaseData, signConfirmationData, upsertFileConfirmationSummary } from '~/utils/data';
+import { type AnnotationData, type ConfirmationData, type CaseConfirmations, type CaseDataWithConfirmations, type ConfirmationImportData } from '~/types';
 import { auditService } from '~/services/audit';
 
 /**
@@ -17,7 +17,8 @@ export async function storeConfirmation(
   caseNumber: string,
   currentImageId: string,
   confirmationData: ConfirmationData,
-  originalImageFileName?: string
+  originalImageFileName?: string,
+  annotationDataForSummary?: AnnotationData
 ): Promise<boolean> {
   const startTime = Date.now();
   let originalImageId: string | undefined; // Declare at function level for error handling
@@ -62,6 +63,14 @@ export async function storeConfirmation(
 
     // Store the updated case data using centralized function
     await updateCaseData(user, caseNumber, caseData);
+
+    if (annotationDataForSummary) {
+      try {
+        await upsertFileConfirmationSummary(user, caseNumber, currentImageId, annotationDataForSummary);
+      } catch (summaryError) {
+        console.warn(`Failed to update confirmation summary for ${caseNumber}/${currentImageId}:`, summaryError);
+      }
+    }
 
     console.log(`Confirmation stored for original image ${originalImageId}:`, confirmationData);
     

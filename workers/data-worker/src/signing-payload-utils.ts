@@ -13,6 +13,7 @@ export interface ConfirmationSignatureMetadata {
   exportedByUid: string;
   exportedByName: string;
   exportedByCompany: string;
+  exportedByBadgeId?: string;
   totalConfirmations: number;
   version: string;
   hash: string;
@@ -131,6 +132,7 @@ export function isValidConfirmationPayload(
     typeof metadata.exportedByUid !== 'string' ||
     typeof metadata.exportedByName !== 'string' ||
     typeof metadata.exportedByCompany !== 'string' ||
+    (typeof metadata.exportedByBadgeId !== 'undefined' && typeof metadata.exportedByBadgeId !== 'string') ||
     typeof metadata.totalConfirmations !== 'number' ||
     metadata.totalConfirmations < 0 ||
     typeof metadata.version !== 'string' ||
@@ -261,6 +263,9 @@ export function createConfirmationSigningPayload(confirmationData: ConfirmationS
       exportedByUid: confirmationData.metadata.exportedByUid,
       exportedByName: confirmationData.metadata.exportedByName,
       exportedByCompany: confirmationData.metadata.exportedByCompany,
+      ...(confirmationData.metadata.exportedByBadgeId
+        ? { exportedByBadgeId: confirmationData.metadata.exportedByBadgeId }
+        : {}),
       totalConfirmations: confirmationData.metadata.totalConfirmations,
       version: confirmationData.metadata.version,
       hash: confirmationData.metadata.hash.toUpperCase(),

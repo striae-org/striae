@@ -489,7 +489,7 @@
   cursor: not-allowed;
 }
 
-.confirmationExportButton {
+.sidebarToggle .confirmationExportButton {
   width: 100%;
   padding: 0.625rem 0.75rem;
   background-color: #198754;
@@ -502,11 +502,11 @@
   transition: all 0.2s;
 }
 
-.confirmationExportButton:hover:not(:disabled) {
+.sidebarToggle .confirmationExportButton:hover:not(:disabled) {
   background-color: #146c43;
 }
 
-.confirmationExportButton:disabled {
+.sidebarToggle .confirmationExportButton:disabled {
   background-color: var(--backgroundLight);
   color: var(--textLight);
   cursor: not-allowed;

@@ -2,6 +2,10 @@ import { useCallback, useMemo, useState } from 'react';
 import type { AuditAction, AuditResult, ValidationAuditEntry } from '~/types';
 import type { DateRangeFilter } from './types';
 
+const isConfirmationImportEntry = (entry: ValidationAuditEntry): boolean => {
+  return entry.action === 'import' && entry.details.workflowPhase === 'confirmation';
+};
+
 export const useAuditViewerFilters = (caseNumber?: string) => {
   const [filterAction, setFilterAction] = useState<AuditAction | 'all'>('all');
   const [filterResult, setFilterResult] = useState<AuditResult | 'all'>('all');
@@ -76,7 +80,13 @@ export const useAuditViewerFilters = (caseNumber?: string) => {
 
       const resultMatch = filterResult === 'all' || entry.result === filterResult;
       const entryBadgeId = entry.details.userProfileDetails?.badgeId?.trim().toLowerCase() || '';
-      const badgeMatch = normalizedBadgeFilter === '' || entryBadgeId.includes(normalizedBadgeFilter);
+      const reviewerBadgeId = isConfirmationImportEntry(entry)
+        ? entry.details.reviewerBadgeId?.trim().toLowerCase() || ''
+        : '';
+      const badgeMatch =
+        normalizedBadgeFilter === '' ||
+        entryBadgeId.includes(normalizedBadgeFilter) ||
+        reviewerBadgeId.includes(normalizedBadgeFilter);
 
       return actionMatch && resultMatch && badgeMatch;
     });

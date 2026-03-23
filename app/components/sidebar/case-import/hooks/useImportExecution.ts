@@ -117,6 +117,8 @@ export const useImportExecution = ({
           }
           
           setSuccess(message);
+
+          onImportComplete?.(result);
           
           // No auto-close for confirmation imports - let user read the details and close manually
           

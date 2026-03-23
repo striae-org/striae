@@ -25,6 +25,7 @@ interface SidebarProps {
   confirmationSaveVersion?: number;
   isUploading?: boolean;
   onUploadStatusChange?: (isUploading: boolean) => void;
+  onOpenCaseExport?: () => void;
 }
 
 export const Sidebar = ({ 
@@ -44,6 +45,7 @@ export const Sidebar = ({
   confirmationSaveVersion = 0,
   isUploading: initialIsUploading = false,
   onUploadStatusChange,
+  onOpenCaseExport,
 }: SidebarProps) => {
   const [isUploading, setIsUploading] = useState(initialIsUploading);
   const [toastMessage, setToastMessage] = useState('');
@@ -74,12 +76,6 @@ export const Sidebar = ({
     setIsToastVisible(true);
   }, []);
 
-  const handleExportNotification = useCallback((message: string, type: 'success' | 'error') => {
-    setToastType(type);
-    setToastMessage(message);
-    setIsToastVisible(true);
-  }, []);
-
   return (
     <div className={styles.sidebar}>
       <CaseSidebar 
@@ -100,7 +96,7 @@ export const Sidebar = ({
         isUploading={isUploading}
         onUploadStatusChange={handleUploadStatusChange}
         onUploadComplete={handleUploadComplete}
-        onExportNotification={handleExportNotification}
+        onOpenCaseExport={onOpenCaseExport}
       />
       <Toast 
         message={toastMessage}

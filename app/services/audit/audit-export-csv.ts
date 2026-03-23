@@ -38,7 +38,8 @@ export const AUDIT_CSV_ENTRY_HEADERS = [
   'Total Files',
   'MFA Method',
   'Security Incident Type',
-  'Security Severity'
+  'Security Severity',
+  'Confirmed Files'
 ];
 
 export const formatForCSV = (value?: string | number | null): string => {
@@ -121,7 +122,8 @@ export const entryToCSVRow = (entry: ValidationAuditEntry): string => {
     caseDetails?.totalFiles?.toString() || '',
     formatForCSV(securityDetails?.mfaMethod),
     formatForCSV(securityDetails?.incidentType),
-    formatForCSV(securityDetails?.severity)
+    formatForCSV(securityDetails?.severity),
+    formatForCSV(caseDetails?.confirmedFileNames?.join('; '))
   ];
 
   return values.join(',');

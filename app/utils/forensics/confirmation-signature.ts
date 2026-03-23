@@ -123,8 +123,12 @@ function normalizeConfirmations(confirmations: ConfirmationMap): ConfirmationMap
 
 export function createConfirmationSigningPayload(
   confirmationData: ConfirmationImportData,
-  signatureVersion: string = CONFIRMATION_SIGNATURE_VERSION
+  signatureVersion: string = CONFIRMATION_SIGNATURE_VERSION,
+  options: {
+    includeExportedByBadgeId?: boolean;
+  } = {}
 ): string {
+  const includeExportedByBadgeId = options.includeExportedByBadgeId !== false;
   const canonicalPayload = {
     signatureVersion,
     metadata: {
@@ -134,7 +138,7 @@ export function createConfirmationSigningPayload(
       exportedByUid: confirmationData.metadata.exportedByUid,
       exportedByName: confirmationData.metadata.exportedByName,
       exportedByCompany: confirmationData.metadata.exportedByCompany,
-      ...(confirmationData.metadata.exportedByBadgeId
+      ...(includeExportedByBadgeId && confirmationData.metadata.exportedByBadgeId
         ? { exportedByBadgeId: confirmationData.metadata.exportedByBadgeId }
         : {}),
       totalConfirmations: confirmationData.metadata.totalConfirmations,
@@ -180,9 +184,7 @@ export async function verifyConfirmationSignature(
     };
   }
 
-  const payload = createConfirmationSigningPayload(confirmationData, signatureVersion);
-
-  return verifySignaturePayload(
+  const verifyPayload = (payload: string) => verifySignaturePayload(
     payload,
     signature,
     FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
@@ -197,4 +199,17 @@ export async function verifyConfirmationSignature(
       verificationPublicKeyPem
     }
   );
+
+  const primaryPayload = createConfirmationSigningPayload(confirmationData, signatureVersion);
+  const primaryResult = await verifyPayload(primaryPayload);
+
+  if (primaryResult.isValid || !confirmationData.metadata.exportedByBadgeId) {
+    return primaryResult;
+  }
+
+  const legacyPayload = createConfirmationSigningPayload(confirmationData, signatureVersion, {
+    includeExportedByBadgeId: false
+  });
+
+  return verifyPayload(legacyPayload);
 }

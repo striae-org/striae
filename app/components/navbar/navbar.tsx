@@ -26,6 +26,7 @@ interface NavbarProps {
   onOpenRenameCase?: () => void;
   onDeleteCase?: () => void;
   onArchiveCase?: () => void;
+  onClearROCase?: () => void;
   onOpenViewAllFiles?: () => void;
   onDeleteCurrentFile?: () => void;
   onOpenImageNotes?: () => void;
@@ -55,6 +56,7 @@ export const Navbar = ({
   onOpenRenameCase,
   onDeleteCase,
   onArchiveCase,
+  onClearROCase,
   onOpenViewAllFiles,
   onDeleteCurrentFile,
   onOpenImageNotes,
@@ -151,6 +153,8 @@ export const Navbar = ({
                   type="button"
                   role="menuitem"
                   className={`${styles.caseMenuItem} ${styles.caseMenuItemOpen}`}
+                  disabled={isReadOnly}
+                  title={isReadOnly ? 'Clear the read-only case first to open or switch cases' : undefined}
                   onClick={() => {
                     onOpenCase?.();
                     setIsCaseMenuOpen(false);
@@ -162,6 +166,8 @@ export const Navbar = ({
                   type="button"
                   role="menuitem"
                   className={`${styles.caseMenuItem} ${styles.caseMenuItemList}`}
+                  disabled={isReadOnly}
+                  title={isReadOnly ? 'Clear the read-only case first to list all cases' : undefined}
                   onClick={() => {
                     onOpenListAllCases?.();
                     setIsCaseMenuOpen(false);
@@ -202,8 +208,21 @@ export const Navbar = ({
                 >
                   Case Audit Trail
                 </button>
-                {(!isReadOnly || archiveDetails?.archived) && (
-                  <div className={styles.caseMenuSectionLabel}>Maintenance</div>
+                <div className={styles.caseMenuSectionLabel}>Maintenance</div>
+                {isReadOnly && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={`${styles.caseMenuItem} ${styles.caseMenuItemClearRO}`}
+                    disabled={!hasLoadedCase}
+                    title={!hasLoadedCase ? 'No read-only case is loaded' : undefined}
+                    onClick={() => {
+                      onClearROCase?.();
+                      setIsCaseMenuOpen(false);
+                    }}
+                  >
+                    Clear RO Case
+                  </button>
                 )}
                 {!isReadOnly && (
                   <button
@@ -226,27 +245,27 @@ export const Navbar = ({
                     Rename Case
                   </button>
                 )}
-                {(!isReadOnly || archiveDetails?.archived) && (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className={`${styles.caseMenuItem} ${styles.caseMenuItemDelete}`}
-                    disabled={!hasLoadedCase || disableLongRunningCaseActions}
-                    title={
-                      !hasLoadedCase
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={`${styles.caseMenuItem} ${styles.caseMenuItemDelete}`}
+                  disabled={!hasLoadedCase || disableLongRunningCaseActions || isReadOnly}
+                  title={
+                    isReadOnly
+                      ? 'Clear the read-only case first before deleting'
+                      : !hasLoadedCase
                         ? 'Load a case to delete it'
                         : disableLongRunningCaseActions
                           ? 'Delete is unavailable while files are uploading'
                           : undefined
-                    }
-                    onClick={() => {
-                      onDeleteCase?.();
-                      setIsCaseMenuOpen(false);
-                    }}
-                  >
-                    Delete Case
-                  </button>
-                )}
+                  }
+                  onClick={() => {
+                    onDeleteCase?.();
+                    setIsCaseMenuOpen(false);
+                  }}
+                >
+                  Delete Case
+                </button>
                 {!isReadOnly && (
                   <button
                     type="button"

@@ -84,11 +84,13 @@ const generateConfirmationSummary = (entries: ValidationAuditEntry[]): string =>
 
   let totalConfirmationsImported = 0;
   let totalConfirmationsInFiles = 0;
-  const reviewingExaminers = new Set<string>();
+  const reviewingExaminers = new Map<string, { uid: string; badgeId?: string; confirmedFiles: Set<string> }>();
+  const allConfirmedFiles = new Set<string>();
 
   imports.forEach(entry => {
     const metrics = entry.details.performanceMetrics;
     const caseDetails = entry.details.caseDetails;
+    const userProfileDetails = entry.details.userProfileDetails;
 
     if (metrics?.validationStepsCompleted) {
       totalConfirmationsImported += metrics.validationStepsCompleted;
@@ -97,9 +99,35 @@ const generateConfirmationSummary = (entries: ValidationAuditEntry[]): string =>
       totalConfirmationsInFiles += caseDetails.totalAnnotations;
     }
     if (entry.details.reviewingExaminerUid) {
-      reviewingExaminers.add(entry.details.reviewingExaminerUid);
+      const uid = entry.details.reviewingExaminerUid;
+      const badgeId = userProfileDetails?.badgeId;
+      const confirmedFileNames = caseDetails?.confirmedFileNames || [];
+
+      if (!reviewingExaminers.has(uid)) {
+        reviewingExaminers.set(uid, {
+          uid,
+          badgeId,
+          confirmedFiles: new Set()
+        });
+      }
+
+      const examiner = reviewingExaminers.get(uid)!;
+      confirmedFileNames.forEach(file => {
+        examiner.confirmedFiles.add(file);
+        allConfirmedFiles.add(file);
+      });
     }
   });
+
+  const examinersDetail = Array.from(reviewingExaminers.values())
+    .map(examiner => {
+      const badgeInfo = examiner.badgeId ? ` (Badge: ${examiner.badgeId})` : '';
+      const filesInfo = examiner.confirmedFiles.size > 0
+        ? `\n    Confirmed Files: ${Array.from(examiner.confirmedFiles).sort().join(', ')}`
+        : '';
+      return `- UID: ${examiner.uid}${badgeInfo}${filesInfo}`;
+    })
+    .join('\n');
 
   return [
     `Confirmation Operations: ${confirmationEntries.length}`,
@@ -112,8 +140,12 @@ const generateConfirmationSummary = (entries: ValidationAuditEntry[]): string =>
     `Reviewing Examiners Involved: ${reviewingExaminers.size}`,
     '',
     reviewingExaminers.size > 0
-      ? `External Reviewers: ${Array.from(reviewingExaminers).join(', ')}`
-      : 'No external reviewers detected'
+      ? `External Reviewers:\n${examinersDetail}`
+      : 'No external reviewers detected',
+    '',
+    allConfirmedFiles.size > 0
+      ? `Successfully Confirmed Files (Total: ${allConfirmedFiles.size}):\n${Array.from(allConfirmedFiles).sort().map(file => `  - ${file}`).join('\n')}`
+      : 'No files confirmed'
   ].join('\n');
 };
 

@@ -107,7 +107,8 @@ export const Canvas = ({
         caseNumber,
         currentImageId,
         confirmationData,
-        filename
+        filename,
+        updatedAnnotationData
       );
       
       if (success) {
