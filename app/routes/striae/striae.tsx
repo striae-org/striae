@@ -17,12 +17,12 @@ import { FilesModal } from '~/components/sidebar/files/files-modal';
 import { NotesEditorModal } from '~/components/sidebar/notes/notes-editor-modal';
 import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import { fetchUserApi } from '~/utils/api';
-import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { type AnnotationData, type FileData } from '~/types';
 import { validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, getCaseArchiveDetails } from '~/components/actions/case-manage';
 import { checkReadOnlyCaseExists, deleteReadOnlyCase } from '~/components/actions/case-review';
 import { canCreateCase } from '~/utils/data';
 import {
+  resolveEarliestAnnotationTimestamp,
   CREATE_READ_ONLY_CASE_EXISTS_ERROR,
   CLEAR_READ_ONLY_CASE_PARTIAL_FAILURE,
   DELETE_CASE_CONFIRMATION,
