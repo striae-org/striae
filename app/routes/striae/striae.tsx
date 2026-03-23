@@ -21,7 +21,7 @@ import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { type AnnotationData, type FileData } from '~/types';
 import type * as CaseExportActions from '~/components/actions/case-export';
 import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, getCaseArchiveDetails } from '~/components/actions/case-manage';
-import { checkReadOnlyCaseExists } from '~/components/actions/case-review';
+import { checkReadOnlyCaseExists, deleteReadOnlyCase } from '~/components/actions/case-review';
 import { canCreateCase, getLimitsDescription, getUserData } from '~/utils/data';
 import styles from './striae.module.css';
 
@@ -413,6 +413,39 @@ export const Striae = ({ user }: StriaePage) => {
     }
   };
 
+  const handleClearROCase = async () => {
+    if (!currentCase) {
+      showNotification('No read-only case is currently loaded.', 'error');
+      return;
+    }
+
+    const caseToRemove = currentCase;
+    const confirmed = window.confirm(
+      `Clear the read-only case "${caseToRemove}" from the workspace? This will remove the imported review data. The original exported case is not affected.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const success = await deleteReadOnlyCase(user, caseToRemove);
+      if (!success) {
+        showNotification(`Failed to fully clear read-only case "${caseToRemove}". Please try again.`, 'error');
+        return;
+      }
+      setCurrentCase('');
+      setFiles([]);
+      handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
+      setShowNotes(false);
+      setIsAuditTrailOpen(false);
+      setIsRenameCaseModalOpen(false);
+      showNotification(`Read-only case "${caseToRemove}" cleared.`, 'success');
+    } catch (clearError) {
+      showNotification(clearError instanceof Error ? clearError.message : 'Failed to clear read-only case.', 'error');
+    }
+  };
+
   const handleArchiveCaseSubmit = async (archiveReason: string) => {
     if (!currentCase) {
       showNotification('Select a case before archiving.', 'error');
@@ -728,6 +761,9 @@ export const Striae = ({ user }: StriaePage) => {
           void handleDeleteCaseAction();
         }}
         onArchiveCase={() => setIsArchiveCaseModalOpen(true)}
+        onClearROCase={() => {
+          void handleClearROCase();
+        }}
         onOpenViewAllFiles={() => setIsFilesModalOpen(true)}
         onDeleteCurrentFile={() => {
           void handleDeleteCurrentFileAction();
