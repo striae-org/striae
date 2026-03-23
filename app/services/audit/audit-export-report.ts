@@ -90,7 +90,6 @@ const generateConfirmationSummary = (entries: ValidationAuditEntry[]): string =>
   imports.forEach(entry => {
     const metrics = entry.details.performanceMetrics;
     const caseDetails = entry.details.caseDetails;
-    const userProfileDetails = entry.details.userProfileDetails;
 
     if (metrics?.validationStepsCompleted) {
       totalConfirmationsImported += metrics.validationStepsCompleted;
@@ -100,7 +99,7 @@ const generateConfirmationSummary = (entries: ValidationAuditEntry[]): string =>
     }
     if (entry.details.reviewingExaminerUid) {
       const uid = entry.details.reviewingExaminerUid;
-      const badgeId = userProfileDetails?.badgeId;
+      const badgeId = entry.details.reviewerBadgeId;
       const confirmedFileNames = caseDetails?.confirmedFileNames || [];
 
       if (!reviewingExaminers.has(uid)) {

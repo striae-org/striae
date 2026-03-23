@@ -3,7 +3,10 @@ import type { AuditAction, AuditResult, ValidationAuditEntry } from '~/types';
 import type { DateRangeFilter } from './types';
 
 const isConfirmationImportEntry = (entry: ValidationAuditEntry): boolean => {
-  return entry.action === 'import' && entry.details.workflowPhase === 'confirmation';
+  return (
+    entry.action === 'confirmation-import' ||
+    (entry.action === 'import' && entry.details.workflowPhase === 'confirmation')
+  );
 };
 
 export const useAuditViewerFilters = (caseNumber?: string) => {
@@ -73,7 +76,7 @@ export const useAuditViewerFilters = (caseNumber?: string) => {
       } else if (filterAction === 'confirmation-export') {
         actionMatch = entry.action === 'export' && entry.details.workflowPhase === 'confirmation';
       } else if (filterAction === 'confirmation-import') {
-        actionMatch = entry.action === 'import' && entry.details.workflowPhase === 'confirmation';
+        actionMatch = isConfirmationImportEntry(entry);
       } else {
         actionMatch = entry.action === filterAction;
       }

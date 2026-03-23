@@ -557,9 +557,12 @@ export const Striae = ({ user }: StriaePage) => {
         // Successful read-only case import - load the case
         handleCaseChange(result.caseNumber);
       } else if (result.caseNumber) {
-        setConfirmationSaveVersion(prev => prev + 1);
         if (result.caseNumber === currentCase) {
+          // Current case updated - refresh annotations (also bumps confirmationSaveVersion)
           refreshAnnotationData();
+        } else {
+          // Different case's confirmations updated - bump confirmation version only
+          setConfirmationSaveVersion(prev => prev + 1);
         }
       } else if (!result.caseNumber && !result.isReadOnly) {
         // Read-only case cleared - reset all UI state
