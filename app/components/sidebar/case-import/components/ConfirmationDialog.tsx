@@ -4,7 +4,8 @@ import styles from '../case-import.module.css';
 interface ConfirmationDialogProps {
   showConfirmation: boolean;
   casePreview: CaseImportPreview | null;
-  showArchivedRegularCaseRiskWarning?: boolean;
+  isArchivedRegularCaseImportBlocked?: boolean;
+  archivedRegularCaseBlockMessage?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -12,7 +13,8 @@ interface ConfirmationDialogProps {
 export const ConfirmationDialog = ({ 
   showConfirmation, 
   casePreview, 
-  showArchivedRegularCaseRiskWarning = false,
+  isArchivedRegularCaseImportBlocked = false,
+  archivedRegularCaseBlockMessage = 'This archived case cannot be imported because the case already exists in your regular case list. Delete the regular case before importing this archive.',
   onConfirm, 
   onCancel 
 }: ConfirmationDialogProps) => {
@@ -51,9 +53,9 @@ export const ConfirmationDialog = ({
                 Archived export detected. Original exporter imports are allowed for archived cases.
               </div>
             )}
-            {showArchivedRegularCaseRiskWarning && (
+            {isArchivedRegularCaseImportBlocked && (
               <div className={styles.archivedRegularCaseRiskNote}>
-                Warning: This archived import matches a case in your regular case list. If you clear the imported read-only case later, the regular case images will be deleted and inaccessible.
+                {archivedRegularCaseBlockMessage}
               </div>
             )}
             {casePreview.hashValid !== undefined && (
@@ -70,6 +72,7 @@ export const ConfirmationDialog = ({
             <button
               className={styles.confirmButton}
               onClick={onConfirm}
+              disabled={isArchivedRegularCaseImportBlocked}
             >
               Confirm Import
             </button>

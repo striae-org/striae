@@ -98,22 +98,40 @@ export const Striae = ({ user }: StriaePage) => {
     archiveReason?: string;
   }>({ archived: false });
 
-
-   useEffect(() => {
-    // Set clear.jpg when case changes or is cleared
+  const clearSelectedImageState = () => {
     setSelectedImage('/clear.jpg');
     setSelectedFilename(undefined);
     setImageId(undefined);
-    setAnnotationData(null);    
+    setAnnotationData(null);
     setError(undefined);
     setImageLoaded(false);
+  };
+
+  const clearCaseContextState = () => {
+    setActiveAnnotations(new Set());
+    setIsBoxAnnotationMode(false);
+    setIsReadOnlyCase(false);
+    setArchiveDetails({ archived: false });
+  };
+
+  const clearLoadedCaseState = () => {
+    setCurrentCase('');
+    setFiles([]);
+    clearCaseContextState();
+    clearSelectedImageState();
+    setShowNotes(false);
+    setIsAuditTrailOpen(false);
+    setIsRenameCaseModalOpen(false);
+  };
+
+
+   useEffect(() => {
+    // Set clear.jpg when case changes or is cleared
+    clearSelectedImageState();
     
     // Reset annotation and UI states when case is cleared
     if (!currentCase) {
-      setActiveAnnotations(new Set());
-      setIsBoxAnnotationMode(false);
-      setIsReadOnlyCase(false);
-      setArchiveDetails({ archived: false });
+      clearCaseContextState();
     }
   }, [currentCase]);
 
@@ -350,11 +368,7 @@ export const Striae = ({ user }: StriaePage) => {
     setIsDeletingCase(true);
     try {
       const deleteResult = await deleteCase(user, currentCase);
-      setCurrentCase('');
-      setFiles([]);
-      setShowNotes(false);
-      setIsAuditTrailOpen(false);
-      setIsRenameCaseModalOpen(false);
+      clearLoadedCaseState();
       if (deleteResult.missingImages.length > 0) {
         showNotification(
           `Case deleted. ${deleteResult.missingImages.length} image(s) were not found and were skipped during deletion.`,
@@ -396,7 +410,7 @@ export const Striae = ({ user }: StriaePage) => {
       const deleteResult = await deleteFile(user, currentCase, imageId, 'User-requested deletion via navbar file management');
       const updatedFiles = files.filter((file) => file.id !== imageId);
       setFiles(updatedFiles);
-      handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
+      clearSelectedImageState();
       setShowNotes(false);
       if (deleteResult.imageMissing) {
         showNotification(
@@ -434,12 +448,7 @@ export const Striae = ({ user }: StriaePage) => {
         showNotification(`Failed to fully clear read-only case "${caseToRemove}". Please try again.`, 'error');
         return;
       }
-      setCurrentCase('');
-      setFiles([]);
-      handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
-      setShowNotes(false);
-      setIsAuditTrailOpen(false);
-      setIsRenameCaseModalOpen(false);
+      clearLoadedCaseState();
       showNotification(`Read-only case "${caseToRemove}" cleared.`, 'success');
     } catch (clearError) {
       showNotification(clearError instanceof Error ? clearError.message : 'Failed to clear read-only case.', 'error');
@@ -566,10 +575,7 @@ export const Striae = ({ user }: StriaePage) => {
         }
       } else if (!result.caseNumber && !result.isReadOnly) {
         // Read-only case cleared - reset all UI state
-        setCurrentCase('');
-        setFiles([]);
-        handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
-        setShowNotes(false);
+        clearLoadedCaseState();
       }
     }
   };

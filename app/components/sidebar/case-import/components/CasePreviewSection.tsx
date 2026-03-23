@@ -4,13 +4,13 @@ import styles from '../case-import.module.css';
 interface CasePreviewSectionProps {
   casePreview: CaseImportPreview | null;
   isLoadingPreview: boolean;
-  showArchivedRegularCaseRiskWarning?: boolean;
+  isArchivedRegularCaseImportBlocked?: boolean;
 }
 
 export const CasePreviewSection = ({
   casePreview,
   isLoadingPreview,
-  showArchivedRegularCaseRiskWarning = false
+  isArchivedRegularCaseImportBlocked = false
 }: CasePreviewSectionProps) => {
   if (isLoadingPreview) {
     return (
@@ -34,9 +34,9 @@ export const CasePreviewSection = ({
             Archived export detected. Original exporter imports are allowed for archived cases.
           </div>
         )}
-        {showArchivedRegularCaseRiskWarning && (
+        {isArchivedRegularCaseImportBlocked && (
           <div className={styles.archivedRegularCaseRiskNote}>
-            Warning: This archived import matches a case already in your regular case list. If you later clear the imported read-only case, the regular case images will be deleted and become inaccessible.
+            Import blocked: This archived case already exists in your regular case list. Delete the regular case before importing this archive.
           </div>
         )}
         <div className={styles.previewGrid}>

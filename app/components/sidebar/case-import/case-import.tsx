@@ -63,13 +63,15 @@ export const CaseImport = ({
   });
   
   const [existingReadOnlyCase, setExistingReadOnlyCase] = useState<string | null>(null);
-  const [showArchivedRegularCaseRiskWarning, setShowArchivedRegularCaseRiskWarning] = useState(false);
+  const [isArchivedRegularCaseImportBlocked, setIsArchivedRegularCaseImportBlocked] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const archivedRegularCaseBlockMessage =
+    'This archived case cannot be imported because the case already exists in your regular case list. Delete the regular case before importing this archive.';
   
   // Clear import selection state (used by preview hook on validation failure)
   const clearImportSelection = useCallback(() => {
     updateImportState({ selectedFile: null, importType: null });
-    setShowArchivedRegularCaseRiskWarning(false);
+    setIsArchivedRegularCaseImportBlocked(false);
     resetFileInput(fileInputRef);
   }, [updateImportState]);
 
@@ -232,6 +234,11 @@ export const CaseImport = ({
   // Handle import action
   const handleImport = useCallback(() => {
     if (!user || !importState.selectedFile || !importState.importType) return;
+
+    if (importState.importType === 'case' && isArchivedRegularCaseImportBlocked) {
+      setError(archivedRegularCaseBlockMessage);
+      return;
+    }
     
     // For case imports, show confirmation dialog with preview
     // For confirmation imports, proceed directly to import
@@ -242,7 +249,16 @@ export const CaseImport = ({
       // Direct import for confirmations
       executeImport();
     }
-  }, [user, importState.selectedFile, importState.importType, casePreview, updateImportState, executeImport]);
+  }, [
+    user,
+    importState.selectedFile,
+    importState.importType,
+    isArchivedRegularCaseImportBlocked,
+    casePreview,
+    updateImportState,
+    executeImport,
+    setError,
+  ]);
 
   const handleCancelImport = useCallback(() => {
     updateImportState({ showConfirmation: false });
@@ -273,7 +289,7 @@ export const CaseImport = ({
         !casePreview.caseNumber
       ) {
         if (isMounted) {
-          setShowArchivedRegularCaseRiskWarning(false);
+          setIsArchivedRegularCaseImportBlocked(false);
         }
         return;
       }
@@ -281,11 +297,12 @@ export const CaseImport = ({
       try {
         const regularCases = await listCases(user);
         if (isMounted) {
-          setShowArchivedRegularCaseRiskWarning(regularCases.includes(casePreview.caseNumber));
+          const hasConflict = regularCases.includes(casePreview.caseNumber);
+          setIsArchivedRegularCaseImportBlocked(hasConflict);
         }
       } catch {
         if (isMounted) {
-          setShowArchivedRegularCaseRiskWarning(false);
+          setIsArchivedRegularCaseImportBlocked(false);
         }
       }
     };
@@ -295,7 +312,13 @@ export const CaseImport = ({
     return () => {
       isMounted = false;
     };
-  }, [user, isOpen, importState.importType, casePreview?.archived, casePreview?.caseNumber]);
+  }, [
+    user,
+    isOpen,
+    importState.importType,
+    casePreview?.archived,
+    casePreview?.caseNumber,
+  ]);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -306,9 +329,19 @@ export const CaseImport = ({
 
   // Handle confirmation import
   const handleConfirmImport = useCallback(() => {
+    if (isArchivedRegularCaseImportBlocked) {
+      setError(archivedRegularCaseBlockMessage);
+      return;
+    }
+
     executeImport();
     updateImportState({ showConfirmation: false });
-  }, [executeImport, updateImportState]);
+  }, [
+    isArchivedRegularCaseImportBlocked,
+    executeImport,
+    updateImportState,
+    setError,
+  ]);
 
   if (!isOpen) return null;
 
@@ -362,7 +395,7 @@ export const CaseImport = ({
                   <CasePreviewSection 
                     casePreview={casePreview} 
                     isLoadingPreview={importState.isLoadingPreview} 
-                    showArchivedRegularCaseRiskWarning={showArchivedRegularCaseRiskWarning}
+                    isArchivedRegularCaseImportBlocked={isArchivedRegularCaseImportBlocked}
                   />
                 )}
                 
@@ -384,6 +417,10 @@ export const CaseImport = ({
                 <strong>⚠️ Import Blocked:</strong> Data hash validation failed. 
                 This file may have been tampered with or corrupted and cannot be imported.
               </div>
+            )}
+
+            {isArchivedRegularCaseImportBlocked && (
+              <div className={styles.error}>{archivedRegularCaseBlockMessage}</div>
             )}
 
             {/* Success message */}
@@ -411,6 +448,7 @@ export const CaseImport = ({
                   importState.isImporting || 
                   importState.isClearing || 
                   importState.isLoadingPreview ||
+                  (importState.importType === 'case' && isArchivedRegularCaseImportBlocked) ||
                   (importState.importType === 'case' && (!casePreview || casePreview.hashValid !== true))
                 }
               >
@@ -454,7 +492,8 @@ export const CaseImport = ({
     <ConfirmationDialog 
       showConfirmation={importState.showConfirmation}
       casePreview={casePreview}
-      showArchivedRegularCaseRiskWarning={showArchivedRegularCaseRiskWarning}
+      isArchivedRegularCaseImportBlocked={isArchivedRegularCaseImportBlocked}
+      archivedRegularCaseBlockMessage={archivedRegularCaseBlockMessage}
       onConfirm={handleConfirmImport}
       onCancel={handleCancelImport}
     />
