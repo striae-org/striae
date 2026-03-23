@@ -2,13 +2,13 @@
 
 **Release Date**: March 23, 2026
 **Period**: March 22 - March 23, 2026
-**Total Commits**: 6 (non-merge since v4.3.2 release)
+**Total Commits**: 10 (non-merge since v4.3.2 release)
 
 ## Patch Release - Case Management, Archive-State Distinction, and Striae Route Refactoring
 
 ## Summary
 
-v4.3.3 is a focused patch release centered on case-management reliability, clearer separation between archived and read-only case states, and a modular refactor of the main Striae route. The release improves archive/import workflow behavior, fixes UI regressions around archive case handling, and extracts route helpers to make the surrounding case operations easier to maintain.
+v4.3.3 is a focused patch release centered on case-management reliability, clearer separation between archived and read-only case states, and a modular refactor of the main Striae route. The release improves archive/import workflow behavior, fixes UI regressions around archive case handling, and extracts route helpers to make the surrounding case operations easier to maintain. Some dependency updates and lint warnings resolved.
 
 ## Detailed Changes
 
@@ -33,13 +33,21 @@ v4.3.3 is a focused patch release centered on case-management reliability, clear
 - Extracted reset helpers, open-case helpers, and case export helpers from the main Striae route.
 - Reduced route-level complexity to make future archive and case-management maintenance safer and more targeted.
 
+### Case and File Operation Messages Centralization
+
+- Centralized case and file operation messages to improve consistency and maintainability across the codebase.
+
+### Dependency Updates and Lint Fixes
+
+- Updated @react-router/cloudflare, @react-router/dev, @react-router/fs-routes, react-router to 7.13.2.
+
 ## Release Statistics
 
 - **Commit Range**: `v4.3.2..v4.3.3`
-- **Commits Included**: 6 (non-merge, excluding the version bump commit)
+- **Commits Included**: 10 (non-merge, excluding the version bump commit)
 - **Build Status**: Succeeded (npm run build)
 - **Typecheck Status**: Passed (npm run typecheck)
-- **Lint Status**: Passed with warnings - 0 errors, 12 warnings (npm run lint)
+- **Lint Status**: Passed with warnings - 0 errors, 12 known/ignored warnings (npm run lint)
 
 ## Closing Note
 
