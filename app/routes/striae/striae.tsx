@@ -19,7 +19,7 @@ import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import { fetchUserApi } from '~/utils/api';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { type AnnotationData, type FileData } from '~/types';
-import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, getCaseArchiveDetails } from '~/components/actions/case-manage';
+import { validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, getCaseArchiveDetails } from '~/components/actions/case-manage';
 import { checkReadOnlyCaseExists, deleteReadOnlyCase } from '~/components/actions/case-review';
 import { canCreateCase } from '~/utils/data';
 import { useStriaeResetHelpers } from './hooks/use-striae-reset-helpers';
@@ -165,10 +165,11 @@ export const Striae = ({ user }: StriaePage) => {
       }
 
       try {
-        // Check if the case data itself has isReadOnly: true
-        const explicitReadOnly = await checkCaseIsReadOnly(user, currentCase);
+        // Imported review cases are tracked in the user's read-only case list.
+        // This includes archived ZIP imports and distinguishes them from manually archived regular cases.
+        const readOnlyCaseEntry = await checkReadOnlyCaseExists(user, currentCase);
         const details = await getCaseArchiveDetails(user, currentCase);
-        const reviewOnly = explicitReadOnly && !details.archived;
+        const reviewOnly = Boolean(readOnlyCaseEntry);
         setIsReviewOnlyCase(reviewOnly);
         setIsReadOnlyCase(reviewOnly || details.archived);
         setArchiveDetails(details);
