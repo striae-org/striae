@@ -1,4 +1,5 @@
 import { type CaseImportPreview } from '~/types';
+import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE } from '~/utils/case-messages';
 import styles from '../case-import.module.css';
 
 interface ConfirmationDialogProps {
@@ -14,7 +15,7 @@ export const ConfirmationDialog = ({
   showConfirmation, 
   casePreview, 
   isArchivedRegularCaseImportBlocked = false,
-  archivedRegularCaseBlockMessage = 'This archived case cannot be imported because the case already exists in your regular case list. Delete the regular case before importing this archive.',
+  archivedRegularCaseBlockMessage = ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE,
   onConfirm, 
   onCancel 
 }: ConfirmationDialogProps) => {

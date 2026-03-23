@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
+import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE } from '~/utils/case-messages';
 import { 
   listReadOnlyCases, 
   deleteReadOnlyCase
@@ -65,8 +66,6 @@ export const CaseImport = ({
   const [existingReadOnlyCase, setExistingReadOnlyCase] = useState<string | null>(null);
   const [isArchivedRegularCaseImportBlocked, setIsArchivedRegularCaseImportBlocked] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const archivedRegularCaseBlockMessage =
-    'This archived case cannot be imported because the case already exists in your regular case list. Delete the regular case before importing this archive.';
   
   // Clear import selection state (used by preview hook on validation failure)
   const clearImportSelection = useCallback(() => {
@@ -236,7 +235,7 @@ export const CaseImport = ({
     if (!user || !importState.selectedFile || !importState.importType) return;
 
     if (importState.importType === 'case' && isArchivedRegularCaseImportBlocked) {
-      setError(archivedRegularCaseBlockMessage);
+      setError(ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE);
       return;
     }
     
@@ -330,7 +329,7 @@ export const CaseImport = ({
   // Handle confirmation import
   const handleConfirmImport = useCallback(() => {
     if (isArchivedRegularCaseImportBlocked) {
-      setError(archivedRegularCaseBlockMessage);
+      setError(ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE);
       return;
     }
 
@@ -420,7 +419,7 @@ export const CaseImport = ({
             )}
 
             {isArchivedRegularCaseImportBlocked && (
-              <div className={styles.error}>{archivedRegularCaseBlockMessage}</div>
+              <div className={styles.error}>{ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE}</div>
             )}
 
             {/* Success message */}
@@ -493,7 +492,7 @@ export const CaseImport = ({
       showConfirmation={importState.showConfirmation}
       casePreview={casePreview}
       isArchivedRegularCaseImportBlocked={isArchivedRegularCaseImportBlocked}
-      archivedRegularCaseBlockMessage={archivedRegularCaseBlockMessage}
+      archivedRegularCaseBlockMessage={ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE}
       onConfirm={handleConfirmImport}
       onCancel={handleCancelImport}
     />

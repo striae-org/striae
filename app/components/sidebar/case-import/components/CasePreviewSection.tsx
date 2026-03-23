@@ -1,4 +1,5 @@
 import { type CaseImportPreview } from '~/types';
+import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE } from '~/utils/case-messages';
 import styles from '../case-import.module.css';
 
 interface CasePreviewSectionProps {
@@ -36,7 +37,7 @@ export const CasePreviewSection = ({
         )}
         {isArchivedRegularCaseImportBlocked && (
           <div className={styles.archivedRegularCaseRiskNote}>
-            Import blocked: This archived case already exists in your regular case list. Delete the regular case before importing this archive.
+            {ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE}
           </div>
         )}
         <div className={styles.previewGrid}>
