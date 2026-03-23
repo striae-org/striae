@@ -169,7 +169,7 @@ export const CasesModal = ({
       return allCases.filter((entry) => entry.archived && !entry.isReadOnly);
     }
 
-    return allCases.filter((entry) => !entry.archived && !entry.isReadOnly);
+    return allCases.filter((entry) => !entry.isReadOnly);
   }, [allCases, preferences.showArchivedOnly]);
 
   const visibleCases = useMemo(() => {
@@ -184,6 +184,11 @@ export const CasesModal = ({
       entry.caseNumber.toLowerCase().includes(normalizedQuery)
     );
   }, [allCases, preferences, caseConfirmationStatus, searchQuery]);
+
+  const totalRegularCases = useMemo(
+    () => allCases.filter((entry) => !entry.isReadOnly).length,
+    [allCases]
+  );
 
   const totalPages = Math.max(1, Math.ceil(visibleCases.length / CASES_PER_PAGE));
 
@@ -653,7 +658,7 @@ export const CasesModal = ({
               </div>
 
               <p className={styles.caseCount}>
-                {visibleCases.length} shown of {allCases.length} total cases
+                {visibleCases.length} shown of {totalRegularCases} total cases
               </p>
 
               {actionNotice && (
@@ -720,12 +725,22 @@ export const CasesModal = ({
                             </span>
                           </div>
 
-                          <span
-                            className={`${styles.confirmationBadge} ${confirmationClass}`}
-                            aria-label={`Confirmation status: ${confirmationLabel}`}
-                          >
-                            {confirmationLabel}
-                          </span>
+                          <div className={styles.badgeColumn}>
+                            {caseEntry.archived && (
+                              <span
+                                className={`${styles.confirmationBadge} ${styles.archivedBadge}`}
+                                aria-label="Archived case"
+                              >
+                                Archived
+                              </span>
+                            )}
+                            <span
+                              className={`${styles.confirmationBadge} ${confirmationClass}`}
+                              aria-label={`Confirmation status: ${confirmationLabel}`}
+                            >
+                              {confirmationLabel}
+                            </span>
+                          </div>
                         </div>
                       </li>
                     );

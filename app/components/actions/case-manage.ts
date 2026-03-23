@@ -182,8 +182,9 @@ export const checkExistingCase = async (user: User, caseNumber: string): Promise
       return null;
     }
 
-    // Check if this is a read-only case - if so, don't consider it as an existing regular case
-    if ('isReadOnly' in caseData && caseData.isReadOnly) {
+    // Imported review cases are read-only and should not be treated as regular cases.
+    // Archived cases remain regular case records even if legacy data includes isReadOnly.
+    if ('isReadOnly' in caseData && caseData.isReadOnly && !caseData.archived) {
       return null;
     }
     
@@ -210,11 +211,6 @@ export const checkCaseIsReadOnly = async (user: User, caseNumber: string): Promi
     if (!caseData) {
       // Case doesn't exist, so it's not read-only
       return false;
-    }
-
-    // Archived cases are always treated as read-only.
-    if (caseData.archived) {
-      return true;
     }
 
     // Use type guard to check for isReadOnly property safely
@@ -748,7 +744,7 @@ export const archiveCase = async (
       archivedBy: user.uid,
       archivedByDisplay,
       archiveReason: archiveReason?.trim() || undefined,
-      isReadOnly: true,
+      isReadOnly: false,
     } as CaseData;
 
     const exportData = await exportCaseData(user, caseNumber, { includeMetadata: true });

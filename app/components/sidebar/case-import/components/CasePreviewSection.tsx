@@ -1,16 +1,17 @@
 import { type CaseImportPreview } from '~/types';
+import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE, DATA_INTEGRITY_VALIDATION_PASSED, DATA_INTEGRITY_VALIDATION_FAILED } from '~/utils/ui';
 import styles from '../case-import.module.css';
 
 interface CasePreviewSectionProps {
   casePreview: CaseImportPreview | null;
   isLoadingPreview: boolean;
-  showArchivedRegularCaseRiskWarning?: boolean;
+  isArchivedRegularCaseImportBlocked?: boolean;
 }
 
 export const CasePreviewSection = ({
   casePreview,
   isLoadingPreview,
-  showArchivedRegularCaseRiskWarning = false
+  isArchivedRegularCaseImportBlocked = false
 }: CasePreviewSectionProps) => {
   if (isLoadingPreview) {
     return (
@@ -34,9 +35,9 @@ export const CasePreviewSection = ({
             Archived export detected. Original exporter imports are allowed for archived cases.
           </div>
         )}
-        {showArchivedRegularCaseRiskWarning && (
+        {isArchivedRegularCaseImportBlocked && (
           <div className={styles.archivedRegularCaseRiskNote}>
-            Warning: This archived import matches a case already in your regular case list. If you later clear the imported read-only case, the regular case images will be deleted and become inaccessible.
+            {ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE}
           </div>
         )}
         <div className={styles.previewGrid}>
@@ -78,9 +79,9 @@ export const CasePreviewSection = ({
           <div className={styles.validationItem}>            
             <span className={`${styles.validationValue} ${casePreview.hashValid ? styles.validationSuccess : styles.validationError}`}>
               {casePreview.hashValid ? (
-                <>✓ Validation passed</>
+                <>{DATA_INTEGRITY_VALIDATION_PASSED}</>
               ) : (
-                <>✗ Validation failed</>
+                <>{DATA_INTEGRITY_VALIDATION_FAILED}</>
               )}
             </span>
           </div>

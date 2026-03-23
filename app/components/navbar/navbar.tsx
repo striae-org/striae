@@ -13,6 +13,7 @@ interface NavbarProps {
   isUploading?: boolean;
   company?: string;
   isReadOnly?: boolean;
+  isReviewOnlyCase?: boolean;
   currentCase?: string;
   currentFileName?: string;
   isCurrentImageConfirmed?: boolean;
@@ -43,6 +44,7 @@ export const Navbar = ({
   isUploading = false,
   company,
   isReadOnly = false,
+  isReviewOnlyCase = false,
   currentCase,
   currentFileName,
   isCurrentImageConfirmed = false,
@@ -119,16 +121,17 @@ export const Navbar = ({
   const disableLongRunningCaseActions = isUploading;
   const isCaseManagementActive = true;
   const isFileManagementActive = isFileMenuOpen || hasLoadedImage;
-  const canOpenImageNotes = hasLoadedImage && !isCurrentImageConfirmed;
+  const canOpenImageNotes = hasLoadedImage && !isCurrentImageConfirmed && !isReadOnly;
   const isImageNotesActive = canOpenImageNotes;
   const canDeleteCurrentFile = hasLoadedImage && !isReadOnly;
+  const isArchivedRegularReadOnly = Boolean(isReadOnly && archiveDetails?.archived && !isReviewOnlyCase);
 
   return (
     <>
       <header className={styles.navbar} aria-label="Canvas top navigation">
         <div className={styles.companyLabelContainer}>
           <div className={styles.companyLabel}>
-            {isReadOnly ? 'CASE REVIEW ONLY' : `${company}${user?.displayName ? ` | ${user.displayName}` : ''}${userBadgeId ? `, ${userBadgeId}` : ''}`}
+            {isReviewOnlyCase ? 'CASE REVIEW ONLY' : `${company}${user?.displayName ? ` | ${user.displayName}` : ''}${userBadgeId ? `, ${userBadgeId}` : ''}`}
           </div>
         </div>
         <div className={styles.navCenterTrack}>
@@ -153,8 +156,8 @@ export const Navbar = ({
                   type="button"
                   role="menuitem"
                   className={`${styles.caseMenuItem} ${styles.caseMenuItemOpen}`}
-                  disabled={isReadOnly}
-                  title={isReadOnly ? 'Clear the read-only case first to open or switch cases' : undefined}
+                  disabled={isReviewOnlyCase}
+                  title={isReviewOnlyCase ? 'Clear the read-only case first to open or switch cases' : undefined}
                   onClick={() => {
                     onOpenCase?.();
                     setIsCaseMenuOpen(false);
@@ -166,8 +169,8 @@ export const Navbar = ({
                   type="button"
                   role="menuitem"
                   className={`${styles.caseMenuItem} ${styles.caseMenuItemList}`}
-                  disabled={isReadOnly}
-                  title={isReadOnly ? 'Clear the read-only case first to list all cases' : undefined}
+                  disabled={isReviewOnlyCase}
+                  title={isReviewOnlyCase ? 'Clear the read-only case first to list all cases' : undefined}
                   onClick={() => {
                     onOpenListAllCases?.();
                     setIsCaseMenuOpen(false);
@@ -180,9 +183,11 @@ export const Navbar = ({
                   type="button"
                   role="menuitem"
                   className={`${styles.caseMenuItem} ${styles.caseMenuItemExport}`}
-                  disabled={!hasLoadedCase || disableLongRunningCaseActions}
+                  disabled={!hasLoadedCase || disableLongRunningCaseActions || isArchivedRegularReadOnly}
                   title={
-                    !hasLoadedCase
+                    isArchivedRegularReadOnly
+                      ? 'Export is unavailable for archived cases loaded from your regular case list'
+                      : !hasLoadedCase
                       ? 'Load a case to export case data'
                       : disableLongRunningCaseActions
                         ? 'Export is unavailable while files are uploading'
@@ -209,7 +214,7 @@ export const Navbar = ({
                   Case Audit Trail
                 </button>
                 <div className={styles.caseMenuSectionLabel}>Maintenance</div>
-                {isReadOnly && (
+                {isReviewOnlyCase && (
                   <button
                     type="button"
                     role="menuitem"
@@ -249,9 +254,9 @@ export const Navbar = ({
                   type="button"
                   role="menuitem"
                   className={`${styles.caseMenuItem} ${styles.caseMenuItemDelete}`}
-                  disabled={!hasLoadedCase || disableLongRunningCaseActions || isReadOnly}
+                  disabled={!hasLoadedCase || disableLongRunningCaseActions || isReviewOnlyCase}
                   title={
-                    isReadOnly
+                    isReviewOnlyCase
                       ? 'Clear the read-only case first before deleting'
                       : !hasLoadedCase
                         ? 'Load a case to delete it'
@@ -370,7 +375,15 @@ export const Navbar = ({
             className={`${styles.navSectionButton} ${isImageNotesActive ? styles.navSectionButtonActive : ''}`}
             disabled={!canOpenImageNotes}
             aria-pressed={isImageNotesActive}
-            title={!hasLoadedImage ? 'Load an image to enable image notes' : isCurrentImageConfirmed ? 'Confirmed images are read-only and viewable via toolbar only' : undefined}
+            title={
+              !hasLoadedImage
+                ? 'Load an image to enable image notes'
+                : isCurrentImageConfirmed
+                  ? 'Confirmed images are read-only and viewable via toolbar only'
+                  : isReadOnly
+                    ? 'Image notes are disabled for read-only cases'
+                    : undefined
+            }
             onClick={() => {
               onOpenImageNotes?.();
             }}

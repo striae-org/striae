@@ -1,25 +1,46 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
-# Basic `dependabot.yml` file with
-# minimum configuration for three package managers
-
 version: 2
 updates:
-  # Enable version updates for npm
   - package-ecosystem: "npm"
-    # Look for `package.json` and `lock` files in the `root` directory
     directory: "/"
-    # Check the npm registry for updates every day (weekdays)
     schedule:
-      interval: "daily"  
+      interval: "daily"
 
-  # Enable version updates for GitHub Actions
+    ignore:
+      # ESLint 10.x blocked: key plugins do not yet declare ^10 peer support.
+      # Blockers: eslint-plugin-react (max ^9.7), eslint-plugin-react-hooks (max ^9),
+      #           eslint-plugin-jsx-a11y (max ^9), eslint-plugin-import (max ^9).
+      # Remove this ignore once those four plugins ship ^10 peer declarations.
+      - dependency-name: "eslint"
+        versions: [">= 10"]
+
+    groups:
+      # Group all ESLint-ecosystem packages together.
+      # When the blocked plugins above update and declare ^10 support,
+      # their PRs will appear here as a set — that's your signal to remove
+      # the eslint ignore above and upgrade.
+      eslint-ecosystem:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+
+      # exceljs is pinned with sub-dependency overrides in package.json:
+      #   archiver, fast-csv, unzipper, glob
+      # When a new exceljs release bundles updated versions of those internally,
+      # review the exceljs changelog and remove the corresponding overrides.
+      exceljs-ecosystem:
+        patterns:
+          - "exceljs"
+
+      # wrangler transitively pulls in undici, which has a security pin override.
+      # When wrangler ships a release that internally requires a newer undici
+      # (>= the pinned version), the override in package.json can be removed.
+      wrangler-ecosystem:
+        patterns:
+          - "wrangler"
+          - "@cloudflare/*"
+
   - package-ecosystem: "github-actions"
-    # Workflow files stored in the default location of `.github/workflows`
-    # You don't need to specify `/.github/workflows` for `directory`. You can use `directory: "/"`.
     directory: "/"
     schedule:
       interval: "weekly"

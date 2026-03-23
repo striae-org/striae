@@ -86,7 +86,7 @@ export function filterCasesForModal(
 ): CasesModalCaseItem[] {
   const archiveFilteredCases = preferences.showArchivedOnly
     ? cases.filter((entry) => entry.archived && !entry.isReadOnly)
-    : cases.filter((entry) => !entry.archived && !entry.isReadOnly);
+    : cases.filter((entry) => !entry.isReadOnly);
 
   return archiveFilteredCases.filter((entry) =>
     matchesConfirmationFilter(entry.caseNumber, preferences.confirmationFilter, caseConfirmationStatus)

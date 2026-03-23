@@ -260,6 +260,19 @@
   white-space: nowrap;
 }
 
+.badgeColumn {
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spaceXS);
+}
+
+.archivedBadge {
+  background-color: color-mix(in lab, #6c757d 18%, var(--backgroundLight));
+  border-color: color-mix(in lab, #6c757d 30%, transparent);
+}
+
 .footerActions {
   display: flex;
   justify-content: space-between;
@@ -487,6 +500,12 @@
   .confirmationBadge {
     grid-column: 1 / -1;
     justify-self: start;
+  }
+
+  .badgeColumn {
+    grid-column: 1 / -1;
+    justify-self: start;
+    align-items: flex-start;
   }
 
   .footerActions {

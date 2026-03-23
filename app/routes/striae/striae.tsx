@@ -19,27 +19,26 @@ import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import { fetchUserApi } from '~/utils/api';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { type AnnotationData, type FileData } from '~/types';
-import type * as CaseExportActions from '~/components/actions/case-export';
-import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, getCaseArchiveDetails } from '~/components/actions/case-manage';
+import { validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, getCaseArchiveDetails } from '~/components/actions/case-manage';
 import { checkReadOnlyCaseExists, deleteReadOnlyCase } from '~/components/actions/case-review';
-import { canCreateCase, getLimitsDescription, getUserData } from '~/utils/data';
+import { canCreateCase } from '~/utils/data';
+import {
+  CREATE_READ_ONLY_CASE_EXISTS_ERROR,
+  CLEAR_READ_ONLY_CASE_PARTIAL_FAILURE,
+  DELETE_CASE_CONFIRMATION,
+  DELETE_FILE_CONFIRMATION,
+  DELETE_CASE_FAILED,
+  DELETE_FILE_FAILED,
+  RENAME_CASE_FAILED
+} from '~/utils/ui';
+import { useStriaeResetHelpers } from './hooks/use-striae-reset-helpers';
+import { getExportProgressLabel, loadCaseExportActions } from './utils/case-export';
+import { resolveOpenCaseHelperText } from './utils/open-case-helper';
 import styles from './striae.module.css';
 
 interface StriaePage {
   user: User;
 }
-
-type CaseExportActionsModule = typeof CaseExportActions;
-
-let caseExportActionsPromise: Promise<CaseExportActionsModule> | null = null;
-
-const loadCaseExportActions = (): Promise<CaseExportActionsModule> => {
-  if (!caseExportActionsPromise) {
-    caseExportActionsPromise = import('~/components/actions/case-export');
-  }
-
-  return caseExportActionsPromise;
-};
 
 export const Striae = ({ user }: StriaePage) => {
   // Image and error states
@@ -61,6 +60,7 @@ export const Striae = ({ user }: StriaePage) => {
   const [showNotes, setShowNotes] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isReadOnlyCase, setIsReadOnlyCase] = useState(false);
+  const [isReviewOnlyCase, setIsReviewOnlyCase] = useState(false);
 
   // Annotation states
   const [activeAnnotations, setActiveAnnotations] = useState<Set<string>>(new Set());
@@ -98,24 +98,39 @@ export const Striae = ({ user }: StriaePage) => {
     archiveReason?: string;
   }>({ archived: false });
 
+  const {
+    clearSelectedImageState,
+    clearCaseContextState,
+    clearLoadedCaseState,
+  } = useStriaeResetHelpers({
+    setSelectedImage,
+    setSelectedFilename,
+    setImageId,
+    setAnnotationData,
+    setError,
+    setImageLoaded,
+    setCurrentCase,
+    setFiles,
+    setActiveAnnotations,
+    setIsBoxAnnotationMode,
+    setIsReadOnlyCase,
+    setIsReviewOnlyCase,
+    setArchiveDetails,
+    setShowNotes,
+    setIsAuditTrailOpen,
+    setIsRenameCaseModalOpen,
+  });
+
 
    useEffect(() => {
     // Set clear.jpg when case changes or is cleared
-    setSelectedImage('/clear.jpg');
-    setSelectedFilename(undefined);
-    setImageId(undefined);
-    setAnnotationData(null);    
-    setError(undefined);
-    setImageLoaded(false);
+    clearSelectedImageState();
     
     // Reset annotation and UI states when case is cleared
     if (!currentCase) {
-      setActiveAnnotations(new Set());
-      setIsBoxAnnotationMode(false);
-      setIsReadOnlyCase(false);
-      setArchiveDetails({ archived: false });
+      clearCaseContextState();
     }
-  }, [currentCase]);
+  }, [currentCase, clearSelectedImageState, clearCaseContextState]);
 
   // Fetch user company data when component mounts
   useEffect(() => {
@@ -154,18 +169,23 @@ export const Striae = ({ user }: StriaePage) => {
     const checkReadOnlyStatus = async () => {
       if (!currentCase || !user?.uid) {
         setIsReadOnlyCase(false);
+        setIsReviewOnlyCase(false);
         return;
       }
 
       try {
-        // Check if the case data itself has isReadOnly: true
-        const isReadOnly = await checkCaseIsReadOnly(user, currentCase);
-        setIsReadOnlyCase(isReadOnly);
+        // Imported review cases are tracked in the user's read-only case list.
+        // This includes archived ZIP imports and distinguishes them from manually archived regular cases.
+        const readOnlyCaseEntry = await checkReadOnlyCaseExists(user, currentCase);
         const details = await getCaseArchiveDetails(user, currentCase);
+        const reviewOnly = Boolean(readOnlyCaseEntry);
+        setIsReviewOnlyCase(reviewOnly);
+        setIsReadOnlyCase(reviewOnly || details.archived);
         setArchiveDetails(details);
       } catch (error) {
         console.error('Error checking read-only status:', error);
         setIsReadOnlyCase(false);
+        setIsReviewOnlyCase(false);
         setArchiveDetails({ archived: false });
       }
     };
@@ -250,11 +270,7 @@ export const Striae = ({ user }: StriaePage) => {
 
     if (includeImages) {
       await caseExportActions.downloadCaseAsZip(user, exportCaseNumber, format, (progress) => {
-        const label = progress < 30 ? 'Loading case data'
-          : progress < 50 ? 'Preparing archive'
-          : progress < 80 ? 'Adding images'
-          : progress < 96 ? 'Finalizing'
-          : 'Downloading';
+        const label = getExportProgressLabel(progress);
         onProgress?.(Math.round(progress), label);
       });
       showNotification(`Case ${exportCaseNumber} exported successfully.`, 'success');
@@ -317,7 +333,7 @@ export const Striae = ({ user }: StriaePage) => {
     try {
       const existingReadOnlyCase = await checkReadOnlyCaseExists(user, newCaseName);
       if (existingReadOnlyCase) {
-        showNotification(`Case "${newCaseName}" already exists as a read-only review case.`, 'error');
+        showNotification(CREATE_READ_ONLY_CASE_EXISTS_ERROR(newCaseName), 'error');
         return;
       }
 
@@ -327,7 +343,7 @@ export const Striae = ({ user }: StriaePage) => {
       setIsRenameCaseModalOpen(false);
       showNotification(`Case renamed to ${newCaseName}.`, 'success');
     } catch (renameError) {
-      showNotification(renameError instanceof Error ? renameError.message : 'Failed to rename case.', 'error');
+      showNotification(renameError instanceof Error ? renameError.message : RENAME_CASE_FAILED, 'error');
     } finally {
       setIsRenamingCase(false);
     }
@@ -339,9 +355,7 @@ export const Striae = ({ user }: StriaePage) => {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete case ${currentCase}? This will permanently delete all associated files and cannot be undone. If any image assets are already missing (404), they will be skipped and the case deletion will continue.`
-    );
+    const confirmed = window.confirm(DELETE_CASE_CONFIRMATION(currentCase));
 
     if (!confirmed) {
       return;
@@ -350,11 +364,7 @@ export const Striae = ({ user }: StriaePage) => {
     setIsDeletingCase(true);
     try {
       const deleteResult = await deleteCase(user, currentCase);
-      setCurrentCase('');
-      setFiles([]);
-      setShowNotes(false);
-      setIsAuditTrailOpen(false);
-      setIsRenameCaseModalOpen(false);
+      clearLoadedCaseState();
       if (deleteResult.missingImages.length > 0) {
         showNotification(
           `Case deleted. ${deleteResult.missingImages.length} image(s) were not found and were skipped during deletion.`,
@@ -364,7 +374,7 @@ export const Striae = ({ user }: StriaePage) => {
         showNotification('Case deleted successfully.', 'success');
       }
     } catch (deleteError) {
-      showNotification(deleteError instanceof Error ? deleteError.message : 'Failed to delete case.', 'error');
+      showNotification(deleteError instanceof Error ? deleteError.message : DELETE_CASE_FAILED, 'error');
     } finally {
       setIsDeletingCase(false);
     }
@@ -383,9 +393,7 @@ export const Striae = ({ user }: StriaePage) => {
 
     const selectedFile = files.find((file) => file.id === imageId);
     const selectedFileName = selectedFile?.originalFilename || imageId;
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedFileName}? This action cannot be undone.`
-    );
+    const confirmed = window.confirm(DELETE_FILE_CONFIRMATION(selectedFileName));
 
     if (!confirmed) {
       return;
@@ -396,7 +404,7 @@ export const Striae = ({ user }: StriaePage) => {
       const deleteResult = await deleteFile(user, currentCase, imageId, 'User-requested deletion via navbar file management');
       const updatedFiles = files.filter((file) => file.id !== imageId);
       setFiles(updatedFiles);
-      handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
+      clearSelectedImageState();
       setShowNotes(false);
       if (deleteResult.imageMissing) {
         showNotification(
@@ -407,13 +415,18 @@ export const Striae = ({ user }: StriaePage) => {
         showNotification('File deleted successfully.', 'success');
       }
     } catch (deleteError) {
-      showNotification(deleteError instanceof Error ? deleteError.message : 'Failed to delete file.', 'error');
+      showNotification(deleteError instanceof Error ? deleteError.message : DELETE_FILE_FAILED, 'error');
     } finally {
       setIsDeletingFile(false);
     }
   };
 
   const handleClearROCase = async () => {
+    if (!isReviewOnlyCase) {
+      showNotification('Only imported review cases can be cleared from workspace.', 'error');
+      return;
+    }
+
     if (!currentCase) {
       showNotification('No read-only case is currently loaded.', 'error');
       return;
@@ -431,15 +444,10 @@ export const Striae = ({ user }: StriaePage) => {
     try {
       const success = await deleteReadOnlyCase(user, caseToRemove);
       if (!success) {
-        showNotification(`Failed to fully clear read-only case "${caseToRemove}". Please try again.`, 'error');
+        showNotification(CLEAR_READ_ONLY_CASE_PARTIAL_FAILURE(caseToRemove), 'error');
         return;
       }
-      setCurrentCase('');
-      setFiles([]);
-      handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
-      setShowNotes(false);
-      setIsAuditTrailOpen(false);
-      setIsRenameCaseModalOpen(false);
+      clearLoadedCaseState();
       showNotification(`Read-only case "${caseToRemove}" cleared.`, 'success');
     } catch (clearError) {
       showNotification(clearError instanceof Error ? clearError.message : 'Failed to clear read-only case.', 'error');
@@ -461,6 +469,7 @@ export const Striae = ({ user }: StriaePage) => {
     try {
       await archiveCase(user, currentCase, archiveReason);
       setIsReadOnlyCase(true);
+      setIsReviewOnlyCase(false);
       setArchiveDetails({
         archived: true,
         archivedAt: new Date().toISOString(),
@@ -506,7 +515,7 @@ export const Striae = ({ user }: StriaePage) => {
 
       const existingReadOnlyCase = await checkReadOnlyCaseExists(user, nextCaseNumber);
       if (existingReadOnlyCase) {
-        showNotification(`Case "${nextCaseNumber}" already exists as a read-only review case.`, 'error');
+        showNotification(CREATE_READ_ONLY_CASE_EXISTS_ERROR(nextCaseNumber), 'error');
         return;
       }
 
@@ -531,17 +540,8 @@ export const Striae = ({ user }: StriaePage) => {
 
   const handleOpenCaseModal = async () => {
     setIsOpenCaseModalOpen(true);
-    try {
-      const userData = await getUserData(user);
-      if (userData && !userData.permitted) {
-        const limitsDescription = await getLimitsDescription(user);
-        setOpenCaseHelperText(limitsDescription || 'Load an existing case or create a new one.');
-      } else {
-        setOpenCaseHelperText('Load an existing case or create a new one.');
-      }
-    } catch {
-      setOpenCaseHelperText('Load an existing case or create a new one.');
-    }
+    const helperText = await resolveOpenCaseHelperText(user);
+    setOpenCaseHelperText(helperText);
   };
 
   // Function to refresh annotation data (called when notes are saved)
@@ -566,10 +566,7 @@ export const Striae = ({ user }: StriaePage) => {
         }
       } else if (!result.caseNumber && !result.isReadOnly) {
         // Read-only case cleared - reset all UI state
-        setCurrentCase('');
-        setFiles([]);
-        handleImageSelect({ id: 'clear', originalFilename: '/clear.jpg', uploadedAt: '' });
-        setShowNotes(false);
+        clearLoadedCaseState();
       }
     }
   };
@@ -746,6 +743,7 @@ export const Striae = ({ user }: StriaePage) => {
         isUploading={isUploading}
         company={userCompany}
         isReadOnly={isReadOnlyCase}
+        isReviewOnlyCase={isReviewOnlyCase}
         currentCase={currentCase}
         currentFileName={selectedFilename}
         isCurrentImageConfirmed={isCurrentImageConfirmed}
