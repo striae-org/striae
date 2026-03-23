@@ -166,8 +166,9 @@ export const Striae = ({ user }: StriaePage) => {
 
       try {
         // Check if the case data itself has isReadOnly: true
-        const reviewOnly = await checkCaseIsReadOnly(user, currentCase);
+        const explicitReadOnly = await checkCaseIsReadOnly(user, currentCase);
         const details = await getCaseArchiveDetails(user, currentCase);
+        const reviewOnly = explicitReadOnly && !details.archived;
         setIsReviewOnlyCase(reviewOnly);
         setIsReadOnlyCase(reviewOnly || details.archived);
         setArchiveDetails(details);

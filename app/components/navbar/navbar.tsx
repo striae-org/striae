@@ -121,7 +121,7 @@ export const Navbar = ({
   const disableLongRunningCaseActions = isUploading;
   const isCaseManagementActive = true;
   const isFileManagementActive = isFileMenuOpen || hasLoadedImage;
-  const canOpenImageNotes = hasLoadedImage && !isCurrentImageConfirmed;
+  const canOpenImageNotes = hasLoadedImage && !isCurrentImageConfirmed && !isReadOnly;
   const isImageNotesActive = canOpenImageNotes;
   const canDeleteCurrentFile = hasLoadedImage && !isReadOnly;
   const isArchivedRegularReadOnly = Boolean(isReadOnly && archiveDetails?.archived && !isReviewOnlyCase);
@@ -375,7 +375,15 @@ export const Navbar = ({
             className={`${styles.navSectionButton} ${isImageNotesActive ? styles.navSectionButtonActive : ''}`}
             disabled={!canOpenImageNotes}
             aria-pressed={isImageNotesActive}
-            title={!hasLoadedImage ? 'Load an image to enable image notes' : isCurrentImageConfirmed ? 'Confirmed images are read-only and viewable via toolbar only' : undefined}
+            title={
+              !hasLoadedImage
+                ? 'Load an image to enable image notes'
+                : isCurrentImageConfirmed
+                  ? 'Confirmed images are read-only and viewable via toolbar only'
+                  : isReadOnly
+                    ? 'Image notes are disabled for read-only cases'
+                    : undefined
+            }
             onClick={() => {
               onOpenImageNotes?.();
             }}
