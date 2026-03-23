@@ -62,6 +62,13 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-23] - *[Patch Release v4.3.3](https://github.com/striae-org/striae/releases/tag/v4.3.3)*
+
+- **🗂️ Case Management Workflow Refinements** - Refined cases modal behavior and related case-management handling to better align active-case workflows with updated state filtering.
+- **🧭 Archive and Read-Only State Separation** - Distinguished archived cases from imported and review read-only cases so navigation, reset behavior, and archive-specific UI paths handle each state correctly.
+- **📥 Archive Import and UI Regression Fixes** - Tightened archive import flow behavior across preview/orchestration surfaces and corrected follow-up archive-case UI regressions.
+- **🧩 Striae Route Modularization** - Extracted route helpers for reset, open-case, and export behavior to reduce main-route complexity and support safer follow-up maintenance.
+
 ## [2026-03-22] - *[Patch Release v4.3.2](https://github.com/striae-org/striae/releases/tag/v4.3.2)*
 
 - **🧭 Confirmation Import Audit Filter Alignment** - Updated audit viewer confirmation-import filtering to include both dedicated `confirmation-import` actions and legacy confirmation-phase import entries for accurate query coverage.
