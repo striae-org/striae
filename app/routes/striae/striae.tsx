@@ -19,27 +19,17 @@ import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import { fetchUserApi } from '~/utils/api';
 import { resolveEarliestAnnotationTimestamp } from '~/utils/ui';
 import { type AnnotationData, type FileData } from '~/types';
-import type * as CaseExportActions from '~/components/actions/case-export';
 import { checkCaseIsReadOnly, validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, getCaseArchiveDetails } from '~/components/actions/case-manage';
 import { checkReadOnlyCaseExists, deleteReadOnlyCase } from '~/components/actions/case-review';
-import { canCreateCase, getLimitsDescription, getUserData } from '~/utils/data';
+import { canCreateCase } from '~/utils/data';
+import { useStriaeResetHelpers } from './hooks/use-striae-reset-helpers';
+import { getExportProgressLabel, loadCaseExportActions } from './utils/case-export';
+import { resolveOpenCaseHelperText } from './utils/open-case-helper';
 import styles from './striae.module.css';
 
 interface StriaePage {
   user: User;
 }
-
-type CaseExportActionsModule = typeof CaseExportActions;
-
-let caseExportActionsPromise: Promise<CaseExportActionsModule> | null = null;
-
-const loadCaseExportActions = (): Promise<CaseExportActionsModule> => {
-  if (!caseExportActionsPromise) {
-    caseExportActionsPromise = import('~/components/actions/case-export');
-  }
-
-  return caseExportActionsPromise;
-};
 
 export const Striae = ({ user }: StriaePage) => {
   // Image and error states
@@ -98,31 +88,27 @@ export const Striae = ({ user }: StriaePage) => {
     archiveReason?: string;
   }>({ archived: false });
 
-  const clearSelectedImageState = () => {
-    setSelectedImage('/clear.jpg');
-    setSelectedFilename(undefined);
-    setImageId(undefined);
-    setAnnotationData(null);
-    setError(undefined);
-    setImageLoaded(false);
-  };
-
-  const clearCaseContextState = () => {
-    setActiveAnnotations(new Set());
-    setIsBoxAnnotationMode(false);
-    setIsReadOnlyCase(false);
-    setArchiveDetails({ archived: false });
-  };
-
-  const clearLoadedCaseState = () => {
-    setCurrentCase('');
-    setFiles([]);
-    clearCaseContextState();
-    clearSelectedImageState();
-    setShowNotes(false);
-    setIsAuditTrailOpen(false);
-    setIsRenameCaseModalOpen(false);
-  };
+  const {
+    clearSelectedImageState,
+    clearCaseContextState,
+    clearLoadedCaseState,
+  } = useStriaeResetHelpers({
+    setSelectedImage,
+    setSelectedFilename,
+    setImageId,
+    setAnnotationData,
+    setError,
+    setImageLoaded,
+    setCurrentCase,
+    setFiles,
+    setActiveAnnotations,
+    setIsBoxAnnotationMode,
+    setIsReadOnlyCase,
+    setArchiveDetails,
+    setShowNotes,
+    setIsAuditTrailOpen,
+    setIsRenameCaseModalOpen,
+  });
 
 
    useEffect(() => {
@@ -133,7 +119,7 @@ export const Striae = ({ user }: StriaePage) => {
     if (!currentCase) {
       clearCaseContextState();
     }
-  }, [currentCase]);
+  }, [currentCase, clearSelectedImageState, clearCaseContextState]);
 
   // Fetch user company data when component mounts
   useEffect(() => {
@@ -268,11 +254,7 @@ export const Striae = ({ user }: StriaePage) => {
 
     if (includeImages) {
       await caseExportActions.downloadCaseAsZip(user, exportCaseNumber, format, (progress) => {
-        const label = progress < 30 ? 'Loading case data'
-          : progress < 50 ? 'Preparing archive'
-          : progress < 80 ? 'Adding images'
-          : progress < 96 ? 'Finalizing'
-          : 'Downloading';
+        const label = getExportProgressLabel(progress);
         onProgress?.(Math.round(progress), label);
       });
       showNotification(`Case ${exportCaseNumber} exported successfully.`, 'success');
@@ -540,17 +522,8 @@ export const Striae = ({ user }: StriaePage) => {
 
   const handleOpenCaseModal = async () => {
     setIsOpenCaseModalOpen(true);
-    try {
-      const userData = await getUserData(user);
-      if (userData && !userData.permitted) {
-        const limitsDescription = await getLimitsDescription(user);
-        setOpenCaseHelperText(limitsDescription || 'Load an existing case or create a new one.');
-      } else {
-        setOpenCaseHelperText('Load an existing case or create a new one.');
-      }
-    } catch {
-      setOpenCaseHelperText('Load an existing case or create a new one.');
-    }
+    const helperText = await resolveOpenCaseHelperText(user);
+    setOpenCaseHelperText(helperText);
   };
 
   // Function to refresh annotation data (called when notes are saved)
