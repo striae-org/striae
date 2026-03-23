@@ -6,7 +6,7 @@ import {
   IMPORT_FILE_TYPE_NOT_ALLOWED,
   IMPORT_FILE_TYPE_NOT_SUPPORTED,
   DATA_INTEGRITY_BLOCKED_TAMPERING
-} from '~/utils/case-messages';
+} from '~/utils/ui';
 import { 
   listReadOnlyCases, 
   deleteReadOnlyCase

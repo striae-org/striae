@@ -1,5 +1,5 @@
 import { type CaseImportPreview } from '~/types';
-import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE, DATA_INTEGRITY_VALIDATION_PASSED, DATA_INTEGRITY_VALIDATION_FAILED } from '~/utils/case-messages';
+import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE, DATA_INTEGRITY_VALIDATION_PASSED, DATA_INTEGRITY_VALIDATION_FAILED } from '~/utils/ui';
 import styles from '../case-import.module.css';
 
 interface CasePreviewSectionProps {

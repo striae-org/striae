@@ -30,7 +30,7 @@ import {
   DELETE_CASE_FAILED,
   DELETE_FILE_FAILED,
   RENAME_CASE_FAILED
-} from '~/utils/case-messages';
+} from '~/utils/ui';
 import { useStriaeResetHelpers } from './hooks/use-striae-reset-helpers';
 import { getExportProgressLabel, loadCaseExportActions } from './utils/case-export';
 import { resolveOpenCaseHelperText } from './utils/open-case-helper';
