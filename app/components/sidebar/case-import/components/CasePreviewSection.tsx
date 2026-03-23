@@ -1,5 +1,5 @@
 import { type CaseImportPreview } from '~/types';
-import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE } from '~/utils/case-messages';
+import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE, DATA_INTEGRITY_VALIDATION_PASSED, DATA_INTEGRITY_VALIDATION_FAILED } from '~/utils/case-messages';
 import styles from '../case-import.module.css';
 
 interface CasePreviewSectionProps {
@@ -79,9 +79,9 @@ export const CasePreviewSection = ({
           <div className={styles.validationItem}>            
             <span className={`${styles.validationValue} ${casePreview.hashValid ? styles.validationSuccess : styles.validationError}`}>
               {casePreview.hashValid ? (
-                <>✓ Validation passed</>
+                <>{DATA_INTEGRITY_VALIDATION_PASSED}</>
               ) : (
-                <>✗ Validation failed</>
+                <>{DATA_INTEGRITY_VALIDATION_FAILED}</>
               )}
             </span>
           </div>

@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
-import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE } from '~/utils/case-messages';
+import {
+  ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE,
+  IMPORT_FILE_TYPE_NOT_ALLOWED,
+  IMPORT_FILE_TYPE_NOT_SUPPORTED,
+  DATA_INTEGRITY_BLOCKED_TAMPERING
+} from '~/utils/case-messages';
 import { 
   listReadOnlyCases, 
   deleteReadOnlyCase
@@ -204,14 +209,14 @@ export const CaseImport = ({
     clearMessages();
 
     if (!isValidImportFile(file)) {
-      setError('Only Striae case ZIP files, confirmation ZIP files, or confirmation JSON files are allowed.');
+      setError(IMPORT_FILE_TYPE_NOT_ALLOWED);
       clearImportData();
       return;
     }
 
     const importType = await resolveImportType(file);
     if (!importType) {
-      setError('The selected file is not a supported Striae case or confirmation import package.');
+      setError(IMPORT_FILE_TYPE_NOT_SUPPORTED);
       clearImportData();
       return;
     }
@@ -413,8 +418,7 @@ export const CaseImport = ({
             {/* Hash validation warning */}
             {casePreview?.hashValid === false && (
               <div className={styles.hashWarning}>
-                <strong>⚠️ Import Blocked:</strong> Data hash validation failed. 
-                This file may have been tampered with or corrupted and cannot be imported.
+                <strong>⚠️ Import Blocked:</strong> {DATA_INTEGRITY_BLOCKED_TAMPERING}
               </div>
             )}
 

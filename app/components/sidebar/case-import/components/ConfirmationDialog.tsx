@@ -1,5 +1,5 @@
 import { type CaseImportPreview } from '~/types';
-import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE } from '~/utils/case-messages';
+import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE, DATA_INTEGRITY_VALIDATION_PASSED, DATA_INTEGRITY_VALIDATION_FAILED } from '~/utils/case-messages';
 import styles from '../case-import.module.css';
 
 interface ConfirmationDialogProps {
@@ -63,7 +63,7 @@ export const ConfirmationDialog = ({
               <div className={`${styles.confirmationItem} ${casePreview.hashValid ? styles.confirmationItemValid : styles.confirmationItemInvalid}`}>
                 <strong>Data Integrity:</strong> 
                 <span className={casePreview.hashValid ? styles.confirmationSuccess : styles.confirmationError}>
-                  {casePreview.hashValid ? '✓ Verified' : '✗ Failed'}
+                  {casePreview.hashValid ? DATA_INTEGRITY_VALIDATION_PASSED : DATA_INTEGRITY_VALIDATION_FAILED}
                 </span>
               </div>
             )}

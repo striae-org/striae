@@ -22,6 +22,15 @@ import { type AnnotationData, type FileData } from '~/types';
 import { validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, getCaseArchiveDetails } from '~/components/actions/case-manage';
 import { checkReadOnlyCaseExists, deleteReadOnlyCase } from '~/components/actions/case-review';
 import { canCreateCase } from '~/utils/data';
+import {
+  CREATE_READ_ONLY_CASE_EXISTS_ERROR,
+  CLEAR_READ_ONLY_CASE_PARTIAL_FAILURE,
+  DELETE_CASE_CONFIRMATION,
+  DELETE_FILE_CONFIRMATION,
+  DELETE_CASE_FAILED,
+  DELETE_FILE_FAILED,
+  RENAME_CASE_FAILED
+} from '~/utils/case-messages';
 import { useStriaeResetHelpers } from './hooks/use-striae-reset-helpers';
 import { getExportProgressLabel, loadCaseExportActions } from './utils/case-export';
 import { resolveOpenCaseHelperText } from './utils/open-case-helper';
@@ -324,7 +333,7 @@ export const Striae = ({ user }: StriaePage) => {
     try {
       const existingReadOnlyCase = await checkReadOnlyCaseExists(user, newCaseName);
       if (existingReadOnlyCase) {
-        showNotification(`Case "${newCaseName}" already exists as a read-only review case.`, 'error');
+        showNotification(CREATE_READ_ONLY_CASE_EXISTS_ERROR(newCaseName), 'error');
         return;
       }
 
@@ -334,7 +343,7 @@ export const Striae = ({ user }: StriaePage) => {
       setIsRenameCaseModalOpen(false);
       showNotification(`Case renamed to ${newCaseName}.`, 'success');
     } catch (renameError) {
-      showNotification(renameError instanceof Error ? renameError.message : 'Failed to rename case.', 'error');
+      showNotification(renameError instanceof Error ? renameError.message : RENAME_CASE_FAILED, 'error');
     } finally {
       setIsRenamingCase(false);
     }
@@ -346,9 +355,7 @@ export const Striae = ({ user }: StriaePage) => {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete case ${currentCase}? This will permanently delete all associated files and cannot be undone. If any image assets are already missing (404), they will be skipped and the case deletion will continue.`
-    );
+    const confirmed = window.confirm(DELETE_CASE_CONFIRMATION(currentCase));
 
     if (!confirmed) {
       return;
@@ -367,7 +374,7 @@ export const Striae = ({ user }: StriaePage) => {
         showNotification('Case deleted successfully.', 'success');
       }
     } catch (deleteError) {
-      showNotification(deleteError instanceof Error ? deleteError.message : 'Failed to delete case.', 'error');
+      showNotification(deleteError instanceof Error ? deleteError.message : DELETE_CASE_FAILED, 'error');
     } finally {
       setIsDeletingCase(false);
     }
@@ -386,9 +393,7 @@ export const Striae = ({ user }: StriaePage) => {
 
     const selectedFile = files.find((file) => file.id === imageId);
     const selectedFileName = selectedFile?.originalFilename || imageId;
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedFileName}? This action cannot be undone.`
-    );
+    const confirmed = window.confirm(DELETE_FILE_CONFIRMATION(selectedFileName));
 
     if (!confirmed) {
       return;
@@ -410,7 +415,7 @@ export const Striae = ({ user }: StriaePage) => {
         showNotification('File deleted successfully.', 'success');
       }
     } catch (deleteError) {
-      showNotification(deleteError instanceof Error ? deleteError.message : 'Failed to delete file.', 'error');
+      showNotification(deleteError instanceof Error ? deleteError.message : DELETE_FILE_FAILED, 'error');
     } finally {
       setIsDeletingFile(false);
     }
@@ -439,7 +444,7 @@ export const Striae = ({ user }: StriaePage) => {
     try {
       const success = await deleteReadOnlyCase(user, caseToRemove);
       if (!success) {
-        showNotification(`Failed to fully clear read-only case "${caseToRemove}". Please try again.`, 'error');
+        showNotification(CLEAR_READ_ONLY_CASE_PARTIAL_FAILURE(caseToRemove), 'error');
         return;
       }
       clearLoadedCaseState();
@@ -510,7 +515,7 @@ export const Striae = ({ user }: StriaePage) => {
 
       const existingReadOnlyCase = await checkReadOnlyCaseExists(user, nextCaseNumber);
       if (existingReadOnlyCase) {
-        showNotification(`Case "${nextCaseNumber}" already exists as a read-only review case.`, 'error');
+        showNotification(CREATE_READ_ONLY_CASE_EXISTS_ERROR(nextCaseNumber), 'error');
         return;
       }
 
