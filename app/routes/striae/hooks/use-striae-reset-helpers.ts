@@ -21,6 +21,7 @@ interface UseStriaeResetHelpersProps {
   setActiveAnnotations: Dispatch<SetStateAction<Set<string>>>;
   setIsBoxAnnotationMode: Dispatch<SetStateAction<boolean>>;
   setIsReadOnlyCase: Dispatch<SetStateAction<boolean>>;
+  setIsReviewOnlyCase: Dispatch<SetStateAction<boolean>>;
   setArchiveDetails: Dispatch<SetStateAction<ArchiveDetailsState>>;
   setShowNotes: Dispatch<SetStateAction<boolean>>;
   setIsAuditTrailOpen: Dispatch<SetStateAction<boolean>>;
@@ -39,6 +40,7 @@ export const useStriaeResetHelpers = ({
   setActiveAnnotations,
   setIsBoxAnnotationMode,
   setIsReadOnlyCase,
+  setIsReviewOnlyCase,
   setArchiveDetails,
   setShowNotes,
   setIsAuditTrailOpen,
@@ -64,11 +66,13 @@ export const useStriaeResetHelpers = ({
     setActiveAnnotations(new Set());
     setIsBoxAnnotationMode(false);
     setIsReadOnlyCase(false);
+    setIsReviewOnlyCase(false);
     setArchiveDetails({ archived: false });
   }, [
     setActiveAnnotations,
     setIsBoxAnnotationMode,
     setIsReadOnlyCase,
+    setIsReviewOnlyCase,
     setArchiveDetails,
   ]);
 

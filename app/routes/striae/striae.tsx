@@ -51,6 +51,7 @@ export const Striae = ({ user }: StriaePage) => {
   const [showNotes, setShowNotes] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isReadOnlyCase, setIsReadOnlyCase] = useState(false);
+  const [isReviewOnlyCase, setIsReviewOnlyCase] = useState(false);
 
   // Annotation states
   const [activeAnnotations, setActiveAnnotations] = useState<Set<string>>(new Set());
@@ -104,6 +105,7 @@ export const Striae = ({ user }: StriaePage) => {
     setActiveAnnotations,
     setIsBoxAnnotationMode,
     setIsReadOnlyCase,
+    setIsReviewOnlyCase,
     setArchiveDetails,
     setShowNotes,
     setIsAuditTrailOpen,
@@ -158,18 +160,21 @@ export const Striae = ({ user }: StriaePage) => {
     const checkReadOnlyStatus = async () => {
       if (!currentCase || !user?.uid) {
         setIsReadOnlyCase(false);
+        setIsReviewOnlyCase(false);
         return;
       }
 
       try {
         // Check if the case data itself has isReadOnly: true
-        const isReadOnly = await checkCaseIsReadOnly(user, currentCase);
-        setIsReadOnlyCase(isReadOnly);
+        const reviewOnly = await checkCaseIsReadOnly(user, currentCase);
         const details = await getCaseArchiveDetails(user, currentCase);
+        setIsReviewOnlyCase(reviewOnly);
+        setIsReadOnlyCase(reviewOnly || details.archived);
         setArchiveDetails(details);
       } catch (error) {
         console.error('Error checking read-only status:', error);
         setIsReadOnlyCase(false);
+        setIsReviewOnlyCase(false);
         setArchiveDetails({ archived: false });
       }
     };
@@ -410,6 +415,11 @@ export const Striae = ({ user }: StriaePage) => {
   };
 
   const handleClearROCase = async () => {
+    if (!isReviewOnlyCase) {
+      showNotification('Only imported review cases can be cleared from workspace.', 'error');
+      return;
+    }
+
     if (!currentCase) {
       showNotification('No read-only case is currently loaded.', 'error');
       return;
@@ -452,6 +462,7 @@ export const Striae = ({ user }: StriaePage) => {
     try {
       await archiveCase(user, currentCase, archiveReason);
       setIsReadOnlyCase(true);
+      setIsReviewOnlyCase(false);
       setArchiveDetails({
         archived: true,
         archivedAt: new Date().toISOString(),
@@ -725,6 +736,7 @@ export const Striae = ({ user }: StriaePage) => {
         isUploading={isUploading}
         company={userCompany}
         isReadOnly={isReadOnlyCase}
+        isReviewOnlyCase={isReviewOnlyCase}
         currentCase={currentCase}
         currentFileName={selectedFilename}
         isCurrentImageConfirmed={isCurrentImageConfirmed}

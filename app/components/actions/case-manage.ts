@@ -212,11 +212,6 @@ export const checkCaseIsReadOnly = async (user: User, caseNumber: string): Promi
       return false;
     }
 
-    // Archived cases are always treated as read-only.
-    if (caseData.archived) {
-      return true;
-    }
-
     // Use type guard to check for isReadOnly property safely
     return isReadOnlyCaseData(caseData) ? !!caseData.isReadOnly : false;
     
