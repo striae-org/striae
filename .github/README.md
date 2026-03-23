@@ -62,6 +62,12 @@ npm run deploy:all
 
 ## 📋 Changelog
 
+## [2026-03-22] - *[Patch Release v4.3.1](https://github.com/striae-org/striae/releases/tag/v4.3.1)*
+
+- **🔐 Confirmation Import Signature Verification** - Fixed confirmation import signature verification logic to ensure accurate validation of imported confirmation signatures and enhanced confirmation import audit refinements.
+- **🗃️ Audit Trail Archival Fixes** - Fixed audit trail archival fetch logic for correct archived entry retrieval and corrected CSV export handling for audit data integrity.
+- **🧾 Audit Viewer Display Refinements** - Fixed reviewer badgeID display in audit viewer and improved audit trail inspector UX accuracy.
+
 ## [2026-03-22] - *[Minor Release v4.3.0](https://github.com/striae-org/striae/releases/tag/v4.3.0)*
 
 - **🗂️ Case and Notes Management Expansion** - Added and iterated file/case management modal workflows, continued notes feature/styling refinement, unified modal presentation behavior, and expanded sidebar confirmation-export flow support.
