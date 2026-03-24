@@ -132,7 +132,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "modern-normalize": "^3.0.1",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "vite": "^6.4.1",
     "vite-tsconfig-paths": "^6.1.1",
     "wrangler": "^4.74.0"
