@@ -182,6 +182,22 @@ console.log(`\n⚠️  About to permanently delete account:`);
 console.log(`   UID:   ${userRecord.uid}`);
 console.log(`   Email: ${userRecord.email ?? '(no email)'}`);
 
+// --- Interactive confirmation ---
+
+{
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const answer = await new Promise((res) => {
+    rl.question('\nType "DELETE" to confirm permanent deletion, or anything else to abort: ', (a) => {
+      rl.close();
+      res(a.trim());
+    });
+  });
+  if (answer !== 'DELETE') {
+    console.log('\nAborted. No changes were made.');
+    process.exit(0);
+  }
+}
+
 // --- Create custom token and exchange for ID token ---
 
 console.log('\n🔑 Obtaining ID token via custom token exchange...');
