@@ -2,13 +2,14 @@
  * Admin script to permanently delete a user account via the user worker's delete endpoint.
  * Run with: npm run delete-account -- <uid> --confirm [--url <base-url>]
  *
- * --url must be the pages.dev URL (e.g. --url https://your-project.pages.dev).
+ * The pages.dev URL is derived automatically from PAGES_PROJECT_NAME in .env.
+ * Use --url to override (e.g. --url https://your-project.pages.dev).
  * The custom domain blocks automated requests via Cloudflare Bot Fight Mode.
  *
  * Requires:
  *   - app/config/admin-service.json (gitignored service account key)
  *   - app/config/firebase.ts (gitignored Firebase config, used for apiKey)
- *   - app/config/config.json (gitignored runtime config, used for app URL)
+ *   - .env (PAGES_PROJECT_NAME used to construct the default pages.dev URL)
  *
  * This script creates a short-lived custom token for the target UID, exchanges it for a
  * Firebase ID token, then calls the Pages DELETE /api/user/:uid endpoint which runs the
@@ -19,6 +20,7 @@ import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { readFileSync } from 'fs';
+import { createInterface } from 'readline';
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
@@ -67,8 +69,8 @@ let urlOverride = null;
 if (!uid) {
   console.error('\n❌ No UID provided.');
   console.error(`\n${USAGE}`);
-  console.error('\n  --url  The pages.dev URL (e.g. https://your-project.pages.dev)');
-  console.error('         Required: the custom domain blocks automated requests via Bot Fight Mode.');
+  console.error('\n  --url  Override the pages.dev URL (e.g. https://your-project.pages.dev)');
+  console.error('         Defaults to https://<PAGES_PROJECT_NAME>.pages.dev from .env');
   process.exit(1);
 }
 
@@ -93,28 +95,44 @@ try {
   process.exit(1);
 }
 
-// --- Resolve app URL (--url flag overrides config.json) ---
+// --- Resolve app URL ---
+// Default: derive from PAGES_PROJECT_NAME in .env → https://<name>.pages.dev
+// Override: --url flag
+// Fallback: interactive prompt
 
 let appUrl;
 if (urlOverride) {
   appUrl = urlOverride.replace(/\/+$/, '');
-  console.log(`\nℹ️  Using pages.dev URL: ${appUrl}`);
+  console.log(`\nℹ️  Using URL: ${appUrl}`);
 } else {
-  const configPath = resolve(__dirname, '../app/config/config.json');
+  let pagesProjectName = null;
+  const envPath = resolve(__dirname, '../.env');
   try {
-    const config = require(configPath);
-    appUrl = config.url;
-    if (!appUrl || appUrl === 'PAGES_CUSTOM_DOMAIN') {
-      throw new Error('url is not set — use --url <base-url> to supply it directly');
+    const envContent = readFileSync(envPath, 'utf8');
+    const match = envContent.match(/^PAGES_PROJECT_NAME=(.+)$/m);
+    if (match && match[1].trim()) {
+      pagesProjectName = match[1].trim();
     }
-    // Normalize: strip trailing slash
-    appUrl = appUrl.replace(/\/+$/, '');
-  } catch (err) {
-    console.error(`\n❌ Could not read app URL from:\n   ${configPath}`);
-    console.error('\nMake sure app/config/config.json exists and has a valid "url" field,');
-    console.error('or pass the pages.dev URL directly: --url https://your-project.pages.dev');
-    console.error(err?.message ?? err);
-    process.exit(1);
+  } catch {
+    // .env not found or unreadable — will fall through to prompt
+  }
+
+  if (pagesProjectName) {
+    appUrl = `https://${pagesProjectName}.pages.dev`;
+    console.log(`\nℹ️  Using derived pages.dev URL: ${appUrl}`);
+  } else {
+    console.warn('\n⚠️  Could not read PAGES_PROJECT_NAME from .env.');
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    appUrl = await new Promise((res) => {
+      rl.question(
+        'Enter the pages.dev URL (e.g. https://<project>.pages.dev): ',
+        (answer) => { rl.close(); res(answer.trim().replace(/\/+$/, '')); }
+      );
+    });
+    if (!appUrl) {
+      console.error('\n❌ No URL provided. Aborting.');
+      process.exit(1);
+    }
   }
 }
 
@@ -258,6 +276,7 @@ const decoder = new TextDecoder();
 let buffer = '';
 let failed = false;
 let completed = false;
+let caseIndex = 0;
 
 console.log('');
 
@@ -285,7 +304,8 @@ outer: while (true) {
         console.log(`   Starting deletion (${event.totalCases ?? 0} case(s) to remove)...`);
         break;
       case 'case-start':
-        console.log(`   [${event.currentCaseNumber}/${event.totalCases}] Deleting case...`);
+        caseIndex++;
+        console.log(`   [${caseIndex}/${event.totalCases}] Deleting case ${event.currentCaseNumber}...`);
         break;
       case 'case-complete':
         if (event.success === false) {
