@@ -20,6 +20,10 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-05-07] - *[Patch Release v7.1.2](https://github.com/striae-org/striae/releases/tag/v7.1.2)*
+
+- **⚙️ Maintenance** - Bumped app and worker dependencies, updated Wrangler, and refreshed Cloudflare compatibility dates across all workers.
+
 ## [2026-04-27] - *[Patch Release v7.1.1](https://github.com/striae-org/striae/releases/tag/v7.1.1)*
 
 - **🗑️ Manual Account Deletion Script** - Added `scripts/delete-account.mjs` (`npm run delete-account`) for operator-driven account cleanup using Firebase Admin SDK and Cloudflare worker APIs, with streaming output for real-time progress feedback; applied code review follow-up for improved error handling and robustness.
