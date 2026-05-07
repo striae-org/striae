@@ -102,24 +102,24 @@
     "deploy-workers:user": "cd workers/user-worker && npm run deploy"
   },
   "dependencies": {
-    "@react-router/cloudflare": "^7.14.2",
-    "firebase": "^12.12.1",
-    "isbot": "^5.1.39",
+    "@react-router/cloudflare": "^7.15.0",
+    "firebase": "^12.13.0",
+    "isbot": "^5.1.40",
     "jszip": "^3.10.1",
     "qrcode": "^1.5.4",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "react-router": "^7.14.2"
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router": "^7.15.0"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.15.0",
-    "@react-router/dev": "^7.14.2",
-    "@react-router/fs-routes": "^7.14.2",
+    "@cloudflare/vitest-pool-workers": "^0.15.2",
+    "@react-router/dev": "^7.15.0",
+    "@react-router/fs-routes": "^7.15.0",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.59.1",
-    "@typescript-eslint/parser": "^8.59.1",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
     "@vitest/coverage-v8": "^4.1.5",
     "eslint": "^9.39.4",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -130,9 +130,9 @@
     "firebase-admin": "^13.8.0",
     "modern-normalize": "^3.0.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10",
+    "vite": "^8.0.11",
     "vitest": "^4.1.5",
-    "wrangler": "^4.89.1"
+    "wrangler": "^4.88.0"
   },
   "overrides": {
     "@tootallnate/once": "3.0.1",
