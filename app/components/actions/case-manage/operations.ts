@@ -1,5 +1,4 @@
 import type { User } from 'firebase/auth';
-import type * as CaseExportActions from '~/components/actions/case-export';
 import { 
   canCreateCase, 
   getUserCases,
@@ -17,25 +16,11 @@ import {
 } from '~/utils/data';
 import { type CaseData, type CaseExportData, type ValidationAuditEntry } from '~/types';
 import { auditService } from '~/services/audit';
+import { loadCaseExportActions } from '~/utils/data/operations/case-export-loader';
 import { buildArchivePackage } from './archive-package-builder';
 import { deleteFileWithoutAudit } from './delete-helpers';
 import { isReadOnlyCaseData, sortCaseNumbers, validateCaseNumber } from './utils';
 import { type CaseArchiveDetails, type DeleteCaseResult } from './types';
-
-type CaseExportActionsModule = typeof CaseExportActions;
-
-let caseExportActionsPromise: Promise<CaseExportActionsModule> | null = null;
-
-const loadCaseExportActions = (): Promise<CaseExportActionsModule> => {
-  if (!caseExportActionsPromise) {
-    caseExportActionsPromise = import('~/components/actions/case-export').catch((error: unknown) => {
-      caseExportActionsPromise = null;
-      throw error;
-    });
-  }
-
-  return caseExportActionsPromise;
-};
 
 /**
  * Delete a file without individual audit logging (for bulk operations)
