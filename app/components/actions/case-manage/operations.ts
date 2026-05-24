@@ -16,7 +16,7 @@ import {
 } from '~/utils/data';
 import { type CaseData, type CaseExportData, type ValidationAuditEntry } from '~/types';
 import { auditService } from '~/services/audit';
-import { exportCaseData, formatDateForFilename } from '~/components/actions/case-export';
+import { loadCaseExportActions } from '~/utils/data/operations/case-export-loader';
 import { buildArchivePackage } from './archive-package-builder';
 import { deleteFileWithoutAudit } from './delete-helpers';
 import { isReadOnlyCaseData, sortCaseNumbers, validateCaseNumber } from './utils';
@@ -600,6 +600,7 @@ export const archiveCase = async (
       isReadOnly: false,
     } as CaseData;
 
+    const { exportCaseData, formatDateForFilename } = await loadCaseExportActions();
     const exportData = await exportCaseData(user, caseNumber, { includeMetadata: true });
     const archivedExportData: CaseExportData = {
       ...exportData,

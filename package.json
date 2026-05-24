@@ -1,6 +1,6 @@
 {
   "name": "@striae-org/striae",
-  "version": "7.1.2",
+  "version": "7.1.3",
   "private": false,
   "description": "Striae is a specialized, cloud-native platform designed to streamline forensic firearms identification by providing an intuitive environment for digital comparison image annotation, authenticated confirmations, and automated report generation.",
   "license": "Apache-2.0",
@@ -102,37 +102,37 @@
     "deploy-workers:user": "cd workers/user-worker && npm run deploy"
   },
   "dependencies": {
-    "@react-router/cloudflare": "^7.15.0",
+    "@react-router/cloudflare": "^7.15.1",
     "firebase": "^12.13.0",
     "isbot": "^5.1.40",
     "jszip": "^3.10.1",
     "qrcode": "^1.5.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-router": "^7.15.0"
+    "react-router": "^7.15.1"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.16.3",
-    "@react-router/dev": "^7.15.0",
-    "@react-router/fs-routes": "^7.15.0",
+    "@cloudflare/vitest-pool-workers": "^0.16.9",
+    "@react-router/dev": "^7.15.1",
+    "@react-router/fs-routes": "^7.15.1",
     "@types/qrcode": "^1.5.6",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.59.2",
-    "@typescript-eslint/parser": "^8.59.2",
-    "@vitest/coverage-v8": "^4.1.5",
+    "@typescript-eslint/eslint-plugin": "^8.59.4",
+    "@typescript-eslint/parser": "^8.59.4",
+    "@vitest/coverage-v8": "^4.1.7",
     "eslint": "^9.39.4",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "firebase-admin": "^13.9.0",
+    "firebase-admin": "^13.10.0",
     "modern-normalize": "^3.0.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.11",
-    "vitest": "^4.1.5",
-    "wrangler": "^4.90.0"
+    "vite": "^8.0.14",
+    "vitest": "^4.1.7",
+    "wrangler": "^4.94.0"
   },
   "overrides": {
     "@tootallnate/once": "3.0.1",
