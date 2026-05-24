@@ -20,6 +20,11 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-05-23] - *[Patch Release v7.1.3](https://github.com/striae-org/striae/releases/tag/v7.1.3)*
+
+- **🛠️ Static Import Fix** - Applied a targeted follow-up fix for a static import issue discovered after the previous maintenance cycle.
+- **🔒 Security and Dependency Maintenance** - Refreshed app and worker dependencies, updated build/test/lint tooling, bumped `protobufjs` for the upstream security fix, and refreshed Cloudflare compatibility dates.
+
 ## [2026-05-07] - *[Patch Release v7.1.2](https://github.com/striae-org/striae/releases/tag/v7.1.2)*
 
 - **⚙️ Maintenance** - Bumped app and worker dependencies, updated Wrangler, and refreshed Cloudflare compatibility dates across all workers.
