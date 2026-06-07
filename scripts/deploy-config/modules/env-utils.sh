@@ -252,3 +252,11 @@ update_private_key_registry() {
 escape_for_sed_replacement() {
     printf '%s' "$1" | sed -e 's/[&|\\]/\\&/g'
 }
+
+generate_worker_subdomain_label() {
+    local label
+    label=$(openssl rand -base64 16 2>/dev/null | tr -dc 'a-z0-9' | head -c 10 || true)
+    if [ -n "$label" ] && [ ${#label} -eq 10 ]; then
+        printf '%s' "$label"
+    fi
+}
