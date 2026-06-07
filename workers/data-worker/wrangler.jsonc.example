@@ -16,6 +16,10 @@
     {
       "binding": "STRIAE_DATA",
       "bucket_name": "DATA_BUCKET_NAME"
+    },
+    {
+      "binding": "STRIAE_CONFIG",
+      "bucket_name": "CONFIG_BUCKET_NAME"
     }
   ],
 

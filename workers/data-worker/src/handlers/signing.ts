@@ -23,7 +23,7 @@ async function signPayloadWithWorkerKey(payload: string, env: Env): Promise<{
   signedAt: string;
   value: string;
 }> {
-  const signingContext = getManifestSigningKeyContext(env);
+  const signingContext = await getManifestSigningKeyContext(env);
 
   return signWithWorkerKey(
     payload,

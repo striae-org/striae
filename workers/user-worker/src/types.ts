@@ -2,6 +2,7 @@ export interface Env {
   USER_DB: KVNamespace;
   STRIAE_DATA: R2Bucket;
   STRIAE_FILES: R2Bucket;
+  STRIAE_CONFIG: R2Bucket;
   DATA_AT_REST_ENCRYPTION_PRIVATE_KEY?: string;
   DATA_AT_REST_ENCRYPTION_KEY_ID?: string;
   DATA_AT_REST_ENCRYPTION_KEYS_JSON?: string;

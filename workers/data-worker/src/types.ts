@@ -1,5 +1,6 @@
 export interface Env {
   STRIAE_DATA: R2Bucket;
+  STRIAE_CONFIG: R2Bucket;
   MANIFEST_SIGNING_PRIVATE_KEY?: string;
   MANIFEST_SIGNING_KEY_ID?: string;
   MANIFEST_SIGNING_KEYS_JSON?: string;

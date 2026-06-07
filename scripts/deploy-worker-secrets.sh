@@ -110,9 +110,7 @@ build_user_worker_secret_list() {
         secrets+=("DATA_AT_REST_ENCRYPTION_KEY_ID")
     fi
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_KEYS_JSON")
-    fi
+    # Key registries are now stored in R2 (CONFIG_BUCKET_NAME); not deployed as secrets.
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")
@@ -120,10 +118,6 @@ build_user_worker_secret_list() {
 
     if [ -n "${USER_KV_ENCRYPTION_PRIVATE_KEY:-}" ]; then
         secrets+=("USER_KV_ENCRYPTION_PRIVATE_KEY")
-    fi
-
-    if [ -n "${USER_KV_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("USER_KV_ENCRYPTION_KEYS_JSON")
     fi
 
     if [ -n "${USER_KV_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
@@ -165,9 +159,7 @@ build_audit_worker_secret_list() {
         secrets+=("DATA_AT_REST_ENCRYPTION_KEY_ID")
     fi
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_KEYS_JSON")
-    fi
+    # Key registries are now stored in R2 (CONFIG_BUCKET_NAME); not deployed as secrets.
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")
@@ -232,9 +224,8 @@ build_data_worker_secret_list() {
         "EXPORT_ENCRYPTION_KEY_ID"
     )
 
-    if [ -n "${MANIFEST_SIGNING_KEYS_JSON:-}" ]; then
-        secrets+=("MANIFEST_SIGNING_KEYS_JSON")
-    fi
+    # Key registries (MANIFEST_SIGNING_KEYS_JSON, DATA_AT_REST_ENCRYPTION_KEYS_JSON,
+    # EXPORT_ENCRYPTION_KEYS_JSON) are now stored in R2 (CONFIG_BUCKET_NAME).
 
     if [ -n "${MANIFEST_SIGNING_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("MANIFEST_SIGNING_ACTIVE_KEY_ID")
@@ -256,16 +247,8 @@ build_data_worker_secret_list() {
         secrets+=("DATA_AT_REST_ENCRYPTION_KEY_ID")
     fi
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_KEYS_JSON")
-    fi
-
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")
-    fi
-
-    if [ -n "${EXPORT_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("EXPORT_ENCRYPTION_KEYS_JSON")
     fi
 
     if [ -n "${EXPORT_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
@@ -293,9 +276,7 @@ build_images_worker_secret_list() {
         secrets+=("DATA_AT_REST_ENCRYPTION_PRIVATE_KEY")
     fi
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_KEYS_JSON")
-    fi
+    # Key registry (DATA_AT_REST_ENCRYPTION_KEYS_JSON) is now stored in R2 (CONFIG_BUCKET_NAME).
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")

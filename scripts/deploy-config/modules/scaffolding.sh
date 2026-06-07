@@ -154,6 +154,7 @@ update_wrangler_configs() {
         sed -i "s/\"AUDIT_WORKER_NAME\"/\"$AUDIT_WORKER_NAME\"/g" workers/audit-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$escaped_account_id\"/g" workers/audit-worker/wrangler.jsonc
         sed -i "s/\"AUDIT_BUCKET_NAME\"/\"$AUDIT_BUCKET_NAME\"/g" workers/audit-worker/wrangler.jsonc
+        sed -i "s/\"CONFIG_BUCKET_NAME\"/\"$CONFIG_BUCKET_NAME\"/g" workers/audit-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ audit-worker configuration updated${NC}"
     fi
 
@@ -162,6 +163,7 @@ update_wrangler_configs() {
         sed -i "s/\"DATA_WORKER_NAME\"/\"$DATA_WORKER_NAME\"/g" workers/data-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$escaped_account_id\"/g" workers/data-worker/wrangler.jsonc
         sed -i "s/\"DATA_BUCKET_NAME\"/\"$DATA_BUCKET_NAME\"/g" workers/data-worker/wrangler.jsonc
+        sed -i "s/\"CONFIG_BUCKET_NAME\"/\"$CONFIG_BUCKET_NAME\"/g" workers/data-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ data-worker configuration updated${NC}"
     fi
 
@@ -170,6 +172,7 @@ update_wrangler_configs() {
         sed -i "s/\"IMAGES_WORKER_NAME\"/\"$IMAGES_WORKER_NAME\"/g" workers/image-worker/wrangler.jsonc
         sed -i "s/\"ACCOUNT_ID\"/\"$escaped_account_id\"/g" workers/image-worker/wrangler.jsonc
         sed -i "s/\"FILES_BUCKET_NAME\"/\"$FILES_BUCKET_NAME\"/g" workers/image-worker/wrangler.jsonc
+        sed -i "s/\"CONFIG_BUCKET_NAME\"/\"$CONFIG_BUCKET_NAME\"/g" workers/image-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ image-worker configuration updated${NC}"
     fi
 
@@ -197,6 +200,7 @@ update_wrangler_configs() {
         sed -i "s/\"KV_STORE_ID\"/\"$KV_STORE_ID\"/g" workers/user-worker/wrangler.jsonc
         sed -i "s/\"DATA_BUCKET_NAME\"/\"$DATA_BUCKET_NAME\"/g" workers/user-worker/wrangler.jsonc
         sed -i "s/\"FILES_BUCKET_NAME\"/\"$FILES_BUCKET_NAME\"/g" workers/user-worker/wrangler.jsonc
+        sed -i "s/\"CONFIG_BUCKET_NAME\"/\"$CONFIG_BUCKET_NAME\"/g" workers/user-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ user-worker configuration updated${NC}"
     fi
 
