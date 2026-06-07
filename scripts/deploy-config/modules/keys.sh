@@ -406,3 +406,28 @@ configure_data_at_rest_encryption_credentials() {
 
     echo ""
 }
+
+configure_registry_encryption_key() {
+    echo -e "${BLUE}🔒 REGISTRY ENCRYPTION KEY CONFIGURATION${NC}"
+    echo "========================================="
+
+    restore_env_var_from_backup_if_missing "REGISTRY_ENCRYPTION_KEY"
+
+    if [ -n "$REGISTRY_ENCRYPTION_KEY" ] && ! is_placeholder "$REGISTRY_ENCRYPTION_KEY"; then
+        echo -e "${GREEN}✅ REGISTRY_ENCRYPTION_KEY already configured${NC}"
+    else
+        echo -e "${YELLOW}Generating REGISTRY_ENCRYPTION_KEY (32 random bytes, base64url)...${NC}"
+        local key_value
+        key_value=$(node -e "const { randomBytes } = require('crypto'); const buf = randomBytes(32); process.stdout.write(buf.toString('base64url'));")
+        if [ -z "$key_value" ] || [ ${#key_value} -lt 20 ]; then
+            echo -e "${RED}❌ Error: Failed to generate REGISTRY_ENCRYPTION_KEY${NC}"
+            exit 1
+        fi
+        REGISTRY_ENCRYPTION_KEY="$key_value"
+        export REGISTRY_ENCRYPTION_KEY
+        write_env_var "REGISTRY_ENCRYPTION_KEY" "$REGISTRY_ENCRYPTION_KEY"
+        echo -e "${GREEN}✅ REGISTRY_ENCRYPTION_KEY generated${NC}"
+    fi
+
+    echo ""
+}

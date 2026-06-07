@@ -100,6 +100,7 @@ build_user_worker_secret_list() {
         "PROJECT_ID"
         "FIREBASE_SERVICE_ACCOUNT_EMAIL"
         "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY"
+        "REGISTRY_ENCRYPTION_KEY"
     )
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_PRIVATE_KEY:-}" ]; then
@@ -141,7 +142,9 @@ build_user_worker_secret_list() {
 }
 
 build_audit_worker_secret_list() {
-    local secrets=()
+    local secrets=(
+        "REGISTRY_ENCRYPTION_KEY"
+    )
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ENABLED:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ENABLED")
@@ -222,6 +225,7 @@ build_data_worker_secret_list() {
         "MANIFEST_SIGNING_KEY_ID"
         "EXPORT_ENCRYPTION_PRIVATE_KEY"
         "EXPORT_ENCRYPTION_KEY_ID"
+        "REGISTRY_ENCRYPTION_KEY"
     )
 
     # Key registries (MANIFEST_SIGNING_KEYS_JSON, DATA_AT_REST_ENCRYPTION_KEYS_JSON,
@@ -270,6 +274,7 @@ build_images_worker_secret_list() {
         "DATA_AT_REST_ENCRYPTION_PUBLIC_KEY"
         "DATA_AT_REST_ENCRYPTION_KEY_ID"
         "IMAGE_SIGNED_URL_SECRET"
+        "REGISTRY_ENCRYPTION_KEY"
     )
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_PRIVATE_KEY:-}" ]; then

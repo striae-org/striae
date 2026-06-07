@@ -63,6 +63,14 @@ if [ -z "${CONFIG_BUCKET_NAME:-}" ]; then
     exit 1
 fi
 
+if [ -z "${REGISTRY_ENCRYPTION_KEY:-}" ]; then
+    echo -e "${RED}❌ REGISTRY_ENCRYPTION_KEY is not set in .env${NC}"
+    echo -e "${YELLOW}   Run deploy-config.sh to generate it.${NC}"
+    exit 1
+fi
+
+export REGISTRY_ENCRYPTION_KEY
+
 echo -e "${YELLOW}  Target bucket: ${CONFIG_BUCKET_NAME}${NC}"
 
 TEMP_DIR=$(mktemp -d)
@@ -97,14 +105,23 @@ upload_registry() {
 
     local filepath="${TEMP_DIR}/${filename}"
     printf '%s' "$value" > "$filepath"
+
+    # Encrypt the registry before upload
+    local encrypted_filepath="${TEMP_DIR}/encrypted-${filename}"
+    if ! node "${SCRIPT_DIR}/encrypt-registry.mjs" "$filepath" "$encrypted_filepath"; then
+        echo -e "${RED}  ❌ ${scope_label}: encryption failed, skipping${NC}"
+        skipped=$((skipped + 1))
+        return
+    fi
+
     local size
-    size=$(wc -c < "$filepath" | tr -d ' ')
+    size=$(wc -c < "$encrypted_filepath" | tr -d ' ')
 
     if [ "$dry_run" = "true" ]; then
-        echo -e "${BLUE}  [dry-run] Would upload ${scope_label}: ${filename} (${size} bytes)${NC}"
+        echo -e "${BLUE}  [dry-run] Would upload ${scope_label}: ${filename} (${size} bytes, encrypted)${NC}"
     else
-        echo -e "${YELLOW}  Uploading ${scope_label}: ${filename} (${size} bytes)...${NC}"
-        if wrangler r2 object put "${CONFIG_BUCKET_NAME}/${filename}" --file "$filepath" --content-type "application/json" --remote 2>/dev/null; then
+        echo -e "${YELLOW}  Uploading ${scope_label}: ${filename} (${size} bytes, encrypted)...${NC}"
+        if wrangler r2 object put "${CONFIG_BUCKET_NAME}/${filename}" --file "$encrypted_filepath" --content-type "application/json" --remote 2>/dev/null; then
             echo -e "${GREEN}    ✅ ${filename} uploaded${NC}"
             uploaded=$((uploaded + 1))
         else

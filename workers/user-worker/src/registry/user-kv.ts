@@ -14,7 +14,8 @@ export async function parseUserKvPrivateKeyRegistry(env: Env): Promise<PrivateKe
   return fetchKeyRegistryFromR2(
     env.STRIAE_CONFIG,
     'user-kv',
-    env.USER_KV_ENCRYPTION_ACTIVE_KEY_ID
+    env.USER_KV_ENCRYPTION_ACTIVE_KEY_ID,
+    env.REGISTRY_ENCRYPTION_KEY
   );
 }
 

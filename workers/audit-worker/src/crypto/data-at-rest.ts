@@ -18,7 +18,8 @@ async function getDataAtRestPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegi
   return fetchKeyRegistryFromR2(
     env.STRIAE_CONFIG,
     'data-at-rest',
-    env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID
+    env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID,
+    env.REGISTRY_ENCRYPTION_KEY
   );
 }
 

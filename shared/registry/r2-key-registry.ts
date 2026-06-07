@@ -9,7 +9,12 @@
  *   - 'export-encryption'  → export-encryption-keys.json
  *   - 'manifest-signing'   → manifest-signing-keys.json
  *   - 'user-kv'            → user-kv-encryption-keys.json
+ *
+ * Registry files are encrypted at rest with AES-256-GCM using
+ * REGISTRY_ENCRYPTION_KEY before upload and decrypted on fetch.
  */
+
+import { decryptRegistryJson, isEncryptedEnvelope } from './registry-encryption';
 
 export type KeyRegistryScope =
   | 'data-at-rest'
@@ -48,13 +53,15 @@ function getNonEmptyString(value: unknown): string | null {
  * @param r2Bucket - The STRIAE_CONFIG R2 bucket binding
  * @param scope - Which registry to fetch
  * @param activeKeyIdOverride - Optional env-level override for the active key ID
+ * @param registryEncryptionKey - Base64-encoded 32-byte AES-256-GCM key for registry decryption
  * @returns Parsed registry with normalized PEM keys
- * @throws If R2 object is missing, JSON is invalid, or no usable keys found
+ * @throws If R2 object is missing, decryption fails, JSON is invalid, or no usable keys found
  */
 export async function fetchKeyRegistryFromR2(
   r2Bucket: R2Bucket,
   scope: KeyRegistryScope,
-  activeKeyIdOverride?: string
+  activeKeyIdOverride: string | undefined,
+  registryEncryptionKey: string
 ): Promise<PrivateKeyRegistry> {
   const filename = SCOPE_FILE_MAP[scope];
   const contextLabel = `${scope} key registry`;
@@ -64,9 +71,28 @@ export async function fetchKeyRegistryFromR2(
     throw new Error(`${contextLabel}: R2 object "${filename}" not found in config bucket`);
   }
 
-  const registryJson = await object.text();
-  if (!registryJson || registryJson.trim().length === 0) {
+  const rawJson = await object.text();
+  if (!rawJson || rawJson.trim().length === 0) {
     throw new Error(`${contextLabel}: R2 object "${filename}" is empty`);
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawJson) as unknown;
+  } catch {
+    throw new Error(`${contextLabel}: R2 object "${filename}" is not valid JSON`);
+  }
+
+  if (!isEncryptedEnvelope(parsed)) {
+    throw new Error(`${contextLabel}: R2 object "${filename}" is not an encrypted registry envelope`);
+  }
+
+  let registryJson: string;
+  try {
+    registryJson = await decryptRegistryJson(parsed, registryEncryptionKey);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'unknown error';
+    throw new Error(`${contextLabel}: failed to decrypt registry — ${message}`);
   }
 
   return parseRegistryJson(registryJson, scope, activeKeyIdOverride);

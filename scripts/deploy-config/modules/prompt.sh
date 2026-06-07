@@ -296,6 +296,7 @@ prompt_for_secrets() {
     configure_export_encryption_credentials
     configure_user_kv_encryption_credentials
     configure_data_at_rest_encryption_credentials
+    configure_registry_encryption_key
 
     # Reload the updated .env file
     source .env

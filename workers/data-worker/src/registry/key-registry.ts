@@ -77,7 +77,8 @@ async function getDataAtRestPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegi
   return fetchKeyRegistryFromR2(
     env.STRIAE_CONFIG,
     'data-at-rest',
-    env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID
+    env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID,
+    env.REGISTRY_ENCRYPTION_KEY
   );
 }
 
@@ -85,7 +86,8 @@ async function getExportPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegistry
   return fetchKeyRegistryFromR2(
     env.STRIAE_CONFIG,
     'export-encryption',
-    env.EXPORT_ENCRYPTION_ACTIVE_KEY_ID
+    env.EXPORT_ENCRYPTION_ACTIVE_KEY_ID,
+    env.REGISTRY_ENCRYPTION_KEY
   );
 }
 
@@ -93,7 +95,8 @@ export async function getManifestSigningKeyContext(env: Env): Promise<{ keyId: s
   const keyRegistry = await fetchKeyRegistryFromR2(
     env.STRIAE_CONFIG,
     'manifest-signing',
-    env.MANIFEST_SIGNING_ACTIVE_KEY_ID
+    env.MANIFEST_SIGNING_ACTIVE_KEY_ID,
+    env.REGISTRY_ENCRYPTION_KEY
   );
 
   const resolvedKeyId = keyRegistry.activeKeyId;
