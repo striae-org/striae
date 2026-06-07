@@ -187,7 +187,7 @@ write_env_var() {
     var_value=$(strip_carriage_returns "$var_value")
     env_file_value="$var_value"
 
-    if [ "$var_name" = "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_PRIVATE_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_PUBLIC_KEY" ] || [ "$var_name" = "EXPORT_ENCRYPTION_PRIVATE_KEY" ] || [ "$var_name" = "EXPORT_ENCRYPTION_PUBLIC_KEY" ] || [ "$var_name" = "DATA_AT_REST_ENCRYPTION_PRIVATE_KEY" ] || [ "$var_name" = "DATA_AT_REST_ENCRYPTION_PUBLIC_KEY" ] || [ "$var_name" = "USER_KV_ENCRYPTION_PRIVATE_KEY" ] || [ "$var_name" = "USER_KV_ENCRYPTION_PUBLIC_KEY" ] || [ "$var_name" = "EXPORT_ENCRYPTION_KEYS_JSON" ] || [ "$var_name" = "DATA_AT_REST_ENCRYPTION_KEYS_JSON" ] || [ "$var_name" = "USER_KV_ENCRYPTION_KEYS_JSON" ]; then
+    if [ "$var_name" = "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_PRIVATE_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_PUBLIC_KEY" ] || [ "$var_name" = "EXPORT_ENCRYPTION_PRIVATE_KEY" ] || [ "$var_name" = "EXPORT_ENCRYPTION_PUBLIC_KEY" ] || [ "$var_name" = "DATA_AT_REST_ENCRYPTION_PRIVATE_KEY" ] || [ "$var_name" = "DATA_AT_REST_ENCRYPTION_PUBLIC_KEY" ] || [ "$var_name" = "USER_KV_ENCRYPTION_PRIVATE_KEY" ] || [ "$var_name" = "USER_KV_ENCRYPTION_PUBLIC_KEY" ] || [ "$var_name" = "MANIFEST_SIGNING_KEYS_JSON" ] || [ "$var_name" = "EXPORT_ENCRYPTION_KEYS_JSON" ] || [ "$var_name" = "DATA_AT_REST_ENCRYPTION_KEYS_JSON" ] || [ "$var_name" = "USER_KV_ENCRYPTION_KEYS_JSON" ]; then
         # Store as a quoted string so sourced .env preserves escaped newline markers (\n)
         env_file_value=${env_file_value//\"/\\\"}
         env_file_value="\"$env_file_value\""
@@ -253,7 +253,7 @@ escape_for_sed_replacement() {
     printf '%s' "$1" | sed -e 's/[&|\\]/\\&/g'
 }
 
-generate_worker_subdomain_label() {
+generate_10_char_id() {
     local label
     label=$(openssl rand -base64 16 2>/dev/null | tr -dc 'a-z0-9' | head -c 10 || true)
     if [ -n "$label" ] && [ ${#label} -eq 10 ]; then

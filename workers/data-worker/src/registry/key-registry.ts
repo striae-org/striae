@@ -174,6 +174,33 @@ function getExportPrivateKeyRegistry(env: Env): PrivateKeyRegistry {
   });
 }
 
+export function getManifestSigningKeyContext(env: Env): { keyId: string; privateKeyPem: string } {
+  const keyRegistry = parsePrivateKeyRegistry({
+    registryJson: env.MANIFEST_SIGNING_KEYS_JSON,
+    activeKeyId: env.MANIFEST_SIGNING_ACTIVE_KEY_ID,
+    legacyKeyId: env.MANIFEST_SIGNING_KEY_ID,
+    legacyPrivateKey: env.MANIFEST_SIGNING_PRIVATE_KEY,
+    context: 'Manifest signing'
+  });
+
+  const legacyKeyId = getNonEmptyString(env.MANIFEST_SIGNING_KEY_ID);
+  const resolvedKeyId = keyRegistry.activeKeyId ?? legacyKeyId;
+
+  if (!resolvedKeyId) {
+    throw new Error('Manifest signing active key ID is not configured');
+  }
+
+  const privateKeyPem = keyRegistry.keys[resolvedKeyId];
+  if (!privateKeyPem) {
+    throw new Error('Manifest signing active key ID is not present in key registry');
+  }
+
+  return {
+    keyId: resolvedKeyId,
+    privateKeyPem
+  };
+}
+
 export function buildExportDecryptionContext(keyId: string | null, env: Env): ExportDecryptionContext {
   const keyRegistry = getExportPrivateKeyRegistry(env);
   const candidates = buildPrivateKeyCandidates(keyId, keyRegistry);

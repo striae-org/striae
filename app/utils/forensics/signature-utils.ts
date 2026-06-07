@@ -29,6 +29,11 @@ export interface PublicSigningKeyDetails {
   publicKeyPem: string | null;
 }
 
+interface VerificationKeyCandidate {
+  keyId: string;
+  publicKeyPem: string;
+}
+
 const RSA_PSS_SALT_LENGTH = 32;
 
 type ManifestSigningConfig = {
@@ -155,6 +160,80 @@ export function getVerificationPublicKey(keyId: string): string | null {
   return null;
 }
 
+function getVerificationPublicKeyCandidates(signatureKeyId: string): VerificationKeyCandidate[] {
+  const config = paths as unknown as ManifestSigningConfig;
+  const keyMap = config.manifest_signing_public_keys;
+  const candidates: VerificationKeyCandidate[] = [];
+  const seenKeyIds = new Set<string>();
+
+  const appendCandidate = (keyId: string | null, publicKeyPem: string | null): void => {
+    if (!keyId || !publicKeyPem || seenKeyIds.has(keyId)) {
+      return;
+    }
+
+    seenKeyIds.add(keyId);
+    candidates.push({ keyId, publicKeyPem });
+  };
+
+  appendCandidate(signatureKeyId, getVerificationPublicKey(signatureKeyId));
+
+  const configuredKeyId =
+    typeof config.manifest_signing_key_id === 'string' && config.manifest_signing_key_id.trim().length > 0
+      ? config.manifest_signing_key_id.trim()
+      : null;
+  const legacyPublicKeyPem = normalizePemOrNull(config.manifest_signing_public_key);
+
+  appendCandidate(configuredKeyId, configuredKeyId ? getVerificationPublicKey(configuredKeyId) : legacyPublicKeyPem);
+
+  if (keyMap && typeof keyMap === 'object') {
+    const orderedEntries = Object.entries(keyMap)
+      .filter(([, value]) => typeof value === 'string' && value.trim().length > 0)
+      .sort(([leftKeyId], [rightKeyId]) => leftKeyId.localeCompare(rightKeyId));
+
+    for (const [keyId, pemValue] of orderedEntries) {
+      appendCandidate(keyId, normalizePemPublicKey(pemValue));
+    }
+  }
+
+  if (candidates.length === 0 && legacyPublicKeyPem) {
+    appendCandidate(configuredKeyId ?? signatureKeyId, legacyPublicKeyPem);
+  }
+
+  return candidates;
+}
+
+async function verifyWithPublicKey(
+  payload: string,
+  signatureValue: string,
+  publicKeyPem: string,
+  invalidPublicKeyError: string
+): Promise<boolean> {
+  const key = await crypto.subtle.importKey(
+    'spki',
+    publicKeyPemToArrayBuffer(publicKeyPem, invalidPublicKeyError),
+    {
+      name: 'RSA-PSS',
+      hash: 'SHA-256'
+    },
+    false,
+    ['verify']
+  );
+
+  const signatureBytes = base64UrlToUint8Array(signatureValue);
+  const signatureBuffer = new Uint8Array(signatureBytes.byteLength);
+  signatureBuffer.set(signatureBytes);
+
+  return crypto.subtle.verify(
+    {
+      name: 'RSA-PSS',
+      saltLength: RSA_PSS_SALT_LENGTH
+    },
+    key,
+    signatureBuffer,
+    new TextEncoder().encode(payload)
+  );
+}
+
 export async function verifySignaturePayload(
   payload: string,
   signature: SignatureEnvelope,
@@ -177,11 +256,20 @@ export async function verifySignaturePayload(
     };
   }
 
-  const publicKeyPem =
+  const verificationFailedError = messages.verificationFailedError || 'Signature verification failed';
+  const invalidPublicKeyError =
+    messages.invalidPublicKeyError ||
+    `${verificationFailedError}: invalid public key`;
+
+  const explicitVerificationKey =
     typeof options.verificationPublicKeyPem === 'string' && options.verificationPublicKeyPem.trim().length > 0
       ? options.verificationPublicKeyPem
-      : getVerificationPublicKey(signature.keyId);
-  if (!publicKeyPem) {
+      : null;
+  const keyCandidates = explicitVerificationKey
+    ? [{ keyId: signature.keyId, publicKeyPem: explicitVerificationKey }]
+    : getVerificationPublicKeyCandidates(signature.keyId);
+
+  if (keyCandidates.length === 0) {
     return {
       isValid: false,
       keyId: signature.keyId,
@@ -189,47 +277,25 @@ export async function verifySignaturePayload(
     };
   }
 
-  const verificationFailedError = messages.verificationFailedError || 'Signature verification failed';
-  const invalidPublicKeyError =
-    messages.invalidPublicKeyError ||
-    `${verificationFailedError}: invalid public key`;
+  let lastError: unknown;
 
-  try {
-    const key = await crypto.subtle.importKey(
-      'spki',
-      publicKeyPemToArrayBuffer(publicKeyPem, invalidPublicKeyError),
-      {
-        name: 'RSA-PSS',
-        hash: 'SHA-256'
-      },
-      false,
-      ['verify']
-    );
-
-    const signatureBytes = base64UrlToUint8Array(signature.value);
-    const signatureBuffer = new Uint8Array(signatureBytes.byteLength);
-    signatureBuffer.set(signatureBytes);
-
-    const verified = await crypto.subtle.verify(
-      {
-        name: 'RSA-PSS',
-        saltLength: RSA_PSS_SALT_LENGTH
-      },
-      key,
-      signatureBuffer,
-      new TextEncoder().encode(payload)
-    );
-
-    return {
-      isValid: verified,
-      keyId: signature.keyId,
-      error: verified ? undefined : verificationFailedError
-    };
-  } catch (error) {
-    return {
-      isValid: false,
-      keyId: signature.keyId,
-      error: error instanceof Error ? error.message : verificationFailedError
-    };
+  for (const candidate of keyCandidates) {
+    try {
+      const verified = await verifyWithPublicKey(payload, signature.value, candidate.publicKeyPem, invalidPublicKeyError);
+      if (verified) {
+        return {
+          isValid: true,
+          keyId: signature.keyId
+        };
+      }
+    } catch (error) {
+      lastError = error;
+    }
   }
+
+  return {
+    isValid: false,
+    keyId: signature.keyId,
+    error: lastError instanceof Error ? lastError.message : verificationFailedError
+  };
 }
