@@ -104,7 +104,7 @@ upload_registry() {
         echo -e "${BLUE}  [dry-run] Would upload ${scope_label}: ${filename} (${size} bytes)${NC}"
     else
         echo -e "${YELLOW}  Uploading ${scope_label}: ${filename} (${size} bytes)...${NC}"
-        if wrangler r2 object put "${CONFIG_BUCKET_NAME}/${filename}" --file "$filepath" --content-type "application/json" 2>/dev/null; then
+        if wrangler r2 object put "${CONFIG_BUCKET_NAME}/${filename}" --file "$filepath" --content-type "application/json" --remote 2>/dev/null; then
             echo -e "${GREEN}    ✅ ${filename} uploaded${NC}"
             uploaded=$((uploaded + 1))
         else

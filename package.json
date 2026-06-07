@@ -88,6 +88,7 @@
     "update-versions": "node ./scripts/update-markdown-versions.cjs",
     "update-compatibility-dates": "node ./scripts/update-compatibility-dates.cjs",
     "deploy-config": "bash ./scripts/deploy-config.sh",
+    "upload-registries": "bash ./scripts/upload-registries.sh",
     "update-env": "bash ./scripts/deploy-config.sh --update-env",
     "install-workers": "bash ./scripts/install-workers.sh",
     "deploy-workers": "npm run deploy-workers:audit && npm run deploy-workers:data && npm run deploy-workers:image && npm run deploy-workers:lists && npm run deploy-workers:pdf && npm run deploy-workers:user",
