@@ -1,5 +1,4 @@
 #:schema node_modules/wrangler/config-schema.json
-account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
 name = "PAGES_PROJECT_NAME"
 compatibility_date = "2026-06-07"
 compatibility_flags = ["nodejs_compat"]
