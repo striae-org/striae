@@ -220,20 +220,34 @@ update_wrangler_configs() {
 
     if [ -f "app/config/config.json" ]; then
         echo -e "${YELLOW}    Updating app/config/config.json...${NC}"
-        local escaped_manifest_signing_key_id
-        local escaped_manifest_signing_public_key
-        local escaped_export_encryption_key_id
-        local escaped_export_encryption_public_key
-        escaped_manifest_signing_key_id=$(escape_for_sed_replacement "$MANIFEST_SIGNING_KEY_ID")
-        escaped_manifest_signing_public_key=$(escape_for_sed_replacement "$MANIFEST_SIGNING_PUBLIC_KEY")
-        escaped_export_encryption_key_id=$(escape_for_sed_replacement "$EXPORT_ENCRYPTION_KEY_ID")
-        escaped_export_encryption_public_key=$(escape_for_sed_replacement "$EXPORT_ENCRYPTION_PUBLIC_KEY")
+        if ! node -e "
+const fs = require('fs');
+const path = process.argv[1];
+const config = JSON.parse(fs.readFileSync(path, 'utf8'));
 
-        sed -i "s|\"url\": \"[^\"]*\"|\"url\": \"https://$escaped_pages_custom_domain\"|g" app/config/config.json
-        sed -i "s|\"MANIFEST_SIGNING_KEY_ID\"|\"$escaped_manifest_signing_key_id\"|g" app/config/config.json
-        sed -i "s|\"MANIFEST_SIGNING_PUBLIC_KEY\"|\"$escaped_manifest_signing_public_key\"|g" app/config/config.json
-        sed -i "s|\"EXPORT_ENCRYPTION_KEY_ID\"|\"$escaped_export_encryption_key_id\"|g" app/config/config.json
-        sed -i "s|\"EXPORT_ENCRYPTION_PUBLIC_KEY\"|\"$escaped_export_encryption_public_key\"|g" app/config/config.json
+config.url = 'https://' + process.env.PAGES_CUSTOM_DOMAIN;
+
+config.manifest_signing_key_id = process.env.MANIFEST_SIGNING_KEY_ID;
+config.manifest_signing_public_key = process.env.MANIFEST_SIGNING_PUBLIC_KEY.replace(/\\\\n/g, '\n');
+
+if (!config.manifest_signing_public_keys || typeof config.manifest_signing_public_keys !== 'object') {
+    config.manifest_signing_public_keys = {};
+}
+config.manifest_signing_public_keys[process.env.MANIFEST_SIGNING_KEY_ID] = config.manifest_signing_public_key;
+
+config.export_encryption_key_id = process.env.EXPORT_ENCRYPTION_KEY_ID;
+config.export_encryption_public_key = process.env.EXPORT_ENCRYPTION_PUBLIC_KEY.replace(/\\\\n/g, '\n');
+
+if (!config.export_encryption_public_keys || typeof config.export_encryption_public_keys !== 'object') {
+    config.export_encryption_public_keys = {};
+}
+config.export_encryption_public_keys[process.env.EXPORT_ENCRYPTION_KEY_ID] = config.export_encryption_public_key;
+
+fs.writeFileSync(path, JSON.stringify(config, null, 2) + '\n', 'utf8');
+" "app/config/config.json"; then
+            echo -e "${RED}❌ Error: Failed to update app/config/config.json${NC}"
+            exit 1
+        fi
         echo -e "${GREEN}      ✅ app config.json updated${NC}"
     fi
 
