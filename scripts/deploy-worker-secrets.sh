@@ -103,15 +103,8 @@ build_user_worker_secret_list() {
         "REGISTRY_ENCRYPTION_KEY"
     )
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_PRIVATE_KEY:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_PRIVATE_KEY")
-    fi
-
-    if [ -n "${DATA_AT_REST_ENCRYPTION_KEY_ID:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_KEY_ID")
-    fi
-
-    # Key registries are now stored in R2 (CONFIG_BUCKET_NAME); not deployed as secrets.
+    # DATA_AT_REST_ENCRYPTION_PRIVATE_KEY and KEY_ID are now fetched from
+    # encrypted R2 registries; only the active key ID override is needed.
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")
@@ -146,13 +139,8 @@ build_audit_worker_secret_list() {
         "REGISTRY_ENCRYPTION_KEY"
     )
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_ENABLED:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_ENABLED")
-    fi
-
-    if [ -n "${DATA_AT_REST_ENCRYPTION_PRIVATE_KEY:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_PRIVATE_KEY")
-    fi
+    # Private keys are now fetched from encrypted R2 registries.
+    # DATA_AT_REST_ENCRYPTION_ENABLED is not checked in audit-worker code.
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_PUBLIC_KEY:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_PUBLIC_KEY")
@@ -161,8 +149,6 @@ build_audit_worker_secret_list() {
     if [ -n "${DATA_AT_REST_ENCRYPTION_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_KEY_ID")
     fi
-
-    # Key registries are now stored in R2 (CONFIG_BUCKET_NAME); not deployed as secrets.
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")
@@ -221,15 +207,13 @@ set_worker_secrets() {
 
 build_data_worker_secret_list() {
     local secrets=(
-        "MANIFEST_SIGNING_PRIVATE_KEY"
-        "MANIFEST_SIGNING_KEY_ID"
-        "EXPORT_ENCRYPTION_PRIVATE_KEY"
-        "EXPORT_ENCRYPTION_KEY_ID"
         "REGISTRY_ENCRYPTION_KEY"
     )
 
-    # Key registries (MANIFEST_SIGNING_KEYS_JSON, DATA_AT_REST_ENCRYPTION_KEYS_JSON,
-    # EXPORT_ENCRYPTION_KEYS_JSON) are now stored in R2 (CONFIG_BUCKET_NAME).
+    # Private keys and key IDs for manifest signing, export encryption, and
+    # data-at-rest are now fetched from encrypted R2 registries via
+    # fetchKeyRegistryFromR2(). Only active-key-ID overrides and the
+    # registry encryption key are needed as secrets.
 
     if [ -n "${MANIFEST_SIGNING_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("MANIFEST_SIGNING_ACTIVE_KEY_ID")
@@ -237,10 +221,6 @@ build_data_worker_secret_list() {
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ENABLED:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ENABLED")
-    fi
-
-    if [ -n "${DATA_AT_REST_ENCRYPTION_PRIVATE_KEY:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_PRIVATE_KEY")
     fi
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_PUBLIC_KEY:-}" ]; then
@@ -277,11 +257,7 @@ build_images_worker_secret_list() {
         "REGISTRY_ENCRYPTION_KEY"
     )
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_PRIVATE_KEY:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_PRIVATE_KEY")
-    fi
-
-    # Key registry (DATA_AT_REST_ENCRYPTION_KEYS_JSON) is now stored in R2 (CONFIG_BUCKET_NAME).
+    # Private keys are now fetched from encrypted R2 registries.
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")

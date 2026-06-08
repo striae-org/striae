@@ -22,7 +22,10 @@ function base64UrlEncode(bytes: Uint8Array): string {
 }
 
 function base64UrlDecode(encoded: string): Uint8Array {
-  const padded = encoded.replace(/-/g, '+').replace(/_/g, '/');
+  let padded = encoded.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = padded.length % 4;
+  if (pad === 2) padded += '==';
+  else if (pad === 3) padded += '=';
   const binary = atob(padded);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
