@@ -100,19 +100,11 @@ build_user_worker_secret_list() {
         "PROJECT_ID"
         "FIREBASE_SERVICE_ACCOUNT_EMAIL"
         "FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY"
+        "REGISTRY_ENCRYPTION_KEY"
     )
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_PRIVATE_KEY:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_PRIVATE_KEY")
-    fi
-
-    if [ -n "${DATA_AT_REST_ENCRYPTION_KEY_ID:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_KEY_ID")
-    fi
-
-    if [ -n "${DATA_AT_REST_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_KEYS_JSON")
-    fi
+    # DATA_AT_REST_ENCRYPTION_PRIVATE_KEY and KEY_ID are now fetched from
+    # encrypted R2 registries; only the active key ID override is needed.
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")
@@ -120,10 +112,6 @@ build_user_worker_secret_list() {
 
     if [ -n "${USER_KV_ENCRYPTION_PRIVATE_KEY:-}" ]; then
         secrets+=("USER_KV_ENCRYPTION_PRIVATE_KEY")
-    fi
-
-    if [ -n "${USER_KV_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("USER_KV_ENCRYPTION_KEYS_JSON")
     fi
 
     if [ -n "${USER_KV_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
@@ -147,15 +135,12 @@ build_user_worker_secret_list() {
 }
 
 build_audit_worker_secret_list() {
-    local secrets=()
+    local secrets=(
+        "REGISTRY_ENCRYPTION_KEY"
+    )
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_ENABLED:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_ENABLED")
-    fi
-
-    if [ -n "${DATA_AT_REST_ENCRYPTION_PRIVATE_KEY:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_PRIVATE_KEY")
-    fi
+    # Private keys are now fetched from encrypted R2 registries.
+    # DATA_AT_REST_ENCRYPTION_ENABLED is not checked in audit-worker code.
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_PUBLIC_KEY:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_PUBLIC_KEY")
@@ -163,10 +148,6 @@ build_audit_worker_secret_list() {
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_KEY_ID")
-    fi
-
-    if [ -n "${DATA_AT_REST_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_KEYS_JSON")
     fi
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
@@ -226,18 +207,20 @@ set_worker_secrets() {
 
 build_data_worker_secret_list() {
     local secrets=(
-        "MANIFEST_SIGNING_PRIVATE_KEY"
-        "MANIFEST_SIGNING_KEY_ID"
-        "EXPORT_ENCRYPTION_PRIVATE_KEY"
-        "EXPORT_ENCRYPTION_KEY_ID"
+        "REGISTRY_ENCRYPTION_KEY"
     )
+
+    # Private keys and key IDs for manifest signing, export encryption, and
+    # data-at-rest are now fetched from encrypted R2 registries via
+    # fetchKeyRegistryFromR2(). Only active-key-ID overrides and the
+    # registry encryption key are needed as secrets.
+
+    if [ -n "${MANIFEST_SIGNING_ACTIVE_KEY_ID:-}" ]; then
+        secrets+=("MANIFEST_SIGNING_ACTIVE_KEY_ID")
+    fi
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ENABLED:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ENABLED")
-    fi
-
-    if [ -n "${DATA_AT_REST_ENCRYPTION_PRIVATE_KEY:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_PRIVATE_KEY")
     fi
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_PUBLIC_KEY:-}" ]; then
@@ -248,16 +231,8 @@ build_data_worker_secret_list() {
         secrets+=("DATA_AT_REST_ENCRYPTION_KEY_ID")
     fi
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_KEYS_JSON")
-    fi
-
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")
-    fi
-
-    if [ -n "${EXPORT_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("EXPORT_ENCRYPTION_KEYS_JSON")
     fi
 
     if [ -n "${EXPORT_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
@@ -279,15 +254,10 @@ build_images_worker_secret_list() {
         "DATA_AT_REST_ENCRYPTION_PUBLIC_KEY"
         "DATA_AT_REST_ENCRYPTION_KEY_ID"
         "IMAGE_SIGNED_URL_SECRET"
+        "REGISTRY_ENCRYPTION_KEY"
     )
 
-    if [ -n "${DATA_AT_REST_ENCRYPTION_PRIVATE_KEY:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_PRIVATE_KEY")
-    fi
-
-    if [ -n "${DATA_AT_REST_ENCRYPTION_KEYS_JSON:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_KEYS_JSON")
-    fi
+    # Private keys are now fetched from encrypted R2 registries.
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")

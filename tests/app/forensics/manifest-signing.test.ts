@@ -5,7 +5,7 @@
  * and forensic manifest signature verification using ephemeral RSA-PSS keys.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   calculateSHA256,
   createManifestSigningPayload,
@@ -16,6 +16,7 @@ import {
   type ForensicManifestData,
   type SignedForensicManifest,
 } from '~/utils/forensics/SHA256';
+import paths from '~/config/config.json';
 
 // ---------------------------------------------------------------------------
 // Helpers: ephemeral RSA-PSS key pair
@@ -218,10 +219,28 @@ describe('extractForensicManifestData', () => {
 describe('verifyForensicManifestSignature', () => {
   let rsaKeyPair: CryptoKeyPair;
   let publicKeyPem: string;
+  const mutableConfig = paths as unknown as {
+    manifest_signing_key_id?: string;
+    manifest_signing_public_key?: string;
+    manifest_signing_public_keys?: Record<string, string>;
+  };
+  const originalConfig = {
+    manifest_signing_key_id: mutableConfig.manifest_signing_key_id,
+    manifest_signing_public_key: mutableConfig.manifest_signing_public_key,
+    manifest_signing_public_keys: mutableConfig.manifest_signing_public_keys
+      ? { ...mutableConfig.manifest_signing_public_keys }
+      : undefined,
+  };
 
   beforeAll(async () => {
     rsaKeyPair = await generateTestRsaPssKeyPair();
     publicKeyPem = await exportPublicKeyToPem(rsaKeyPair.publicKey);
+  });
+
+  afterAll(() => {
+    mutableConfig.manifest_signing_key_id = originalConfig.manifest_signing_key_id;
+    mutableConfig.manifest_signing_public_key = originalConfig.manifest_signing_public_key;
+    mutableConfig.manifest_signing_public_keys = originalConfig.manifest_signing_public_keys;
   });
 
   async function buildSignedManifest(data: ForensicManifestData): Promise<SignedForensicManifest> {
@@ -292,5 +311,30 @@ describe('verifyForensicManifestSignature', () => {
     const signed = await buildSignedManifest(sampleManifestData);
     const result = await verifyForensicManifestSignature(signed);
     expect(result.isValid).toBe(false);
+  });
+
+  it('falls back to other configured public keys when keyId lookup misses', async () => {
+    const payload = createManifestSigningPayload(sampleManifestData);
+    const signatureValue = await signWithKey(payload, rsaKeyPair.privateKey);
+
+    const signed: SignedForensicManifest = {
+      ...sampleManifestData,
+      manifestVersion: FORENSIC_MANIFEST_VERSION,
+      signature: {
+        algorithm: FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
+        keyId: 'missing-key-id',
+        signedAt: new Date().toISOString(),
+        value: signatureValue,
+      },
+    };
+
+    mutableConfig.manifest_signing_key_id = 'configured-key';
+    mutableConfig.manifest_signing_public_key = '';
+    mutableConfig.manifest_signing_public_keys = {
+      'known-key': publicKeyPem,
+    };
+
+    const result = await verifyForensicManifestSignature(signed);
+    expect(result.isValid).toBe(true);
   });
 });

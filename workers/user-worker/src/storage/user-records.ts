@@ -18,7 +18,7 @@ export async function readUserRecord(env: Env, userUid: string): Promise<UserDat
   }
 
   validateEncryptedRecord(encryptedRecord);
-  const keyRegistry = parseUserKvPrivateKeyRegistry(env);
+  const keyRegistry = await parseUserKvPrivateKeyRegistry(env);
   const decryptedJson = await decryptUserKvRecord(encryptedRecord, keyRegistry);
   return JSON.parse(decryptedJson) as UserData;
 }

@@ -8,93 +8,12 @@ import type {
   DecryptionTelemetryOutcome,
   Env,
   ExportDecryptionContext,
-  KeyRegistryPayload,
   PrivateKeyRegistry
 } from '../types';
-
-function normalizePrivateKeyPem(rawValue: string): string {
-  return rawValue.trim().replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n');
-}
+import { fetchKeyRegistryFromR2 } from '../../../../shared/registry/r2-key-registry';
 
 export function getNonEmptyString(value: unknown): string | null {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
-}
-
-function parsePrivateKeyRegistry(input: {
-  registryJson: string | undefined;
-  activeKeyId: string | undefined;
-  legacyKeyId: string | undefined;
-  legacyPrivateKey: string | undefined;
-  context: string;
-}): PrivateKeyRegistry {
-  const keys: Record<string, string> = {};
-  const configuredActiveKeyId = getNonEmptyString(input.activeKeyId);
-  const registryJson = getNonEmptyString(input.registryJson);
-
-  if (registryJson) {
-    let parsedRegistry: unknown;
-
-    try {
-      parsedRegistry = JSON.parse(registryJson) as unknown;
-    } catch {
-      throw new Error(`${input.context} registry JSON is invalid`);
-    }
-
-    if (!parsedRegistry || typeof parsedRegistry !== 'object') {
-      throw new Error(`${input.context} registry JSON must be an object`);
-    }
-
-    const payload = parsedRegistry as KeyRegistryPayload;
-    const payloadActiveKeyId = getNonEmptyString(payload.activeKeyId);
-    const rawKeys = payload.keys && typeof payload.keys === 'object'
-      ? payload.keys as Record<string, unknown>
-      : parsedRegistry as Record<string, unknown>;
-
-    for (const [keyId, pemValue] of Object.entries(rawKeys)) {
-      if (keyId === 'activeKeyId' || keyId === 'keys') {
-        continue;
-      }
-
-      const normalizedKeyId = getNonEmptyString(keyId);
-      const normalizedPem = getNonEmptyString(pemValue);
-
-      if (!normalizedKeyId || !normalizedPem) {
-        continue;
-      }
-
-      keys[normalizedKeyId] = normalizePrivateKeyPem(normalizedPem);
-    }
-
-    const resolvedActiveKeyId = configuredActiveKeyId ?? payloadActiveKeyId;
-
-    if (Object.keys(keys).length === 0) {
-      throw new Error(`${input.context} registry does not contain any usable keys`);
-    }
-
-    if (resolvedActiveKeyId && !keys[resolvedActiveKeyId]) {
-      throw new Error(`${input.context} active key ID is not present in registry`);
-    }
-
-    return {
-      activeKeyId: resolvedActiveKeyId ?? null,
-      keys
-    };
-  }
-
-  const legacyKeyId = getNonEmptyString(input.legacyKeyId);
-  const legacyPrivateKey = getNonEmptyString(input.legacyPrivateKey);
-
-  if (!legacyKeyId || !legacyPrivateKey) {
-    throw new Error(`${input.context} private key registry is not configured`);
-  }
-
-  keys[legacyKeyId] = normalizePrivateKeyPem(legacyPrivateKey);
-  const resolvedActiveKeyId = configuredActiveKeyId ?? legacyKeyId;
-
-  return {
-    activeKeyId: resolvedActiveKeyId,
-    keys
-  };
 }
 
 function buildPrivateKeyCandidates(
@@ -154,28 +73,51 @@ function logRegistryDecryptionTelemetry(input: {
   console.info('Key registry decryption resolved', details);
 }
 
-function getDataAtRestPrivateKeyRegistry(env: Env): PrivateKeyRegistry {
-  return parsePrivateKeyRegistry({
-    registryJson: env.DATA_AT_REST_ENCRYPTION_KEYS_JSON,
-    activeKeyId: env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID,
-    legacyKeyId: env.DATA_AT_REST_ENCRYPTION_KEY_ID,
-    legacyPrivateKey: env.DATA_AT_REST_ENCRYPTION_PRIVATE_KEY,
-    context: 'Data-at-rest decryption'
-  });
+async function getDataAtRestPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegistry> {
+  return fetchKeyRegistryFromR2(
+    env.STRIAE_CONFIG,
+    'data-at-rest',
+    env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID,
+    env.REGISTRY_ENCRYPTION_KEY
+  );
 }
 
-function getExportPrivateKeyRegistry(env: Env): PrivateKeyRegistry {
-  return parsePrivateKeyRegistry({
-    registryJson: env.EXPORT_ENCRYPTION_KEYS_JSON,
-    activeKeyId: env.EXPORT_ENCRYPTION_ACTIVE_KEY_ID,
-    legacyKeyId: env.EXPORT_ENCRYPTION_KEY_ID,
-    legacyPrivateKey: env.EXPORT_ENCRYPTION_PRIVATE_KEY,
-    context: 'Export decryption'
-  });
+async function getExportPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegistry> {
+  return fetchKeyRegistryFromR2(
+    env.STRIAE_CONFIG,
+    'export-encryption',
+    env.EXPORT_ENCRYPTION_ACTIVE_KEY_ID,
+    env.REGISTRY_ENCRYPTION_KEY
+  );
 }
 
-export function buildExportDecryptionContext(keyId: string | null, env: Env): ExportDecryptionContext {
-  const keyRegistry = getExportPrivateKeyRegistry(env);
+export async function getManifestSigningKeyContext(env: Env): Promise<{ keyId: string; privateKeyPem: string }> {
+  const keyRegistry = await fetchKeyRegistryFromR2(
+    env.STRIAE_CONFIG,
+    'manifest-signing',
+    env.MANIFEST_SIGNING_ACTIVE_KEY_ID,
+    env.REGISTRY_ENCRYPTION_KEY
+  );
+
+  const resolvedKeyId = keyRegistry.activeKeyId;
+
+  if (!resolvedKeyId) {
+    throw new Error('Manifest signing active key ID is not configured');
+  }
+
+  const privateKeyPem = keyRegistry.keys[resolvedKeyId];
+  if (!privateKeyPem) {
+    throw new Error('Manifest signing active key ID is not present in key registry');
+  }
+
+  return {
+    keyId: resolvedKeyId,
+    privateKeyPem
+  };
+}
+
+export async function buildExportDecryptionContext(keyId: string | null, env: Env): Promise<ExportDecryptionContext> {
+  const keyRegistry = await getExportPrivateKeyRegistry(env);
   const candidates = buildPrivateKeyCandidates(keyId, keyRegistry);
 
   if (candidates.length === 0) {
@@ -194,7 +136,7 @@ export async function decryptJsonFromStorageWithRegistry(
   envelope: DataAtRestEnvelope,
   env: Env
 ): Promise<string> {
-  const keyRegistry = getDataAtRestPrivateKeyRegistry(env);
+  const keyRegistry = await getDataAtRestPrivateKeyRegistry(env);
   const candidates = buildPrivateKeyCandidates(getNonEmptyString(envelope.keyId), keyRegistry);
   const primaryKeyId = candidates[0]?.keyId ?? null;
   let lastError: unknown;

@@ -1,6 +1,6 @@
 {
   "name": "lists-worker",
-  "version": "7.1.3",
+  "version": "8.0.0",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
@@ -8,6 +8,6 @@
     "start": "wrangler dev"
   },
   "devDependencies": {
-    "wrangler": "^4.90.0"
+    "wrangler": "^4.98.0"
   }
 }

@@ -14,6 +14,7 @@ import {
   isValidConfirmationPayload,
   isValidManifestPayload
 } from '../signing-payload-utils';
+import { getManifestSigningKeyContext } from '../registry/key-registry';
 import type { CreateResponse, Env } from '../types';
 
 async function signPayloadWithWorkerKey(payload: string, env: Env): Promise<{
@@ -22,10 +23,12 @@ async function signPayloadWithWorkerKey(payload: string, env: Env): Promise<{
   signedAt: string;
   value: string;
 }> {
+  const signingContext = await getManifestSigningKeyContext(env);
+
   return signWithWorkerKey(
     payload,
-    env.MANIFEST_SIGNING_PRIVATE_KEY,
-    env.MANIFEST_SIGNING_KEY_ID,
+    signingContext.privateKeyPem,
+    signingContext.keyId,
     FORENSIC_MANIFEST_SIGNATURE_ALGORITHM
   );
 }

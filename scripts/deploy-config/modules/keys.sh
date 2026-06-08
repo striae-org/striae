@@ -108,6 +108,8 @@ configure_manifest_signing_credentials() {
     restore_env_var_from_backup_if_missing "MANIFEST_SIGNING_PRIVATE_KEY"
     restore_env_var_from_backup_if_missing "MANIFEST_SIGNING_PUBLIC_KEY"
     restore_env_var_from_backup_if_missing "MANIFEST_SIGNING_KEY_ID"
+    restore_env_var_from_backup_if_missing "MANIFEST_SIGNING_KEYS_JSON"
+    restore_env_var_from_backup_if_missing "MANIFEST_SIGNING_ACTIVE_KEY_ID"
 
     if [ -z "$MANIFEST_SIGNING_PRIVATE_KEY" ] || is_placeholder "$MANIFEST_SIGNING_PRIVATE_KEY" || [ -z "$MANIFEST_SIGNING_PUBLIC_KEY" ] || is_placeholder "$MANIFEST_SIGNING_PUBLIC_KEY"; then
         should_generate="true"
@@ -131,7 +133,7 @@ configure_manifest_signing_credentials() {
 
     if [ -z "$MANIFEST_SIGNING_KEY_ID" ] || is_placeholder "$MANIFEST_SIGNING_KEY_ID" || [ "$should_generate" = "true" ]; then
         local generated_key_id
-        generated_key_id=$(generate_worker_subdomain_label)
+        generated_key_id=$(generate_10_char_id)
         if [ -z "$generated_key_id" ] || [ ${#generated_key_id} -ne 10 ]; then
             echo -e "${RED}❌ Error: Failed to generate MANIFEST_SIGNING_KEY_ID${NC}"
             exit 1
@@ -143,6 +145,8 @@ configure_manifest_signing_credentials() {
     else
         echo -e "${GREEN}✅ MANIFEST_SIGNING_KEY_ID: $MANIFEST_SIGNING_KEY_ID${NC}"
     fi
+
+    update_private_key_registry "MANIFEST_SIGNING_KEYS_JSON" "MANIFEST_SIGNING_ACTIVE_KEY_ID" "$MANIFEST_SIGNING_KEY_ID" "$MANIFEST_SIGNING_PRIVATE_KEY" "manifest signing"
 
     echo ""
 }
@@ -212,7 +216,7 @@ configure_export_encryption_credentials() {
 
     if [ -z "$EXPORT_ENCRYPTION_KEY_ID" ] || is_placeholder "$EXPORT_ENCRYPTION_KEY_ID" || [ "$should_generate" = "true" ]; then
         local generated_key_id
-        generated_key_id=$(generate_worker_subdomain_label)
+        generated_key_id=$(generate_10_char_id)
         if [ -z "$generated_key_id" ] || [ ${#generated_key_id} -ne 10 ]; then
             echo -e "${RED}❌ Error: Failed to generate EXPORT_ENCRYPTION_KEY_ID${NC}"
             exit 1
@@ -327,7 +331,7 @@ configure_user_kv_encryption_credentials() {
 
     if [ -z "$USER_KV_ENCRYPTION_KEY_ID" ] || is_placeholder "$USER_KV_ENCRYPTION_KEY_ID" || [ "$should_generate" = "true" ]; then
         local generated_key_id
-        generated_key_id=$(generate_worker_subdomain_label)
+        generated_key_id=$(generate_10_char_id)
         if [ -z "$generated_key_id" ] || [ ${#generated_key_id} -ne 10 ]; then
             echo -e "${RED}❌ Error: Failed to generate USER_KV_ENCRYPTION_KEY_ID${NC}"
             exit 1
@@ -385,7 +389,7 @@ configure_data_at_rest_encryption_credentials() {
 
     if [ -z "$DATA_AT_REST_ENCRYPTION_KEY_ID" ] || is_placeholder "$DATA_AT_REST_ENCRYPTION_KEY_ID" || [ "$should_generate" = "true" ]; then
         local generated_key_id
-        generated_key_id=$(generate_worker_subdomain_label)
+        generated_key_id=$(generate_10_char_id)
         if [ -z "$generated_key_id" ] || [ ${#generated_key_id} -ne 10 ]; then
             echo -e "${RED}❌ Error: Failed to generate DATA_AT_REST_ENCRYPTION_KEY_ID${NC}"
             exit 1
@@ -399,6 +403,31 @@ configure_data_at_rest_encryption_credentials() {
     fi
 
     update_private_key_registry "DATA_AT_REST_ENCRYPTION_KEYS_JSON" "DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID" "$DATA_AT_REST_ENCRYPTION_KEY_ID" "$DATA_AT_REST_ENCRYPTION_PRIVATE_KEY" "data-at-rest encryption"
+
+    echo ""
+}
+
+configure_registry_encryption_key() {
+    echo -e "${BLUE}🔒 REGISTRY ENCRYPTION KEY CONFIGURATION${NC}"
+    echo "========================================="
+
+    restore_env_var_from_backup_if_missing "REGISTRY_ENCRYPTION_KEY"
+
+    if [ -n "$REGISTRY_ENCRYPTION_KEY" ] && ! is_placeholder "$REGISTRY_ENCRYPTION_KEY"; then
+        echo -e "${GREEN}✅ REGISTRY_ENCRYPTION_KEY already configured${NC}"
+    else
+        echo -e "${YELLOW}Generating REGISTRY_ENCRYPTION_KEY (32 random bytes, base64url)...${NC}"
+        local key_value
+        key_value=$(node -e "const { randomBytes } = require('crypto'); const buf = randomBytes(32); process.stdout.write(buf.toString('base64url'));")
+        if [ -z "$key_value" ] || [ ${#key_value} -lt 20 ]; then
+            echo -e "${RED}❌ Error: Failed to generate REGISTRY_ENCRYPTION_KEY${NC}"
+            exit 1
+        fi
+        REGISTRY_ENCRYPTION_KEY="$key_value"
+        export REGISTRY_ENCRYPTION_KEY
+        write_env_var "REGISTRY_ENCRYPTION_KEY" "$REGISTRY_ENCRYPTION_KEY"
+        echo -e "${GREEN}✅ REGISTRY_ENCRYPTION_KEY generated${NC}"
+    fi
 
     echo ""
 }

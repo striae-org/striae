@@ -5,13 +5,9 @@ import {
 import type {
   DecryptionTelemetryOutcome,
   Env,
-  KeyRegistryPayload,
   PrivateKeyRegistry
 } from '../types';
-
-function normalizePrivateKeyPem(rawValue: string): string {
-  return rawValue.trim().replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n');
-}
+import { fetchKeyRegistryFromR2 } from '../../../../shared/registry/r2-key-registry';
 
 function getNonEmptyString(value: unknown): string | null {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
@@ -23,76 +19,19 @@ export function requireEncryptionUploadConfig(env: Env): void {
   }
 }
 
-export function requireEncryptionRetrievalConfig(env: Env): void {
-  const hasLegacyPrivateKey = typeof env.DATA_AT_REST_ENCRYPTION_PRIVATE_KEY === 'string' && env.DATA_AT_REST_ENCRYPTION_PRIVATE_KEY.trim().length > 0;
-  const hasRegistry = typeof env.DATA_AT_REST_ENCRYPTION_KEYS_JSON === 'string' && env.DATA_AT_REST_ENCRYPTION_KEYS_JSON.trim().length > 0;
-
-  if (!hasLegacyPrivateKey && !hasRegistry) {
-    throw new Error('Data-at-rest decryption registry is not configured for image retrieval');
-  }
+export function requireEncryptionRetrievalConfig(_env: Env): void {
+  // Key registry is now fetched from R2 at decryption time.
+  // This check is kept for interface compatibility but validation
+  // happens when fetchKeyRegistryFromR2 is called.
 }
 
-function parseDataAtRestPrivateKeyRegistry(env: Env): PrivateKeyRegistry {
-  const keys: Record<string, string> = {};
-  const configuredActiveKeyId = getNonEmptyString(env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID);
-  const registryJson = getNonEmptyString(env.DATA_AT_REST_ENCRYPTION_KEYS_JSON);
-
-  if (registryJson) {
-    let parsedRegistry: unknown;
-    try {
-      parsedRegistry = JSON.parse(registryJson) as unknown;
-    } catch {
-      throw new Error('DATA_AT_REST_ENCRYPTION_KEYS_JSON is not valid JSON');
-    }
-
-    if (!parsedRegistry || typeof parsedRegistry !== 'object') {
-      throw new Error('DATA_AT_REST_ENCRYPTION_KEYS_JSON must be an object');
-    }
-
-    const payload = parsedRegistry as KeyRegistryPayload;
-    if (!payload.keys || typeof payload.keys !== 'object') {
-      throw new Error('DATA_AT_REST_ENCRYPTION_KEYS_JSON must include a keys object');
-    }
-
-    for (const [keyId, pemValue] of Object.entries(payload.keys as Record<string, unknown>)) {
-      const normalizedKeyId = getNonEmptyString(keyId);
-      const normalizedPem = getNonEmptyString(pemValue);
-      if (!normalizedKeyId || !normalizedPem) {
-        continue;
-      }
-
-      keys[normalizedKeyId] = normalizePrivateKeyPem(normalizedPem);
-    }
-
-    const payloadActiveKeyId = getNonEmptyString(payload.activeKeyId);
-    const resolvedActiveKeyId = configuredActiveKeyId ?? payloadActiveKeyId;
-
-    if (Object.keys(keys).length === 0) {
-      throw new Error('DATA_AT_REST_ENCRYPTION_KEYS_JSON does not contain any usable keys');
-    }
-
-    if (resolvedActiveKeyId && !keys[resolvedActiveKeyId]) {
-      throw new Error('DATA_AT_REST active key ID is not present in DATA_AT_REST_ENCRYPTION_KEYS_JSON');
-    }
-
-    return {
-      activeKeyId: resolvedActiveKeyId ?? null,
-      keys
-    };
-  }
-
-  const legacyKeyId = getNonEmptyString(env.DATA_AT_REST_ENCRYPTION_KEY_ID);
-  const legacyPrivateKey = getNonEmptyString(env.DATA_AT_REST_ENCRYPTION_PRIVATE_KEY);
-  if (!legacyKeyId || !legacyPrivateKey) {
-    throw new Error('Data-at-rest decryption key registry is not configured');
-  }
-
-  keys[legacyKeyId] = normalizePrivateKeyPem(legacyPrivateKey);
-
-  return {
-    activeKeyId: configuredActiveKeyId ?? legacyKeyId,
-    keys
-  };
+async function getDataAtRestPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegistry> {
+  return fetchKeyRegistryFromR2(
+    env.STRIAE_CONFIG,
+    'data-at-rest',
+    env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID,
+    env.REGISTRY_ENCRYPTION_KEY
+  );
 }
 
 function buildPrivateKeyCandidates(
@@ -156,7 +95,7 @@ export async function decryptBinaryWithRegistry(
   envelope: DataAtRestEnvelope,
   env: Env
 ): Promise<ArrayBuffer> {
-  const keyRegistry = parseDataAtRestPrivateKeyRegistry(env);
+  const keyRegistry = await getDataAtRestPrivateKeyRegistry(env);
   const candidates = buildPrivateKeyCandidates(envelope.keyId, keyRegistry);
   const primaryKeyId = candidates[0]?.keyId ?? null;
   let lastError: unknown;

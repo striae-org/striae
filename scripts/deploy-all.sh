@@ -6,10 +6,12 @@
 # This script deploys the entire Striae application:
 # 1. Configuration setup (copy configs, replace placeholders)
 # 2. Worker dependencies installation
-# 3. Workers (all 5 workers)
-# 4. Worker secrets/environment variables
-# 5. Pages secrets/environment variables
-# 6. Pages (frontend)
+# 3. Wrangler types generation
+# 4. Workers (all 6 workers)
+# 5. Key registries (upload to R2 config bucket)
+# 6. Worker secrets/environment variables
+# 7. Pages secrets/environment variables
+# 8. Pages (frontend)
 
 set -e
 set -o pipefail
@@ -67,6 +69,7 @@ require_command wrangler
 assert_file_exists "$SCRIPT_DIR/deploy-config.sh"
 assert_file_exists "$SCRIPT_DIR/install-workers.sh"
 assert_file_exists "$SCRIPT_DIR/deploy-worker-secrets.sh"
+assert_file_exists "$SCRIPT_DIR/upload-registries.sh"
 assert_file_exists "$SCRIPT_DIR/deploy-pages-secrets.sh"
 assert_file_exists "package.json"
 
@@ -79,7 +82,7 @@ echo -e "${GREEN}✅ Preflight checks passed${NC}"
 echo ""
 
 # Step 1: Configuration Setup
-echo -e "${PURPLE}Step 1/7: Configuration Setup${NC}"
+echo -e "${PURPLE}Step 1/8: Configuration Setup${NC}"
 echo "------------------------------"
 echo -e "${YELLOW}⚙️  Setting up configuration files and replacing placeholders...${NC}"
 if ! bash "$SCRIPT_DIR/deploy-config.sh"; then
@@ -92,7 +95,7 @@ run_config_checkpoint
 echo ""
 
 # Step 2: Install Worker Dependencies
-echo -e "${PURPLE}Step 2/7: Installing Worker Dependencies${NC}"
+echo -e "${PURPLE}Step 2/8: Installing Worker Dependencies${NC}"
 echo "----------------------------------------"
 echo -e "${YELLOW}📦 Installing npm dependencies for all workers...${NC}"
 if ! bash "$SCRIPT_DIR/install-workers.sh"; then
@@ -103,7 +106,7 @@ echo -e "${GREEN}✅ All worker dependencies installed successfully${NC}"
 echo ""
 
 # Step 3: Generate Wrangler Types
-echo -e "${PURPLE}Step 3/7: Generating Wrangler Types${NC}"
+echo -e "${PURPLE}Step 3/8: Generating Wrangler Types${NC}"
 echo "-------------------------------------"
 echo -e "${YELLOW}📝 Running wrangler types in root and all worker directories...${NC}"
 if ! npx wrangler types; then
@@ -121,7 +124,7 @@ echo -e "${GREEN}✅ Wrangler types generated successfully${NC}"
 echo ""
 
 # Step 4: Deploy Workers
-echo -e "${PURPLE}Step 4/7: Deploying Workers${NC}"
+echo -e "${PURPLE}Step 4/8: Deploying Workers${NC}"
 echo "----------------------------"
 echo -e "${YELLOW}🔧 Deploying all 6 Cloudflare Workers...${NC}"
 if ! npm run deploy-workers; then
@@ -131,8 +134,19 @@ fi
 echo -e "${GREEN}✅ All workers deployed successfully${NC}"
 echo ""
 
-# Step 5: Deploy Worker Secrets
-echo -e "${PURPLE}Step 5/7: Deploying Worker Secrets${NC}"
+# Step 5: Upload Key Registries to R2
+echo -e "${PURPLE}Step 5/8: Uploading Key Registries to R2${NC}"
+echo "-----------------------------------------"
+echo -e "${YELLOW}📦 Uploading key registries to config bucket...${NC}"
+if ! bash "$SCRIPT_DIR/upload-registries.sh"; then
+    echo -e "${RED}❌ Key registry upload failed!${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Key registries uploaded successfully${NC}"
+echo ""
+
+# Step 6: Deploy Worker Secrets
+echo -e "${PURPLE}Step 6/8: Deploying Worker Secrets${NC}"
 echo "-----------------------------------"
 echo -e "${YELLOW}🔐 Deploying worker environment variables...${NC}"
 if ! bash "$SCRIPT_DIR/deploy-worker-secrets.sh"; then
@@ -142,8 +156,8 @@ fi
 echo -e "${GREEN}✅ Worker secrets deployed successfully${NC}"
 echo ""
 
-# Step 6: Deploy Pages Secrets
-echo -e "${PURPLE}Step 6/7: Deploying Pages Secrets${NC}"
+# Step 7: Deploy Pages Secrets
+echo -e "${PURPLE}Step 7/8: Deploying Pages Secrets${NC}"
 echo "----------------------------------"
 echo -e "${YELLOW}🔐 Deploying Pages environment variables...${NC}"
 if ! bash "$SCRIPT_DIR/deploy-pages-secrets.sh"; then
@@ -153,8 +167,8 @@ fi
 echo -e "${GREEN}✅ Pages secrets deployed successfully${NC}"
 echo ""
 
-# Step 7: Deploy Pages
-echo -e "${PURPLE}Step 7/7: Deploying Pages${NC}"
+# Step 8: Deploy Pages
+echo -e "${PURPLE}Step 8/8: Deploying Pages${NC}"
 echo "--------------------------"
 echo -e "${YELLOW}🌐 Building and deploying Pages...${NC}"
 if ! npm run deploy-pages; then

@@ -2,78 +2,21 @@ import { decryptJsonFromUserKv, type UserKvEncryptedRecord } from '../encryption
 import type {
   DecryptionTelemetryOutcome,
   Env,
-  KeyRegistryPayload,
   PrivateKeyRegistry
 } from '../types';
-
-function normalizePrivateKeyPem(rawValue: string): string {
-  return rawValue.trim().replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n');
-}
+import { fetchKeyRegistryFromR2 } from '../../../../shared/registry/r2-key-registry';
 
 function getNonEmptyString(value: unknown): string | null {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
 }
 
-export function parseUserKvPrivateKeyRegistry(env: Env): PrivateKeyRegistry {
-  const keys: Record<string, string> = {};
-  const configuredActiveKeyId = getNonEmptyString(env.USER_KV_ENCRYPTION_ACTIVE_KEY_ID);
-
-  if (getNonEmptyString(env.USER_KV_ENCRYPTION_KEYS_JSON)) {
-    let parsedRegistry: unknown;
-    try {
-      parsedRegistry = JSON.parse(env.USER_KV_ENCRYPTION_KEYS_JSON as string) as unknown;
-    } catch {
-      throw new Error('USER_KV_ENCRYPTION_KEYS_JSON is not valid JSON');
-    }
-
-    if (!parsedRegistry || typeof parsedRegistry !== 'object') {
-      throw new Error('USER_KV_ENCRYPTION_KEYS_JSON must be an object');
-    }
-
-    const payload = parsedRegistry as KeyRegistryPayload;
-    if (!payload.keys || typeof payload.keys !== 'object') {
-      throw new Error('USER_KV_ENCRYPTION_KEYS_JSON must include a keys object');
-    }
-
-    for (const [keyId, pemValue] of Object.entries(payload.keys as Record<string, unknown>)) {
-      const normalizedKeyId = getNonEmptyString(keyId);
-      const normalizedPem = getNonEmptyString(pemValue);
-      if (!normalizedKeyId || !normalizedPem) {
-        continue;
-      }
-
-      keys[normalizedKeyId] = normalizePrivateKeyPem(normalizedPem);
-    }
-
-    const payloadActiveKeyId = getNonEmptyString(payload.activeKeyId);
-    const activeKeyId = configuredActiveKeyId ?? payloadActiveKeyId;
-
-    if (Object.keys(keys).length === 0) {
-      throw new Error('USER_KV_ENCRYPTION_KEYS_JSON does not contain any usable keys');
-    }
-
-    if (activeKeyId && !keys[activeKeyId]) {
-      throw new Error('USER_KV active key ID is not present in USER_KV_ENCRYPTION_KEYS_JSON');
-    }
-
-    return {
-      activeKeyId: activeKeyId ?? null,
-      keys
-    };
-  }
-
-  const legacyKeyId = getNonEmptyString(env.USER_KV_ENCRYPTION_KEY_ID);
-  const legacyPrivateKey = getNonEmptyString(env.USER_KV_ENCRYPTION_PRIVATE_KEY);
-  if (!legacyKeyId || !legacyPrivateKey) {
-    throw new Error('User KV encryption private key registry is not configured');
-  }
-
-  keys[legacyKeyId] = normalizePrivateKeyPem(legacyPrivateKey);
-
-  return {
-    activeKeyId: configuredActiveKeyId ?? legacyKeyId,
-    keys
-  };
+export async function parseUserKvPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegistry> {
+  return fetchKeyRegistryFromR2(
+    env.STRIAE_CONFIG,
+    'user-kv',
+    env.USER_KV_ENCRYPTION_ACTIVE_KEY_ID,
+    env.REGISTRY_ENCRYPTION_KEY
+  );
 }
 
 function buildPrivateKeyCandidates(

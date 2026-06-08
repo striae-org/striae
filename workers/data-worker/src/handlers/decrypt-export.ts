@@ -52,7 +52,7 @@ export async function handleDecryptExport(
     }
 
     const recordKeyId = getNonEmptyString(keyId);
-    const decryptionContext = buildExportDecryptionContext(recordKeyId, env);
+    const decryptionContext = await buildExportDecryptionContext(recordKeyId, env);
 
     let plaintextData: string;
     try {

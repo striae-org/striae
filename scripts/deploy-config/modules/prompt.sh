@@ -271,6 +271,7 @@ prompt_for_secrets() {
     prompt_for_var "DATA_BUCKET_NAME" "Your R2 bucket name for case data storage"
     prompt_for_var "AUDIT_BUCKET_NAME" "Your R2 bucket name for audit logs (separate from data bucket)"
     prompt_for_var "FILES_BUCKET_NAME" "Your R2 bucket name for encrypted files storage"
+    prompt_for_var "CONFIG_BUCKET_NAME" "Your R2 bucket name for config/key registries (shared across workers)"
     prompt_for_var "KV_STORE_ID" "Your KV namespace ID (UUID format)"
     prompt_for_var "STRIAE_LISTS_KV_ID" "KV namespace ID for the lists-worker (UUID format; backs registration and primershear allowlists)"
 
@@ -296,6 +297,7 @@ prompt_for_secrets() {
     configure_export_encryption_credentials
     configure_user_kv_encryption_credentials
     configure_data_at_rest_encryption_credentials
+    configure_registry_encryption_key
 
     # Reload the updated .env file
     source .env
