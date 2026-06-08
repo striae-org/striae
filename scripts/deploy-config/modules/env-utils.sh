@@ -254,8 +254,9 @@ escape_for_sed_replacement() {
 }
 
 generate_10_char_id() {
-    local label
-    label=$(openssl rand -base64 16 2>/dev/null | tr -dc 'a-z0-9' | head -c 10 || true)
+    local raw label
+    raw=$(openssl rand -base64 32 2>/dev/null | tr -dc 'a-z0-9' || true)
+    label="${raw:0:10}"
     if [ -n "$label" ] && [ ${#label} -eq 10 ]; then
         printf '%s' "$label"
     fi
