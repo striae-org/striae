@@ -20,6 +20,13 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-06-07] - *[Major Release v8.0.0](https://github.com/striae-org/striae/releases/tag/v8.0.0)*
+
+- **🗝️ Key Registry R2 Migration** - Migrated cryptographic key registries from environment secrets to AES-256-GCM encrypted R2 storage, resolving the 5.1 kB secret size limit and enabling centralized key management across all workers; added shared registry module, encryption tooling, and automated upload scripts.
+- **⚛️ React Router v8 Future Flags** - Enabled all React Router v8 future flags (`v8_middleware`, `v8_splitRouteModules`, `v8_viteEnvironmentApi`, `v8_passThroughRequests`, `v8_trailingSlashAwareDataRequests`) for early opt-in to the upcoming framework version.
+- **📦 Shared Case Export Loader** - Extracted case export action loading into a shared lazy-import utility for reduced bundle size and deduplicated import logic.
+- **⚙️ Maintenance** - Refreshed app and worker dependencies, fixed label auto-generation, and updated worker package installs.
+
 ## [2026-05-23] - *[Patch Release v7.1.3](https://github.com/striae-org/striae/releases/tag/v7.1.3)*
 
 - **🛠️ Static Import Fix** - Applied a targeted follow-up fix for a static import issue discovered after the previous maintenance cycle.

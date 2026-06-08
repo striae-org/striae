@@ -5,6 +5,7 @@
     "/assets/*",
     "/build/*",
     "/*.css",
+    "/*.ico",
     "/*.js",
     "/*.pdf",
     "/*.png",
