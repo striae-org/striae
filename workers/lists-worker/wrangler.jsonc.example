@@ -3,7 +3,7 @@
   "account_id": "ACCOUNT_ID",
   "main": "src/lists-worker.ts",
   "workers_dev": false,
-  "compatibility_date": "2026-06-19",
+  "compatibility_date": "2026-06-20",
   "compatibility_flags": [
     "nodejs_compat"
   ],
