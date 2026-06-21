@@ -64,7 +64,7 @@
     "build": "node ./scripts/dev.cjs && react-router build",
     "clean": "rm -rf build node_modules/.cache .cache",
     "clean:build": "npm run clean && npm run build",
-    "deploy": "npm run build && wrangler pages deploy",
+    "deploy": "npm run build && node -e \"const fs=require('fs');fs.rmSync('build/client/wrangler.json',{force:true});fs.rmSync('.wrangler/deploy',{recursive:true,force:true})\" && wrangler pages deploy",
     "publish:npm": "npm publish --access public --registry=https://registry.npmjs.org --@striae-org:registry=https://registry.npmjs.org",
     "publish:npm:dry-run": "npm publish --dry-run --access public --registry=https://registry.npmjs.org --@striae-org:registry=https://registry.npmjs.org",
     "publish:github": "npm publish --registry=https://npm.pkg.github.com --@striae-org:registry=https://npm.pkg.github.com",
