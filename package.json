@@ -116,6 +116,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.42.1",
     "@cloudflare/vitest-pool-workers": "^0.16.18",
+    "@cloudflare/workers-types": "^4.20260621.1",
     "@eslint-react/eslint-plugin": "^5.9.1",
     "@eslint/js": "^10.0.0",
     "@react-router/dev": "^8.0.1",
