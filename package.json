@@ -60,6 +60,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "striae-install": "npm install --legacy-peer-deps",
     "deploy:all": "bash ./scripts/deploy-all.sh",
     "emulators": "firebase emulators:start --only auth",
     "dev": "node ./scripts/dev.cjs && react-router dev",
