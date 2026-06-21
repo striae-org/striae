@@ -1,6 +1,6 @@
 {
   "name": "image-worker",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
@@ -8,6 +8,6 @@
     "start": "wrangler dev"
   },
   "devDependencies": {
-    "wrangler": "^4.98.0"
+    "wrangler": "^4.103.0"
   }
 }

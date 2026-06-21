@@ -20,6 +20,11 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-06-20] - *[Patch Release v8.0.1](https://github.com/striae-org/striae/releases/tag/v8.0.1)*
+
+- **📦 Firebase Admin SDK Major Bump** - Bumped `firebase-admin` from v13 to v14 for upstream alignment and improved stability.
+- **⚙️ Maintenance** - Refreshed app and worker dependencies, bumped Wrangler ecosystem packages, ESLint TypeScript tooling, esbuild, Vitest, and isbot; refreshed Cloudflare compatibility dates across all workers.
+
 ## [2026-06-07] - *[Major Release v8.0.0](https://github.com/striae-org/striae/releases/tag/v8.0.0)*
 
 - **🗝️ Key Registry R2 Migration** - Migrated cryptographic key registries from environment secrets to AES-256-GCM encrypted R2 storage, resolving the 5.1 kB secret size limit and enabling centralized key management across all workers; added shared registry module, encryption tooling, and automated upload scripts.
