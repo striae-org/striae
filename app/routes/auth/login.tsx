@@ -143,7 +143,7 @@ export const Login = () => {
     } catch (error) {
       console.error('Error checking user existence:', error);
       // On network/API errors, throw error to prevent login
-      throw new Error('System error. Please try logging in at a later time.');
+      throw new Error('System error. Please try logging in at a later time.', { cause: error });
     }
   };
 

@@ -1,6 +1,6 @@
 {
   "name": "@striae-org/striae",
-  "version": "8.0.1",
+  "version": "8.1.0",
   "private": false,
   "description": "Striae is a specialized, cloud-native platform designed to streamline forensic firearms identification by providing an intuitive environment for digital comparison image annotation, authenticated confirmations, and automated report generation.",
   "license": "Apache-2.0",
@@ -41,6 +41,7 @@
     "workers/",
     "shared/",
     "!workers/*/.wrangler",
+    "!workers/*/dist",
     "!workers/*/package-lock.json",
     "!workers/*/worker-configuration.d.ts",
     "!workers/*/wrangler.jsonc",
@@ -49,6 +50,7 @@
     "!workers/pdf-worker/src/formats/**/*",
     "workers/pdf-worker/src/formats/format-striae.ts",
     ".env.example",
+    "eslint.config.js",
     "firebase.json",
     "tsconfig.json",
     "vite.config.ts",
@@ -58,13 +60,16 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "striae-install": "npm install --legacy-peer-deps",
+    "striae-clean-install": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps",
+    "strip-modules": "rm -rf node_modules package-lock.json && for dir in workers/*/; do rm -rf \"$dir/node_modules\" \"$dir/package-lock.json\"; done",
     "deploy:all": "bash ./scripts/deploy-all.sh",
     "emulators": "firebase emulators:start --only auth",
     "dev": "node ./scripts/dev.cjs && react-router dev",
     "build": "node ./scripts/dev.cjs && react-router build",
     "clean": "rm -rf build node_modules/.cache .cache",
     "clean:build": "npm run clean && npm run build",
-    "deploy": "npm run build && wrangler pages deploy",
+    "deploy": "npm run build && node -e \"const fs=require('fs');fs.rmSync('build/client/wrangler.json',{force:true});fs.rmSync('.wrangler/deploy',{recursive:true,force:true})\" && wrangler pages deploy",
     "publish:npm": "npm publish --access public --registry=https://registry.npmjs.org --@striae-org:registry=https://registry.npmjs.org",
     "publish:npm:dry-run": "npm publish --dry-run --access public --registry=https://registry.npmjs.org --@striae-org:registry=https://registry.npmjs.org",
     "publish:github": "npm publish --registry=https://npm.pkg.github.com --@striae-org:registry=https://npm.pkg.github.com",
@@ -104,46 +109,44 @@
     "deploy-workers:user": "cd workers/user-worker && npm run deploy"
   },
   "dependencies": {
-    "@react-router/cloudflare": "^7.18.0",
+    "@react-router/cloudflare": "^8.0.1",
     "firebase": "^12.15.0",
     "isbot": "^5.1.43",
     "jszip": "^3.10.1",
     "qrcode": "^1.5.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router": "^7.18.0"
+    "react-router": "^8.0.1"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.42.1",
     "@cloudflare/vitest-pool-workers": "^0.16.18",
-    "@react-router/dev": "^7.18.0",
-    "@react-router/fs-routes": "^7.18.0",
+    "@cloudflare/workers-types": "^4.20260621.1",
+    "@eslint-react/eslint-plugin": "^5.9.1",
+    "@eslint/js": "^10.0.1",
+    "@react-router/dev": "^8.0.1",
+    "@react-router/fs-routes": "^8.0.1",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.61.1",
-    "@typescript-eslint/parser": "^8.61.1",
     "@vitest/coverage-v8": "^4.1.9",
-    "eslint": "^9.39.4",
+    "eslint": "^10.5.0",
     "eslint-import-resolver-typescript": "^4.4.5",
-    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-import-x": "^4.16.2",
     "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "firebase-admin": "^14.0.0",
+    "globals": "^17.6.0",
     "modern-normalize": "^3.0.1",
     "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1",
     "vite": "^8.0.16",
     "vitest": "^4.1.9",
     "wrangler": "^4.103.0"
   },
   "overrides": {
     "@tootallnate/once": "3.0.1",
-    "uuid": "^14.0.0",
-    "vite-node": {
-      "vite": {
-        "esbuild": "0.28.1"
-      }
-    }
+    "uuid": "^14.0.0"
   },
   "engines": {
     "node": ">=22.0.0"

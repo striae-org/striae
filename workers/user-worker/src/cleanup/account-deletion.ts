@@ -164,7 +164,7 @@ async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): 
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'unknown case data read error';
-      throw new Error(`Failed to read case file references for ${caseNumber}: ${message}`);
+      throw new Error(`Failed to read case file references for ${caseNumber}: ${message}`, { cause: error });
     }
   }
 
@@ -198,7 +198,7 @@ async function deleteUserConfirmationSummary(env: Env, userUid: string): Promise
   try {
     await env.STRIAE_DATA.delete(key);
   } catch (error) {
-    throw new Error(`Failed to delete confirmation summary metadata: ${error instanceof Error ? error.message : 'unknown error'}`);
+    throw new Error(`Failed to delete confirmation summary metadata: ${error instanceof Error ? error.message : 'unknown error'}`, { cause: error });
   }
 }
 

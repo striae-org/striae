@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from 'react';
 import { multiFactor, TotpMultiFactorGenerator, type TotpSecret, type User } from 'firebase/auth';
 import { toDataURL as qrToDataURL } from 'qrcode';
@@ -102,7 +101,7 @@ export const MfaTotpEnrollment: React.FC<MfaTotpEnrollmentProps> = ({
       onSuccess();
     } catch (err) {
       const authError = err as { code?: string; message?: string };
-      let errorMsg = '';
+      let errorMsg: string;
 
       if (authError.code === 'auth/invalid-verification-code') {
         errorMsg = getValidationError('MFA_INVALID_CODE');

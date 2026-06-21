@@ -80,7 +80,7 @@ async function extractConfirmationPackageFromZip(file: File): Promise<Confirmati
   let confirmationData: ConfirmationImportData;
   let confirmationJsonContent: string;
   let confirmationFileName: string;
-  let isEncrypted = false;
+  let isEncrypted: boolean;
   let encryptionManifest: unknown;
   let encryptedDataBase64: string | undefined;
 
@@ -192,7 +192,8 @@ export async function previewConfirmationImport(
     throw new Error(
       `Failed to decrypt confirmation package for preview: ${
         error instanceof Error ? error.message : 'Unknown error'
-      }`
+      }`,
+      { cause: error }
     );
   }
 

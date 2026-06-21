@@ -20,6 +20,12 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-06-20] - *[Minor Release v8.1.0](https://github.com/striae-org/striae/releases/tag/v8.1.0)*
+
+- **⚛️ React Router v8 Major Bump** - Upgraded React Router from v7 to v8, replaced `cloudflareDevProxy` with `@cloudflare/vite-plugin`, and removed v8 future flags now default in the new major.
+- **🧹 ESLint v10 Major Bump** - Upgraded ESLint from v9 to v10 with a modernized flat config, unified `typescript-eslint` package, `@eslint-react/eslint-plugin`, and `eslint-plugin-import-x`; applied lint corrections across the codebase.
+- **⚙️ Maintenance** - Updated Dependabot config for the new ESLint ecosystem, added npm packaging/install scripts, refreshed app and worker dependencies.
+
 ## [2026-06-20] - *[Patch Release v8.0.1](https://github.com/striae-org/striae/releases/tag/v8.0.1)*
 
 - **📦 Firebase Admin SDK Major Bump** - Bumped `firebase-admin` from v13 to v14 for upstream alignment and improved stability.

@@ -249,7 +249,7 @@ export async function downloadCaseAsZip(
       onProgress?.(80);
     } catch (error) {
       console.error('Export encryption failed:', error);
-      throw new Error(`Failed to encrypt export: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to encrypt export: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error });
     }
 
     const instructionContent = `EVIDENCE ARCHIVE - READ ONLY
@@ -364,7 +364,7 @@ For questions about this export, contact your Striae system administrator.
 
     auditService.endWorkflow();
 
-    throw new Error('Failed to export encrypted case package');
+    throw new Error('Failed to export encrypted case package', { cause: error });
   }
 }
 

@@ -269,7 +269,8 @@ export async function importCaseForReview(
     } catch (decryptError) {
       throw new Error(
         `Failed to decrypt export: ${decryptError instanceof Error ? decryptError.message : 'Unknown error'}. ` +
-        'Ensure your Striae instance has export encryption configured.'
+        'Ensure your Striae instance has export encryption configured.',
+        { cause: decryptError }
       );
     }
 

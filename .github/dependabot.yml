@@ -5,27 +5,62 @@ updates:
     schedule:
       interval: "daily"
 
-    ignore:
-      # ESLint 10.x blocked: key plugins do not yet declare ^10 peer support.
-      # Blockers: eslint-plugin-react (max ^9.7), eslint-plugin-jsx-a11y (max ^9),
-      #           eslint-plugin-import (max ^9).
-      # eslint-plugin-react-hooks resolved: now declares ^10 peer support.
-      # Remove this ignore once those three plugins ship ^10 peer declarations.
-      - dependency-name: "eslint"
-        versions: [">= 10"]
-
     groups:
-      # Group all ESLint-ecosystem packages together.
-      # When the blocked plugins above update and declare ^10 support,
-      # their PRs will appear here as a set — that's your signal to remove
-      # the eslint ignore above and upgrade.
+      # ESLint ecosystem: core, plugins, parsers, and config packages.
       eslint-ecosystem:
         patterns:
           - "eslint"
           - "eslint-*"
-          - "@typescript-eslint/*"
+          - "@eslint/*"
+          - "@eslint-react/*"
+          - "typescript-eslint"
+          - "globals"
 
-      # Group wrangler and Cloudflare packages together for coordinated upgrades.
+      # Wrangler and Cloudflare packages for coordinated upgrades.
+      wrangler-ecosystem:
+        patterns:
+          - "wrangler"
+          - "@cloudflare/*"
+
+      # React Router framework packages.
+      react-router:
+        patterns:
+          - "react-router"
+          - "@react-router/*"
+
+      # React core packages.
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+
+      # Firebase packages.
+      firebase:
+        patterns:
+          - "firebase"
+          - "firebase-admin"
+
+      # Vitest and testing packages.
+      testing:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+
+  # Worker directories — each has its own package.json.
+  - package-ecosystem: "npm"
+    directories:
+      - "/workers/audit-worker"
+      - "/workers/data-worker"
+      - "/workers/image-worker"
+      - "/workers/lists-worker"
+      - "/workers/pdf-worker"
+      - "/workers/user-worker"
+    schedule:
+      interval: "weekly"
+
+    groups:
       wrangler-ecosystem:
         patterns:
           - "wrangler"

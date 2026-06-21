@@ -129,7 +129,8 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
         parsedManifest = JSON.parse(manifestContent);
       } catch (error) {
         throw new Error(
-          `Encrypted export detected but encryption manifest is invalid: ${error instanceof Error ? error.message : 'Unknown error'}`
+          `Encrypted export detected but encryption manifest is invalid: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          { cause: error }
         );
       }
 
@@ -168,7 +169,8 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
         decryptedCaseData = JSON.parse(decryptResult.plaintext) as CaseExportData;
       } catch (error) {
         throw new Error(
-          `Failed to decrypt export for preview: ${error instanceof Error ? error.message : 'Unknown error'}`
+          `Failed to decrypt export for preview: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          { cause: error }
         );
       }
 
@@ -250,7 +252,7 @@ export async function previewCaseImport(zipFile: File, currentUser: User): Promi
 
   } catch (error) {
     console.error('Error previewing case import:', error);
-    throw new Error(`Failed to preview case: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(`Failed to preview case: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error });
   }
 }
 
@@ -361,7 +363,7 @@ export async function parseImportZip(zipFile: File): Promise<{
               const encryptedBase64Url = uint8ArrayToBase64Url(encryptedBlob);
               return [filename, encryptedBase64Url] as [string, string];
             } catch (err) {
-              throw new Error(`Failed to extract encrypted image ${filename}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+              throw new Error(`Failed to extract encrypted image ${filename}: ${err instanceof Error ? err.message : 'Unknown error'}`, { cause: err });
             }
           })());
         }
@@ -377,7 +379,7 @@ export async function parseImportZip(zipFile: File): Promise<{
       caseData = { metadata: { caseNumber: 'ENCRYPTED' } } as CaseExportData;
       parsedCaseData = caseData;
     } catch (error) {
-      throw new Error(`Failed to process encrypted export: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to process encrypted export: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error });
     }
 
     const isArchivedExport = isArchivedExportData(parsedCaseData);
@@ -414,6 +416,6 @@ export async function parseImportZip(zipFile: File): Promise<{
     
   } catch (error) {
     console.error('Error parsing ZIP file:', error);
-    throw new Error(`Failed to parse ZIP file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(`Failed to parse ZIP file: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error });
   }
 }

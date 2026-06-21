@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from 'react';
 import { auth } from '~/services/firebase';
 import {
@@ -228,7 +227,7 @@ export const MFAEnrollment: React.FC<MFAEnrollmentProps> = ({
     } catch (error: unknown) {
       console.error('Error enrolling MFA:', error);
       const authError = error as { code?: string; message?: string };
-      let errorMsg = '';
+      let errorMsg: string;
       if (authError.code === 'auth/invalid-verification-code') {
         errorMsg = getValidationError('MFA_INVALID_CODE');
       } else if (authError.code === 'auth/code-expired') {

@@ -22,12 +22,11 @@ workers/pdf-worker/src/assets/*
 firebase-debug.log
 .react-router/
 
-# Secrets and Configuration
+# Secrets and Configuration - DO NOT MODIFY/COMMIT LISTED FILES
 *.env
 *.env.backup
 *.dev.vars
 *.toml
 *.jsonc
 *.d.ts
-workers/*/*.d.ts
 app/config

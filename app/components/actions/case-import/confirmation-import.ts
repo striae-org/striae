@@ -138,7 +138,8 @@ export async function importConfirmationData(
       confirmationJsonContent = decryptedJsonString;
     } catch (error) {
       throw new Error(
-        `Failed to decrypt confirmation data: ${error instanceof Error ? error.message : 'Unknown decryption error'}`
+        `Failed to decrypt confirmation data: ${error instanceof Error ? error.message : 'Unknown decryption error'}`,
+        { cause: error }
       );
     }
 

@@ -302,7 +302,7 @@ export const decryptExportBatch = async (
           decryptedImages[imageEntry.filename] = new Blob([bytes]);
         } catch (error) {
           console.error(`Failed to convert decrypted image ${imageEntry.filename}:`, error);
-          throw new Error(`Failed to convert decrypted image: ${imageEntry.filename}`);
+          throw new Error(`Failed to convert decrypted image: ${imageEntry.filename}`, { cause: error });
         }
       }
     }
