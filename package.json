@@ -62,6 +62,7 @@
   "scripts": {
     "striae-install": "npm install --legacy-peer-deps",
     "striae-clean-install": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps",
+    "strip-modules": "rm -rf node_modules package-lock.json && for dir in workers/*/; do rm -rf \"$dir/node_modules\" \"$dir/package-lock.json\"; done",
     "deploy:all": "bash ./scripts/deploy-all.sh",
     "emulators": "firebase emulators:start --only auth",
     "dev": "node ./scripts/dev.cjs && react-router dev",
