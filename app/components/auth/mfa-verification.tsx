@@ -152,7 +152,7 @@ export const MFAVerification = ({ resolver, onSuccess, onError, onCancel }: MFAV
       onSuccess(result);
     } catch (error: unknown) {
       const authError = error as { code?: string; message?: string };
-      let errorMsg = '';
+      let errorMsg: string;
 
       if (authError.code === 'auth/invalid-verification-code') {
         errorMsg = getValidationError('MFA_INVALID_CODE');
@@ -242,7 +242,7 @@ export const MFAVerification = ({ resolver, onSuccess, onError, onCancel }: MFAV
       onSuccess(result);
     } catch (error: unknown) {
       const authError = error as { code?: string; message?: string };
-      let errorMsg = '';
+      let errorMsg: string;
 
       if (authError.code === 'auth/invalid-verification-code') {
         errorMsg = getValidationError('MFA_INVALID_CODE');

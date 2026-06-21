@@ -1,116 +1,102 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
+import globals from "globals";
+import tseslint from "typescript-eslint";
+import eslintReact from "@eslint-react/eslint-plugin";
+import reactHooks from "eslint-plugin-react-hooks";
+import jsxA11y from "eslint-plugin-jsx-a11y";
+import importX from "eslint-plugin-import-x";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-});
-
-export default [
+export default tseslint.config(
+  // Global ignores
   {
-    ignores: ["public/vendor/**"],
+    ignores: ["public/vendor/**", "build/**", "**/dist/**"],
   },
-  ...compat.config({
-    root: true,
-    parserOptions: {
+
+  // Base recommended
+  js.configs.recommended,
+
+  // React + JSX A11y for all JS/TS files
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    ...eslintReact.configs.recommended,
+    plugins: {
+      ...eslintReact.configs.recommended.plugins,
+      "jsx-a11y": jsxA11y,
+      "react-hooks": reactHooks,
+    },
+    languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      ecmaFeatures: {
-        jsx: true,
+      globals: {
+        ...globals.browser,
+        ...globals.es2021,
+      },
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
       },
     },
-    env: {
-      browser: true,
-      commonjs: true,
-      es6: true,
+    settings: {
+      formComponents: ["Form"],
+      linkComponents: [
+        { name: "Link", linkAttribute: "to" },
+        { name: "NavLink", linkAttribute: "to" },
+      ],
     },
-    ignorePatterns: ["!**/.server", "!**/.client"],
-    extends: ["eslint:recommended"],
-    overrides: [
-      {
-        files: ["**/*.{js,jsx,ts,tsx}"],
-        plugins: ["react", "jsx-a11y"],
-        extends: [
-          "plugin:react/recommended",
-          "plugin:react/jsx-runtime",
-          "plugin:react-hooks/recommended",
-          "plugin:jsx-a11y/recommended",
-        ],
-        rules: {
-          // set-state-in-effect produces widespread false positives for accepted patterns
-          // such as SSR hydration guards (setIsClient), modal reset effects, and
-          // async data-loading callbacks (void loadData()). Disabled at config level.
-          "react-hooks/set-state-in-effect": "off",
-        },
-        settings: {
-          react: {
-            version: "detect",
-          },
-          formComponents: ["Form"],
-          linkComponents: [
-            { name: "Link", linkAttribute: "to" },
-            { name: "NavLink", linkAttribute: "to" },
-          ],
-          "import/resolver": {
-            typescript: {},
-          },
+    rules: {
+      ...eslintReact.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      ...jsxA11y.flatConfigs.recommended.rules,
+      // set-state-in-effect produces widespread false positives for accepted patterns
+      // such as SSR hydration guards (setIsClient), modal reset effects, and
+      // async data-loading callbacks (void loadData()). Disabled at config level.
+      "react-hooks/set-state-in-effect": "off",
+      "@eslint-react/set-state-in-effect": "off",
+      // Not using React Compiler; IIFE-in-JSX is acceptable
+      "@eslint-react/unsupported-syntax": "off",
+    },
+  },
+
+  // TypeScript
+  ...tseslint.configs.recommended,
+  {
+    files: ["**/*.{ts,tsx}"],
+    plugins: {
+      "import-x": importX,
+    },
+    settings: {
+      "import-x/internal-regex": "^~/",
+      "import-x/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
         },
       },
-      {
-        files: ["**/*.{ts,tsx}"],
-        plugins: ["@typescript-eslint", "import"],
-        parser: "@typescript-eslint/parser",
-        rules: {
-          "@typescript-eslint/consistent-type-imports": [
-            "error",
-            {
-              prefer: "type-imports",
-              fixStyle: "inline-type-imports"
-            }
-          ],
-          // Allow _-prefixed and rest-sibling discard variables (e.g. const { x: _, ...rest } = obj)
-          "@typescript-eslint/no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "ignoreRestSiblings": true }],
+    },
+    rules: {
+      ...importX.configs.recommended.rules,
+      ...importX.configs.typescript.rules,
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        {
+          prefer: "type-imports",
+          fixStyle: "inline-type-imports",
         },
-        settings: {
-          "import/internal-regex": "^~/",
-          "import/resolver": {
-            node: {
-              extensions: [".ts", ".tsx"],
-            },
-            typescript: {
-              alwaysTryTypes: true,
-            },
-          },
-        },
-        extends: [
-          "plugin:@typescript-eslint/recommended",
-          "plugin:import/recommended",
-          "plugin:import/typescript",
-        ],
-      },
-      {
-        files: [".eslintrc.cjs"],
-        env: {
-          node: true,
-        },
-      },
-      {
-        files: ["scripts/**/*.cjs", "scripts/**/*.mjs"],
-        env: {
-          node: true,
-        },
-      },
-      {
-        files: ["workers/**/scripts/**/*.js"],
-        env: {
-          node: true,
-        },
-      },
-    ],
-  }),
-];
+      ],
+      // Allow _-prefixed and rest-sibling discard variables (e.g. const { x: _, ...rest } = obj)
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { varsIgnorePattern: "^_", argsIgnorePattern: "^_", ignoreRestSiblings: true },
+      ],
+    },
+  },
+
+  // Node scripts
+  {
+    files: ["scripts/**/*.{cjs,mjs}", "workers/**/scripts/**/*.js", "tests/**/*.mjs"],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
+);

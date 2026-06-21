@@ -345,7 +345,7 @@ export async function exportConfirmationData(
       encryptionManifestJson = JSON.stringify(encryptionResult.encryptionManifest, null, 2);
     } catch (error) {
       console.error('Confirmation export encryption failed:', error);
-      throw new Error(`Failed to encrypt confirmation export: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to encrypt confirmation export: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error });
     }
 
     zip.file(confirmationFileName, encryptedConfirmationContent);

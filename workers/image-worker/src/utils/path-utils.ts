@@ -4,7 +4,7 @@ export function parseFileId(pathname: string): string | null {
     return null;
   }
 
-  let decodedFileId = '';
+  let decodedFileId: string;
   try {
     decodedFileId = decodeURIComponent(encodedFileId);
   } catch {
@@ -32,7 +32,7 @@ export function parsePathSegments(pathname: string): string[] | null {
       return null;
     }
 
-    let decoded = '';
+    let decoded: string;
     try {
       decoded = decodeURIComponent(segment);
     } catch {

@@ -83,7 +83,7 @@ export const NotesEditorModal = ({
     }
 
     setIsSavingBeforeClose(true);
-    let didSave = false;
+    let didSave: boolean;
 
     try {
       didSave = await saveHandler();

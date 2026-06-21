@@ -92,7 +92,7 @@ export async function fetchKeyRegistryFromR2(
     registryJson = await decryptRegistryJson(parsed, registryEncryptionKey);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error';
-    throw new Error(`${contextLabel}: failed to decrypt registry — ${message}`);
+    throw new Error(`${contextLabel}: failed to decrypt registry — ${message}`, { cause: err });
   }
 
   return parseRegistryJson(registryJson, scope, activeKeyIdOverride);
