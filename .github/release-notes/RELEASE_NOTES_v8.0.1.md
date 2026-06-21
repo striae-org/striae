@@ -22,7 +22,7 @@ v8.0.1 is a maintenance patch that bumps `firebase-admin` to its new major versi
 
 ### ESLint Tooling Update
 
-- Bumped `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` from 8.60.1 to 8.61.0 for improved linting coverage and rule refinements.
+- Bumped `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` from 8.60.1 to 8.61.1 for improved linting coverage and rule refinements.
 
 ### Dependency and Tooling Maintenance
 
