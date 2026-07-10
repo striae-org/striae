@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { Sidebar } from './sidebar';
 import type { User } from 'firebase/auth';
@@ -10,8 +10,6 @@ import { type UserConfirmationSummaryDocument } from '~/utils/data';
 import styles from './sidebar.module.css';
 import { getAppVersion } from '~/utils/common';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
-
-const getCurrentYear = (): number => new Date().getFullYear();
 
 interface SidebarContainerProps {
   user: User;
@@ -38,22 +36,8 @@ interface SidebarContainerProps {
 
 export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
   const [isFooterModalOpen, setIsFooterModalOpen] = useState(false);
-  const [year, setYear] = useState(getCurrentYear);
+  const [year] = useState(() => new Date().getFullYear());
   const appVersion = getAppVersion();
-
-  useEffect(() => {
-    const now = new Date();
-    const nextYear = new Date(now.getFullYear() + 1, 0, 1, 0, 0, 0, 0);
-    const msUntilNextYear = nextYear.getTime() - now.getTime();
-
-    const timer = window.setTimeout(() => {
-      setYear(getCurrentYear());
-    }, msUntilNextYear);
-
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [year]);
 
   const {
     overlayProps,

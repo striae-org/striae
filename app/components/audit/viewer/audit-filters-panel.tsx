@@ -3,7 +3,13 @@ import type { AuditAction, AuditResult } from '~/types';
 import type { DateRangeFilter } from './types';
 import styles from '../user-audit.module.css';
 
-const getTodayIso = (): string => new Date().toISOString().split('T')[0];
+const getTodayIso = (): string => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const formatDateLabel = (isoDate: string): string => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
@@ -88,13 +94,13 @@ export const AuditFiltersPanel = ({
 
   useEffect(() => {
     const now = new Date();
-    const nextUtcMidnight = new Date(now);
-    nextUtcMidnight.setUTCHours(24, 0, 0, 0);
-    const msUntilUtcMidnight = nextUtcMidnight.getTime() - now.getTime();
+    const nextLocalMidnight = new Date(now);
+    nextLocalMidnight.setHours(24, 0, 0, 0);
+    const msUntilLocalMidnight = nextLocalMidnight.getTime() - now.getTime();
 
     const timer = window.setTimeout(() => {
       setTodayIso(getTodayIso());
-    }, msUntilUtcMidnight);
+    }, msUntilLocalMidnight);
 
     return () => {
       window.clearTimeout(timer);
