@@ -1,4 +1,4 @@
-import { type JSX, createContext, useContext } from 'react';
+import { type JSX, createContext, use } from 'react';
 import { classes, media } from '~/utils/ui';
 import { themes, tokens } from './theme';
 
@@ -27,7 +27,7 @@ export const ThemeProvider = ({
   const isRootProvider = !parentTheme.theme;
 
   return (
-    <ThemeContext.Provider
+    <ThemeContext
       value={{
         theme,        
       }}
@@ -38,12 +38,12 @@ export const ThemeProvider = ({
           {children}
         </Component>
       )}
-    </ThemeContext.Provider>
+    </ThemeContext>
   );
 };
 
 export function useTheme() {
-  const currentTheme = useContext(ThemeContext);
+  const currentTheme = use(ThemeContext);
   return currentTheme;
 }
 

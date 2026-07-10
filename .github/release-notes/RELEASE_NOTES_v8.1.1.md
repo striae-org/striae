@@ -8,7 +8,7 @@
 
 ## Summary
 
-v8.1.1 is a patch release focused on dependency refresh and tooling alignment across the app and worker surfaces. The release updates the core build and runtime toolchain to the latest compatible versions, refreshes Cloudflare compatibility dates, and keeps package manifests consistent across the root app and all workers.
+v8.1.1 is a patch release focused on dependency refresh and tooling alignment across the app and worker surfaces. The release updates the core build and runtime toolchain to the latest compatible versions, refreshes Cloudflare compatibility dates, keeps package manifests consistent across the root app and all workers, and completes the React 19 lint migration cleanup in the app UI layer.
 
 ## Detailed Changes
 
@@ -21,6 +21,7 @@ v8.1.1 is a patch release focused on dependency refresh and tooling alignment ac
 ### Release Maintenance
 
 - Refreshed package-lock files and worker lockfiles to reflect the updated dependency graph.
+- Completed React 19 lint migration cleanup across UI components by migrating context usage/provider syntax, replacing remaining `forwardRef` patterns where appropriate, and resolving lint findings without disabling the active React lint rules.
 - Applied the standard patch-release housekeeping required to keep the app and workers in sync after the v8.1.0 rollout.
 
 ## Release Statistics

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { use, useCallback, useMemo, useState } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { exportAuditPDF } from '~/components/actions/export-audit-pdf';
@@ -21,7 +21,7 @@ interface UserAuditViewerProps {
 }
 
 export const UserAuditViewer = ({ isOpen, onClose, caseNumber, title }: UserAuditViewerProps) => {
-  const { user } = useContext(AuthContext);
+  const { user } = use(AuthContext);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastType, setToastType] = useState<ToastType>('success');

@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import {
@@ -103,7 +103,7 @@ export const FilesModal = ({
   confirmationSaveVersion = 0,
   initialConfirmationSummary,
 }: FilesModalProps) => {
-  const { user } = useContext(AuthContext);
+  const { user } = use(AuthContext);
   const [currentPage, setCurrentPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [openSelectedFileId, setOpenSelectedFileId] = useState<string | null>(selectedFileId || null);

@@ -51,11 +51,6 @@ export default tseslint.config(
       // async data-loading callbacks (void loadData()). Disabled at config level.
       "react-hooks/set-state-in-effect": "off",
       "@eslint-react/set-state-in-effect": "off",
-      // React 19 migration guidance rules are informational for now in this codebase.
-      "@eslint-react/no-use-context": "off",
-      "@eslint-react/no-context-provider": "off",
-      "@eslint-react/no-forward-ref": "off",
-      "@eslint-react/dom-no-dangerously-set-innerhtml": "off",
       // Not using React Compiler; IIFE-in-JSX is acceptable
       "@eslint-react/unsupported-syntax": "off",
     },

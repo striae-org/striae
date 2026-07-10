@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react';
 import type { AuditAction, AuditResult } from '~/types';
 import type { DateRangeFilter } from './types';
 import styles from '../user-audit.module.css';
 
-const TODAY_ISO = new Date().toISOString().split('T')[0];
+const getTodayIso = (): string => new Date().toISOString().split('T')[0];
 
 const formatDateLabel = (isoDate: string): string => {
   const parsed = Date.parse(isoDate);
@@ -68,6 +69,23 @@ export const AuditFiltersPanel = ({
   onFilterActionChange,
   onFilterResultChange,
 }: AuditFiltersPanelProps) => {
+  const [todayIso, setTodayIso] = useState(getTodayIso);
+
+  useEffect(() => {
+    const now = new Date();
+    const nextMidnight = new Date(now);
+    nextMidnight.setHours(24, 0, 0, 0);
+    const msUntilMidnight = nextMidnight.getTime() - now.getTime();
+
+    const timer = window.setTimeout(() => {
+      setTodayIso(getTodayIso());
+    }, msUntilMidnight);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [todayIso]);
+
   return (
     <div className={styles.filters}>
       <div className={styles.filterGroup}>
@@ -99,7 +117,7 @@ export const AuditFiltersPanel = ({
                 value={customStartDateInput}
                 onChange={(e) => onCustomStartDateInputChange(e.target.value)}
                 className={styles.filterInput}
-                max={customEndDateInput || TODAY_ISO}
+                max={customEndDateInput || todayIso}
               />
             </div>
             <div className={styles.filterGroup}>
@@ -111,7 +129,7 @@ export const AuditFiltersPanel = ({
                 onChange={(e) => onCustomEndDateInputChange(e.target.value)}
                 className={styles.filterInput}
                 min={customStartDateInput}
-                max={TODAY_ISO}
+                max={todayIso}
               />
             </div>
             <div className={styles.dateRangeButtons}>

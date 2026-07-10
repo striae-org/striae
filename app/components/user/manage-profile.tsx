@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useCallback } from 'react';
+import { use, useState, useEffect, useCallback } from 'react';
 import { updateProfile } from 'firebase/auth';
 import { PasswordReset } from '~/routes/auth/passwordReset';
 import { DeleteAccount } from './delete-account';
@@ -21,7 +21,7 @@ interface ManageProfileProps {
 }
 
 export const ManageProfile = ({ isOpen, onClose }: ManageProfileProps) => {
-  const { user } = useContext(AuthContext);
+  const { user } = use(AuthContext);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [badgeId, setBadgeId] = useState('');
   const [initialBadgeId, setInitialBadgeId] = useState('');
