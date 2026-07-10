@@ -6,8 +6,23 @@ import styles from '../user-audit.module.css';
 const getTodayIso = (): string => new Date().toISOString().split('T')[0];
 
 const formatDateLabel = (isoDate: string): string => {
-  const parsed = Date.parse(isoDate);
-  if (Number.isNaN(parsed)) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
+  if (!match) {
+    return isoDate;
+  }
+
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const parsed = new Date(year, monthIndex, day);
+
+  // Guard against rollover from invalid date components like 2026-02-31.
+  if (
+    Number.isNaN(parsed.getTime()) ||
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== monthIndex ||
+    parsed.getDate() !== day
+  ) {
     return isoDate;
   }
 
@@ -73,13 +88,13 @@ export const AuditFiltersPanel = ({
 
   useEffect(() => {
     const now = new Date();
-    const nextMidnight = new Date(now);
-    nextMidnight.setHours(24, 0, 0, 0);
-    const msUntilMidnight = nextMidnight.getTime() - now.getTime();
+    const nextUtcMidnight = new Date(now);
+    nextUtcMidnight.setUTCHours(24, 0, 0, 0);
+    const msUntilUtcMidnight = nextUtcMidnight.getTime() - now.getTime();
 
     const timer = window.setTimeout(() => {
       setTodayIso(getTodayIso());
-    }, msUntilMidnight);
+    }, msUntilUtcMidnight);
 
     return () => {
       window.clearTimeout(timer);

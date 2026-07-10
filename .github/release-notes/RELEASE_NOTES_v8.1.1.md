@@ -1,8 +1,8 @@
 # Striae Release Notes - v8.1.1
 
 **Release Date**: July 9, 2026
-**Period**: July 9, 2026 (same-day patch release following v8.1.0)
-**Total Commits**: 1 (non-merge after the v8.1.0 release)
+**Period**: June 20, 2026 to July 9, 2026
+**Total Commits**: 6 (non-merge after the v8.1.0 release)
 
 ## Patch Release - Dependency Refresh and Tooling Alignment
 
@@ -27,7 +27,7 @@ v8.1.1 is a patch release focused on dependency refresh and tooling alignment ac
 ## Release Statistics
 
 - **Baseline**: .github/release-notes/RELEASE_NOTES_v8.1.0.md
-- **Commits Included**: 1 (non-merge commits after v8.1.0 on 2026-07-09)
+- **Commits Included**: 6 (non-merge commits after v8.1.0 on 2026-07-09)
 - **Build Status**: Passed (`npm run build`)
 - **Typecheck Status**: Passed (`npm run typecheck`)
 - **Lint Status**: Passed (`npm run lint`)

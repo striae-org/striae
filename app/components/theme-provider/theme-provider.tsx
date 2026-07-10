@@ -23,21 +23,15 @@ export const ThemeProvider = ({
   as: Component = 'div',
   ...rest
 }: ThemeProviderProps) => {
-  const parentTheme = useTheme();
-  const isRootProvider = !parentTheme.theme;
-
   return (
     <ThemeContext
       value={{
-        theme,        
+        theme,
       }}
     >
-      {isRootProvider && children}      
-      {!isRootProvider && (
-       <Component className={classes(className)} data-theme={theme} {...rest}>
-          {children}
-        </Component>
-      )}
+      <Component className={classes(className)} data-theme={theme} {...rest}>
+        {children}
+      </Component>
     </ThemeContext>
   );
 };
