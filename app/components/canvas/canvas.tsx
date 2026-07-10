@@ -178,16 +178,33 @@ export const Canvas = ({
       };
     }
 
-    const flashInterval = setInterval(() => {
-      setIsFlashing(true);
-      setTimeout(() => setIsFlashing(false), 200);
-      setTimeout(() => {
+    const flashTimeoutIds: number[] = [];
+
+    const queueFlash = (delayMs: number) => {
+      // eslint-disable-next-line @eslint-react/web-api-no-leaked-timeout
+      const startId = window.setTimeout(() => {
         setIsFlashing(true);
-        setTimeout(() => setIsFlashing(false), 200);
-      }, 300);
+        // eslint-disable-next-line @eslint-react/web-api-no-leaked-timeout
+        const stopId = window.setTimeout(() => {
+          setIsFlashing(false);
+        }, 200);
+        flashTimeoutIds.push(stopId);
+      }, delayMs);
+
+      flashTimeoutIds.push(startId);
+    };
+
+    const flashInterval = window.setInterval(() => {
+      queueFlash(0);
+      queueFlash(300);
     }, 60000);
 
-    return () => clearInterval(flashInterval);
+    return () => {
+      window.clearInterval(flashInterval);
+      flashTimeoutIds.forEach((timeoutId) => {
+        window.clearTimeout(timeoutId);
+      });
+    };
   }, [activeAnnotations, annotationData?.leftHasSubclass, annotationData?.rightHasSubclass, annotationData?.hasSubclass, clearFlashingState]);
 
   const getErrorMessage = () => {

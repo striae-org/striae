@@ -11,6 +11,8 @@ import styles from './sidebar.module.css';
 import { getAppVersion } from '~/utils/common';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 interface SidebarContainerProps {
   user: User;
   onImageSelect: (file: FileData) => void;
@@ -36,7 +38,7 @@ interface SidebarContainerProps {
 
 export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
   const [isFooterModalOpen, setIsFooterModalOpen] = useState(false);
-  const year = new Date().getFullYear();
+  const year = CURRENT_YEAR;
   const appVersion = getAppVersion();
 
   const {

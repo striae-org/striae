@@ -107,7 +107,7 @@ export const FilesModal = ({
   const [currentPage, setCurrentPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [openSelectedFileId, setOpenSelectedFileId] = useState<string | null>(selectedFileId || null);
-  const [deleteSelectedFileIds, setDeleteSelectedFileIds] = useState<Set<string>>(new Set());
+  const [deleteSelectedFileIds, setDeleteSelectedFileIds] = useState<Set<string>>(() => new Set());
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeletingSelected, setIsDeletingSelected] = useState(false);
   const [actionNotice, setActionNotice] = useState<ActionNotice | null>(null);

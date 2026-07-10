@@ -27,9 +27,9 @@ v8.1.1 is a patch release focused on dependency refresh and tooling alignment ac
 
 - **Baseline**: .github/release-notes/RELEASE_NOTES_v8.1.0.md
 - **Commits Included**: 1 (non-merge commits after v8.1.0 on 2026-07-09)
-- **Build Status**: Not run for this documentation update
-- **Typecheck Status**: Not run for this documentation update
-- **Lint Status**: Not run for this documentation update
+- **Build Status**: Passed (`npm run build`)
+- **Typecheck Status**: Passed (`npm run typecheck`)
+- **Lint Status**: Passed (`npm run lint`)
 
 ## Closing Note
 

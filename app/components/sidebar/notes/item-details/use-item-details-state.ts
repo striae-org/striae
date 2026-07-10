@@ -150,7 +150,9 @@ export const useItemDetailsState = ({
   const [bDiameter, setBDiameter] = useState(() => bulletData?.diameter || '');
   const [bLgNumber, setBLgNumber] = useState(() => bulletData?.lgNumber !== undefined ? String(bulletData.lgNumber) : '');
   const [bLgDirection, setBLgDirection] = useState(() => bulletData?.lgDirection || '');
+  // eslint-disable-next-line @eslint-react/use-state
   const [bLWidths, setBLWidths] = useState<string[]>(() => bulletData?.lWidths || []);
+  // eslint-disable-next-line @eslint-react/use-state
   const [bGWidths, setBGWidths] = useState<string[]>(() => bulletData?.gWidths || []);
   const [bJacketMetal, setBJacketMetal] = useState(() => bulletData?.jacketMetal || '');
   const [bJacketMetalIsCustom, setBJacketMetalIsCustom] = useState(() => isCustomValue(bulletData?.jacketMetal, BULLET_JACKET_METAL_OPTIONS));

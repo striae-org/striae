@@ -2,6 +2,17 @@ import type { AuditAction, AuditResult } from '~/types';
 import type { DateRangeFilter } from './types';
 import styles from '../user-audit.module.css';
 
+const TODAY_ISO = new Date().toISOString().split('T')[0];
+
+const formatDateLabel = (isoDate: string): string => {
+  const parsed = Date.parse(isoDate);
+  if (Number.isNaN(parsed)) {
+    return isoDate;
+  }
+
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(parsed);
+};
+
 interface AuditFiltersPanelProps {
   dateRange: DateRangeFilter;
   customStartDate: string;
@@ -88,7 +99,7 @@ export const AuditFiltersPanel = ({
                 value={customStartDateInput}
                 onChange={(e) => onCustomStartDateInputChange(e.target.value)}
                 className={styles.filterInput}
-                max={customEndDateInput || new Date().toISOString().split('T')[0]}
+                max={customEndDateInput || TODAY_ISO}
               />
             </div>
             <div className={styles.filterGroup}>
@@ -100,7 +111,7 @@ export const AuditFiltersPanel = ({
                 onChange={(e) => onCustomEndDateInputChange(e.target.value)}
                 className={styles.filterInput}
                 min={customStartDateInput}
-                max={new Date().toISOString().split('T')[0]}
+                max={TODAY_ISO}
               />
             </div>
             <div className={styles.dateRangeButtons}>
@@ -130,8 +141,8 @@ export const AuditFiltersPanel = ({
             <div className={styles.activeFilter}>
               <small>
                 Custom range:
-                {customStartDate && <strong> from {new Date(customStartDate).toLocaleDateString()}</strong>}
-                {customEndDate && <strong> to {new Date(customEndDate).toLocaleDateString()}</strong>}
+                {customStartDate && <strong> from {formatDateLabel(customStartDate)}</strong>}
+                {customEndDate && <strong> to {formatDateLabel(customEndDate)}</strong>}
               </small>
             </div>
           )}
