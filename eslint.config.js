@@ -9,7 +9,7 @@ import importX from "eslint-plugin-import-x";
 export default tseslint.config(
   // Global ignores
   {
-    ignores: ["public/vendor/**", "build/**", "**/dist/**"],
+    ignores: ["public/vendor/**", "build/**", "**/dist/**", "**/worker-configuration.d.ts"],
   },
 
   // Base recommended

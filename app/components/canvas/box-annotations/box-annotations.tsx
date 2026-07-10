@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect, useContext } from 'react';
+import { use, useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { type BoxAnnotation } from '~/types';
 import { AuthContext } from '~/contexts/auth.context';
 import { auditService } from '~/services/audit';
@@ -70,7 +70,7 @@ export const BoxAnnotations = ({
   imageFileId,
   originalImageFileName
 }: BoxAnnotationsProps) => {
-  const { user } = useContext(AuthContext);
+  const { user } = use(AuthContext);
   const [drawingState, setDrawingState] = useState<DrawingState>({
     isDrawing: false,
     startX: 0,

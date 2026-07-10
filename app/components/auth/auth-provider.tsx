@@ -65,7 +65,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext value={{ user, setUser }}>
       {children}
       <InactivityWarning
         isOpen={showInactivityWarning}
@@ -73,6 +73,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         onExtendSession={handleExtendSession}
         onSignOut={handleSignOutNow}
       />
-    </AuthContext.Provider>
+    </AuthContext>
   );
 }

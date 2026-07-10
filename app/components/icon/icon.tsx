@@ -1,15 +1,15 @@
 import { classes } from '~/utils/ui';
 import styles from './icon.module.css';
-import { forwardRef } from 'react';
 import sprites from './icons.svg';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   icon: string;
   className?: string;
   size?: number;
+  ref?: React.Ref<SVGSVGElement>;
 }
 
-export const Icon = forwardRef<SVGSVGElement, IconProps>(({ icon, className, size, ...rest }, ref) => {
+export const Icon = ({ icon, className, size, ref, ...rest }: IconProps) => {
   return (
     <svg
       aria-hidden
@@ -22,6 +22,4 @@ export const Icon = forwardRef<SVGSVGElement, IconProps>(({ icon, className, siz
       <use href={`${sprites}#${icon}`} />
     </svg>
   );
-});
-
-Icon.displayName = 'Icon';
+};

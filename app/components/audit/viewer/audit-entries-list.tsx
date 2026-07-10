@@ -39,7 +39,7 @@ const getEntryKey = (entry: ValidationAuditEntry): string => {
 };
 
 export const AuditEntriesList = ({ entries }: AuditEntriesListProps) => {
-  const [expandedEntryKeys, setExpandedEntryKeys] = useState<Set<string>>(new Set());
+  const [expandedEntryKeys, setExpandedEntryKeys] = useState<Set<string>>(() => new Set());
 
   const expandableEntries = useMemo(() => {
     return new Set(entries.filter(supportsFullDetailsToggle).map(getEntryKey));

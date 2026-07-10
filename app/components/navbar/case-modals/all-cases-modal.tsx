@@ -83,7 +83,7 @@ export const CasesModal = ({
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedCaseNumber, setSelectedCaseNumber] = useState<string | null>(currentCase || null);
   const [focusedIndex, setFocusedIndex] = useState(0);
-  const caseRowRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const caseRowRef = useRef<Array<HTMLDivElement | null>>([]);
   const {
     preferences,
     setSortBy,
@@ -544,7 +544,7 @@ export const CasesModal = ({
       const nextIndex = Math.min(index + 1, paginatedCases.length - 1);
       setFocusedIndex(nextIndex);
       window.requestAnimationFrame(() => {
-        caseRowRefs.current[nextIndex]?.focus();
+        caseRowRef.current[nextIndex]?.focus();
       });
       return;
     }
@@ -554,7 +554,7 @@ export const CasesModal = ({
       const nextIndex = Math.max(index - 1, 0);
       setFocusedIndex(nextIndex);
       window.requestAnimationFrame(() => {
-        caseRowRefs.current[nextIndex]?.focus();
+        caseRowRef.current[nextIndex]?.focus();
       });
       return;
     }
@@ -698,7 +698,7 @@ export const CasesModal = ({
                       <li key={caseNum}>
                         <div
                           ref={(node) => {
-                            caseRowRefs.current[index] = node;
+                            caseRowRef.current[index] = node;
                           }}
                           role="option"
                           aria-selected={isSelected}

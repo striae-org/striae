@@ -1,6 +1,39 @@
+import { useEffect, useState } from 'react';
 import type { AuditAction, AuditResult } from '~/types';
 import type { DateRangeFilter } from './types';
 import styles from '../user-audit.module.css';
+
+const getTodayIso = (): string => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const formatDateLabel = (isoDate: string): string => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
+  if (!match) {
+    return isoDate;
+  }
+
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const parsed = new Date(year, monthIndex, day);
+
+  // Guard against rollover from invalid date components like 2026-02-31.
+  if (
+    Number.isNaN(parsed.getTime()) ||
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== monthIndex ||
+    parsed.getDate() !== day
+  ) {
+    return isoDate;
+  }
+
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(parsed);
+};
 
 interface AuditFiltersPanelProps {
   dateRange: DateRangeFilter;
@@ -57,6 +90,23 @@ export const AuditFiltersPanel = ({
   onFilterActionChange,
   onFilterResultChange,
 }: AuditFiltersPanelProps) => {
+  const [todayIso, setTodayIso] = useState(getTodayIso);
+
+  useEffect(() => {
+    const now = new Date();
+    const nextLocalMidnight = new Date(now);
+    nextLocalMidnight.setHours(24, 0, 0, 0);
+    const msUntilLocalMidnight = nextLocalMidnight.getTime() - now.getTime();
+
+    const timer = window.setTimeout(() => {
+      setTodayIso(getTodayIso());
+    }, msUntilLocalMidnight);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [todayIso]);
+
   return (
     <div className={styles.filters}>
       <div className={styles.filterGroup}>
@@ -88,7 +138,7 @@ export const AuditFiltersPanel = ({
                 value={customStartDateInput}
                 onChange={(e) => onCustomStartDateInputChange(e.target.value)}
                 className={styles.filterInput}
-                max={customEndDateInput || new Date().toISOString().split('T')[0]}
+                max={customEndDateInput || todayIso}
               />
             </div>
             <div className={styles.filterGroup}>
@@ -100,7 +150,7 @@ export const AuditFiltersPanel = ({
                 onChange={(e) => onCustomEndDateInputChange(e.target.value)}
                 className={styles.filterInput}
                 min={customStartDateInput}
-                max={new Date().toISOString().split('T')[0]}
+                max={todayIso}
               />
             </div>
             <div className={styles.dateRangeButtons}>
@@ -130,8 +180,8 @@ export const AuditFiltersPanel = ({
             <div className={styles.activeFilter}>
               <small>
                 Custom range:
-                {customStartDate && <strong> from {new Date(customStartDate).toLocaleDateString()}</strong>}
-                {customEndDate && <strong> to {new Date(customEndDate).toLocaleDateString()}</strong>}
+                {customStartDate && <strong> from {formatDateLabel(customStartDate)}</strong>}
+                {customEndDate && <strong> to {formatDateLabel(customEndDate)}</strong>}
               </small>
             </div>
           )}

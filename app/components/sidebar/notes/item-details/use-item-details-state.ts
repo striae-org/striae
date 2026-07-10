@@ -150,8 +150,8 @@ export const useItemDetailsState = ({
   const [bDiameter, setBDiameter] = useState(() => bulletData?.diameter || '');
   const [bLgNumber, setBLgNumber] = useState(() => bulletData?.lgNumber !== undefined ? String(bulletData.lgNumber) : '');
   const [bLgDirection, setBLgDirection] = useState(() => bulletData?.lgDirection || '');
-  const [bLWidths, setBLWidths] = useState<string[]>(() => bulletData?.lWidths || []);
-  const [bGWidths, setBGWidths] = useState<string[]>(() => bulletData?.gWidths || []);
+  const [bulletLWidths, setBulletLWidths] = useState(() => bulletData?.lWidths || []);
+  const [bulletGWidths, setBulletGWidths] = useState(() => bulletData?.gWidths || []);
   const [bJacketMetal, setBJacketMetal] = useState(() => bulletData?.jacketMetal || '');
   const [bJacketMetalIsCustom, setBJacketMetalIsCustom] = useState(() => isCustomValue(bulletData?.jacketMetal, BULLET_JACKET_METAL_OPTIONS));
   const [bCoreMetal, setBCoreMetal] = useState(() => bulletData?.coreMetal || '');
@@ -195,10 +195,10 @@ export const useItemDetailsState = ({
   const [isSaving, setIsSaving] = useState(false);
 
   const lgCount = Math.max(0, Math.min(30, Number(bLgNumber) || 0));
-  const calculatedDiameter = calculateBulletDiameter(lgCount, bLWidths, bGWidths);
+  const calculatedDiameter = calculateBulletDiameter(lgCount, bulletLWidths, bulletGWidths);
 
   const updateLWidth = (index: number, value: string) => {
-    setBLWidths((previous) => {
+    setBulletLWidths((previous) => {
       const next = [...previous];
       next[index] = value;
       return next;
@@ -206,7 +206,7 @@ export const useItemDetailsState = ({
   };
 
   const updateGWidth = (index: number, value: string) => {
-    setBGWidths((previous) => {
+    setBulletGWidths((previous) => {
       const next = [...previous];
       next[index] = value;
       return next;
@@ -225,8 +225,8 @@ export const useItemDetailsState = ({
       calcDiameter: calculatedDiameter !== null ? formatCalculatedDiameter(calculatedDiameter) : undefined,
       lgNumber: bLgNumber ? Number(bLgNumber) : undefined,
       lgDirection: bLgDirection || undefined,
-      lWidths: bLWidths.some(Boolean) ? bLWidths : undefined,
-      gWidths: bGWidths.some(Boolean) ? bGWidths : undefined,
+      lWidths: bulletLWidths.some(Boolean) ? bulletLWidths : undefined,
+      gWidths: bulletGWidths.some(Boolean) ? bulletGWidths : undefined,
       jacketMetal: bJacketMetal || undefined,
       coreMetal: bCoreMetal || undefined,
       bulletType: bBulletType || undefined,
@@ -266,8 +266,8 @@ export const useItemDetailsState = ({
     diameter: bDiameter,
     lgNumber: bLgNumber,
     lgDirection: bLgDirection,
-    lWidths: bLWidths,
-    gWidths: bGWidths,
+    lWidths: bulletLWidths,
+    gWidths: bulletGWidths,
     jacketMetal: bJacketMetal,
     jacketMetalIsCustom: bJacketMetalIsCustom,
     coreMetal: bCoreMetal,

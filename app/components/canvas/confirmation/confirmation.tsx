@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useRef } from 'react';
+import { use, useState, useEffect, useRef } from 'react';
 import { type ConfirmationData } from '~/types/annotations';
 import { AuthContext } from '~/contexts/auth.context';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
@@ -29,7 +29,7 @@ const formatTimestamp = (): string => {
 };
 
 export const ConfirmationModal = ({ isOpen, onClose, onConfirm, company, defaultBadgeId, existingConfirmation }: ConfirmationModalProps) => {
-  const { user } = useContext(AuthContext);
+  const { user } = use(AuthContext);
   const [badgeId, setBadgeId] = useState('');
   const [error, setError] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);

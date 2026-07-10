@@ -303,7 +303,7 @@ export const MFAVerification = ({ resolver, onSuccess, onError, onCancel }: MFAV
               className={styles.select}
             >
               {resolver.hints.map((hint, index) => (
-                <option key={index} value={index}>
+                <option key={`${hint.factorId}-${hint.uid || index}`} value={index}>
                   {getHintLabel(hint, index)}
                 </option>
               ))}

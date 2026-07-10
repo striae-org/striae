@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useContext, useCallback } from 'react';
+import { use, useEffect, useState, useRef, useCallback } from 'react';
 import { BoxAnnotations } from './box-annotations/box-annotations';
 import { ConfirmationModal } from './confirmation/confirmation';
 import { type AnnotationData, type BoxAnnotation, type ConfirmationData } from '~/types/annotations';
@@ -47,7 +47,7 @@ export const Canvas = ({
   caseNumber,
   currentImageId
 }: CanvasProps) => {
-  const { user } = useContext(AuthContext);
+  const { user } = use(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<ImageLoadError | undefined>();
   const [isFlashing, setIsFlashing] = useState(false);
@@ -178,16 +178,40 @@ export const Canvas = ({
       };
     }
 
-    const flashInterval = setInterval(() => {
-      setIsFlashing(true);
-      setTimeout(() => setIsFlashing(false), 200);
-      setTimeout(() => {
+    const pendingFlashTimeoutIds = new Set<number>();
+
+    const queueFlash = (delayMs: number) => {
+      // eslint-disable-next-line @eslint-react/web-api-no-leaked-timeout
+      const startId = window.setTimeout(() => {
+        pendingFlashTimeoutIds.delete(startId);
         setIsFlashing(true);
-        setTimeout(() => setIsFlashing(false), 200);
-      }, 300);
+
+        // eslint-disable-next-line @eslint-react/web-api-no-leaked-timeout
+        const stopId = window.setTimeout(() => {
+          pendingFlashTimeoutIds.delete(stopId);
+          setIsFlashing(false);
+        }, 200);
+
+        pendingFlashTimeoutIds.add(stopId);
+      }, delayMs);
+
+      pendingFlashTimeoutIds.add(startId);
+    };
+
+    const flashInterval = window.setInterval(() => {
+      queueFlash(0);
+      queueFlash(300);
     }, 60000);
 
-    return () => clearInterval(flashInterval);
+    return () => {
+      window.clearInterval(flashInterval);
+
+      pendingFlashTimeoutIds.forEach((timeoutId) => {
+        window.clearTimeout(timeoutId);
+      });
+
+      pendingFlashTimeoutIds.clear();
+    };
   }, [activeAnnotations, annotationData?.leftHasSubclass, annotationData?.rightHasSubclass, annotationData?.hasSubclass, clearFlashingState]);
 
   const getErrorMessage = () => {
@@ -455,14 +479,17 @@ export const Canvas = ({
         )}
         </div>
       ) : (
-        <p 
-          className={styles.placeholder}
-          dangerouslySetInnerHTML={{
-            __html: firstName 
-              ? `Hello, ${firstName}<br>Upload or select an image to get started`
-              : 'Upload or select an image to get started'
-          }}
-        />
+        <p className={styles.placeholder}>
+          {firstName ? (
+            <>
+              {`Hello, ${firstName}`}
+              <br />
+              Upload or select an image to get started
+            </>
+          ) : (
+            'Upload or select an image to get started'
+          )}
+        </p>
       )}
       
       {/* Support Level - Bottom Left of Canvas */}

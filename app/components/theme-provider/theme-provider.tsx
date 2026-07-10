@@ -1,4 +1,4 @@
-import { type JSX, createContext, useContext } from 'react';
+import { type JSX, createContext, use } from 'react';
 import { classes, media } from '~/utils/ui';
 import { themes, tokens } from './theme';
 
@@ -23,27 +23,21 @@ export const ThemeProvider = ({
   as: Component = 'div',
   ...rest
 }: ThemeProviderProps) => {
-  const parentTheme = useTheme();
-  const isRootProvider = !parentTheme.theme;
-
   return (
-    <ThemeContext.Provider
+    <ThemeContext
       value={{
-        theme,        
+        theme,
       }}
     >
-      {isRootProvider && children}      
-      {!isRootProvider && (
-       <Component className={classes(className)} data-theme={theme} {...rest}>
-          {children}
-        </Component>
-      )}
-    </ThemeContext.Provider>
+      <Component className={classes(className)} data-theme={theme} {...rest}>
+        {children}
+      </Component>
+    </ThemeContext>
   );
 };
 
 export function useTheme() {
-  const currentTheme = useContext(ThemeContext);
+  const currentTheme = use(ThemeContext);
   return currentTheme;
 }
 

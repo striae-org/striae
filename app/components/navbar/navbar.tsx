@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useContext } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import styles from './navbar.module.css';
 import { SignOut } from '../actions/signout';
 import { ManageProfile } from '../user/manage-profile';
@@ -62,7 +62,7 @@ export const Navbar = ({
   onOpenImageNotes,
   archiveDetails,
 }: NavbarProps) => {
-  const { user } = useContext(AuthContext);
+  const { user } = use(AuthContext);
   const [userBadgeId, setUserBadgeId] = useState<string>('');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useContext, useCallback } from 'react';
+import { use, useState, useEffect, useRef, useCallback } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import {
@@ -42,7 +42,7 @@ export const CaseImport = ({
   onClose, 
   onImportComplete 
 }: CaseImportProps) => {
-  const { user } = useContext(AuthContext);
+  const { user } = use(AuthContext);
   
   // Use our custom hooks
   const {

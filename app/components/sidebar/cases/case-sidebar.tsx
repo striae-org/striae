@@ -61,7 +61,7 @@ export const CaseSidebar = ({
   initialConfirmationSummary,
 }: CaseSidebarProps) => {
   
-  const [, setFileError] = useState('');
+  const [fileError, setFileError] = useState('');
   const [canUploadNewFile, setCanUploadNewFile] = useState(true);
   const [uploadFileError, setUploadFileError] = useState('');
   const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
@@ -331,7 +331,7 @@ return (
           currentCase={currentCase}
           isReadOnly={isReadOnly}
           canUploadNewFile={canUploadNewFile}
-          uploadFileError={uploadFileError}
+          uploadFileError={fileError || uploadFileError}
           onFilesChanged={setFiles}
           onUploadPermissionCheck={checkFileUploadPermissions}
           currentFiles={files}

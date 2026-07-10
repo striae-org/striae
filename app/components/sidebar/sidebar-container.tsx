@@ -36,7 +36,7 @@ interface SidebarContainerProps {
 
 export const SidebarContainer: React.FC<SidebarContainerProps> = (props) => {
   const [isFooterModalOpen, setIsFooterModalOpen] = useState(false);
-  const year = new Date().getFullYear();
+  const [year] = useState(() => new Date().getFullYear());
   const appVersion = getAppVersion();
 
   const {

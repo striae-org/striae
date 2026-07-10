@@ -20,6 +20,11 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-07-09] - *[Patch Release v8.1.1](https://github.com/striae-org/striae/releases/tag/v8.1.1)*
+
+- **⚙️ Dependency Refresh** - Bumped the app and worker toolchain to current compatible versions, including React Router to v8.2.0, Vite to v8.1.4, Wrangler to v4.110.0, Vitest to v4.1.10, and the Cloudflare Vite plugin to v1.44.0.
+- **🧰 Tooling Alignment** - Refreshed package-lock files, worker package manifests, and Wrangler example configs across the app and all workers to keep the release consistent and deploy-ready.
+
 ## [2026-06-20] - *[Minor Release v8.1.0](https://github.com/striae-org/striae/releases/tag/v8.1.0)*
 
 - **⚛️ React Router v8 Major Bump** - Upgraded React Router from v7 to v8, replaced `cloudflareDevProxy` with `@cloudflare/vite-plugin`, and removed v8 future flags now default in the new major.

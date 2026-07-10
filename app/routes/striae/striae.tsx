@@ -67,7 +67,7 @@ export const Striae = ({ user }: StriaePage) => {
   const [initialConfirmationSummary, setInitialConfirmationSummary] = useState<UserConfirmationSummaryDocument | undefined>(undefined);
 
   // Annotation states
-  const [activeAnnotations, setActiveAnnotations] = useState<Set<string>>(new Set());
+  const [activeAnnotations, setActiveAnnotations] = useState<Set<string>>(() => new Set());
   const [annotationData, setAnnotationData] = useState<AnnotationData | null>(null);
   const [annotationRefreshTrigger, setAnnotationRefreshTrigger] = useState(0);
   const [confirmationSaveVersion, setConfirmationSaveVersion] = useState(0);

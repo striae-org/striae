@@ -30,7 +30,7 @@ export const Toolbar = ({
   isConfirmed = false,
   isNotesOpen = false
 }: ToolbarProps) => {
-  const [activeTools, setActiveTools] = useState<Set<ToolId>>(new Set());
+  const [activeTools, setActiveTools] = useState<Set<ToolId>>(() => new Set());
   const [isVisible, setIsVisible] = useState(true);
   const [showColorSelector, setShowColorSelector] = useState(false);
 
