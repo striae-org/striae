@@ -385,6 +385,26 @@
   }
 }
 
+.legalNotice {
+  text-align: center;
+  color: var(--textLight);
+  border-top: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+  margin-top: var(--spaceL);
+  padding-top: var(--spaceM);
+  font-size: var(--fontSizeBodyXS);
+}
+
+.legalNoticeLink {
+  color: var(--textLight);
+  text-decoration: none;
+}
+
+.legalNoticeLink:hover {
+  color: var(--textBody);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   .error,

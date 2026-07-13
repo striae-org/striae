@@ -24,7 +24,7 @@ import styles from './login.module.css';
 import { Striae } from '~/routes/striae/striae';
 import { getUserData, createUser } from '~/utils/data';
 import { auditService } from '~/services/audit';
-import { generateUniqueId } from '~/utils/common';
+import { generateUniqueId, getAppVersion } from '~/utils/common';
 import { evaluatePasswordPolicy, buildActionCodeSettings, userHasMFA } from '~/utils/auth';
 import type { UserData } from '~/types';
 
@@ -71,6 +71,9 @@ export const Login = () => {
   const [badgeId, setBadgeId] = useState('');
   const [confirmPasswordValue, setConfirmPasswordValue] = useState('');
   
+  const [year] = useState(() => new Date().getFullYear());
+  const appVersion = getAppVersion();
+
   // MFA state
   const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
   const [showMfaVerification, setShowMfaVerification] = useState(false);
@@ -677,6 +680,10 @@ export const Login = () => {
                 {isLogin ? 'Register' : 'Login'}
               </button>
             </p>
+            <div className={styles.legalNotice}>
+              <a href={`https://github.com/striae-org/striae/releases/tag/v${appVersion}`} className={styles.legalNoticeLink} target="_blank" rel="noopener noreferrer">Striae v{appVersion}</a> © {year}.{' '}
+              Licensed under Apache 2.0.<br />Patent Pending.
+            </div>
           </div>
         </div>
       )}
