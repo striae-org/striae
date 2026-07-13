@@ -20,6 +20,12 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-07-13] - *[Patch Release v8.1.2](https://github.com/striae-org/striae/releases/tag/v8.1.2)*
+
+- **⚛️ React 19 Migration Completion** - Completed React 19 context, provider, and `forwardRef` migration across audit, canvas, auth, form, navbar, sidebar, and theme-provider components; removed now-unnecessary ESLint disable directives.
+- **⚖️ Legal Notice Update** - Added "Patent Pending" to the sidebar footer copyright line and introduced a matching legal notice section on the login screen.
+- **⚙️ Dependency Refresh** - Bumped root and data-worker dependencies, refreshed lockfiles, and updated Wrangler example compatibility dates across all workers.
+
 ## [2026-07-09] - *[Patch Release v8.1.1](https://github.com/striae-org/striae/releases/tag/v8.1.1)*
 
 - **⚙️ Dependency Refresh** - Bumped the app and worker toolchain to current compatible versions, including React Router to v8.2.0, Vite to v8.1.4, Wrangler to v4.110.0, Vitest to v4.1.10, and the Cloudflare Vite plugin to v1.44.0.
