@@ -1,0 +1,43 @@
+Striae
+
+Striae is a specialized, cloud-native platform designed to streamline
+forensic firearms identification by providing an intuitive environment for
+digital comparison image annotation, authenticated confirmations, and
+automated report generation.
+
+Copyright (c) 2025 Stephen J. Lu
+
+This product includes third-party software components that are licensed
+separately by their respective copyright holders.
+
+Third-party attribution summary
+
+1. Firebase JavaScript SDK and related Firebase packages
+   - Package family: firebase, @firebase/*
+   - License: Apache-2.0
+   - Upstream: https://github.com/firebase/firebase-js-sdk
+
+2. Additional Apache-2.0 licensed transitive dependencies discovered in
+   production dependency resolution
+   - Packages include: @grpc/grpc-js, @grpc/proto-loader, long,
+     faye-websocket, websocket-driver, websocket-extensions, web-vitals
+
+3. Multi-license packages in production dependency resolution
+   - Package: jszip
+     - License: MIT OR GPL-3.0-or-later
+     - Upstream: https://github.com/Stuk/jszip
+   - Package: pako
+     - License: MIT AND Zlib
+     - Upstream: https://github.com/nodeca/pako
+
+Audit notes
+
+- Audit date: 2026-07-20
+- Scope: npm production dependencies only
+- Method: license-checker audit of the locked production tree
+  (npm ci --omit=dev from package-lock.json)
+- Result: no separate upstream NOTICE files were detected in installed
+  production dependencies during this audit. This NOTICE records
+  attribution-relevant Apache-2.0 components.
+- Full license texts and per-package inventory are provided in
+   THIRD_PARTY_LICENSES.md.
