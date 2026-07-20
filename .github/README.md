@@ -20,6 +20,12 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-07-19] - *[Patch Release v8.1.3](https://github.com/striae-org/striae/releases/tag/v8.1.3)*
+
+- **📜 Third-Party Attribution & License Inventory** - Added a top-level `NOTICE` file and `THIRD_PARTY_LICENSES.md` inventory, plus a `generate:third-party-licenses` script (`scripts/generate-third-party-licenses.cjs`) to reproducibly regenerate the license report; registered both files in the npm package allowlist.
+- **🧹 Lint Toolchain Fix** - Reverted `typescript` from `^7.0.2` to `^6.0.3`; the TypeScript 7 native port's minimal API crashed `@typescript-eslint/typescript-estree` during `npm run lint`, and no released `typescript-eslint` supports TypeScript 7 yet.
+- **⚙️ Dependency Refresh** - Bumped root dependencies (`isbot`, `@cloudflare/vite-plugin`, `@cloudflare/workers-types`, `@eslint-react/eslint-plugin`, `firebase-admin`, `vite`, `wrangler`), bumped Wrangler and `@cloudflare/vitest-pool-workers` across workers, added an `allowScripts` allowlist, and refreshed Wrangler example compatibility dates.
+
 ## [2026-07-13] - *[Patch Release v8.1.2](https://github.com/striae-org/striae/releases/tag/v8.1.2)*
 
 - **⚛️ React 19 Migration Completion** - Completed React 19 context, provider, and `forwardRef` migration across audit, canvas, auth, form, navbar, sidebar, and theme-provider components; removed now-unnecessary ESLint disable directives.
