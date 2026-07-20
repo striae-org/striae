@@ -110,6 +110,8 @@ function generateThirdPartyLicenses() {
   }
 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'striae-license-audit-'));
+
+  try {
   const tempPackageJsonPath = path.join(tempDir, 'package.json');
   const tempReportPath = path.join(tempDir, 'license-checker.json');
 
@@ -239,6 +241,17 @@ function generateThirdPartyLicenses() {
   console.log(`Wrote ${OUTPUT_FILE}`);
   console.log(`Dependencies documented: ${entries.length}`);
   console.log(`Unresolved license text entries: ${unresolvedCount}`);
+  } finally {
+    try {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    } catch (cleanupError) {
+      console.warn(
+        `Warning: failed to remove temporary directory ${tempDir}: ${
+          cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
+        }`
+      );
+    }
+  }
 }
 
 if (require.main === module) {
