@@ -73,8 +73,6 @@ function findFallbackLicenseFile(packagePath) {
     'COPYING.txt',
     'NOTICE',
     'NOTICE.txt',
-    'README.md',
-    'README',
   ];
 
   for (const filename of candidates) {
@@ -220,10 +218,6 @@ function generateThirdPartyLicenses() {
 
     if (entry.repository) {
       lines.push(`- Repository: ${entry.repository}`);
-    }
-
-    if (licenseSource) {
-      lines.push(`- License file source: ${licenseSource}`);
     }
 
     lines.push('');

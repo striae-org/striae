@@ -144,7 +144,6 @@ This file contains third-party license attributions for production dependencies 
 - License: MIT OR Apache-2.0
 - Publisher: Cloudflare Workers DevProd Team
 - Repository: https://github.com/cloudflare/workerd
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@cloudflare\workers-types\README.md
 
 ```text
 # Cloudflare Workers Types
@@ -288,7 +287,6 @@ Wrangler can also generate this for you automatically from your `wrangler.toml` 
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\ai\README.md
 
 ```text
 # @firebase/ai
@@ -303,7 +301,6 @@ This is the Firebase AI component of the Firebase JS SDK.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\analytics\README.md
 
 ```text
 # @firebase/analytics
@@ -318,7 +315,6 @@ This is the Firebase Analytics component of the Firebase JS SDK.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\analytics-compat\README.md
 
 ```text
 # @firebase/analytics-compat
@@ -333,7 +329,6 @@ This is the compatibility layer for the Firebase Analytics component of the Fire
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\analytics-types\README.md
 
 ```text
 # @firebase/analytics-types
@@ -346,7 +341,6 @@ This is the compatibility layer for the Firebase Analytics component of the Fire
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app\README.md
 
 ```text
 # @firebase/app
@@ -361,7 +355,6 @@ This package coordinates the communication between the different Firebase compon
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app-check\README.md
 
 ```text
 # @firebase/app-check
@@ -376,7 +369,6 @@ This is the Firebase App Check component of the Firebase JS SDK.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app-check-compat\README.md
 
 ```text
 # @firebase/app-check-compat
@@ -391,7 +383,6 @@ This is the Firebase App Check component (compat version) of the Firebase JS SDK
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app-check-interop-types\README.md
 
 ```text
 # @firebase/app-check-interop-types
@@ -404,7 +395,6 @@ This is the Firebase App Check component (compat version) of the Firebase JS SDK
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app-check-types\README.md
 
 ```text
 # @firebase/app-check-types
@@ -417,7 +407,6 @@ This is the Firebase App Check component (compat version) of the Firebase JS SDK
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app-compat\README.md
 
 ```text
 # @firebase/app-compat
@@ -432,7 +421,6 @@ This is the compatibility layer for the Firebase App package, which recreates th
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app-types\README.md
 
 ```text
 # @firebase/app-types
@@ -445,7 +433,6 @@ This is the compatibility layer for the Firebase App package, which recreates th
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\auth\README.md
 
 ```text
 # @firebase/auth
@@ -594,7 +581,6 @@ serve the static files the browser robot uses.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\auth-compat\README.md
 
 ```text
 # @firebase/auth-compat
@@ -609,7 +595,6 @@ This is a compatability layer to for the Firebase Authentication SDK
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\auth-interop-types\README.md
 
 ```text
 # @firebase/auth-interop-types
@@ -622,7 +607,6 @@ This is a compatability layer to for the Firebase Authentication SDK
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\auth-types\README.md
 
 ```text
 # @firebase/auth-types
@@ -635,7 +619,6 @@ This is a compatability layer to for the Firebase Authentication SDK
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\component\README.md
 
 ```text
 # @firebase/component
@@ -657,7 +640,6 @@ import { Component } from '@firebase/component';
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\data-connect\README.md
 
 ```text
 # Firebase Data Connect
@@ -672,7 +654,6 @@ Check `test/dataconnect.yaml` to ensure that the correct values are filled in.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\database\README.md
 
 ```text
 # @firebase/database
@@ -687,7 +668,6 @@ This is the Firebase Realtime Database component of the Firebase JS SDK.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\database-compat\README.md
 
 ```text
 # @firebase/database-compat
@@ -702,7 +682,6 @@ This is the compatibility layer for the Firebase Realtime Database component of 
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\database-types\README.md
 
 ```text
 # @firebase/database-types
@@ -715,7 +694,6 @@ This is the compatibility layer for the Firebase Realtime Database component of 
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\firestore\README.md
 
 ```text
 # @firebase/firestore
@@ -749,7 +727,6 @@ details specific to the Cloud Firestore code and tests.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\firestore-compat\README.md
 
 ```text
 # @firebase/firestore-compat
@@ -783,7 +760,6 @@ details specific to the Cloud Firestore code and tests.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\firestore-types\README.md
 
 ```text
 # @firebase/firestore-types
@@ -796,7 +772,6 @@ details specific to the Cloud Firestore code and tests.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\functions\README.md
 
 ```text
 # `@firebase/functions`
@@ -811,7 +786,6 @@ This is the Firebase Functions component of the Firebase JS SDK.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app\README.md
 
 ```text
 # @firebase/app
@@ -826,7 +800,6 @@ This package coordinates the communication between the different Firebase compon
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\functions-types\README.md
 
 ```text
 # @firebase/functions-types
@@ -839,7 +812,6 @@ This package coordinates the communication between the different Firebase compon
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app\README.md
 
 ```text
 # @firebase/app
@@ -854,7 +826,6 @@ This package coordinates the communication between the different Firebase compon
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\installations-compat\README.md
 
 ```text
 # @firebase/installations-compat
@@ -869,7 +840,6 @@ This is a compatability layer  for the Firebase Installations SDK
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app\README.md
 
 ```text
 # @firebase/app
@@ -884,7 +854,6 @@ This package coordinates the communication between the different Firebase compon
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\logger\README.md
 
 ```text
 # @firebase/logger
@@ -933,7 +902,6 @@ Each log will be formatted in the following manner:
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\messaging\README.md
 
 ```text
 # @firebase/messaging
@@ -948,7 +916,6 @@ This is the Firebase Cloud Messaging component of the Firebase JS SDK.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\messaging-compat\README.md
 
 ```text
 # @firebase/messaging-compat
@@ -963,7 +930,6 @@ This is the compat package that recreates the v8 APIs.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\messaging-interop-types\README.md
 
 ```text
 # @firebase/messaging-interop-types
@@ -977,7 +943,6 @@ supported [firebase](https://www.npmjs.com/package/firebase) package.**
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\performance\README.md
 
 ```text
 # @firebase/performance
@@ -992,7 +957,6 @@ This is the Firebase Performance component of the Firebase JS SDK.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\performance-compat\README.md
 
 ```text
 # @firebase/performance-compat
@@ -1007,7 +971,6 @@ This is the compat package that recreates the  v8 APIs.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\app\README.md
 
 ```text
 # @firebase/app
@@ -1022,7 +985,6 @@ This package coordinates the communication between the different Firebase compon
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\remote-config\README.md
 
 ```text
 # @firebase/remote-config
@@ -1059,7 +1021,6 @@ End-to-end test:
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\remote-config-compat\README.md
 
 ```text
 # @firebase/remote-compat
@@ -1074,7 +1035,6 @@ This is the compat package that recreates the v8 APIs.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\remote-config-types\README.md
 
 ```text
 # @firebase/remoteconfig-types
@@ -1087,7 +1047,6 @@ This is the compat package that recreates the v8 APIs.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\storage\README.md
 
 ```text
 # @firebase/storage
@@ -1102,7 +1061,6 @@ This is the Cloud Storage component of the Firebase JS SDK.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\storage-compat\README.md
 
 ```text
 # @firebase/storage
@@ -1117,7 +1075,6 @@ This is the Cloud Storage component of the Firebase JS SDK.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\storage-types\README.md
 
 ```text
 # @firebase/storage-types
@@ -1130,7 +1087,6 @@ This is the Cloud Storage component of the Firebase JS SDK.
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\util\README.md
 
 ```text
 # @firebase/util
@@ -1164,7 +1120,6 @@ const utils = require('@firebase/util');
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@firebase\webchannel-wrapper\README.md
 
 ```text
 # @firebase/webchannel-wrapper
@@ -1207,7 +1162,6 @@ const webchannelWrapper = require('@firebase/webchannel-wrapper');
 - License: Apache-2.0
 - Publisher: Google Inc.
 - Repository: https://github.com/grpc/grpc-node/tree/master/packages/grpc-js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@grpc\grpc-js\LICENSE
 
 ```text
 Apache License
@@ -1418,7 +1372,6 @@ Apache License
 - License: Apache-2.0
 - Publisher: Google Inc.
 - Repository: https://github.com/grpc/grpc-node
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@grpc\proto-loader\LICENSE
 
 ```text
 Apache License
@@ -1629,7 +1582,6 @@ Apache License
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/dcodeIO/protobuf.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@protobufjs\aspromise\LICENSE
 
 ```text
 Copyright (c) 2016, Daniel Wirtz  All rights reserved.
@@ -1665,7 +1617,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/dcodeIO/protobuf.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@protobufjs\base64\LICENSE
 
 ```text
 Copyright (c) 2016, Daniel Wirtz  All rights reserved.
@@ -1701,7 +1652,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/dcodeIO/protobuf.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@protobufjs\codegen\LICENSE
 
 ```text
 Copyright (c) 2016, Daniel Wirtz  All rights reserved.
@@ -1737,7 +1687,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/dcodeIO/protobuf.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@protobufjs\eventemitter\LICENSE
 
 ```text
 Copyright (c) 2016, Daniel Wirtz  All rights reserved.
@@ -1773,7 +1722,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/dcodeIO/protobuf.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@protobufjs\fetch\LICENSE
 
 ```text
 Copyright (c) 2016, Daniel Wirtz  All rights reserved.
@@ -1809,7 +1757,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/dcodeIO/protobuf.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@protobufjs\float\LICENSE
 
 ```text
 Copyright (c) 2016, Daniel Wirtz  All rights reserved.
@@ -1845,7 +1792,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/dcodeIO/protobuf.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@protobufjs\path\LICENSE
 
 ```text
 Copyright (c) 2016, Daniel Wirtz  All rights reserved.
@@ -1881,7 +1827,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/dcodeIO/protobuf.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@protobufjs\pool\LICENSE
 
 ```text
 Copyright (c) 2016, Daniel Wirtz  All rights reserved.
@@ -1917,7 +1862,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/protobufjs/protobuf.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@protobufjs\utf8\LICENSE
 
 ```text
 Copyright (c) 2016, Daniel Wirtz  All rights reserved.
@@ -1952,7 +1896,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 - License: MIT
 - Repository: https://github.com/remix-run/react-router
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@react-router\cloudflare\LICENSE.md
 
 ```text
 MIT License
@@ -1984,7 +1927,6 @@ SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\@types\node\LICENSE
 
 ```text
 MIT License
@@ -2015,7 +1957,6 @@ MIT License
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/chalk/ansi-regex
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\ansi-regex\license
 
 ```text
 MIT License
@@ -2034,7 +1975,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/chalk/ansi-styles
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\wrap-ansi\node_modules\ansi-styles\license
 
 ```text
 MIT License
@@ -2053,7 +1993,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/sindresorhus/camelcase
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\camelcase\license
 
 ```text
 MIT License
@@ -2072,7 +2011,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: ISC
 - Publisher: Ben Coe
 - Repository: https://github.com/yargs/cliui
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\qrcode\node_modules\cliui\LICENSE.txt
 
 ```text
 Copyright (c) 2015, Contributors
@@ -2096,7 +2034,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 - License: ISC
 - Publisher: Ben Coe
 - Repository: https://github.com/yargs/cliui
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\cliui\LICENSE.txt
 
 ```text
 Copyright (c) 2015, Contributors
@@ -2120,7 +2057,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 - License: MIT
 - Publisher: Heather Arthur
 - Repository: https://github.com/Qix-/color-convert
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\wrap-ansi\node_modules\color-convert\LICENSE
 
 ```text
 Copyright (c) 2011-2016 Heather Arthur <fayearthur@gmail.com>
@@ -2150,7 +2086,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 - License: MIT
 - Publisher: DY
 - Repository: https://github.com/colorjs/color-name
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\wrap-ansi\node_modules\color-name\LICENSE
 
 ```text
 The MIT License (MIT)
@@ -2167,7 +2102,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 - License: MIT
 - Repository: https://github.com/unjs/cookie-es
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\cookie-es\LICENSE
 
 ```text
 MIT License
@@ -2205,7 +2139,6 @@ SOFTWARE.
 - License: MIT
 - Publisher: Isaac Z. Schlueter
 - Repository: https://github.com/isaacs/core-util-is
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\core-util-is\LICENSE
 
 ```text
 Copyright Node.js contributors. All rights reserved.
@@ -2234,7 +2167,6 @@ IN THE SOFTWARE.
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/sindresorhus/decamelize
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\decamelize\license
 
 ```text
 The MIT License (MIT)
@@ -2264,7 +2196,6 @@ THE SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/tcort/dijkstrajs
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\dijkstrajs\LICENSE.md
 
 ```text
 ```
@@ -2293,7 +2224,6 @@ THE SOFTWARE.
 - License: MIT
 - Publisher: Mathias Bynens
 - Repository: https://github.com/mathiasbynens/emoji-regex
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\emoji-regex\LICENSE-MIT.txt
 
 ```text
 Copyright Mathias Bynens <https://mathiasbynens.be/>
@@ -2323,7 +2253,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 - License: MIT
 - Publisher: Luke Edwards
 - Repository: https://github.com/lukeed/escalade
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\escalade\license
 
 ```text
 MIT License
@@ -2342,7 +2271,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: Apache-2.0
 - Publisher: James Coglan
 - Repository: https://github.com/faye/faye-websocket-node
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\faye-websocket\LICENSE.md
 
 ```text
 Copyright 2010-2021 James Coglan
@@ -2364,7 +2292,6 @@ specific language governing permissions and limitations under the License.
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/sindresorhus/find-up
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\find-up\license
 
 ```text
 MIT License
@@ -2383,7 +2310,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: Apache-2.0
 - Publisher: Firebase
 - Repository: https://github.com/firebase/firebase-js-sdk
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\firebase\README.md
 
 ```text
 <!-- BADGES -->
@@ -2608,7 +2534,6 @@ Please see [Environment Support](https://firebase.google.com/support/guides/envi
 - License: ISC
 - Publisher: Stefan Penner
 - Repository: https://github.com/stefanpenner/get-caller-file
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\get-caller-file\LICENSE.md
 
 ```text
 ISC License (ISC)
@@ -2624,7 +2549,6 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH RE
 - License: MIT
 - Publisher: Tim Caswell
 - Repository: https://github.com/creationix/http-parser-js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\http-parser-js\LICENSE.md
 
 ```text
 Copyright (c) 2015 Tim Caswell (https://github.com/creationix) and other
@@ -2743,7 +2667,6 @@ of nodejs/io.js:
 - License: ISC
 - Publisher: Jake Archibald
 - Repository: https://github.com/jakearchibald/idb
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\idb\LICENSE
 
 ```text
 ISC License (ISC)
@@ -2758,7 +2681,6 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH RE
 
 - License: MIT
 - Repository: https://github.com/calvinmetcalf/immediate
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\immediate\LICENSE.txt
 
 ```text
 Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, Domenic Denicola, Brian Cavalier
@@ -2787,7 +2709,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 - License: ISC
 - Repository: https://github.com/isaacs/inherits
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\inherits\LICENSE
 
 ```text
 The ISC License
@@ -2812,7 +2733,6 @@ PERFORMANCE OF THIS SOFTWARE.
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/sindresorhus/is-fullwidth-code-point
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\is-fullwidth-code-point\license
 
 ```text
 MIT License
@@ -2831,7 +2751,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: MIT
 - Publisher: Julian Gruber
 - Repository: https://github.com/juliangruber/isarray
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\isarray\README.md
 
 ```text
 # isarray
@@ -2899,7 +2818,6 @@ SOFTWARE.
 
 - License: Unlicense
 - Repository: https://github.com/omrilotan/isbot
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\isbot\LICENSE
 
 ```text
 # Unlicense
@@ -2935,7 +2853,6 @@ For more information, please refer to <http://unlicense.org/>
 - License: (MIT OR GPL-3.0-or-later)
 - Publisher: Stuart Knightley
 - Repository: https://github.com/Stuk/jszip
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\jszip\LICENSE.markdown
 
 ```text
 JSZip is dual licensed. At your choice you may use it under the MIT license *or* the GPLv3
@@ -3595,7 +3512,6 @@ copy of the Program in return for a fee.
 
 - License: MIT
 - Repository: https://github.com/calvinmetcalf/lie
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\lie\license.md
 
 ```text
 #Copyright (c) 2014-2018 Calvin Metcalf, Jordan Harband
@@ -3612,7 +3528,6 @@ The above copyright notice and this permission notice shall be included in all c
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/sindresorhus/locate-path
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\locate-path\license
 
 ```text
 MIT License
@@ -3631,7 +3546,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: MIT
 - Publisher: John-David Dalton
 - Repository: https://github.com/lodash/lodash
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\lodash.camelcase\LICENSE
 
 ```text
 Copyright jQuery Foundation and other contributors <https://jquery.org/>
@@ -3688,7 +3602,6 @@ terms above.
 - License: Apache-2.0
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/dcodeIO/long.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\long\LICENSE
 
 ```text
 Apache License
@@ -3899,7 +3812,6 @@ Apache License
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/sindresorhus/p-limit
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\p-limit\license
 
 ```text
 MIT License
@@ -3918,7 +3830,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/sindresorhus/p-locate
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\p-locate\license
 
 ```text
 MIT License
@@ -3937,7 +3848,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/sindresorhus/p-try
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\p-try\license
 
 ```text
 MIT License
@@ -3955,7 +3865,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 - License: (MIT AND Zlib)
 - Repository: https://github.com/nodeca/pako
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\pako\LICENSE
 
 ```text
 (The MIT License)
@@ -3986,7 +3895,6 @@ THE SOFTWARE.
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/sindresorhus/path-exists
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\path-exists\license
 
 ```text
 MIT License
@@ -4004,7 +3912,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 - License: MIT
 - Repository: https://github.com/lukeapage/pngjs
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\pngjs\LICENSE
 
 ```text
 pngjs2 original work Copyright (c) 2015 Luke Page & Original Contributors
@@ -4033,7 +3940,6 @@ THE SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/calvinmetcalf/process-nextick-args
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\process-nextick-args\license.md
 
 ```text
 # Copyright (c) 2015 Calvin Metcalf
@@ -4062,7 +3968,6 @@ SOFTWARE.**
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
 - Repository: https://github.com/protobufjs/protobuf.js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\protobufjs\LICENSE
 
 ```text
 This license applies to all parts of protobuf.js except those files
@@ -4111,7 +4016,6 @@ support library is itself covered by the above license.
 - License: MIT
 - Publisher: Ryan Day
 - Repository: https://github.com/soldair/node-qrcode
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\qrcode\license
 
 ```text
 The MIT License (MIT)
@@ -4130,7 +4034,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: MIT
 - Publisher: Alexey Vasiliev
 - Repository: https://github.com/le0pard/re2js
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\re2js\LICENSE
 
 ```text
 MIT License
@@ -4160,7 +4063,6 @@ SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/facebook/react
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\react\LICENSE
 
 ```text
 MIT License
@@ -4190,7 +4092,6 @@ SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/facebook/react
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\react-dom\LICENSE
 
 ```text
 MIT License
@@ -4221,7 +4122,6 @@ SOFTWARE.
 - License: MIT
 - Publisher: Remix Software
 - Repository: https://github.com/remix-run/react-router
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\react-router\LICENSE.md
 
 ```text
 MIT License
@@ -4253,7 +4153,6 @@ SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/nodejs/readable-stream
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\readable-stream\LICENSE
 
 ```text
 Node.js is licensed for use as follows:
@@ -4310,7 +4209,6 @@ IN THE SOFTWARE.
 - License: MIT
 - Publisher: Troy Goode
 - Repository: https://github.com/troygoode/node-require-directory
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\require-directory\LICENSE
 
 ```text
 The MIT License (MIT)
@@ -4342,7 +4240,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 - License: ISC
 - Publisher: Ben Coe
 - Repository: https://github.com/yargs/require-main-filename
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\require-main-filename\LICENSE.txt
 
 ```text
 Copyright (c) 2016, Contributors
@@ -4366,7 +4263,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 - License: MIT
 - Publisher: Feross Aboukhadijeh
 - Repository: https://github.com/feross/safe-buffer
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\safe-buffer\LICENSE
 
 ```text
 The MIT License (MIT)
@@ -4396,7 +4292,6 @@ THE SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/facebook/react
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\scheduler\LICENSE
 
 ```text
 MIT License
@@ -4427,7 +4322,6 @@ SOFTWARE.
 - License: ISC
 - Publisher: Ben Coe
 - Repository: https://github.com/yargs/set-blocking
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\set-blocking\LICENSE.txt
 
 ```text
 Copyright (c) 2016, Contributors
@@ -4451,7 +4345,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 - License: MIT
 - Publisher: YuzuJS
 - Repository: https://github.com/YuzuJS/setImmediate
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\setimmediate\LICENSE.txt
 
 ```text
 Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, and Domenic Denicola
@@ -4480,7 +4373,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/nodejs/string_decoder
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\string_decoder\LICENSE
 
 ```text
 Node.js is licensed for use as follows:
@@ -4537,7 +4429,6 @@ IN THE SOFTWARE.
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/sindresorhus/string-width
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\string-width\license
 
 ```text
 MIT License
@@ -4556,7 +4447,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/chalk/strip-ansi
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\strip-ansi\license
 
 ```text
 MIT License
@@ -4575,7 +4465,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: 0BSD
 - Publisher: Microsoft Corp.
 - Repository: https://github.com/Microsoft/tslib
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\tslib\LICENSE.txt
 
 ```text
 Copyright (c) Microsoft Corporation.
@@ -4596,7 +4485,6 @@ PERFORMANCE OF THIS SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/nodejs/undici
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\undici-types\LICENSE
 
 ```text
 MIT License
@@ -4627,7 +4515,6 @@ SOFTWARE.
 - License: MIT
 - Publisher: Nathan Rajlich
 - Repository: https://github.com/TooTallNate/util-deprecate
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\util-deprecate\LICENSE
 
 ```text
 (The MIT License)
@@ -4661,7 +4548,6 @@ OTHER DEALINGS IN THE SOFTWARE.
 - License: Apache-2.0
 - Publisher: Philip Walton
 - Repository: https://github.com/GoogleChrome/web-vitals
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\web-vitals\LICENSE
 
 ```text
 Apache License
@@ -4872,7 +4758,6 @@ Apache License
 - License: Apache-2.0
 - Publisher: James Coglan
 - Repository: https://github.com/faye/websocket-driver-node
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\websocket-driver\LICENSE.md
 
 ```text
 Copyright 2010-2026 James Coglan
@@ -4894,7 +4779,6 @@ specific language governing permissions and limitations under the License.
 - License: Apache-2.0
 - Publisher: James Coglan
 - Repository: https://github.com/faye/websocket-extensions-node
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\websocket-extensions\LICENSE.md
 
 ```text
 Copyright 2014-2020 James Coglan
@@ -4916,7 +4800,6 @@ specific language governing permissions and limitations under the License.
 - License: ISC
 - Publisher: nexdrew
 - Repository: https://github.com/nexdrew/which-module
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\which-module\LICENSE
 
 ```text
 Copyright (c) 2016, Contributors
@@ -4939,7 +4822,6 @@ THIS SOFTWARE.
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/chalk/wrap-ansi
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\qrcode\node_modules\wrap-ansi\license
 
 ```text
 MIT License
@@ -4958,7 +4840,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: MIT
 - Publisher: Sindre Sorhus
 - Repository: https://github.com/chalk/wrap-ansi
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\wrap-ansi\license
 
 ```text
 MIT License
@@ -4977,7 +4858,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - License: ISC
 - Publisher: Ben Coe
 - Repository: https://github.com/yargs/y18n
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\qrcode\node_modules\y18n\LICENSE
 
 ```text
 Copyright (c) 2015, Contributors
@@ -5000,7 +4880,6 @@ THIS SOFTWARE.
 - License: ISC
 - Publisher: Ben Coe
 - Repository: https://github.com/yargs/y18n
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\y18n\LICENSE
 
 ```text
 Copyright (c) 2015, Contributors
@@ -5022,7 +4901,6 @@ THIS SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/yargs/yargs
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\qrcode\node_modules\yargs\LICENSE
 
 ```text
 MIT License
@@ -5052,7 +4930,6 @@ THE SOFTWARE.
 
 - License: MIT
 - Repository: https://github.com/yargs/yargs
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\yargs\LICENSE
 
 ```text
 MIT License
@@ -5083,7 +4960,6 @@ THE SOFTWARE.
 - License: ISC
 - Publisher: Ben Coe
 - Repository: https://github.com/yargs/yargs-parser
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\qrcode\node_modules\yargs-parser\LICENSE.txt
 
 ```text
 Copyright (c) 2016, Contributors
@@ -5107,7 +4983,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 - License: ISC
 - Publisher: Ben Coe
 - Repository: https://github.com/yargs/yargs-parser
-- License file source: C:\Users\Steph\AppData\Local\Temp\striae-license-audit-XzldKU\node_modules\yargs-parser\LICENSE.txt
 
 ```text
 Copyright (c) 2016, Contributors
