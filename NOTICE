@@ -22,17 +22,20 @@ Third-party attribution summary
    - Packages include: @grpc/grpc-js, @grpc/proto-loader, long,
      faye-websocket, websocket-driver, websocket-extensions, web-vitals
 
-3. Dual-license package in production dependency resolution
-   - Package: @cloudflare/workers-types
-   - License: MIT OR Apache-2.0
-   - Upstream: https://github.com/cloudflare/workerd
+3. Multi-license packages in production dependency resolution
+   - Package: jszip
+     - License: MIT OR GPL-3.0-or-later
+     - Upstream: https://github.com/Stuk/jszip
+   - Package: pako
+     - License: MIT AND Zlib
+     - Upstream: https://github.com/nodeca/pako
 
 Audit notes
 
-- Audit date: 2026-07-19
-- Scope: production dependency graph resolved from package.json
-- Method: npm install in isolated temp directory and license scan via
-  license-checker
+- Audit date: 2026-07-20
+- Scope: npm production dependencies only
+- Method: license-checker audit of the locked production tree
+  (npm ci --omit=dev from package-lock.json)
 - Result: no separate upstream NOTICE files were detected in installed
   production dependencies during this audit. This NOTICE records
   attribution-relevant Apache-2.0 components.
