@@ -14,7 +14,7 @@ v8.1.3 is a patch release that adds formal third-party attribution and license i
 
 ### Third-Party Attribution and License Inventory
 
-- Added a top-level `NOTICE` file recording attribution-relevant Apache-2.0 components (Firebase SDK family, gRPC and related transitive dependencies) and the dual-licensed `@cloudflare/workers-types` package.
+- Added a top-level `NOTICE` file recording attribution-relevant Apache-2.0 components (Firebase SDK family, gRPC and related transitive dependencies) and multi-license production dependencies (`jszip` under MIT OR GPL-3.0-or-later, `pako` under MIT AND Zlib).
 - Added a `THIRD_PARTY_LICENSES.md` inventory containing the full per-package license texts for the resolved production dependency graph.
 - Added `scripts/generate-third-party-licenses.cjs` and the `generate:third-party-licenses` npm script to reproducibly regenerate the license inventory via an isolated production dependency scan.
 - Registered `NOTICE` and `THIRD_PARTY_LICENSES.md` in the npm package files allowlist so the attribution artifacts ship with the published package.

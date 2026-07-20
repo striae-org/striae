@@ -109,6 +109,18 @@ function toTableCell(value) {
   return String(value || '').replace(/\|/g, '\\|');
 }
 
+function getGeneratedDate() {
+  // Honor SOURCE_DATE_EPOCH (reproducible-builds convention) so the report can
+  // be byte-for-byte reproducible when a fixed timestamp is provided. Fall back
+  // to the current date for normal local runs.
+  const sourceDateEpoch = process.env.SOURCE_DATE_EPOCH;
+  if (sourceDateEpoch && /^\d+$/.test(sourceDateEpoch)) {
+    return new Date(Number(sourceDateEpoch) * 1000).toISOString().slice(0, 10);
+  }
+
+  return new Date().toISOString().slice(0, 10);
+}
+
 function generateThirdPartyLicenses() {
   const rootPackage = readRootPackageJson();
   const dependencies = rootPackage.dependencies || {};
@@ -160,7 +172,7 @@ function generateThirdPartyLicenses() {
       version: '1.0.0',
       private: true,
       devDependencies: {
-        'license-checker': '^25.0.1',
+        'license-checker': '25.0.1',
       },
     };
 
@@ -220,7 +232,7 @@ function generateThirdPartyLicenses() {
     lines.push('This file contains third-party license attributions for production dependencies used by Striae.');
     lines.push('');
     lines.push(`- Project: Striae`);
-    lines.push(`- Generated: ${new Date().toISOString().slice(0, 10)}`);
+    lines.push(`- Generated: ${getGeneratedDate()}`);
     lines.push('- Scope: npm production dependencies only');
     lines.push('- Source: license-checker audit of the locked production tree (`npm ci --omit=dev` from package-lock.json)');
     lines.push('');
