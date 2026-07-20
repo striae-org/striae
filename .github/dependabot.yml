@@ -48,6 +48,13 @@ updates:
           - "vitest"
           - "@vitest/*"
 
+    ignore:
+      # TypeScript 7 removes ts.Extension, which breaks typescript-eslint's
+      # typescript-estree (peer >=4.8.4 <6.1.0). Hold on 6.x until
+      # typescript-eslint ships TS7 support.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+
   # Worker directories — each has its own package.json.
   - package-ecosystem: "npm"
     directories:
