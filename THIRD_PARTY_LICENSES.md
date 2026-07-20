@@ -5,13 +5,12 @@ This file contains third-party license attributions for production dependencies 
 - Project: Striae
 - Generated: 2026-07-20
 - Scope: npm production dependencies only
-- Source: license-checker JSON audit of resolved dependency tree
+- Source: license-checker audit of the locked production tree (`npm ci --omit=dev` from package-lock.json)
 
 ## Dependency Inventory
 
 | Package | Version | License | Repository |
 | --- | --- | --- | --- |
-| @cloudflare/workers-types | 4.20260702.1 | MIT OR Apache-2.0 | https://github.com/cloudflare/workerd |
 | @firebase/ai | 2.13.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/analytics | 0.10.22 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/analytics-compat | 0.2.28 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
@@ -115,6 +114,7 @@ This file contains third-party license attributions for production dependencies 
 | require-directory | 2.1.1 | MIT | https://github.com/troygoode/node-require-directory |
 | require-main-filename | 2.0.0 | ISC | https://github.com/yargs/require-main-filename |
 | safe-buffer | 5.1.2 | MIT | https://github.com/feross/safe-buffer |
+| safe-buffer | 5.2.1 | MIT | https://github.com/feross/safe-buffer |
 | scheduler | 0.27.0 | MIT | https://github.com/facebook/react |
 | set-blocking | 2.0.0 | ISC | https://github.com/yargs/set-blocking |
 | setimmediate | 1.0.5 | MIT | https://github.com/YuzuJS/setImmediate |
@@ -138,149 +138,6 @@ This file contains third-party license attributions for production dependencies 
 | yargs-parser | 21.1.1 | ISC | https://github.com/yargs/yargs-parser |
 
 ## License Texts
-
-### @cloudflare/workers-types@4.20260702.1
-
-- License: MIT OR Apache-2.0
-- Publisher: Cloudflare Workers DevProd Team
-- Repository: https://github.com/cloudflare/workerd
-
-```text
-# Cloudflare Workers Types
-
-> **Note**
->
-> We now recommend using the [Wrangler CLI](https://www.npmjs.com/package/wrangler) and the `wrangler types` command to generate types based on your compatibility date _and_ compatibility flags. You can learn more about this, and how to migrate from @cloudflare/workers-types [here in our docs](https://developers.cloudflare.com/workers/languages/typescript/#generate-types).
->
-> @cloudflare/workers-types will continue to be published on the same schedule.
-
-
-## Install
-
-```bash
-npm install -D @cloudflare/workers-types
--- Or
-yarn add -D @cloudflare/workers-types
-```
-
-## Usage
-
-The following is a minimal `tsconfig.json` for use alongside this package:
-
-**`tsconfig.json`**
-
-```json
-{
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "lib": ["esnext"],
-    "types": ["@cloudflare/workers-types"]
-  }
-}
-```
-
-### Compatibility dates
-
-![Entrypoints for compatibility dates](./npm/workers-types/entrypoints.svg)
-
-The Cloudflare Workers runtime manages backwards compatibility through the use of [Compatibility Dates](https://developers.cloudflare.com/workers/platform/compatibility-dates/). Using different compatibility dates affects the runtime types available to your Worker, and so it's important you specify the correct entrypoint to the `workers-types` package to match your compatibility date (which is usually set in your `wrangler.toml` configuration file). `workers-types` currently exposes the following entrypoints to choose from:
-
-- `@cloudflare/workers-types`
-
-  The default entrypoint exposes the runtime types for a compatibility date before `2021-11-03`.
-
-- `@cloudflare/workers-types/2021-11-03`
-
-  This entrypoint exposes the runtime types for a compatibility date between `2021-11-03` and `2022-01-31`.
-
-- `@cloudflare/workers-types/2022-01-31`
-
-  This entrypoint exposes the runtime types for a compatibility date between `2022-01-31` and `2022-03-21`.
-
-- `@cloudflare/workers-types/2022-03-21`
-
-  This entrypoint exposes the runtime types for a compatibility date between `2022-03-21` and `2022-08-04`.
-
-- `@cloudflare/workers-types/2022-08-04`
-
-  This entrypoint exposes the runtime types for a compatibility date between `2022-08-04` and `2022-10-31`.
-
-- `@cloudflare/workers-types/2022-10-31`
-
-  This entrypoint exposes the runtime types for a compatibility date between `2022-10-31` and `2022-11-30`.
-
-- `@cloudflare/workers-types/2022-11-30`
-
-  This entrypoint exposes the runtime types for a compatibility date between `2022-11-30` and `2023-03-01`.
-
-- `@cloudflare/workers-types/2023-03-01`
-
-  This entrypoint exposes the runtime types for a compatibility date between `2023-03-01` and `2023-07-01`.
-
-- `@cloudflare/workers-types/2023-07-01`
-
-  This entrypoint exposes the runtime types for a compatibility date after `2023-07-01`.
-
-- `@cloudflare/workers-types/experimental`
-
-  This entrypoint exposes the runtime types for the latest compatibility date. The types exposed by this entrypoint will change over time to always reflect the latest version of the Workers runtime.
-
-To use one of these entrypoints, you need to specify them in your `tsconfig.json`. For example, this is a sample `tsconfig.json` for using the `2022-08-04` entrypoint.
-
-```json
-{
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "lib": ["esnext"],
-    "types": ["@cloudflare/workers-types/2022-08-04"]
-  }
-}
-```
-
-### Importable Types
-
-It's not always possible (or desirable) to modify the `tsconfig.json` settings for a project to include all the Cloudflare Workers types. For use cases like that, this package provides importable versions of its types, which are usable with no additional `tsconfig.json` setup. For example:
-
-```ts
-import type { Request as WorkerRequest, ExecutionContext } from "@cloudflare/workers-types/experimental"
-
-export default {
-  fetch(request: WorkerRequest, env: unknown, ctx: ExecutionContext) {
-    return new Response("OK")
-  }
-}
-```
-
-
-### Using bindings
-
-It's recommended that you create a type file for any bindings your Worker uses. Create a file named
-`worker-configuration.d.ts` in your src directory.
-
-If you're using Module Workers, it should look like this:
-```typescript
-// worker-configuration.d.ts
-interface Env {
-  MY_ENV_VAR: string;
-  MY_SECRET: string;
-  myKVNamespace: KVNamespace;
-}
-```
-For Service Workers, it should augment the global scope:
-```typescript
-// worker-configuration.d.ts
-declare global {
-  const MY_ENV_VAR: string;
-  const MY_SECRET: string;
-  const myKVNamespace: KVNamespace;
-}
-export {}
-```
-
-Wrangler can also generate this for you automatically from your `wrangler.toml` configuration file, using the `wrangler types` command.
-```
 
 ### @firebase/ai@2.13.1
 
@@ -895,6 +752,7 @@ Each log will be formatted in the following manner:
 ```typescript
 `[${new Date()}]  ${COMPONENT_NAME}: ${...args}`
 ```
+
 ```
 
 ### @firebase/messaging@0.13.0
@@ -1113,6 +971,7 @@ const utils = require('@firebase/util');
 
 // Do stuff with any of the re-exported `utils`
 ```
+
 ```
 
 ### @firebase/webchannel-wrapper@1.0.6
@@ -1164,7 +1023,7 @@ const webchannelWrapper = require('@firebase/webchannel-wrapper');
 - Repository: https://github.com/grpc/grpc-node/tree/master/packages/grpc-js
 
 ```text
-Apache License
+                                 Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -1374,7 +1233,7 @@ Apache License
 - Repository: https://github.com/grpc/grpc-node
 
 ```text
-Apache License
+                                 Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -1929,7 +1788,7 @@ SOFTWARE.
 - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 ```text
-MIT License
+    MIT License
 
     Copyright (c) Microsoft Corporation.
 
@@ -2079,6 +1938,7 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 ```
 
 ### color-name@1.1.4
@@ -2660,6 +2520,7 @@ of nodejs/io.js:
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE.
   """
+  
 ```
 
 ### idb@7.1.1
@@ -2726,6 +2587,7 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
+
 ```
 
 ### is-fullwidth-code-point@3.0.0
@@ -2753,6 +2615,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - Repository: https://github.com/juliangruber/isarray
 
 ```text
+
 # isarray
 
 `Array#isArray` for older browsers.
@@ -3604,7 +3467,8 @@ terms above.
 - Repository: https://github.com/dcodeIO/long.js
 
 ```text
-Apache License
+
+                                 Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -4027,6 +3891,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 ```
 
 ### re2js@0.4.3
@@ -4288,6 +4153,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
+### safe-buffer@5.2.1
+
+- License: MIT
+- Publisher: Feross Aboukhadijeh
+- Repository: https://github.com/feross/safe-buffer
+
+```text
+The MIT License (MIT)
+
+Copyright (c) Feross Aboukhadijeh
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
+
 ### scheduler@0.27.0
 
 - License: MIT
@@ -4422,6 +4317,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.
 """
+
 ```
 
 ### string-width@4.2.3
@@ -4550,7 +4446,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 - Repository: https://github.com/GoogleChrome/web-vitals
 
 ```text
-Apache License
+
+                                 Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 

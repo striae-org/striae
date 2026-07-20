@@ -29,15 +29,23 @@ function runCommand(command, args, options = {}) {
   return result;
 }
 
-function runNpmInstall(cwd) {
-  if (process.platform === 'win32') {
-    runCommand('cmd.exe', ['/d', '/s', '/c', 'npm install --no-audit --no-fund --ignore-scripts'], {
-      cwd,
-    });
-    return;
+function runNpm(args, cwd) {
+  const npmArgs = ['--no-progress', ...args];
+  const result =
+    process.platform === 'win32'
+      ? runCommand('cmd.exe', ['/d', '/s', '/c', `npm ${npmArgs.join(' ')}`], {
+          cwd,
+          capture: true,
+        })
+      : runCommand('npm', npmArgs, { cwd, capture: true });
+
+  if (result.stdout) {
+    process.stdout.write(result.stdout);
   }
 
-  runCommand('npm', ['install', '--no-audit', '--no-fund', '--ignore-scripts'], { cwd });
+  if (result.stderr) {
+    process.stderr.write(result.stderr);
+  }
 }
 
 function readRootPackageJson() {
@@ -91,7 +99,7 @@ function safeReadText(filePath) {
   }
 
   try {
-    return fs.readFileSync(filePath, 'utf8').trim();
+    return fs.readFileSync(filePath, 'utf8');
   } catch {
     return '';
   }
@@ -109,138 +117,174 @@ function generateThirdPartyLicenses() {
     throw new Error('No production dependencies found in package.json');
   }
 
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'striae-license-audit-'));
+  const rootPackageJsonPath = path.join(ROOT_DIR, 'package.json');
+  const rootPackageLockPath = path.join(ROOT_DIR, 'package-lock.json');
 
-  try {
-  const tempPackageJsonPath = path.join(tempDir, 'package.json');
-  const tempReportPath = path.join(tempDir, 'license-checker.json');
-
-  const tempPackageJson = {
-    name: AUDIT_PACKAGE_NAME,
-    version: '1.0.0',
-    private: true,
-    dependencies,
-    devDependencies: {
-      'license-checker': '^25.0.1',
-    },
-  };
-
-  fs.writeFileSync(tempPackageJsonPath, `${JSON.stringify(tempPackageJson, null, 2)}\n`);
-
-  console.log(`Installing production dependencies in ${tempDir}`);
-  runNpmInstall(tempDir);
-
-  const licenseCheckerCli = path.join(
-    tempDir,
-    'node_modules',
-    'license-checker',
-    'bin',
-    'license-checker'
-  );
-
-  const scanResult = runCommand(
-    process.execPath,
-    [licenseCheckerCli, '--production', '--json'],
-    { cwd: tempDir, capture: true }
-  );
-
-  fs.writeFileSync(tempReportPath, scanResult.stdout || '');
-
-  const report = JSON.parse(fs.readFileSync(tempReportPath, 'utf8'));
-  const firebaseSharedReadme = path.join(
-    tempDir,
-    'node_modules',
-    '@firebase',
-    'app',
-    'README.md'
-  );
-
-  const entries = Object.entries(report)
-    .map(([depId, details]) => {
-      const { name, version } = parseDependencyId(depId);
-      return {
-        depId,
-        name,
-        version,
-        license: String(details.licenses || 'UNKNOWN'),
-        repository: details.repository || '',
-        publisher: details.publisher || '',
-        packagePath: details.path || '',
-        metadataLicenseFile: details.licenseFile || '',
-      };
-    })
-    .filter((entry) => entry.name !== AUDIT_PACKAGE_NAME)
-    .sort((a, b) => a.name.localeCompare(b.name) || a.version.localeCompare(b.version));
-
-  const lines = [];
-  lines.push('# THIRD_PARTY_LICENSES');
-  lines.push('');
-  lines.push('This file contains third-party license attributions for production dependencies used by Striae.');
-  lines.push('');
-  lines.push(`- Project: Striae`);
-  lines.push(`- Generated: ${new Date().toISOString().slice(0, 10)}`);
-  lines.push('- Scope: npm production dependencies only');
-  lines.push('- Source: license-checker JSON audit of resolved dependency tree');
-  lines.push('');
-  lines.push('## Dependency Inventory');
-  lines.push('');
-  lines.push('| Package | Version | License | Repository |');
-  lines.push('| --- | --- | --- | --- |');
-
-  for (const entry of entries) {
-    lines.push(
-      `| ${toTableCell(entry.name)} | ${toTableCell(entry.version)} | ${toTableCell(
-        entry.license
-      )} | ${toTableCell(entry.repository)} |`
+  if (!fs.existsSync(rootPackageLockPath)) {
+    throw new Error(
+      'package-lock.json not found. A committed lockfile is required to reproduce the locked production dependency tree.'
     );
   }
 
-  lines.push('');
-  lines.push('## License Texts');
-  lines.push('');
+  const rootPackageId = rootPackage.version
+    ? `${rootPackage.name}@${rootPackage.version}`
+    : rootPackage.name;
 
-  let unresolvedCount = 0;
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'striae-license-audit-'));
 
-  for (const entry of entries) {
-    let licenseSource = entry.metadataLicenseFile || findFallbackLicenseFile(entry.packagePath);
+  try {
+    // Reproduce the exact locked production tree by installing from the
+    // checked-in package.json + package-lock.json with `npm ci --omit=dev`.
+    // This keeps the report deterministic and aligned with released versions,
+    // instead of re-resolving version ranges at run time.
+    const reproDir = path.join(tempDir, 'repro');
+    const toolingDir = path.join(tempDir, 'tooling');
+    const tempReportPath = path.join(tempDir, 'license-checker.json');
 
-    if (!licenseSource && entry.name.startsWith('@firebase/') && fs.existsSync(firebaseSharedReadme)) {
-      licenseSource = firebaseSharedReadme;
-    }
+    fs.mkdirSync(reproDir, { recursive: true });
+    fs.mkdirSync(toolingDir, { recursive: true });
 
-    const licenseText = safeReadText(licenseSource);
+    fs.copyFileSync(rootPackageJsonPath, path.join(reproDir, 'package.json'));
+    fs.copyFileSync(rootPackageLockPath, path.join(reproDir, 'package-lock.json'));
 
-    lines.push(`### ${entry.name}@${entry.version}`);
+    console.log(`Reproducing locked production tree in ${reproDir}`);
+    runNpm(
+      ['ci', '--omit=dev', '--legacy-peer-deps', '--no-audit', '--no-fund', '--ignore-scripts'],
+      reproDir
+    );
+
+    // Install the scanner in a separate directory so it never becomes part of
+    // the audited production tree.
+    const toolingPackageJson = {
+      name: AUDIT_PACKAGE_NAME,
+      version: '1.0.0',
+      private: true,
+      devDependencies: {
+        'license-checker': '^25.0.1',
+      },
+    };
+
+    fs.writeFileSync(
+      path.join(toolingDir, 'package.json'),
+      `${JSON.stringify(toolingPackageJson, null, 2)}\n`
+    );
+
+    console.log(`Installing license scanner in ${toolingDir}`);
+    runNpm(['install', '--no-audit', '--no-fund', '--ignore-scripts'], toolingDir);
+
+    const licenseCheckerCli = path.join(
+      toolingDir,
+      'node_modules',
+      'license-checker',
+      'bin',
+      'license-checker'
+    );
+
+    const scanResult = runCommand(
+      process.execPath,
+      [licenseCheckerCli, '--start', reproDir, '--production', '--json'],
+      { cwd: reproDir, capture: true }
+    );
+
+    fs.writeFileSync(tempReportPath, scanResult.stdout || '');
+
+    const report = JSON.parse(fs.readFileSync(tempReportPath, 'utf8'));
+    const firebaseSharedReadme = path.join(
+      reproDir,
+      'node_modules',
+      '@firebase',
+      'app',
+      'README.md'
+    );
+
+    const entries = Object.entries(report)
+      .map(([depId, details]) => {
+        const { name, version } = parseDependencyId(depId);
+        return {
+          depId,
+          name,
+          version,
+          license: String(details.licenses || 'UNKNOWN'),
+          repository: details.repository || '',
+          publisher: details.publisher || '',
+          packagePath: details.path || '',
+          metadataLicenseFile: details.licenseFile || '',
+        };
+      })
+      .filter((entry) => entry.depId !== rootPackageId && entry.name !== rootPackage.name)
+      .sort((a, b) => a.name.localeCompare(b.name) || a.version.localeCompare(b.version));
+
+    const lines = [];
+    lines.push('# THIRD_PARTY_LICENSES');
     lines.push('');
-    lines.push(`- License: ${entry.license}`);
+    lines.push('This file contains third-party license attributions for production dependencies used by Striae.');
+    lines.push('');
+    lines.push(`- Project: Striae`);
+    lines.push(`- Generated: ${new Date().toISOString().slice(0, 10)}`);
+    lines.push('- Scope: npm production dependencies only');
+    lines.push('- Source: license-checker audit of the locked production tree (`npm ci --omit=dev` from package-lock.json)');
+    lines.push('');
+    lines.push('## Dependency Inventory');
+    lines.push('');
+    lines.push('| Package | Version | License | Repository |');
+    lines.push('| --- | --- | --- | --- |');
 
-    if (entry.publisher) {
-      lines.push(`- Publisher: ${entry.publisher}`);
-    }
-
-    if (entry.repository) {
-      lines.push(`- Repository: ${entry.repository}`);
+    for (const entry of entries) {
+      lines.push(
+        `| ${toTableCell(entry.name)} | ${toTableCell(entry.version)} | ${toTableCell(
+          entry.license
+        )} | ${toTableCell(entry.repository)} |`
+      );
     }
 
     lines.push('');
+    lines.push('## License Texts');
+    lines.push('');
 
-    if (licenseText) {
-      lines.push('```text');
-      lines.push(licenseText);
-      lines.push('```');
-    } else {
-      unresolvedCount += 1;
-      lines.push('_License text could not be resolved from the installed package metadata or package directory._');
+    let unresolvedCount = 0;
+
+    for (const entry of entries) {
+      let licenseSource = entry.metadataLicenseFile || findFallbackLicenseFile(entry.packagePath);
+
+      if (!licenseSource && entry.name.startsWith('@firebase/') && fs.existsSync(firebaseSharedReadme)) {
+        licenseSource = firebaseSharedReadme;
+      }
+
+      const licenseText = safeReadText(licenseSource);
+
+      lines.push(`### ${entry.name}@${entry.version}`);
+      lines.push('');
+      lines.push(`- License: ${entry.license}`);
+
+      if (entry.publisher) {
+        lines.push(`- Publisher: ${entry.publisher}`);
+      }
+
+      if (entry.repository) {
+        lines.push(`- Repository: ${entry.repository}`);
+      }
+
+      lines.push('');
+
+      if (licenseText.trim()) {
+        // Preserve the upstream license text verbatim, only trimming the trailing
+        // newline so the closing code fence renders correctly.
+        lines.push('```text');
+        lines.push(licenseText.replace(/\n$/, ''));
+        lines.push('```');
+      } else {
+        unresolvedCount += 1;
+        lines.push('_License text could not be resolved from the installed package metadata or package directory._');
+      }
+
+      lines.push('');
     }
 
-    lines.push('');
-  }
+    fs.writeFileSync(OUTPUT_FILE, `${lines.join('\n')}\n`);
 
-  fs.writeFileSync(OUTPUT_FILE, `${lines.join('\n')}\n`);
-
-  console.log(`Wrote ${OUTPUT_FILE}`);
-  console.log(`Dependencies documented: ${entries.length}`);
-  console.log(`Unresolved license text entries: ${unresolvedCount}`);
+    console.log(`Wrote ${OUTPUT_FILE}`);
+    console.log(`Dependencies documented: ${entries.length}`);
+    console.log(`Unresolved license text entries: ${unresolvedCount}`);
   } finally {
     try {
       fs.rmSync(tempDir, { recursive: true, force: true });
