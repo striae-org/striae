@@ -124,7 +124,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.49.0",
     "@cloudflare/vitest-pool-workers": "^0.19.1",
-    "@cloudflare/workers-types": "4.20260702.1",
+    "@cloudflare/workers-types": "^4",
     "@eslint-react/eslint-plugin": "^5.18.1",
     "@eslint/js": "^10.0.1",
     "@react-router/dev": "^8.3.0",
@@ -166,7 +166,8 @@
     "esbuild@0.28.1": true,
     "protobufjs@7.6.5": true,
     "unrs-resolver@1.12.2": true,
+    "workerd@1.20260611.1": true,
     "workerd@1.20260730.1": true,
-    "workerd@1.20260611.1": true
+    "sharp@0.35.0": true
   }
 }
