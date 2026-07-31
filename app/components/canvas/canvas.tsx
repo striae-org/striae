@@ -181,12 +181,10 @@ export const Canvas = ({
     const pendingFlashTimeoutIds = new Set<number>();
 
     const queueFlash = (delayMs: number) => {
-      // eslint-disable-next-line @eslint-react/web-api-no-leaked-timeout
       const startId = window.setTimeout(() => {
         pendingFlashTimeoutIds.delete(startId);
         setIsFlashing(true);
 
-        // eslint-disable-next-line @eslint-react/web-api-no-leaked-timeout
         const stopId = window.setTimeout(() => {
           pendingFlashTimeoutIds.delete(stopId);
           setIsFlashing(false);

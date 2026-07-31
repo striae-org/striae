@@ -3,7 +3,7 @@
 This file contains third-party license attributions for production dependencies used by Striae.
 
 - Project: Striae
-- Generated: 2026-07-20
+- Generated: 2026-07-31
 - Scope: npm production dependencies only
 - Source: license-checker audit of the locked production tree (`npm ci --omit=dev` from package-lock.json)
 
@@ -11,49 +11,49 @@ This file contains third-party license attributions for production dependencies 
 
 | Package | Version | License | Repository |
 | --- | --- | --- | --- |
-| @firebase/ai | 2.13.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/analytics | 0.10.22 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/analytics-compat | 0.2.28 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/ai | 2.14.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/analytics | 0.10.23 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/analytics-compat | 0.2.29 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/analytics-types | 0.8.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/app | 0.15.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/app-check | 0.12.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/app-check-compat | 0.4.5 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/app | 0.16.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/app-check | 0.13.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/app-check-compat | 0.4.6 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/app-check-interop-types | 0.3.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/app-check-types | 0.5.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/app-compat | 0.5.15 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/app-compat | 0.5.16 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/app-types | 0.9.5 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/auth | 1.13.3 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/auth-compat | 0.6.8 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/auth | 1.13.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/auth-compat | 0.6.9 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/auth-interop-types | 0.2.5 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/auth-types | 0.13.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/component | 0.7.3 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/data-connect | 0.7.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/database | 1.1.3 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/database-compat | 2.1.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/database-types | 1.0.20 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/firestore | 4.16.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/firestore-compat | 0.4.11 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/component | 0.7.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/data-connect | 0.7.2 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/database | 1.1.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/database-compat | 2.1.5 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/database-types | 1.0.21 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/firestore | 4.17.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/firestore-compat | 0.4.12 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/firestore-types | 3.0.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/functions | 0.13.5 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/functions-compat | 0.4.5 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/functions | 0.13.6 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/functions-compat | 0.4.6 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/functions-types | 0.6.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/installations | 0.6.22 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/installations-compat | 0.2.22 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/installations | 0.6.23 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/installations-compat | 0.2.23 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/installations-types | 0.5.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/logger | 0.5.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/messaging | 0.13.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/messaging-compat | 0.2.27 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/messaging | 0.13.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/messaging-compat | 0.2.28 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/messaging-interop-types | 0.2.5 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/performance | 0.7.12 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/performance-compat | 0.2.25 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/performance | 0.7.13 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/performance-compat | 0.2.26 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/performance-types | 0.2.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/remote-config | 0.9.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/remote-config-compat | 0.2.27 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/remote-config | 0.9.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/remote-config-compat | 0.2.28 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/remote-config-types | 0.5.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/storage | 0.14.3 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/storage-compat | 0.4.3 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/storage | 0.14.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/storage-compat | 0.4.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/storage-types | 0.8.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/util | 1.15.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/util | 1.15.2 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/webchannel-wrapper | 1.0.6 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @grpc/grpc-js | 1.9.16 | Apache-2.0 | https://github.com/grpc/grpc-node/tree/master/packages/grpc-js |
 | @grpc/proto-loader | 0.7.15 | Apache-2.0 | https://github.com/grpc/grpc-node |
@@ -66,8 +66,8 @@ This file contains third-party license attributions for production dependencies 
 | @protobufjs/path | 1.1.2 | BSD-3-Clause | https://github.com/dcodeIO/protobuf.js |
 | @protobufjs/pool | 1.1.0 | BSD-3-Clause | https://github.com/dcodeIO/protobuf.js |
 | @protobufjs/utf8 | 1.1.2 | BSD-3-Clause | https://github.com/protobufjs/protobuf.js |
-| @react-router/cloudflare | 8.2.0 | MIT | https://github.com/remix-run/react-router |
-| @types/node | 26.1.1 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped |
+| @react-router/cloudflare | 8.3.0 | MIT | https://github.com/remix-run/react-router |
+| @types/node | 26.1.2 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped |
 | ansi-regex | 5.0.1 | MIT | https://github.com/chalk/ansi-regex |
 | ansi-styles | 4.3.0 | MIT | https://github.com/chalk/ansi-styles |
 | camelcase | 5.3.1 | MIT | https://github.com/sindresorhus/camelcase |
@@ -83,7 +83,7 @@ This file contains third-party license attributions for production dependencies 
 | escalade | 3.2.0 | MIT | https://github.com/lukeed/escalade |
 | faye-websocket | 0.11.4 | Apache-2.0 | https://github.com/faye/faye-websocket-node |
 | find-up | 4.1.0 | MIT | https://github.com/sindresorhus/find-up |
-| firebase | 12.16.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| firebase | 12.17.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | get-caller-file | 2.0.5 | ISC | https://github.com/stefanpenner/get-caller-file |
 | http-parser-js | 0.5.10 | MIT | https://github.com/creationix/http-parser-js |
 | idb | 7.1.1 | ISC | https://github.com/jakearchibald/idb |
@@ -106,10 +106,10 @@ This file contains third-party license attributions for production dependencies 
 | process-nextick-args | 2.0.1 | MIT | https://github.com/calvinmetcalf/process-nextick-args |
 | protobufjs | 7.6.5 | BSD-3-Clause | https://github.com/protobufjs/protobuf.js |
 | qrcode | 1.5.4 | MIT | https://github.com/soldair/node-qrcode |
-| re2js | 0.4.3 | MIT | https://github.com/le0pard/re2js |
-| react | 19.2.7 | MIT | https://github.com/facebook/react |
-| react-dom | 19.2.7 | MIT | https://github.com/facebook/react |
-| react-router | 8.2.0 | MIT | https://github.com/remix-run/react-router |
+| re2js | 2.8.6 | MIT | https://github.com/le0pard/re2js |
+| react | 19.2.8 | MIT | https://github.com/react/react |
+| react-dom | 19.2.8 | MIT | https://github.com/react/react |
+| react-router | 8.3.0 | MIT | https://github.com/remix-run/react-router |
 | readable-stream | 2.3.8 | MIT | https://github.com/nodejs/readable-stream |
 | require-directory | 2.1.1 | MIT | https://github.com/troygoode/node-require-directory |
 | require-main-filename | 2.0.0 | ISC | https://github.com/yargs/require-main-filename |
@@ -139,7 +139,7 @@ This file contains third-party license attributions for production dependencies 
 
 ## License Texts
 
-### @firebase/ai@2.13.1
+### @firebase/ai@2.14.0
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -153,7 +153,7 @@ This is the Firebase AI component of the Firebase JS SDK.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/analytics@0.10.22
+### @firebase/analytics@0.10.23
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -167,7 +167,7 @@ This is the Firebase Analytics component of the Firebase JS SDK.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/analytics-compat@0.2.28
+### @firebase/analytics-compat@0.2.29
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -193,7 +193,7 @@ This is the compatibility layer for the Firebase Analytics component of the Fire
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/app@0.15.1
+### @firebase/app@0.16.0
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -207,7 +207,7 @@ This package coordinates the communication between the different Firebase compon
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/app-check@0.12.0
+### @firebase/app-check@0.13.0
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -221,7 +221,7 @@ This is the Firebase App Check component of the Firebase JS SDK.
 **This package is not intended for direct usage, and should only be used via the officially supported [`firebase`](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/app-check-compat@0.4.5
+### @firebase/app-check-compat@0.4.6
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -259,7 +259,7 @@ This is the Firebase App Check component (compat version) of the Firebase JS SDK
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/app-compat@0.5.15
+### @firebase/app-compat@0.5.16
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -285,7 +285,7 @@ This is the compatibility layer for the Firebase App package, which recreates th
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/auth@1.13.3
+### @firebase/auth@1.13.4
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -433,7 +433,7 @@ in Node. When you run these tests a small Express server will be started to
 serve the static files the browser robot uses.
 ```
 
-### @firebase/auth-compat@0.6.8
+### @firebase/auth-compat@0.6.9
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -471,7 +471,7 @@ This is a compatability layer to for the Firebase Authentication SDK
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/component@0.7.3
+### @firebase/component@0.7.4
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -492,7 +492,7 @@ import { Component } from '@firebase/component';
 ```
 ```
 
-### @firebase/data-connect@0.7.1
+### @firebase/data-connect@0.7.2
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -506,7 +506,7 @@ import { Component } from '@firebase/component';
 Check `test/dataconnect.yaml` to ensure that the correct values are filled in.
 ```
 
-### @firebase/database@1.1.3
+### @firebase/database@1.1.4
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -520,7 +520,7 @@ This is the Firebase Realtime Database component of the Firebase JS SDK.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/database-compat@2.1.4
+### @firebase/database-compat@2.1.5
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -534,7 +534,7 @@ This is the compatibility layer for the Firebase Realtime Database component of 
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/database-types@1.0.20
+### @firebase/database-types@1.0.21
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -546,7 +546,7 @@ This is the compatibility layer for the Firebase Realtime Database component of 
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/firestore@4.16.0
+### @firebase/firestore@4.17.0
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -579,7 +579,7 @@ information about contributing to the firebase-js-sdk repo and
 details specific to the Cloud Firestore code and tests.
 ```
 
-### @firebase/firestore-compat@0.4.11
+### @firebase/firestore-compat@0.4.12
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -624,7 +624,7 @@ details specific to the Cloud Firestore code and tests.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/functions@0.13.5
+### @firebase/functions@0.13.6
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -638,7 +638,7 @@ This is the Firebase Functions component of the Firebase JS SDK.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/functions-compat@0.4.5
+### @firebase/functions-compat@0.4.6
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -664,7 +664,7 @@ This package coordinates the communication between the different Firebase compon
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/installations@0.6.22
+### @firebase/installations@0.6.23
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -678,7 +678,7 @@ This package coordinates the communication between the different Firebase compon
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/installations-compat@0.2.22
+### @firebase/installations-compat@0.2.23
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -755,7 +755,7 @@ Each log will be formatted in the following manner:
 
 ```
 
-### @firebase/messaging@0.13.0
+### @firebase/messaging@0.13.1
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -769,7 +769,7 @@ This is the Firebase Cloud Messaging component of the Firebase JS SDK.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/messaging-compat@0.2.27
+### @firebase/messaging-compat@0.2.28
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -796,7 +796,7 @@ This is the compat package that recreates the v8 APIs.
 supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/performance@0.7.12
+### @firebase/performance@0.7.13
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -810,7 +810,7 @@ This is the Firebase Performance component of the Firebase JS SDK.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/performance-compat@0.2.25
+### @firebase/performance-compat@0.2.26
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -838,7 +838,7 @@ This package coordinates the communication between the different Firebase compon
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/remote-config@0.9.0
+### @firebase/remote-config@0.9.1
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -874,7 +874,7 @@ End-to-end test:
 1. Open test_app/index.html in a browser
 ```
 
-### @firebase/remote-config-compat@0.2.27
+### @firebase/remote-config-compat@0.2.28
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -900,7 +900,7 @@ This is the compat package that recreates the v8 APIs.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/storage@0.14.3
+### @firebase/storage@0.14.4
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -914,7 +914,7 @@ This is the Cloud Storage component of the Firebase JS SDK.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/storage-compat@0.4.3
+### @firebase/storage-compat@0.4.4
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -940,7 +940,7 @@ This is the Cloud Storage component of the Firebase JS SDK.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/util@1.15.1
+### @firebase/util@1.15.2
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -1751,7 +1751,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### @react-router/cloudflare@8.2.0
+### @react-router/cloudflare@8.3.0
 
 - License: MIT
 - Repository: https://github.com/remix-run/react-router
@@ -1782,7 +1782,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### @types/node@26.1.1
+### @types/node@26.1.2
 
 - License: MIT
 - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -2165,7 +2165,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### firebase@12.16.0
+### firebase@12.17.0
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -3894,16 +3894,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ```
 
-### re2js@0.4.3
+### re2js@2.8.6
 
 - License: MIT
-- Publisher: Alexey Vasiliev
+- Publisher: Oleksii Vasyliev
 - Repository: https://github.com/le0pard/re2js
 
 ```text
 MIT License
 
-Copyright (c) 2023 Alexey Vasiliev
+Copyright (c) 2023 Oleksii Vasyliev
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -3924,10 +3924,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### react@19.2.7
+### react@19.2.8
 
 - License: MIT
-- Repository: https://github.com/facebook/react
+- Repository: https://github.com/react/react
 
 ```text
 MIT License
@@ -3953,10 +3953,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### react-dom@19.2.7
+### react-dom@19.2.8
 
 - License: MIT
-- Repository: https://github.com/facebook/react
+- Repository: https://github.com/react/react
 
 ```text
 MIT License
@@ -3982,7 +3982,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### react-router@8.2.0
+### react-router@8.3.0
 
 - License: MIT
 - Publisher: Remix Software

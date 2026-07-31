@@ -6,7 +6,7 @@ For deep implementation details, use the wiki docs.
 ## Scope and Architecture Snapshot
 
 - Frontend: React Router app in `app/`, deployed with Cloudflare Pages.
-- Workers: `user`, `image`, `pdf`, `data`, `keys`, and `audit` in `workers/`.
+- Workers: `audit`, `data`, `image`, `lists`, `pdf`, and `user` in `workers/`.
 - Data services: Firebase Auth plus Cloudflare KV, R2, and Images.
 - Config sources:
   - App runtime: `app/config/config.json`
@@ -17,9 +17,9 @@ For deep implementation details, use the wiki docs.
 ## Highest-Priority Rules
 
 1. Use centralized utilities for app data and permissions.
-   - `app/utils/data-operations.ts`
-   - `app/utils/permissions.ts`
-    - `app/services/audit/audit.service.ts`
+   - `app/utils/data/data-operations.ts`
+   - `app/utils/data/permissions.ts`
+   - `app/services/audit/audit.service.ts`
    - Avoid introducing direct worker `fetch` calls in `app/components` or `app/routes` unless extending these utility modules.
 2. Validate permissions before case operations.
    - Read access: `canAccessCase`
@@ -50,6 +50,9 @@ For deep implementation details, use the wiki docs.
 - Global button hover behavior:
   - Shared hover lift is already defined in `app/styles/root.module.css`.
   - Do not duplicate `transform: translateY(-1px)` in component CSS.
+- Indentation Style:
+  - Use 1 tab character per indentation level.
+  - Do not use spaces or mix for indentation.
 
 ## Worker Communication Expectations
 
@@ -70,6 +73,7 @@ npm run lint
 npm run deploy:all
 npm run deploy-workers
 npm run deploy-workers:secrets
+npm run deploy-pages
 npm run publish:all
 ```
 
@@ -97,6 +101,21 @@ When asked to bump to `vX.Y.Z`:
 
 Use these for details that are intentionally not duplicated here:
 
-- `wiki/striae.wiki/Architecture-Guide.md`
-- `wiki/striae.wiki/API-Reference.md`
-- `wiki/striae.wiki/Security-Guide.md`
+- `../striae-wiki/wiki/striae.wiki/Home.md`
+- `../striae-wiki/wiki/striae.wiki/Project-Overview.md`
+- `../striae-wiki/wiki/striae.wiki/Installation-Guide.md`
+- `../striae-wiki/wiki/striae.wiki/Environment-Variables-Setup.md`
+- `../striae-wiki/wiki/striae.wiki/Architecture-Guide.md`
+- `../striae-wiki/wiki/striae.wiki/Component-Guide.md`
+- `../striae-wiki/wiki/striae.wiki/Utilities-Guide.md`
+- `../striae-wiki/wiki/striae.wiki/API-Reference.md`
+- `../striae-wiki/wiki/striae.wiki/Guide-Summaries.md`
+- `../striae-wiki/wiki/striae.wiki/Security-Guide.md`
+- `../striae-wiki/wiki/striae.wiki/Authenticated-Confirmation-System.md`
+- `../striae-wiki/wiki/striae.wiki/Manifest-and-Confirmation-Signing.md`
+- `../striae-wiki/wiki/striae.wiki/Export-Encryption.md`
+- `../striae-wiki/wiki/striae.wiki/Data-at-Rest-Encryption.md`
+- `../striae-wiki/wiki/striae.wiki/Encryption-Basics-and-Risks.md`
+- `../striae-wiki/wiki/striae.wiki/Audit-Trail-System.md`
+- `../striae-wiki/wiki/striae.wiki/PDF-Report-System.md`
+- `../striae-wiki/wiki/striae.wiki/Error-Handling-Guide.md`
