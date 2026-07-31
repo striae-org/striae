@@ -2,7 +2,7 @@
 
 **Release Date**: July 31, 2026
 **Period**: July 20, 2026 to July 31, 2026
-**Total Commits**: 9 (non-merge commits since July 19, 2026)
+**Total Commits**: 9 (non-merge after the v8.1.3 release)
 
 ## Patch Release - Dependency and Lint Maintenance, Compatibility-Date Refresh, and License Inventory Regeneration
 
