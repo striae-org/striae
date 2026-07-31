@@ -6,7 +6,14 @@ import importX from "eslint-plugin-import-x";
 
 export default tseslint.config(
   {
-    ignores: ["public/vendor/**", "build/**", "**/dist/**", "**/worker-configuration.d.ts"],
+    ignores: [
+      "public/vendor/**",
+      "build/**",
+      "**/dist/**",
+      "**/worker-configuration.d.ts",
+      ".react-router/**",
+      ".wrangler/**",
+    ],
   },
 
   js.configs.recommended,
