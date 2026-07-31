@@ -20,6 +20,12 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-07-31] - *[Patch Release v8.1.4](https://github.com/striae-org/striae/releases/tag/v8.1.4)*
+
+- **⚙️ Dependency and Package Maintenance** - Refreshed app and worker package metadata (`package.json`/`package-lock.json`), aligned install metadata, and applied npm override corrections for stable dependency resolution.
+- **🧹 Lint and Review Follow-Ups** - Applied targeted ESLint configuration fixes plus small review-driven app follow-ups in canvas and sidebar container components.
+- **☁️ Compatibility-Date and License Inventory Refresh** - Updated worker/root Wrangler compatibility-date examples and regenerated `THIRD_PARTY_LICENSES.md` to keep license inventory output synchronized with the active dependency graph.
+
 ## [2026-07-19] - *[Patch Release v8.1.3](https://github.com/striae-org/striae/releases/tag/v8.1.3)*
 
 - **📜 Third-Party Attribution & License Inventory** - Added a top-level `NOTICE` file and `THIRD_PARTY_LICENSES.md` inventory, plus a `generate:third-party-licenses` script (`scripts/generate-third-party-licenses.cjs`) to reproducibly regenerate the license report; registered both files in the npm package allowlist.
