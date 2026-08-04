@@ -8,11 +8,14 @@
     "start": "wrangler dev"
   },
   "devDependencies": {
-    "wrangler": "^4.116.0"
+    "wrangler": "^4.118.0"
   },
   "allowScripts": {
     "esbuild": true,
     "sharp": true,
     "workerd": true
+  },
+  "overrides": {
+    "undici": "7.29.0"
   }
 }
