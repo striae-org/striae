@@ -4,6 +4,11 @@ import {
   decryptExportImageWithRegistry,
   getNonEmptyString
 } from '../registry/key-registry';
+import {
+  getNonEmptyRequestString,
+  requireAuthenticatedUserContext,
+  requireMatchingUserId
+} from '../forensic-authorization';
 import type { CreateResponse, Env } from '../types';
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -27,13 +32,27 @@ export async function handleDecryptExport(
   respond: CreateResponse
 ): Promise<Response> {
   try {
+    const authenticatedContext = requireAuthenticatedUserContext(request);
+    if (!authenticatedContext.allowed || !authenticatedContext.userId) {
+      return respond({ error: authenticatedContext.error || 'Unauthorized' }, authenticatedContext.status);
+    }
+
     const requestBody = await request.json() as {
       wrappedKey?: string;
       dataIv?: string;
       encryptedData?: string;
       encryptedImages?: Array<{ filename: string; encryptedData: string; iv?: string }>;
       keyId?: string;
+      userId?: string;
     };
+
+    const userMatchResult = requireMatchingUserId(
+      authenticatedContext.userId,
+      getNonEmptyRequestString(requestBody.userId)
+    );
+    if (!userMatchResult.allowed) {
+      return respond({ error: userMatchResult.error || 'Forbidden' }, userMatchResult.status);
+    }
 
     const { wrappedKey, dataIv, encryptedData, encryptedImages, keyId } = requestBody;
 
@@ -69,6 +88,23 @@ export async function handleDecryptExport(
         { error: `Failed to decrypt data file: ${errorMessage}` },
         500
       );
+    }
+
+    try {
+      const parsedPlaintext = JSON.parse(plaintextData) as {
+        metadata?: {
+          originalCaseOwnerUid?: unknown;
+        };
+      };
+      const originalCaseOwnerUid = getNonEmptyRequestString(parsedPlaintext.metadata?.originalCaseOwnerUid);
+      if (originalCaseOwnerUid && originalCaseOwnerUid !== authenticatedContext.userId) {
+        return respond(
+          { error: 'Authenticated user is not authorized to decrypt this export payload' },
+          403
+        );
+      }
+    } catch {
+      // Ignore plaintext parsing here; downstream import validation still validates package structure.
     }
 
     const decryptedImages: Array<{ filename: string; data: string }> = [];

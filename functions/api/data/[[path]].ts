@@ -6,7 +6,9 @@ interface DataProxyContext {
 }
 
 const SUPPORTED_METHODS = new Set(['GET', 'PUT', 'DELETE', 'POST', 'OPTIONS']);
-const UNSCOPED_PATH_PREFIXES = ['/api/forensic/'];
+const FORENSIC_PATH_PREFIX = '/api/forensic/';
+const AUTHENTICATED_USER_ID_HEADER = 'X-Striae-Authenticated-User-Id';
+const AUTHENTICATED_USER_EMAIL_HEADER = 'X-Striae-Authenticated-User-Email';
 
 function textResponse(message: string, status: number): Response {
   return new Response(message, {
@@ -41,8 +43,8 @@ function extractUserIdFromProxyPath(proxyPath: string): string | null {
   }
 }
 
-function isUnscopedProxyPath(proxyPath: string): boolean {
-  return UNSCOPED_PATH_PREFIXES.some((prefix) => proxyPath.startsWith(prefix));
+function isForensicProxyPath(proxyPath: string): boolean {
+  return proxyPath.startsWith(FORENSIC_PATH_PREFIX);
 }
 
 export const onRequest = async ({ request, env }: DataProxyContext): Promise<Response> => {
@@ -71,7 +73,7 @@ export const onRequest = async ({ request, env }: DataProxyContext): Promise<Res
     return textResponse('Not Found', 404);
   }
 
-  if (!isUnscopedProxyPath(proxyPath)) {
+  if (!isForensicProxyPath(proxyPath)) {
     const requestedUserId = extractUserIdFromProxyPath(proxyPath);
     if (!requestedUserId) {
       return textResponse('Missing user identifier', 400);
@@ -95,6 +97,13 @@ export const onRequest = async ({ request, env }: DataProxyContext): Promise<Res
   const acceptHeader = request.headers.get('Accept');
   if (acceptHeader) {
     upstreamHeaders.set('Accept', acceptHeader);
+  }
+
+  if (isForensicProxyPath(proxyPath)) {
+    upstreamHeaders.set(AUTHENTICATED_USER_ID_HEADER, identity.uid);
+    if (typeof identity.email === 'string' && identity.email.trim().length > 0) {
+      upstreamHeaders.set(AUTHENTICATED_USER_EMAIL_HEADER, identity.email);
+    }
   }
 
   const shouldForwardBody = request.method !== 'GET' && request.method !== 'HEAD';

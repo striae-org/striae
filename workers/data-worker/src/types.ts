@@ -1,6 +1,7 @@
 export interface Env {
   STRIAE_DATA: R2Bucket;
   STRIAE_CONFIG: R2Bucket;
+  USER_WORKER?: Fetcher;
   REGISTRY_ENCRYPTION_KEY: string;
   MANIFEST_SIGNING_PRIVATE_KEY?: string;
   MANIFEST_SIGNING_KEY_ID?: string;
