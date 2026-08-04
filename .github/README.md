@@ -20,6 +20,12 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-04] - *[Major Release v9.0.0](https://github.com/striae-org/striae/releases/tag/v9.0.0)*
+
+- **🔒 Security Remediation: Forensic Authorization Hardening** - Closed GHSA-qgj2-x8xw-v75r, reported by @arpitjain099, by restoring forensic request scoping and confirmation-signing entitlement checks so authenticated users cannot mint confirmation signatures for cases they do not own or cannot access.
+- **⚙️ Dependency and Release-Window Maintenance** - Refreshed root and worker manifests/lockfiles and kept the package metadata aligned with the new major release line.
+- **🧹 Repository Hygiene Follow-Up** - Included a small `.gitignore` cleanup for the local tests directory in the same release window.
+
 ## [2026-07-31] - *[Patch Release v8.1.4](https://github.com/striae-org/striae/releases/tag/v8.1.4)*
 
 - **⚙️ Dependency and Package Maintenance** - Refreshed app and worker package metadata (`package.json`/`package-lock.json`), aligned install metadata, and applied npm override corrections for stable dependency resolution.
