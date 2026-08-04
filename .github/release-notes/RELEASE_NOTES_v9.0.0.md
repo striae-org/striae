@@ -8,7 +8,7 @@
 
 ## Summary
 
-v9.0.0 is a security-focused major release that closes GHSA-qgj2-x8xw-v75r, reported by [@arpitjain099](https://github.com/arpitjain099). It restores the intended authorization boundary around forensic signing paths so authenticated users cannot mint confirmation signatures for cases they do not own or cannot access, and it includes release-window dependency refreshes plus small repository hygiene follow-ups.
+v9.0.0 is a security-focused major release that closes [GHSA-qgj2-x8xw-v75r](https://github.com/striae-org/striae/security/advisories/GHSA-qgj2-x8xw-v75r), reported by [@arpitjain099](https://github.com/arpitjain099). It restores the intended authorization boundary around forensic signing paths so authenticated users cannot mint confirmation signatures for cases they do not own or cannot access, and it includes release-window dependency refreshes plus small repository hygiene follow-ups.
 
 ## Detailed Changes
 
