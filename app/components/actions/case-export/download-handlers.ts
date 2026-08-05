@@ -191,7 +191,7 @@ export async function downloadCaseAsZip(
 
     const contentForHash = await generateJSONContent(exportData, options.includeUserInfo, false);
 
-    const forensicManifest = await generateForensicManifestSecure(contentForHash, imageFiles);
+    const forensicManifest = await generateForensicManifestSecure(contentForHash, imageFiles, caseNumber);
 
     const signingResult = await signForensicManifest(user, caseNumber, forensicManifest);
     manifestSignatureKeyId = signingResult.signature.keyId;

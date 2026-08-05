@@ -1,6 +1,6 @@
 {
   "name": "pdf-worker",
-  "version": "8.1.4",
+  "version": "9.0.0",
   "private": true,
   "scripts": {
     "generate:assets": "node scripts/generate-assets.js",
@@ -9,11 +9,14 @@
     "start": "wrangler dev"
   },
   "devDependencies": {
-    "wrangler": "^4.116.0"
+    "wrangler": "^4.118.0"
   },
   "allowScripts": {
     "esbuild": true,
     "sharp": true,
     "workerd": true
+  },
+  "overrides": {
+    "undici": "7.29.0"
   }
 }

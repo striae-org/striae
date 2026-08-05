@@ -3,6 +3,7 @@ node_modules/
 build/
 dist/
 archive/
+tests/
 
 # PDF Formats (Except Striae Default)
 workers/pdf-worker/src/formats/*.ts

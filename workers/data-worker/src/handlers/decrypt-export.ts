@@ -4,6 +4,12 @@ import {
   decryptExportImageWithRegistry,
   getNonEmptyString
 } from '../registry/key-registry';
+import {
+  AUTHENTICATED_USER_EMAIL_HEADER,
+  getNonEmptyRequestString,
+  requireAuthenticatedUserContext,
+  requireMatchingUserId
+} from '../forensic-authorization';
 import type { CreateResponse, Env } from '../types';
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -21,19 +27,37 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
+function emailsMatch(left: string, right: string): boolean {
+  return left.trim().toLowerCase() === right.trim().toLowerCase();
+}
+
 export async function handleDecryptExport(
   request: Request,
   env: Env,
   respond: CreateResponse
 ): Promise<Response> {
   try {
+    const authenticatedContext = requireAuthenticatedUserContext(request);
+    if (!authenticatedContext.allowed || !authenticatedContext.userId) {
+      return respond({ error: authenticatedContext.error || 'Unauthorized' }, authenticatedContext.status);
+    }
+
     const requestBody = await request.json() as {
       wrappedKey?: string;
       dataIv?: string;
       encryptedData?: string;
       encryptedImages?: Array<{ filename: string; encryptedData: string; iv?: string }>;
       keyId?: string;
+      userId?: string;
     };
+
+    const userMatchResult = requireMatchingUserId(
+      authenticatedContext.userId,
+      getNonEmptyRequestString(requestBody.userId)
+    );
+    if (!userMatchResult.allowed) {
+      return respond({ error: userMatchResult.error || 'Forbidden' }, userMatchResult.status);
+    }
 
     const { wrappedKey, dataIv, encryptedData, encryptedImages, keyId } = requestBody;
 
@@ -68,6 +92,44 @@ export async function handleDecryptExport(
       return respond(
         { error: `Failed to decrypt data file: ${errorMessage}` },
         500
+      );
+    }
+
+    const authenticatedUserEmail = getNonEmptyRequestString(
+      request.headers.get(AUTHENTICATED_USER_EMAIL_HEADER)
+    );
+
+    try {
+      const parsedPlaintext = JSON.parse(plaintextData) as {
+        metadata?: {
+          designatedReviewerEmail?: unknown;
+        };
+      };
+
+      const designatedReviewerEmail = getNonEmptyRequestString(parsedPlaintext.metadata?.designatedReviewerEmail);
+      if (designatedReviewerEmail) {
+        if (!authenticatedUserEmail) {
+          return respond(
+            {
+              error: 'Your account does not have an email address. This export is restricted to a designated reviewer.'
+            },
+            403
+          );
+        }
+
+        if (!emailsMatch(authenticatedUserEmail, designatedReviewerEmail)) {
+          return respond(
+            {
+              error: `This export is restricted to the designated reviewer (${designatedReviewerEmail}).`
+            },
+            403
+          );
+        }
+      }
+    } catch {
+      return respond(
+        { error: 'Invalid export payload: unable to validate designated reviewer metadata' },
+        400
       );
     }
 
