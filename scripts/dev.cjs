@@ -20,10 +20,11 @@ try {
 // Pop a lil' logo in the terminal
 console.info(asciiArt);
 
+updateMarkdownVersions();
+
 if (shouldSyncMetadata()) {
-    // Explicit opt-in for release/maintenance flows that intentionally update files.
-    updateMarkdownVersions();
+    // Explicit opt-in for release/maintenance flows that intentionally update compatibility dates.
     updateCompatibilityDates();
 } else {
-    console.info('Skipping metadata sync. Set STRIAE_SYNC_METADATA=1 to update versions and compatibility dates.');
+    console.info('Skipping compatibility date sync. Set STRIAE_SYNC_METADATA=1 to update compatibility dates.');
 }
