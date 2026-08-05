@@ -5,6 +5,7 @@ import {
   getNonEmptyString
 } from '../registry/key-registry';
 import {
+  AUTHENTICATED_USER_EMAIL_HEADER,
   getNonEmptyRequestString,
   requireAuthenticatedUserContext,
   requireMatchingUserId
@@ -24,6 +25,10 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   }
 
   return btoa(binary);
+}
+
+function emailsMatch(left: string, right: string): boolean {
+  return left.trim().toLowerCase() === right.trim().toLowerCase();
 }
 
 export async function handleDecryptExport(
@@ -90,21 +95,42 @@ export async function handleDecryptExport(
       );
     }
 
+    const authenticatedUserEmail = getNonEmptyRequestString(
+      request.headers.get(AUTHENTICATED_USER_EMAIL_HEADER)
+    );
+
     try {
       const parsedPlaintext = JSON.parse(plaintextData) as {
         metadata?: {
-          originalCaseOwnerUid?: unknown;
+          designatedReviewerEmail?: unknown;
         };
       };
-      const originalCaseOwnerUid = getNonEmptyRequestString(parsedPlaintext.metadata?.originalCaseOwnerUid);
-      if (originalCaseOwnerUid && originalCaseOwnerUid !== authenticatedContext.userId) {
-        return respond(
-          { error: 'Authenticated user is not authorized to decrypt this export payload' },
-          403
-        );
+
+      const designatedReviewerEmail = getNonEmptyRequestString(parsedPlaintext.metadata?.designatedReviewerEmail);
+      if (designatedReviewerEmail) {
+        if (!authenticatedUserEmail) {
+          return respond(
+            {
+              error: 'Your account does not have an email address. This export is restricted to a designated reviewer.'
+            },
+            403
+          );
+        }
+
+        if (!emailsMatch(authenticatedUserEmail, designatedReviewerEmail)) {
+          return respond(
+            {
+              error: `This export is restricted to the designated reviewer (${designatedReviewerEmail}).`
+            },
+            403
+          );
+        }
       }
     } catch {
-      // Ignore plaintext parsing here; downstream import validation still validates package structure.
+      return respond(
+        { error: 'Invalid export payload: unable to validate designated reviewer metadata' },
+        400
+      );
     }
 
     const decryptedImages: Array<{ filename: string; data: string }> = [];

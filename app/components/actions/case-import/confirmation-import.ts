@@ -24,6 +24,19 @@ type AnnotationImportData = Record<string, unknown> & {
   updatedAt?: string;
 };
 
+function getNonEmptyString(value: unknown): string | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function resolveConfirmationImportOwnerUid(confirmationData: ConfirmationImportData): string | null {
+  return getNonEmptyString(confirmationData.metadata.originalCaseOwnerUid);
+}
+
 function isEncryptionManifest(value: unknown): value is EncryptionManifest {
   if (!value || typeof value !== 'object') {
     return false;
@@ -187,11 +200,16 @@ export async function importConfirmationData(
     }
 
     // Validate that this confirmation package was intended for the current user.
-    // originalCaseOwnerUid is embedded at export time and covered by the package signature.
-    if (
-      confirmationData.metadata.originalCaseOwnerUid &&
-      confirmationData.metadata.originalCaseOwnerUid !== user.uid
-    ) {
+    // Fail closed: originalCaseOwnerUid must be present and must match current user.
+    const confirmationOwnerUid = resolveConfirmationImportOwnerUid(confirmationData);
+    if (!confirmationOwnerUid) {
+      throw new Error(
+        'Invalid confirmation package: missing owner identity metadata. ' +
+        'Only packages bound to an original case owner can be imported.'
+      );
+    }
+
+    if (confirmationOwnerUid !== user.uid) {
       throw new Error(
         'This confirmation package was not exported for your case. It can only be imported by the original case owner.'
       );
