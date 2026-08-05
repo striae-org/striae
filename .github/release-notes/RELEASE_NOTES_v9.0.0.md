@@ -26,8 +26,7 @@ v9.0.0 is a security-focused major release that closes [GHSA-qgj2-x8xw-v75r](htt
 
 ### Repository Hygiene Follow-Up
 
-- Cleaned up the `tests/app/security/*` `Env` mock casts and tuple assertions that were blocking `npm run typecheck`.
-- Added a small `.gitignore` update for the local tests directory as a cleanup follow-up in the same release window.
+- Updated repository ignore rules as part of the release window.
 
 ## Release Statistics
 
