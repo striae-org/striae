@@ -30,6 +30,14 @@ export const signForensicManifest = async (
   manifest: ForensicManifestData
 ): Promise<ManifestSigningResponse> => {
   try {
+    if (typeof manifest.caseNumber !== 'string' || manifest.caseNumber.trim().length === 0) {
+      throw new Error('Manifest signing request requires manifest.caseNumber');
+    }
+
+    if (manifest.caseNumber !== caseNumber) {
+      throw new Error('Manifest case number must match the requested signing case number');
+    }
+
     const sessionValidation = await validateUserSession(user);
     if (!sessionValidation.valid) {
       throw new Error(`Session validation failed: ${sessionValidation.reason}`);

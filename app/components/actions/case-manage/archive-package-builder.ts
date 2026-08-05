@@ -127,7 +127,7 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
     }
   }
 
-  const forensicManifest = await generateForensicManifestSecure(caseJsonContent, imageBlobs);
+  const forensicManifest = await generateForensicManifestSecure(caseJsonContent, imageBlobs, caseNumber);
   const manifestSigningResponse = await signForensicManifest(user, caseNumber, forensicManifest);
 
   const signingKey = getVerificationPublicSigningKey(manifestSigningResponse.signature.keyId);

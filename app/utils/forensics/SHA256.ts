@@ -6,10 +6,12 @@
 
 import { verifySignaturePayload } from './signature-utils';
 
-export const FORENSIC_MANIFEST_VERSION = '3.0';
+export const FORENSIC_MANIFEST_LEGACY_VERSION = '3.0';
+export const FORENSIC_MANIFEST_VERSION = '4.0';
 export const FORENSIC_MANIFEST_SIGNATURE_ALGORITHM = 'RSASSA-PSS-SHA-256';
 
 export interface ForensicManifestData {
+  caseNumber?: string;
   dataHash: string;
   imageHashes: { [filename: string]: string };
   manifestHash: string;
@@ -48,9 +50,22 @@ function normalizeImageHashes(imageHashes: { [filename: string]: string }): { [f
   return normalized;
 }
 
-function isValidManifestData(candidate: Partial<ForensicManifestData>): candidate is ForensicManifestData {
+function isSupportedManifestVersion(version: string): boolean {
+  return version === FORENSIC_MANIFEST_VERSION || version === FORENSIC_MANIFEST_LEGACY_VERSION;
+}
+
+function isValidManifestData(
+  candidate: Partial<ForensicManifestData>,
+  manifestVersion: string
+): candidate is ForensicManifestData {
   if (!candidate) {
     return false;
+  }
+
+  if (manifestVersion === FORENSIC_MANIFEST_VERSION) {
+    if (typeof candidate.caseNumber !== 'string' || candidate.caseNumber.trim().length === 0) {
+      return false;
+    }
   }
 
   if (typeof candidate.dataHash !== 'string' || !SHA256_HEX_REGEX.test(candidate.dataHash)) {
@@ -83,17 +98,28 @@ function isValidManifestData(candidate: Partial<ForensicManifestData>): candidat
 }
 
 export function extractForensicManifestData(candidate: Partial<SignedForensicManifest>): ForensicManifestData | null {
-  if (!isValidManifestData(candidate)) {
+  const manifestVersion =
+    typeof candidate.manifestVersion === 'string' && candidate.manifestVersion.trim().length > 0
+      ? candidate.manifestVersion
+      : FORENSIC_MANIFEST_VERSION;
+
+  if (!isSupportedManifestVersion(manifestVersion) || !isValidManifestData(candidate, manifestVersion)) {
     return null;
   }
 
-  return {
+  const normalizedData: ForensicManifestData = {
     dataHash: candidate.dataHash.toLowerCase(),
     imageHashes: normalizeImageHashes(candidate.imageHashes),
     manifestHash: candidate.manifestHash.toLowerCase(),
     totalFiles: candidate.totalFiles,
     createdAt: candidate.createdAt
   };
+
+  if (manifestVersion === FORENSIC_MANIFEST_VERSION) {
+    normalizedData.caseNumber = candidate.caseNumber?.trim();
+  }
+
+  return normalizedData;
 }
 
 /**
@@ -104,6 +130,28 @@ export function createManifestSigningPayload(
   manifest: ForensicManifestData,
   manifestVersion: string = FORENSIC_MANIFEST_VERSION
 ): string {
+  if (manifestVersion === FORENSIC_MANIFEST_VERSION) {
+    if (typeof manifest.caseNumber !== 'string' || manifest.caseNumber.trim().length === 0) {
+      throw new Error('Manifest case number is required for version 4.0 signatures');
+    }
+
+    const canonicalPayload = {
+      manifestVersion,
+      caseNumber: manifest.caseNumber,
+      dataHash: manifest.dataHash.toLowerCase(),
+      imageHashes: normalizeImageHashes(manifest.imageHashes),
+      manifestHash: manifest.manifestHash.toLowerCase(),
+      totalFiles: manifest.totalFiles,
+      createdAt: manifest.createdAt
+    };
+
+    return JSON.stringify(canonicalPayload);
+  }
+
+  if (manifestVersion !== FORENSIC_MANIFEST_LEGACY_VERSION) {
+    throw new Error(`Unsupported manifest version: ${manifestVersion}`);
+  }
+
   const canonicalPayload = {
     manifestVersion,
     dataHash: manifest.dataHash.toLowerCase(),
@@ -130,7 +178,12 @@ export async function verifyForensicManifestSignature(
     };
   }
 
-  if (manifest.manifestVersion !== FORENSIC_MANIFEST_VERSION) {
+  const manifestVersion =
+    typeof manifest.manifestVersion === 'string' && manifest.manifestVersion.trim().length > 0
+      ? manifest.manifestVersion
+      : FORENSIC_MANIFEST_VERSION;
+
+  if (!isSupportedManifestVersion(manifestVersion)) {
     return {
       isValid: false,
       keyId: manifest.signature.keyId,
@@ -147,7 +200,7 @@ export async function verifyForensicManifestSignature(
     };
   }
 
-  const payload = createManifestSigningPayload(manifestData, manifest.manifestVersion);
+  const payload = createManifestSigningPayload(manifestData, manifestVersion);
 
   return verifySignaturePayload(
     payload,
@@ -300,8 +353,14 @@ export async function calculateSHA256Binary(data: Uint8Array | ArrayBuffer | Blo
  */
 export async function generateForensicManifestSecure(
   dataContent: string,
-  imageFiles: { [filename: string]: Blob }
+  imageFiles: { [filename: string]: Blob },
+  caseNumber: string
 ): Promise<ForensicManifestData> {
+  const normalizedCaseNumber = caseNumber.trim();
+  if (normalizedCaseNumber.length === 0) {
+    throw new Error('Case number is required to generate a forensic manifest');
+  }
+
   const dataHash = await calculateSHA256Secure(dataContent);
 
   const imageHashes: { [filename: string]: string } = {};
@@ -311,6 +370,7 @@ export async function generateForensicManifestSecure(
   }
 
   const manifestForHash = {
+    caseNumber: normalizedCaseNumber,
     dataHash,
     imageHashes,
     totalFiles: Object.keys(imageFiles).length + 1,
@@ -321,6 +381,7 @@ export async function generateForensicManifestSecure(
   const manifestHash = await calculateSHA256Secure(manifestContent);
 
   return {
+    caseNumber: normalizedCaseNumber,
     dataHash,
     imageHashes,
     manifestHash,
@@ -335,9 +396,12 @@ export async function generateForensicManifestSecure(
 export async function generateForensicManifestWithTimestampSecure(
   dataContent: string,
   imageFiles: { [filename: string]: Blob },
-  createdAt: string
+  createdAt: string,
+  caseNumber?: string
 ): Promise<ForensicManifestData> {
   const dataHash = await calculateSHA256Secure(dataContent);
+
+  const normalizedCaseNumber = typeof caseNumber === 'string' ? caseNumber.trim() : '';
 
   const imageHashes: { [filename: string]: string } = {};
   const sortedFilenames = Object.keys(imageFiles).sort();
@@ -346,6 +410,7 @@ export async function generateForensicManifestWithTimestampSecure(
   }
 
   const manifestForHash = {
+    ...(normalizedCaseNumber.length > 0 ? { caseNumber: normalizedCaseNumber } : {}),
     dataHash,
     imageHashes,
     totalFiles: Object.keys(imageFiles).length + 1,
@@ -356,6 +421,7 @@ export async function generateForensicManifestWithTimestampSecure(
   const manifestHash = await calculateSHA256Secure(manifestContent);
 
   return {
+    ...(normalizedCaseNumber.length > 0 ? { caseNumber: normalizedCaseNumber } : {}),
     dataHash,
     imageHashes,
     manifestHash,
@@ -418,7 +484,8 @@ export async function validateCaseIntegritySecure(
   const recreatedManifest = await generateForensicManifestWithTimestampSecure(
     dataContent,
     imageFiles,
-    expectedManifest.createdAt
+    expectedManifest.createdAt,
+    expectedManifest.caseNumber
   );
 
   const manifestValid = recreatedManifest.manifestHash === expectedManifest.manifestHash.toLowerCase();

@@ -73,6 +73,10 @@ function getTopLevelRequestCaseNumber(requestBody: Record<string, unknown>): str
   return getNonEmptyRequestString(requestBody.caseNumber);
 }
 
+function getManifestRequestCaseNumber(manifestBody: Record<string, unknown>): string | null {
+  return getNonEmptyRequestString(manifestBody.caseNumber);
+}
+
 function getTopLevelRequestUserId(requestBody: Record<string, unknown>): string | null {
   return getNonEmptyRequestString(requestBody.userId);
 }
@@ -101,22 +105,38 @@ export async function handleSignManifest(
       return respond({ error: userMatchResult.error || 'Forbidden' }, userMatchResult.status);
     }
 
+    const topLevelCaseNumber = getTopLevelRequestCaseNumber(requestBody as Record<string, unknown>);
+    const manifestCandidate: Partial<ForensicManifestPayload> = requestBody.manifest ?? requestBody;
+    const manifestCaseNumber = getManifestRequestCaseNumber(manifestCandidate as Record<string, unknown>);
+
+    if (topLevelCaseNumber && manifestCaseNumber && topLevelCaseNumber !== manifestCaseNumber) {
+      return respond({ error: 'Request case number does not match manifest payload case number' }, 400);
+    }
+
+    const effectiveCaseNumber = manifestCaseNumber ?? topLevelCaseNumber;
+    if (!effectiveCaseNumber) {
+      return respond({ error: 'Missing case number for manifest signing authorization' }, 400);
+    }
+
     const caseAccessResult = await requireCaseAccess(
       env,
       authenticatedContext.userId,
-      getTopLevelRequestCaseNumber(requestBody as Record<string, unknown>)
+      effectiveCaseNumber
     );
     if (!caseAccessResult.allowed) {
       return respond({ error: caseAccessResult.error || 'Forbidden' }, caseAccessResult.status);
     }
 
-    const manifestCandidate: Partial<ForensicManifestPayload> = requestBody.manifest ?? requestBody;
+    const normalizedManifestCandidate: Partial<ForensicManifestPayload> = {
+      ...manifestCandidate,
+      caseNumber: effectiveCaseNumber
+    };
 
-    if (!manifestCandidate || !isValidManifestPayload(manifestCandidate)) {
+    if (!manifestCandidate || !isValidManifestPayload(normalizedManifestCandidate)) {
       return respond({ error: 'Invalid manifest payload' }, 400);
     }
 
-    const signature = await signManifest(manifestCandidate, env);
+    const signature = await signManifest(normalizedManifestCandidate, env);
 
     return respond({
       success: true,

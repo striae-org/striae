@@ -123,7 +123,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.43.0",
-    "@cloudflare/vitest-pool-workers": "0.18.0",
+    "@cloudflare/vitest-pool-workers": "0.20.1",
     "@cloudflare/workers-types": "^4",
     "@eslint-react/eslint-plugin": "^5.18.2",
     "@eslint/js": "^10.0.1",

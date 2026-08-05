@@ -1,4 +1,5 @@
 export interface ForensicManifestPayload {
+  caseNumber: string;
   dataHash: string;
   imageHashes: { [filename: string]: string };
   manifestHash: string;
@@ -52,7 +53,8 @@ export interface AuditExportSigningPayload {
   hash: string;
 }
 
-export const FORENSIC_MANIFEST_VERSION = '3.0';
+export const FORENSIC_MANIFEST_LEGACY_VERSION = '3.0';
+export const FORENSIC_MANIFEST_VERSION = '4.0';
 export const CONFIRMATION_SIGNATURE_VERSION = '3.0';
 export const AUDIT_EXPORT_SIGNATURE_VERSION = '2.0';
 export const FORENSIC_MANIFEST_SIGNATURE_ALGORITHM = 'RSASSA-PSS-SHA-256';
@@ -86,6 +88,10 @@ function hasValidConfirmationRecord(entry: Partial<ConfirmationRecord>): entry i
 
 export function isValidManifestPayload(candidate: Partial<ForensicManifestPayload>): candidate is ForensicManifestPayload {
   if (!candidate) {
+    return false;
+  }
+
+  if (typeof candidate.caseNumber !== 'string' || candidate.caseNumber.trim().length === 0) {
     return false;
   }
 
@@ -219,8 +225,26 @@ export function isValidAuditExportPayload(
 }
 
 export function createManifestSigningPayload(manifest: ForensicManifestPayload): string {
+  if (manifest.caseNumber.trim().length === 0) {
+    throw new Error('Manifest case number is required for signing');
+  }
+
   const canonicalPayload = {
     manifestVersion: FORENSIC_MANIFEST_VERSION,
+    caseNumber: manifest.caseNumber,
+    dataHash: manifest.dataHash.toLowerCase(),
+    imageHashes: normalizeImageHashes(manifest.imageHashes),
+    manifestHash: manifest.manifestHash.toLowerCase(),
+    totalFiles: manifest.totalFiles,
+    createdAt: manifest.createdAt
+  };
+
+  return JSON.stringify(canonicalPayload);
+}
+
+export function createLegacyManifestSigningPayload(manifest: Omit<ForensicManifestPayload, 'caseNumber'>): string {
+  const canonicalPayload = {
+    manifestVersion: FORENSIC_MANIFEST_LEGACY_VERSION,
     dataHash: manifest.dataHash.toLowerCase(),
     imageHashes: normalizeImageHashes(manifest.imageHashes),
     manifestHash: manifest.manifestHash.toLowerCase(),
