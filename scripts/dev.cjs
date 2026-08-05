@@ -3,6 +3,10 @@ const path = require('path');
 const { updateMarkdownVersions } = require('./update-markdown-versions.cjs');
 const { updateCompatibilityDates } = require('./update-compatibility-dates.cjs');
 
+function shouldSyncMetadata() {
+    return process.env.STRIAE_SYNC_METADATA === '1';
+}
+
 // Read the ASCII art file from the filesystem
 const asciiArtPath = path.join(__dirname, '..', 'public', 'striae-ascii.txt');
 let asciiArt;  
@@ -16,8 +20,10 @@ try {
 // Pop a lil' logo in the terminal
 console.info(asciiArt);
 
-// Update markdown files with current version
-updateMarkdownVersions();
-
-// Update compatibility dates to current date
-updateCompatibilityDates();
+if (shouldSyncMetadata()) {
+    // Explicit opt-in for release/maintenance flows that intentionally update files.
+    updateMarkdownVersions();
+    updateCompatibilityDates();
+} else {
+    console.info('Skipping metadata sync. Set STRIAE_SYNC_METADATA=1 to update versions and compatibility dates.');
+}
