@@ -126,7 +126,13 @@ echo ""
 # Step 4: Deploy Workers
 echo -e "${PURPLE}Step 4/8: Deploying Workers${NC}"
 echo "----------------------------"
-echo -e "${YELLOW}🔧 Deploying all 6 Cloudflare Workers...${NC}"
+echo -e "${YELLOW}�️ Running admin-service security guard before worker deployment...${NC}"
+if ! npm run security:admin-service-guard; then
+    echo -e "${RED}❌ Admin-service security guard failed!${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Admin-service security guard passed${NC}"
+echo -e "${YELLOW}�🔧 Deploying all 6 Cloudflare Workers...${NC}"
 if ! npm run deploy-workers; then
     echo -e "${RED}❌ Worker deployment failed!${NC}"
     exit 1
@@ -169,8 +175,12 @@ echo ""
 
 # Step 8: Deploy Pages
 echo -e "${PURPLE}Step 8/8: Deploying Pages${NC}"
-echo "--------------------------"
-echo -e "${YELLOW}🌐 Building and deploying Pages...${NC}"
+echo "--------------------------"echo -e "${YELLOW}🛡️ Running admin-service security guard before Pages deployment...${NC}"
+if ! npm run security:admin-service-guard; then
+    echo -e "${RED}❌ Admin-service security guard failed!${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Admin-service security guard passed${NC}"echo -e "${YELLOW}🌐 Building and deploying Pages...${NC}"
 if ! npm run deploy-pages; then
     echo -e "${RED}❌ Pages deployment failed!${NC}"
     exit 1

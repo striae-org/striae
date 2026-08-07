@@ -20,6 +20,12 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-07] - *[Patch Release v9.0.1](https://github.com/striae-org/striae/releases/tag/v9.0.1)*
+
+- **🛡️ Admin-Service Guard Hardening** - Enforced the admin-service security guard during build and deployment flows so releases fail fast when `app/config/admin-service.json` is tracked or service-account material is exposed in public/build artifacts.
+- **⚙️ Deploy Pipeline Alignment** - Wired the guard into the deployment scripts used for worker and Pages deploy paths so the release pipeline stays consistent with the stricter admin-service protections.
+- **🧰 Release Metadata Refresh** - Updated package metadata and release documentation to keep the patch release aligned with the hardened deployment workflow.
+
 ## [2026-08-04] - *[Major Release v9.0.0](https://github.com/striae-org/striae/releases/tag/v9.0.0)*
 
 - **🔒 Security Remediation: Forensic Authorization Hardening** - Closed GHSA-qgj2-x8xw-v75r, reported by @arpitjain099, by restoring forensic request scoping and confirmation-signing entitlement checks so authenticated users cannot mint confirmation signatures for cases they do not own or cannot access.

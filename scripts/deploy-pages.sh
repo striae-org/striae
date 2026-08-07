@@ -18,7 +18,13 @@ echo -e "${BLUE}📄 Striae Pages Deployment Script${NC}"
 echo "=================================="
 
 # Deploy to Cloudflare Pages (includes build step)
-echo -e "${YELLOW}🚀 Building and deploying to Cloudflare Pages...${NC}"
+echo -e "${YELLOW}�️ Running admin-service security guard before Pages deployment...${NC}"
+if ! npm run security:admin-service-guard; then
+    echo -e "${RED}❌ Admin-service security guard failed!${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Admin-service security guard passed${NC}"
+echo -e "${YELLOW}�🚀 Building and deploying to Cloudflare Pages...${NC}"
 if ! npm run deploy; then
     echo -e "${RED}❌ Deployment failed!${NC}"
     exit 1

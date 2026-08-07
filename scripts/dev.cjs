@@ -16,8 +16,7 @@ try {
 // Pop a lil' logo in the terminal
 console.info(asciiArt);
 
-// Update markdown files with current version
 updateMarkdownVersions();
 
-// Update compatibility dates to current date
-updateCompatibilityDates();
+// Keep compatibility dates current, bounded by local runtime support.
+updateCompatibilityDates({ mode: 'latest-compatible' });

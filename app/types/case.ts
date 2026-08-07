@@ -72,32 +72,6 @@ export interface CaseExportData {
   };
 }
 
-export interface AllCasesExportData {
-  metadata: {
-    exportDate: string;
-    exportedBy: string | null;
-    exportedByUid: string;
-    exportedByName: string;
-    exportedByCompany: string;
-    exportedByBadgeId?: string;
-    striaeExportSchemaVersion: string;
-    totalCases: number;
-    totalFiles: number;
-    totalAnnotations: number;
-    totalConfirmations: number;
-    totalConfirmationsRequested: number;
-  };
-  cases: CaseExportData[];
-  summary?: {
-    casesWithFiles: number;
-    casesWithAnnotations: number;
-    casesWithoutFiles: number;
-    lastModified?: string;
-    earliestAnnotationDate?: string;
-    latestAnnotationDate?: string;
-  };
-}
-
 // Confirmation-related case types
 export interface CaseConfirmations {
   [originalImageId: string]: ConfirmationData[];
