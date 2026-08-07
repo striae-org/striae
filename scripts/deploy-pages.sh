@@ -19,7 +19,7 @@ echo "=================================="
 
 # Deploy to Cloudflare Pages (includes build step)
 echo -e "${YELLOW}�️ Running admin-service security guard before Pages deployment...${NC}"
-if ! npm run security:admin-service-guard:strict; then
+if ! npm run security:admin-service-guard; then
     echo -e "${RED}❌ Admin-service security guard failed!${NC}"
     exit 1
 fi

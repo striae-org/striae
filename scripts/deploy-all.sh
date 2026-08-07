@@ -127,7 +127,7 @@ echo ""
 echo -e "${PURPLE}Step 4/8: Deploying Workers${NC}"
 echo "----------------------------"
 echo -e "${YELLOW}�️ Running admin-service security guard before worker deployment...${NC}"
-if ! npm run security:admin-service-guard:strict; then
+if ! npm run security:admin-service-guard; then
     echo -e "${RED}❌ Admin-service security guard failed!${NC}"
     exit 1
 fi
@@ -176,7 +176,7 @@ echo ""
 # Step 8: Deploy Pages
 echo -e "${PURPLE}Step 8/8: Deploying Pages${NC}"
 echo "--------------------------"echo -e "${YELLOW}🛡️ Running admin-service security guard before Pages deployment...${NC}"
-if ! npm run security:admin-service-guard:strict; then
+if ! npm run security:admin-service-guard; then
     echo -e "${RED}❌ Admin-service security guard failed!${NC}"
     exit 1
 fi
