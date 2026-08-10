@@ -8,7 +8,6 @@ const JSON_HEADERS: HeadersInit = {
 
 /** Routes map URL path segment to the KV key used in STRIAE_LISTS. */
 const ROUTE_TO_KV_KEY: Record<string, string> = {
-  allow: 'allow',
   members: 'allow',
   primershear: 'primershear',
 };
