@@ -20,6 +20,8 @@ function isEncryptionManifest(value: unknown): value is EncryptionManifest {
 
 const CONFIRMATION_EXPORT_FILE_REGEX = /^confirmation-data-.*\.json$/i;
 const ENCRYPTION_MANIFEST_FILE_NAME = 'encryption_manifest.json';
+const AUDIT_TRAIL_FILE_NAME = 'confirmation-audit-trail.json';
+const AUDIT_MANIFEST_FILE_NAME = 'audit-encryption-manifest.json';
 
 function uint8ArrayToBase64Url(data: Uint8Array): string {
   const chunkSize = 8192;
@@ -42,11 +44,13 @@ function uint8ArrayToBase64Url(data: Uint8Array): string {
 export interface ConfirmationImportPackage {
   confirmationData: ConfirmationImportData;
   confirmationJsonContent: string;
-  verificationPublicKeyPem?: string;
   confirmationFileName: string;
+  packagedVerificationPublicKeyPem?: string;
   isEncrypted?: boolean;
   encryptionManifest?: unknown;
   encryptedDataBase64?: string;
+  auditBundleEncryptedDataBase64?: string;
+  auditBundleEncryptionManifest?: unknown;
 }
 
 function getLeafFileName(path: string): string {
@@ -147,19 +151,47 @@ async function extractConfirmationPackageFromZip(file: File): Promise<Confirmati
   const pemPaths = fileEntries.filter((path) => getLeafFileName(path).toLowerCase().endsWith('.pem'));
   const preferredPemPath = selectPreferredPemPath(pemPaths);
 
-  let verificationPublicKeyPem: string | undefined;
+  let packagedVerificationPublicKeyPem: string | undefined;
   if (preferredPemPath) {
-    verificationPublicKeyPem = await zip.file(preferredPemPath)?.async('text');
+    packagedVerificationPublicKeyPem = await zip.file(preferredPemPath)?.async('text');
+  }
+
+  // Optional reviewing-examiner audit trail bundle (encrypted separately under audit/).
+  let auditBundleEncryptedDataBase64: string | undefined;
+  let auditBundleEncryptionManifest: unknown;
+
+  const auditTrailPath = fileEntries.find(
+    (path) => getLeafFileName(path).toLowerCase() === AUDIT_TRAIL_FILE_NAME
+  );
+  const auditManifestPath = fileEntries.find(
+    (path) => getLeafFileName(path).toLowerCase() === AUDIT_MANIFEST_FILE_NAME
+  );
+
+  if (auditTrailPath && auditManifestPath) {
+    const auditManifestContent = await zip.file(auditManifestPath)?.async('text');
+    const auditTrailBytes = await zip.file(auditTrailPath)?.async('uint8array');
+
+    if (auditManifestContent && auditManifestContent.trim().length > 0 && auditTrailBytes) {
+      try {
+        auditBundleEncryptionManifest = JSON.parse(auditManifestContent);
+        auditBundleEncryptedDataBase64 = uint8ArrayToBase64Url(auditTrailBytes);
+      } catch {
+        auditBundleEncryptionManifest = undefined;
+        auditBundleEncryptedDataBase64 = undefined;
+      }
+    }
   }
 
   return {
     confirmationData,
     confirmationJsonContent,
-    verificationPublicKeyPem,
     confirmationFileName,
+    packagedVerificationPublicKeyPem,
     isEncrypted,
     encryptionManifest,
-    encryptedDataBase64
+    encryptedDataBase64,
+    auditBundleEncryptedDataBase64,
+    auditBundleEncryptionManifest
   };
 }
 

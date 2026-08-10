@@ -1,10 +1,12 @@
 import type { User } from 'firebase/auth';
 import { fetchDataApi } from '~/utils/api';
-import { upsertFileConfirmationSummary, decryptExportBatch } from '~/utils/data';
-import { type AnnotationData, type ConfirmationImportResult, type ConfirmationImportData } from '~/types';
+import { upsertFileConfirmationSummary, decryptExportBatch, getCaseData, updateCaseData } from '~/utils/data';
+import { type AnnotationData, type ConfirmationImportResult, type ConfirmationImportData, type ConfirmationAuditBundle } from '~/types';
 import type { EncryptionManifest } from '~/utils/forensics/export-encryption';
+import { getVerificationPublicKey } from '~/utils/forensics';
 import { checkExistingCase } from '../case-manage';
 import { extractConfirmationImportPackage } from './confirmation-package';
+import { verifyConfirmationAuditTrail } from '../confirmation-audit-bundle';
 import { validateExporterUid, validateConfirmationHash, validateConfirmationSignatureFile } from './validation';
 import { auditService } from '~/services/audit';
 
@@ -35,6 +37,36 @@ function getNonEmptyString(value: unknown): string | null {
 
 function resolveConfirmationImportOwnerUid(confirmationData: ConfirmationImportData): string | null {
   return getNonEmptyString(confirmationData.metadata.originalCaseOwnerUid);
+}
+
+function normalizePemForComparison(pem: string): string {
+  return pem
+    .replace(/\\n/g, '\n')
+    .replace(/\r/g, '')
+    .replace(/\s+/g, '')
+    .trim();
+}
+
+function enforcePackagedPemMatchesTrustedSigningKey(
+  signatureKeyId: string,
+  packagedVerificationPublicKeyPem: string,
+  packageType: 'case package' | 'confirmation package'
+): void {
+  const trustedVerificationPublicKeyPem = getVerificationPublicKey(signatureKeyId);
+
+  if (!trustedVerificationPublicKeyPem) {
+    return;
+  }
+
+  const trustedNormalized = normalizePemForComparison(trustedVerificationPublicKeyPem);
+  const packagedNormalized = normalizePemForComparison(packagedVerificationPublicKeyPem);
+
+  if (trustedNormalized !== packagedNormalized) {
+    throw new Error(
+      `Security validation failed: the bundled public signing key in this ${packageType} does not match the trusted configured key for key ID "${signatureKeyId}". ` +
+      'The package may have been tampered with and cannot be imported.'
+    );
+  }
 }
 
 function isEncryptionManifest(value: unknown): value is EncryptionManifest {
@@ -88,6 +120,45 @@ function validateConfirmationEncryptionManifest(manifest: EncryptionManifest): v
 }
 
 /**
+ * Ensures that the audit bundle's scope matches the expected case number.
+ */
+function ensureAuditBundleScopeMatchesCase(
+  expectedCaseNumber: string,
+  scopeIdentifier?: string,
+  auditTrailCaseNumber?: string
+): void {
+  const normalizedExpected = expectedCaseNumber.trim();
+  const normalizedScopeIdentifier = typeof scopeIdentifier === 'string' ? scopeIdentifier.trim() : '';
+  const normalizedAuditTrailCaseNumber = typeof auditTrailCaseNumber === 'string' ? auditTrailCaseNumber.trim() : '';
+
+  if (!normalizedScopeIdentifier) {
+    throw new Error(
+      'Invalid confirmation audit bundle: signed scope identifier is missing. '
+      + 'The bundle cannot be safely merged into this case.'
+    );
+  }
+
+  if (normalizedScopeIdentifier !== normalizedExpected) {
+    throw new Error(
+      `Invalid confirmation audit bundle: signed scope case "${normalizedScopeIdentifier}" does not match target case "${normalizedExpected}".`
+    );
+  }
+
+  if (!normalizedAuditTrailCaseNumber) {
+    throw new Error(
+      'Invalid confirmation audit bundle: audit trail case number is missing. '
+      + 'The bundle cannot be safely merged into this case.'
+    );
+  }
+
+  if (normalizedAuditTrailCaseNumber !== normalizedExpected) {
+    throw new Error(
+      `Invalid confirmation audit bundle: audit trail case "${normalizedAuditTrailCaseNumber}" does not match target case "${normalizedExpected}".`
+    );
+  }
+}
+
+/**
  * Import confirmation data from JSON file
  */
 export async function importConfirmationData(
@@ -120,7 +191,6 @@ export async function importConfirmationData(
 
     let confirmationData = packageData.confirmationData;
     let confirmationJsonContent = packageData.confirmationJsonContent;
-    const verificationPublicKeyPem = packageData.verificationPublicKeyPem;
     const confirmationFileName = packageData.confirmationFileName;
 
     // All confirmation imports are encrypted — fail closed if manifest is missing
@@ -159,6 +229,20 @@ export async function importConfirmationData(
     confirmationDataForAudit = confirmationData;
     confirmationJsonFileNameForAudit = confirmationFileName;
     result.caseNumber = confirmationData.metadata.caseNumber;
+
+    const confirmationSignatureKeyId = confirmationData.metadata.signature?.keyId;
+    if (
+      typeof packageData.packagedVerificationPublicKeyPem === 'string' &&
+      packageData.packagedVerificationPublicKeyPem.trim().length > 0 &&
+      typeof confirmationSignatureKeyId === 'string' &&
+      confirmationSignatureKeyId.trim().length > 0
+    ) {
+      enforcePackagedPemMatchesTrustedSigningKey(
+        confirmationSignatureKeyId,
+        packageData.packagedVerificationPublicKeyPem,
+        'confirmation package'
+      );
+    }
     
     // Start audit workflow
     auditService.startWorkflow(result.caseNumber);
@@ -173,10 +257,7 @@ export async function importConfirmationData(
 
     onProgress?.('Validating signature', 30, 'Verifying signed confirmation metadata...');
 
-    const signatureResult = await validateConfirmationSignatureFile(
-      confirmationData,
-      verificationPublicKeyPem
-    );
+    const signatureResult = await validateConfirmationSignatureFile(confirmationData);
     signaturePresent = !!confirmationData.metadata.signature;
     signatureValid = signatureResult.isValid;
     signatureKeyId = signatureResult.keyId;
@@ -445,7 +526,69 @@ export async function importConfirmationData(
       },
       confirmationData.metadata.exportedByBadgeId // Reviewer's badge/ID number
     );
-    
+
+    // Merge the reviewing examiner's bundled audit trail into the original examiner's live
+    // case audit trail — best-effort, and only when the confirmation import actually succeeded.
+    if (
+      result.success &&
+      result.confirmationsImported > 0 &&
+      packageData.auditBundleEncryptedDataBase64 &&
+      packageData.auditBundleEncryptionManifest &&
+      isEncryptionManifest(packageData.auditBundleEncryptionManifest)
+    ) {
+      try {
+        const auditDecryptResult = await decryptExportBatch(
+          user,
+          packageData.auditBundleEncryptionManifest,
+          packageData.auditBundleEncryptedDataBase64,
+          {}
+        );
+
+        const verifiedBundle = await verifyConfirmationAuditTrail(
+          auditDecryptResult.plaintext
+        );
+
+        ensureAuditBundleScopeMatchesCase(
+          result.caseNumber,
+          verifiedBundle.scopeIdentifier,
+          verifiedBundle.auditTrailCaseNumber
+        );
+
+        if (verifiedBundle.entries.length > 0) {
+          const bundle: ConfirmationAuditBundle = {
+            source: 'confirmation-bundle',
+            importedAt: new Date().toISOString(),
+            exportTimestamp: verifiedBundle.exportTimestamp,
+            totalEntries: verifiedBundle.totalEntries ?? verifiedBundle.entries.length,
+            reviewingExaminerUid: confirmationData.metadata.exportedByUid,
+            reviewingExaminerName: confirmationData.metadata.exportedByName,
+            reviewingExaminerBadgeId: confirmationData.metadata.exportedByBadgeId,
+            confirmationFileName,
+            entries: verifiedBundle.entries
+          };
+
+          const liveCaseData = await getCaseData(user, result.caseNumber);
+          if (liveCaseData) {
+            const existingTrails = liveCaseData.confirmationAuditTrails ?? [];
+            const alreadyImported = existingTrails.some(
+              (trail) =>
+                trail.reviewingExaminerUid === bundle.reviewingExaminerUid &&
+                trail.exportTimestamp === bundle.exportTimestamp
+            );
+
+            if (!alreadyImported) {
+              await updateCaseData(user, result.caseNumber, {
+                ...liveCaseData,
+                confirmationAuditTrails: [...existingTrails, bundle]
+              });
+            }
+          }
+        }
+      } catch (auditMergeError) {
+        console.warn('Failed to merge reviewer audit trail into case audit trail:', auditMergeError);
+      }
+    }
+
     auditService.endWorkflow();
     
     return result;

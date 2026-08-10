@@ -14,6 +14,19 @@ export interface BundledAuditTrailData {
   entries: ValidationAuditEntry[];
 }
 
+// Reviewing examiner audit entries merged into the original examiner's live case on confirmation import.
+export interface ConfirmationAuditBundle {
+  source: 'confirmation-bundle';
+  importedAt: string;
+  exportTimestamp?: string;
+  totalEntries?: number;
+  reviewingExaminerUid?: string;
+  reviewingExaminerName?: string;
+  reviewingExaminerBadgeId?: string;
+  confirmationFileName?: string;
+  entries: ValidationAuditEntry[];
+}
+
 export interface CaseData {
   createdAt: string;
   caseNumber: string;
@@ -25,6 +38,7 @@ export interface CaseData {
   archivedByDisplay?: string;
   archiveReason?: string;
   bundledAuditTrail?: BundledAuditTrailData;
+  confirmationAuditTrails?: ConfirmationAuditBundle[];
 }
 
 export interface ReadOnlyCaseData extends CaseData {
