@@ -120,6 +120,45 @@ function validateConfirmationEncryptionManifest(manifest: EncryptionManifest): v
 }
 
 /**
+ * Ensures that the audit bundle's scope matches the expected case number.
+ */
+function ensureAuditBundleScopeMatchesCase(
+  expectedCaseNumber: string,
+  scopeIdentifier?: string,
+  auditTrailCaseNumber?: string
+): void {
+  const normalizedExpected = expectedCaseNumber.trim();
+  const normalizedScopeIdentifier = typeof scopeIdentifier === 'string' ? scopeIdentifier.trim() : '';
+  const normalizedAuditTrailCaseNumber = typeof auditTrailCaseNumber === 'string' ? auditTrailCaseNumber.trim() : '';
+
+  if (!normalizedScopeIdentifier) {
+    throw new Error(
+      'Invalid confirmation audit bundle: signed scope identifier is missing. '
+      + 'The bundle cannot be safely merged into this case.'
+    );
+  }
+
+  if (normalizedScopeIdentifier !== normalizedExpected) {
+    throw new Error(
+      `Invalid confirmation audit bundle: signed scope case "${normalizedScopeIdentifier}" does not match target case "${normalizedExpected}".`
+    );
+  }
+
+  if (!normalizedAuditTrailCaseNumber) {
+    throw new Error(
+      'Invalid confirmation audit bundle: audit trail case number is missing. '
+      + 'The bundle cannot be safely merged into this case.'
+    );
+  }
+
+  if (normalizedAuditTrailCaseNumber !== normalizedExpected) {
+    throw new Error(
+      `Invalid confirmation audit bundle: audit trail case "${normalizedAuditTrailCaseNumber}" does not match target case "${normalizedExpected}".`
+    );
+  }
+}
+
+/**
  * Import confirmation data from JSON file
  */
 export async function importConfirmationData(
@@ -507,6 +546,12 @@ export async function importConfirmationData(
 
         const verifiedBundle = await verifyConfirmationAuditTrail(
           auditDecryptResult.plaintext
+        );
+
+        ensureAuditBundleScopeMatchesCase(
+          result.caseNumber,
+          verifiedBundle.scopeIdentifier,
+          verifiedBundle.auditTrailCaseNumber
         );
 
         if (verifiedBundle.entries.length > 0) {

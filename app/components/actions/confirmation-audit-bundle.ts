@@ -101,6 +101,8 @@ export interface VerifiedConfirmationAuditBundle {
   entries: ValidationAuditEntry[];
   exportTimestamp?: string;
   totalEntries?: number;
+  scopeIdentifier?: string;
+  auditTrailCaseNumber?: string;
 }
 
 /**
@@ -162,6 +164,8 @@ export const verifyConfirmationAuditTrail = async (
   return {
     entries: auditTrail.entries,
     exportTimestamp: metadata.exportTimestamp,
-    totalEntries: metadata.totalEntries
+    totalEntries: metadata.totalEntries,
+    scopeIdentifier: metadata.scopeIdentifier,
+    auditTrailCaseNumber: auditTrail.caseNumber
   };
 };

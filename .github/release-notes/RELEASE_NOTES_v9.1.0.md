@@ -2,9 +2,9 @@
 
 **Release Date**: August 9, 2026
 **Period**: August 8, 2026 to August 9, 2026
-**Total Commits**: 6 (non-merge after the v9.0.1 release)
+**Total Commits**: 7 (non-merge after the v9.0.1 release)
 
-## Minor Release - Confirmation Audit Trail Merge + Signature Trust-Anchor Hardening
+## Minor Release - Confirmation Audit Trail Merge + Cross-Case Scope Guardrail + Signature Trust-Anchor Hardening
 
 ## Summary
 
@@ -19,6 +19,7 @@ This release also closes a signature trust-anchor risk in import verification by
 - Implemented the confirmation audit-trail merge flow during confirmation import so reviewer-generated audit entries are carried into the recipient case's live audit trail.
 - Preserved audit continuity and provenance for confirmation imports by wiring the merge step into the existing verification and import handling path.
 - Hardened the import workflow around malformed or unverifiable reviewer bundles so incomplete audit state is avoided when a merge cannot be completed safely.
+- Added strict signed-scope enforcement for reviewer audit bundle merges so `metadata.scopeIdentifier` and `auditTrail.caseNumber` must match the confirmation target case number before any bundle is persisted.
 
 ### Signature Trust-Anchor Hardening
 
@@ -34,11 +35,11 @@ This release also closes a signature trust-anchor risk in import verification by
 ## Release Statistics
 
 - **Baseline**: .github/release-notes/RELEASE_NOTES_v9.0.1.md
-- **Commits Included**: 6 (non-merge commits from 2026-08-08 through 2026-08-09)
+- **Commits Included**: 7 (non-merge commits from 2026-08-08 through 2026-08-09)
 - **Build Status**: Passed (`npm run build`)
 - **Typecheck Status**: Passed (`npm run typecheck`)
 - **Lint Status**: Passed (`npm run lint`)
 
 ## Closing Note
 
-v9.1.0 improves confirmation import audit fidelity by merging reviewer audit trails into the active case record and hardens import signature verification by anchoring trust to configured signing keys (with fail-closed bundled-PEM mismatch checks), so audit history remains complete, trustworthy, and resilient against key-substitution tampering.
+v9.1.0 improves confirmation import audit fidelity by merging reviewer audit trails into the active case record, enforcing signed case-scope matching before any reviewer bundle merge, and hardening import signature verification by anchoring trust to configured signing keys (with fail-closed bundled-PEM mismatch checks), so audit history remains complete, trustworthy, and resilient against cross-case data drift and key-substitution tampering.
