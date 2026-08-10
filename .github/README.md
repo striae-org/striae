@@ -20,6 +20,12 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-09] - *[Minor Release v9.1.0](https://github.com/striae-org/striae/releases/tag/v9.1.0)*
+
+- **🧾 Confirmation Audit Trail Merge** - Implemented the confirmation import audit-trail merge flow so reviewer-generated audit entries are carried into the recipient case's live audit trail for a complete and attributable record.
+- **🔐 Import Safety Hardening** - Preserved audit continuity and provenance during confirmation imports by wiring the merge step into the verification and import handling path and avoiding incomplete audit state when bundles cannot be merged safely.
+- **🧰 Release Metadata Refresh** - Updated package metadata and release documentation to reflect the new minor release line.
+
 ## [2026-08-07] - *[Patch Release v9.0.1](https://github.com/striae-org/striae/releases/tag/v9.0.1)*
 
 - **🛡️ Admin-Service Guard Hardening** - Enforced the admin-service security guard during build and deployment flows so releases fail fast when `app/config/admin-service.json` is tracked or service-account material is exposed in public/build artifacts.
