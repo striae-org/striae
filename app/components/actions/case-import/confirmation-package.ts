@@ -44,8 +44,8 @@ function uint8ArrayToBase64Url(data: Uint8Array): string {
 export interface ConfirmationImportPackage {
   confirmationData: ConfirmationImportData;
   confirmationJsonContent: string;
-  verificationPublicKeyPem?: string;
   confirmationFileName: string;
+  packagedVerificationPublicKeyPem?: string;
   isEncrypted?: boolean;
   encryptionManifest?: unknown;
   encryptedDataBase64?: string;
@@ -151,9 +151,9 @@ async function extractConfirmationPackageFromZip(file: File): Promise<Confirmati
   const pemPaths = fileEntries.filter((path) => getLeafFileName(path).toLowerCase().endsWith('.pem'));
   const preferredPemPath = selectPreferredPemPath(pemPaths);
 
-  let verificationPublicKeyPem: string | undefined;
+  let packagedVerificationPublicKeyPem: string | undefined;
   if (preferredPemPath) {
-    verificationPublicKeyPem = await zip.file(preferredPemPath)?.async('text');
+    packagedVerificationPublicKeyPem = await zip.file(preferredPemPath)?.async('text');
   }
 
   // Optional reviewing-examiner audit trail bundle (encrypted separately under audit/).
@@ -185,8 +185,8 @@ async function extractConfirmationPackageFromZip(file: File): Promise<Confirmati
   return {
     confirmationData,
     confirmationJsonContent,
-    verificationPublicKeyPem,
     confirmationFileName,
+    packagedVerificationPublicKeyPem,
     isEncrypted,
     encryptionManifest,
     encryptedDataBase64,

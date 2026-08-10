@@ -3,6 +3,7 @@ import { fetchDataApi } from '~/utils/api';
 import { upsertFileConfirmationSummary, decryptExportBatch, getCaseData, updateCaseData } from '~/utils/data';
 import { type AnnotationData, type ConfirmationImportResult, type ConfirmationImportData, type ConfirmationAuditBundle } from '~/types';
 import type { EncryptionManifest } from '~/utils/forensics/export-encryption';
+import { getVerificationPublicKey } from '~/utils/forensics';
 import { checkExistingCase } from '../case-manage';
 import { extractConfirmationImportPackage } from './confirmation-package';
 import { verifyConfirmationAuditTrail } from '../confirmation-audit-bundle';
@@ -36,6 +37,36 @@ function getNonEmptyString(value: unknown): string | null {
 
 function resolveConfirmationImportOwnerUid(confirmationData: ConfirmationImportData): string | null {
   return getNonEmptyString(confirmationData.metadata.originalCaseOwnerUid);
+}
+
+function normalizePemForComparison(pem: string): string {
+  return pem
+    .replace(/\\n/g, '\n')
+    .replace(/\r/g, '')
+    .replace(/\s+/g, '')
+    .trim();
+}
+
+function enforcePackagedPemMatchesTrustedSigningKey(
+  signatureKeyId: string,
+  packagedVerificationPublicKeyPem: string,
+  packageType: 'case package' | 'confirmation package'
+): void {
+  const trustedVerificationPublicKeyPem = getVerificationPublicKey(signatureKeyId);
+
+  if (!trustedVerificationPublicKeyPem) {
+    return;
+  }
+
+  const trustedNormalized = normalizePemForComparison(trustedVerificationPublicKeyPem);
+  const packagedNormalized = normalizePemForComparison(packagedVerificationPublicKeyPem);
+
+  if (trustedNormalized !== packagedNormalized) {
+    throw new Error(
+      `Security validation failed: the bundled public signing key in this ${packageType} does not match the trusted configured key for key ID "${signatureKeyId}". ` +
+      'The package may have been tampered with and cannot be imported.'
+    );
+  }
 }
 
 function isEncryptionManifest(value: unknown): value is EncryptionManifest {
@@ -121,7 +152,6 @@ export async function importConfirmationData(
 
     let confirmationData = packageData.confirmationData;
     let confirmationJsonContent = packageData.confirmationJsonContent;
-    const verificationPublicKeyPem = packageData.verificationPublicKeyPem;
     const confirmationFileName = packageData.confirmationFileName;
 
     // All confirmation imports are encrypted — fail closed if manifest is missing
@@ -160,6 +190,20 @@ export async function importConfirmationData(
     confirmationDataForAudit = confirmationData;
     confirmationJsonFileNameForAudit = confirmationFileName;
     result.caseNumber = confirmationData.metadata.caseNumber;
+
+    const confirmationSignatureKeyId = confirmationData.metadata.signature?.keyId;
+    if (
+      typeof packageData.packagedVerificationPublicKeyPem === 'string' &&
+      packageData.packagedVerificationPublicKeyPem.trim().length > 0 &&
+      typeof confirmationSignatureKeyId === 'string' &&
+      confirmationSignatureKeyId.trim().length > 0
+    ) {
+      enforcePackagedPemMatchesTrustedSigningKey(
+        confirmationSignatureKeyId,
+        packageData.packagedVerificationPublicKeyPem,
+        'confirmation package'
+      );
+    }
     
     // Start audit workflow
     auditService.startWorkflow(result.caseNumber);
@@ -174,10 +218,7 @@ export async function importConfirmationData(
 
     onProgress?.('Validating signature', 30, 'Verifying signed confirmation metadata...');
 
-    const signatureResult = await validateConfirmationSignatureFile(
-      confirmationData,
-      verificationPublicKeyPem
-    );
+    const signatureResult = await validateConfirmationSignatureFile(confirmationData);
     signaturePresent = !!confirmationData.metadata.signature;
     signatureValid = signatureResult.isValid;
     signatureKeyId = signatureResult.keyId;
@@ -465,8 +506,7 @@ export async function importConfirmationData(
         );
 
         const verifiedBundle = await verifyConfirmationAuditTrail(
-          auditDecryptResult.plaintext,
-          verificationPublicKeyPem
+          auditDecryptResult.plaintext
         );
 
         if (verifiedBundle.entries.length > 0) {

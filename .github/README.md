@@ -20,10 +20,11 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
-## [2026-08-09] - *[Minor Release v9.1.0](https://github.com/striae-org/striae/releases/tag/v9.1.0)*
+## [2026-08-09] - *[Minor Release v9.1.0](https://github.com/striae-org/striae/releases/tag/v9.1.0)* — *Confirmation Audit Trail Merge + Signature Trust-Anchor Hardening*
 
 - **🧾 Confirmation Audit Trail Merge** - Implemented the confirmation import audit-trail merge flow so reviewer-generated audit entries are carried into the recipient case's live audit trail for a complete and attributable record.
 - **🔐 Import Safety Hardening** - Preserved audit continuity and provenance during confirmation imports by wiring the merge step into the verification and import handling path and avoiding incomplete audit state when bundles cannot be merged safely.
+- **🛡️ Signature Trust-Anchor Hardening** - Removed package-shipped PEM trust from import verification and anchored signature verification to trusted configured signing keys by `keyId`; added a fail-closed mismatch guard when bundled PEM content does not match the trusted key.
 - **🧰 Release Metadata Refresh** - Updated package metadata and release documentation to reflect the new minor release line.
 
 ## [2026-08-07] - *[Patch Release v9.0.1](https://github.com/striae-org/striae/releases/tag/v9.0.1)*

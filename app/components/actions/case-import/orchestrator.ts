@@ -11,7 +11,8 @@ import {
 import { checkExistingCase, validateCaseNumber } from '../case-manage';
 import {
   type SignedForensicManifest,
-  verifyCasePackageIntegrity
+  verifyCasePackageIntegrity,
+  getVerificationPublicKey
 } from '~/utils/forensics';
 import type { EncryptionManifest } from '~/utils/forensics/export-encryption';
 import { deleteFile } from '../image-manage';
@@ -64,6 +65,36 @@ function isEncryptionManifest(value: unknown): value is EncryptionManifest {
     typeof candidate.dataIv === 'string' &&
     Array.isArray(candidate.encryptedImages)
   );
+}
+
+function normalizePemForComparison(pem: string): string {
+  return pem
+    .replace(/\\n/g, '\n')
+    .replace(/\r/g, '')
+    .replace(/\s+/g, '')
+    .trim();
+}
+
+function enforcePackagedPemMatchesTrustedSigningKey(
+  signatureKeyId: string,
+  packagedVerificationPublicKeyPem: string,
+  packageType: 'case package' | 'confirmation package'
+): void {
+  const trustedVerificationPublicKeyPem = getVerificationPublicKey(signatureKeyId);
+
+  if (!trustedVerificationPublicKeyPem) {
+    return;
+  }
+
+  const trustedNormalized = normalizePemForComparison(trustedVerificationPublicKeyPem);
+  const packagedNormalized = normalizePemForComparison(packagedVerificationPublicKeyPem);
+
+  if (trustedNormalized !== packagedNormalized) {
+    throw new Error(
+      `Security validation failed: the bundled public signing key in this ${packageType} does not match the trusted configured key for key ID "${signatureKeyId}". ` +
+      'The package may have been tampered with and cannot be imported.'
+    );
+  }
 }
 
 function extractBundledAuditTrailData(
@@ -212,7 +243,7 @@ export async function importCaseForReview(
       bundledAuditFiles,
       metadata,
       cleanedContent: initialCleanedContent,
-      verificationPublicKeyPem,
+      packagedVerificationPublicKeyPem,
       encryptionManifest,
       encryptedDataBase64,
       encryptedImages,
@@ -324,6 +355,21 @@ export async function importCaseForReview(
       (typeof caseData.metadata.archivedAt === 'string' && caseData.metadata.archivedAt.trim().length > 0);
 
     parsedForensicManifest = metadata?.forensicManifest as SignedForensicManifest | undefined;
+
+    const manifestSignatureKeyId = parsedForensicManifest?.signature?.keyId;
+    if (
+      typeof packagedVerificationPublicKeyPem === 'string' &&
+      packagedVerificationPublicKeyPem.trim().length > 0 &&
+      typeof manifestSignatureKeyId === 'string' &&
+      manifestSignatureKeyId.trim().length > 0
+    ) {
+      enforcePackagedPemMatchesTrustedSigningKey(
+        manifestSignatureKeyId,
+        packagedVerificationPublicKeyPem,
+        'case package'
+      );
+    }
+
     result.caseNumber = caseData.metadata.caseNumber;
     importState.caseNumber = result.caseNumber;
     
@@ -368,7 +414,6 @@ export async function importCaseForReview(
         cleanedContent,
         imageFiles: imageBlobs,
         forensicManifest: parsedForensicManifest,
-        verificationPublicKeyPem,
         bundledAuditFiles: resolvedBundledAuditFiles
       });
 

@@ -44,7 +44,6 @@ export interface CasePackageIntegrityInput {
   cleanedContent: string;
   imageFiles: Record<string, Blob>;
   forensicManifest: SignedForensicManifest;
-  verificationPublicKeyPem?: string;
   bundledAuditFiles?: {
     auditTrailContent?: string;
     auditSignatureContent?: string;
@@ -92,8 +91,7 @@ function getSignatureFailureMessage(
 async function verifyBundledAuditExport(
   zip: {
     file: (path: string) => { async: (type: 'text') => Promise<string> } | null;
-  },
-  verificationPublicKeyPem: string
+  }
 ): Promise<ExportVerificationResult | null> {
   const auditTrailContent = await zip.file('audit/case-audit-trail.json')?.async('text');
   const auditSignatureContent = await zip.file('audit/case-audit-signature.json')?.async('text');
@@ -174,8 +172,7 @@ async function verifyBundledAuditExport(
 
     const signatureVerification = await verifyAuditExportSignature(
       embeddedSignaturePayload,
-      metadata.signature,
-      verificationPublicKeyPem
+      metadata.signature
     );
 
     if (!signatureVerification.isValid) {
@@ -258,7 +255,6 @@ export async function verifyCasePackageIntegrity(
   input: CasePackageIntegrityInput
 ): Promise<CasePackageIntegrityResult> {
   const manifestData = extractForensicManifestData(input.forensicManifest);
-  const verificationPublicKeyPem = input.verificationPublicKeyPem;
 
   if (!manifestData) {
     return {
@@ -279,28 +275,8 @@ export async function verifyCasePackageIntegrity(
     };
   }
 
-  if (!verificationPublicKeyPem) {
-    return {
-      isValid: false,
-      signatureResult: {
-        isValid: false,
-        error: 'Missing verification public key'
-      },
-      integrityResult: {
-        isValid: false,
-        dataValid: false,
-        imageValidation: {},
-        manifestValid: false,
-        errors: ['Missing verification public key'],
-        summary: 'Manifest validation failed'
-      },
-      bundledAuditVerification: null
-    };
-  }
-
   const signatureResult = await verifyForensicManifestSignature(
-    input.forensicManifest,
-    verificationPublicKeyPem
+    input.forensicManifest
   );
 
   const integrityResult = await validateCaseIntegritySecure(
@@ -327,8 +303,7 @@ export async function verifyCasePackageIntegrity(
               async: async () => content,
             };
           }
-        },
-        verificationPublicKeyPem
+        }
       )
     : null;
 

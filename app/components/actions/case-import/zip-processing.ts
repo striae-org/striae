@@ -22,7 +22,7 @@ function selectPreferredPemPath(pemPaths: string[]): string | undefined {
   return preferred ?? sortedPaths[0];
 }
 
-async function extractVerificationPublicKeyFromZip(
+async function extractPackagedVerificationPublicKeyFromZip(
   zip: {
     files: Record<string, { dir: boolean }>;
     file: (path: string) => { async: (type: 'text') => Promise<string> } | null;
@@ -269,7 +269,7 @@ export async function parseImportZip(zipFile: File): Promise<{
   };
   metadata?: Record<string, unknown>;
   cleanedContent?: string; // Add cleaned content for hash validation
-  verificationPublicKeyPem?: string;
+  packagedVerificationPublicKeyPem?: string;
   encryptionManifest?: Record<string, unknown>; // Optional: decryption metadata
   encryptedDataBase64?: string; // Optional: encrypted data file content (base64url)
   encryptedImages?: { [filename: string]: string }; // Optional: encrypted image files (filename -> base64url)
@@ -281,7 +281,7 @@ export async function parseImportZip(zipFile: File): Promise<{
   
   try {
     const zip = await JSZip.loadAsync(zipFile);
-    const verificationPublicKeyPem = await extractVerificationPublicKeyFromZip(zip);
+    const packagedVerificationPublicKeyPem = await extractPackagedVerificationPublicKeyFromZip(zip);
     
     // Find the main data file (JSON)
     const dataFiles = Object.keys(zip.files).filter(name => 
@@ -406,7 +406,7 @@ export async function parseImportZip(zipFile: File): Promise<{
       },
       metadata,
       cleanedContent,
-      verificationPublicKeyPem,
+      packagedVerificationPublicKeyPem,
       encryptionManifest,
       encryptedDataBase64,
       encryptedImages: Object.keys(encryptedImages).length > 0 ? encryptedImages : undefined,
