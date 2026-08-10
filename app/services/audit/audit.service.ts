@@ -972,6 +972,7 @@ class AuditService {
     workflowPhase?: WorkflowPhase;
     offset?: number;
     limit?: number;
+    forceOwnEntries?: boolean;
   }): Promise<ValidationAuditEntry[]> {
     const queryParams: AuditQueryParams = {
       userId,
@@ -1029,11 +1030,84 @@ class AuditService {
     return applyAuditPagination(filteredEntries, params);
   }
 
+  private async getConfirmationBundleAuditEntries(
+    params: AuditQueryParams,
+    requestingUser?: User
+  ): Promise<ValidationAuditEntry[]> {
+    if (!requestingUser || !params.caseNumber) {
+      return [];
+    }
+
+    const caseData = await getCaseData(requestingUser, params.caseNumber);
+    // Merge only into the owner's live case; read-only review copies are excluded.
+    if (!caseData || caseData.isReadOnly === true) {
+      return [];
+    }
+
+    const bundles = caseData.confirmationAuditTrails;
+    if (!Array.isArray(bundles) || bundles.length === 0) {
+      return [];
+    }
+
+    const bundledEntries = bundles.flatMap((bundle) =>
+      Array.isArray(bundle?.entries) ? bundle.entries : []
+    );
+    if (bundledEntries.length === 0) {
+      return [];
+    }
+
+    const dateFilteredEntries = this.applyDateRangeFilter(
+      bundledEntries,
+      params.startDate,
+      params.endDate
+    );
+    return applyAuditEntryFilters(dateFilteredEntries, {
+      ...params,
+      userId: undefined
+    });
+  }
+
+  private async mergeConfirmationBundleEntries(
+    ownEntries: ValidationAuditEntry[],
+    params: AuditQueryParams,
+    requestingUser?: User
+  ): Promise<ValidationAuditEntry[]> {
+    const bundleEntries = await this.getConfirmationBundleAuditEntries(params, requestingUser);
+    if (bundleEntries.length === 0) {
+      return ownEntries;
+    }
+
+    const identityOf = (entry: ValidationAuditEntry): string => [
+      entry.timestamp,
+      entry.userId,
+      entry.action,
+      entry.result,
+      entry.details.caseNumber || '',
+      entry.details.fileName || '',
+      entry.details.confirmationId || ''
+    ].join('|');
+
+    const merged = new Map<string, ValidationAuditEntry>();
+    for (const entry of ownEntries) {
+      merged.set(identityOf(entry), entry);
+    }
+    for (const entry of bundleEntries) {
+      const key = identityOf(entry);
+      if (!merged.has(key)) {
+        merged.set(key, entry);
+      }
+    }
+
+    return sortAuditEntriesNewestFirst(Array.from(merged.values()));
+  }
+
   private async getAuditEntries(params: AuditQueryParams, requestingUser?: User): Promise<ValidationAuditEntry[]> {
     try {
-      const bundledArchivedEntries = await this.getBundledArchivedCaseAuditEntries(params, requestingUser);
-      if (bundledArchivedEntries !== null) {
-        return bundledArchivedEntries;
+      if (!params.forceOwnEntries) {
+        const bundledArchivedEntries = await this.getBundledArchivedCaseAuditEntries(params, requestingUser);
+        if (bundledArchivedEntries !== null) {
+          return bundledArchivedEntries;
+        }
       }
 
       // If userId is provided, fetch from server
@@ -1049,7 +1123,8 @@ class AuditService {
             ...params,
             userId: undefined
           });
-          return applyAuditPagination(filteredEntries, params);
+          const mergedEntries = await this.mergeConfirmationBundleEntries(filteredEntries, params, requestingUser);
+          return applyAuditPagination(mergedEntries, params);
         }
 
         console.error('🚨 Audit: Failed to fetch entries from server');

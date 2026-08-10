@@ -185,6 +185,8 @@ export interface AuditQueryParams {
   endDate?: string;
   limit?: number;
   offset?: number;
+  // Force retrieval of the requesting user's own entries, bypassing bundled read-only case trails.
+  forceOwnEntries?: boolean;
 }
 
 // =============================================================================

@@ -5,6 +5,7 @@ import { getCaseData } from '~/utils/data';
 import { canAccessCase } from '~/utils/data/permissions';
 import { fetchPdfApi } from '~/utils/api';
 import type { ToastType } from '~/components/toast/toast';
+import { fetchAllCaseEntriesForExport } from './audit-export-shared';
 
 interface ExportAuditPdfParams {
   user: User;
@@ -34,7 +35,6 @@ interface AuditTrailPdfPayload {
 }
 
 const MAX_AUDIT_ENTRIES_PER_PDF = 200;
-const AUDIT_FETCH_WINDOW_DAYS = 30;
 
 const formatShortDate = (date: Date): string => {
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -85,82 +85,6 @@ const normalizeIsoDate = (value?: string): string | null => {
   }
 
   return parsed.toISOString();
-};
-
-const toUtcDayStart = (value: string): Date => {
-  const parsed = new Date(value);
-  return new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate(), 0, 0, 0, 0));
-};
-
-const toUtcDayEnd = (value: string): Date => {
-  const parsed = new Date(value);
-  return new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate(), 23, 59, 59, 999));
-};
-
-const addUtcDays = (date: Date, days: number): Date => {
-  return new Date(Date.UTC(
-    date.getUTCFullYear(),
-    date.getUTCMonth(),
-    date.getUTCDate() + days,
-    date.getUTCHours(),
-    date.getUTCMinutes(),
-    date.getUTCSeconds(),
-    date.getUTCMilliseconds()
-  ));
-};
-
-const getAuditEntryIdentity = (entry: ValidationAuditEntry): string => {
-  return [
-    entry.timestamp,
-    entry.userId,
-    entry.action,
-    entry.result,
-    entry.details.caseNumber || '',
-    entry.details.fileName || '',
-    entry.details.confirmationId || ''
-  ].join('|');
-};
-
-const fetchAllCaseEntriesForExport = async (
-  user: User,
-  caseNumber: string,
-  caseCreatedAtIso: string,
-  nowIso: string
-): Promise<ValidationAuditEntry[]> => {
-  const rangeStart = toUtcDayStart(caseCreatedAtIso);
-  const rangeEnd = toUtcDayEnd(nowIso);
-
-  const mergedEntries = new Map<string, ValidationAuditEntry>();
-  let windowStart = new Date(rangeStart);
-
-  while (windowStart.getTime() <= rangeEnd.getTime()) {
-    const windowEndCandidate = addUtcDays(windowStart, AUDIT_FETCH_WINDOW_DAYS - 1);
-    const windowEnd = windowEndCandidate.getTime() > rangeEnd.getTime() ? new Date(rangeEnd) : windowEndCandidate;
-
-    const windowEntries = await auditService.getAuditEntriesForUser(user.uid, {
-      requestingUser: user,
-      caseNumber,
-      startDate: windowStart.toISOString(),
-      endDate: windowEnd.toISOString()
-    });
-
-    for (const entry of windowEntries) {
-      mergedEntries.set(getAuditEntryIdentity(entry), entry);
-    }
-
-    windowStart = addUtcDays(windowEnd, 1);
-    windowStart = new Date(Date.UTC(
-      windowStart.getUTCFullYear(),
-      windowStart.getUTCMonth(),
-      windowStart.getUTCDate(),
-      0,
-      0,
-      0,
-      0
-    ));
-  }
-
-  return Array.from(mergedEntries.values());
 };
 
 const extractErrorMessage = async (response: Response): Promise<string> => {

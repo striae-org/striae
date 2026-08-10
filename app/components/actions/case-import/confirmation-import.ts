@@ -1,10 +1,11 @@
 import type { User } from 'firebase/auth';
 import { fetchDataApi } from '~/utils/api';
-import { upsertFileConfirmationSummary, decryptExportBatch } from '~/utils/data';
-import { type AnnotationData, type ConfirmationImportResult, type ConfirmationImportData } from '~/types';
+import { upsertFileConfirmationSummary, decryptExportBatch, getCaseData, updateCaseData } from '~/utils/data';
+import { type AnnotationData, type ConfirmationImportResult, type ConfirmationImportData, type ConfirmationAuditBundle } from '~/types';
 import type { EncryptionManifest } from '~/utils/forensics/export-encryption';
 import { checkExistingCase } from '../case-manage';
 import { extractConfirmationImportPackage } from './confirmation-package';
+import { verifyConfirmationAuditTrail } from '../confirmation-audit-bundle';
 import { validateExporterUid, validateConfirmationHash, validateConfirmationSignatureFile } from './validation';
 import { auditService } from '~/services/audit';
 
@@ -445,7 +446,64 @@ export async function importConfirmationData(
       },
       confirmationData.metadata.exportedByBadgeId // Reviewer's badge/ID number
     );
-    
+
+    // Merge the reviewing examiner's bundled audit trail into the original examiner's live
+    // case audit trail — best-effort, and only when the confirmation import actually succeeded.
+    if (
+      result.success &&
+      result.confirmationsImported > 0 &&
+      packageData.auditBundleEncryptedDataBase64 &&
+      packageData.auditBundleEncryptionManifest &&
+      isEncryptionManifest(packageData.auditBundleEncryptionManifest)
+    ) {
+      try {
+        const auditDecryptResult = await decryptExportBatch(
+          user,
+          packageData.auditBundleEncryptionManifest,
+          packageData.auditBundleEncryptedDataBase64,
+          {}
+        );
+
+        const verifiedBundle = await verifyConfirmationAuditTrail(
+          auditDecryptResult.plaintext,
+          verificationPublicKeyPem
+        );
+
+        if (verifiedBundle.entries.length > 0) {
+          const bundle: ConfirmationAuditBundle = {
+            source: 'confirmation-bundle',
+            importedAt: new Date().toISOString(),
+            exportTimestamp: verifiedBundle.exportTimestamp,
+            totalEntries: verifiedBundle.totalEntries ?? verifiedBundle.entries.length,
+            reviewingExaminerUid: confirmationData.metadata.exportedByUid,
+            reviewingExaminerName: confirmationData.metadata.exportedByName,
+            reviewingExaminerBadgeId: confirmationData.metadata.exportedByBadgeId,
+            confirmationFileName,
+            entries: verifiedBundle.entries
+          };
+
+          const liveCaseData = await getCaseData(user, result.caseNumber);
+          if (liveCaseData) {
+            const existingTrails = liveCaseData.confirmationAuditTrails ?? [];
+            const alreadyImported = existingTrails.some(
+              (trail) =>
+                trail.reviewingExaminerUid === bundle.reviewingExaminerUid &&
+                trail.exportTimestamp === bundle.exportTimestamp
+            );
+
+            if (!alreadyImported) {
+              await updateCaseData(user, result.caseNumber, {
+                ...liveCaseData,
+                confirmationAuditTrails: [...existingTrails, bundle]
+              });
+            }
+          }
+        }
+      } catch (auditMergeError) {
+        console.warn('Failed to merge reviewer audit trail into case audit trail:', auditMergeError);
+      }
+    }
+
     auditService.endWorkflow();
     
     return result;

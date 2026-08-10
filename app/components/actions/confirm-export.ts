@@ -10,6 +10,8 @@ import {
 import { getUserData, getCaseData, updateCaseData, signConfirmationData, upsertFileConfirmationSummary } from '~/utils/data';
 import { type AnnotationData, type ConfirmationData, type CaseConfirmations, type CaseDataWithConfirmations, type ConfirmationImportData } from '~/types';
 import { auditService } from '~/services/audit';
+import { fetchAllCaseEntriesForExport } from './audit-export-shared';
+import { buildSignedConfirmationAuditTrail } from './confirmation-audit-bundle';
 
 /**
  * Store a confirmation for a specific image, linked to the original image ID
@@ -351,6 +353,36 @@ export async function exportConfirmationData(
     zip.file(confirmationFileName, encryptedConfirmationContent);
     zip.file(publicKeyFileName, normalizedPem);
     zip.file('ENCRYPTION_MANIFEST.json', encryptionManifestJson);
+
+    // Bundle the reviewing examiner's full case-scoped audit trail (signed + encrypted, best-effort).
+    try {
+      const reviewerCaseData = await getCaseData(user, caseNumber);
+      const caseCreatedAtIso = reviewerCaseData?.createdAt || '1970-01-01T00:00:00.000Z';
+      const reviewerEntries = await fetchAllCaseEntriesForExport(
+        user,
+        caseNumber,
+        caseCreatedAtIso,
+        new Date().toISOString(),
+        { forceOwnEntries: true }
+      );
+
+      if (reviewerEntries.length > 0) {
+        const signedAuditTrailJson = await buildSignedConfirmationAuditTrail(user, caseNumber, reviewerEntries);
+        const auditEncryptionResult = await encryptExportDataWithAllImages(
+          signedAuditTrailJson,
+          [],
+          encKeyDetails.publicKeyPem,
+          encKeyDetails.keyId
+        );
+        zip.file('audit/confirmation-audit-trail.json', auditEncryptionResult.ciphertext);
+        zip.file(
+          'audit/audit-encryption-manifest.json',
+          JSON.stringify(auditEncryptionResult.encryptionManifest, null, 2)
+        );
+      }
+    } catch (auditBundleError) {
+      console.warn('Failed to bundle reviewer audit trail into confirmation export:', auditBundleError);
+    }
 
     const zipBlob = await zip.generateAsync({
       type: 'blob',
