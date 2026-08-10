@@ -1123,7 +1123,9 @@ class AuditService {
             ...params,
             userId: undefined
           });
-          const mergedEntries = await this.mergeConfirmationBundleEntries(filteredEntries, params, requestingUser);
+          const mergedEntries = params.forceOwnEntries
+            ? filteredEntries
+            : await this.mergeConfirmationBundleEntries(filteredEntries, params, requestingUser);
           return applyAuditPagination(mergedEntries, params);
         }
 

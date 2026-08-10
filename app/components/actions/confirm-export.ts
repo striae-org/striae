@@ -355,33 +355,35 @@ export async function exportConfirmationData(
     zip.file('ENCRYPTION_MANIFEST.json', encryptionManifestJson);
 
     // Bundle the reviewing examiner's full case-scoped audit trail (signed + encrypted, best-effort).
-    try {
-      const reviewerCaseData = await getCaseData(user, caseNumber);
-      const caseCreatedAtIso = reviewerCaseData?.createdAt || '1970-01-01T00:00:00.000Z';
-      const reviewerEntries = await fetchAllCaseEntriesForExport(
-        user,
-        caseNumber,
-        caseCreatedAtIso,
-        new Date().toISOString(),
-        { forceOwnEntries: true }
-      );
+    if (originalExportCreatedAt) {
+      try {
+        const reviewerEntries = await fetchAllCaseEntriesForExport(
+          user,
+          caseNumber,
+          originalExportCreatedAt,
+          new Date().toISOString(),
+          { forceOwnEntries: true }
+        );
 
-      if (reviewerEntries.length > 0) {
-        const signedAuditTrailJson = await buildSignedConfirmationAuditTrail(user, caseNumber, reviewerEntries);
-        const auditEncryptionResult = await encryptExportDataWithAllImages(
-          signedAuditTrailJson,
-          [],
-          encKeyDetails.publicKeyPem,
-          encKeyDetails.keyId
-        );
-        zip.file('audit/confirmation-audit-trail.json', auditEncryptionResult.ciphertext);
-        zip.file(
-          'audit/audit-encryption-manifest.json',
-          JSON.stringify(auditEncryptionResult.encryptionManifest, null, 2)
-        );
+        if (reviewerEntries.length > 0) {
+          const signedAuditTrailJson = await buildSignedConfirmationAuditTrail(user, caseNumber, reviewerEntries);
+          const auditEncryptionResult = await encryptExportDataWithAllImages(
+            signedAuditTrailJson,
+            [],
+            encKeyDetails.publicKeyPem,
+            encKeyDetails.keyId
+          );
+          zip.file('audit/confirmation-audit-trail.json', auditEncryptionResult.ciphertext);
+          zip.file(
+            'audit/audit-encryption-manifest.json',
+            JSON.stringify(auditEncryptionResult.encryptionManifest, null, 2)
+          );
+        }
+      } catch (auditBundleError) {
+        console.warn('Failed to bundle reviewer audit trail into confirmation export:', auditBundleError);
       }
-    } catch (auditBundleError) {
-      console.warn('Failed to bundle reviewer audit trail into confirmation export:', auditBundleError);
+    } else {
+      console.warn(`Skipping reviewer audit trail bundling for case ${caseNumber} because the original export timestamp is unavailable.`);
     }
 
     const zipBlob = await zip.generateAsync({
