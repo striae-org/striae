@@ -85,9 +85,17 @@ jobs:
         run: npm run release:check
 
       - name: Publish to npm
+        shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --provenance --access public --registry=https://registry.npmjs.org
+        run: |
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "Using repository NPM_TOKEN secret for npm publish."
+            npm publish --provenance --access public --registry=https://registry.npmjs.org
+          else
+            echo "No NPM_TOKEN secret present; attempting npm Trusted Publisher OIDC publish."
+            npm publish --provenance --access public --registry=https://registry.npmjs.org
+          fi
 
       - name: Publish to GitHub Packages
         env:
