@@ -7,7 +7,7 @@ For deep implementation details, use the wiki docs.
 
 - Frontend: React Router app in `app/`, deployed with Cloudflare Pages.
 - Workers: `audit`, `data`, `image`, `lists`, `pdf`, and `user` in `workers/`.
-- Data services: Firebase Auth plus Cloudflare KV, R2, and Images.
+- Data services: Firebase Auth plus Cloudflare KV and R2.
 - Config sources:
   - App runtime: `app/config/config.json`
   - Example config: `app/config-example/`
@@ -95,7 +95,44 @@ When asked to bump to `vX.Y.Z`:
    - `npm run build`
    - `npm run typecheck`
    - `npm run lint`
-7. Publish with `npm run publish:all` only when explicitly requested.
+7. Trigger the GitHub Actions `Release and publish` workflow only when explicitly requested.
+
+## Release Playbook (Tag-Based Publishing)
+
+Use this checklist for release operations that publish to npm, GitHub Packages, and GitHub Releases.
+
+- Confirm the package version in `package.json` matches the intended release version `vX.Y.Z`.
+- Confirm the matching release notes file exists at `.github/release-notes/RELEASE_NOTES_vX.Y.Z.md`.
+- Ensure the repo is on `master` and the working tree is clean before tagging.
+- Commit release changes with a message like `Release vX.Y.Z`.
+- Create a version tag exactly matching the package version:
+  - `git tag vX.Y.Z`
+- Push the release tag:
+  - `git push origin vX.Y.Z`
+- GitHub Actions will run the `Release and publish` workflow only for a tag push matching `v*.*.*`.
+- The workflow enforces the following release gate:
+  - tag format must be `vX.Y.Z`
+  - package version in `package.json` must match the tag
+  - the tag must point to the current `origin/master` HEAD
+  - the working tree must be clean
+- Before creating or pushing the release tag, run the local preflight checks and only proceed if they pass:
+  - `npm run release:check`
+  - `npm run build`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm test` when the required secrets, config, and private files are available locally
+- After the local preflight passes, the workflow will:
+  - run `npm ci`
+  - validate the release notes file
+  - publish to npm using npm Trusted Publisher OIDC
+  - publish to GitHub Packages
+  - create the GitHub Release with the release-notes body
+- Do not rely on a plain commit message alone; the workflow is tag-based, not commit-message-based.
+- For manual local safety checks before tagging, run:
+  - `npm run release:check`
+  - `npm run build`
+  - `npm run typecheck`
+  - `npm run lint`
 
 ## Source-of-Truth Docs
 

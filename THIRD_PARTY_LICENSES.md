@@ -3,7 +3,7 @@
 This file contains third-party license attributions for production dependencies used by Striae.
 
 - Project: Striae
-- Generated: 2026-07-31
+- Generated: 2026-08-11
 - Scope: npm production dependencies only
 - Source: license-checker audit of the locked production tree (`npm ci --omit=dev` from package-lock.json)
 
@@ -27,9 +27,9 @@ This file contains third-party license attributions for production dependencies 
 | @firebase/auth-interop-types | 0.2.5 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/auth-types | 0.13.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/component | 0.7.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/data-connect | 0.7.2 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/data-connect | 0.7.3 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/database | 1.1.4 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
-| @firebase/database-compat | 2.1.5 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| @firebase/database-compat | 2.1.6 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/database-types | 1.0.21 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/firestore | 4.17.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/firestore-compat | 0.4.12 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
@@ -67,7 +67,7 @@ This file contains third-party license attributions for production dependencies 
 | @protobufjs/pool | 1.1.0 | BSD-3-Clause | https://github.com/dcodeIO/protobuf.js |
 | @protobufjs/utf8 | 1.1.2 | BSD-3-Clause | https://github.com/protobufjs/protobuf.js |
 | @react-router/cloudflare | 8.3.0 | MIT | https://github.com/remix-run/react-router |
-| @types/node | 26.1.2 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped |
+| @types/node | 26.2.0 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped |
 | ansi-regex | 5.0.1 | MIT | https://github.com/chalk/ansi-regex |
 | ansi-styles | 4.3.0 | MIT | https://github.com/chalk/ansi-styles |
 | camelcase | 5.3.1 | MIT | https://github.com/sindresorhus/camelcase |
@@ -83,7 +83,7 @@ This file contains third-party license attributions for production dependencies 
 | escalade | 3.2.0 | MIT | https://github.com/lukeed/escalade |
 | faye-websocket | 0.11.4 | Apache-2.0 | https://github.com/faye/faye-websocket-node |
 | find-up | 4.1.0 | MIT | https://github.com/sindresorhus/find-up |
-| firebase | 12.17.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
+| firebase | 12.17.1 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | get-caller-file | 2.0.5 | ISC | https://github.com/stefanpenner/get-caller-file |
 | http-parser-js | 0.5.10 | MIT | https://github.com/creationix/http-parser-js |
 | idb | 7.1.1 | ISC | https://github.com/jakearchibald/idb |
@@ -492,7 +492,7 @@ import { Component } from '@firebase/component';
 ```
 ```
 
-### @firebase/data-connect@0.7.2
+### @firebase/data-connect@0.7.3
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -520,7 +520,7 @@ This is the Firebase Realtime Database component of the Firebase JS SDK.
 **This package is not intended for direct usage, and should only be used via the officially supported [firebase](https://www.npmjs.com/package/firebase) package.**
 ```
 
-### @firebase/database-compat@2.1.5
+### @firebase/database-compat@2.1.6
 
 - License: Apache-2.0
 - Publisher: Firebase
@@ -1782,7 +1782,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### @types/node@26.1.2
+### @types/node@26.2.0
 
 - License: MIT
 - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -2165,7 +2165,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### firebase@12.17.0
+### firebase@12.17.1
 
 - License: Apache-2.0
 - Publisher: Firebase
