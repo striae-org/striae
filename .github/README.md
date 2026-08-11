@@ -20,9 +20,9 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
-## [2026-08-11] - *[Patch Release v9.1.1](https://github.com/striae-org/striae/releases/tag/v9.1.1)* — *Trusted Publishing Setup + Dependency/Compatibility Maintenance + Lists Worker Endpoint Stabilization*
+## [2026-08-11] - *[Patch Release v9.1.1](https://github.com/striae-org/striae/releases/tag/v9.1.1)* — *Script-Based Publish Flow Restoration + Dependency/Compatibility Maintenance + Lists Worker Endpoint Stabilization*
 
-- **🔐 Trusted Publishing Setup** - Added npm Trusted Publishing workflow support to align package publishing with OIDC-based release automation and reduce reliance on long-lived registry tokens.
+- **📦 Script-Based Publish Flow Restoration** - Restored the pre-v9.1.1 npm script publish flow for npmjs and GitHub Packages using the package-level `publish:npm`, `publish:github`, and `publish:all` commands instead of the tag-triggered GitHub Actions release workflow.
 - **⚙️ Dependency and Compatibility Maintenance** - Refreshed root/worker dependency metadata, lockfiles, Wrangler ecosystem versions, and worker compatibility-date examples to keep the patch line deploy-ready.
 - **🧭 Lists Worker Endpoint Stabilization** - Applied a targeted lists-worker endpoint follow-up with a corrective revert to preserve stable endpoint behavior and avoid carrying unintended route changes.
 - **🧰 Release Metadata Refresh** - Updated release documentation and supported-version metadata for the v9.1.1 patch line.

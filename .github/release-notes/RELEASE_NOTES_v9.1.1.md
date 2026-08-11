@@ -4,18 +4,18 @@
 **Period**: August 10, 2026 to August 11, 2026
 **Total Commits**: 7 (non-merge after the v9.1.0 release)
 
-## Patch Release - Trusted Publishing Setup + Dependency/Compatibility Maintenance + Lists Worker Endpoint Stabilization
+## Patch Release - Script-Based Publish Flow Restoration + Dependency/Compatibility Maintenance + Lists Worker Endpoint Stabilization
 
 ## Summary
 
-v9.1.1 is a patch release focused on release-pipeline reliability and maintenance alignment. It introduces npm Trusted Publishing workflow setup, refreshes dependency and compatibility metadata across the app and workers, and applies a lists-worker endpoint stabilization follow-up (including a corrective revert) to keep behavior consistent.
+v9.1.1 is a patch release focused on release-pipeline reliability and maintenance alignment. It restores the script-based publish flow used before v9.1.1, refreshes dependency and compatibility metadata across the app and workers, and applies a lists-worker endpoint stabilization follow-up (including a corrective revert) to keep behavior consistent.
 
 ## Detailed Changes
 
-### Release Pipeline and Publishing Hardening
+### Release Pipeline and Publishing Alignment
 
-- Added npm Trusted Publishing workflow configuration to support OIDC-based publish automation without relying on long-lived npm tokens.
-- Updated release workflow scaffolding to align package publishing behavior with the repository's tag-gated release process.
+- Restored the pre-v9.1.1 package publish scripts for npmjs and GitHub Packages: `publish:npm`, `publish:github`, and `publish:all`.
+- Removed the tag-triggered GitHub Actions publishing path so release publishing returns to the explicit script-based flow used in v9.1.0.
 
 ### Dependency and Compatibility Maintenance
 
@@ -42,4 +42,4 @@ v9.1.1 is a patch release focused on release-pipeline reliability and maintenanc
 
 ## Closing Note
 
-v9.1.1 strengthens release safety and operational consistency by introducing Trusted Publishing support, keeping dependency and compatibility metadata current across app and worker surfaces, and stabilizing lists-worker endpoint behavior through targeted patch-window follow-ups.
+v9.1.1 restores the explicit script-based publish workflow used prior to v9.1.1 while keeping dependency and compatibility metadata current across app and worker surfaces and stabilizing lists-worker endpoint behavior through targeted patch-window follow-ups.
