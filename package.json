@@ -73,7 +73,7 @@
     "clean": "rm -rf build node_modules/.cache .cache",
     "clean:build": "npm run clean && npm run build",
     "deploy": "npm run build && node -e \"const fs=require('fs');fs.rmSync('build/client/wrangler.json',{force:true});fs.rmSync('.wrangler/deploy',{recursive:true,force:true})\" && wrangler pages deploy",
-    "release:check": "node -e 'const fs=require(\"fs\"); const version=require(\"./package.json\").version; const file=`.github/release-notes/RELEASE_NOTES_v${version}.md`; if (!fs.existsSync(file)) { console.error(\"Missing release notes: \" + file); process.exit(1); } console.log(\"Release notes exists for v\" + version);'",
+    "release:check": "node -e 'const fs=require(\"fs\"); const version=require(\"./package.json\").version; const file=`.github/release-notes/RELEASE_NOTES_v${version}.md`; if (!fs.existsSync(file)) { console.error(\"Missing release notes: \" + file); process.exit(1); } console.log(\"Release notes exist for v\" + version);'",
     "lint": "node ./scripts/run-eslint.cjs",
     "start": "node ./scripts/dev.cjs && wrangler pages dev",
     "typecheck": "react-router typegen && tsc",

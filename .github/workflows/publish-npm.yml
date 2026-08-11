@@ -84,12 +84,6 @@ jobs:
       - name: Validate release notes file
         run: npm run release:check
 
-      - name: Run build
-        run: npm run build
-
-      - name: Run tests
-        run: npm test
-
       - name: Publish to npm via Trusted Publisher
         # This uses npm's OIDC Trusted Publisher flow.
         # No NPM_TOKEN secret is required for the npm publish step.

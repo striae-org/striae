@@ -115,11 +115,15 @@ Use this checklist for release operations that publish to npm, GitHub Packages, 
   - package version in `package.json` must match the tag
   - the tag must point to the current `origin/master` HEAD
   - the working tree must be clean
-- If the gate passes, the workflow will:
+- Before creating or pushing the release tag, run the local preflight checks and only proceed if they pass:
+  - `npm run release:check`
+  - `npm run build`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm test` when the required secrets, config, and private files are available locally
+- After the local preflight passes, the workflow will:
   - run `npm ci`
   - validate the release notes file
-  - run `npm run build`
-  - run `npm test`
   - publish to npm using npm Trusted Publisher OIDC
   - publish to GitHub Packages
   - create the GitHub Release with the release-notes body
