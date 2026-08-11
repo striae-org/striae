@@ -20,6 +20,13 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-11] - *[Patch Release v9.1.1](https://github.com/striae-org/striae/releases/tag/v9.1.1)* — *Trusted Publishing Setup + Dependency/Compatibility Maintenance + Lists Worker Endpoint Stabilization*
+
+- **🔐 Trusted Publishing Setup** - Added npm Trusted Publishing workflow support to align package publishing with OIDC-based release automation and reduce reliance on long-lived registry tokens.
+- **⚙️ Dependency and Compatibility Maintenance** - Refreshed root/worker dependency metadata, lockfiles, Wrangler ecosystem versions, and worker compatibility-date examples to keep the patch line deploy-ready.
+- **🧭 Lists Worker Endpoint Stabilization** - Applied a targeted lists-worker endpoint follow-up with a corrective revert to preserve stable endpoint behavior and avoid carrying unintended route changes.
+- **🧰 Release Metadata Refresh** - Updated release documentation and supported-version metadata for the v9.1.1 patch line.
+
 ## [2026-08-09] - *[Minor Release v9.1.0](https://github.com/striae-org/striae/releases/tag/v9.1.0)* — *Confirmation Audit Trail Merge + Cross-Case Scope Guardrail + Signature Trust-Anchor Hardening*
 
 - **🧾 Confirmation Audit Trail Merge** - Implemented the confirmation import audit-trail merge flow so reviewer-generated audit entries are carried into the recipient case's live audit trail for a complete and attributable record.
