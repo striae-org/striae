@@ -7,7 +7,7 @@ For deep implementation details, use the wiki docs.
 
 - Frontend: React Router app in `app/`, deployed with Cloudflare Pages.
 - Workers: `audit`, `data`, `image`, `lists`, `pdf`, and `user` in `workers/`.
-- Data services: Firebase Auth plus Cloudflare KV, R2, and Images.
+- Data services: Firebase Auth plus Cloudflare KV and R2.
 - Config sources:
   - App runtime: `app/config/config.json`
   - Example config: `app/config-example/`
