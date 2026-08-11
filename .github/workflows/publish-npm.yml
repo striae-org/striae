@@ -79,7 +79,7 @@ jobs:
           echo "note_file=${NOTE_FILE}" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Validate release notes file
         run: npm run release:check
