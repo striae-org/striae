@@ -10,7 +10,7 @@ export const getExportProgressLabel = (progress: number): string => {
   }
 
   if (progress < 80) {
-    return 'Adding images';
+    return 'Adding files';
   }
 
   if (progress < 96) {

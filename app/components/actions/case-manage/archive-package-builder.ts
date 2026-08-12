@@ -36,6 +36,7 @@ export interface BuildArchivePackageInput {
   otherFiles?: NonNullable<CaseExportData['otherFiles']>;
   auditConfig: ArchiveBundleAuditConfig;
   readmeConfig: ArchiveBundleReadmeConfig;
+  onProgress?: (progress: number) => void;
 }
 
 export interface BuildArchivePackageResult {
@@ -140,7 +141,7 @@ async function fetchOtherFileAsBlob(
 }
 
 export async function buildArchivePackage(input: BuildArchivePackageInput): Promise<BuildArchivePackageResult> {
-  const { user, caseNumber, caseJsonContent, files, otherFiles = [], auditConfig, readmeConfig } = input;
+  const { user, caseNumber, caseJsonContent, files, otherFiles = [], auditConfig, readmeConfig, onProgress } = input;
 
   const JSZip = (await import('jszip')).default;
   const zip = new JSZip();
@@ -149,10 +150,24 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
   const imageFolder = zip.folder('images');
   const filesFolder = zip.folder('files');
   const associatedBlobs: Record<string, Blob> = {};
+  const totalAssociatedFileCount = (files?.length || 0) + otherFiles.length;
+  let processedAssociatedFileCount = 0;
+
+  const updateAssociatedFileProgress = () => {
+    if (!onProgress || totalAssociatedFileCount <= 0) {
+      return;
+    }
+
+    const progress = 50 + (processedAssociatedFileCount / totalAssociatedFileCount) * 30;
+    onProgress(progress);
+  };
+
   if (imageFolder && files) {
     for (const fileEntry of files) {
       const imageBlob = await fetchImageAsBlob(user, fileEntry.fileData, caseNumber);
       if (!imageBlob) {
+        processedAssociatedFileCount += 1;
+        updateAssociatedFileProgress();
         continue;
       }
 
@@ -162,6 +177,8 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
       );
       imageFolder.file(exportFileName, imageBlob);
       associatedBlobs[`images/${exportFileName}`] = imageBlob;
+      processedAssociatedFileCount += 1;
+      updateAssociatedFileProgress();
     }
   }
 
@@ -169,6 +186,8 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
     for (const fileEntry of otherFiles) {
       const fileBlob = await fetchOtherFileAsBlob(user, fileEntry.fileData, caseNumber);
       if (!fileBlob) {
+        processedAssociatedFileCount += 1;
+        updateAssociatedFileProgress();
         continue;
       }
 
@@ -178,6 +197,8 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
       );
       filesFolder.file(exportFileName, fileBlob);
       associatedBlobs[`files/${exportFileName}`] = fileBlob;
+      processedAssociatedFileCount += 1;
+      updateAssociatedFileProgress();
     }
   }
 

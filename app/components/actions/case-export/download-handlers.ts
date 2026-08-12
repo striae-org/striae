@@ -110,6 +110,7 @@ export async function downloadCaseAsZip(
         caseJsonContent,
         files: exportData.files,
         otherFiles: exportData.otherFiles || [],
+        onProgress,
         auditConfig: {
           startDate: exportData.metadata.caseCreatedDate,
           endDate: archivedAt,
@@ -175,6 +176,18 @@ export async function downloadCaseAsZip(
     const imageFolder = zip.folder('images');
     const otherFilesFolder = zip.folder('files');
     const associatedFiles: { [filename: string]: Blob } = {};
+    const totalAssociatedFileCount = (exportData.files?.length || 0) + (exportData.otherFiles?.length || 0);
+    let processedAssociatedFileCount = 0;
+
+    const updateAssociatedFileProgress = () => {
+      if (totalAssociatedFileCount <= 0) {
+        return;
+      }
+
+      const progress = 50 + (processedAssociatedFileCount / totalAssociatedFileCount) * 30;
+      onProgress?.(progress);
+    };
+
     if (imageFolder && exportData.files) {
       for (let i = 0; i < exportData.files.length; i++) {
         const file = exportData.files[i];
@@ -188,7 +201,8 @@ export async function downloadCaseAsZip(
         } catch (error) {
           console.warn(`Failed to fetch image ${file.fileData.originalFilename}:`, error);
         }
-        onProgress?.(50 + (i / exportData.files.length) * 30);
+        processedAssociatedFileCount += 1;
+        updateAssociatedFileProgress();
       }
     }
 
@@ -205,6 +219,9 @@ export async function downloadCaseAsZip(
         } catch (error) {
           console.warn(`Failed to fetch associated file ${file.fileData.originalFilename}:`, error);
         }
+
+        processedAssociatedFileCount += 1;
+        updateAssociatedFileProgress();
       }
     }
 
