@@ -59,8 +59,13 @@ export const OtherFilesModal = ({
 }: OtherFilesModalProps) => {
   const { user } = use(AuthContext);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [currentUploadIndex, setCurrentUploadIndex] = useState(0);
+  const [uploadQueueCount, setUploadQueueCount] = useState(0);
+  const [currentUploadName, setCurrentUploadName] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(() => new Set());
@@ -118,13 +123,21 @@ export const OtherFilesModal = ({
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
+    setCurrentUploadIndex(0);
+    setUploadQueueCount(files.length);
+    setCurrentUploadName('');
     setErrorMessage('');
     setStatusMessage('Uploading files...');
 
     const uploaded: OtherFileData[] = [];
     const failed: string[] = [];
 
-    for (const file of files) {
+    for (const [index, file] of files.entries()) {
+      setCurrentUploadIndex(index);
+      setCurrentUploadName(file.name);
+      setUploadProgress(0);
+
       const validationMessage = validateFile(file);
       if (validationMessage) {
         failed.push(validationMessage);
@@ -132,7 +145,9 @@ export const OtherFilesModal = ({
       }
 
       try {
-        const nextFile = await uploadOtherFile(user, currentCase, file, uploadMethod);
+        const nextFile = await uploadOtherFile(user, currentCase, file, uploadMethod, (progress) => {
+          setUploadProgress(progress);
+        });
         uploaded.push(nextFile);
       } catch (error) {
         failed.push(`${file.name}: ${error instanceof Error ? error.message : 'Upload failed'}`);
@@ -151,6 +166,10 @@ export const OtherFilesModal = ({
     }
 
     setIsUploading(false);
+    setUploadProgress(0);
+    setCurrentUploadIndex(0);
+    setUploadQueueCount(0);
+    setCurrentUploadName('');
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -181,6 +200,38 @@ export const OtherFilesModal = ({
     }
 
     await handleUploadFiles(Array.from(droppedFiles), 'drag-drop');
+  };
+
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!canWrite) {
+      return;
+    }
+
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const relatedTarget = event.relatedTarget as HTMLElement | null;
+    if (!relatedTarget || !dropZoneRef.current?.contains(relatedTarget)) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!canWrite) {
+      return;
+    }
+
+    if (!isDragging) {
+      setIsDragging(true);
+    }
   };
 
   const handleDownloadOne = async (file: OtherFileData) => {
@@ -311,26 +362,18 @@ export const OtherFilesModal = ({
           )}
 
           <div
+            ref={dropZoneRef}
             className={`${styles.uploadArea} ${isDragging ? styles.uploadAreaDragging : ''}`}
-            onDragEnter={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              setIsDragging(true);
-            }}
-            onDragOver={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-            }}
-            onDragLeave={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              setIsDragging(false);
-            }}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
             onDrop={(event) => {
               void handleDrop(event);
             }}
           >
-            <p className={styles.uploadHint}>Drag and drop non-image files here (Phase 1 limit: 100 MB each)</p>
+            <p className={styles.uploadHint}>
+              {isDragging ? 'Drop files here to upload them to this case' : 'Drag and drop non-image files here (Phase 1 limit: 100 MB each)'}
+            </p>
             <div className={styles.uploadActions}>
               <input
                 ref={fileInputRef}
@@ -347,6 +390,36 @@ export const OtherFilesModal = ({
             </div>
             {errorMessage && <p className={styles.errorText}>{errorMessage}</p>}
           </div>
+
+          {isUploading && (
+            <div className={styles.uploadProgressSection}>
+              <div
+                className={styles.progressBar}
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={uploadProgress}
+                aria-label="Associated file upload progress"
+              >
+                <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }} />
+              </div>
+              <div className={styles.uploadStatusContainer}>
+                <span className={styles.uploadingText}>
+                  {uploadProgress === 100 ? 'Processing...' : `${uploadProgress}%`}
+                </span>
+                {uploadQueueCount > 1 && (
+                  <span className={styles.fileCountText}>
+                    {currentUploadIndex + 1} of {uploadQueueCount}
+                  </span>
+                )}
+              </div>
+              {currentUploadName && (
+                <p className={styles.currentFileName} title={currentUploadName}>
+                  Uploading: {currentUploadName}
+                </p>
+              )}
+            </div>
+          )}
 
           <div className={styles.controls}>
             <p className={styles.countText}>{otherFiles.length} associated file{otherFiles.length === 1 ? '' : 's'}</p>
