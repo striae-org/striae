@@ -16,7 +16,7 @@ interface OtherFilesModalProps {
   isReviewOnlyCase?: boolean;
 }
 
-const MAX_OTHER_FILE_SIZE = 100 * 1024 * 1024;
+const MAX_OTHER_FILE_SIZE = 512 * 1024 * 1024;
 
 function formatDate(value: string): string {
   const parsed = Date.parse(value);
@@ -111,7 +111,7 @@ export const OtherFilesModal = ({
 
   const validateFile = (file: File): string | null => {
     if (file.size > MAX_OTHER_FILE_SIZE) {
-      return `${file.name}: file size exceeds 100 MB Phase 1 limit`;
+      return `${file.name}: file size exceeds 512 MB limit`;
     }
 
     return null;
@@ -372,7 +372,7 @@ export const OtherFilesModal = ({
             }}
           >
             <p className={styles.uploadHint}>
-              {isDragging ? 'Drop files here to upload them to this case' : 'Drag and drop non-image files here (Phase 1 limit: 100 MB each)'}
+              {isDragging ? 'Drop files here to upload them to this case' : 'Drag and drop non-image files here (512 MB limit per file)'}
             </p>
             <div className={styles.uploadActions}>
               <input

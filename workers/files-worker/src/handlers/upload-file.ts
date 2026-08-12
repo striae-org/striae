@@ -4,7 +4,7 @@ import { dispatchMalwareScanHook } from '../security/malware-scan';
 import type { CreateResponse, Env } from '../types';
 import { deriveFileKind } from '../utils/content-disposition';
 
-const MAX_OTHER_FILE_SIZE_BYTES = 100 * 1024 * 1024;
+const MAX_OTHER_FILE_SIZE_BYTES = 512 * 1024 * 1024;
 
 const BLOCKED_EXTENSIONS = new Set([
   '.exe',
@@ -60,7 +60,7 @@ export async function handleFileUpload(
   }
 
   if (fileBlob.size > MAX_OTHER_FILE_SIZE_BYTES) {
-    return respond({ error: 'File size exceeds 100 MB Phase 1 limit' }, 400);
+    return respond({ error: 'File size exceeds 512 MB limit' }, 400);
   }
 
   const contentType = fileBlob.type || 'application/octet-stream';

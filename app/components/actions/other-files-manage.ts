@@ -14,7 +14,7 @@ import type {
 } from '~/types';
 import { auditService } from '~/services/audit';
 
-const MAX_OTHER_FILE_SIZE = 100 * 1024 * 1024;
+const MAX_OTHER_FILE_SIZE = 512 * 1024 * 1024;
 
 export interface DeleteOtherFileResult {
   fileMissing: boolean;
@@ -46,7 +46,7 @@ export const uploadOtherFile = async (
   const startTime = Date.now();
 
   if (file.size > MAX_OTHER_FILE_SIZE) {
-    throw new Error('File size must be less than or equal to 100 MB in Phase 1');
+    throw new Error('File size must be less than or equal to 512 MB');
   }
 
   const caseData = await getCaseData(user, caseNumber);

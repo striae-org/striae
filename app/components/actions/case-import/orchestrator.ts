@@ -523,15 +523,19 @@ export async function importCaseForReview(
       }
     }
     
-    onProgress?.('Uploading images', 30, 'Processing image files...');
+    const totalImages = Object.keys(imageFiles).length;
+    const totalOtherFiles = Object.keys(associatedFiles).length;
+    const totalFilesToUpload = totalImages + totalOtherFiles;
+
+    onProgress?.('Uploading files', 30, 'Processing image files...');
     
     // Step 3: Upload all image files and create original image ID to new file ID mapping
     const originalImageIdMapping = new Map<string, string>(); // originalImageId -> newFileId
     const importedFiles = [];
     const importedOtherFiles: OtherFileData[] = [];
     
-    let uploadedCount = 0;
-    const totalImages = Object.keys(imageFiles).length;
+    let uploadedImageCount = 0;
+    let uploadedOtherCount = 0;
     
     for (const [exportFilename, blob] of Object.entries(imageFiles)) {
       try {
@@ -548,8 +552,9 @@ export async function importCaseForReview(
         const originalFilename = originalFileEntry?.fileData.originalFilename || exportFilename;
         
         const fileData = await uploadImageBlob(user, blob, originalFilename, (fname, progress) => {
-          const overallProgress = 30 + (uploadedCount / totalImages) * 40 + (progress / totalImages) * 0.4;
-          onProgress?.('Uploading images', overallProgress, `Uploading ${fname}...`);
+          const overallProgress = 30 + (uploadedImageCount / totalImages) * 40 + (progress / totalImages) * 0.4;
+          const uploadedTotal = uploadedImageCount + uploadedOtherCount;
+          onProgress?.('Uploading files', overallProgress, `Uploading ${fname} (${uploadedTotal + 1}/${totalFilesToUpload})...`);
         });
         
         // Map original image ID to new file ID
@@ -557,10 +562,11 @@ export async function importCaseForReview(
         
         importedFiles.push(fileData);
         importState.uploadedFiles.push(fileData);
-        uploadedCount++;
+        uploadedImageCount++;
+        const uploadedTotal = uploadedImageCount + uploadedOtherCount;
         
-        const overallProgress = 30 + (uploadedCount / totalImages) * 40;
-        onProgress?.('Uploading images', overallProgress, `Uploaded ${uploadedCount}/${totalImages} files`);
+        const overallProgress = 30 + (uploadedImageCount / totalImages) * 40;
+        onProgress?.('Uploading files', overallProgress, `Uploaded ${uploadedTotal}/${totalFilesToUpload} files`);
         
       } catch (error) {
         result.errors?.push(`Failed to upload ${exportFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -568,13 +574,12 @@ export async function importCaseForReview(
     }
 
     if (Object.keys(associatedFiles).length > 0) {
-      onProgress?.('Uploading associated files', 71, 'Processing non-image files...');
+      onProgress?.('Uploading files', 71, 'Processing non-image files...');
 
       const originalOtherFileById = new Map(
         (caseData.otherFiles || []).map((entry) => [entry.fileData.id, entry.fileData])
       );
-      const totalOtherFiles = Object.keys(associatedFiles).length;
-      let uploadedOtherCount = 0;
+      
 
       for (const [exportFilename, blob] of Object.entries(associatedFiles)) {
         try {
@@ -585,15 +590,17 @@ export async function importCaseForReview(
 
           const fileData = await uploadOtherFileBlob(user, blob, originalFilename, (fname, progress) => {
             const overallProgress = 71 + (uploadedOtherCount / totalOtherFiles) * 4 + (progress / totalOtherFiles) * 0.04;
-            onProgress?.('Uploading associated files', overallProgress, `Uploading ${fname}...`);
+            const uploadedTotal = uploadedImageCount + uploadedOtherCount;
+            onProgress?.('Uploading files', overallProgress, `Uploading ${fname} (${uploadedTotal + 1}/${totalFilesToUpload})...`);
           });
 
           importedOtherFiles.push(fileData);
           importState.uploadedOtherFiles.push(fileData);
           uploadedOtherCount++;
+          const uploadedTotal = uploadedImageCount + uploadedOtherCount;
 
           const overallProgress = 71 + (uploadedOtherCount / totalOtherFiles) * 4;
-          onProgress?.('Uploading associated files', overallProgress, `Uploaded ${uploadedOtherCount}/${totalOtherFiles} associated files`);
+          onProgress?.('Uploading files', overallProgress, `Uploaded ${uploadedTotal}/${totalFilesToUpload} files`);
         } catch (error) {
           result.errors?.push(`Failed to upload associated file ${exportFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
