@@ -339,10 +339,10 @@ export const Navbar = ({
               onClick={() => setIsFileMenuOpen((prev) => !prev)}
               title={!hasLoadedCase ? 'Load a case to enable image management' : undefined}
             >
-              Image Management
+              Image/File Management
             </button>
             {isFileMenuOpen && (
-              <div className={styles.fileMenu} role="menu" aria-label="Image Management actions">
+              <div className={styles.fileMenu} role="menu" aria-label="Image/File Management actions">
                 <button
                   type="button"
                   role="menuitem"
