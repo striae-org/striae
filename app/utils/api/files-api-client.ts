@@ -164,7 +164,7 @@ export async function uploadOtherFileApi(
   }
 
   const proxyUploadResult = await uploadWithXhr(
-    `${FILES_API_BASE}/`,
+    FILES_API_BASE,
     `Bearer ${idToken}`,
     file,
     onProgress
