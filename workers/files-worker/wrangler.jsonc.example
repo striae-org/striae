@@ -1,0 +1,27 @@
+{
+  "name": "FILES_WORKER_NAME",
+  "account_id": "ACCOUNT_ID",
+  "main": "src/files-worker.ts",
+  "workers_dev": false,
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ], 
+  
+  "observability": { 
+	"enabled": true
+  },
+
+  "r2_buckets": [
+    {
+      "binding": "STRIAE_FILES",
+      "bucket_name": "FILES_BUCKET_NAME"
+    },
+    {
+      "binding": "STRIAE_CONFIG",
+      "bucket_name": "CONFIG_BUCKET_NAME"
+    }
+  ],
+
+  "placement": { "mode": "smart" }
+}

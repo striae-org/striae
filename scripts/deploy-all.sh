@@ -113,7 +113,7 @@ if ! npx wrangler types; then
     echo -e "${RED}❌ Root wrangler types generation failed!${NC}"
     exit 1
 fi
-for WORKER in audit-worker data-worker image-worker lists-worker pdf-worker user-worker; do
+for WORKER in audit-worker data-worker image-worker files-worker lists-worker pdf-worker user-worker; do
     echo -e "${YELLOW}  → Generating types for ${WORKER}...${NC}"
     if ! (cd "workers/$WORKER" && npx wrangler types); then
         echo -e "${RED}❌ wrangler types failed for ${WORKER}!${NC}"
@@ -132,7 +132,7 @@ if ! npm run security:admin-service-guard; then
     exit 1
 fi
 echo -e "${GREEN}✅ Admin-service security guard passed${NC}"
-echo -e "${YELLOW}�🔧 Deploying all 6 Cloudflare Workers...${NC}"
+echo -e "${YELLOW}�🔧 Deploying all 7 Cloudflare Workers...${NC}"
 if ! npm run deploy-workers; then
     echo -e "${RED}❌ Worker deployment failed!${NC}"
     exit 1

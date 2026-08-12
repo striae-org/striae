@@ -6,6 +6,14 @@ export interface FileData {
   uploadedAt: string;
 }
 
+export interface OtherFileData {
+  id: string;
+  originalFilename: string;
+  uploadedAt: string;
+  contentType?: string;
+  byteLength?: number;
+}
+
 export interface FileUploadResponse {
   success: boolean;
   result: {
@@ -37,7 +45,25 @@ export interface SignedImageUrlResponse {
   };
 }
 
+export interface SignedFileUrlResponse {
+  success: boolean;
+  result: {
+    fileId: string;
+    url: string;
+    expiresAt: string;
+    expiresInSeconds: number;
+  };
+}
+
 export interface ImageAccessResult {
+  url: string;
+  revoke: () => void;
+  blob?: Blob;
+  urlType: 'signed' | 'blob';
+  expiresAt?: string;
+}
+
+export interface FileAccessResult {
   url: string;
   revoke: () => void;
   blob?: Blob;

@@ -27,6 +27,7 @@ interface NavbarProps {
   onArchiveCase?: () => void;
   onClearROCase?: () => void;
   onOpenViewAllFiles?: () => void;
+  onOpenOtherFiles?: () => void;
   onDeleteCurrentFile?: () => void;
   onOpenImageNotes?: () => void;
   archiveDetails?: {
@@ -58,6 +59,7 @@ export const Navbar = ({
   onArchiveCase,
   onClearROCase,
   onOpenViewAllFiles,
+  onOpenOtherFiles,
   onDeleteCurrentFile,
   onOpenImageNotes,
   archiveDetails,
@@ -353,6 +355,17 @@ export const Navbar = ({
                   }}
                 >
                   View All Images
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={`${styles.fileMenuItem} ${styles.fileMenuItemViewAll}`}
+                  onClick={() => {
+                    onOpenOtherFiles?.();
+                    setIsFileMenuOpen(false);
+                  }}
+                >
+                  Manage Other Files
                 </button>
                 <div className={styles.fileMenuSectionLabel}>Selected Image</div>
                 <button

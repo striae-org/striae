@@ -1,4 +1,4 @@
-import { type FileData } from './file';
+import { type FileData, type OtherFileData } from './file';
 import { type AnnotationData, type ConfirmationData } from './annotations';
 import { type ValidationAuditEntry } from './audit';
 
@@ -31,6 +31,7 @@ export interface CaseData {
   createdAt: string;
   caseNumber: string;
   files: FileData[];
+  otherFiles?: OtherFileData[];
   isReadOnly?: boolean;
   archived?: boolean;
   archivedAt?: string;
@@ -73,6 +74,9 @@ export interface CaseExportData {
     annotations?: AnnotationData;
     hasAnnotations: boolean;
   }>;
+  otherFiles?: Array<{
+    fileData: OtherFileData;
+  }>;
   summary?: {
     filesWithAnnotations: number;
     filesWithoutAnnotations: number;
@@ -95,6 +99,7 @@ export interface CaseDataWithConfirmations {
   createdAt: string;
   caseNumber: string;
   files: FileData[];
+  otherFiles?: OtherFileData[];
   isReadOnly?: boolean;
   archived?: boolean;
   archivedAt?: string;

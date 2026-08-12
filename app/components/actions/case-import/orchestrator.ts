@@ -4,6 +4,7 @@ import {
   type ImportResult,
   type ReadOnlyCaseMetadata,
   type FileData,
+  type OtherFileData,
   type BundledAuditTrailData,
   type ValidationAuditEntry,
   type CaseExportData
@@ -16,6 +17,7 @@ import {
 } from '~/utils/forensics';
 import type { EncryptionManifest } from '~/utils/forensics/export-encryption';
 import { deleteFile } from '../image-manage';
+import { deleteOtherFile } from '../other-files-manage';
 import { parseImportZip } from './zip-processing';
 import { 
   checkReadOnlyCaseExists, 
@@ -25,7 +27,7 @@ import {
   removeReadOnlyCase,
   listReadOnlyCases
 } from './storage-operations';
-import { uploadImageBlob } from './image-operations';
+import { uploadImageBlob, uploadOtherFileBlob } from './image-operations';
 import { importAnnotations } from './annotation-import';
 import { auditService } from '~/services/audit';
 import { decryptExportBatch } from '~/utils/data/operations/signing-operations';
@@ -36,6 +38,7 @@ import { validateCaseExporterUidForImport } from './validation';
  */
 interface ImportState {
   uploadedFiles: FileData[];
+  uploadedOtherFiles: OtherFileData[];
   caseDataStored: boolean;
   userProfileUpdated: boolean;
   caseNumber: string;
@@ -187,6 +190,28 @@ async function cleanupPartialImport(
       
       await Promise.all(deletePromises);
     }
+
+    if (state.uploadedOtherFiles.length > 0) {
+      const deletePromises = state.uploadedOtherFiles.map(async (file) => {
+        try {
+          await deleteOtherFile(
+            user,
+            state.caseNumber,
+            file.id,
+            'Partial import cleanup - associated file deletion',
+            {
+              skipValidation: true,
+              skipCaseDataUpdate: true,
+              suppressAudit: true
+            }
+          );
+        } catch (error) {
+          cleanupWarnings.push(`Failed to delete associated file ${file.originalFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      });
+
+      await Promise.all(deletePromises);
+    }
     
     onProgress?.('Cleaning up partial import', 100, 'Cleanup completed');
     
@@ -221,6 +246,7 @@ export async function importCaseForReview(
   // Track import state for cleanup purposes
   const importState: ImportState = {
     uploadedFiles: [],
+    uploadedOtherFiles: [],
     caseDataStored: false,
     userProfileUpdated: false,
     caseNumber: ''
@@ -254,6 +280,7 @@ export async function importCaseForReview(
     let caseData = initialCaseData;
     let cleanedContent = initialCleanedContent || '';
     let imageFiles: { [filename: string]: Blob } = {};
+    let associatedFiles: { [filename: string]: Blob } = {};
     let resolvedBundledAuditFiles = bundledAuditFiles;
 
     if (!isEncryptionManifest(encryptionManifest) || !encryptedDataBase64) {
@@ -291,12 +318,23 @@ export async function importCaseForReview(
         };
       }
 
-      const decryptedImageBlobMap = Object.fromEntries(
-        Object.entries(decryptedFiles).filter(([filename]) => !filename.startsWith('audit/'))
+      imageFiles = Object.fromEntries(
+        Object.entries(decryptedFiles)
+          .filter(([filename]) => filename.startsWith('images/'))
+          .map(([filename, blob]) => [filename.replace(/^images\//, ''), blob])
       );
-      imageFiles = decryptedImageBlobMap;
 
-      onProgress?.('Decryption successful', 13, `Decrypted case data and ${Object.keys(decryptedImageBlobMap).length} images`);
+      associatedFiles = Object.fromEntries(
+        Object.entries(decryptedFiles)
+          .filter(([filename]) => filename.startsWith('files/'))
+          .map(([filename, blob]) => [filename.replace(/^files\//, ''), blob])
+      );
+
+      onProgress?.(
+        'Decryption successful',
+        13,
+        `Decrypted case data, ${Object.keys(imageFiles).length} images, and ${Object.keys(associatedFiles).length} associated files`
+      );
     } catch (decryptError) {
       throw new Error(
         `Failed to decrypt export: ${decryptError instanceof Error ? decryptError.message : 'Unknown error'}. ` +
@@ -407,7 +445,11 @@ export async function importCaseForReview(
 
       const imageBlobs: { [filename: string]: Blob } = {};
       for (const [filename, blob] of Object.entries(imageFiles)) {
-        imageBlobs[filename] = blob;
+        imageBlobs[`images/${filename}`] = blob;
+      }
+
+      for (const [filename, blob] of Object.entries(associatedFiles)) {
+        imageBlobs[`files/${filename}`] = blob;
       }
 
       const casePackageResult = await verifyCasePackageIntegrity({
@@ -486,6 +528,7 @@ export async function importCaseForReview(
     // Step 3: Upload all image files and create original image ID to new file ID mapping
     const originalImageIdMapping = new Map<string, string>(); // originalImageId -> newFileId
     const importedFiles = [];
+    const importedOtherFiles: OtherFileData[] = [];
     
     let uploadedCount = 0;
     const totalImages = Object.keys(imageFiles).length;
@@ -523,11 +566,44 @@ export async function importCaseForReview(
         result.errors?.push(`Failed to upload ${exportFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
+
+    if (Object.keys(associatedFiles).length > 0) {
+      onProgress?.('Uploading associated files', 71, 'Processing non-image files...');
+
+      const originalOtherFileById = new Map(
+        (caseData.otherFiles || []).map((entry) => [entry.fileData.id, entry.fileData])
+      );
+      const totalOtherFiles = Object.keys(associatedFiles).length;
+      let uploadedOtherCount = 0;
+
+      for (const [exportFilename, blob] of Object.entries(associatedFiles)) {
+        try {
+          const originalFileIdMatch = exportFilename.match(/__(\w+)\.[^./]+$/);
+          const originalFileId = originalFileIdMatch ? originalFileIdMatch[1] : undefined;
+          const originalFileEntry = originalFileId ? originalOtherFileById.get(originalFileId) : undefined;
+          const originalFilename = originalFileEntry?.originalFilename || exportFilename;
+
+          const fileData = await uploadOtherFileBlob(user, blob, originalFilename, (fname, progress) => {
+            const overallProgress = 71 + (uploadedOtherCount / totalOtherFiles) * 4 + (progress / totalOtherFiles) * 0.04;
+            onProgress?.('Uploading associated files', overallProgress, `Uploading ${fname}...`);
+          });
+
+          importedOtherFiles.push(fileData);
+          importState.uploadedOtherFiles.push(fileData);
+          uploadedOtherCount++;
+
+          const overallProgress = 71 + (uploadedOtherCount / totalOtherFiles) * 4;
+          onProgress?.('Uploading associated files', overallProgress, `Uploaded ${uploadedOtherCount}/${totalOtherFiles} associated files`);
+        } catch (error) {
+          result.errors?.push(`Failed to upload associated file ${exportFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+    }
     
-    result.filesImported = importedFiles.length;
+    result.filesImported = importedFiles.length + importedOtherFiles.length;
     
-    if (importedFiles.length === 0) {
-      throw new Error('No images were successfully uploaded');
+    if (result.filesImported === 0) {
+      throw new Error('No associated files were successfully uploaded');
     }
     
     onProgress?.('Storing case data', 75, 'Creating case structure...');
@@ -538,6 +614,7 @@ export async function importCaseForReview(
       result.caseNumber,
       caseData,
       importedFiles,
+      importedOtherFiles,
       originalImageIdMapping,
       parsedForensicManifest,
       resolvedIsArchivedExport,

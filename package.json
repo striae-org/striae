@@ -105,7 +105,7 @@
     "update-env": "bash ./scripts/deploy-config.sh --update-env",
     "install-workers": "bash ./scripts/install-workers.sh",
     "predeploy-workers": "node -e \"const fs=require('fs');fs.rmSync('.wrangler/deploy',{recursive:true,force:true})\"",
-    "deploy-workers": "npm run deploy-workers:audit && npm run deploy-workers:data && npm run deploy-workers:image && npm run deploy-workers:lists && npm run deploy-workers:pdf && npm run deploy-workers:user",
+    "deploy-workers": "npm run deploy-workers:audit && npm run deploy-workers:data && npm run deploy-workers:image && npm run deploy-workers:files && npm run deploy-workers:lists && npm run deploy-workers:pdf && npm run deploy-workers:user",
     "predeploy-workers:secrets": "node -e \"const fs=require('fs');fs.rmSync('.wrangler/deploy',{recursive:true,force:true})\"",
     "deploy-workers:secrets": "bash ./scripts/deploy-worker-secrets.sh",
     "deploy-pages:secrets": "bash ./scripts/deploy-pages-secrets.sh",
@@ -113,6 +113,7 @@
     "deploy-workers:audit": "cd workers/audit-worker && npm run deploy",
     "deploy-workers:data": "cd workers/data-worker && npm run deploy",
     "deploy-workers:image": "cd workers/image-worker && npm run deploy",
+    "deploy-workers:files": "cd workers/files-worker && npm run deploy",
     "deploy-workers:pdf": "cd workers/pdf-worker && npm run deploy",
     "deploy-workers:lists": "cd workers/lists-worker && npm run deploy",
     "deploy-workers:user": "cd workers/user-worker && npm run deploy"

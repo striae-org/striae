@@ -334,11 +334,12 @@ export async function parseImportZip(zipFile: File): Promise<{
         const fileList = Object.keys(zip.files);
         for (const filePath of fileList) {
           const isImageFile = filePath.startsWith('images/') && filePath !== 'images/';
+          const isAssociatedFile = filePath.startsWith('files/') && filePath !== 'files/';
           const isBundledAuditFile =
             filePath === 'audit/case-audit-trail.json' ||
             filePath === 'audit/case-audit-signature.json';
 
-          if ((!isImageFile && !isBundledAuditFile) || filePath.endsWith('/')) {
+          if ((!isImageFile && !isAssociatedFile && !isBundledAuditFile) || filePath.endsWith('/')) {
             continue;
           }
           
@@ -347,12 +348,12 @@ export async function parseImportZip(zipFile: File): Promise<{
             continue;
           }
           
-          const filename = isImageFile ? filePath.replace(/^images\//, '') : filePath;
+          const imageFilename = isImageFile ? filePath.replace(/^images\//, '') : filePath;
 
           if (isImageFile) {
-            const originalImageId = extractImageIdFromFilename(filename);
+            const originalImageId = extractImageIdFromFilename(imageFilename);
             if (originalImageId) {
-              imageIdMapping[filename] = originalImageId;
+              imageIdMapping[imageFilename] = originalImageId;
             }
           }
 
@@ -361,9 +362,9 @@ export async function parseImportZip(zipFile: File): Promise<{
               const encryptedBlob = await file.async('uint8array');
               // Convert to base64url (chunked to avoid stack overflow)
               const encryptedBase64Url = uint8ArrayToBase64Url(encryptedBlob);
-              return [filename, encryptedBase64Url] as [string, string];
+              return [filePath, encryptedBase64Url] as [string, string];
             } catch (err) {
-              throw new Error(`Failed to extract encrypted image ${filename}: ${err instanceof Error ? err.message : 'Unknown error'}`, { cause: err });
+              throw new Error(`Failed to extract encrypted file ${filePath}: ${err instanceof Error ? err.message : 'Unknown error'}`, { cause: err });
             }
           })());
         }

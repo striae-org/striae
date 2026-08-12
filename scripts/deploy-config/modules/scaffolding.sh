@@ -98,6 +98,14 @@ copy_example_configs() {
         echo -e "${YELLOW}    ⚠️  image-worker: wrangler.jsonc already exists, skipping copy${NC}"
     fi
 
+    cd ../files-worker
+    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
+        cp wrangler.jsonc.example wrangler.jsonc
+        echo -e "${GREEN}    ✅ files-worker: wrangler.jsonc created from example${NC}"
+    elif [ -f "wrangler.jsonc" ]; then
+        echo -e "${YELLOW}    ⚠️  files-worker: wrangler.jsonc already exists, skipping copy${NC}"
+    fi
+
     cd ../pdf-worker
     if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
         cp wrangler.jsonc.example wrangler.jsonc
@@ -176,6 +184,15 @@ update_wrangler_configs() {
         echo -e "${GREEN}    ✅ image-worker configuration updated${NC}"
     fi
 
+    if [ -f "workers/files-worker/wrangler.jsonc" ]; then
+        echo -e "${YELLOW}  Updating files-worker/wrangler.jsonc...${NC}"
+        sed -i "s/\"FILES_WORKER_NAME\"/\"$FILES_WORKER_NAME\"/g" workers/files-worker/wrangler.jsonc
+        sed -i "s/\"ACCOUNT_ID\"/\"$escaped_account_id\"/g" workers/files-worker/wrangler.jsonc
+        sed -i "s/\"FILES_BUCKET_NAME\"/\"$FILES_BUCKET_NAME\"/g" workers/files-worker/wrangler.jsonc
+        sed -i "s/\"CONFIG_BUCKET_NAME\"/\"$CONFIG_BUCKET_NAME\"/g" workers/files-worker/wrangler.jsonc
+        echo -e "${GREEN}    ✅ files-worker configuration updated${NC}"
+    fi
+
     if [ -f "workers/pdf-worker/wrangler.jsonc" ]; then
         echo -e "${YELLOW}  Updating pdf-worker/wrangler.jsonc...${NC}"
         sed -i "s/\"PDF_WORKER_NAME\"/\"$PDF_WORKER_NAME\"/g" workers/pdf-worker/wrangler.jsonc
@@ -211,6 +228,7 @@ update_wrangler_configs() {
         sed -i "s/DATA_WORKER_NAME/$DATA_WORKER_NAME/g" wrangler.toml
         sed -i "s/AUDIT_WORKER_NAME/$AUDIT_WORKER_NAME/g" wrangler.toml
         sed -i "s/IMAGES_WORKER_NAME/$IMAGES_WORKER_NAME/g" wrangler.toml
+        sed -i "s/FILES_WORKER_NAME/$FILES_WORKER_NAME/g" wrangler.toml
         sed -i "s/PDF_WORKER_NAME/$PDF_WORKER_NAME/g" wrangler.toml
         sed -i "s/LISTS_WORKER_NAME/$LISTS_WORKER_NAME/g" wrangler.toml
         echo -e "${GREEN}    ✅ main wrangler.toml configuration updated${NC}"

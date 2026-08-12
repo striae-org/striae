@@ -1,0 +1,161 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal {
+  width: min(900px, 92vw);
+  max-height: 88vh;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #d5d9df;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #e0e5ec;
+}
+
+.closeButton {
+  border: none;
+  background: transparent;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.modalContent {
+  padding: 1rem;
+  overflow: auto;
+}
+
+.readOnlyNotice {
+  margin: 0 0 0.8rem;
+  color: #8a5a00;
+  background: #fff6e6;
+  border: 1px solid #f0d08f;
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+}
+
+.uploadArea {
+  border: 2px dashed #9aa8bc;
+  border-radius: 10px;
+  padding: 0.9rem;
+  margin-bottom: 0.8rem;
+  background: #f8fbff;
+}
+
+.uploadAreaDragging {
+  border-color: #2e5c9a;
+  background: #eef5ff;
+}
+
+.uploadActions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.uploadHint {
+  margin: 0 0 0.5rem;
+  color: #3f4a57;
+  font-size: 0.9rem;
+}
+
+.statusText {
+  color: #2f4f7f;
+  font-size: 0.9rem;
+}
+
+.errorText {
+  color: #9f1b1b;
+  margin: 0.5rem 0 0;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.countText {
+  margin: 0;
+  color: #475569;
+}
+
+.filesList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #e0e5ec;
+  border-radius: 8px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.fileItem:last-child {
+  border-bottom: none;
+}
+
+.fileMeta {
+  min-width: 0;
+  flex: 1;
+}
+
+.fileName {
+  margin: 0;
+  font-weight: 600;
+  color: #1f2937;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileDetails {
+  margin: 0.2rem 0 0;
+  color: #5f6b7a;
+  font-size: 0.86rem;
+}
+
+.fileActions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.footerActions {
+  padding: 0.8rem 1rem;
+  border-top: 1px solid #e0e5ec;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.emptyState {
+  margin: 0;
+  color: #596678;
+}

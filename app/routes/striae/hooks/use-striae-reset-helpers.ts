@@ -1,5 +1,5 @@
 import { useCallback, type Dispatch, type SetStateAction } from 'react';
-import { type AnnotationData, type FileData } from '~/types';
+import { type AnnotationData, type FileData, type OtherFileData } from '~/types';
 
 interface ArchiveDetailsState {
   archived: boolean;
@@ -18,6 +18,7 @@ interface UseStriaeResetHelpersProps {
   setImageLoaded: Dispatch<SetStateAction<boolean>>;
   setCurrentCase: Dispatch<SetStateAction<string>>;
   setFiles: Dispatch<SetStateAction<FileData[]>>;
+  setOtherFiles: Dispatch<SetStateAction<OtherFileData[]>>;
   setActiveAnnotations: Dispatch<SetStateAction<Set<string>>>;
   setIsBoxAnnotationMode: Dispatch<SetStateAction<boolean>>;
   setIsReadOnlyCase: Dispatch<SetStateAction<boolean>>;
@@ -38,6 +39,7 @@ export const useStriaeResetHelpers = ({
   setImageLoaded,
   setCurrentCase,
   setFiles,
+  setOtherFiles,
   setActiveAnnotations,
   setIsBoxAnnotationMode,
   setIsReadOnlyCase,
@@ -83,6 +85,7 @@ export const useStriaeResetHelpers = ({
   const clearLoadedCaseState = useCallback(() => {
     setCurrentCase('');
     setFiles([]);
+    setOtherFiles([]);
     clearCaseContextState();
     clearSelectedImageState();
     setShowNotes(false);
@@ -91,6 +94,7 @@ export const useStriaeResetHelpers = ({
   }, [
     setCurrentCase,
     setFiles,
+    setOtherFiles,
     clearCaseContextState,
     clearSelectedImageState,
     setShowNotes,

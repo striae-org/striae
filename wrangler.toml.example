@@ -24,6 +24,10 @@ binding = "IMAGE_WORKER"
 service = "IMAGES_WORKER_NAME"
 
 [[services]]
+binding = "FILES_WORKER"
+service = "FILES_WORKER_NAME"
+
+[[services]]
 binding = "PDF_WORKER"
 service = "PDF_WORKER_NAME"
 

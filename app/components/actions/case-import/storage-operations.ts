@@ -9,11 +9,13 @@ import {
 import { 
   type CaseExportData,   
   type FileData,
+  type OtherFileData,
   type CaseData,
   type ReadOnlyCaseMetadata,
   type BundledAuditTrailData
 } from '~/types';
 import { deleteFile } from '../image-manage';
+import { deleteOtherFile } from '../other-files-manage';
 import { type SignedForensicManifest } from '~/utils/forensics';
 
 /**
@@ -81,6 +83,7 @@ export async function storeCaseDataInR2(
   caseNumber: string,
   caseData: CaseExportData,
   importedFiles: FileData[],
+  importedOtherFiles: OtherFileData[] = [],
   originalImageIdMapping?: Map<string, string>,
   forensicManifest?: SignedForensicManifest,
   isArchivedExport?: boolean,
@@ -106,6 +109,7 @@ export async function storeCaseDataInR2(
       createdAt: new Date().toISOString(),
       caseNumber: caseNumber,
       files: importedFiles,
+      otherFiles: importedOtherFiles,
       // Add read-only metadata
       isReadOnly: true,
       ...(archived && {
@@ -297,6 +301,37 @@ export async function deleteReadOnlyCase(user: User, caseNumber: string): Promis
         console.info(
           `Read-only cleanup for case ${caseNumber}: ` +
           `${benignNotFoundDeletes.length} file deletions were already missing (404/not found) and treated as successful cleanup.`
+        );
+      }
+    }
+
+    if (caseData.otherFiles && caseData.otherFiles.length > 0) {
+      const deleteResults = await Promise.allSettled(
+        caseData.otherFiles.map((file: OtherFileData) =>
+          deleteOtherFile(
+            user,
+            caseNumber,
+            file.id,
+            'Read-only case clearing - associated files cleanup',
+            {
+              skipValidation: true,
+              skipCaseDataUpdate: true,
+              suppressAudit: true
+            }
+          )
+        )
+      );
+
+      const failedDeletes = deleteResults.filter(
+        (result): result is PromiseRejectedResult =>
+          result.status === 'rejected' && !isBenignCleanupError(result.reason)
+      );
+
+      if (failedDeletes.length > 0) {
+        caseDataDeleteHadFailure = true;
+        console.warn(
+          `Partial associated-file cleanup for read-only case ${caseNumber}: ` +
+          `${failedDeletes.length}/${caseData.otherFiles.length} file deletions failed.`
         );
       }
     }
