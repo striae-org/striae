@@ -12,6 +12,19 @@ export interface OtherFileData {
   uploadedAt: string;
   contentType?: string;
   byteLength?: number;
+  malwareScanState?: 'pending' | 'clean' | 'infected' | 'error';
+  malwareScanHookState?: 'queued' | 'unavailable' | 'failed';
+  malwareScanUpdatedAt?: string;
+  malwareScanHookConfigured?: boolean;
+  malwareScanHookError?: string;
+}
+
+export interface MalwareScanStatus {
+  scanState: 'pending' | 'clean' | 'infected' | 'error';
+  hookState: 'queued' | 'unavailable' | 'failed';
+  updatedAt: string;
+  hookConfigured: boolean;
+  hookError?: string;
 }
 
 export interface FileUploadResponse {
@@ -20,6 +33,7 @@ export interface FileUploadResponse {
     id: string;
     filename: string;
     uploaded: string;
+    malwareScan?: MalwareScanStatus;
   };
   errors: Array<{
     code: number;

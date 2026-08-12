@@ -13,7 +13,7 @@ export const FORENSIC_MANIFEST_SIGNATURE_ALGORITHM = 'RSASSA-PSS-SHA-256';
 export interface ForensicManifestData {
   caseNumber?: string;
   dataHash: string;
-  imageHashes: { [filename: string]: string };
+  fileHashes: { [filename: string]: string };
   manifestHash: string;
   totalFiles: number;
   createdAt: string;
@@ -39,15 +39,33 @@ export interface ManifestSignatureVerificationResult {
 
 const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
 
-function normalizeImageHashes(imageHashes: { [filename: string]: string }): { [filename: string]: string } {
+type ForensicManifestHashField = 'fileHashes' | 'imageHashes';
+
+function normalizeFileHashes(fileHashes: { [filename: string]: string }): { [filename: string]: string } {
   const normalized: { [filename: string]: string } = {};
-  const sortedFilenames = Object.keys(imageHashes).sort();
+  const sortedFilenames = Object.keys(fileHashes).sort();
 
   for (const filename of sortedFilenames) {
-    normalized[filename] = imageHashes[filename].toLowerCase();
+    normalized[filename] = fileHashes[filename].toLowerCase();
   }
 
   return normalized;
+}
+
+function getCandidateFileHashes(candidate: Partial<ForensicManifestData> & { imageHashes?: unknown }): Record<string, string> | null {
+  if (candidate.fileHashes && typeof candidate.fileHashes === 'object') {
+    return candidate.fileHashes;
+  }
+
+  if (candidate.imageHashes && typeof candidate.imageHashes === 'object') {
+    return candidate.imageHashes as Record<string, string>;
+  }
+
+  return null;
+}
+
+function detectManifestHashField(candidate: Partial<SignedForensicManifest>): ForensicManifestHashField {
+  return candidate.fileHashes && typeof candidate.fileHashes === 'object' ? 'fileHashes' : 'imageHashes';
 }
 
 function isSupportedManifestVersion(version: string): boolean {
@@ -55,7 +73,7 @@ function isSupportedManifestVersion(version: string): boolean {
 }
 
 function isValidManifestData(
-  candidate: Partial<ForensicManifestData>,
+  candidate: Partial<ForensicManifestData> & { imageHashes?: unknown },
   manifestVersion: string
 ): candidate is ForensicManifestData {
   if (!candidate) {
@@ -72,11 +90,12 @@ function isValidManifestData(
     return false;
   }
 
-  if (!candidate.imageHashes || typeof candidate.imageHashes !== 'object') {
+  const fileHashes = getCandidateFileHashes(candidate);
+  if (!fileHashes) {
     return false;
   }
 
-  for (const hash of Object.values(candidate.imageHashes)) {
+  for (const hash of Object.values(fileHashes)) {
     if (typeof hash !== 'string' || !SHA256_HEX_REGEX.test(hash)) {
       return false;
     }
@@ -109,7 +128,7 @@ export function extractForensicManifestData(candidate: Partial<SignedForensicMan
 
   const normalizedData: ForensicManifestData = {
     dataHash: candidate.dataHash.toLowerCase(),
-    imageHashes: normalizeImageHashes(candidate.imageHashes),
+    fileHashes: normalizeFileHashes(getCandidateFileHashes(candidate) ?? {}),
     manifestHash: candidate.manifestHash.toLowerCase(),
     totalFiles: candidate.totalFiles,
     createdAt: candidate.createdAt
@@ -128,7 +147,8 @@ export function extractForensicManifestData(candidate: Partial<SignedForensicMan
  */
 export function createManifestSigningPayload(
   manifest: ForensicManifestData,
-  manifestVersion: string = FORENSIC_MANIFEST_VERSION
+  manifestVersion: string = FORENSIC_MANIFEST_VERSION,
+  hashFieldName: ForensicManifestHashField = 'fileHashes'
 ): string {
   if (manifestVersion === FORENSIC_MANIFEST_VERSION) {
     if (typeof manifest.caseNumber !== 'string' || manifest.caseNumber.trim().length === 0) {
@@ -139,7 +159,7 @@ export function createManifestSigningPayload(
       manifestVersion,
       caseNumber: manifest.caseNumber,
       dataHash: manifest.dataHash.toLowerCase(),
-      imageHashes: normalizeImageHashes(manifest.imageHashes),
+      [hashFieldName]: normalizeFileHashes(manifest.fileHashes),
       manifestHash: manifest.manifestHash.toLowerCase(),
       totalFiles: manifest.totalFiles,
       createdAt: manifest.createdAt
@@ -155,7 +175,7 @@ export function createManifestSigningPayload(
   const canonicalPayload = {
     manifestVersion,
     dataHash: manifest.dataHash.toLowerCase(),
-    imageHashes: normalizeImageHashes(manifest.imageHashes),
+    [hashFieldName]: normalizeFileHashes(manifest.fileHashes),
     manifestHash: manifest.manifestHash.toLowerCase(),
     totalFiles: manifest.totalFiles,
     createdAt: manifest.createdAt
@@ -200,7 +220,7 @@ export async function verifyForensicManifestSignature(
     };
   }
 
-  const payload = createManifestSigningPayload(manifestData, manifestVersion);
+  const payload = createManifestSigningPayload(manifestData, manifestVersion, detectManifestHashField(manifest));
 
   return verifySignaturePayload(
     payload,
@@ -353,7 +373,7 @@ export async function calculateSHA256Binary(data: Uint8Array | ArrayBuffer | Blo
  */
 export async function generateForensicManifestSecure(
   dataContent: string,
-  imageFiles: { [filename: string]: Blob },
+  fileBlobs: { [filename: string]: Blob },
   caseNumber: string
 ): Promise<ForensicManifestData> {
   const normalizedCaseNumber = caseNumber.trim();
@@ -363,17 +383,17 @@ export async function generateForensicManifestSecure(
 
   const dataHash = await calculateSHA256Secure(dataContent);
 
-  const imageHashes: { [filename: string]: string } = {};
-  const sortedFilenames = Object.keys(imageFiles).sort();
+  const fileHashes: { [filename: string]: string } = {};
+  const sortedFilenames = Object.keys(fileBlobs).sort();
   for (const filename of sortedFilenames) {
-    imageHashes[filename] = await calculateSHA256Binary(imageFiles[filename]);
+    fileHashes[filename] = await calculateSHA256Binary(fileBlobs[filename]);
   }
 
   const manifestForHash = {
     caseNumber: normalizedCaseNumber,
     dataHash,
-    imageHashes,
-    totalFiles: Object.keys(imageFiles).length + 1,
+    fileHashes,
+    totalFiles: Object.keys(fileBlobs).length + 1,
     createdAt: new Date().toISOString()
   };
 
@@ -383,7 +403,7 @@ export async function generateForensicManifestSecure(
   return {
     caseNumber: normalizedCaseNumber,
     dataHash,
-    imageHashes,
+    fileHashes,
     manifestHash,
     totalFiles: manifestForHash.totalFiles,
     createdAt: manifestForHash.createdAt
@@ -395,7 +415,7 @@ export async function generateForensicManifestSecure(
  */
 export async function generateForensicManifestWithTimestampSecure(
   dataContent: string,
-  imageFiles: { [filename: string]: Blob },
+  fileBlobs: { [filename: string]: Blob },
   createdAt: string,
   caseNumber?: string
 ): Promise<ForensicManifestData> {
@@ -403,17 +423,17 @@ export async function generateForensicManifestWithTimestampSecure(
 
   const normalizedCaseNumber = typeof caseNumber === 'string' ? caseNumber.trim() : '';
 
-  const imageHashes: { [filename: string]: string } = {};
-  const sortedFilenames = Object.keys(imageFiles).sort();
+  const fileHashes: { [filename: string]: string } = {};
+  const sortedFilenames = Object.keys(fileBlobs).sort();
   for (const filename of sortedFilenames) {
-    imageHashes[filename] = await calculateSHA256Binary(imageFiles[filename]);
+    fileHashes[filename] = await calculateSHA256Binary(fileBlobs[filename]);
   }
 
   const manifestForHash = {
     ...(normalizedCaseNumber.length > 0 ? { caseNumber: normalizedCaseNumber } : {}),
     dataHash,
-    imageHashes,
-    totalFiles: Object.keys(imageFiles).length + 1,
+    fileHashes,
+    totalFiles: Object.keys(fileBlobs).length + 1,
     createdAt
   };
 
@@ -423,7 +443,7 @@ export async function generateForensicManifestWithTimestampSecure(
   return {
     ...(normalizedCaseNumber.length > 0 ? { caseNumber: normalizedCaseNumber } : {}),
     dataHash,
-    imageHashes,
+    fileHashes,
     manifestHash,
     totalFiles: manifestForHash.totalFiles,
     createdAt: manifestForHash.createdAt
@@ -435,7 +455,7 @@ export async function generateForensicManifestWithTimestampSecure(
  */
 export async function validateCaseIntegritySecure(
   dataContent: string,
-  imageFiles: { [filename: string]: Blob },
+  fileBlobs: { [filename: string]: Blob },
   expectedManifest: ForensicManifestData
 ): Promise<{
   isValid: boolean;
@@ -454,27 +474,27 @@ export async function validateCaseIntegritySecure(
     errors.push('Data hash mismatch detected');
   }
 
-  const actualImageFiles = Object.keys(imageFiles).sort();
-  const expectedImageFiles = Object.keys(expectedManifest.imageHashes).sort();
+  const actualFileNames = Object.keys(fileBlobs).sort();
+  const expectedFileNames = Object.keys(expectedManifest.fileHashes).sort();
 
-  const missingFiles = expectedImageFiles.filter((f) => !actualImageFiles.includes(f));
-  const extraFiles = actualImageFiles.filter((f) => !expectedImageFiles.includes(f));
+  const missingFiles = expectedFileNames.filter((f) => !actualFileNames.includes(f));
+  const extraFiles = actualFileNames.filter((f) => !expectedFileNames.includes(f));
 
   if (missingFiles.length > 0) {
-    errors.push(`Missing image files: ${missingFiles.join(', ')}`);
+    errors.push(`Missing files: ${missingFiles.join(', ')}`);
   }
   if (extraFiles.length > 0) {
-    errors.push(`Extra image files not in manifest: ${extraFiles.join(', ')}`);
+    errors.push(`Extra files not in manifest: ${extraFiles.join(', ')}`);
   }
 
-  for (const filename of actualImageFiles) {
-    if (expectedManifest.imageHashes[filename]) {
-      const actualHash = await calculateSHA256Binary(imageFiles[filename]);
-      const isValid = actualHash === expectedManifest.imageHashes[filename].toLowerCase();
+  for (const filename of actualFileNames) {
+    if (expectedManifest.fileHashes[filename]) {
+      const actualHash = await calculateSHA256Binary(fileBlobs[filename]);
+      const isValid = actualHash === expectedManifest.fileHashes[filename].toLowerCase();
       imageValidation[filename] = isValid;
 
       if (!isValid) {
-        errors.push(`Image hash mismatch detected for ${filename}`);
+        errors.push(`File hash mismatch detected for ${filename}`);
       }
     } else {
       imageValidation[filename] = false;
@@ -483,7 +503,7 @@ export async function validateCaseIntegritySecure(
 
   const recreatedManifest = await generateForensicManifestWithTimestampSecure(
     dataContent,
-    imageFiles,
+    fileBlobs,
     expectedManifest.createdAt,
     expectedManifest.caseNumber
   );
@@ -496,12 +516,12 @@ export async function validateCaseIntegritySecure(
       errors.push('Manifest data hash field differs from actual data');
     }
 
-    for (const filename of Object.keys(imageFiles).sort()) {
+    for (const filename of Object.keys(fileBlobs).sort()) {
       if (
-        recreatedManifest.imageHashes[filename] &&
-        recreatedManifest.imageHashes[filename] !== expectedManifest.imageHashes[filename]?.toLowerCase()
+        recreatedManifest.fileHashes[filename] &&
+        recreatedManifest.fileHashes[filename] !== expectedManifest.fileHashes[filename]?.toLowerCase()
       ) {
-        errors.push(`Manifest image hash entry for ${filename} differs from actual file`);
+        errors.push(`Manifest file hash entry for ${filename} differs from actual file`);
       }
     }
   }
@@ -509,12 +529,12 @@ export async function validateCaseIntegritySecure(
   const allImageFilesValid = Object.values(imageValidation).every((valid) => valid);
   const isValid = dataValid && allImageFilesValid && manifestValid && errors.length === 0;
 
-  const totalFiles = Object.keys(imageFiles).length;
+  const totalFiles = Object.keys(fileBlobs).length;
   const validFiles = Object.values(imageValidation).filter((valid) => valid).length;
 
   let summary = `Validation ${isValid ? 'PASSED' : 'FAILED'}: `;
   summary += `Data ${dataValid ? 'valid' : 'invalid'}, `;
-  summary += `${validFiles}/${totalFiles} images valid, `;
+  summary += `${validFiles}/${totalFiles} files valid, `;
   summary += `manifest ${manifestValid ? 'valid' : 'invalid'}`;
 
   if (errors.length > 0) {

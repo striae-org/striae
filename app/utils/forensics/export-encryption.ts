@@ -3,10 +3,10 @@ import paths from '~/config/config.json';
 export const EXPORT_ENCRYPTION_VERSION = '1.0';
 export const EXPORT_ENCRYPTION_ALGORITHM = 'RSA-OAEP-AES-256-GCM';
 
-export interface EncryptedImageEntry {
+export interface EncryptedFileEntry {
   filename: string;
   encryptedHash: string; // SHA256 of encrypted bytes (lowercase hex)
-  iv: string; // base64url — per-image nonce
+  iv: string; // base64url — per-file nonce
 }
 
 export interface EncryptionManifest {
@@ -15,12 +15,13 @@ export interface EncryptionManifest {
   keyId: string;
   wrappedKey: string; // base64url
   dataIv: string; // base64url — nonce for the data file
-  encryptedImages: EncryptedImageEntry[];
+  encryptedFiles: EncryptedFileEntry[];
+  encryptedImages?: EncryptedFileEntry[];
 }
 
 export interface EncryptedExportResult {
   ciphertext: Uint8Array;
-  encryptedImages: Uint8Array[];
+  encryptedFiles: Uint8Array[];
   encryptionManifest: EncryptionManifest;
 }
 
@@ -196,7 +197,7 @@ export async function encryptDataWithSharedKey(
 }
 
 /**
- * Encrypt a single image blob with shared AES key, return ciphertext and SHA256 hash
+ * Encrypt a single file blob with shared AES key, return ciphertext and SHA256 hash
  */
 export async function encryptImageWithSharedKey(
   imageBlob: Blob,
@@ -248,8 +249,8 @@ export async function wrapAesKeyWithPublicKey(
 }
 
 /**
- * Encrypt export data file and all images with a shared AES-256 key
- * Returns ciphertext, encrypted image array, and encryption manifest
+ * Encrypt export data file and all associated files with a shared AES-256 key
+ * Returns ciphertext, encrypted file array, and encryption manifest
  */
 export async function encryptExportDataWithAllImages(
   plaintextString: string,
@@ -271,9 +272,9 @@ export async function encryptExportDataWithAllImages(
     dataIv
   );
 
-  // Encrypt all images — each with its own unique IV
-  const encryptedImages: Uint8Array[] = [];
-  const encryptedImageEntries: EncryptedImageEntry[] = [];
+  // Encrypt all files — each with its own unique IV
+  const encryptedFiles: Uint8Array[] = [];
+  const encryptedFileEntries: EncryptedFileEntry[] = [];
 
   for (const { filename, blob } of imageBlobs) {
     const imageIv = crypto.getRandomValues(new Uint8Array(12));
@@ -285,8 +286,8 @@ export async function encryptExportDataWithAllImages(
       imageIv
     );
 
-    encryptedImages.push(ciphertext);
-    encryptedImageEntries.push({
+    encryptedFiles.push(ciphertext);
+    encryptedFileEntries.push({
       filename,
       encryptedHash: hash,
       iv: imageIvBase64
@@ -305,12 +306,24 @@ export async function encryptExportDataWithAllImages(
     keyId,
     wrappedKey: wrappedKeyBase64,
     dataIv: dataIvBase64,
-    encryptedImages: encryptedImageEntries
+    encryptedFiles: encryptedFileEntries
   };
 
   return {
     ciphertext: dataCiphertext,
-    encryptedImages,
+    encryptedFiles,
     encryptionManifest
   };
+}
+
+export function getEncryptedManifestEntries(manifest: EncryptionManifest): EncryptedFileEntry[] {
+  if (Array.isArray(manifest.encryptedFiles)) {
+    return manifest.encryptedFiles;
+  }
+
+  if (Array.isArray(manifest.encryptedImages)) {
+    return manifest.encryptedImages;
+  }
+
+  return [];
 }

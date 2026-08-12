@@ -10,6 +10,12 @@ export interface Env {
   FILES_SIGNED_URL_SECRET?: string;
   FILES_SIGNED_URL_TTL_SECONDS?: string;
   FILES_SIGNED_URL_BASE_URL?: string;
+  FILES_UPLOAD_RATE_LIMIT_PER_MINUTE?: string;
+  FILES_SIGNED_URL_RATE_LIMIT_PER_MINUTE?: string;
+  FILES_DELETE_RATE_LIMIT_PER_MINUTE?: string;
+  FILES_MALWARE_SCAN_HOOK_URL?: string;
+  FILES_MALWARE_SCAN_HOOK_TIMEOUT_MS?: string;
+  FILES_MALWARE_SCAN_HOOK_TOKEN?: string;
 }
 
 export interface KeyRegistryPayload {
@@ -28,6 +34,18 @@ export interface UploadResult {
   id: string;
   filename: string;
   uploaded: string;
+  malwareScan?: MalwareScanStatus;
+}
+
+export type MalwareScanState = 'pending' | 'clean' | 'infected' | 'error';
+export type MalwareScanHookState = 'queued' | 'unavailable' | 'failed';
+
+export interface MalwareScanStatus {
+  scanState: MalwareScanState;
+  hookState: MalwareScanHookState;
+  updatedAt: string;
+  hookConfigured: boolean;
+  hookError?: string;
 }
 
 export interface UploadResponse {

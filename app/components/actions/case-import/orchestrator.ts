@@ -66,7 +66,7 @@ function isEncryptionManifest(value: unknown): value is EncryptionManifest {
     typeof candidate.keyId === 'string' &&
     typeof candidate.wrappedKey === 'string' &&
     typeof candidate.dataIv === 'string' &&
-    Array.isArray(candidate.encryptedImages)
+    (Array.isArray(candidate.encryptedFiles) || Array.isArray(candidate.encryptedImages))
   );
 }
 
@@ -272,7 +272,7 @@ export async function importCaseForReview(
       packagedVerificationPublicKeyPem,
       encryptionManifest,
       encryptedDataBase64,
-      encryptedImages,
+      encryptedFiles,
       dataFileName
     } = await parseImportZip(zipFile);
 
@@ -295,7 +295,7 @@ export async function importCaseForReview(
         user,
         encryptionManifest,
         encryptedDataBase64,
-        encryptedImages ?? {}
+        encryptedFiles ?? {}
       );
 
       cleanedContent = decryptResult.plaintext;

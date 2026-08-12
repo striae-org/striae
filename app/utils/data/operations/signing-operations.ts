@@ -13,7 +13,7 @@ import {
   type ForensicManifestSignature,
   FORENSIC_MANIFEST_VERSION
 } from '../../forensics/SHA256';
-import type { EncryptionManifest } from '../../forensics/export-encryption';
+import { getEncryptedManifestEntries, type EncryptionManifest } from '../../forensics/export-encryption';
 import { canAccessCase, validateUserSession } from '../permissions';
 import type {
   AuditExportSigningResponse,
@@ -234,13 +234,13 @@ export const signAuditExportData = async (
 };
 
 /**
- * Request batch decryption of export data file and images from the data worker
+ * Request batch decryption of export data file and associated files from the data worker
  */
 export const decryptExportBatch = async (
   user: User,
   encryptionManifest: EncryptionManifest,
   encryptedDataBase64: string,
-  encryptedImageMap: Record<string, string>
+  encryptedFileMap: Record<string, string>
 ): Promise<{ plaintext: string; decryptedImages: Record<string, Blob> }> => {
   try {
     const sessionValidation = await validateUserSession(user);
@@ -248,9 +248,10 @@ export const decryptExportBatch = async (
       throw new Error(`Session validation failed: ${sessionValidation.reason}`);
     }
 
-    // Convert encryptedImageMap to array format expected by worker, including per-image IV from manifest
-    const encryptedImages = Object.entries(encryptedImageMap).map(([filename, encryptedData]) => {
-      const manifestEntry = encryptionManifest.encryptedImages.find(e => e.filename === filename);
+    // Convert encrypted file map to array format expected by worker, including per-file IV from manifest.
+    const manifestEntries = getEncryptedManifestEntries(encryptionManifest);
+    const encryptedFiles = Object.entries(encryptedFileMap).map(([filename, encryptedData]) => {
+      const manifestEntry = manifestEntries.find((entry) => entry.filename === filename);
       return {
         filename,
         encryptedData,
@@ -268,7 +269,7 @@ export const decryptExportBatch = async (
         wrappedKey: encryptionManifest.wrappedKey,
         dataIv: encryptionManifest.dataIv,
         encryptedData: encryptedDataBase64,
-        encryptedImages,
+        encryptedFiles,
         keyId: encryptionManifest.keyId
       })
     });
@@ -297,7 +298,7 @@ export const decryptExportBatch = async (
       throw new Error('Invalid decrypt response from data worker');
     }
 
-    // Convert decrypted image base64 data back to Blobs
+    // Convert decrypted file base64 data back to Blobs
     const decryptedImages: Record<string, Blob> = {};
     if (Array.isArray(responseData.decryptedImages)) {
       for (const imageEntry of responseData.decryptedImages) {

@@ -107,14 +107,18 @@ function validateConfirmationEncryptionManifest(manifest: EncryptionManifest): v
   // a tampered/malformed file.
   const candidate = manifest as unknown as Record<string, unknown>;
   const encryptedImages = candidate['encryptedImages'];
+  const encryptedFiles = candidate['encryptedFiles'];
   if (
-    encryptedImages !== undefined &&
-    (typeof encryptedImages !== 'object' ||
-      Object.keys(encryptedImages as object).length > 0)
+    (encryptedImages !== undefined &&
+      (typeof encryptedImages !== 'object' ||
+        Object.keys(encryptedImages as object).length > 0)) ||
+    (encryptedFiles !== undefined &&
+      (typeof encryptedFiles !== 'object' ||
+        Object.keys(encryptedFiles as object).length > 0))
   ) {
     throw new Error(
-      'Invalid confirmation package: this manifest contains encrypted image references. ' +
-      'Confirmation packages must not include image data. The file may be a case export or may have been tampered with.'
+      'Invalid confirmation package: this manifest contains encrypted file references. ' +
+      'Confirmation packages must not include file payloads. The file may be a case export or may have been tampered with.'
     );
   }
 }

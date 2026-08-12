@@ -74,6 +74,7 @@ export const onRequest = async ({ request, env }: ImageProxyContext): Promise<Re
   }
 
   const requestUrl = new URL(request.url);
+  let authenticatedUid: string | null = null;
 
   const signedToken = requestUrl.searchParams.get('st');
   const isSignedTokenRequest =
@@ -90,6 +91,8 @@ export const onRequest = async ({ request, env }: ImageProxyContext): Promise<Re
     if (!identity) {
       return textResponse('Unauthorized', 401);
     }
+
+    authenticatedUid = identity.uid;
   }
 
   const proxyPathResult = extractProxyPath(requestUrl);
@@ -115,6 +118,15 @@ export const onRequest = async ({ request, env }: ImageProxyContext): Promise<Re
   const acceptHeader = request.headers.get('Accept');
   if (acceptHeader) {
     upstreamHeaders.set('Accept', acceptHeader);
+  }
+
+  const clientIpHeader = request.headers.get('CF-Connecting-IP');
+  if (clientIpHeader) {
+    upstreamHeaders.set('CF-Connecting-IP', clientIpHeader);
+  }
+
+  if (authenticatedUid) {
+    upstreamHeaders.set('X-Striae-Authenticated-Uid', authenticatedUid);
   }
 
   const shouldForwardBody = request.method !== 'GET' && request.method !== 'HEAD';

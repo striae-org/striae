@@ -301,7 +301,7 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
 
   for (let index = 0; index < filesToEncrypt.length; index += 1) {
     const originalFilename = filesToEncrypt[index].filename;
-    const encryptedContent = encryptionResult.encryptedImages[index];
+    const encryptedContent = encryptionResult.encryptedFiles[index];
 
     if (originalFilename.startsWith('audit/')) {
       zip.file(originalFilename, encryptedContent);
@@ -337,7 +337,7 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
       '- files/ folder with exported associated non-image files (encrypted)',
       '- Full case audit trail export and signed audit metadata',
       '- Forensic manifest with server-side signature',
-      '- ENCRYPTION_MANIFEST.json with encryption metadata and encrypted image hashes',
+      '- ENCRYPTION_MANIFEST.json with encryption metadata and encrypted file hashes',
       `- ${publicKeyFileName} for verification`,
       '',
       'This package is intended for read-only review and verification workflows.',

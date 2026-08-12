@@ -1,5 +1,6 @@
 import { encryptBinaryForStorage } from '../encryption-utils';
 import { requireEncryptionUploadConfig } from '../security/key-registry';
+import { dispatchMalwareScanHook } from '../security/malware-scan';
 import type { CreateResponse, Env } from '../types';
 import { deriveFileKind } from '../utils/content-disposition';
 
@@ -65,6 +66,13 @@ export async function handleFileUpload(
   const contentType = fileBlob.type || 'application/octet-stream';
   const fileId = crypto.randomUUID().replace(/-/g, '');
   const plaintextBytes = await fileBlob.arrayBuffer();
+  const malwareScan = await dispatchMalwareScanHook(env, {
+    fileId,
+    filename,
+    contentType,
+    byteLength: fileBlob.size,
+    uploadedAt
+  });
 
   const encryptedPayload = await encryptBinaryForStorage(
     plaintextBytes,
@@ -83,7 +91,12 @@ export async function handleFileUpload(
       originalFilename: filename,
       byteLength: String(fileBlob.size),
       createdAt: uploadedAt,
-      fileKind: deriveFileKind(contentType)
+      fileKind: deriveFileKind(contentType),
+      malwareScanState: malwareScan.scanState,
+      malwareScanHookState: malwareScan.hookState,
+      malwareScanUpdatedAt: malwareScan.updatedAt,
+      malwareScanHookConfigured: malwareScan.hookConfigured ? 'true' : 'false',
+      ...(malwareScan.hookError ? { malwareScanHookError: malwareScan.hookError } : {})
     }
   });
 
@@ -94,7 +107,8 @@ export async function handleFileUpload(
     result: {
       id: fileId,
       filename,
-      uploaded: uploadedAt
+      uploaded: uploadedAt,
+      malwareScan
     }
   });
 }

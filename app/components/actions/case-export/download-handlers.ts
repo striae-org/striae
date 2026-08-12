@@ -252,10 +252,10 @@ export async function downloadCaseAsZip(
 
       zip.file(`${caseNumber}_data.json`, encryptionResult.ciphertext);
 
-      if (encryptionResult.encryptedImages.length > 0) {
+      if (encryptionResult.encryptedFiles.length > 0) {
         for (let i = 0; i < filesToEncrypt.length; i++) {
           const originalFilename = filesToEncrypt[i].filename;
-          const encryptedContent = encryptionResult.encryptedImages[i];
+          const encryptedContent = encryptionResult.encryptedFiles[i];
 
           if (originalFilename.startsWith('images/')) {
             imageFolder?.file(originalFilename.replace(/^images\//, ''), encryptedContent);

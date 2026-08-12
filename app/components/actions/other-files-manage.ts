@@ -99,6 +99,11 @@ export const uploadOtherFile = async (
       uploadedAt: new Date().toISOString(),
       contentType: file.type || 'application/octet-stream',
       byteLength: file.size,
+      malwareScanState: uploaded.result?.malwareScan?.scanState,
+      malwareScanHookState: uploaded.result?.malwareScan?.hookState,
+      malwareScanUpdatedAt: uploaded.result?.malwareScan?.updatedAt,
+      malwareScanHookConfigured: uploaded.result?.malwareScan?.hookConfigured,
+      malwareScanHookError: uploaded.result?.malwareScan?.hookError,
     };
 
     const updatedData: CaseData = {

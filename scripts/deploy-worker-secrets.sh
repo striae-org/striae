@@ -290,6 +290,30 @@ build_files_worker_secret_list() {
         secrets+=("FILES_SIGNED_URL_TTL_SECONDS")
     fi
 
+    if [ -n "${FILES_UPLOAD_RATE_LIMIT_PER_MINUTE:-}" ]; then
+        secrets+=("FILES_UPLOAD_RATE_LIMIT_PER_MINUTE")
+    fi
+
+    if [ -n "${FILES_SIGNED_URL_RATE_LIMIT_PER_MINUTE:-}" ]; then
+        secrets+=("FILES_SIGNED_URL_RATE_LIMIT_PER_MINUTE")
+    fi
+
+    if [ -n "${FILES_DELETE_RATE_LIMIT_PER_MINUTE:-}" ]; then
+        secrets+=("FILES_DELETE_RATE_LIMIT_PER_MINUTE")
+    fi
+
+    if [ -n "${FILES_MALWARE_SCAN_HOOK_URL:-}" ]; then
+        secrets+=("FILES_MALWARE_SCAN_HOOK_URL")
+    fi
+
+    if [ -n "${FILES_MALWARE_SCAN_HOOK_TIMEOUT_MS:-}" ]; then
+        secrets+=("FILES_MALWARE_SCAN_HOOK_TIMEOUT_MS")
+    fi
+
+    if [ -n "${FILES_MALWARE_SCAN_HOOK_TOKEN:-}" ]; then
+        secrets+=("FILES_MALWARE_SCAN_HOOK_TOKEN")
+    fi
+
     printf '%s\n' "${secrets[@]}"
 }
 

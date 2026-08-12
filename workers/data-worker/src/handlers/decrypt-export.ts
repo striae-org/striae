@@ -46,6 +46,7 @@ export async function handleDecryptExport(
       wrappedKey?: string;
       dataIv?: string;
       encryptedData?: string;
+      encryptedFiles?: Array<{ filename: string; encryptedData: string; iv?: string }>;
       encryptedImages?: Array<{ filename: string; encryptedData: string; iv?: string }>;
       keyId?: string;
       userId?: string;
@@ -59,7 +60,8 @@ export async function handleDecryptExport(
       return respond({ error: userMatchResult.error || 'Forbidden' }, userMatchResult.status);
     }
 
-    const { wrappedKey, dataIv, encryptedData, encryptedImages, keyId } = requestBody;
+    const { wrappedKey, dataIv, encryptedData, encryptedFiles, encryptedImages, keyId } = requestBody;
+    const encryptedEntries = Array.isArray(encryptedFiles) ? encryptedFiles : encryptedImages;
 
     if (
       !wrappedKey ||
@@ -134,8 +136,8 @@ export async function handleDecryptExport(
     }
 
     const decryptedImages: Array<{ filename: string; data: string }> = [];
-    if (Array.isArray(encryptedImages) && encryptedImages.length > 0) {
-      for (const imageEntry of encryptedImages) {
+    if (Array.isArray(encryptedEntries) && encryptedEntries.length > 0) {
+      for (const imageEntry of encryptedEntries) {
         try {
           if (!imageEntry.iv || typeof imageEntry.iv !== 'string') {
             return respond(
