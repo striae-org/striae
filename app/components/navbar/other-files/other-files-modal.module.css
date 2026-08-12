@@ -98,6 +98,13 @@
   color: #475569;
 }
 
+.bulkSelectionActions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
 .filesList {
   list-style: none;
   padding: 0;
@@ -145,6 +152,56 @@
   gap: 0.45rem;
 }
 
+.primaryButton,
+.secondaryButton {
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.primaryButton {
+  background: var(--primary);
+  color: var(--white);
+  border: 1px solid var(--primary);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--primary) 85%, var(--black));
+  border-color: color-mix(in lab, var(--primary) 85%, var(--black));
+}
+
+.secondaryButton {
+  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+  background: var(--backgroundLight);
+  color: var(--textBody);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--background) 94%, transparent);
+}
+
+.deleteButton {
+  border-color: color-mix(in lab, var(--error) 28%, transparent);
+  color: var(--error);
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--error) 12%, var(--backgroundLight));
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .footerActions {
   padding: 0.8rem 1rem;
   border-top: 1px solid #e0e5ec;
@@ -152,6 +209,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.footerButtonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   flex-wrap: wrap;
 }
 

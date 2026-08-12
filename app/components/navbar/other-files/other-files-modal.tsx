@@ -350,9 +350,9 @@ export const OtherFilesModal = ({
 
           <div className={styles.controls}>
             <p className={styles.countText}>{otherFiles.length} associated file{otherFiles.length === 1 ? '' : 's'}</p>
-            <div>
-              <button type="button" onClick={selectAll} disabled={otherFiles.length === 0}>Select All</button>
-              <button type="button" onClick={clearSelected} disabled={selectedFileIds.size === 0}>Clear</button>
+            <div className={styles.bulkSelectionActions}>
+              <button type="button" className={styles.secondaryButton} onClick={selectAll} disabled={otherFiles.length === 0}>Select All</button>
+              <button type="button" className={styles.secondaryButton} onClick={clearSelected} disabled={selectedFileIds.size === 0}>Clear</button>
             </div>
           </div>
 
@@ -382,6 +382,7 @@ export const OtherFilesModal = ({
                     <div className={styles.fileActions}>
                       <button
                         type="button"
+                        className={styles.primaryButton}
                         onClick={() => {
                           void handleDownloadOne(file);
                         }}
@@ -390,6 +391,7 @@ export const OtherFilesModal = ({
                       </button>
                       <button
                         type="button"
+                        className={`${styles.secondaryButton} ${styles.deleteButton}`}
                         onClick={() => {
                           void handleDeleteOne(file);
                         }}
@@ -409,6 +411,7 @@ export const OtherFilesModal = ({
         <div className={styles.footerActions}>
           <button
             type="button"
+            className={styles.primaryButton}
             onClick={() => {
               void handleDownloadSelected();
             }}
@@ -417,9 +420,10 @@ export const OtherFilesModal = ({
             Download Selected ({selectedFiles.length})
           </button>
 
-          <div>
+          <div className={styles.footerButtonGroup}>
             <button
               type="button"
+              className={`${styles.secondaryButton} ${styles.deleteButton}`}
               onClick={() => {
                 void handleDeleteSelected();
               }}
@@ -428,7 +432,12 @@ export const OtherFilesModal = ({
             >
               Delete Selected ({selectedFiles.length})
             </button>
-            <button type="button" onClick={requestClose} disabled={isUploading || isDeletingSelected || isDownloadingSelected}>
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              onClick={requestClose}
+              disabled={isUploading || isDeletingSelected || isDownloadingSelected}
+            >
               Close
             </button>
           </div>
