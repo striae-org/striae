@@ -254,7 +254,7 @@ const requiredEnvVars = [
 for (const varName of requiredEnvVars) {
     const value = process.env[varName];
     if (typeof value !== 'string' || value.length === 0) {
-        throw new Error(`Missing required environment variable for app/config/config.json update: ${varName}`);
+        throw new Error('Missing required environment variable for app/config/config.json update: ' + varName);
     }
 }
 
