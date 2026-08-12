@@ -12,13 +12,6 @@
 	"enabled": true
   },
 
-  "vars": {
-    "FILES_UPLOAD_RATE_LIMIT_PER_MINUTE": "30",
-    "FILES_SIGNED_URL_RATE_LIMIT_PER_MINUTE": "120",
-    "FILES_DELETE_RATE_LIMIT_PER_MINUTE": "30",
-    "FILES_MALWARE_SCAN_HOOK_TIMEOUT_MS": "2500"
-  },
-
   "r2_buckets": [
     {
       "binding": "STRIAE_FILES",
