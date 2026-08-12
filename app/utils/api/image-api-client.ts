@@ -48,8 +48,60 @@ interface XhrUploadResult {
   responseText: string;
 }
 
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isUploadErrorsArray(
+  value: unknown
+): value is Array<{ code: number; message: string }> {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (entry) =>
+        typeof entry === 'object' &&
+        entry !== null &&
+        'code' in entry &&
+        typeof entry.code === 'number' &&
+        'message' in entry &&
+        typeof entry.message === 'string'
+    )
+  );
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+}
+
 function isUploadSuccessResponse(value: unknown): value is ImageUploadResponse {
-  return !!value && typeof value === 'object' && 'success' in value && value.success === true && 'result' in value && !!value.result && typeof value.result === 'object' && 'id' in value.result && !!value.result.id;
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as {
+    success?: unknown;
+    result?: unknown;
+    errors?: unknown;
+    messages?: unknown;
+  };
+
+  if (candidate.success !== true || !candidate.result || typeof candidate.result !== 'object') {
+    return false;
+  }
+
+  const result = candidate.result as {
+    id?: unknown;
+    filename?: unknown;
+    uploaded?: unknown;
+  };
+
+  return (
+    isNonEmptyString(result.id) &&
+    isNonEmptyString(result.filename) &&
+    isNonEmptyString(result.uploaded) &&
+    isUploadErrorsArray(candidate.errors) &&
+    isStringArray(candidate.messages)
+  );
 }
 
 function uploadWithXhr(
