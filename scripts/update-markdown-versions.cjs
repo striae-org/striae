@@ -10,6 +10,7 @@ const markdownFiles = [
 const workerDirs = [
   'workers/audit-worker',
   'workers/data-worker',
+  'workers/files-worker',
   'workers/image-worker',
   'workers/lists-worker',
   'workers/pdf-worker',
