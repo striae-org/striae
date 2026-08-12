@@ -61,6 +61,10 @@ export const FORENSIC_MANIFEST_SIGNATURE_ALGORITHM = 'RSASSA-PSS-SHA-256';
 
 const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Object.prototype.toString.call(value) === '[object Object]';
+}
+
 function normalizeFileHashes(fileHashes: { [filename: string]: string }): { [filename: string]: string } {
   const normalized: { [filename: string]: string } = {};
   const sortedFilenames = Object.keys(fileHashes).sort();
@@ -73,11 +77,11 @@ function normalizeFileHashes(fileHashes: { [filename: string]: string }): { [fil
 }
 
 function getCandidateFileHashes(candidate: Partial<ForensicManifestPayload> & { imageHashes?: unknown }): Record<string, string> | null {
-  if (candidate.fileHashes && typeof candidate.fileHashes === 'object') {
-    return candidate.fileHashes;
+  if (candidate.fileHashes && isPlainObject(candidate.fileHashes)) {
+    return candidate.fileHashes as Record<string, string>;
   }
 
-  if (candidate.imageHashes && typeof candidate.imageHashes === 'object') {
+  if (candidate.imageHashes && isPlainObject(candidate.imageHashes)) {
     return candidate.imageHashes as Record<string, string>;
   }
 

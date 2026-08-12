@@ -4,7 +4,16 @@ import { dispatchMalwareScanHook } from '../security/malware-scan';
 import type { CreateResponse, Env } from '../types';
 import { deriveFileKind } from '../utils/content-disposition';
 
-const MAX_OTHER_FILE_SIZE_BYTES = 512 * 1024 * 1024;
+// Full-file encryption buffers are materialized in memory before AES-GCM executes.
+// A 100 MB cap keeps uploads within practical Worker memory and request limits while preserving
+// usability for moderately sized non-image attachments.
+export const MAX_OTHER_FILE_SIZE_BYTES = 100 * 1024 * 1024;
+
+export function validateUploadSize(fileSizeBytes: number): void {
+  if (fileSizeBytes > MAX_OTHER_FILE_SIZE_BYTES) {
+    throw new Error(`File size exceeds ${MAX_OTHER_FILE_SIZE_BYTES / (1024 * 1024)} MB limit`);
+  }
+}
 
 const BLOCKED_EXTENSIONS = new Set([
   '.exe',
@@ -59,8 +68,11 @@ export async function handleFileUpload(
     return respond({ error: 'This file extension is blocked for security reasons' }, 400);
   }
 
-  if (fileBlob.size > MAX_OTHER_FILE_SIZE_BYTES) {
-    return respond({ error: 'File size exceeds 512 MB limit' }, 400);
+  try {
+    validateUploadSize(fileBlob.size);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'File size exceeds limit';
+    return respond({ error: message }, 400);
   }
 
   const contentType = fileBlob.type || 'application/octet-stream';

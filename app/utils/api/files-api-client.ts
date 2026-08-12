@@ -48,6 +48,10 @@ interface XhrUploadResult {
   responseText: string;
 }
 
+interface UploadErrorResponse {
+  error: string;
+}
+
 function uploadWithXhr(
   targetUrl: string,
   authorizationValue: string,
@@ -84,7 +88,12 @@ function uploadWithXhr(
 }
 
 function parseUploadResponse(payload: string): FileUploadResponse {
-  const parsed = JSON.parse(payload) as FileUploadResponse;
+  const parsed = JSON.parse(payload) as FileUploadResponse | UploadErrorResponse;
+
+  if ('error' in parsed && typeof parsed.error === 'string' && parsed.error.trim()) {
+    throw new Error(parsed.error);
+  }
+
   if (!parsed.success || !parsed.result?.id) {
     const errorMessage = parsed.errors?.map((entry) => entry.message).join(', ') || 'Upload failed';
     throw new Error(errorMessage);
@@ -171,6 +180,14 @@ export async function uploadOtherFileApi(
   );
 
   if (proxyUploadResult.status < 200 || proxyUploadResult.status >= 300) {
+    try {
+      parseUploadResponse(proxyUploadResult.responseText);
+    } catch (error) {
+      if (error instanceof Error && error.message !== 'Upload failed') {
+        throw error;
+      }
+    }
+
     throw new Error(`Upload failed with status ${proxyUploadResult.status}`);
   }
 

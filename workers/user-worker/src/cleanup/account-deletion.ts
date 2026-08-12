@@ -103,13 +103,23 @@ async function decryptCaseDataWithRegistry(
   );
 }
 
-function extractFileIdsFromCaseData(caseData: StoredCaseData): string[] {
-  if (!Array.isArray(caseData.files)) {
-    return [];
+function extractFileIdFromEntry(file: unknown): string | null {
+  if (!file || typeof file !== 'object') {
+    return null;
   }
 
-  return caseData.files
-    .map((file) => getNonEmptyString(file?.id))
+  const record = file as { id?: unknown; fileData?: { id?: unknown } };
+  return getNonEmptyString(record.id) ?? getNonEmptyString(record.fileData?.id);
+}
+
+function extractFileIdsFromCaseData(caseData: StoredCaseData): string[] {
+  const allFileEntries = [
+    ...(Array.isArray(caseData.files) ? caseData.files : []),
+    ...(Array.isArray(caseData.otherFiles) ? caseData.otherFiles : [])
+  ];
+
+  return allFileEntries
+    .map((file) => extractFileIdFromEntry(file))
     .filter((fileId): fileId is string => fileId !== null);
 }
 

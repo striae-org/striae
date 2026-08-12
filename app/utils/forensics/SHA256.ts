@@ -41,6 +41,25 @@ const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
 
 type ForensicManifestHashField = 'fileHashes' | 'imageHashes';
 
+function isPlainStringRecord(value: unknown): value is Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) {
+    return false;
+  }
+
+  for (const entryValue of Object.values(value as Record<string, unknown>)) {
+    if (typeof entryValue !== 'string') {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function normalizeFileHashes(fileHashes: { [filename: string]: string }): { [filename: string]: string } {
   const normalized: { [filename: string]: string } = {};
   const sortedFilenames = Object.keys(fileHashes).sort();
@@ -53,19 +72,19 @@ function normalizeFileHashes(fileHashes: { [filename: string]: string }): { [fil
 }
 
 function getCandidateFileHashes(candidate: Partial<ForensicManifestData> & { imageHashes?: unknown }): Record<string, string> | null {
-  if (candidate.fileHashes && typeof candidate.fileHashes === 'object') {
+  if (isPlainStringRecord(candidate.fileHashes)) {
     return candidate.fileHashes;
   }
 
-  if (candidate.imageHashes && typeof candidate.imageHashes === 'object') {
-    return candidate.imageHashes as Record<string, string>;
+  if (isPlainStringRecord(candidate.imageHashes)) {
+    return candidate.imageHashes;
   }
 
   return null;
 }
 
 function detectManifestHashField(candidate: Partial<SignedForensicManifest>): ForensicManifestHashField {
-  return candidate.fileHashes && typeof candidate.fileHashes === 'object' ? 'fileHashes' : 'imageHashes';
+  return isPlainStringRecord(candidate.fileHashes) ? 'fileHashes' : 'imageHashes';
 }
 
 function isSupportedManifestVersion(version: string): boolean {
