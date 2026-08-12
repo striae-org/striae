@@ -118,7 +118,7 @@ export const Navbar = ({
   const caseActionsDisabled = false;
   const disableLongRunningCaseActions = isUploading;
   const isCaseManagementActive = true;
-  const isFileManagementActive = isFileMenuOpen || hasLoadedImage;
+  const isFileManagementActive = isFileMenuOpen || hasLoadedCase;
   const canDeleteCurrentFile = hasLoadedImage && !isReadOnly;
   const isArchivedCase = Boolean(isReadOnly && archiveDetails?.archived);
   
