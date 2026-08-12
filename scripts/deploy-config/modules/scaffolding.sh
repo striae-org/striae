@@ -243,6 +243,21 @@ const fs = require('fs');
 const path = process.argv[1];
 const config = JSON.parse(fs.readFileSync(path, 'utf8'));
 
+const requiredEnvVars = [
+    'PAGES_CUSTOM_DOMAIN',
+    'MANIFEST_SIGNING_KEY_ID',
+    'MANIFEST_SIGNING_PUBLIC_KEY',
+    'EXPORT_ENCRYPTION_KEY_ID',
+    'EXPORT_ENCRYPTION_PUBLIC_KEY'
+];
+
+for (const varName of requiredEnvVars) {
+    const value = process.env[varName];
+    if (typeof value !== 'string' || value.length === 0) {
+        throw new Error(`Missing required environment variable for app/config/config.json update: ${varName}`);
+    }
+}
+
 config.url = 'https://' + process.env.PAGES_CUSTOM_DOMAIN;
 
 config.manifest_signing_key_id = process.env.MANIFEST_SIGNING_KEY_ID;

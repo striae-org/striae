@@ -27,7 +27,9 @@ fi
 
 # Source the .env file
 echo -e "${YELLOW}📖 Loading environment variables from .env...${NC}"
+set -a
 source .env
+set +a
 
 is_admin_service_placeholder() {
     local value="$1"

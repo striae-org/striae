@@ -320,7 +320,9 @@ prompt_for_secrets() {
     configure_registry_encryption_key
 
     # Reload the updated .env file
+    set -a
     source .env
+    set +a
 
     echo -e "${GREEN}🎉 Environment variables setup completed!${NC}"
     echo -e "${BLUE}📄 All values saved to .env file${NC}"
