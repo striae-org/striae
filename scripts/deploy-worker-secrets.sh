@@ -159,6 +159,20 @@ build_audit_worker_secret_list() {
     printf '%s\n' "${secrets[@]}"
 }
 
+clear_plaintext_var_bindings() {
+    local worker_name="$1"
+    local config_worker_name="$2"
+
+    echo -e "${YELLOW}  Detected conflicting plaintext var bindings for $worker_name. Clearing remote vars and retrying...${NC}"
+
+    if ! wrangler deploy --name "$config_worker_name" --keep-vars=false; then
+        echo -e "${RED}❌ Failed to clear plaintext vars for $worker_name${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}✅ Cleared plaintext vars for $worker_name${NC}"
+}
+
 # Function to set worker secrets
 set_worker_secrets() {
     local worker_name=$1
@@ -193,10 +207,31 @@ set_worker_secrets() {
     fi
     
     echo -e "${YELLOW}  Using worker name: $config_worker_name${NC}"
+    local did_clear_plaintext_vars=0
     
     for secret in "${secrets[@]}"; do
         echo -e "${YELLOW}  Setting $secret...${NC}"
-        if ! echo "${!secret}" | wrangler secret put "$secret" --name "$config_worker_name"; then
+        local set_output
+        if ! set_output=$(printf '%s' "${!secret}" | wrangler secret put "$secret" --name "$config_worker_name" 2>&1); then
+            if [ $did_clear_plaintext_vars -eq 0 ] && echo "$set_output" | grep -qi "already in use"; then
+                if ! clear_plaintext_var_bindings "$worker_name" "$config_worker_name"; then
+                    popd > /dev/null
+                    return 1
+                fi
+
+                did_clear_plaintext_vars=1
+
+                if ! set_output=$(printf '%s' "${!secret}" | wrangler secret put "$secret" --name "$config_worker_name" 2>&1); then
+                    echo "$set_output"
+                    echo -e "${RED}❌ Failed to set $secret for $worker_name after clearing plaintext vars${NC}"
+                    popd > /dev/null
+                    return 1
+                fi
+
+                continue
+            fi
+
+            echo "$set_output"
             echo -e "${RED}❌ Failed to set $secret for $worker_name${NC}"
             popd > /dev/null
             return 1
