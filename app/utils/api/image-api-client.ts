@@ -48,8 +48,8 @@ interface XhrUploadResult {
   responseText: string;
 }
 
-interface UploadErrorResponse {
-  error: string;
+function isUploadSuccessResponse(value: unknown): value is ImageUploadResponse {
+  return !!value && typeof value === 'object' && 'success' in value && value.success === true && 'result' in value && !!value.result && typeof value.result === 'object' && 'id' in value.result && !!value.result.id;
 }
 
 function uploadWithXhr(
@@ -88,14 +88,19 @@ function uploadWithXhr(
 }
 
 function parseUploadResponse(payload: string): ImageUploadResponse {
-  const parsed = JSON.parse(payload) as ImageUploadResponse | UploadErrorResponse;
+  const parsed = JSON.parse(payload) as unknown;
 
-  if ('error' in parsed && typeof parsed.error === 'string' && parsed.error.trim()) {
+  if (parsed && typeof parsed === 'object' && 'error' in parsed && typeof parsed.error === 'string' && parsed.error.trim()) {
     throw new Error(parsed.error);
   }
 
-  if (!parsed.success || !parsed.result?.id) {
-    const errorMessage = parsed.errors?.map((entry) => entry.message).join(', ') || 'Upload failed';
+  if (!isUploadSuccessResponse(parsed)) {
+    const errorMessage =
+      parsed && typeof parsed === 'object' && 'errors' in parsed && Array.isArray(parsed.errors)
+        ? parsed.errors
+            .map((entry) => (typeof entry === 'object' && entry && 'message' in entry && typeof entry.message === 'string' ? entry.message : 'Upload failed'))
+            .join(', ')
+        : 'Upload failed';
     throw new Error(errorMessage);
   }
 
