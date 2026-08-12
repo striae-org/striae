@@ -281,7 +281,7 @@ export const Canvas = ({
       {/* Filename & Connfirmation Field Display - Upper Left */}
       {filename && (
         <div className={styles.filenameDisplay}>
-          File: {filename}
+          Image: {filename}
           {annotationData?.includeConfirmation && (
             <>
               {/* Show confirmation status based on whether confirmation data exists */}

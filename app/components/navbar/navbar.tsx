@@ -164,7 +164,7 @@ export const Navbar = ({
               aria-haspopup="menu"
               disabled={caseActionsDisabled}
               onClick={() => setIsCaseMenuOpen((prev) => !prev)}
-              title={isUploading ? 'Some case actions are unavailable while files are uploading' : undefined}
+              title={isUploading ? 'Some case actions are unavailable while images are uploading' : undefined}
             >
               Case Management
             </button>
@@ -207,7 +207,7 @@ export const Navbar = ({
                     !hasLoadedCase
                       ? 'Load a case to export case data'
                       : disableLongRunningCaseActions
-                        ? 'Export is unavailable while files are uploading'
+                        ? 'Export is unavailable while images are uploading'
                         : isArchivedCase && isReviewOnlyCase
                           ? 'Cannot export imported archive packages'
                           : undefined
@@ -258,7 +258,7 @@ export const Navbar = ({
                       !hasLoadedCase
                         ? 'Load a case to rename it'
                         : disableLongRunningCaseActions
-                          ? 'Rename is unavailable while files are uploading'
+                          ? 'Rename is unavailable while images are uploading'
                           : undefined
                     }
                     onClick={() => {
@@ -280,7 +280,7 @@ export const Navbar = ({
                       : !hasLoadedCase
                         ? 'Load a case to delete it'
                         : disableLongRunningCaseActions
-                          ? 'Delete is unavailable while files are uploading'
+                          ? 'Delete is unavailable while images are uploading'
                           : undefined
                   }
                   onClick={() => {
@@ -300,7 +300,7 @@ export const Navbar = ({
                       !hasLoadedCase
                         ? 'Load a case to archive it'
                         : disableLongRunningCaseActions
-                          ? 'Archive is unavailable while files are uploading'
+                          ? 'Archive is unavailable while images are uploading'
                           : undefined
                     }
                     onClick={() => {
@@ -337,12 +337,12 @@ export const Navbar = ({
               aria-expanded={isFileMenuOpen}
               aria-haspopup="menu"
               onClick={() => setIsFileMenuOpen((prev) => !prev)}
-              title={!hasLoadedCase ? 'Load a case to enable file management' : undefined}
+              title={!hasLoadedCase ? 'Load a case to enable image management' : undefined}
             >
-              File Management
+              Image Management
             </button>
             {isFileMenuOpen && (
-              <div className={styles.fileMenu} role="menu" aria-label="File Management actions">
+              <div className={styles.fileMenu} role="menu" aria-label="Image Management actions">
                 <button
                   type="button"
                   role="menuitem"
@@ -352,27 +352,27 @@ export const Navbar = ({
                     setIsFileMenuOpen(false);
                   }}
                 >
-                  View All Files
+                  View All Images
                 </button>
-                <div className={styles.fileMenuSectionLabel}>Selected File</div>
+                <div className={styles.fileMenuSectionLabel}>Selected Image</div>
                 <button
                   type="button"
                   role="menuitem"
                   className={`${styles.fileMenuItem} ${styles.fileMenuItemDelete}`}
                   disabled={!canDeleteCurrentFile}
-                  title={!hasLoadedImage ? 'Load an image to delete the selected file' : isReadOnly ? 'Cannot delete files for read-only cases' : undefined}
+                  title={!hasLoadedImage ? 'Load an image to delete the selected image' : isReadOnly ? 'Cannot delete images for read-only cases' : undefined}
                   onClick={() => {
                     onDeleteCurrentFile?.();
                     setIsFileMenuOpen(false);
                   }}
                 >
-                  Delete File
+                  Delete Image
                 </button>
                 <div
                   className={styles.fileMenuCaption}
-                  title={hasLoadedImage && currentFileName ? currentFileName : 'No file loaded'}
+                  title={hasLoadedImage && currentFileName ? currentFileName : 'No image loaded'}
                 >
-                  File: {hasLoadedImage && currentFileName ? currentFileName : 'No file loaded'}
+                  Image: {hasLoadedImage && currentFileName ? currentFileName : 'No image loaded'}
                 </div>
               </div>
             )}
@@ -398,7 +398,7 @@ export const Navbar = ({
             onClick={() => setIsImportModalOpen(true)}
             className={`${styles.navSectionButton} ${styles.navPrimaryButton}`}
             disabled={isUploading}
-            title={isUploading ? 'Cannot import while uploading files' : undefined}
+            title={isUploading ? 'Cannot import while uploading images' : undefined}
           >
             Import Case/Confirmations
           </button>
@@ -410,7 +410,7 @@ export const Navbar = ({
             onClick={() => setIsProfileModalOpen(true)}
             className={styles.navTextButton}
             disabled={isUploading}
-            title={isUploading ? 'Cannot manage profile while uploading files' : undefined}
+            title={isUploading ? 'Cannot manage profile while uploading images' : undefined}
           >
             Manage Profile
           </button>

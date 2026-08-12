@@ -44,17 +44,17 @@ export const DeleteFilesModal = ({
   }
 
   return (
-    <div className={sharedStyles.overlay} aria-label="Close delete files dialog" {...overlayProps}>
-      <div className={`${sharedStyles.modal} ${styles.deleteFilesModal}`} role="dialog" aria-modal="true" aria-label="Delete Selected Files">
-        <button {...getCloseButtonProps({ ariaLabel: 'Close delete files dialog' })}>×</button>
+    <div className={sharedStyles.overlay} aria-label="Close delete images dialog" {...overlayProps}>
+      <div className={`${sharedStyles.modal} ${styles.deleteFilesModal}`} role="dialog" aria-modal="true" aria-label="Delete Selected Images">
+        <button {...getCloseButtonProps({ ariaLabel: 'Close delete images dialog' })}>×</button>
 
-        <h3 className={sharedStyles.title}>Delete Selected Files</h3>
+        <h3 className={sharedStyles.title}>Delete Selected Images</h3>
         <p className={sharedStyles.subtitle}>
-          {selectedFiles.length} file{selectedFiles.length === 1 ? '' : 's'} selected
+          {selectedFiles.length} image{selectedFiles.length === 1 ? '' : 's'} selected
         </p>
 
         <div className={sharedStyles.warningPanel}>
-          <p>This action permanently deletes the selected files and their annotation data.</p>
+          <p>This action permanently deletes the selected images and their annotation data.</p>
           <p>This operation cannot be undone.</p>
           {previewFiles.length > 0 && (
             <ul className={styles.filePreviewList}>
@@ -85,7 +85,7 @@ export const DeleteFilesModal = ({
             }}
             disabled={isSubmitting || selectedFiles.length === 0}
           >
-            {isSubmitting ? 'Deleting...' : `Delete ${selectedFiles.length} File${selectedFiles.length === 1 ? '' : 's'}`}
+            {isSubmitting ? 'Deleting...' : `Delete ${selectedFiles.length} Image${selectedFiles.length === 1 ? '' : 's'}`}
           </button>
         </div>
       </div>
