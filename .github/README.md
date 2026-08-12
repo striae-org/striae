@@ -20,6 +20,14 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-11] - *[Major Release v10.0.0](https://github.com/striae-org/striae/releases/tag/v10.0.0)* — *Files Worker + Non-Image File Management*
+
+- **🗂️ Files Worker and Storage Architecture** - Added a dedicated `files-worker` and integrated it into deployment scaffolding, environment validation, and worker configuration so associated non-image files have a dedicated storage layer.
+- **📁 Non-Image File Management Flow** - Implemented the end-to-end associated-file workflow in the app, including upload, listing, deletion, progress indication, and navbar/file modal integration for case-scoped non-image file operations.
+- **🔐 Manifest, Export, and Import Integrity** - Updated archive/export packaging and manifest/decryption validation to carry associated non-image files through case exports and import verification without breaking integrity checks.
+- **🧹 File Lifecycle Follow-Ups** - Fixed upload path resolution, navbar state behavior, styling issues, and case-deletion handling so the new file-management flow is consistent and stable.
+- **🧰 Release Metadata Refresh** - Updated package metadata and release documentation to reflect the v10.0.0 major release line.
+
 ## [2026-08-11] - *[Patch Release v9.1.1](https://github.com/striae-org/striae/releases/tag/v9.1.1)* — *Script-Based Publish Flow Restoration + Dependency/Compatibility Maintenance + Lists Worker Endpoint Stabilization*
 
 - **📦 Script-Based Publish Flow Restoration** - Restored the pre-v9.1.1 npm script publish flow for npmjs and GitHub Packages using the package-level `publish:npm`, `publish:github`, and `publish:all` commands instead of the tag-triggered GitHub Actions release workflow.
