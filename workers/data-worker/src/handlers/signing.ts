@@ -129,6 +129,8 @@ export async function handleSignManifest(
 
     const normalizedManifestCandidate: Partial<ForensicManifestPayload> = {
       ...manifestCandidate,
+      fileHashes: (manifestCandidate as Partial<ForensicManifestPayload> & { imageHashes?: Record<string, string> }).fileHashes
+        ?? (manifestCandidate as Partial<ForensicManifestPayload> & { imageHashes?: Record<string, string> }).imageHashes,
       caseNumber: effectiveCaseNumber
     };
 

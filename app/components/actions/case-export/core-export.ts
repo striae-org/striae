@@ -2,6 +2,7 @@ import type { User } from 'firebase/auth';
 import { type AnnotationData, type CaseExportData, type ExportOptions } from '~/types';
 import { getCaseData } from '~/utils/data';
 import { fetchFiles } from '../image-manage';
+import { fetchOtherFiles } from '../other-files-manage';
 import { getNotes } from '../notes-manage';
 import { validateCaseNumber } from '../case-manage';
 import { getUserExportMetadata } from './metadata-helpers';
@@ -40,9 +41,11 @@ export async function exportCaseData(
     
     // Fetch all files for the case
     const files = await fetchFiles(user, caseNumber);
-    
-    if (!files || files.length === 0) {
-      throw new Error(`No files found for case: ${caseNumber}`);
+    const otherFiles = await fetchOtherFiles(user, caseNumber, { skipValidation: true });
+    const totalAssociatedFiles = (files?.length || 0) + (otherFiles?.length || 0);
+
+    if (totalAssociatedFiles === 0) {
+      throw new Error(`No associated files found for case: ${caseNumber}`);
     }
 
     // Collect file data with annotations
@@ -146,9 +149,10 @@ export async function exportCaseData(
           ? { designatedReviewerEmail: options.designatedReviewerEmail.trim() }
           : {}),
         striaeExportSchemaVersion: '1.0',
-        totalFiles: files.length
+        totalFiles: totalAssociatedFiles
       },
       files: filesWithAnnotations,
+      otherFiles: (otherFiles || []).map((otherFile) => ({ fileData: otherFile })),
       ...(includeMetadata && {
         summary: {
           filesWithAnnotations: filesWithAnnotationsCount,

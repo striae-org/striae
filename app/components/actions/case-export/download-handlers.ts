@@ -1,6 +1,7 @@
 import type { User } from 'firebase/auth';
-import { type FileData, type CaseExportData, type ExportOptions } from '~/types';
+import { type FileData, type OtherFileData, type CaseExportData, type ExportOptions } from '~/types';
 import { getImageUrl } from '../image-manage';
+import { getOtherFileUrl } from '../other-files-manage';
 import {
   generateForensicManifestSecure,
   calculateSHA256Secure,
@@ -108,6 +109,8 @@ export async function downloadCaseAsZip(
         caseNumber,
         caseJsonContent,
         files: exportData.files,
+        otherFiles: exportData.otherFiles || [],
+        onProgress,
         auditConfig: {
           startDate: exportData.metadata.caseCreatedDate,
           endDate: archivedAt,
@@ -145,7 +148,7 @@ export async function downloadCaseAsZip(
         {
           processingTimeMs: endTime - startTime,
           fileSizeBytes: archivePackage.zipBlob.size,
-          validationStepsCompleted: exportData.files?.length || 0,
+          validationStepsCompleted: (exportData.files?.length || 0) + (exportData.otherFiles?.length || 0),
           validationStepsFailed: 0,
         },
         'zip',
@@ -171,7 +174,20 @@ export async function downloadCaseAsZip(
 
     // Add images and collect them for manifest generation
     const imageFolder = zip.folder('images');
-    const imageFiles: { [filename: string]: Blob } = {};
+    const otherFilesFolder = zip.folder('files');
+    const associatedFiles: { [filename: string]: Blob } = {};
+    const totalAssociatedFileCount = (exportData.files?.length || 0) + (exportData.otherFiles?.length || 0);
+    let processedAssociatedFileCount = 0;
+
+    const updateAssociatedFileProgress = () => {
+      if (totalAssociatedFileCount <= 0) {
+        return;
+      }
+
+      const progress = 50 + (processedAssociatedFileCount / totalAssociatedFileCount) * 30;
+      onProgress?.(progress);
+    };
+
     if (imageFolder && exportData.files) {
       for (let i = 0; i < exportData.files.length; i++) {
         const file = exportData.files[i];
@@ -180,18 +196,38 @@ export async function downloadCaseAsZip(
           if (imageBlob) {
             const exportFilename = generateExportFilename(file.fileData.originalFilename, file.fileData.id);
             imageFolder.file(exportFilename, imageBlob);
-            imageFiles[exportFilename] = imageBlob;
+            associatedFiles[`images/${exportFilename}`] = imageBlob;
           }
         } catch (error) {
           console.warn(`Failed to fetch image ${file.fileData.originalFilename}:`, error);
         }
-        onProgress?.(50 + (i / exportData.files.length) * 30);
+        processedAssociatedFileCount += 1;
+        updateAssociatedFileProgress();
+      }
+    }
+
+    if (otherFilesFolder && exportData.otherFiles && exportData.otherFiles.length > 0) {
+      for (let i = 0; i < exportData.otherFiles.length; i++) {
+        const file = exportData.otherFiles[i];
+        try {
+          const fileBlob = await fetchOtherFileAsBlob(user, file.fileData, caseNumber);
+          if (fileBlob) {
+            const exportFilename = generateExportFilename(file.fileData.originalFilename, file.fileData.id);
+            otherFilesFolder.file(exportFilename, fileBlob);
+            associatedFiles[`files/${exportFilename}`] = fileBlob;
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch associated file ${file.fileData.originalFilename}:`, error);
+        }
+
+        processedAssociatedFileCount += 1;
+        updateAssociatedFileProgress();
       }
     }
 
     const contentForHash = await generateJSONContent(exportData, options.includeUserInfo, false);
 
-    const forensicManifest = await generateForensicManifestSecure(contentForHash, imageFiles, caseNumber);
+    const forensicManifest = await generateForensicManifestSecure(contentForHash, associatedFiles, caseNumber);
 
     const signingResult = await signForensicManifest(user, caseNumber, forensicManifest);
     manifestSignatureKeyId = signingResult.signature.keyId;
@@ -218,7 +254,7 @@ export async function downloadCaseAsZip(
 
     try {
       const filesToEncrypt = [
-        ...Object.entries(imageFiles).map(([filename, blob]) => ({
+        ...Object.entries(associatedFiles).map(([filename, blob]) => ({
           filename,
           blob,
         })),
@@ -233,13 +269,15 @@ export async function downloadCaseAsZip(
 
       zip.file(`${caseNumber}_data.json`, encryptionResult.ciphertext);
 
-      if (encryptionResult.encryptedImages.length > 0) {
+      if (encryptionResult.encryptedFiles.length > 0) {
         for (let i = 0; i < filesToEncrypt.length; i++) {
           const originalFilename = filesToEncrypt[i].filename;
-          const encryptedContent = encryptionResult.encryptedImages[i];
+          const encryptedContent = encryptionResult.encryptedFiles[i];
 
-          if (imageFolder) {
-            imageFolder.file(originalFilename, encryptedContent);
+          if (originalFilename.startsWith('images/')) {
+            imageFolder?.file(originalFilename.replace(/^images\//, ''), encryptedContent);
+          } else if (originalFilename.startsWith('files/')) {
+            otherFilesFolder?.file(originalFilename.replace(/^files\//, ''), encryptedContent);
           }
         }
       }
@@ -266,6 +304,7 @@ IMPORTANT WARNINGS:
 Archive Contents:
 - ${caseNumber}_data.json: Complete case data manifest (encrypted)
 - images/: Image files with annotations (encrypted)
+- files/: Associated non-image files (encrypted)
 - FORENSIC_MANIFEST.json: File integrity validation manifest
 - ENCRYPTION_MANIFEST.json: Encryption metadata and encrypted file hashes
 - ${publicKeyFileName}: Public signing key PEM for verification
@@ -324,7 +363,7 @@ For questions about this export, contact your Striae system administrator.
       {
         processingTimeMs: endTime - startTime,
         fileSizeBytes: zipBlob.size,
-        validationStepsCompleted: exportData.files?.length || 0,
+        validationStepsCompleted: (exportData.files?.length || 0) + (exportData.otherFiles?.length || 0),
         validationStepsFailed: 0,
       },
       'zip',
@@ -402,6 +441,41 @@ async function fetchImageAsBlob(user: User, fileData: FileData, caseNumber: stri
   }
 }
 
+async function fetchOtherFileAsBlob(
+  user: User,
+  fileData: OtherFileData,
+  caseNumber: string
+): Promise<Blob | null> {
+  try {
+    const fileAccess = await getOtherFileUrl(user, fileData, caseNumber, 'Export Package');
+    const { blob, revoke, url } = fileAccess;
+
+    if (!blob) {
+      const signedResponse = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/octet-stream',
+        },
+      });
+
+      if (!signedResponse.ok) {
+        throw new Error(`Signed URL fetch failed with status ${signedResponse.status}`);
+      }
+
+      return await signedResponse.blob();
+    }
+
+    try {
+      return blob;
+    } finally {
+      revoke();
+    }
+  } catch (error) {
+    console.error('Failed to fetch associated file blob:', error);
+    return null;
+  }
+}
+
 /**
  * Generate README content for ZIP export with optional forensic protection
  */
@@ -410,7 +484,9 @@ function generateZipReadme(
   protectForensicData: boolean = true,
   publicKeyFileName: string = createPublicSigningKeyFileName()
 ): string {
-  const totalFiles = exportData.files?.length || 0;
+  const imageFileCount = exportData.files?.length || 0;
+  const otherFileCount = exportData.otherFiles?.length || 0;
+  const totalFiles = imageFileCount + otherFileCount;
   const filesWithAnnotations = exportData.summary?.filesWithAnnotations || 0;
   const totalBoxAnnotations = exportData.summary?.totalBoxAnnotations || 0;
   const totalAnnotations = filesWithAnnotations + totalBoxAnnotations;
@@ -432,8 +508,10 @@ Striae Export Schema Version: ${exportData.metadata.striaeExportSchemaVersion}
 
 Summary:
 - Total Files: ${totalFiles}
+- Image Files: ${imageFileCount}
+- Associated Non-Image Files: ${otherFileCount}
 - Files with Annotations: ${filesWithAnnotations}
-- Files without Annotations: ${totalFiles - filesWithAnnotations}
+- Files without Annotations: ${imageFileCount - filesWithAnnotations}
 - Total Box Annotations: ${totalBoxAnnotations}
 - Total Annotations: ${totalAnnotations}
 - Files with Confirmations: ${filesWithConfirmations}
@@ -444,6 +522,7 @@ Summary:
 Contents:
 - ${exportData.metadata.caseNumber}_data.json: Encrypted case data and annotations
 - images/: Encrypted uploaded images
+- files/: Encrypted associated non-image files
 - ${publicKeyFileName}: Public signing key PEM for verification
 - README.txt: This file`;
 

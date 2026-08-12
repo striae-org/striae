@@ -27,7 +27,9 @@ fi
 
 # Source the .env file
 echo -e "${YELLOW}📖 Loading environment variables from .env...${NC}"
+set -a
 source .env
+set +a
 
 is_admin_service_placeholder() {
     local value="$1"
@@ -270,13 +272,60 @@ build_images_worker_secret_list() {
     printf '%s\n' "${secrets[@]}"
 }
 
+build_files_worker_secret_list() {
+    local secrets=(
+        "DATA_AT_REST_ENCRYPTION_PUBLIC_KEY"
+        "DATA_AT_REST_ENCRYPTION_KEY_ID"
+        "FILES_SIGNED_URL_SECRET"
+        "REGISTRY_ENCRYPTION_KEY"
+    )
+
+    if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
+        secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")
+    fi
+
+    if [ -n "${FILES_SIGNED_URL_BASE_URL:-}" ]; then
+        secrets+=("FILES_SIGNED_URL_BASE_URL")
+    fi
+
+    if [ -n "${FILES_SIGNED_URL_TTL_SECONDS:-}" ]; then
+        secrets+=("FILES_SIGNED_URL_TTL_SECONDS")
+    fi
+
+    if [ -n "${FILES_UPLOAD_RATE_LIMIT_PER_MINUTE:-}" ]; then
+        secrets+=("FILES_UPLOAD_RATE_LIMIT_PER_MINUTE")
+    fi
+
+    if [ -n "${FILES_SIGNED_URL_RATE_LIMIT_PER_MINUTE:-}" ]; then
+        secrets+=("FILES_SIGNED_URL_RATE_LIMIT_PER_MINUTE")
+    fi
+
+    if [ -n "${FILES_DELETE_RATE_LIMIT_PER_MINUTE:-}" ]; then
+        secrets+=("FILES_DELETE_RATE_LIMIT_PER_MINUTE")
+    fi
+
+    if [ -n "${FILES_MALWARE_SCAN_HOOK_URL:-}" ]; then
+        secrets+=("FILES_MALWARE_SCAN_HOOK_URL")
+    fi
+
+    if [ -n "${FILES_MALWARE_SCAN_HOOK_TIMEOUT_MS:-}" ]; then
+        secrets+=("FILES_MALWARE_SCAN_HOOK_TIMEOUT_MS")
+    fi
+
+    if [ -n "${FILES_MALWARE_SCAN_HOOK_TOKEN:-}" ]; then
+        secrets+=("FILES_MALWARE_SCAN_HOOK_TOKEN")
+    fi
+
+    printf '%s\n' "${secrets[@]}"
+}
+
 # Deploy secrets to each worker
 echo -e "\n${BLUE}🔐 Deploying secrets to workers...${NC}"
 
 # Check if workers are configured
 echo -e "${YELLOW}🔍 Checking worker configurations...${NC}"
 workers_configured=0
-total_workers=6
+total_workers=7
 
 for worker_dir in workers/*/; do
     if [ -f "$worker_dir/wrangler.jsonc" ] || [ -f "$worker_dir/wrangler.toml" ]; then
@@ -334,6 +383,16 @@ if ! set_worker_secrets "Images Worker" "workers/image-worker" "${images_worker_
     echo -e "${YELLOW}⚠️  Skipping Images Worker (not configured)${NC}"
 fi
 
+# Files Worker
+files_worker_secrets=()
+while IFS= read -r secret; do
+    files_worker_secrets+=("$secret")
+done < <(build_files_worker_secret_list)
+
+if ! set_worker_secrets "Files Worker" "workers/files-worker" "${files_worker_secrets[@]}"; then
+    echo -e "${YELLOW}⚠️  Skipping Files Worker (not configured)${NC}"
+fi
+
 # PDF Worker
 if ! set_worker_secrets "PDF Worker" "workers/pdf-worker" \
     "ACCOUNT_ID" "BROWSER_API_TOKEN"; then
@@ -358,6 +417,7 @@ echo "   - Configure KV namespace ID in workers/user-worker/wrangler.jsonc"
 echo "   - Configure R2 bucket name in workers/data-worker/wrangler.jsonc"
 echo "   - Configure R2 bucket name in workers/audit-worker/wrangler.jsonc"
 echo "   - Configure R2 bucket name in workers/image-worker/wrangler.jsonc"
+echo "   - Configure R2 bucket name in workers/files-worker/wrangler.jsonc"
 echo "   - Configure KV namespace ID in workers/lists-worker/wrangler.jsonc"
 echo "   - Update ACCOUNT_ID and custom domains in all worker configurations"
 

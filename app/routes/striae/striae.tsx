@@ -16,10 +16,11 @@ import { generatePDF } from '~/components/actions/generate-pdf';
 import { exportConfirmationData } from '~/components/actions/confirm-export';
 import { CasesModal } from '~/components/navbar/case-modals/all-cases-modal';
 import { FilesModal } from '~/components/sidebar/files/files-modal';
+import { OtherFilesModal } from '~/components/navbar/other-files/other-files-modal';
 import { NotesEditorModal } from '~/components/sidebar/notes/notes-editor-modal';
 import { UserAuditViewer } from '~/components/audit/user-audit-viewer';
 import { fetchUserApi } from '~/utils/api';
-import { type AnnotationData, type FileData, type ExportOptions } from '~/types';
+import { type AnnotationData, type FileData, type OtherFileData, type ExportOptions } from '~/types';
 import { validateCaseNumber, renameCase, deleteCase, checkExistingCase, createNewCase, archiveCase, deriveCaseArchiveDetails } from '~/components/actions/case-manage';
 import { checkReadOnlyCaseExists, deleteReadOnlyCase } from '~/components/actions/case-review';
 import { canCreateCase, ensureCaseConfirmationSummary, getCaseData, getConfirmationSummaryDocument, type UserConfirmationSummaryDocument } from '~/utils/data';
@@ -60,6 +61,7 @@ export const Striae = ({ user }: StriaePage) => {
   // Case management states - All managed here
   const [currentCase, setCurrentCase] = useState<string>('');
   const [files, setFiles] = useState<FileData[]>([]);
+  const [otherFiles, setOtherFiles] = useState<OtherFileData[]>([]);
   const [showNotes, setShowNotes] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isReadOnlyCase, setIsReadOnlyCase] = useState(false);
@@ -91,6 +93,7 @@ export const Striae = ({ user }: StriaePage) => {
   const [isOpenCaseModalOpen, setIsOpenCaseModalOpen] = useState(false);
   const [isListCasesModalOpen, setIsListCasesModalOpen] = useState(false);
   const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
+  const [isOtherFilesModalOpen, setIsOtherFilesModalOpen] = useState(false);
 
   // Case management action states
   const [isRenamingCase, setIsRenamingCase] = useState(false);
@@ -136,6 +139,7 @@ export const Striae = ({ user }: StriaePage) => {
     setImageLoaded,
     setCurrentCase,
     setFiles,
+    setOtherFiles,
     setActiveAnnotations,
     setIsBoxAnnotationMode,
     setIsReadOnlyCase,
@@ -222,6 +226,7 @@ export const Striae = ({ user }: StriaePage) => {
         setIsReviewOnlyCase(false);
         setArchiveDetails({ archived: false });
         setFiles([]);
+        setOtherFiles([]);
         setInitialConfirmationSummary(undefined);
         return;
       }
@@ -244,6 +249,7 @@ export const Striae = ({ user }: StriaePage) => {
         setIsReadOnlyCase(reviewOnly || details.archived);
         setArchiveDetails(details);
         setFiles(caseData?.files ?? []);
+        setOtherFiles(caseData?.otherFiles ?? []);
         setInitialConfirmationSummary(summaryDoc ?? undefined);
         // Only show toast for loads triggered via loadCaseIntoWorkspace.
         // Direct setCurrentCase calls (e.g. case creation) handle their own notifications.
@@ -258,6 +264,7 @@ export const Striae = ({ user }: StriaePage) => {
         setIsReviewOnlyCase(false);
         setArchiveDetails({ archived: false });
         setFiles([]);
+        setOtherFiles([]);
         setInitialConfirmationSummary(undefined);
         if (loadInitiatedRef.current) {
           showNotification(`Failed to load case ${currentCase}. Please try again.`, 'error');
@@ -879,6 +886,7 @@ export const Striae = ({ user }: StriaePage) => {
           void handleClearROCase();
         }}
         onOpenViewAllFiles={() => setIsFilesModalOpen(true)}
+        onOpenOtherFiles={() => setIsOtherFilesModalOpen(true)}
         onDeleteCurrentFile={() => {
           void handleDeleteCurrentFileAction();
         }}
@@ -976,6 +984,15 @@ export const Striae = ({ user }: StriaePage) => {
         selectedFileId={imageId}
         confirmationSaveVersion={confirmationSaveVersion}
         initialConfirmationSummary={initialConfirmationSummary}
+      />
+      <OtherFilesModal
+        isOpen={isOtherFilesModalOpen}
+        onClose={() => setIsOtherFilesModalOpen(false)}
+        currentCase={currentCase || null}
+        otherFiles={otherFiles}
+        setOtherFiles={setOtherFiles}
+        isReadOnly={isReadOnlyCase}
+        isReviewOnlyCase={isReviewOnlyCase}
       />
       <NotesEditorModal
         isOpen={effectiveShowNotes}

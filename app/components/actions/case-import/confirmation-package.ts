@@ -14,7 +14,7 @@ function isEncryptionManifest(value: unknown): value is EncryptionManifest {
     typeof candidate.keyId === 'string' &&
     typeof candidate.wrappedKey === 'string' &&
     typeof candidate.dataIv === 'string' &&
-    Array.isArray(candidate.encryptedImages)
+    (Array.isArray(candidate.encryptedFiles) || Array.isArray(candidate.encryptedImages))
   );
 }
 

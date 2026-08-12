@@ -14,6 +14,7 @@ import { signAuditExport } from '~/services/audit/audit-export-signing';
 import { generateAuditSummary, sortAuditEntriesNewestFirst } from '~/services/audit/audit-query-helpers';
 import { auditService } from '~/services/audit';
 import { getImageUrl } from '../image-manage';
+import { getOtherFileUrl } from '../other-files-manage';
 
 export interface ArchiveBundleAuditConfig {
   startDate: string;
@@ -32,8 +33,10 @@ export interface BuildArchivePackageInput {
   caseNumber: string;
   caseJsonContent: string;
   files: CaseExportData['files'];
+  otherFiles?: NonNullable<CaseExportData['otherFiles']>;
   auditConfig: ArchiveBundleAuditConfig;
   readmeConfig: ArchiveBundleReadmeConfig;
+  onProgress?: (progress: number) => void;
 }
 
 export interface BuildArchivePackageResult {
@@ -102,19 +105,69 @@ async function fetchImageAsBlob(user: User, fileData: CaseExportData['files'][nu
   }
 }
 
+async function fetchOtherFileAsBlob(
+  user: User,
+  fileData: NonNullable<CaseExportData['otherFiles']>[number]['fileData'],
+  caseNumber: string
+): Promise<Blob | null> {
+  try {
+    const fileAccess = await getOtherFileUrl(user, fileData, caseNumber, 'Archive Package');
+    const { blob, revoke, url } = fileAccess;
+
+    if (!blob) {
+      const signedResponse = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/octet-stream',
+        },
+      });
+
+      if (!signedResponse.ok) {
+        throw new Error(`Signed URL fetch failed with status ${signedResponse.status}`);
+      }
+
+      return await signedResponse.blob();
+    }
+
+    try {
+      return blob;
+    } finally {
+      revoke();
+    }
+  } catch (error) {
+    console.error('Failed to fetch associated file for archive package:', error);
+    return null;
+  }
+}
+
 export async function buildArchivePackage(input: BuildArchivePackageInput): Promise<BuildArchivePackageResult> {
-  const { user, caseNumber, caseJsonContent, files, auditConfig, readmeConfig } = input;
+  const { user, caseNumber, caseJsonContent, files, otherFiles = [], auditConfig, readmeConfig, onProgress } = input;
 
   const JSZip = (await import('jszip')).default;
   const zip = new JSZip();
   zip.file(`${caseNumber}_data.json`, caseJsonContent);
 
   const imageFolder = zip.folder('images');
-  const imageBlobs: Record<string, Blob> = {};
+  const filesFolder = zip.folder('files');
+  const associatedBlobs: Record<string, Blob> = {};
+  const totalAssociatedFileCount = (files?.length || 0) + otherFiles.length;
+  let processedAssociatedFileCount = 0;
+
+  const updateAssociatedFileProgress = () => {
+    if (!onProgress || totalAssociatedFileCount <= 0) {
+      return;
+    }
+
+    const progress = 50 + (processedAssociatedFileCount / totalAssociatedFileCount) * 30;
+    onProgress(progress);
+  };
+
   if (imageFolder && files) {
     for (const fileEntry of files) {
       const imageBlob = await fetchImageAsBlob(user, fileEntry.fileData, caseNumber);
       if (!imageBlob) {
+        processedAssociatedFileCount += 1;
+        updateAssociatedFileProgress();
         continue;
       }
 
@@ -123,11 +176,33 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
         fileEntry.fileData.id
       );
       imageFolder.file(exportFileName, imageBlob);
-      imageBlobs[exportFileName] = imageBlob;
+      associatedBlobs[`images/${exportFileName}`] = imageBlob;
+      processedAssociatedFileCount += 1;
+      updateAssociatedFileProgress();
     }
   }
 
-  const forensicManifest = await generateForensicManifestSecure(caseJsonContent, imageBlobs, caseNumber);
+  if (filesFolder && otherFiles.length > 0) {
+    for (const fileEntry of otherFiles) {
+      const fileBlob = await fetchOtherFileAsBlob(user, fileEntry.fileData, caseNumber);
+      if (!fileBlob) {
+        processedAssociatedFileCount += 1;
+        updateAssociatedFileProgress();
+        continue;
+      }
+
+      const exportFileName = generateArchiveImageFilename(
+        fileEntry.fileData.originalFilename,
+        fileEntry.fileData.id
+      );
+      filesFolder.file(exportFileName, fileBlob);
+      associatedBlobs[`files/${exportFileName}`] = fileBlob;
+      processedAssociatedFileCount += 1;
+      updateAssociatedFileProgress();
+    }
+  }
+
+  const forensicManifest = await generateForensicManifestSecure(caseJsonContent, associatedBlobs, caseNumber);
   const manifestSigningResponse = await signForensicManifest(user, caseNumber, forensicManifest);
 
   const signingKey = getVerificationPublicSigningKey(manifestSigningResponse.signature.keyId);
@@ -222,7 +297,7 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
   }
 
   const filesToEncrypt: Array<{ filename: string; blob: Blob }> = [
-    ...Object.entries(imageBlobs).map(([filename, blob]) => ({
+    ...Object.entries(associatedBlobs).map(([filename, blob]) => ({
       filename,
       blob,
     })),
@@ -247,15 +322,20 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
 
   for (let index = 0; index < filesToEncrypt.length; index += 1) {
     const originalFilename = filesToEncrypt[index].filename;
-    const encryptedContent = encryptionResult.encryptedImages[index];
+    const encryptedContent = encryptionResult.encryptedFiles[index];
 
     if (originalFilename.startsWith('audit/')) {
       zip.file(originalFilename, encryptedContent);
       continue;
     }
 
-    if (imageFolder) {
-      imageFolder.file(originalFilename, encryptedContent);
+    if (originalFilename.startsWith('images/')) {
+      imageFolder?.file(originalFilename.replace(/^images\//, ''), encryptedContent);
+      continue;
+    }
+
+    if (originalFilename.startsWith('files/')) {
+      filesFolder?.file(originalFilename.replace(/^files\//, ''), encryptedContent);
     }
   }
 
@@ -275,9 +355,10 @@ export async function buildArchivePackage(input: BuildArchivePackageInput): Prom
       'Package Contents',
       '- Case data JSON export with all image references',
       '- images/ folder with exported image files (encrypted)',
+      '- files/ folder with exported associated non-image files (encrypted)',
       '- Full case audit trail export and signed audit metadata',
       '- Forensic manifest with server-side signature',
-      '- ENCRYPTION_MANIFEST.json with encryption metadata and encrypted image hashes',
+      '- ENCRYPTION_MANIFEST.json with encryption metadata and encrypted file hashes',
       `- ${publicKeyFileName} for verification`,
       '',
       'This package is intended for read-only review and verification workflows.',

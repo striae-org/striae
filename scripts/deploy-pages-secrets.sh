@@ -130,7 +130,9 @@ if [ ! -f ".env" ]; then
 fi
 
 echo -e "${YELLOW}📖 Loading environment variables from .env...${NC}"
+set -a
 source .env
+set +a
 
 load_required_project_id
 

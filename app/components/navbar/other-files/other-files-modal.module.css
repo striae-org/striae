@@ -1,0 +1,280 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal {
+  width: min(900px, 92vw);
+  max-height: 88vh;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #d5d9df;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #e0e5ec;
+}
+
+.closeButton {
+  border: none;
+  background: transparent;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.modalContent {
+  padding: 1rem;
+  overflow: auto;
+}
+
+.readOnlyNotice {
+  margin: 0 0 0.8rem;
+  color: #8a5a00;
+  background: #fff6e6;
+  border: 1px solid #f0d08f;
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+}
+
+.uploadArea {
+  border: 2px dashed #9aa8bc;
+  border-radius: 10px;
+  padding: 0.9rem;
+  margin-bottom: 0.8rem;
+  background: #f8fbff;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.uploadAreaDragging {
+  border-color: var(--primary);
+  background: color-mix(in lab, var(--primary) 10%, white);
+  box-shadow: 0 0 0 4px color-mix(in lab, var(--primary) 16%, transparent);
+  transform: translateY(-1px);
+}
+
+.uploadActions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.uploadHint {
+  margin: 0 0 0.5rem;
+  color: #3f4a57;
+  font-size: 0.9rem;
+}
+
+.statusText {
+  color: #2f4f7f;
+  font-size: 0.9rem;
+}
+
+.uploadProgressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: -0.15rem 0 0.9rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background-color: #e9ecef;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #198754;
+  transition: width 0.25s ease;
+}
+
+.uploadStatusContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.uploadingText {
+  font-size: 0.84rem;
+  color: var(--textBody);
+  font-weight: 600;
+}
+
+.fileCountText {
+  font-size: 0.76rem;
+  color: var(--textLight);
+}
+
+.currentFileName {
+  margin: 0;
+  color: #445062;
+  font-size: 0.84rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.errorText {
+  color: #9f1b1b;
+  margin: 0.5rem 0 0;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.countText {
+  margin: 0;
+  color: #475569;
+}
+
+.bulkSelectionActions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.filesList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #e0e5ec;
+  border-radius: 8px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.fileItem:last-child {
+  border-bottom: none;
+}
+
+.fileMeta {
+  min-width: 0;
+  flex: 1;
+}
+
+.fileName {
+  margin: 0;
+  font-weight: 600;
+  color: #1f2937;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileDetails {
+  margin: 0.2rem 0 0;
+  color: #5f6b7a;
+  font-size: 0.86rem;
+}
+
+.fileActions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.primaryButton {
+  background: var(--primary);
+  color: var(--white);
+  border: 1px solid var(--primary);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--primary) 85%, var(--black));
+  border-color: color-mix(in lab, var(--primary) 85%, var(--black));
+}
+
+.secondaryButton {
+  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+  background: var(--backgroundLight);
+  color: var(--textBody);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--background) 94%, transparent);
+}
+
+.deleteButton {
+  border-color: color-mix(in lab, var(--error) 28%, transparent);
+  color: var(--error);
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: color-mix(in lab, var(--error) 12%, var(--backgroundLight));
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.footerActions {
+  padding: 0.8rem 1rem;
+  border-top: 1px solid #e0e5ec;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.footerButtonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.emptyState {
+  margin: 0;
+  color: #596678;
+}

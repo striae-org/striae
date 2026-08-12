@@ -1,0 +1,21 @@
+{
+  "name": "files-worker",
+  "version": "9.1.1",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.121.0"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "sharp": true,
+    "workerd": true
+  },
+  "overrides": {
+    "undici": "7.29.0"
+  }
+}

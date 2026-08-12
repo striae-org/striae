@@ -158,7 +158,9 @@ fi
 
 # Source the .env file
 echo -e "${YELLOW}📖 Loading environment variables from .env...${NC}"
+set -a
 source .env
+set +a
 
 DEPLOY_CONFIG_MODULES_DIR="$SCRIPT_DIR/deploy-config/modules"
 DEPLOY_CONFIG_ENV_UTILS_MODULE="$DEPLOY_CONFIG_MODULES_DIR/env-utils.sh"

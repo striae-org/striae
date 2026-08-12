@@ -19,6 +19,7 @@ import { auditService } from '~/services/audit';
 import { loadCaseExportActions } from '~/utils/data/operations/case-export-loader';
 import { buildArchivePackage } from './archive-package-builder';
 import { deleteFileWithoutAudit } from './delete-helpers';
+import { deleteOtherFile } from '../other-files-manage';
 import { isReadOnlyCaseData, sortCaseNumbers, validateCaseNumber } from './utils';
 import { type CaseArchiveDetails, type DeleteCaseResult } from './types';
 
@@ -346,14 +347,16 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
     }
 
     // Store case info for audit logging
-    const fileCount = caseData.files?.length || 0;
+    const fileCount = (caseData.files?.length || 0) + (caseData.otherFiles?.length || 0);
     const caseName = caseData.caseNumber || caseNumber;
     
+    const files = caseData.files || [];
+    const associatedFiles = caseData.otherFiles || [];
+
     // Process file deletions in batches to reduce audit rate limiting
-    if (caseData.files && caseData.files.length > 0) {
+    if (files.length > 0 || associatedFiles.length > 0) {
       const BATCH_SIZE = 3; // Reduced batch size for better stability
       const BATCH_DELAY = 300; // Increased delay between batches
-      const files = caseData.files;
       const deletedFiles: Array<{id: string, originalFilename: string, fileSize: number}> = [];
       const failedFiles: Array<{id: string, originalFilename: string, error: string}> = [];
       const missingImages: string[] = [];
@@ -408,6 +411,50 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
         }
       }
       
+      if (associatedFiles.length > 0) {
+        const BATCH_SIZE = 3;
+        const BATCH_DELAY = 300;
+
+        console.log(`🗑️  Deleting ${associatedFiles.length} associated files in batches of ${BATCH_SIZE}...`);
+
+        for (let i = 0; i < associatedFiles.length; i += BATCH_SIZE) {
+          const batch = associatedFiles.slice(i, i + BATCH_SIZE);
+
+          await Promise.allSettled(
+            batch.map(async file => {
+              try {
+                const deleteResult = await deleteOtherFile(user, caseNumber, file.id, 'Case deletion cleanup', {
+                  suppressAudit: true,
+                  skipCaseDataUpdate: !!caseData.archived,
+                  skipValidation: !!caseData.archived,
+                });
+
+                if (deleteResult.fileMissing) {
+                  missingImages.push(deleteResult.fileName);
+                }
+
+                deletedFiles.push({
+                  id: file.id,
+                  originalFilename: file.originalFilename,
+                  fileSize: file.byteLength || 0,
+                });
+              } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                failedFiles.push({
+                  id: file.id,
+                  originalFilename: file.originalFilename,
+                  error: errorMessage,
+                });
+              }
+            })
+          );
+
+          if (i + BATCH_SIZE < associatedFiles.length) {
+            await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
+          }
+        }
+      }
+
       // Single consolidated audit entry for all file operations
       try {
         const endTime = Date.now();
@@ -424,7 +471,7 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
           caseNumber,
           caseDetails: {
             newCaseName: `${caseNumber} - Bulk file deletion`,
-            deleteReason: `Case deletion: processed ${files.length} files (${successCount} deleted, ${failureCount} failed)`,
+            deleteReason: `Case deletion: processed ${(files.length + associatedFiles.length)} files (${successCount} deleted, ${failureCount} failed)`,
             backupCreated: false,
             lastModified: new Date().toISOString()
           },
@@ -629,7 +676,7 @@ export const archiveCase = async (
         caseDetails: {
           newCaseName: caseNumber,
           archiveReason: archiveReason?.trim() || 'No reason provided',
-          totalFiles: archiveData.files?.length || 0,
+          totalFiles: (archiveData.files?.length || 0) + (archiveData.otherFiles?.length || 0),
           lastModified: archivedAt,
         },
         performanceMetrics: {
@@ -644,6 +691,7 @@ export const archiveCase = async (
       caseNumber,
       caseJsonContent,
       files: exportData.files,
+      otherFiles: exportData.otherFiles || [],
       auditConfig: {
         startDate: caseData.createdAt,
         endDate: archivedAt,
@@ -672,7 +720,7 @@ export const archiveCase = async (
       archiveReason?.trim() || 'No reason provided',
       'success',
       [],
-      archiveData.files?.length || 0,
+      (archiveData.files?.length || 0) + (archiveData.otherFiles?.length || 0),
       archivedAt,
       Date.now() - startTime
     );

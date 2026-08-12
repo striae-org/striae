@@ -23,7 +23,7 @@ prompt_for_secrets() {
     is_auto_generated_secret_var() {
         local var_name=$1
         case "$var_name" in
-            IMAGE_SIGNED_URL_SECRET|LISTS_ADMIN_SECRET)
+            IMAGE_SIGNED_URL_SECRET|FILES_SIGNED_URL_SECRET|LISTS_ADMIN_SECRET)
                 return 0
                 ;;
             *)
@@ -39,6 +39,9 @@ prompt_for_secrets() {
             IMAGE_SIGNED_URL_SECRET)
                 [ "$value" = "your_image_signed_url_secret_here" ]
                 ;;
+            FILES_SIGNED_URL_SECRET)
+                [ "$value" = "your_files_signed_url_secret_here" ]
+                ;;
             LISTS_ADMIN_SECRET)
                 [ "$value" = "your_lists_admin_secret_here" ]
                 ;;
@@ -51,7 +54,7 @@ prompt_for_secrets() {
     generate_secret_value() {
         local var_name=$1
         case "$var_name" in
-            IMAGE_SIGNED_URL_SECRET)
+            IMAGE_SIGNED_URL_SECRET|FILES_SIGNED_URL_SECRET)
                 openssl rand -base64 48 2>/dev/null | tr '+/' '-_' | tr -d '='
                 ;;
             *)
@@ -257,6 +260,10 @@ prompt_for_secrets() {
     [ -n "$_new" ] && { IMAGES_WORKER_NAME="$_new"; export IMAGES_WORKER_NAME; }
     prompt_for_var "IMAGES_WORKER_NAME" "Images worker name (auto-generated; change only if using an existing worker)"
 
+    _new=$(_gen_worker_name "FILES_WORKER_NAME")
+    [ -n "$_new" ] && { FILES_WORKER_NAME="$_new"; export FILES_WORKER_NAME; }
+    prompt_for_var "FILES_WORKER_NAME" "Files worker name (auto-generated; change only if using an existing worker)"
+
     _new=$(_gen_worker_name "PDF_WORKER_NAME")
     [ -n "$_new" ] && { PDF_WORKER_NAME="$_new"; export PDF_WORKER_NAME; }
     prompt_for_var "PDF_WORKER_NAME" "PDF worker name (auto-generated; change only if using an existing worker)"
@@ -290,6 +297,19 @@ prompt_for_secrets() {
     fi
     prompt_for_var "IMAGE_SIGNED_URL_BASE_URL" "Signed URL delivery base URL — routes signed image delivery through the Pages proxy (leave as-is unless using a non-standard domain)"
 
+    prompt_for_var "FILES_SIGNED_URL_SECRET" "Files signed URL secret (generate with: openssl rand -base64 48 | tr '+/' '-_' | tr -d '=')"
+
+    # Auto-derive FILES_SIGNED_URL_BASE_URL from PAGES_CUSTOM_DOMAIN if not yet set or still
+    # contains a placeholder-domain pattern (i.e. was expanded from .env.example at source time).
+    _current_files_base_url="${FILES_SIGNED_URL_BASE_URL:-}"
+    if [[ "$_current_files_base_url" =~ your_[a-z0-9_]+_here|your-[a-z0-9-]+-here ]] || [ -z "$_current_files_base_url" ]; then
+        if [ -n "${PAGES_CUSTOM_DOMAIN:-}" ] && ! is_placeholder "${PAGES_CUSTOM_DOMAIN:-}"; then
+            FILES_SIGNED_URL_BASE_URL="https://${PAGES_CUSTOM_DOMAIN}/api/files"
+            export FILES_SIGNED_URL_BASE_URL
+        fi
+    fi
+    prompt_for_var "FILES_SIGNED_URL_BASE_URL" "Signed URL delivery base URL — routes signed file delivery through the Pages proxy (leave as-is unless using a non-standard domain)"
+
     prompt_for_var "BROWSER_API_TOKEN" "Cloudflare Browser Rendering API token (for PDF Worker)"
     prompt_for_var "LISTS_ADMIN_SECRET" "Lists worker admin secret — guards write endpoints (auto-generated; guards POST/DELETE on the lists-worker)"
 
@@ -300,7 +320,9 @@ prompt_for_secrets() {
     configure_registry_encryption_key
 
     # Reload the updated .env file
+    set -a
     source .env
+    set +a
 
     echo -e "${GREEN}🎉 Environment variables setup completed!${NC}"
     echo -e "${BLUE}📄 All values saved to .env file${NC}"

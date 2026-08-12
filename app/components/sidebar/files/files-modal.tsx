@@ -256,7 +256,7 @@ export const FilesModal = ({
     if (!targetFile) {
       setActionNotice({
         type: 'error',
-        message: 'Selected file is no longer available.',
+        message: 'Selected image is no longer available.',
       });
       return;
     }
@@ -316,17 +316,17 @@ export const FilesModal = ({
     if (failedFiles.length > 0) {
       setActionNotice({
         type: 'warning',
-        message: `Deleted ${deletedIds.length} file(s). Failed: ${failedFiles.join(', ')}`,
+        message: `Deleted ${deletedIds.length} image(s). Failed: ${failedFiles.join(', ')}`,
       });
     } else if (missingImages > 0) {
       setActionNotice({
         type: 'warning',
-        message: `Deleted ${deletedIds.length} file(s). ${missingImages} image asset(s) were missing and skipped.`,
+        message: `Deleted ${deletedIds.length} image(s). ${missingImages} image asset(s) were missing and skipped.`,
       });
     } else {
       setActionNotice({
         type: 'success',
-        message: `Deleted ${deletedIds.length} file(s) successfully.`,
+        message: `Deleted ${deletedIds.length} image(s) successfully.`,
       });
     }
 
@@ -340,21 +340,21 @@ export const FilesModal = ({
   }
 
   return (
-    <div className={styles.modalOverlay} aria-label="Close files dialog" {...overlayProps}>
+    <div className={styles.modalOverlay} aria-label="Close images dialog" {...overlayProps}>
       <div className={styles.modal}>
         <header className={styles.modalHeader}>
-          <h2>File Management {currentCase ? `- ${currentCase}` : ''}</h2>
-          <button className={styles.closeButton} {...getCloseButtonProps({ ariaLabel: 'Close files dialog' })}>
+          <h2>Image Management {currentCase ? `- ${currentCase}` : ''}</h2>
+          <button className={styles.closeButton} {...getCloseButtonProps({ ariaLabel: 'Close images dialog' })}>
             ×
           </button>
         </header>
 
         <div className={styles.modalContent}>
           {files.length === 0 ? (
-            <p className={styles.emptyState}>No files found in this case</p>
+            <p className={styles.emptyState}>No images found in this case</p>
           ) : (
             <>
-              <section className={styles.controlsSection} aria-label="File list controls">
+              <section className={styles.controlsSection} aria-label="Image list controls">
                 <div className={styles.controlGroup}>
                   <label htmlFor="files-sort">Sort</label>
                   <select
@@ -366,7 +366,7 @@ export const FilesModal = ({
                     }}
                   >
                     <option value="recent">Date Uploaded</option>
-                    <option value="filename">File Name</option>
+                    <option value="filename">Image Name</option>
                     <option value="confirmation">Confirmation Status</option>
                     <option value="itemType">Item Type</option>
                   </select>
@@ -422,7 +422,7 @@ export const FilesModal = ({
               </section>
 
               <div className={styles.searchSection}>
-                <label htmlFor="file-search">Search file name</label>
+                <label htmlFor="file-search">Search image name</label>
                 <input
                   id="file-search"
                   type="text"
@@ -431,13 +431,13 @@ export const FilesModal = ({
                     setSearchQuery(event.target.value);
                     setCurrentPage(0);
                   }}
-                  placeholder="Type to filter files"
+                  placeholder="Type to filter images"
                   className={styles.searchInput}
                 />
               </div>
 
               <p className={styles.fileCount}>
-                {visibleFiles.length} shown of {files.length} total files
+                {visibleFiles.length} shown of {files.length} total images
               </p>
 
               {actionNotice && (
@@ -455,7 +455,7 @@ export const FilesModal = ({
               )}
 
               {visibleFiles.length === 0 ? (
-                <p className={styles.emptyState}>No files match your filters</p>
+                <p className={styles.emptyState}>No images match your filters</p>
               ) : (
                 <ul className={styles.filesList}>
                   {paginatedFiles.map((file) => {
@@ -555,7 +555,7 @@ export const FilesModal = ({
             onClick={handleOpenSelectedFile}
             disabled={!effectiveOpenSelectedFileId || isDeletingSelected}
           >
-            Open Selected File
+            Open Selected Image
           </button>
 
           {totalPages > 1 && (
@@ -567,7 +567,7 @@ export const FilesModal = ({
                 Previous
               </button>
               <span>
-                {effectiveCurrentPage + 1} of {totalPages} ({visibleFiles.length} filtered files)
+                {effectiveCurrentPage + 1} of {totalPages} ({visibleFiles.length} filtered images)
               </span>
               <button
                 onClick={() => setCurrentPage((previous) => Math.min(totalPages - 1, previous + 1))}

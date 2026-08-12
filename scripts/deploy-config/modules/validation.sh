@@ -95,6 +95,7 @@ required_vars=(
     "DATA_WORKER_NAME"
     "AUDIT_WORKER_NAME"
     "IMAGES_WORKER_NAME"
+    "FILES_WORKER_NAME"
     "PDF_WORKER_NAME"
     "LISTS_WORKER_NAME"
 
@@ -108,6 +109,7 @@ required_vars=(
 
     # Worker-Specific Secrets (required for deployment)
     "IMAGE_SIGNED_URL_SECRET"
+    "FILES_SIGNED_URL_SECRET"
     "BROWSER_API_TOKEN"
     "MANIFEST_SIGNING_PRIVATE_KEY"
     "MANIFEST_SIGNING_KEY_ID"
@@ -248,11 +250,13 @@ validate_generated_configs() {
         "workers/audit-worker/wrangler.jsonc"
         "workers/data-worker/wrangler.jsonc"
         "workers/image-worker/wrangler.jsonc"
+        "workers/files-worker/wrangler.jsonc"
         "workers/pdf-worker/wrangler.jsonc"
         "workers/user-worker/wrangler.jsonc"
         "workers/audit-worker/src/audit-worker.ts"
         "workers/data-worker/src/data-worker.ts"
         "workers/image-worker/src/image-worker.ts"
+        "workers/files-worker/src/files-worker.ts"
         "workers/pdf-worker/src/pdf-worker.ts"
         "workers/user-worker/src/user-worker.ts"
     )
@@ -271,12 +275,14 @@ validate_generated_configs() {
     assert_contains_literal "workers/data-worker/wrangler.jsonc" "$DATA_WORKER_NAME" "DATA_WORKER_NAME was not applied"
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$AUDIT_WORKER_NAME" "AUDIT_WORKER_NAME was not applied"
     assert_contains_literal "workers/image-worker/wrangler.jsonc" "$IMAGES_WORKER_NAME" "IMAGES_WORKER_NAME was not applied"
+    assert_contains_literal "workers/files-worker/wrangler.jsonc" "$FILES_WORKER_NAME" "FILES_WORKER_NAME was not applied"
     assert_contains_literal "workers/pdf-worker/wrangler.jsonc" "$PDF_WORKER_NAME" "PDF_WORKER_NAME was not applied"
 
     assert_contains_literal "workers/user-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in user worker config"
     assert_contains_literal "workers/data-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in data worker config"
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in audit worker config"
     assert_contains_literal "workers/image-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in image worker config"
+    assert_contains_literal "workers/files-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in files worker config"
     assert_contains_literal "workers/pdf-worker/wrangler.jsonc" "$ACCOUNT_ID" "ACCOUNT_ID missing in pdf worker config"
 
     assert_contains_literal "workers/data-worker/wrangler.jsonc" "$DATA_BUCKET_NAME" "DATA_BUCKET_NAME missing in data worker config"
@@ -285,6 +291,8 @@ validate_generated_configs() {
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$CONFIG_BUCKET_NAME" "CONFIG_BUCKET_NAME missing in audit worker config"
     assert_contains_literal "workers/image-worker/wrangler.jsonc" "$FILES_BUCKET_NAME" "FILES_BUCKET_NAME missing in image worker config"
     assert_contains_literal "workers/image-worker/wrangler.jsonc" "$CONFIG_BUCKET_NAME" "CONFIG_BUCKET_NAME missing in image worker config"
+    assert_contains_literal "workers/files-worker/wrangler.jsonc" "$FILES_BUCKET_NAME" "FILES_BUCKET_NAME missing in files worker config"
+    assert_contains_literal "workers/files-worker/wrangler.jsonc" "$CONFIG_BUCKET_NAME" "CONFIG_BUCKET_NAME missing in files worker config"
     assert_contains_literal "workers/user-worker/wrangler.jsonc" "$KV_STORE_ID" "KV_STORE_ID missing in user worker config"
     assert_contains_literal "workers/user-worker/wrangler.jsonc" "$DATA_BUCKET_NAME" "DATA_BUCKET_NAME missing in user worker config"
     assert_contains_literal "workers/user-worker/wrangler.jsonc" "$FILES_BUCKET_NAME" "FILES_BUCKET_NAME missing in user worker config"
@@ -303,13 +311,14 @@ validate_generated_configs() {
     assert_contains_literal "app/config/firebase.ts" "$MEASUREMENT_ID" "MEASUREMENT_ID missing in app/config/firebase.ts"
 
     local placeholder_pattern
-    placeholder_pattern="(\"(ACCOUNT_ID|PAGES_PROJECT_NAME|PAGES_CUSTOM_DOMAIN|USER_WORKER_NAME|DATA_WORKER_NAME|AUDIT_WORKER_NAME|IMAGES_WORKER_NAME|PDF_WORKER_NAME|DATA_BUCKET_NAME|AUDIT_BUCKET_NAME|FILES_BUCKET_NAME|CONFIG_BUCKET_NAME|KV_STORE_ID|MANIFEST_SIGNING_KEY_ID|MANIFEST_SIGNING_PUBLIC_KEY|EXPORT_ENCRYPTION_KEY_ID|EXPORT_ENCRYPTION_PUBLIC_KEY|YOUR_FIREBASE_API_KEY|YOUR_FIREBASE_AUTH_DOMAIN|YOUR_FIREBASE_PROJECT_ID|YOUR_FIREBASE_STORAGE_BUCKET|YOUR_FIREBASE_MESSAGING_SENDER_ID|YOUR_FIREBASE_APP_ID|YOUR_FIREBASE_MEASUREMENT_ID)\")"
+    placeholder_pattern="(\"(ACCOUNT_ID|PAGES_PROJECT_NAME|PAGES_CUSTOM_DOMAIN|USER_WORKER_NAME|DATA_WORKER_NAME|AUDIT_WORKER_NAME|IMAGES_WORKER_NAME|FILES_WORKER_NAME|PDF_WORKER_NAME|DATA_BUCKET_NAME|AUDIT_BUCKET_NAME|FILES_BUCKET_NAME|CONFIG_BUCKET_NAME|KV_STORE_ID|MANIFEST_SIGNING_KEY_ID|MANIFEST_SIGNING_PUBLIC_KEY|EXPORT_ENCRYPTION_KEY_ID|EXPORT_ENCRYPTION_PUBLIC_KEY|YOUR_FIREBASE_API_KEY|YOUR_FIREBASE_AUTH_DOMAIN|YOUR_FIREBASE_PROJECT_ID|YOUR_FIREBASE_STORAGE_BUCKET|YOUR_FIREBASE_MESSAGING_SENDER_ID|YOUR_FIREBASE_APP_ID|YOUR_FIREBASE_MEASUREMENT_ID)\")"
 
     local files_to_scan=(
         "wrangler.toml"
         "workers/audit-worker/wrangler.jsonc"
         "workers/data-worker/wrangler.jsonc"
         "workers/image-worker/wrangler.jsonc"
+        "workers/files-worker/wrangler.jsonc"
         "workers/pdf-worker/wrangler.jsonc"
         "workers/user-worker/wrangler.jsonc"
         "app/config/config.json"

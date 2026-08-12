@@ -347,9 +347,9 @@ return (
             className={styles.filesModalButton}
             onClick={() => setIsFilesModalOpen(true)}
             disabled={files.length === 0 || isUploading}
-            title={isUploading ? "Cannot view files while uploading" : files.length === 0 ? "No files to view" : "View all files in modal"}
+            title={isUploading ? "Cannot view images while uploading" : files.length === 0 ? "No images to view" : "View all images in modal"}
           >
-            View All Files ({files.length})
+            View All Images ({files.length})
           </button>
         </div>
       )}
@@ -357,7 +357,7 @@ return (
       {currentCase ? (
         <ul className={styles.fileList}>
           {files.length === 0 ? (
-            <li className={styles.fileListMessage}>No files found for {currentCase}</li>
+            <li className={styles.fileListMessage}>No images found for {currentCase}</li>
           ) : (
             files.map((file) => {
               const confirmationStatus = fileConfirmationStatus[file.id];
@@ -377,18 +377,18 @@ return (
                       onClick={() => handleImageSelect(file)}
                       onKeyDown={(e) => e.key === 'Enter' && handleImageSelect(file)}
                       disabled={isUploading}
-                      title={isUploading ? "Cannot select files while uploading" : undefined}
+                      title={isUploading ? "Cannot select images while uploading" : undefined}
                     >
                     <span className={styles.fileName}>{file.originalFilename}</span>
                   </button>
                   <button
                     onClick={() => {
-                      if (window.confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
+                      if (window.confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
                         handleFileDelete(file.id);
                       }
                     }}
                     className={styles.deleteButton}
-                    aria-label="Delete file"
+                    aria-label="Delete image"
                     disabled={isReadOnly || deletingFileId === file.id || isUploading}
                     style={{ opacity: (isReadOnly || isUploading) ? 0.5 : 1, cursor: (isReadOnly || isUploading) ? 'not-allowed' : 'pointer' }}
                     title={isUploading ? "Cannot delete while uploading" : undefined}
@@ -401,7 +401,7 @@ return (
           )}
         </ul>
       ) : (
-        <div className={styles.fileListPlaceholder}>Select a case to view files</div>
+        <div className={styles.fileListPlaceholder}>Select a case to view images</div>
       )}
     </div>
     <div className={styles.sidebarToggle}>

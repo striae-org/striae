@@ -107,18 +107,26 @@ function isEncryptionManifest(value: unknown): value is EncryptionManifest {
     typeof candidate.keyId === 'string' &&
     typeof candidate.wrappedKey === 'string' &&
     typeof candidate.dataIv === 'string' &&
-    Array.isArray(candidate.encryptedImages)
+    (Array.isArray(candidate.encryptedFiles) || Array.isArray(candidate.encryptedImages))
   );
+}
+
+async function loadZipArchive(zipFile: File) {
+  const JSZip = (await import('jszip')).default;
+  const zipSource = typeof zipFile.arrayBuffer === 'function'
+    ? await zipFile.arrayBuffer()
+    : zipFile;
+
+  return JSZip.loadAsync(zipSource);
 }
 
 /**
  * Preview case information from ZIP file without importing
  */
 export async function previewCaseImport(zipFile: File, currentUser: User): Promise<CaseImportPreview> {
-  const JSZip = (await import('jszip')).default;
   
   try {
-    const zip = await JSZip.loadAsync(zipFile);
+    const zip = await loadZipArchive(zipFile);
 
     // Check if export is encrypted
     const encryptionManifestFile = zip.file('ENCRYPTION_MANIFEST.json');
@@ -272,15 +280,12 @@ export async function parseImportZip(zipFile: File): Promise<{
   packagedVerificationPublicKeyPem?: string;
   encryptionManifest?: Record<string, unknown>; // Optional: decryption metadata
   encryptedDataBase64?: string; // Optional: encrypted data file content (base64url)
-  encryptedImages?: { [filename: string]: string }; // Optional: encrypted image files (filename -> base64url)
+  encryptedFiles?: { [filename: string]: string }; // Optional: encrypted files (filename -> base64url)
   isEncrypted?: boolean;
   dataFileName?: string; // The encrypted data file name (leaf), for post-decrypt case number validation
 }> {
-  // Dynamic import of JSZip to avoid bundle size issues
-  const JSZip = (await import('jszip')).default;
-  
   try {
-    const zip = await JSZip.loadAsync(zipFile);
+    const zip = await loadZipArchive(zipFile);
     const packagedVerificationPublicKeyPem = await extractPackagedVerificationPublicKeyFromZip(zip);
     
     // Find the main data file (JSON)
@@ -308,7 +313,7 @@ export async function parseImportZip(zipFile: File): Promise<{
 
     let encryptionManifest: Record<string, unknown>;
     let encryptedDataBase64: string;
-    const encryptedImages: { [filename: string]: string } = {};
+    const encryptedFiles: { [filename: string]: string } = {};
     const imageIdMapping: { [exportFilename: string]: string } = {};
     const isEncrypted = true;
 
@@ -329,16 +334,17 @@ export async function parseImportZip(zipFile: File): Promise<{
         encryptedDataBase64 = uint8ArrayToBase64Url(dataContent);
 
         // Extract encrypted files referenced by encrypted export payloads
-        const encryptedImagePromises: Promise<[string, string]>[] = [];
+        const encryptedFilePromises: Promise<[string, string]>[] = [];
         
         const fileList = Object.keys(zip.files);
         for (const filePath of fileList) {
           const isImageFile = filePath.startsWith('images/') && filePath !== 'images/';
+          const isAssociatedFile = filePath.startsWith('files/') && filePath !== 'files/';
           const isBundledAuditFile =
             filePath === 'audit/case-audit-trail.json' ||
             filePath === 'audit/case-audit-signature.json';
 
-          if ((!isImageFile && !isBundledAuditFile) || filePath.endsWith('/')) {
+          if ((!isImageFile && !isAssociatedFile && !isBundledAuditFile) || filePath.endsWith('/')) {
             continue;
           }
           
@@ -347,31 +353,31 @@ export async function parseImportZip(zipFile: File): Promise<{
             continue;
           }
           
-          const filename = isImageFile ? filePath.replace(/^images\//, '') : filePath;
+          const imageFilename = isImageFile ? filePath.replace(/^images\//, '') : filePath;
 
           if (isImageFile) {
-            const originalImageId = extractImageIdFromFilename(filename);
+            const originalImageId = extractImageIdFromFilename(imageFilename);
             if (originalImageId) {
-              imageIdMapping[filename] = originalImageId;
+              imageIdMapping[imageFilename] = originalImageId;
             }
           }
 
-          encryptedImagePromises.push((async () => {
+          encryptedFilePromises.push((async () => {
             try {
               const encryptedBlob = await file.async('uint8array');
               // Convert to base64url (chunked to avoid stack overflow)
               const encryptedBase64Url = uint8ArrayToBase64Url(encryptedBlob);
-              return [filename, encryptedBase64Url] as [string, string];
+              return [filePath, encryptedBase64Url] as [string, string];
             } catch (err) {
-              throw new Error(`Failed to extract encrypted image ${filename}: ${err instanceof Error ? err.message : 'Unknown error'}`, { cause: err });
+              throw new Error(`Failed to extract encrypted file ${filePath}: ${err instanceof Error ? err.message : 'Unknown error'}`, { cause: err });
             }
           })());
         }
         
         // Wait for all image conversions
-        const encryptedImageResults = await Promise.all(encryptedImagePromises);
-        for (const [filename, data] of encryptedImageResults) {
-          encryptedImages[filename] = data;
+        const encryptedFileResults = await Promise.all(encryptedFilePromises);
+        for (const [filename, data] of encryptedFileResults) {
+          encryptedFiles[filename] = data;
         }
 
         // For encrypted exports, data file will be processed after decryption
@@ -409,7 +415,7 @@ export async function parseImportZip(zipFile: File): Promise<{
       packagedVerificationPublicKeyPem,
       encryptionManifest,
       encryptedDataBase64,
-      encryptedImages: Object.keys(encryptedImages).length > 0 ? encryptedImages : undefined,
+      encryptedFiles: Object.keys(encryptedFiles).length > 0 ? encryptedFiles : undefined,
       isEncrypted,
       dataFileName
     };

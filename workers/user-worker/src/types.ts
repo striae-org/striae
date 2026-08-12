@@ -70,11 +70,15 @@ export interface UserData {
 }
 
 export interface StoredCaseFileData {
-  id: string;
+  id?: unknown;
+  fileData?: {
+    id?: unknown;
+  };
 }
 
 export interface StoredCaseData {
   files?: StoredCaseFileData[];
+  otherFiles?: StoredCaseFileData[];
 }
 
 export interface UserRequestData {

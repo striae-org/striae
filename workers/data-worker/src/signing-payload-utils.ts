@@ -1,7 +1,7 @@
 export interface ForensicManifestPayload {
   caseNumber: string;
   dataHash: string;
-  imageHashes: { [filename: string]: string };
+  fileHashes: { [filename: string]: string };
   manifestHash: string;
   totalFiles: number;
   createdAt: string;
@@ -61,15 +61,31 @@ export const FORENSIC_MANIFEST_SIGNATURE_ALGORITHM = 'RSASSA-PSS-SHA-256';
 
 const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
 
-function normalizeImageHashes(imageHashes: { [filename: string]: string }): { [filename: string]: string } {
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Object.prototype.toString.call(value) === '[object Object]';
+}
+
+function normalizeFileHashes(fileHashes: { [filename: string]: string }): { [filename: string]: string } {
   const normalized: { [filename: string]: string } = {};
-  const sortedFilenames = Object.keys(imageHashes).sort();
+  const sortedFilenames = Object.keys(fileHashes).sort();
 
   for (const filename of sortedFilenames) {
-    normalized[filename] = imageHashes[filename].toLowerCase();
+    normalized[filename] = fileHashes[filename].toLowerCase();
   }
 
   return normalized;
+}
+
+function getCandidateFileHashes(candidate: Partial<ForensicManifestPayload> & { imageHashes?: unknown }): Record<string, string> | null {
+  if (candidate.fileHashes && isPlainObject(candidate.fileHashes)) {
+    return candidate.fileHashes as Record<string, string>;
+  }
+
+  if (candidate.imageHashes && isPlainObject(candidate.imageHashes)) {
+    return candidate.imageHashes as Record<string, string>;
+  }
+
+  return null;
 }
 
 function hasValidConfirmationRecord(entry: Partial<ConfirmationRecord>): entry is ConfirmationRecord {
@@ -86,7 +102,7 @@ function hasValidConfirmationRecord(entry: Partial<ConfirmationRecord>): entry i
   );
 }
 
-export function isValidManifestPayload(candidate: Partial<ForensicManifestPayload>): candidate is ForensicManifestPayload {
+export function isValidManifestPayload(candidate: Partial<ForensicManifestPayload> & { imageHashes?: unknown }): candidate is ForensicManifestPayload {
   if (!candidate) {
     return false;
   }
@@ -99,11 +115,12 @@ export function isValidManifestPayload(candidate: Partial<ForensicManifestPayloa
     return false;
   }
 
-  if (!candidate.imageHashes || typeof candidate.imageHashes !== 'object') {
+  const fileHashes = getCandidateFileHashes(candidate);
+  if (!fileHashes) {
     return false;
   }
 
-  for (const hash of Object.values(candidate.imageHashes)) {
+  for (const hash of Object.values(fileHashes)) {
     if (typeof hash !== 'string' || !SHA256_HEX_REGEX.test(hash)) {
       return false;
     }
@@ -233,7 +250,7 @@ export function createManifestSigningPayload(manifest: ForensicManifestPayload):
     manifestVersion: FORENSIC_MANIFEST_VERSION,
     caseNumber: manifest.caseNumber,
     dataHash: manifest.dataHash.toLowerCase(),
-    imageHashes: normalizeImageHashes(manifest.imageHashes),
+    fileHashes: normalizeFileHashes(manifest.fileHashes),
     manifestHash: manifest.manifestHash.toLowerCase(),
     totalFiles: manifest.totalFiles,
     createdAt: manifest.createdAt
@@ -246,7 +263,7 @@ export function createLegacyManifestSigningPayload(manifest: Omit<ForensicManife
   const canonicalPayload = {
     manifestVersion: FORENSIC_MANIFEST_LEGACY_VERSION,
     dataHash: manifest.dataHash.toLowerCase(),
-    imageHashes: normalizeImageHashes(manifest.imageHashes),
+    fileHashes: normalizeFileHashes(manifest.fileHashes),
     manifestHash: manifest.manifestHash.toLowerCase(),
     totalFiles: manifest.totalFiles,
     createdAt: manifest.createdAt
