@@ -17,6 +17,8 @@ interface OtherFilesModalProps {
 }
 
 const MAX_OTHER_FILE_SIZE = 100 * 1024 * 1024;
+const OTHER_FILES_PER_PAGE = 10;
+const UNKNOWN_FILE_TYPE = '__unknown__';
 
 function formatDate(value: string): string {
   const parsed = Date.parse(value);
@@ -38,6 +40,17 @@ function formatBytes(value?: number): string {
   }
 
   return `${mb.toFixed(2)} MB`;
+}
+
+function getLocalDateKey(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 function triggerDownload(url: string, filename: string): void {
@@ -71,6 +84,10 @@ export const OtherFilesModal = ({
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(() => new Set());
   const [isDownloadingSelected, setIsDownloadingSelected] = useState(false);
   const [isDeletingSelected, setIsDeletingSelected] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [fileNameFilter, setFileNameFilter] = useState('');
+  const [fileTypeFilter, setFileTypeFilter] = useState('');
+  const [uploadedDateFilter, setUploadedDateFilter] = useState('');
 
   const {
     overlayProps,
@@ -85,6 +102,29 @@ export const OtherFilesModal = ({
   const selectedFiles = useMemo(
     () => otherFiles.filter((file) => selectedFileIds.has(file.id)),
     [otherFiles, selectedFileIds]
+  );
+  const availableFileTypes = useMemo(
+    () => Array.from(new Set(otherFiles.map((file) => file.contentType || UNKNOWN_FILE_TYPE))).sort(),
+    [otherFiles]
+  );
+  const filteredFiles = useMemo(() => {
+    const normalizedName = fileNameFilter.trim().toLowerCase();
+
+    return otherFiles.filter((file) => {
+      const fileType = file.contentType || UNKNOWN_FILE_TYPE;
+
+      return (
+        (!normalizedName || file.originalFilename.toLowerCase().includes(normalizedName)) &&
+        (!fileTypeFilter || fileType === fileTypeFilter) &&
+        (!uploadedDateFilter || getLocalDateKey(file.uploadedAt) === uploadedDateFilter)
+      );
+    });
+  }, [fileNameFilter, fileTypeFilter, otherFiles, uploadedDateFilter]);
+  const totalPages = Math.max(1, Math.ceil(filteredFiles.length / OTHER_FILES_PER_PAGE));
+  const effectiveCurrentPage = Math.min(currentPage, totalPages - 1);
+  const paginatedFiles = filteredFiles.slice(
+    effectiveCurrentPage * OTHER_FILES_PER_PAGE,
+    (effectiveCurrentPage + 1) * OTHER_FILES_PER_PAGE
   );
 
   const canWrite = !isReadOnly && !isReviewOnlyCase;
@@ -422,18 +462,82 @@ export const OtherFilesModal = ({
           )}
 
           <div className={styles.controls}>
-            <p className={styles.countText}>{otherFiles.length} associated file{otherFiles.length === 1 ? '' : 's'}</p>
+            <p className={styles.countText}>{filteredFiles.length} shown of {otherFiles.length} associated file{otherFiles.length === 1 ? '' : 's'}</p>
             <div className={styles.bulkSelectionActions}>
               <button type="button" className={styles.secondaryButton} onClick={selectAll} disabled={otherFiles.length === 0}>Select All</button>
               <button type="button" className={styles.secondaryButton} onClick={clearSelected} disabled={selectedFileIds.size === 0}>Clear</button>
             </div>
           </div>
 
+          {otherFiles.length > 0 && (
+            <section className={styles.filterControls} aria-label="Associated file filters">
+              <label className={styles.filterField} htmlFor="associated-files-name-filter">
+                File Name
+                <input
+                  id="associated-files-name-filter"
+                  type="search"
+                  value={fileNameFilter}
+                  onChange={(event) => {
+                    setFileNameFilter(event.target.value);
+                    setCurrentPage(0);
+                  }}
+                  placeholder="Filter by file name"
+                />
+              </label>
+              <label className={styles.filterField} htmlFor="associated-files-type-filter">
+                File Type
+                <select
+                  id="associated-files-type-filter"
+                  value={fileTypeFilter}
+                  onChange={(event) => {
+                    setFileTypeFilter(event.target.value);
+                    setCurrentPage(0);
+                  }}
+                >
+                  <option value="">All types</option>
+                  {availableFileTypes.map((fileType) => (
+                    <option key={fileType} value={fileType}>
+                      {fileType === UNKNOWN_FILE_TYPE ? 'Unknown' : fileType}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={styles.filterField} htmlFor="associated-files-date-filter">
+                Date Uploaded
+                <input
+                  id="associated-files-date-filter"
+                  type="date"
+                  value={uploadedDateFilter}
+                  onChange={(event) => {
+                    setUploadedDateFilter(event.target.value);
+                    setCurrentPage(0);
+                  }}
+                />
+              </label>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={() => {
+                  setFileNameFilter('');
+                  setFileTypeFilter('');
+                  setUploadedDateFilter('');
+                  setCurrentPage(0);
+                }}
+                disabled={!fileNameFilter && !fileTypeFilter && !uploadedDateFilter}
+              >
+                Reset Filters
+              </button>
+            </section>
+          )}
+
           {otherFiles.length === 0 ? (
             <p className={styles.emptyState}>No associated files found for this case.</p>
+          ) : filteredFiles.length === 0 ? (
+            <p className={styles.emptyState}>No associated files match the selected filters.</p>
           ) : (
-            <ul className={styles.filesList}>
-              {otherFiles.map((file) => {
+            <>
+              <ul className={styles.filesList}>
+                {paginatedFiles.map((file) => {
                 const checked = selectedFileIds.has(file.id);
 
                 return (
@@ -476,8 +580,32 @@ export const OtherFilesModal = ({
                     </div>
                   </li>
                 );
-              })}
-            </ul>
+                })}
+              </ul>
+              {totalPages > 1 && (
+                <nav className={styles.pagination} aria-label="Associated files pagination">
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    onClick={() => setCurrentPage(Math.max(0, effectiveCurrentPage - 1))}
+                    disabled={effectiveCurrentPage === 0}
+                  >
+                    Previous
+                  </button>
+                  <span aria-live="polite">
+                    Page {effectiveCurrentPage + 1} of {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    onClick={() => setCurrentPage(Math.min(totalPages - 1, effectiveCurrentPage + 1))}
+                    disabled={effectiveCurrentPage === totalPages - 1}
+                  >
+                    Next
+                  </button>
+                </nav>
+              )}
+            </>
           )}
         </div>
 

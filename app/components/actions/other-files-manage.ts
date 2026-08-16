@@ -13,6 +13,7 @@ import type {
   OtherFileData,
 } from '~/types';
 import { auditService } from '~/services/audit';
+import { getAuditFileTypeFromMime } from '~/services/audit/audit-file-type';
 
 const MAX_OTHER_FILE_SIZE = 100 * 1024 * 1024;
 
@@ -66,6 +67,21 @@ export const uploadOtherFile = async (
       validationErrors: ['Read-only cases allow download only for associated files']
     });
     throw new Error('Read-only cases allow download only for associated files');
+  }
+
+  const modifyPermission = await canModifyCase(user, caseNumber);
+  if (!modifyPermission.allowed) {
+    await auditService.logEvent({
+      userId: user.uid,
+      userEmail: user.email || '',
+      action: 'file-upload',
+      result: 'blocked',
+      fileName: file.name,
+      fileType: getAuditFileTypeFromMime(file.type),
+      caseNumber,
+      validationErrors: [modifyPermission.reason || 'You do not have permission to modify this case'],
+    });
+    throw new Error(modifyPermission.reason || 'You do not have permission to modify this case');
   }
 
   const permission = await canUploadFile(
@@ -160,7 +176,7 @@ export const deleteOtherFile = async (
       throw new Error('Case not found');
     }
 
-    if (caseData.isReadOnly) {
+    if (caseData.isReadOnly && options.skipValidation !== true) {
       if (options.suppressAudit !== true) {
         await auditService.logEvent({
           userId: user.uid,
