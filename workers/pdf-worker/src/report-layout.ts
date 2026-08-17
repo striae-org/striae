@@ -5,7 +5,9 @@ interface ReportChromeTemplateConfig {
   headerCenter?: string;
   headerRight?: string;
   headerDetailLeft?: string;
+  headerDetailLeftLabel?: string;
   headerDetailRight?: string;
+  headerDetailRightLabel?: string;
   footerLeft?: string;
   footerCenter?: string;
   footerRight?: string;
@@ -66,9 +68,19 @@ const HEADER_TEMPLATE_STYLES = `
     .report-header__detail {
       flex: 1 1 0;
       min-width: 0;
+    }
+    .report-header__detail-label {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .report-header__detail-value {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 700;
+      color: #333333;
+      margin-top: 2px;
     }
     .report-header__detail--left {
       text-align: left;
@@ -157,6 +169,18 @@ function renderTemplateCell(value: string | undefined, className: string): strin
   return `<div class="${className}">${content}</div>`;
 }
 
+function renderDetailCell(label: string | undefined, value: string | undefined, className: string): string {
+  if (!value || value.trim().length === 0) {
+    return `<div class="${className}">&nbsp;</div>`;
+  }
+
+  const labelContent = label && label.trim().length > 0
+    ? `<div class="report-header__detail-label">${escapeHtml(label.trim())}</div>`
+    : '';
+
+  return `<div class="${className}">${labelContent}<div class="report-header__detail-value">${escapeHtml(value.trim())}</div></div>`;
+}
+
 export function buildRepeatedChromePdfOptions(config: ReportChromeTemplateConfig): Partial<ReportPdfOptions> {
   const hasHeaderDetails = Boolean(
     (config.headerDetailLeft && config.headerDetailLeft.trim().length > 0) ||
@@ -166,8 +190,8 @@ export function buildRepeatedChromePdfOptions(config: ReportChromeTemplateConfig
   const headerDetails = hasHeaderDetails
     ? `
       <div class="report-header__details">
-        ${renderTemplateCell(config.headerDetailLeft, 'report-header__detail report-header__detail--left')}
-        ${renderTemplateCell(config.headerDetailRight, 'report-header__detail report-header__detail--right')}
+        ${renderDetailCell(config.headerDetailLeftLabel, config.headerDetailLeft, 'report-header__detail report-header__detail--left')}
+        ${renderDetailCell(config.headerDetailRightLabel, config.headerDetailRight, 'report-header__detail report-header__detail--right')}
       </div>
     `
     : '';
@@ -220,7 +244,7 @@ export function buildRepeatedChromePdfOptions(config: ReportChromeTemplateConfig
     headerTemplate,
     footerTemplate,
     margin: {
-      top: hasHeaderDetails ? '1.45in' : '1.15in',
+      top: hasHeaderDetails ? '1.6in' : '1.15in',
       bottom: '0.8in',
     },
   };
