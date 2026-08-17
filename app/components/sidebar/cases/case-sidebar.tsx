@@ -158,8 +158,7 @@ export const CaseSidebar = ({
             next[fileId] = { includeConfirmation: false, isConfirmed: false };
           });
           return next;
-        });
-        return;
+        });        
       }
 
       const caseSummary = await ensureCaseConfirmationSummary(

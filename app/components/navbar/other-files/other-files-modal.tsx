@@ -53,6 +53,14 @@ function getLocalDateKey(value: string): string {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
+function getFileExtension(filename: string): string {
+  const lastDot = filename.lastIndexOf('.');
+  if (lastDot === -1) {
+    return UNKNOWN_FILE_TYPE;
+  }
+  return filename.substring(lastDot).toLowerCase();
+}
+
 function triggerDownload(url: string, filename: string): void {
   const link = document.createElement('a');
   link.href = url;
@@ -104,18 +112,18 @@ export const OtherFilesModal = ({
     [otherFiles, selectedFileIds]
   );
   const availableFileTypes = useMemo(
-    () => Array.from(new Set(otherFiles.map((file) => file.contentType || UNKNOWN_FILE_TYPE))).sort(),
+    () => Array.from(new Set(otherFiles.map((file) => getFileExtension(file.originalFilename)))).sort(),
     [otherFiles]
   );
   const filteredFiles = useMemo(() => {
     const normalizedName = fileNameFilter.trim().toLowerCase();
 
     return otherFiles.filter((file) => {
-      const fileType = file.contentType || UNKNOWN_FILE_TYPE;
+      const fileExtension = getFileExtension(file.originalFilename);
 
       return (
         (!normalizedName || file.originalFilename.toLowerCase().includes(normalizedName)) &&
-        (!fileTypeFilter || fileType === fileTypeFilter) &&
+        (!fileTypeFilter || fileExtension === fileTypeFilter) &&
         (!uploadedDateFilter || getLocalDateKey(file.uploadedAt) === uploadedDateFilter)
       );
     });
@@ -142,7 +150,7 @@ export const OtherFilesModal = ({
   };
 
   const selectAll = () => {
-    setSelectedFileIds(new Set(otherFiles.map((file) => file.id)));
+    setSelectedFileIds(new Set(paginatedFiles.map((file) => file.id)));
   };
 
   const clearSelected = () => {
@@ -464,7 +472,7 @@ export const OtherFilesModal = ({
           <div className={styles.controls}>
             <p className={styles.countText}>{filteredFiles.length} shown of {otherFiles.length} associated file{otherFiles.length === 1 ? '' : 's'}</p>
             <div className={styles.bulkSelectionActions}>
-              <button type="button" className={styles.secondaryButton} onClick={selectAll} disabled={otherFiles.length === 0}>Select All</button>
+              <button type="button" className={styles.secondaryButton} onClick={selectAll} disabled={paginatedFiles.length === 0}>Select All Visible</button>
               <button type="button" className={styles.secondaryButton} onClick={clearSelected} disabled={selectedFileIds.size === 0}>Clear</button>
             </div>
           </div>

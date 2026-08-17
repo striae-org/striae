@@ -542,10 +542,10 @@ export const getPdfOptions: ReportPdfOptionsBuilder = (data: PDFGenerationData) 
     headerLeft: data.currentDate,
     headerRight: data.caseNumber,
     headerDetailLeft: [data.annotationData?.leftCase, data.annotationData?.leftItem, data.annotationData?.leftMagnification].filter(Boolean).join(' / ')
-      ? `Left Case / Item: ${[data.annotationData?.leftCase, data.annotationData?.leftItem, data.annotationData?.leftMagnification].filter(Boolean).join(' / ')}`
+      ? `Left Case / Item / (Mag X): ${[data.annotationData?.leftCase, data.annotationData?.leftItem, data.annotationData?.leftMagnification].filter(Boolean).join(' / ')}`
       : undefined,
     headerDetailRight: [data.annotationData?.rightCase, data.annotationData?.rightItem, data.annotationData?.rightMagnification].filter(Boolean).join(' / ')
-      ? `Right Case / Item: ${[data.annotationData?.rightCase, data.annotationData?.rightItem, data.annotationData?.rightMagnification].filter(Boolean).join(' / ')}`
+      ? `Right Case / Item / (Mag X): ${[data.annotationData?.rightCase, data.annotationData?.rightItem, data.annotationData?.rightMagnification].filter(Boolean).join(' / ')}`
       : undefined,
     footerLeft: 'Notes formatted by Striae',
     footerCenter: data.userCompany,
