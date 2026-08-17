@@ -20,6 +20,13 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-16] - *[Patch Release v10.0.1](https://github.com/striae-org/striae/releases/tag/v10.0.1)* — *Magnification + Other-File Management Refinements*
+
+- **🔍 Magnification Field** - Added magnification input fields and carried magnification data through case export and PDF report output.
+- **📁 Other-File Management Refinements** - Improved the other-file management modal, filtering, display, and related file actions for clearer case-scoped file handling.
+- **🧾 Confirmation Summary Display Fix** - Fixed confirmation summary updates so current confirmation data displays reliably after case changes and confirmation operations.
+- **⚙️ Dependency and Deployment Maintenance** - Refreshed dependency metadata, compatibility-date examples, and deployment configuration while aligning package and worker versions at v10.0.1.
+
 ## [2026-08-11] - *[Major Release v10.0.0](https://github.com/striae-org/striae/releases/tag/v10.0.0)* — *Files Worker + Non-Image File Management*
 
 - **🗂️ Files Worker and Storage Architecture** - Added a dedicated `files-worker` and integrated it into deployment scaffolding, environment validation, and worker configuration so associated non-image files have a dedicated storage layer.

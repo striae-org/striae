@@ -11,6 +11,7 @@ interface ImageUploadZoneProps {
   canUploadNewFile: boolean;
   uploadFileError: string;
   onFilesChanged: (files: FileData[]) => void;
+  onFileUploaded?: (file: FileData) => void;
   onUploadPermissionCheck?: (fileCount: number) => Promise<void>;
   currentFiles: FileData[];
   onUploadStatusChange?: (isUploading: boolean) => void;
@@ -34,6 +35,7 @@ export const ImageUploadZone = ({
   canUploadNewFile,
   uploadFileError,
   onFilesChanged,
+  onFileUploaded,
   onUploadPermissionCheck,
   currentFiles,
   onUploadStatusChange,
@@ -120,6 +122,7 @@ export const ImageUploadZone = ({
       const updatedFiles = [...currentFilesList, uploadedFile];
       
       if (isMountedRef.current) {
+        onFileUploaded?.(uploadedFile);
         onFilesChanged(updatedFiles);
         if (fileInputRef.current) fileInputRef.current.value = '';
       }

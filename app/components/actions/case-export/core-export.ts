@@ -82,6 +82,8 @@ export async function exportCaseData(
           annotations.rightCase ||
           annotations.leftItem ||
           annotations.rightItem ||
+          annotations.leftMagnification ||
+          annotations.rightMagnification ||
           annotations.leftItemType ||
           annotations.rightItemType ||
           annotations.supportLevel ||

@@ -28,6 +28,8 @@ export interface AnnotationData {
   leftItem?: string;
   rightCase?: string;
   rightItem?: string;
+  leftMagnification?: string;
+  rightMagnification?: string;
 
   // Box annotations
   boxAnnotations?: BoxAnnotation[];

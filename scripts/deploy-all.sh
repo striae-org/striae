@@ -7,7 +7,7 @@
 # 1. Configuration setup (copy configs, replace placeholders)
 # 2. Worker dependencies installation
 # 3. Wrangler types generation
-# 4. Workers (all 6 workers)
+# 4. Workers (all 7 workers)
 # 5. Key registries (upload to R2 config bucket)
 # 6. Worker secrets/environment variables
 # 7. Pages secrets/environment variables
@@ -137,7 +137,7 @@ if ! npm run deploy-workers; then
     echo -e "${RED}❌ Worker deployment failed!${NC}"
     exit 1
 fi
-echo -e "${GREEN}✅ All workers deployed successfully${NC}"
+echo -e "${GREEN}✅ All 7 workers deployed successfully${NC}"
 echo ""
 
 # Step 5: Upload Key Registries to R2
@@ -196,7 +196,7 @@ echo ""
 echo -e "${BLUE}Deployed Components:${NC}"
 echo "  ✅ Worker dependencies (npm install)"
 echo "  ✅ Wrangler types (root + all workers)"
-echo "  ✅ 6 Cloudflare Workers"
+echo "  ✅ 7 Cloudflare Workers"
 echo "  ✅ Worker environment variables"
 echo "  ✅ Pages environment variables"
 echo "  ✅ Cloudflare Pages frontend"

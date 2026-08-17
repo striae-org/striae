@@ -74,6 +74,8 @@ export interface AnnotationData {
   rightCase: string;
   leftItem: string;
   rightItem: string;
+  leftMagnification?: string;
+  rightMagnification?: string;
   caseFontColor?: string;
   // Left item class characteristics
   leftItemType?: ItemType;

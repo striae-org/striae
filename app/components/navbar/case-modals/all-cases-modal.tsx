@@ -237,19 +237,27 @@ export const CasesModal = ({
 
   const effectiveFocusedIndex = paginatedCases.length === 0 ? 0 : Math.min(focusedIndex, paginatedCases.length - 1);
 
-  const hydrateCaseConfirmationStatuses = useCallback(async (caseNumbers: string[]) => {
-    const missingCaseNumbers = caseNumbers.filter(
-      (caseNum) => !caseConfirmationStatusRef.current[caseNum]
-    );
+  const hydrateCaseConfirmationStatuses = useCallback(async (
+    caseNumbers: string[],
+    forceRefresh = false
+  ) => {
+    const caseNumbersToHydrate = forceRefresh
+      ? caseNumbers
+      : caseNumbers.filter((caseNum) => !caseConfirmationStatusRef.current[caseNum]);
 
-    if (missingCaseNumbers.length === 0) {
+    if (caseNumbersToHydrate.length === 0) {
       return;
     }
 
-    const caseStatusPromises = missingCaseNumbers.map(async (caseNum) => {
+    const caseStatusPromises = caseNumbersToHydrate.map(async (caseNum) => {
       try {
         const files = await fetchFiles(user, caseNum);
-        const caseSummary = await ensureCaseConfirmationSummary(user, caseNum, files);
+        const caseSummary = await ensureCaseConfirmationSummary(
+          user,
+          caseNum,
+          files,
+          forceRefresh ? { forceRefresh: true } : undefined
+        );
 
         return {
           caseNum,
@@ -291,11 +299,10 @@ export const CasesModal = ({
         return;
       }
 
-      // Use the pre-fetched summary if available and no confirmation saves have
-      // been made since case load (confirmationSaveVersion === 0). When saves
-      // have occurred the summary may be stale, so re-fetch from the data worker.
+      // Use the pre-fetched summary when available. Save-version changes are
+      // handled below by rebuilding every listed case from its annotations.
       const summary =
-        initialConfirmationSummary && confirmationSaveVersion === 0
+        initialConfirmationSummary
           ? initialConfirmationSummary
           : await getConfirmationSummaryDocument(user).catch((err) => {
               console.error('Failed to load confirmation summary:', err);
@@ -322,7 +329,18 @@ export const CasesModal = ({
     return () => {
       isCancelled = true;
     };
-  }, [isOpen, user, confirmationSaveVersion, initialConfirmationSummary]);
+  }, [isOpen, user, initialConfirmationSummary]);
+
+  useEffect(() => {
+    if (!isOpen || confirmationSaveVersion === 0 || allCases.length === 0) {
+      return;
+    }
+
+    void hydrateCaseConfirmationStatuses(
+      allCases.map((entry) => entry.caseNumber),
+      true
+    );
+  }, [isOpen, confirmationSaveVersion, allCases, hydrateCaseConfirmationStatuses]);
 
   useEffect(() => {
     if (!isOpen || paginatedCases.length === 0) {

@@ -1,6 +1,6 @@
 import type { User } from 'firebase/auth';
 import type React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import styles from './cases.module.css';
 import { FilesModal } from '../files/files-modal';
 import { ImageUploadZone } from '../upload/image-upload-zone';
@@ -73,6 +73,7 @@ export const CaseSidebar = ({
     includeConfirmation: boolean;
     isConfirmed: boolean;
   }>({ includeConfirmation: false, isConfirmed: false });
+  const uploadedFileIdsRef = useRef(new Set<string>());
 
   const fileIdsKey = useMemo(
     () => files.map((file) => file.id).sort().join('|'),
@@ -98,6 +99,10 @@ export const CaseSidebar = ({
       setUploadFileError('');
     }
   }, [currentCase, files.length, user]);
+
+  const handleFileUploaded = useCallback((file: FileData) => {
+    uploadedFileIdsRef.current.add(file.id);
+  }, []);
 
   // Check file upload permissions when currentCase or files change.
   useEffect(() => {
@@ -140,6 +145,20 @@ export const CaseSidebar = ({
           setCaseConfirmationStatus({ includeConfirmation: false, isConfirmed: false });
         }
         return;
+      }
+
+      const uploadedFileIds = files
+        .map((file) => file.id)
+        .filter((fileId) => uploadedFileIdsRef.current.delete(fileId));
+
+      if (uploadedFileIds.length > 0) {
+        setFileConfirmationStatus((previous) => {
+          const next = { ...previous };
+          uploadedFileIds.forEach((fileId) => {
+            next[fileId] = { includeConfirmation: false, isConfirmed: false };
+          });
+          return next;
+        });        
       }
 
       const caseSummary = await ensureCaseConfirmationSummary(
@@ -333,6 +352,7 @@ return (
           canUploadNewFile={canUploadNewFile}
           uploadFileError={fileError || uploadFileError}
           onFilesChanged={setFiles}
+          onFileUploaded={handleFileUploaded}
           onUploadPermissionCheck={checkFileUploadPermissions}
           currentFiles={files}
           onUploadStatusChange={onUploadStatusChange}
