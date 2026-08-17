@@ -28,6 +28,8 @@ interface NotesFormSnapshot {
   rightCase: string;
   leftItem: string;
   rightItem: string;
+  leftMagnification: string;
+  rightMagnification: string;
   caseFontColor: string;
   // Left item class characteristics
   leftItemType: ItemType | '';
@@ -103,6 +105,8 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
   const [rightCase, setRightCase] = useState('');
   const [leftItem, setLeftItem] = useState('');
   const [rightItem, setRightItem] = useState('');
+  const [leftMagnification, setLeftMagnification] = useState('');
+  const [rightMagnification, setRightMagnification] = useState('');
   const [useCurrentCaseLeft, setUseCurrentCaseLeft] = useState(false);
   const [useCurrentCaseRight, setUseCurrentCaseRight] = useState(false);
   const [caseFontColor, setCaseFontColor] = useState('');
@@ -224,6 +228,8 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
         rightCase,
         leftItem,
         rightItem,
+        leftMagnification,
+        rightMagnification,
         caseFontColor,
         leftItemType,
         leftCustomClass,
@@ -270,6 +276,7 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
     leftHasSubclass,
     leftItemType,
     leftItem,
+    leftMagnification,
     leftShotshellData,
     rightBulletData,
     rightCartridgeCaseData,
@@ -279,6 +286,7 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
     rightHasSubclass,
     rightItemType,
     rightItem,
+    rightMagnification,
     rightShotshellData,
     caseFontColor,
     savedSnapshot,
@@ -310,6 +318,8 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
           setRightCase(existingNotes.rightCase);
           setLeftItem(existingNotes.leftItem);
           setRightItem(existingNotes.rightItem);
+          setLeftMagnification(existingNotes.leftMagnification || '');
+          setRightMagnification(existingNotes.rightMagnification || '');
           setCaseFontColor(existingNotes.caseFontColor || '');
           
           // Migration: if old single-set fields exist, map to left item; otherwise use new left/right fields
@@ -353,6 +363,8 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
             rightCase: existingNotes.rightCase || '',
             leftItem: existingNotes.leftItem || '',
             rightItem: existingNotes.rightItem || '',
+            leftMagnification: existingNotes.leftMagnification || '',
+            rightMagnification: existingNotes.rightMagnification || '',
             caseFontColor: existingNotes.caseFontColor || '',
             leftItemType: migratedLeftItemType,
             leftCustomClass: migratedLeftCustomClass,
@@ -385,6 +397,8 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
             rightCase: '',
             leftItem: '',
             rightItem: '',
+            leftMagnification: '',
+            rightMagnification: '',
             caseFontColor: '',
             leftItemType: '',
             leftCustomClass: '',
@@ -474,6 +488,8 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
         rightCase: rightCase || '',
         leftItem: leftItem || '',
         rightItem: rightItem || '',
+        leftMagnification: leftMagnification || undefined,
+        rightMagnification: rightMagnification || undefined,
         caseFontColor: caseFontColor || undefined,
         
         // Left item class characteristics
@@ -542,6 +558,8 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
         rightCase,
         leftItem,
         rightItem,
+        leftMagnification,
+        rightMagnification,
         caseFontColor,
         leftItemType,
         leftCustomClass,
@@ -621,6 +639,7 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
     isReadOnly,
     leftCase,
     leftItem,
+    leftMagnification,
     notificationHandler,
     onAnnotationRefresh,
     onDirtyChange,
@@ -633,6 +652,7 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
     rightHasSubclass,
     rightItemType,
     rightItem,
+    rightMagnification,
     rightShotshellData,
     leftShotshellData,
     leftAdditionalNotes,
@@ -709,6 +729,16 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
                 disabled={areEditsDisabled}
               />
             </div>
+            <div className={styles.caseInput}>
+              <label htmlFor="leftMagnification">Left Side Magnification</label>
+              <input
+                id="leftMagnification"
+                type="text"
+                value={leftMagnification}
+                onChange={(e) => setLeftMagnification(e.target.value)}
+                disabled={areEditsDisabled}
+              />
+            </div>
           </div>
           {/* Right side inputs */}
           <div className={styles.inputGroup}>
@@ -739,6 +769,16 @@ export const NotesEditorForm = ({ currentCase, user, imageId, onAnnotationRefres
                 type="text"
                 value={rightItem}
                 onChange={(e) => setRightItem(e.target.value)}
+                disabled={areEditsDisabled}
+              />
+            </div>
+            <div className={styles.caseInput}>
+              <label htmlFor="rightMagnification">Right Side Magnification</label>
+              <input
+                id="rightMagnification"
+                type="text"
+                value={rightMagnification}
+                onChange={(e) => setRightMagnification(e.target.value)}
                 disabled={areEditsDisabled}
               />
             </div>            

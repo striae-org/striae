@@ -405,6 +405,7 @@ export const Canvas = ({
                 <div className={styles.caseText}>
                   {annotationData.leftCase}
                   {annotationData.leftItem && ` ${annotationData.leftItem}`}
+                  {annotationData.leftMagnification && ` ${annotationData.leftMagnification}`}
                 </div>
               </div>
               
@@ -420,6 +421,7 @@ export const Canvas = ({
                 <div className={styles.caseText}>
                   {annotationData.rightCase}
                   {annotationData.rightItem && ` ${annotationData.rightItem}`}
+                  {annotationData.rightMagnification && ` ${annotationData.rightMagnification}`}
                 </div>
               </div>
             </div>

@@ -396,12 +396,12 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
         <div class="annotations-overlay">
           <div class="left-annotation" style="${needsLightBackground(annotationData.caseFontColor || '#FFDE21') ? 'background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(0, 0, 0, 0.2); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);' : ''}">
             <div class="case-text" style="color: ${annotationData.caseFontColor || '#FFDE21'};">
-              ${safeText(annotationData.leftCase)}${annotationData.leftItem ? ` ${safeText(annotationData.leftItem)}` : ''}
+              ${safeText(annotationData.leftCase)}${annotationData.leftItem ? ` ${safeText(annotationData.leftItem)}` : ''}${annotationData.leftMagnification ? ` ${safeText(annotationData.leftMagnification)}` : ''}
             </div>
           </div>
           <div class="right-annotation" style="${needsLightBackground(annotationData.caseFontColor || '#FFDE21') ? 'background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(0, 0, 0, 0.2); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);' : ''}">
             <div class="case-text" style="color: ${annotationData.caseFontColor || '#FFDE21'};">
-              ${safeText(annotationData.rightCase)}${annotationData.rightItem ? ` ${safeText(annotationData.rightItem)}` : ''}
+              ${safeText(annotationData.rightCase)}${annotationData.rightItem ? ` ${safeText(annotationData.rightItem)}` : ''}${annotationData.rightMagnification ? ` ${safeText(annotationData.rightMagnification)}` : ''}
             </div>
           </div>
         </div>
@@ -541,11 +541,11 @@ export const getPdfOptions: ReportPdfOptionsBuilder = (data: PDFGenerationData) 
   return buildRepeatedChromePdfOptions({
     headerLeft: data.currentDate,
     headerRight: data.caseNumber,
-    headerDetailLeft: [data.annotationData?.leftCase, data.annotationData?.leftItem].filter(Boolean).join(' / ')
-      ? `Left Case / Item: ${[data.annotationData?.leftCase, data.annotationData?.leftItem].filter(Boolean).join(' / ')}`
+    headerDetailLeft: [data.annotationData?.leftCase, data.annotationData?.leftItem, data.annotationData?.leftMagnification].filter(Boolean).join(' / ')
+      ? `Left Case / Item: ${[data.annotationData?.leftCase, data.annotationData?.leftItem, data.annotationData?.leftMagnification].filter(Boolean).join(' / ')}`
       : undefined,
-    headerDetailRight: [data.annotationData?.rightCase, data.annotationData?.rightItem].filter(Boolean).join(' / ')
-      ? `Right Case / Item: ${[data.annotationData?.rightCase, data.annotationData?.rightItem].filter(Boolean).join(' / ')}`
+    headerDetailRight: [data.annotationData?.rightCase, data.annotationData?.rightItem, data.annotationData?.rightMagnification].filter(Boolean).join(' / ')
+      ? `Right Case / Item: ${[data.annotationData?.rightCase, data.annotationData?.rightItem, data.annotationData?.rightMagnification].filter(Boolean).join(' / ')}`
       : undefined,
     footerLeft: 'Notes formatted by Striae',
     footerCenter: data.userCompany,
