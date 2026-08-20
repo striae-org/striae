@@ -48,7 +48,7 @@ export interface ConfirmationSummaryTelemetry {
 }
 
 export const CONFIRMATION_SUMMARY_VERSION = 1;
-export const DEFAULT_CONFIRMATION_SUMMARY_MAX_AGE_MS = 5 * 60 * 1000;
+export const DEFAULT_CONFIRMATION_SUMMARY_MAX_AGE_MS = 60 * 60 * 1000;
 
 const CONFIRMATION_SUMMARY_LOG_INTERVAL = 25;
 
