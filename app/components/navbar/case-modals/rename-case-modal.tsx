@@ -75,7 +75,7 @@ export const RenameCaseModal = ({
             Warning: Renaming a case will obviate the existing audit trail until it is renamed back to the original case number.
           </p>
           <p>
-            Consider the impact on chain of custody and audit trail before renaming this case.
+            Consider the impact on the chain of custody and audit trail before renaming this case.
           </p>
         </div>
 
