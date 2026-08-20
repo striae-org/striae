@@ -551,7 +551,7 @@ export async function importCaseForReview(
         const originalFileEntry = caseData.files.find(f => f.fileData.id === originalImageId);
         const originalFilename = originalFileEntry?.fileData.originalFilename || exportFilename;
         
-        const fileData = await uploadImageBlob(user, blob, originalFilename, (fname, progress) => {
+        const fileData = await uploadImageBlob(user, blob, originalFilename, originalFileEntry?.fileData.uploadedAt, (fname, progress) => {
           const overallProgress = 30 + (uploadedImageCount / totalImages) * 40 + (progress / totalImages) * 0.4;
           const uploadedTotal = uploadedImageCount + uploadedOtherCount;
           onProgress?.('Uploading files', overallProgress, `Uploading ${fname} (${uploadedTotal + 1}/${totalFilesToUpload})...`);
@@ -588,7 +588,7 @@ export async function importCaseForReview(
           const originalFileEntry = originalFileId ? originalOtherFileById.get(originalFileId) : undefined;
           const originalFilename = originalFileEntry?.originalFilename || exportFilename;
 
-          const fileData = await uploadOtherFileBlob(user, blob, originalFilename, (fname, progress) => {
+          const fileData = await uploadOtherFileBlob(user, blob, originalFilename, originalFileEntry?.uploadedAt, (fname, progress) => {
             const overallProgress = 71 + (uploadedOtherCount / totalOtherFiles) * 4 + (progress / totalOtherFiles) * 0.04;
             const uploadedTotal = uploadedImageCount + uploadedOtherCount;
             onProgress?.('Uploading files', overallProgress, `Uploading ${fname} (${uploadedTotal + 1}/${totalFilesToUpload})...`);
