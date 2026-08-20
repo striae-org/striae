@@ -69,6 +69,16 @@ export const RenameCaseModal = ({
         </button>
         <h3 className={styles.title}>Rename Case</h3>
         <p className={styles.subtitle}>Current case: {currentCase}</p>
+
+        <div className={styles.warningPanel}>
+          <p>
+            Warning: Renaming a case will obviate the existing audit trail until it is renamed back to the original case number.
+          </p>
+          <p>
+            Consider the impact on chain of custody and audit trail before renaming this case.
+          </p>
+        </div>
+
         <input
           ref={inputRef}
           type="text"
