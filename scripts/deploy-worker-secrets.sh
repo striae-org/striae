@@ -142,7 +142,6 @@ build_audit_worker_secret_list() {
     )
 
     # Private keys are now fetched from encrypted R2 registries.
-    # DATA_AT_REST_ENCRYPTION_ENABLED is not checked in audit-worker code.
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_PUBLIC_KEY:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_PUBLIC_KEY")
@@ -254,10 +253,6 @@ build_data_worker_secret_list() {
 
     if [ -n "${MANIFEST_SIGNING_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("MANIFEST_SIGNING_ACTIVE_KEY_ID")
-    fi
-
-    if [ -n "${DATA_AT_REST_ENCRYPTION_ENABLED:-}" ]; then
-        secrets+=("DATA_AT_REST_ENCRYPTION_ENABLED")
     fi
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_PUBLIC_KEY:-}" ]; then

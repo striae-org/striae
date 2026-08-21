@@ -1,14 +1,6 @@
 #!/bin/bash
 
 validate_data_at_rest_encryption_settings() {
-    local enabled_normalized
-    enabled_normalized=$(printf '%s' "${DATA_AT_REST_ENCRYPTION_ENABLED:-false}" | tr '[:upper:]' '[:lower:]')
-
-    if [ "$enabled_normalized" != "1" ] && [ "$enabled_normalized" != "true" ] && [ "$enabled_normalized" != "yes" ] && [ "$enabled_normalized" != "on" ]; then
-        echo -e "${RED}❌ Error: DATA_AT_REST_ENCRYPTION_ENABLED must be true because data-at-rest encryption is mandatory${NC}"
-        exit 1
-    fi
-
     local has_legacy_private_key=false
     local has_registry_keys_json=false
 

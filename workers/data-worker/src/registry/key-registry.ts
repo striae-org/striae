@@ -266,16 +266,6 @@ export async function decryptExportImageWithRegistry(
   );
 }
 
-export function isDataAtRestEncryptionEnabled(env: Env): boolean {
-  const value = env.DATA_AT_REST_ENCRYPTION_ENABLED;
-  if (!value) {
-    return false;
-  }
-
-  const normalizedValue = value.trim().toLowerCase();
-  return normalizedValue === '1' || normalizedValue === 'true' || normalizedValue === 'yes' || normalizedValue === 'on';
-}
-
 export function extractDataAtRestEnvelope(file: R2ObjectBody): DataAtRestEnvelope | null {
   const metadata = file.customMetadata;
   if (!metadata) {

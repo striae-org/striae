@@ -130,9 +130,11 @@ async function readCaseFileIds(env: Env, caseDataKey: string): Promise<string[]>
   }
 
   const atRestEnvelope = extractDataAtRestEnvelope(file);
-  const fileText = atRestEnvelope
-    ? await decryptCaseDataWithRegistry(await file.arrayBuffer(), atRestEnvelope, env)
-    : await file.text();
+  if (!atRestEnvelope) {
+    throw new Error('Case data record is missing its data-at-rest encryption envelope');
+  }
+
+  const fileText = await decryptCaseDataWithRegistry(await file.arrayBuffer(), atRestEnvelope, env);
 
   const parsed = JSON.parse(fileText) as StoredCaseData;
   return extractFileIdsFromCaseData(parsed);

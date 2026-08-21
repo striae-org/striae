@@ -5,8 +5,7 @@ import {
 import { encryptJsonForStorage } from '../encryption-utils';
 import {
   decryptJsonFromStorageWithRegistry,
-  extractDataAtRestEnvelope,
-  isDataAtRestEncryptionEnabled
+  extractDataAtRestEnvelope
 } from '../registry/key-registry';
 import type { CreateResponse, Env } from '../types';
 
@@ -31,37 +30,30 @@ export async function handleStorageRequest(
       }
 
       const atRestEnvelope = extractDataAtRestEnvelope(file);
-      if (atRestEnvelope) {
-        if (atRestEnvelope.algorithm !== DATA_AT_REST_ENCRYPTION_ALGORITHM) {
-          return respond({ error: 'Unsupported data-at-rest encryption algorithm' }, 500);
-        }
+      if (!atRestEnvelope) {
+        return respond({ error: 'Missing data-at-rest envelope metadata' }, 500);
+      }
 
-        if (atRestEnvelope.encryptionVersion !== DATA_AT_REST_ENCRYPTION_VERSION) {
-          return respond({ error: 'Unsupported data-at-rest encryption version' }, 500);
-        }
+      if (atRestEnvelope.algorithm !== DATA_AT_REST_ENCRYPTION_ALGORITHM) {
+        return respond({ error: 'Unsupported data-at-rest encryption algorithm' }, 500);
+      }
 
-        try {
-          const encryptedData = await file.arrayBuffer();
-          const plaintext = await decryptJsonFromStorageWithRegistry(
-            encryptedData,
-            atRestEnvelope,
-            env
-          );
-          const decryptedPayload = JSON.parse(plaintext);
-          return respond(decryptedPayload);
-        } catch (error) {
-          console.error('Data-at-rest decryption failed:', error);
-          return respond({ error: 'Failed to decrypt stored data' }, 500);
-        }
+      if (atRestEnvelope.encryptionVersion !== DATA_AT_REST_ENCRYPTION_VERSION) {
+        return respond({ error: 'Unsupported data-at-rest encryption version' }, 500);
       }
 
       try {
-        const fileText = await file.text();
-        const data = JSON.parse(fileText);
-        return respond(data);
+        const encryptedData = await file.arrayBuffer();
+        const plaintext = await decryptJsonFromStorageWithRegistry(
+          encryptedData,
+          atRestEnvelope,
+          env
+        );
+        const decryptedPayload = JSON.parse(plaintext);
+        return respond(decryptedPayload);
       } catch (error) {
-        console.error('Stored JSON parse failed:', error);
-        return respond({ error: 'Stored data is corrupted or not valid JSON' }, 500);
+        console.error('Data-at-rest decryption failed:', error);
+        return respond({ error: 'Failed to decrypt stored data' }, 500);
       }
     }
 
@@ -77,14 +69,9 @@ export async function handleStorageRequest(
 
       const serializedData = JSON.stringify(newData);
 
-      if (!isDataAtRestEncryptionEnabled(env)) {
-        await bucket.put(filename, serializedData);
-        return respond({ success: true });
-      }
-
       if (!env.DATA_AT_REST_ENCRYPTION_PUBLIC_KEY || !env.DATA_AT_REST_ENCRYPTION_KEY_ID) {
         return respond(
-          { error: 'Data-at-rest encryption is enabled but not fully configured' },
+          { error: 'Data-at-rest encryption is not fully configured' },
           500
         );
       }

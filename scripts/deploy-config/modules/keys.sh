@@ -353,13 +353,6 @@ configure_data_at_rest_encryption_credentials() {
     echo -e "${BLUE}🗃️ DATA-AT-REST ENCRYPTION CONFIGURATION${NC}"
     echo "========================================"
 
-    # Data-at-rest encryption is mandatory for all environments.
-    DATA_AT_REST_ENCRYPTION_ENABLED="true"
-
-    export DATA_AT_REST_ENCRYPTION_ENABLED
-    write_env_var "DATA_AT_REST_ENCRYPTION_ENABLED" "$DATA_AT_REST_ENCRYPTION_ENABLED"
-    echo -e "${GREEN}✅ DATA_AT_REST_ENCRYPTION_ENABLED: $DATA_AT_REST_ENCRYPTION_ENABLED${NC}"
-
     local should_generate="false"
     restore_env_var_from_backup_if_missing "DATA_AT_REST_ENCRYPTION_PRIVATE_KEY"
     restore_env_var_from_backup_if_missing "DATA_AT_REST_ENCRYPTION_PUBLIC_KEY"
