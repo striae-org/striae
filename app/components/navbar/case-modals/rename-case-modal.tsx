@@ -72,10 +72,10 @@ export const RenameCaseModal = ({
 
         <div className={styles.warningPanel}>
           <p>
-            Warning: Renaming a case will obviate the existing audit trail until it is renamed back to the original case number.
+            <strong>Warning:</strong> Existing audit trail entries remain indexed under the current case number. After renaming, filtering the audit trail by the new case number will not show these prior entries.
           </p>
           <p>
-            Consider the impact on the chain of custody and audit trail before renaming this case.
+            Renaming back to the original case number does not restore continuity — entries recorded under this or any intermediate case number will still be split across the different case numbers used over time.
           </p>
         </div>
 

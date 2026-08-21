@@ -1,4 +1,5 @@
 import { requireUserKvReadConfig, requireUserKvWriteConfig } from './auth';
+import { runOrphanSweep } from './cleanup/orphan-sweep';
 import { USER_CASES_SEGMENT } from './config';
 import {
   handleAddCases,
@@ -63,5 +64,9 @@ export default {
 
       return createWorkerResponse({ error: 'Internal Server Error' }, 500);
     }
+  },
+
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(runOrphanSweep(env));
   }
 };

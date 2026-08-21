@@ -10,6 +10,7 @@ import { ExportConfirmationsModal } from '~/components/navbar/case-modals/export
 import { Toolbar } from '~/components/toolbar/toolbar';
 import { Canvas } from '~/components/canvas/canvas';
 import { Toast, type ToastType } from '~/components/toast/toast';
+import { auditService } from '~/services/audit';
 import { getImageUrl, deleteFile } from '~/components/actions/image-manage';
 import { getNotes, saveNotes } from '~/components/actions/notes-manage';
 import { generatePDF } from '~/components/actions/generate-pdf';
@@ -208,6 +209,18 @@ export const Striae = ({ user }: StriaePage) => {
   const closeToast = () => {
     setShowToast(false);
   };
+
+  // Warn once an audit entry exhausts all write retries; the underlying action already completed.
+  useEffect(() => {
+    const unsubscribe = auditService.subscribeToPersistFailures(() => {
+      showNotification(
+        'An audit entry could not be saved after multiple attempts. Your action was completed, but it may be missing from the audit trail.',
+        'warning',
+        6000
+      );
+    });
+    return unsubscribe;
+  }, []);
 
   // Tracks whether the current case load was triggered by loadCaseIntoWorkspace.
   // A ref (not state) so it can be read inside the metadata effect without

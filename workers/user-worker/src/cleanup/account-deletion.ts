@@ -1,144 +1,7 @@
-import { decryptJsonFromStorage, type DataAtRestEnvelope } from '../encryption-utils';
 import { deleteFirebaseAuthUser } from '../firebase/admin';
 import { readUserRecord } from '../storage/user-records';
-import type {
-  AccountDeletionProgressEvent,
-  Env,
-  PrivateKeyRegistry,
-  StoredCaseData
-} from '../types';
-import { fetchKeyRegistryFromR2 } from '../../../../shared/registry/r2-key-registry';
-
-function getNonEmptyString(value: unknown): string | null {
-  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
-}
-
-async function getDataAtRestPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegistry> {
-  return fetchKeyRegistryFromR2(
-    env.STRIAE_CONFIG,
-    'data-at-rest',
-    env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID,
-    env.REGISTRY_ENCRYPTION_KEY
-  );
-}
-
-function buildPrivateKeyCandidates(
-  recordKeyId: string | null,
-  registry: PrivateKeyRegistry
-): Array<{ keyId: string; privateKeyPem: string }> {
-  const candidates: Array<{ keyId: string; privateKeyPem: string }> = [];
-  const seen = new Set<string>();
-
-  const appendCandidate = (candidateKeyId: string | null): void => {
-    if (!candidateKeyId || seen.has(candidateKeyId)) {
-      return;
-    }
-
-    const privateKeyPem = registry.keys[candidateKeyId];
-    if (!privateKeyPem) {
-      return;
-    }
-
-    seen.add(candidateKeyId);
-    candidates.push({ keyId: candidateKeyId, privateKeyPem });
-  };
-
-  appendCandidate(recordKeyId);
-  appendCandidate(registry.activeKeyId);
-
-  for (const keyId of Object.keys(registry.keys)) {
-    appendCandidate(keyId);
-  }
-
-  return candidates;
-}
-
-function extractDataAtRestEnvelope(file: R2ObjectBody): DataAtRestEnvelope | null {
-  const metadata = file.customMetadata;
-
-  if (!metadata) {
-    return null;
-  }
-
-  const algorithm = getNonEmptyString(metadata.algorithm);
-  const encryptionVersion = getNonEmptyString(metadata.encryptionVersion);
-  const keyId = getNonEmptyString(metadata.keyId);
-  const dataIv = getNonEmptyString(metadata.dataIv);
-  const wrappedKey = getNonEmptyString(metadata.wrappedKey);
-
-  if (!algorithm || !encryptionVersion || !keyId || !dataIv || !wrappedKey) {
-    return null;
-  }
-
-  return {
-    algorithm,
-    encryptionVersion,
-    keyId,
-    dataIv,
-    wrappedKey
-  };
-}
-
-async function decryptCaseDataWithRegistry(
-  ciphertext: ArrayBuffer,
-  envelope: DataAtRestEnvelope,
-  env: Env
-): Promise<string> {
-  const keyRegistry = await getDataAtRestPrivateKeyRegistry(env);
-  const candidates = buildPrivateKeyCandidates(getNonEmptyString(envelope.keyId), keyRegistry);
-  let lastError: unknown;
-
-  for (const candidate of candidates) {
-    try {
-      return await decryptJsonFromStorage(ciphertext, envelope, candidate.privateKeyPem);
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw new Error(
-    `Failed to decrypt case data after ${candidates.length} key attempt(s): ${
-      lastError instanceof Error ? lastError.message : 'unknown decryption error'
-    }`
-  );
-}
-
-function extractFileIdFromEntry(file: unknown): string | null {
-  if (!file || typeof file !== 'object') {
-    return null;
-  }
-
-  const record = file as { id?: unknown; fileData?: { id?: unknown } };
-  return getNonEmptyString(record.id) ?? getNonEmptyString(record.fileData?.id);
-}
-
-function extractFileIdsFromCaseData(caseData: StoredCaseData): string[] {
-  const allFileEntries = [
-    ...(Array.isArray(caseData.files) ? caseData.files : []),
-    ...(Array.isArray(caseData.otherFiles) ? caseData.otherFiles : [])
-  ];
-
-  return allFileEntries
-    .map((file) => extractFileIdFromEntry(file))
-    .filter((fileId): fileId is string => fileId !== null);
-}
-
-async function readCaseFileIds(env: Env, caseDataKey: string): Promise<string[]> {
-  const file = await env.STRIAE_DATA.get(caseDataKey);
-  if (!file) {
-    return [];
-  }
-
-  const atRestEnvelope = extractDataAtRestEnvelope(file);
-  if (!atRestEnvelope) {
-    throw new Error('Case data record is missing its data-at-rest encryption envelope');
-  }
-
-  const fileText = await decryptCaseDataWithRegistry(await file.arrayBuffer(), atRestEnvelope, env);
-
-  const parsed = JSON.parse(fileText) as StoredCaseData;
-  return extractFileIdsFromCaseData(parsed);
-}
+import type { AccountDeletionProgressEvent, Env } from '../types';
+import { readCaseFileIds } from './case-data-reader';
 
 async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): Promise<void> {
   const encodedUserId = encodeURIComponent(userUid);
@@ -170,13 +33,9 @@ async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): 
   } while (dataCursor !== undefined);
 
   if (dataKeys.includes(caseDataKey)) {
-    try {
-      for (const fileId of await readCaseFileIds(env, caseDataKey)) {
-        fileIds.add(fileId);
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'unknown case data read error';
-      throw new Error(`Failed to read case file references for ${caseNumber}: ${message}`, { cause: error });
+    // readCaseFileIds is best-effort and never throws, so deletion always proceeds below.
+    for (const fileId of await readCaseFileIds(env, caseDataKey)) {
+      fileIds.add(fileId);
     }
   }
 
@@ -267,7 +126,8 @@ export async function executeUserDeletion(
   }
 
   if (caseCleanupErrors.length > 0) {
-    throw new Error(`Failed to fully delete all case data: ${caseCleanupErrors.join(' | ')}`);
+    // R2 delete-call failures are logged but must not block auth/user record removal.
+    console.error(`Account deletion for ${userUid} proceeding despite incomplete case cleanup: ${caseCleanupErrors.join(' | ')}`);
   }
 
   await deleteUserConfirmationSummary(env, userUid);
@@ -276,8 +136,10 @@ export async function executeUserDeletion(
   await env.USER_DB.delete(userUid);
 
   return {
-    success: true,
-    message: 'Account successfully deleted',
+    success: caseCleanupErrors.length === 0,
+    message: caseCleanupErrors.length === 0
+      ? 'Account successfully deleted'
+      : `Account deleted; some case data cleanup failed and may require manual review: ${caseCleanupErrors.join(' | ')}`,
     totalCases,
     completedCases
   };

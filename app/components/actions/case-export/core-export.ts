@@ -84,6 +84,8 @@ export async function exportCaseData(
           annotations.leftItemType ||
           annotations.rightItemType ||
           annotations.supportLevel ||
+          annotations.includeConfirmation ||
+          annotations.confirmationData ||
           (annotations.boxAnnotations && annotations.boxAnnotations.length > 0)
         ));
 

@@ -52,6 +52,10 @@ import {
   buildValidationAuditEntry
 } from './builders/index';
 
+type AttemptPersistResult =
+  | { ok: true; entryCount: number }
+  | { ok: false; status?: number; errorData?: unknown; error?: unknown };
+
 /**
  * Audit Service for ValidationAuditEntry system
  * Provides comprehensive audit logging throughout the confirmation workflow
@@ -61,6 +65,7 @@ class AuditService {
   private auditBuffer: ValidationAuditEntry[] = [];
   private workflowId: string | null = null;
   private userBadgeIdByUserId = new Map<string, string>();
+  private persistFailureListeners = new Set<(entry: ValidationAuditEntry) => void>();
 
   private constructor() {}
 
@@ -1143,23 +1148,77 @@ class AuditService {
   }
 
   /**
-   * Persist audit entry to storage
+   * Attempt a single write of an audit entry to storage
    */
-  private async persistAuditEntry(entry: ValidationAuditEntry): Promise<void> {
+  private async attemptPersist(entry: ValidationAuditEntry): Promise<AttemptPersistResult> {
     try {
       const persistResult = await persistAuditEntryForUser(entry);
 
       if (!persistResult.ok) {
-        console.error(
-          '🚨 Audit: Failed to persist entry:',
-          persistResult.status,
-          persistResult.errorData
-        );
-      } else {
-        console.log(`🔍 Audit: Entry persisted (${persistResult.entryCount} total entries)`);
+        return { ok: false, status: persistResult.status, errorData: persistResult.errorData };
       }
+
+      return { ok: true, entryCount: persistResult.entryCount };
     } catch (error) {
-      console.error('🚨 Audit: Storage error:', error);
+      return { ok: false, error };
+    }
+  }
+
+  /**
+   * Persist audit entry to storage, retrying in the background on failure
+   */
+  private async persistAuditEntry(entry: ValidationAuditEntry): Promise<void> {
+    const firstAttempt = await this.attemptPersist(entry);
+
+    if (firstAttempt.ok) {
+      console.log(`🔍 Audit: Entry persisted (${firstAttempt.entryCount} total entries)`);
+      return;
+    }
+
+    console.warn('⚠️ Audit: Initial persist failed, retrying in background:', firstAttempt);
+    // Best-effort only: retries run detached so callers are never held up by retry delays.
+    void this.retryPersistInBackground(entry);
+  }
+
+  /**
+   * Retry a failed audit write on a spaced-out schedule; warns subscribers if all attempts fail
+   */
+  private async retryPersistInBackground(entry: ValidationAuditEntry): Promise<void> {
+    const retryDelaysMs = [1000, 2000];
+
+    for (let i = 0; i < retryDelaysMs.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, retryDelaysMs[i]));
+
+      const attemptNumber = i + 2;
+      const result = await this.attemptPersist(entry);
+
+      if (result.ok) {
+        console.log(`🔍 Audit: Entry persisted on attempt ${attemptNumber} (${result.entryCount} total entries)`);
+        return;
+      }
+
+      console.error(`🚨 Audit: Attempt ${attemptNumber} failed:`, result);
+    }
+
+    console.error('🚨 Audit: All persist attempts exhausted, entry was not written:', entry);
+    this.notifyPersistFailure(entry);
+  }
+
+  /**
+   * Subscribe to final (all-retries-exhausted) audit persistence failures
+   */
+  public subscribeToPersistFailures(listener: (entry: ValidationAuditEntry) => void): () => void {
+    this.persistFailureListeners.add(listener);
+    return () => this.persistFailureListeners.delete(listener);
+  }
+
+  private notifyPersistFailure(entry: ValidationAuditEntry): void {
+    for (const listener of this.persistFailureListeners) {
+      try {
+        listener(entry);
+      } catch (error) {
+        console.error('🚨 Audit: Persist-failure listener threw:', error);
+      }
     }
   }
 

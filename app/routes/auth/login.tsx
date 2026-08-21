@@ -95,6 +95,18 @@ export const Login = () => {
     setIsClient(true);
   }, []);
 
+  // Warn once an audit entry exhausts all write retries; the underlying action already completed.
+  useEffect(() => {
+    const unsubscribe = auditService.subscribeToPersistFailures(() => {
+      setWelcomeToastType('warning');
+      setWelcomeToastMessage(
+        'An audit entry could not be saved after multiple attempts. Your action was completed, but it may be missing from the audit trail.'
+      );
+      setIsWelcomeToastVisible(true);
+    });
+    return unsubscribe;
+  }, []);
+
   // Email validation with regex and registration gateway allowlist check
   const validateRegistrationEmail = async (email: string): Promise<{ valid: boolean; message?: string }> => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
