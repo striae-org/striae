@@ -20,6 +20,14 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-21] - *[Minor Release v10.1.0](https://github.com/striae-org/striae/releases/tag/v10.1.0)* — *Data Entry Enhancements + Legacy Type Removal + Unencrypted Fallback Removal*
+
+- **📝 Data Entry Enhancements** - Added a shotshell length field, consolidated shot size data entry with custom/other support, and added an 'RN' bullet type option.
+- **🧹 Legacy Type Fallback Removal** - Removed legacy `classType`/single-`itemType` fallback handling across canvas, notes editor, file filters, confirmation summary, case export, and the PDF `striae` format now that the split item model is the sole path.
+- **🔒 Unencrypted Data Fallback Removal (Security Fix)** - Removed remaining unencrypted data-at-rest fallback pathways from the data worker's storage routes, key registry, worker types, account-deletion cleanup, and related deploy-config/secrets scripts and examples.
+- **🗓️ Case Review Import and Confirmation Fixes** - Fixed case review imports to retain original upload dates, increased the confirmation-summary staleness check interval to one hour, and added a rename-case warning.
+- **🧾 Report and File Management Refinements** - Refined PDF report layout/formatting and added a file extension filter to the other-files modal.
+
 ## [2026-08-16] - *[Patch Release v10.0.1](https://github.com/striae-org/striae/releases/tag/v10.0.1)* — *Magnification + Other-File Management Refinements*
 
 - **🔍 Magnification Field** - Added magnification input fields and carried magnification data through case export and PDF report output.
