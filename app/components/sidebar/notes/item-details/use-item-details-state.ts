@@ -16,6 +16,7 @@ import {
   CARTRIDGE_PRIMER_TYPE_OPTIONS,
   SHOTSHELL_GAUGES,
   SHOTSHELL_LENGTH_OPTIONS,
+  SHOTSHELL_SHOT_SIZE_OPTIONS,
   calculateBulletDiameter,
   formatCalculatedDiameter,
   isCustomValue,
@@ -121,6 +122,7 @@ export interface ShotshellDetailsState {
   shotshellLength: string;
   shotshellLengthIsCustom: boolean;
   shotSize: string;
+  shotSizeIsCustom: boolean;
   metal: string;
   metalIsCustom: boolean;
   brand: string;
@@ -134,6 +136,7 @@ export interface ShotshellDetailsState {
   setShotshellLength: (value: string) => void;
   setShotshellLengthIsCustom: (value: boolean) => void;
   setShotSize: (value: string) => void;
+  setShotSizeIsCustom: (value: boolean) => void;
   setMetal: (value: string) => void;
   setMetalIsCustom: (value: boolean) => void;
   setBrand: (value: string) => void;
@@ -190,6 +193,7 @@ export const useItemDetailsState = ({
   const [sShotshellLength, setSShotshellLength] = useState(() => shotshellData?.shotshellLength || '');
   const [sShotshellLengthIsCustom, setSShotshellLengthIsCustom] = useState(() => isCustomValue(shotshellData?.shotshellLength, SHOTSHELL_LENGTH_OPTIONS));
   const [sShotSize, setSShotSize] = useState(() => shotshellData?.shotSize || '');
+  const [sShotSizeIsCustom, setSShotSizeIsCustom] = useState(() => isCustomValue(shotshellData?.shotSize, SHOTSHELL_SHOT_SIZE_OPTIONS));
   const [sMetal, setSMetal] = useState(() => shotshellData?.metal || '');
   const [sMetalIsCustom, setSMetalIsCustom] = useState(() => isCustomValue(shotshellData?.metal, CARTRIDGE_METAL_OPTIONS));
   const [sBrand, setSBrand] = useState(() => shotshellData?.brand || '');
@@ -349,6 +353,7 @@ export const useItemDetailsState = ({
     shotshellLength: sShotshellLength,
     shotshellLengthIsCustom: sShotshellLengthIsCustom,
     shotSize: sShotSize,
+    shotSizeIsCustom: sShotSizeIsCustom,
     metal: sMetal,
     metalIsCustom: sMetalIsCustom,
     brand: sBrand,
@@ -362,6 +367,7 @@ export const useItemDetailsState = ({
     setShotshellLength: setSShotshellLength,
     setShotshellLengthIsCustom: setSShotshellLengthIsCustom,
     setShotSize: setSShotSize,
+    setShotSizeIsCustom: setSShotSizeIsCustom,
     setMetal: setSMetal,
     setMetalIsCustom: setSMetalIsCustom,
     setBrand: setSBrand,

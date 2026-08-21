@@ -9,13 +9,11 @@ import {
   CARTRIDGE_FPI_SHAPE_OPTIONS,
   CARTRIDGE_METAL_OPTIONS,
   CARTRIDGE_PRIMER_TYPE_OPTIONS,
-  SHOTSHELL_BIRDSHOT_OPTIONS,
-  SHOTSHELL_BUCKSHOT_OPTIONS,
   PISTOL_CALIBERS,
   RIFLE_CALIBERS,
   SHOTSHELL_GAUGES,
   SHOTSHELL_LENGTH_OPTIONS,
-  SHOTSHELL_STEEL_WATERFOWL_OPTIONS,
+  SHOTSHELL_SHOT_SIZE_OPTIONS,
   formatCalculatedDiameter,
 } from './item-details-shared';
 import { CheckboxField, SelectField, SelectWithCustomField, TextField } from './item-details-fields';
@@ -501,25 +499,15 @@ export const ShotshellSection = ({
         },
         {
           key: 'shotSize',
-          kind: 'select',
+          kind: 'select-custom',
           label: 'Shot Size',
           value: shotshell.shotSize,
+          isCustom: shotshell.shotSizeIsCustom,
           onChange: shotshell.setShotSize,
+          onCustomChange: shotshell.setShotSizeIsCustom,
           placeholder: 'Select shot size...',
-          options: [
-            {
-              groupLabel: 'Birdshot',
-              options: SHOTSHELL_BIRDSHOT_OPTIONS.map((option) => ({ value: option })),
-            },
-            {
-              groupLabel: 'Steel/Waterfowl Shot',
-              options: SHOTSHELL_STEEL_WATERFOWL_OPTIONS.map((option) => ({ value: option })),
-            },
-            {
-              groupLabel: 'Buckshot',
-              options: SHOTSHELL_BUCKSHOT_OPTIONS.map((option) => ({ value: option })),
-            },
-          ],
+          customPlaceholder: 'Enter shot size...',
+          options: SHOTSHELL_SHOT_SIZE_OPTIONS.map((option) => ({ value: option })),
         },
         {
           key: 'metal',

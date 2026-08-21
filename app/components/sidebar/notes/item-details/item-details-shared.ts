@@ -62,7 +62,8 @@ export const SHOTSHELL_LENGTH_OPTIONS: string[] = [
   '3 1/2 inch',
 ];
 
-export const SHOTSHELL_BIRDSHOT_OPTIONS = [
+export const SHOTSHELL_SHOT_SIZE_OPTIONS = [
+  '#12',
   '#9',
   '#8 1/2',
   '#8',
@@ -74,25 +75,19 @@ export const SHOTSHELL_BIRDSHOT_OPTIONS = [
   '#3',
   '#2',
   '#1',
-] as const;
-
-export const SHOTSHELL_STEEL_WATERFOWL_OPTIONS = [
-  '#4',
-  '#3',
-  '#2',
-  '#1',
   'B',
   'BB',
   'BBB',
   'T',
-] as const;
-
-export const SHOTSHELL_BUCKSHOT_OPTIONS = [
-  '#4 buck',
-  '#1 buck',
-  '0 buck',
-  '00 buck',
-  '000 buck',
+  'TT',
+  'F/TTT',
+  '#4 Buck',
+  '#3 Buck',
+  '#2 Buck',
+  '#1 Buck',
+  '#0 Buck',
+  '#00 Buck',
+  '#000 Buck',
 ] as const;
 
 export const ALL_CALIBERS: string[] = [...PISTOL_CALIBERS, ...RIFLE_CALIBERS];
