@@ -15,6 +15,7 @@ import {
   CARTRIDGE_METAL_OPTIONS,
   CARTRIDGE_PRIMER_TYPE_OPTIONS,
   SHOTSHELL_GAUGES,
+  SHOTSHELL_LENGTH_OPTIONS,
   calculateBulletDiameter,
   formatCalculatedDiameter,
   isCustomValue,
@@ -117,6 +118,8 @@ export interface CartridgeCaseDetailsState {
 export interface ShotshellDetailsState {
   gauge: string;
   gaugeIsCustom: boolean;
+  shotshellLength: string;
+  shotshellLengthIsCustom: boolean;
   shotSize: string;
   metal: string;
   metalIsCustom: boolean;
@@ -128,6 +131,8 @@ export interface ShotshellDetailsState {
   hasChamberMarks: boolean;
   setGauge: (value: string) => void;
   setGaugeIsCustom: (value: boolean) => void;
+  setShotshellLength: (value: string) => void;
+  setShotshellLengthIsCustom: (value: boolean) => void;
   setShotSize: (value: string) => void;
   setMetal: (value: string) => void;
   setMetalIsCustom: (value: boolean) => void;
@@ -182,6 +187,8 @@ export const useItemDetailsState = ({
 
   const [sGauge, setSGauge] = useState(() => shotshellData?.gauge || '');
   const [sGaugeIsCustom, setSGaugeIsCustom] = useState(() => isCustomValue(shotshellData?.gauge, SHOTSHELL_GAUGES));
+  const [sShotshellLength, setSShotshellLength] = useState(() => shotshellData?.shotshellLength || '');
+  const [sShotshellLengthIsCustom, setSShotshellLengthIsCustom] = useState(() => isCustomValue(shotshellData?.shotshellLength, SHOTSHELL_LENGTH_OPTIONS));
   const [sShotSize, setSShotSize] = useState(() => shotshellData?.shotSize || '');
   const [sMetal, setSMetal] = useState(() => shotshellData?.metal || '');
   const [sMetalIsCustom, setSMetalIsCustom] = useState(() => isCustomValue(shotshellData?.metal, CARTRIDGE_METAL_OPTIONS));
@@ -249,6 +256,7 @@ export const useItemDetailsState = ({
     } : undefined,
     shotshellData: showShotshell ? {
       gauge: sGauge || undefined,
+      shotshellLength: sShotshellLength || undefined,
       shotSize: sShotSize || undefined,
       metal: sMetal || undefined,
       brand: sBrand || undefined,
@@ -338,6 +346,8 @@ export const useItemDetailsState = ({
   const shotshell: ShotshellDetailsState = {
     gauge: sGauge,
     gaugeIsCustom: sGaugeIsCustom,
+    shotshellLength: sShotshellLength,
+    shotshellLengthIsCustom: sShotshellLengthIsCustom,
     shotSize: sShotSize,
     metal: sMetal,
     metalIsCustom: sMetalIsCustom,
@@ -349,6 +359,8 @@ export const useItemDetailsState = ({
     hasChamberMarks: sHasChamberMarks,
     setGauge: setSGauge,
     setGaugeIsCustom: setSGaugeIsCustom,
+    setShotshellLength: setSShotshellLength,
+    setShotshellLengthIsCustom: setSShotshellLengthIsCustom,
     setShotSize: setSShotSize,
     setMetal: setSMetal,
     setMetalIsCustom: setSMetalIsCustom,

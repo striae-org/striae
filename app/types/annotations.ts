@@ -60,6 +60,7 @@ export interface CartridgeCaseAnnotationData {
 
 export interface ShotshellAnnotationData {
   gauge?: string;
+  shotshellLength?: string;
   shotSize?: string;
   metal?: string;
   brand?: string;

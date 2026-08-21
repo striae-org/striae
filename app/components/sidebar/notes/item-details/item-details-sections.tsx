@@ -14,6 +14,7 @@ import {
   PISTOL_CALIBERS,
   RIFLE_CALIBERS,
   SHOTSHELL_GAUGES,
+  SHOTSHELL_LENGTH_OPTIONS,
   SHOTSHELL_STEEL_WATERFOWL_OPTIONS,
   formatCalculatedDiameter,
 } from './item-details-shared';
@@ -485,6 +486,18 @@ export const ShotshellSection = ({
           placeholder: 'Select gauge...',
           customPlaceholder: 'Enter gauge...',
           options: SHOTSHELL_GAUGES.map((option) => ({ value: option })),
+        },
+        {
+          key: 'shotshellLength',
+          kind: 'select-custom',
+          label: 'Length',
+          value: shotshell.shotshellLength,
+          isCustom: shotshell.shotshellLengthIsCustom,
+          onChange: shotshell.setShotshellLength,
+          onCustomChange: shotshell.setShotshellLengthIsCustom,
+          placeholder: 'Select length...',
+          customPlaceholder: 'Enter length...',
+          options: SHOTSHELL_LENGTH_OPTIONS.map((option) => ({ value: option })),
         },
         {
           key: 'shotSize',

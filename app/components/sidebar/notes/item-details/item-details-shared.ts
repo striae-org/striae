@@ -55,6 +55,13 @@ export const SHOTSHELL_GAUGES: string[] = [
   '.410 bore',
 ];
 
+export const SHOTSHELL_LENGTH_OPTIONS: string[] = [
+  '2 1/2 inch',
+  '2 3/4 inch',
+  '3 inch',
+  '3 1/2 inch',
+];
+
 export const SHOTSHELL_BIRDSHOT_OPTIONS = [
   '#9',
   '#8 1/2',
@@ -202,6 +209,7 @@ export const buildItemDetailsSummary = (
     const rows: string[] = [];
     const add = (v: string | null) => { if (v) rows.push(v); };
     add(r('Gauge', shotshellData.gauge));
+    add(r('Length', shotshellData.shotshellLength));
     add(r('Shot Size', shotshellData.shotSize));
     add(r('Metal', shotshellData.metal));
     add(r('Brand', shotshellData.brand));
