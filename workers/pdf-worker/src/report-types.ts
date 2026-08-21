@@ -46,12 +46,6 @@ export interface AnnotationData {
   rightCustomClass?: string;
   rightClassNote?: string;
   rightHasSubclass?: boolean;
-  // Legacy (kept for backward compatibility)
-  itemType?: string;
-  classType?: string;
-  customClass?: string;
-  classNote?: string;
-  hasSubclass?: boolean;
 
   // Confirmation annotations
   includeConfirmation?: boolean;

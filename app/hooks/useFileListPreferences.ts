@@ -38,7 +38,7 @@ function parseStoredPreferences(value: string | null): FilesModalPreferences {
         ? parsed.confirmationFilter
         : DEFAULT_FILES_MODAL_PREFERENCES.confirmationFilter;
 
-    // Support both new 'itemTypeFilter' and legacy 'classTypeFilter' properties
+    // Validate 'itemTypeFilter' property
     const itemTypeFilter: FilesModalItemTypeFilter =
       parsed.itemTypeFilter === 'Bullet' ||
       parsed.itemTypeFilter === 'Cartridge Case' ||
@@ -46,13 +46,7 @@ function parseStoredPreferences(value: string | null): FilesModalPreferences {
       parsed.itemTypeFilter === 'Other' ||
       parsed.itemTypeFilter === 'all'
         ? parsed.itemTypeFilter
-        : parsed.classTypeFilter === 'Bullet' ||
-          parsed.classTypeFilter === 'Cartridge Case' ||
-          parsed.classTypeFilter === 'Shotshell' ||
-          parsed.classTypeFilter === 'Other' ||
-          parsed.classTypeFilter === 'all'
-          ? parsed.classTypeFilter
-          : 'all';
+        : 'all';
 
     return {
       sortBy,

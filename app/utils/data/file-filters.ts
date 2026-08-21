@@ -1,4 +1,4 @@
-import type { FileData } from '~/types';
+import type { FileData, ItemType } from '~/types';
 import type { FileConfirmationSummary } from '~/utils/data';
 
 export type FilesModalSortBy = 'recent' | 'filename' | 'confirmation' | 'itemType';
@@ -16,15 +16,10 @@ export type FilesModalItemTypeFilter =
   | 'Shotshell'
   | 'Other';
 
-// Backwards compatibility alias
-export type FilesModalClassTypeFilter = FilesModalItemTypeFilter;
-
 export interface FilesModalPreferences {
   sortBy: FilesModalSortBy;
   confirmationFilter: FilesModalConfirmationFilter;
   itemTypeFilter: FilesModalItemTypeFilter;
-  // Backwards compatibility: legacy classTypeFilter will be migrated to itemTypeFilter
-  classTypeFilter?: FilesModalItemTypeFilter;
 }
 
 export type FileConfirmationById = Record<string, FileConfirmationSummary>;
@@ -39,17 +34,16 @@ function getFileConfirmationState(fileId: string, statusById: FileConfirmationBy
   return statusById[fileId] || DEFAULT_CONFIRMATION_SUMMARY;
 }
 
-function getSummaryItemTypes(summary: FileConfirmationSummary): Array<NonNullable<FileConfirmationSummary['itemType']>> {
+function getSummaryItemTypes(summary: FileConfirmationSummary): ItemType[] {
   const types = [
     summary.leftItemType,
     summary.rightItemType,
-    summary.itemType,
-  ].filter((value): value is NonNullable<FileConfirmationSummary['itemType']> => Boolean(value));
+  ].filter((value): value is ItemType => Boolean(value));
 
   return Array.from(new Set(types));
 }
 
-function getPrimaryItemType(summary: FileConfirmationSummary): FileConfirmationSummary['itemType'] {
+function getPrimaryItemType(summary: FileConfirmationSummary): ItemType | undefined {
   const [first] = getSummaryItemTypes(summary);
   return first;
 }
@@ -66,7 +60,7 @@ function getConfirmationRank(summary: FileConfirmationSummary): number {
   return 2;
 }
 
-function getItemTypeRank(itemType: FileConfirmationSummary['itemType']): number {
+function getItemTypeRank(itemType: ItemType | undefined): number {
   if (itemType === 'Bullet') {
     return 0;
   }

@@ -1,7 +1,4 @@
-import type { BulletAnnotationData, CartridgeCaseAnnotationData, ShotshellAnnotationData, ItemType } from '~/types/annotations';
-
-// Re-export ItemType from annotations for backwards compatibility
-export type ClassType = ItemType;
+import type { BulletAnnotationData, CartridgeCaseAnnotationData, ShotshellAnnotationData } from '~/types/annotations';
 
 export const CUSTOM = '__custom__';
 

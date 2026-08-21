@@ -94,16 +94,6 @@ export interface AnnotationData {
   rightCartridgeCaseData?: CartridgeCaseAnnotationData;
   rightShotshellData?: ShotshellAnnotationData;
   rightHasSubclass?: boolean;
-  // Deprecated (kept for backward compatibility): use leftItemType, rightItemType, etc.
-  itemType?: ItemType;
-  /** @deprecated Pre-split legacy field; use leftItemType / rightItemType instead. */
-  classType?: string;
-  customClass?: string;
-  classNote?: string;
-  bulletData?: BulletAnnotationData;
-  cartridgeCaseData?: CartridgeCaseAnnotationData;
-  shotshellData?: ShotshellAnnotationData;
-  hasSubclass?: boolean;
   indexType?: IndexType;
   indexNumber?: string;
   indexColor?: string;

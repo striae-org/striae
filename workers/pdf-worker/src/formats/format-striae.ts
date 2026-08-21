@@ -438,25 +438,23 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
             ${(() => {
               const leftValue = annotationData.leftCustomClass || annotationData.leftItemType;
               const rightValue = annotationData.rightCustomClass || annotationData.rightItemType;
-              const legacyValue = annotationData.customClass || annotationData.itemType || annotationData.classType;
               const displayValue =
                 leftValue && rightValue && leftValue !== rightValue
                   ? `${leftValue} / ${rightValue}`
-                  : leftValue || rightValue || legacyValue;
+                  : leftValue || rightValue;
               const leftClassNote = annotationData.leftClassNote?.trim();
               const rightClassNote = annotationData.rightClassNote?.trim();
-              const legacyClassNote = annotationData.classNote?.trim();
               const displayClassNote =
                 leftClassNote && rightClassNote && leftClassNote !== rightClassNote
                   ? `${leftClassNote} / ${rightClassNote}`
-                  : leftClassNote || rightClassNote || legacyClassNote;
+                  : leftClassNote || rightClassNote;
               return safeText(displayValue || '') + (displayClassNote ? ` (${safeText(displayClassNote)})` : '');
             })()}
           </div>
         </div>
         ` : '<div class="class-annotation"></div>'}
         
-        ${annotationData && annotationsSet?.has('item') && (annotationData.leftHasSubclass || annotationData.rightHasSubclass || annotationData.hasSubclass) ? `
+        ${annotationData && annotationsSet?.has('item') && (annotationData.leftHasSubclass || annotationData.rightHasSubclass) ? `
         <div class="subclass-annotation">
           <div class="subclass-text">
             POTENTIAL SUBCLASS

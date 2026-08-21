@@ -5,7 +5,6 @@ export interface FileConfirmationSummary {
   includeConfirmation: boolean;
   isConfirmed: boolean;
   updatedAt: string;
-  itemType?: ItemType;
   leftItemType?: ItemType;
   rightItemType?: ItemType;
 }
@@ -203,9 +202,6 @@ function normalizeFileConfirmationSummary(value: unknown): FileConfirmationSumma
     };
   }
 
-  // Support both new 'itemType' and legacy 'classType' properties
-  const itemType = value.itemType ?? value.classType;
-  const normalizedItemType = typeof itemType === 'string' && ['Bullet', 'Cartridge Case', 'Shotshell', 'Other'].includes(itemType) ? (itemType as ItemType) : undefined;
   const normalizedLeftItemType =
     typeof value.leftItemType === 'string' && ['Bullet', 'Cartridge Case', 'Shotshell', 'Other'].includes(value.leftItemType)
       ? (value.leftItemType as ItemType)
@@ -220,10 +216,6 @@ function normalizeFileConfirmationSummary(value: unknown): FileConfirmationSumma
     isConfirmed: value.isConfirmed === true,
     updatedAt: typeof value.updatedAt === 'string' && value.updatedAt.length > 0 ? value.updatedAt : getIsoNow()
   };
-
-  if (normalizedItemType) {
-    summary.itemType = normalizedItemType;
-  }
 
   if (normalizedLeftItemType) {
     summary.leftItemType = normalizedLeftItemType;
@@ -262,7 +254,7 @@ export function computeCaseConfirmationAggregate(filesById: Record<string, FileC
 
 export function toFileConfirmationSummary(annotationData: AnnotationData | null): FileConfirmationSummary {
   const includeConfirmation = annotationData?.includeConfirmation === true;
-  const leftItemType = annotationData?.leftItemType || annotationData?.itemType || (annotationData?.classType as ItemType | undefined);
+  const leftItemType = annotationData?.leftItemType;
   const rightItemType = annotationData?.rightItemType;
 
   const summary: FileConfirmationSummary = {
@@ -277,13 +269,6 @@ export function toFileConfirmationSummary(annotationData: AnnotationData | null)
 
   if (rightItemType) {
     summary.rightItemType = rightItemType;
-  }
-
-  // Keep legacy single-value item type for existing consumers.
-  if (leftItemType) {
-    summary.itemType = leftItemType;
-  } else if (rightItemType) {
-    summary.itemType = rightItemType;
   }
 
   return summary;

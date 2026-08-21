@@ -67,8 +67,7 @@ function getItemTypeLabel(summary: FileConfirmationSummary): string {
   const itemTypes = [
     summary.leftItemType,
     summary.rightItemType,
-    summary.itemType,
-  ].filter((value): value is NonNullable<FileConfirmationSummary['itemType']> => Boolean(value));
+  ].filter((value): value is NonNullable<FileConfirmationSummary['leftItemType']> => Boolean(value));
 
   const uniqueItemTypes = Array.from(new Set(itemTypes));
 
