@@ -1,9 +1,9 @@
 import { deleteSingleCase, deleteUserConfirmationSummary } from './account-deletion';
 import { getDataAtRestPrivateKeyRegistry } from './case-data-reader';
 import {
-	deletePendingCleanupMarkerIfUnchanged,
 	PENDING_CLEANUP_PREFIX,
 	readPendingCleanupMarker,
+	tombstonePendingCleanupMarkerIfUnchanged,
 	writePendingCleanupMarkerIfUnchanged,
 } from './pending-cleanup-marker';
 import type { Env } from '../types';
@@ -13,6 +13,7 @@ export interface PendingCleanupSweepResult {
 	resolved: number;
 	stillFailing: number;
 	conflicted: number;
+	awaitingFinalization: number;
 }
 
 /**
@@ -24,6 +25,7 @@ export async function sweepPendingCaseCleanup(env: Env): Promise<PendingCleanupS
 	let resolved = 0;
 	let stillFailing = 0;
 	let conflicted = 0;
+	let awaitingFinalization = 0;
 	let cursor: string | undefined;
 	// Fetched once and reused for every marker instead of refetching per key.
 	const keyRegistry = await getDataAtRestPrivateKeyRegistry(env);
@@ -39,7 +41,14 @@ export async function sweepPendingCaseCleanup(env: Env): Promise<PendingCleanupS
 
 			const { marker, etag } = read;
 			processed += 1;
+			if (!marker.authDeletionComplete) {
+				// Account deletion hasn't finalized (or failed) yet, so the account may
+				// still be active. Leave the marker and its case data untouched.
+				awaitingFinalization += 1;
+				continue;
+			}
 
+			
 			const remainingFailedCases: { caseNumber: string; message: string }[] = [];
 			for (const { caseNumber } of marker.failedCases) {
 				try {
@@ -62,10 +71,10 @@ export async function sweepPendingCaseCleanup(env: Env): Promise<PendingCleanupS
 			}
 
 			if (remainingFailedCases.length === 0 && !pendingConfirmationSummary) {
-				// Conditioned on the etag from our initial read: if a concurrent account
-				// deletion already replaced this marker, don't delete its newer state.
-				const deleted = await deletePendingCleanupMarkerIfUnchanged(env, obj.key, etag);
-				if (deleted) {
+				// Conditioned atomically on the etag from our initial read via put's onlyIf: if a
+				// concurrent account deletion already replaced this marker, leave its newer state alone.
+				const tombstoned = await tombstonePendingCleanupMarkerIfUnchanged(env, obj.key, etag);
+				if (tombstoned) {
 					resolved += 1;
 				} else {
 					conflicted += 1;
@@ -97,7 +106,7 @@ export async function sweepPendingCaseCleanup(env: Env): Promise<PendingCleanupS
 		cursor = listed.truncated ? listed.cursor : undefined;
 	} while (cursor !== undefined);
 
-	return { processed, resolved, stillFailing, conflicted };
+	return { processed, resolved, stillFailing, conflicted, awaitingFinalization };
 }
 
 export async function runPendingCaseCleanupSweep(env: Env): Promise<void> {

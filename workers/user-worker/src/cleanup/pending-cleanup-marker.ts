@@ -4,6 +4,11 @@ import { decryptWithKeyRegistry, extractDataAtRestEnvelope, getDataAtRestPrivate
 
 export const PENDING_CLEANUP_PREFIX = '_pending-cleanup/';
 
+// Marks a marker key as resolved via customMetadata on a conditional put, since R2's
+// delete has no onlyIf/CAS support and an unconditional delete could remove a marker a
+// concurrent account deletion just replaced.
+const TOMBSTONE_METADATA_FLAG = 'tombstone';
+
 export interface PendingCaseCleanupMarker {
 	userUid: string;
 	recordedAt: string;
@@ -11,6 +16,12 @@ export interface PendingCaseCleanupMarker {
 	pendingConfirmationSummary: boolean;
 	attempts: number;
 	lastAttemptAt?: string;
+	/**
+	 * False until Firebase Auth + USER_DB deletion have both finalized. The sweep
+	 * must never act on case data while this is false, since the account it
+	 * belongs to may still be active.
+	 */
+	authDeletionComplete: boolean;
 }
 
 export function markerKeyFor(userUid: string): string {
@@ -33,6 +44,10 @@ function isPendingCaseCleanupMarker(value: unknown): value is PendingCaseCleanup
 	}
 
 	if (candidate.lastAttemptAt !== undefined && typeof candidate.lastAttemptAt !== 'string') {
+		return false;
+	}
+
+	if (candidate.authDeletionComplete !== undefined && typeof candidate.authDeletionComplete !== 'boolean') {
 		return false;
 	}
 
@@ -112,6 +127,10 @@ export async function readPendingCleanupMarker(
 			return null;
 		}
 
+		if (file.customMetadata?.[TOMBSTONE_METADATA_FLAG] === 'true') {
+			return null;
+		}
+
 		const atRestEnvelope: DataAtRestEnvelope | null = extractDataAtRestEnvelope(file);
 		if (!atRestEnvelope) {
 			console.warn(`Pending-cleanup marker ${key} has no data-at-rest envelope, skipping this run.`);
@@ -128,11 +147,31 @@ export async function readPendingCleanupMarker(
 			return null;
 		}
 
-		return { marker: parsed, etag: file.etag };
+		return { marker: { ...parsed, authDeletionComplete: parsed.authDeletionComplete ?? false }, etag: file.etag };
 	} catch (error) {
 		console.warn(`Unable to read pending-cleanup marker ${key}, skipping this run:`, error);
 		return null;
 	}
+}
+
+/**
+ * Flags a marker as safe to sweep once account deletion (Firebase Auth +
+ * USER_DB) has actually finalized. Returns false if there was no marker to
+ * flag or a concurrent writer replaced it since it was last read; both cases
+ * are logged by the caller since the account is already gone at that point.
+ */
+export async function markPendingCleanupAuthDeletionComplete(env: Env, userUid: string): Promise<boolean> {
+	const read = await readPendingCleanupMarker(env, markerKeyFor(userUid));
+	if (!read) {
+		return false;
+	}
+
+	if (read.marker.authDeletionComplete) {
+		return true;
+	}
+
+	const wrote = await writePendingCleanupMarkerIfUnchanged(env, { ...read.marker, authDeletionComplete: true }, read.etag);
+	return wrote !== null;
 }
 
 /**
@@ -183,19 +222,16 @@ export async function writePendingCleanupMarkerIfUnchanged(
 }
 
 /**
- * Deletes the marker only if its etag still matches `expectedEtag` as of a
- * conditional read taken immediately beforehand. R2 `delete` has no `onlyIf`
- * support, so this narrows (but cannot fully close) the race window between
- * the check and the delete call; a concurrent writer landing in that gap
- * would still be lost. Returns false without deleting if the etag no longer
- * matches, i.e. a newer marker already replaced this one.
+ * Resolves the marker by overwriting it with a tombstone, conditioned atomically on
+ * `expectedEtag` via `put`'s `onlyIf` (unlike `delete`, which R2 cannot condition).
+ * Returns false without writing if a concurrent writer already replaced the marker
+ * since it was read, i.e. its newer state is left untouched.
  */
-export async function deletePendingCleanupMarkerIfUnchanged(env: Env, key: string, expectedEtag: string): Promise<boolean> {
-	const current = await env.STRIAE_DATA.get(key, { onlyIf: { etagMatches: expectedEtag } });
-	if (!current || !('body' in current)) {
-		return false;
-	}
+export async function tombstonePendingCleanupMarkerIfUnchanged(env: Env, key: string, expectedEtag: string): Promise<boolean> {
+	const result = await env.STRIAE_DATA.put(key, '', {
+		onlyIf: { etagMatches: expectedEtag },
+		customMetadata: { [TOMBSTONE_METADATA_FLAG]: 'true', tombstonedAt: new Date().toISOString() },
+	});
 
-	await env.STRIAE_DATA.delete(key);
-	return true;
+	return result !== null;
 }

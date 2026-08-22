@@ -2,7 +2,7 @@ import { deleteFirebaseAuthUser } from '../firebase/admin';
 import { readUserRecord } from '../storage/user-records';
 import type { AccountDeletionProgressEvent, AccountDeletionResult, Env } from '../types';
 import { readCaseFileIds } from './case-data-reader';
-import { writePendingCleanupMarker } from './pending-cleanup-marker';
+import { markPendingCleanupAuthDeletionComplete, writePendingCleanupMarker } from './pending-cleanup-marker';
 
 export async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): Promise<void> {
 	const encodedUserId = encodeURIComponent(userUid);
@@ -147,6 +147,7 @@ export async function executeUserDeletion(
 			failedCases: failedCaseDetails,
 			pendingConfirmationSummary,
 			attempts: 0,
+			authDeletionComplete: false,
 		});
 
 		if (!markerRecorded) {
@@ -163,6 +164,17 @@ export async function executeUserDeletion(
 
 	await deleteFirebaseAuthUser(env, userUid);
 	await env.USER_DB.delete(userUid);
+
+	if (pendingCleanup) {
+		// Only now that the account is actually gone is it safe for the sweep to
+		// treat the marker's case data as orphaned rather than belonging to a live account.
+		const flagged = await markPendingCleanupAuthDeletionComplete(env, userUid);
+		if (!flagged) {
+			console.error(
+				`CRITICAL: account ${userUid} was deleted but its pending-cleanup marker could not be flagged as finalized. The sweep will leave its case data untouched until this is resolved manually.`,
+			);
+		}
+	}
 
 	return {
 		success: true,
