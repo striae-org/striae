@@ -313,13 +313,16 @@ fs.writeFileSync(path, JSON.stringify(config, null, 2) + '\n', 'utf8');
 
     if [ -f "app/config/firebase.ts" ]; then
         echo -e "${YELLOW}    Updating app/config/firebase.ts...${NC}"
-        sed -i "s|\"YOUR_FIREBASE_API_KEY\"|\"$API_KEY\"|g" app/config/firebase.ts
-        sed -i "s|\"YOUR_FIREBASE_AUTH_DOMAIN\"|\"$AUTH_DOMAIN\"|g" app/config/firebase.ts
-        sed -i "s|\"YOUR_FIREBASE_PROJECT_ID\"|\"$PROJECT_ID\"|g" app/config/firebase.ts
-        sed -i "s|\"YOUR_FIREBASE_STORAGE_BUCKET\"|\"$STORAGE_BUCKET\"|g" app/config/firebase.ts
-        sed -i "s|\"YOUR_FIREBASE_MESSAGING_SENDER_ID\"|\"$MESSAGING_SENDER_ID\"|g" app/config/firebase.ts
-        sed -i "s|\"YOUR_FIREBASE_APP_ID\"|\"$APP_ID\"|g" app/config/firebase.ts
-        sed -i "s|\"YOUR_FIREBASE_MEASUREMENT_ID\"|\"$MEASUREMENT_ID\"|g" app/config/firebase.ts
+        # config-example/firebase.ts uses single-quoted placeholders; matching either
+        # quote style keeps this working whether the file was freshly copied from the
+        # template or previously generated (which normalizes to double quotes).
+        sed -i -E "s|['\"]YOUR_FIREBASE_API_KEY['\"]|\"$API_KEY\"|g" app/config/firebase.ts
+        sed -i -E "s|['\"]YOUR_FIREBASE_AUTH_DOMAIN['\"]|\"$AUTH_DOMAIN\"|g" app/config/firebase.ts
+        sed -i -E "s|['\"]YOUR_FIREBASE_PROJECT_ID['\"]|\"$PROJECT_ID\"|g" app/config/firebase.ts
+        sed -i -E "s|['\"]YOUR_FIREBASE_STORAGE_BUCKET['\"]|\"$STORAGE_BUCKET\"|g" app/config/firebase.ts
+        sed -i -E "s|['\"]YOUR_FIREBASE_MESSAGING_SENDER_ID['\"]|\"$MESSAGING_SENDER_ID\"|g" app/config/firebase.ts
+        sed -i -E "s|['\"]YOUR_FIREBASE_APP_ID['\"]|\"$APP_ID\"|g" app/config/firebase.ts
+        sed -i -E "s|['\"]YOUR_FIREBASE_MEASUREMENT_ID['\"]|\"$MEASUREMENT_ID\"|g" app/config/firebase.ts
         echo -e "${GREEN}      ✅ app firebase.ts updated${NC}"
     fi
 
