@@ -279,6 +279,7 @@ validate_generated_configs() {
 
     assert_contains_literal "workers/data-worker/wrangler.jsonc" "$DATA_BUCKET_NAME" "DATA_BUCKET_NAME missing in data worker config"
     assert_contains_literal "workers/data-worker/wrangler.jsonc" "$CONFIG_BUCKET_NAME" "CONFIG_BUCKET_NAME missing in data worker config"
+    assert_contains_literal "workers/data-worker/wrangler.jsonc" "$USER_WORKER_NAME" "USER_WORKER_NAME missing in data worker config"
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$AUDIT_BUCKET_NAME" "AUDIT_BUCKET_NAME missing in audit worker config"
     assert_contains_literal "workers/audit-worker/wrangler.jsonc" "$CONFIG_BUCKET_NAME" "CONFIG_BUCKET_NAME missing in audit worker config"
     assert_contains_literal "workers/image-worker/wrangler.jsonc" "$FILES_BUCKET_NAME" "FILES_BUCKET_NAME missing in image worker config"

@@ -1,6 +1,6 @@
 {
   "name": "data-worker",
-  "version": "10.1.0",
+  "version": "10.1.1",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
@@ -8,7 +8,7 @@
     "start": "wrangler dev"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.21.3",
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
     "wrangler": "^4.125.0"
   },
   "allowScripts": {

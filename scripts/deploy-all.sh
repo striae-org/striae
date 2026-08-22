@@ -47,7 +47,10 @@ for arg in "$@"; do
             echo ""
             echo "  --redeploy-only, -r   Redeploy workers and Pages using the existing"
             echo "                        configuration only. Skips configuration setup"
-            echo "                        (deploy-config), but still uploads key"
+            echo "                        (deploy-config), but still validates the existing"
+            echo "                        configuration (deploy-config --validate-only) and"
+            echo "                        fails if it is missing values expected by the"
+            echo "                        current templates, and still uploads key"
             echo "                        registries and deploys worker/Pages secrets."
             echo "                        Normal (non-redeploy-only) runs pass"
             echo "                        --refresh-templates to deploy-config.sh so"
@@ -121,6 +124,15 @@ echo -e "${PURPLE}Step 1/8: Configuration Setup${NC}"
 echo "------------------------------"
 if [ "$redeploy_only" = "true" ]; then
     echo -e "${YELLOW}⏭️  Skipping configuration setup (redeploy-only mode)${NC}"
+    echo -e "${YELLOW}🧪 Validating existing configuration is still current...${NC}"
+    if ! bash "$SCRIPT_DIR/deploy-config.sh" --validate-only; then
+        echo -e "${RED}❌ Configuration checkpoint validation failed!${NC}"
+        echo -e "${YELLOW}Existing configuration is missing values expected by the current templates.${NC}"
+        echo -e "${YELLOW}Re-run without --redeploy-only (or run 'deploy-config.sh --refresh-templates')${NC}"
+        echo -e "${YELLOW}to regenerate configuration before redeploying.${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✅ Configuration checkpoint validation passed${NC}"
 else
     echo -e "${YELLOW}⚙️  Setting up configuration files and replacing placeholders...${NC}"
     echo -e "${YELLOW}   (using --refresh-templates so already-initialized deployments pick up new template fields)${NC}"

@@ -194,6 +194,7 @@ update_wrangler_configs() {
         sed -i "s/\"ACCOUNT_ID\"/\"$escaped_account_id\"/g" workers/data-worker/wrangler.jsonc
         sed -i "s/\"DATA_BUCKET_NAME\"/\"$DATA_BUCKET_NAME\"/g" workers/data-worker/wrangler.jsonc
         sed -i "s/\"CONFIG_BUCKET_NAME\"/\"$CONFIG_BUCKET_NAME\"/g" workers/data-worker/wrangler.jsonc
+        sed -i "s/\"USER_WORKER_NAME\"/\"$USER_WORKER_NAME\"/g" workers/data-worker/wrangler.jsonc
         echo -e "${GREEN}    ✅ data-worker configuration updated${NC}"
     fi
 
