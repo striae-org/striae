@@ -131,3 +131,30 @@ export async function deleteFirebaseAuthUser(env: Env, userUid: string): Promise
 			: `Firebase Auth deletion failed with status ${deleteResponse.status}`,
 	);
 }
+
+/**
+ * Throws on any lookup failure rather than returning false, since callers must
+ * treat "unknown" as "still active" and never as "safe to sweep".
+ */
+export async function checkFirebaseAuthUserExists(env: Env, userUid: string): Promise<boolean> {
+	if (!env.PROJECT_ID || !env.FIREBASE_SERVICE_ACCOUNT_EMAIL || !env.FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY) {
+		throw new Error('Firebase Auth lookup is not configured in User Worker secrets');
+	}
+
+	const accessToken = await getGoogleAccessToken(env);
+	const lookupResponse = await fetch(`${FIREBASE_IDENTITY_TOOLKIT_BASE_URL}/${encodeURIComponent(env.PROJECT_ID)}/accounts:lookup`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ localId: [userUid] }),
+	});
+
+	if (!lookupResponse.ok) {
+		throw new Error(`Firebase Auth lookup failed with status ${lookupResponse.status}`);
+	}
+
+	const lookupPayload = (await lookupResponse.json().catch(() => ({}))) as { users?: unknown[] };
+	return Array.isArray(lookupPayload.users) && lookupPayload.users.length > 0;
+}

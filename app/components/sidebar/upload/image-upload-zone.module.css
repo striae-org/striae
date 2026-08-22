@@ -1,123 +1,123 @@
 /* Image Upload Zone */
 .imageUploadZone {
-  margin: 0.25rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
+	margin: 0.25rem 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.375rem;
 }
 
 .imageUploadZone label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #000000;
-  margin-bottom: 0.25rem;
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: #000000;
+	margin-bottom: 0.25rem;
 }
 
 .fileInput {
-  width: 100%;
-  padding: 0.375rem 0.5rem;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  font-size: 0.8125rem;
-  box-sizing: border-box;
-  cursor: pointer;
+	width: 100%;
+	padding: 0.375rem 0.5rem;
+	border: 1px solid #dee2e6;
+	border-radius: 4px;
+	font-size: 0.8125rem;
+	box-sizing: border-box;
+	cursor: pointer;
 }
 
 .fileInput:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-  opacity: 0.6;
+	background-color: #f5f5f5;
+	cursor: not-allowed;
+	opacity: 0.6;
 }
 
 .dragDropHint {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem 0.75rem;
-  border: 2px dashed #dee2e6;
-  border-radius: 6px;
-  background-color: #fafafa;
-  transition: all 0.2s ease;
-  pointer-events: none;
-  min-height: 72px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem 0.75rem;
+	border: 2px dashed #dee2e6;
+	border-radius: 6px;
+	background-color: #fafafa;
+	transition: all 0.2s ease;
+	pointer-events: none;
+	min-height: 72px;
 }
 
 .dragDropText {
-  margin: 0;
-  font-size: 0.82rem;
-  color: #6c757d;
-  text-align: center;
-  font-weight: 500;
+	margin: 0;
+	font-size: 0.82rem;
+	color: #6c757d;
+	text-align: center;
+	font-weight: 500;
 }
 
 .imageUploadZone.dragActive {
-  background-color: rgba(13, 110, 253, 0.05);
-  border-radius: 6px;
+	background-color: rgba(13, 110, 253, 0.05);
+	border-radius: 6px;
 }
 
 .imageUploadZone.dragActive .dragDropHint {
-  border-color: #0d6efd;
-  background-color: rgba(13, 110, 253, 0.1);
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+	border-color: #0d6efd;
+	background-color: rgba(13, 110, 253, 0.1);
+	box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
 }
 
 .imageUploadZone.dragActive .dragDropText {
-  color: #0d6efd;
-  font-weight: 600;
+	color: #0d6efd;
+	font-weight: 600;
 }
 
 .progressBar {
-  width: 100%;
-  height: 5px;
-  background-color: #e9ecef;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 0.25rem;
+	width: 100%;
+	height: 5px;
+	background-color: #e9ecef;
+	border-radius: 3px;
+	overflow: hidden;
+	margin-top: 0.25rem;
 }
 
 .progressFill {
-  height: 100%;
-  background-color: #198754;
-  transition: width 0.3s ease;
+	height: 100%;
+	background-color: #198754;
+	transition: width 0.3s ease;
 }
 
 .uploadingText {
-  font-size: 0.8125rem;
-  color: var(--textBody);
-  font-weight: 500;
+	font-size: 0.8125rem;
+	color: var(--textBody);
+	font-weight: 500;
 }
 
 .uploadStatusContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  margin-top: 0.125rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	width: 100%;
+	margin-top: 0.125rem;
 }
 
 .fileCountText {
-  font-size: 0.75rem;
-  color: var(--textLight);
-  font-weight: 400;
+	font-size: 0.75rem;
+	color: var(--textLight);
+	font-weight: 400;
 }
 
 .currentFileName {
-  font-size: 0.875rem;
-  color: var(--textBody);
-  margin: 0.25rem 0 0 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
+	font-size: 0.875rem;
+	color: var(--textBody);
+	margin: 0.25rem 0 0 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 100%;
 }
 
 /* Status Messages */
 .error {
-  font-size: 0.875rem;
-  color: #dc3545;
-  background-color: rgba(220, 53, 69, 0.1);
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 4px;
+	font-size: 0.875rem;
+	color: #dc3545;
+	background-color: rgba(220, 53, 69, 0.1);
+	margin-top: 0.5rem;
+	padding: 0.5rem;
+	border-radius: 4px;
 }

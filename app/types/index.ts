@@ -8,7 +8,7 @@ export * from './annotations';
 // User types
 export * from './user';
 
-// File types  
+// File types
 export * from './file';
 
 // Case types

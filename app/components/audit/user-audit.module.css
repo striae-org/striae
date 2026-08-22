@@ -1,682 +1,682 @@
 /* User Audit Trail Viewer Styles */
 
 .overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  cursor: default;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	padding: 20px;
+	cursor: default;
 }
 
 .modal {
-  background: var(--background);
-  border-radius: 8px;
-  width: 90%;
-  max-width: 1000px;
-  max-height: 90vh;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  cursor: default;
+	background: var(--background);
+	border-radius: 8px;
+	width: 90%;
+	max-width: 1000px;
+	max-height: 90vh;
+	overflow: hidden;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	display: flex;
+	flex-direction: column;
+	cursor: default;
 }
 
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid color-mix(in lab, var(--textLight) 20%, transparent);
-  background: var(--backgroundLight);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px;
+	border-bottom: 1px solid color-mix(in lab, var(--textLight) 20%, transparent);
+	background: var(--backgroundLight);
 }
 
 .headerActions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
 }
 
 .exportButtons {
-  display: flex;
-  gap: 8px;
+	display: flex;
+	gap: 8px;
 }
 
 .exportButton {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  display: flex;
-  align-items: center;
-  gap: 4px;
+	background: var(--primary);
+	color: white;
+	border: none;
+	padding: 8px 12px;
+	border-radius: 6px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	display: flex;
+	align-items: center;
+	gap: 4px;
 }
 
 .exportButton:hover {
-  background: color-mix(in lab, var(--primary) 85%, var(--black));
-  box-shadow: 0 2px 6px color-mix(in lab, var(--primary) 30%, transparent);
+	background: color-mix(in lab, var(--primary) 85%, var(--black));
+	box-shadow: 0 2px 6px color-mix(in lab, var(--primary) 30%, transparent);
 }
 
 .exportButton:active {
-  transform: translateY(0);
+	transform: translateY(0);
 }
 
 .exportButton:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-  box-shadow: none;
+	opacity: 0.65;
+	cursor: not-allowed;
+	box-shadow: none;
 }
 
 .title {
-  margin: 0;
-  color: var(--textTitle);
-  font-size: 1.5rem;
-  font-weight: var(--fontWeightMedium);
+	margin: 0;
+	color: var(--textTitle);
+	font-size: 1.5rem;
+	font-weight: var(--fontWeightMedium);
 }
 
 .closeButton {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 8px;
-  color: var(--textLight);
-  transition: color var(--durationS) var(--bezierFastoutSlowin);
-  border-radius: 4px;
+	background: none;
+	border: none;
+	font-size: 1.5rem;
+	cursor: pointer;
+	padding: 8px;
+	color: var(--textLight);
+	transition: color var(--durationS) var(--bezierFastoutSlowin);
+	border-radius: 4px;
 }
 
 .closeButton:hover {
-  color: var(--text);
-  background: color-mix(in lab, var(--textLight) 10%, transparent);
+	color: var(--text);
+	background: color-mix(in lab, var(--textLight) 10%, transparent);
 }
 
 .content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px;
 }
 
 .archivedNotice,
 .archivedWarning {
-  margin-bottom: 16px;
-  padding: 12px 14px;
-  border-radius: 6px;
-  border: 1px solid;
-  font-size: 0.9rem;
+	margin-bottom: 16px;
+	padding: 12px 14px;
+	border-radius: 6px;
+	border: 1px solid;
+	font-size: 0.9rem;
 }
 
 .archivedNotice {
-  background: color-mix(in lab, var(--primary) 8%, transparent);
-  border-color: color-mix(in lab, var(--primary) 35%, transparent);
-  color: var(--textBody);
+	background: color-mix(in lab, var(--primary) 8%, transparent);
+	border-color: color-mix(in lab, var(--primary) 35%, transparent);
+	color: var(--textBody);
 }
 
 .archivedWarning {
-  background: color-mix(in lab, var(--warning) 12%, transparent);
-  border-color: color-mix(in lab, var(--warning) 40%, transparent);
-  color: var(--text);
+	background: color-mix(in lab, var(--warning) 12%, transparent);
+	border-color: color-mix(in lab, var(--warning) 40%, transparent);
+	color: var(--text);
 }
 
 /* Loading & Error States */
 .loading,
 .error {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--textBody);
+	text-align: center;
+	padding: 40px 20px;
+	color: var(--textBody);
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid color-mix(in lab, var(--primary) 20%, transparent);
-  border-top: 3px solid var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
+	width: 40px;
+	height: 40px;
+	border: 3px solid color-mix(in lab, var(--primary) 20%, transparent);
+	border-top: 3px solid var(--primary);
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin: 0 auto 16px;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
 }
 
 .error {
-  color: var(--error);
+	color: var(--error);
 }
 
 .retryButton {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  margin-top: 12px;
-  transition: background-color var(--durationS) var(--bezierFastoutSlowin);
+	background: var(--primary);
+	color: white;
+	border: none;
+	padding: 8px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 0.9rem;
+	margin-top: 12px;
+	transition: background-color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .retryButton:hover {
-  background: color-mix(in lab, var(--primary) 85%, var(--black));
+	background: color-mix(in lab, var(--primary) 85%, var(--black));
 }
 
 /* Summary Section */
 .summary {
-  margin-bottom: 24px;
-  padding: 16px;
-  background: var(--backgroundLight);
-  border-radius: 6px;
-  border: 1px solid color-mix(in lab, var(--textLight) 20%, transparent);
+	margin-bottom: 24px;
+	padding: 16px;
+	background: var(--backgroundLight);
+	border-radius: 6px;
+	border: 1px solid color-mix(in lab, var(--textLight) 20%, transparent);
 }
 
 .exportScopeNote {
-  margin: -12px 0 16px;
-  padding: 10px 12px;
-  border-radius: 6px;
-  border: 1px solid color-mix(in lab, var(--primary) 30%, transparent);
-  background: color-mix(in lab, var(--primary) 10%, transparent);
-  color: var(--textBody);
-  font-size: 0.85rem;
-  line-height: 1.45;
+	margin: -12px 0 16px;
+	padding: 10px 12px;
+	border-radius: 6px;
+	border: 1px solid color-mix(in lab, var(--primary) 30%, transparent);
+	background: color-mix(in lab, var(--primary) 10%, transparent);
+	color: var(--textBody);
+	font-size: 0.85rem;
+	line-height: 1.45;
 }
 
 /* Common heading styles */
 .summary h3,
 .entriesList h3 {
-  margin: 0 0 16px 0;
-  color: var(--textTitle);
-  font-size: 1.2rem;
+	margin: 0 0 16px 0;
+	color: var(--textTitle);
+	font-size: 1.2rem;
 }
 
 .summaryGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 12px;
 }
 
 .summaryItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background: var(--background);
-  border-radius: 4px;
-  border: 1px solid color-mix(in lab, var(--textLight) 15%, transparent);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 12px;
+	background: var(--background);
+	border-radius: 4px;
+	border: 1px solid color-mix(in lab, var(--textLight) 15%, transparent);
 }
 
 .label {
-  color: var(--textBody);
-  font-weight: 500;
-  font-size: 0.9rem;
+	color: var(--textBody);
+	font-weight: 500;
+	font-size: 0.9rem;
 }
 
 .value {
-  color: var(--text);
-  font-weight: var(--fontWeightMedium);
-  font-size: 0.9rem;
+	color: var(--text);
+	font-weight: var(--fontWeightMedium);
+	font-size: 0.9rem;
 }
 
 .value.warning {
-  color: var(--error);
-  font-weight: var(--fontWeightBold);
+	color: var(--error);
+	font-weight: var(--fontWeightBold);
 }
 
 .warning {
-  color: var(--error);
-  font-weight: var(--fontWeightBold);
+	color: var(--error);
+	font-weight: var(--fontWeightBold);
 }
 
 /* Standalone classes for dynamic assignment */
 .success {
-  border-color: color-mix(in lab, var(--success) 40%, transparent);
-  background: color-mix(in lab, var(--success) 3%, transparent);
+	border-color: color-mix(in lab, var(--success) 40%, transparent);
+	background: color-mix(in lab, var(--success) 3%, transparent);
 }
 
 .failure {
-  border-color: color-mix(in lab, var(--error) 40%, transparent);
-  background: color-mix(in lab, var(--error) 3%, transparent);
+	border-color: color-mix(in lab, var(--error) 40%, transparent);
+	background: color-mix(in lab, var(--error) 3%, transparent);
 }
 
 .blocked {
-  border-color: color-mix(in lab, var(--error) 60%, transparent);
-  background: color-mix(in lab, var(--error) 5%, transparent);
+	border-color: color-mix(in lab, var(--error) 60%, transparent);
+	background: color-mix(in lab, var(--error) 5%, transparent);
 }
 
 .low {
-  background: color-mix(in lab, var(--success) 15%, transparent);
-  color: var(--success);
+	background: color-mix(in lab, var(--success) 15%, transparent);
+	color: var(--success);
 }
 
 .medium {
-  background: color-mix(in lab, var(--warning) 15%, transparent);
-  color: var(--warning);
+	background: color-mix(in lab, var(--warning) 15%, transparent);
+	color: var(--warning);
 }
 
 .high {
-  background: color-mix(in lab, var(--error) 15%, transparent);
-  color: var(--error);
+	background: color-mix(in lab, var(--error) 15%, transparent);
+	color: var(--error);
 }
 
 .critical {
-  background: color-mix(in lab, var(--error) 25%, transparent);
-  color: var(--error);
-  font-weight: var(--fontWeightBold);
+	background: color-mix(in lab, var(--error) 25%, transparent);
+	color: var(--error);
+	font-weight: var(--fontWeightBold);
 }
 
 /* User Information Section */
 .userInfoContent {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 }
 
 .userInfoItem {
-  color: var(--textBody);
-  font-size: 0.9rem;
-  line-height: 1.4;
+	color: var(--textBody);
+	font-size: 0.9rem;
+	line-height: 1.4;
 }
 
 .userInfoItem strong {
-  color: var(--text);
-  font-weight: var(--fontWeightMedium);
+	color: var(--text);
+	font-weight: var(--fontWeightMedium);
 }
 
 /* Filters */
 .filters {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-  padding: 16px;
-  background: color-mix(in lab, var(--backgroundLight) 50%, transparent);
-  border-radius: 6px;
-  border: 1px solid color-mix(in lab, var(--textLight) 15%, transparent);
+	display: flex;
+	gap: 16px;
+	flex-wrap: wrap;
+	margin-bottom: 24px;
+	padding: 16px;
+	background: color-mix(in lab, var(--backgroundLight) 50%, transparent);
+	border-radius: 6px;
+	border: 1px solid color-mix(in lab, var(--textLight) 15%, transparent);
 }
 
 .filterGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 140px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 140px;
 }
 
 .filterGroup label {
-  font-size: 0.85rem;
-  color: var(--textBody);
-  font-weight: 500;
+	font-size: 0.85rem;
+	color: var(--textBody);
+	font-weight: 500;
 }
 
 .filterSelect {
-  padding: 6px 8px;
-  border: 1px solid color-mix(in lab, var(--textLight) 30%, transparent);
-  border-radius: 4px;
-  background: var(--background);
-  color: var(--text);
-  font-size: 0.9rem;
-  min-width: 120px;
+	padding: 6px 8px;
+	border: 1px solid color-mix(in lab, var(--textLight) 30%, transparent);
+	border-radius: 4px;
+	background: var(--background);
+	color: var(--text);
+	font-size: 0.9rem;
+	min-width: 120px;
 }
 
 .customDateRange {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 0 8px 0;
-  border-top: 1px solid color-mix(in lab, var(--textLight) 20%, transparent);
-  margin-top: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	width: 100%;
+	padding: 12px 0 8px 0;
+	border-top: 1px solid color-mix(in lab, var(--textLight) 20%, transparent);
+	margin-top: 8px;
 }
 
 .customDateInputs {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  width: 100%;
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+	width: 100%;
 }
 
 .filterInput {
-  padding: 6px 8px;
-  border: 1px solid color-mix(in lab, var(--textLight) 30%, transparent);
-  border-radius: 4px;
-  background: var(--background);
-  color: var(--text);
-  font-size: 0.9rem;
-  min-width: 140px;
-  font-family: inherit;
-  flex: 1;
+	padding: 6px 8px;
+	border: 1px solid color-mix(in lab, var(--textLight) 30%, transparent);
+	border-radius: 4px;
+	background: var(--background);
+	color: var(--text);
+	font-size: 0.9rem;
+	min-width: 140px;
+	font-family: inherit;
+	flex: 1;
 }
 
 .filterInput:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 20%, transparent);
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 20%, transparent);
 }
 
 .filterInput:disabled {
-  background: color-mix(in lab, var(--background) 95%, var(--text));
-  color: color-mix(in lab, var(--text) 50%, transparent);
-  cursor: not-allowed;
+	background: color-mix(in lab, var(--background) 95%, var(--text));
+	color: color-mix(in lab, var(--text) 50%, transparent);
+	cursor: not-allowed;
 }
 
 .inputWithButton {
-  display: flex;
-  align-items: center;
-  position: relative;
-  flex: 1;
-  gap: 8px;
+	display: flex;
+	align-items: center;
+	position: relative;
+	flex: 1;
+	gap: 8px;
 }
 
 .caseFilterButtons {
-  display: flex;
-  gap: 4px;
-  align-items: center;
+	display: flex;
+	gap: 4px;
+	align-items: center;
 }
 
 .filterButton {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  white-space: nowrap;
+	background: var(--primary);
+	color: white;
+	border: none;
+	padding: 6px 12px;
+	border-radius: 4px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	white-space: nowrap;
 }
 
 .filterButton:hover {
-  background: color-mix(in lab, var(--primary) 85%, var(--black));
-  box-shadow: 0 2px 6px color-mix(in lab, var(--primary) 30%, transparent);
+	background: color-mix(in lab, var(--primary) 85%, var(--black));
+	box-shadow: 0 2px 6px color-mix(in lab, var(--primary) 30%, transparent);
 }
 
 .filterButton:active {
-  transform: translateY(0);
+	transform: translateY(0);
 }
 
 .clearButton {
-  background: var(--error);
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  white-space: nowrap;
+	background: var(--error);
+	color: white;
+	border: none;
+	padding: 6px 12px;
+	border-radius: 4px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	white-space: nowrap;
 }
 
 .clearButton:hover {
-  background: color-mix(in lab, var(--error) 85%, var(--black));
-  box-shadow: 0 2px 6px color-mix(in lab, var(--error) 30%, transparent);
+	background: color-mix(in lab, var(--error) 85%, var(--black));
+	box-shadow: 0 2px 6px color-mix(in lab, var(--error) 30%, transparent);
 }
 
 .clearButton:active {
-  transform: translateY(0);
+	transform: translateY(0);
 }
 
 .activeFilter {
-  margin-top: 4px;
-  color: var(--textLight);
-  font-size: 0.875rem;
+	margin-top: 4px;
+	color: var(--textLight);
+	font-size: 0.875rem;
 }
 
 .activeFilter strong {
-  color: var(--primary);
+	color: var(--primary);
 }
 
 .dateRangeButtons {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid color-mix(in lab, var(--textLight) 20%, transparent);
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px solid color-mix(in lab, var(--textLight) 20%, transparent);
 }
 
 /* Entries List */
 .entry {
-  margin-bottom: 12px;
-  border-radius: 6px;
-  border: 1px solid;
-  overflow: hidden;
-  transition: box-shadow var(--durationS) var(--bezierFastoutSlowin);
+	margin-bottom: 12px;
+	border-radius: 6px;
+	border: 1px solid;
+	overflow: hidden;
+	transition: box-shadow var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .entry:hover {
-  box-shadow: 0 2px 8px color-mix(in lab, var(--textLight) 20%, transparent);
+	box-shadow: 0 2px 8px color-mix(in lab, var(--textLight) 20%, transparent);
 }
 
 .entry.success {
-  border-color: color-mix(in lab, var(--success) 40%, transparent);
-  background: color-mix(in lab, var(--success) 3%, transparent);
+	border-color: color-mix(in lab, var(--success) 40%, transparent);
+	background: color-mix(in lab, var(--success) 3%, transparent);
 }
 
 .entry.failure {
-  border-color: color-mix(in lab, var(--error) 40%, transparent);
-  background: color-mix(in lab, var(--error) 3%, transparent);
+	border-color: color-mix(in lab, var(--error) 40%, transparent);
+	background: color-mix(in lab, var(--error) 3%, transparent);
 }
 
 .entry.warning {
-  border-color: color-mix(in lab, var(--warning) 40%, transparent);
-  background: color-mix(in lab, var(--warning) 3%, transparent);
+	border-color: color-mix(in lab, var(--warning) 40%, transparent);
+	background: color-mix(in lab, var(--warning) 3%, transparent);
 }
 
 .entry.blocked {
-  border-color: color-mix(in lab, var(--error) 60%, transparent);
-  background: color-mix(in lab, var(--error) 5%, transparent);
+	border-color: color-mix(in lab, var(--error) 60%, transparent);
+	background: color-mix(in lab, var(--error) 5%, transparent);
 }
 
 .entryHeader {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: color-mix(in lab, var(--backgroundLight) 50%, transparent);
-  border-bottom: 1px solid color-mix(in lab, var(--textLight) 15%, transparent);
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 14px;
+	background: color-mix(in lab, var(--backgroundLight) 50%, transparent);
+	border-bottom: 1px solid color-mix(in lab, var(--textLight) 15%, transparent);
 }
 
 .entryIcons {
-  display: flex;
-  gap: 4px;
-  align-items: center;
+	display: flex;
+	gap: 4px;
+	align-items: center;
 }
 
 .actionIcon {
-  font-size: 1rem;
+	font-size: 1rem;
 }
 
 .statusIcon {
-  font-size: 1rem;
+	font-size: 1rem;
 }
 
 .entryTitle {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
 }
 
 .action {
-  background: var(--primary);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 0.7rem;
-  font-weight: var(--fontWeightMedium);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+	background: var(--primary);
+	color: white;
+	padding: 2px 6px;
+	border-radius: 10px;
+	font-size: 0.7rem;
+	font-weight: var(--fontWeightMedium);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
 }
 
 .fileName {
-  color: var(--textBody);
-  font-size: 0.85rem;
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+	color: var(--textBody);
+	font-size: 0.85rem;
+	max-width: 200px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .entryTimestamp {
-  color: var(--textLight);
-  font-size: 0.8rem;
-  white-space: nowrap;
+	color: var(--textLight);
+	font-size: 0.8rem;
+	white-space: nowrap;
 }
 
 .entryHeaderActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: auto;
 }
 
 .entryDetailsToggle {
-  background: color-mix(in lab, var(--primary) 10%, transparent);
-  color: color-mix(in lab, var(--primary) 65%, var(--text));
-  border: 1px solid color-mix(in lab, var(--primary) 30%, transparent);
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: var(--fontWeightMedium);
-  cursor: pointer;
-  transition: background-color var(--durationS) var(--bezierFastoutSlowin);
+	background: color-mix(in lab, var(--primary) 10%, transparent);
+	color: color-mix(in lab, var(--primary) 65%, var(--text));
+	border: 1px solid color-mix(in lab, var(--primary) 30%, transparent);
+	padding: 4px 8px;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: var(--fontWeightMedium);
+	cursor: pointer;
+	transition: background-color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .entryDetailsToggle:hover {
-  background: color-mix(in lab, var(--primary) 16%, transparent);
+	background: color-mix(in lab, var(--primary) 16%, transparent);
 }
 
 .entryDetailsToggle:focus-visible {
-  outline: 2px solid color-mix(in lab, var(--primary) 45%, transparent);
-  outline-offset: 2px;
+	outline: 2px solid color-mix(in lab, var(--primary) 45%, transparent);
+	outline-offset: 2px;
 }
 
 /* Entry Details */
 .entryDetails {
-  padding: 12px 14px;
+	padding: 12px 14px;
 }
 
 .expandedDetails {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed color-mix(in lab, var(--textLight) 25%, transparent);
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 1px dashed color-mix(in lab, var(--textLight) 25%, transparent);
 }
 
 .expandedDetailsCode {
-  margin: 4px 0 0;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid color-mix(in lab, var(--textLight) 20%, transparent);
-  background: color-mix(in lab, var(--backgroundLight) 75%, transparent);
-  color: var(--text);
-  font-size: 0.78rem;
-  line-height: 1.4;
-  white-space: pre-wrap;
-  word-break: break-word;
-  max-height: 280px;
-  overflow: auto;
+	margin: 4px 0 0;
+	padding: 10px;
+	border-radius: 6px;
+	border: 1px solid color-mix(in lab, var(--textLight) 20%, transparent);
+	background: color-mix(in lab, var(--backgroundLight) 75%, transparent);
+	color: var(--text);
+	font-size: 0.78rem;
+	line-height: 1.4;
+	white-space: pre-wrap;
+	word-break: break-word;
+	max-height: 280px;
+	overflow: auto;
 }
 
 .detailRow {
-  display: flex;
-  align-items: center;
-  margin-bottom: 6px;
-  gap: 8px;
+	display: flex;
+	align-items: center;
+	margin-bottom: 6px;
+	gap: 8px;
 }
 
 .detailRow:last-child {
-  margin-bottom: 0;
+	margin-bottom: 0;
 }
 
 .detailLabel {
-  color: var(--textBody);
-  font-size: 0.85rem;
-  font-weight: 500;
-  min-width: max-content;
-  flex-shrink: 0;
+	color: var(--textBody);
+	font-size: 0.85rem;
+	font-weight: 500;
+	min-width: max-content;
+	flex-shrink: 0;
 }
 
 .detailValue {
-  color: var(--text);
-  font-size: 0.85rem;
-  word-break: break-word;
+	color: var(--text);
+	font-size: 0.85rem;
+	word-break: break-word;
 }
 
 .badgeTag {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in lab, var(--primary) 35%, transparent);
-  background: color-mix(in lab, var(--primary) 12%, transparent);
-  color: color-mix(in lab, var(--primary) 70%, var(--text));
-  font-size: 0.78rem;
-  font-weight: var(--fontWeightMedium);
-  letter-spacing: 0.2px;
-  line-height: 1.4;
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 10px;
+	border-radius: 999px;
+	border: 1px solid color-mix(in lab, var(--primary) 35%, transparent);
+	background: color-mix(in lab, var(--primary) 12%, transparent);
+	color: color-mix(in lab, var(--primary) 70%, var(--text));
+	font-size: 0.78rem;
+	font-weight: var(--fontWeightMedium);
+	letter-spacing: 0.2px;
+	line-height: 1.4;
 }
 
 .badgeTagMuted {
-  border-color: color-mix(in lab, var(--textLight) 25%, transparent);
-  background: color-mix(in lab, var(--backgroundLight) 70%, transparent);
-  color: var(--textLight);
+	border-color: color-mix(in lab, var(--textLight) 25%, transparent);
+	background: color-mix(in lab, var(--backgroundLight) 70%, transparent);
+	color: var(--textLight);
 }
 
 .severity {
-  font-weight: var(--fontWeightMedium);
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 0.7rem;
-  text-transform: uppercase;
+	font-weight: var(--fontWeightMedium);
+	padding: 2px 6px;
+	border-radius: 10px;
+	font-size: 0.7rem;
+	text-transform: uppercase;
 }
 
 .severity.low {
-  background: color-mix(in lab, var(--success) 15%, transparent);
-  color: var(--success);
+	background: color-mix(in lab, var(--success) 15%, transparent);
+	color: var(--success);
 }
 
 .severity.medium {
-  background: color-mix(in lab, var(--warning) 15%, transparent);
-  color: var(--warning);
+	background: color-mix(in lab, var(--warning) 15%, transparent);
+	color: var(--warning);
 }
 
 .severity.high {
-  background: color-mix(in lab, var(--error) 15%, transparent);
-  color: var(--error);
+	background: color-mix(in lab, var(--error) 15%, transparent);
+	color: var(--error);
 }
 
 .severity.critical {
-  background: color-mix(in lab, var(--error) 25%, transparent);
-  color: var(--error);
-  font-weight: var(--fontWeightBold);
+	background: color-mix(in lab, var(--error) 25%, transparent);
+	color: var(--error);
+	font-weight: var(--fontWeightBold);
 }
 
 .noEntries {
-  text-align: center;
-  padding: 32px 16px;
-  color: var(--textLight);
-  font-style: italic;
+	text-align: center;
+	padding: 32px 16px;
+	color: var(--textLight);
+	font-style: italic;
 }
 
 .noData {
-  text-align: center;
-  padding: 32px 16px;
-  color: var(--textLight);
-  font-style: italic;
+	text-align: center;
+	padding: 32px 16px;
+	color: var(--textLight);
+	font-style: italic;
 }

@@ -1,14 +1,20 @@
 import type { User } from 'firebase/auth';
 import {
-  calculateSHA256Secure,
-  createPublicSigningKeyFileName,
-  getCurrentPublicSigningKeyDetails,
-  getVerificationPublicKey,
-  getCurrentEncryptionPublicKeyDetails,
-  encryptExportDataWithAllImages
+	calculateSHA256Secure,
+	createPublicSigningKeyFileName,
+	getCurrentPublicSigningKeyDetails,
+	getVerificationPublicKey,
+	getCurrentEncryptionPublicKeyDetails,
+	encryptExportDataWithAllImages,
 } from '~/utils/forensics';
 import { getUserData, getCaseData, updateCaseData, signConfirmationData, upsertFileConfirmationSummary } from '~/utils/data';
-import { type AnnotationData, type ConfirmationData, type CaseConfirmations, type CaseDataWithConfirmations, type ConfirmationImportData } from '~/types';
+import {
+	type AnnotationData,
+	type ConfirmationData,
+	type CaseConfirmations,
+	type CaseDataWithConfirmations,
+	type ConfirmationImportData,
+} from '~/types';
 import { auditService } from '~/services/audit';
 import { fetchAllCaseEntriesForExport } from './audit-export-shared';
 import { buildSignedConfirmationAuditTrail } from './confirmation-audit-bundle';
@@ -17,448 +23,428 @@ import { buildSignedConfirmationAuditTrail } from './confirmation-audit-bundle';
  * Store a confirmation for a specific image, linked to the original image ID
  */
 export async function storeConfirmation(
-  user: User,
-  caseNumber: string,
-  currentImageId: string,
-  confirmationData: ConfirmationData,
-  originalImageFileName?: string,
-  annotationDataForSummary?: AnnotationData
+	user: User,
+	caseNumber: string,
+	currentImageId: string,
+	confirmationData: ConfirmationData,
+	originalImageFileName?: string,
+	annotationDataForSummary?: AnnotationData,
 ): Promise<boolean> {
-  const startTime = Date.now();
-  let originalImageId: string | undefined; // Declare at function level for error handling
-  
-  try {
-    // Start workflow for confirmation creation
-    auditService.startWorkflow(caseNumber);
-    
-    // Get the current case data using centralized function
-    const caseData = await getCaseData(user, caseNumber) as CaseDataWithConfirmations;
-    if (!caseData) {
-      throw new Error('Case not found');
-    }
+	const startTime = Date.now();
+	let originalImageId: string | undefined; // Declare at function level for error handling
 
-    // Find the original image ID for the current image
-    if (caseData.originalImageIds) {
-      // Find the original ID by looking up the current image ID in the mapping
-      for (const [origId, currentId] of Object.entries(caseData.originalImageIds)) {
-        if (currentId === currentImageId) {
-          originalImageId = origId;
-          break;
-        }
-      }
-    }
+	try {
+		// Start workflow for confirmation creation
+		auditService.startWorkflow(caseNumber);
 
-    if (!originalImageId) {
-      throw new Error('Could not find original image ID for current image');
-    }
+		// Get the current case data using centralized function
+		const caseData = (await getCaseData(user, caseNumber)) as CaseDataWithConfirmations;
+		if (!caseData) {
+			throw new Error('Case not found');
+		}
 
-    // Initialize confirmations object if it doesn't exist
-    if (!caseData.confirmations) {
-      caseData.confirmations = {};
-    }
+		// Find the original image ID for the current image
+		if (caseData.originalImageIds) {
+			// Find the original ID by looking up the current image ID in the mapping
+			for (const [origId, currentId] of Object.entries(caseData.originalImageIds)) {
+				if (currentId === currentImageId) {
+					originalImageId = origId;
+					break;
+				}
+			}
+		}
 
-    // Initialize array for this original image if it doesn't exist
-    if (!caseData.confirmations[originalImageId]) {
-      caseData.confirmations[originalImageId] = [];
-    }
+		if (!originalImageId) {
+			throw new Error('Could not find original image ID for current image');
+		}
 
-    // Add the confirmation data directly (already complete from modal)
-    caseData.confirmations[originalImageId].push(confirmationData);
+		// Initialize confirmations object if it doesn't exist
+		if (!caseData.confirmations) {
+			caseData.confirmations = {};
+		}
 
-    // Store the updated case data using centralized function
-    await updateCaseData(user, caseNumber, caseData);
+		// Initialize array for this original image if it doesn't exist
+		if (!caseData.confirmations[originalImageId]) {
+			caseData.confirmations[originalImageId] = [];
+		}
 
-    if (annotationDataForSummary) {
-      try {
-        await upsertFileConfirmationSummary(user, caseNumber, currentImageId, annotationDataForSummary);
-      } catch (summaryError) {
-        console.warn(`Failed to update confirmation summary for ${caseNumber}/${currentImageId}:`, summaryError);
-      }
-    }
+		// Add the confirmation data directly (already complete from modal)
+		caseData.confirmations[originalImageId].push(confirmationData);
 
-    console.log(`Confirmation stored for original image ${originalImageId}:`, confirmationData);
-    
-    // Log successful confirmation creation
-    const endTime = Date.now();
-    await auditService.logConfirmationCreation(
-      user,
-      caseNumber,
-      confirmationData.confirmationId,
-      'success',
-      [],
-      undefined, // Original examiner UID not available in this context
-      {
-        processingTimeMs: endTime - startTime,
-        fileSizeBytes: 0 // Not applicable for confirmation creation
-      },
-      originalImageId,
-      originalImageFileName,
-      confirmationData.badgeId
-    );
-    
-    auditService.endWorkflow();
-    
-    return true;
+		// Store the updated case data using centralized function
+		await updateCaseData(user, caseNumber, caseData);
 
-  } catch (error) {
-    console.error('Failed to store confirmation:', error);
-    
-    // Log failed confirmation creation
-    const endTime = Date.now();
-    await auditService.logConfirmationCreation(
-      user,
-      caseNumber,
-      confirmationData?.confirmationId || 'unknown',
-      'failure',
-      [error instanceof Error ? error.message : 'Unknown error'],
-      undefined,
-      {
-        processingTimeMs: endTime - startTime,
-        fileSizeBytes: 0
-      },
-      originalImageId || currentImageId, // Use originalImageId if available, fallback to currentImageId
-      originalImageFileName,
-      confirmationData?.badgeId
-    );
-    
-    auditService.endWorkflow();
-    
-    return false;
-  }
+		if (annotationDataForSummary) {
+			try {
+				await upsertFileConfirmationSummary(user, caseNumber, currentImageId, annotationDataForSummary);
+			} catch (summaryError) {
+				console.warn(`Failed to update confirmation summary for ${caseNumber}/${currentImageId}:`, summaryError);
+			}
+		}
+
+		console.log(`Confirmation stored for original image ${originalImageId}:`, confirmationData);
+
+		// Log successful confirmation creation
+		const endTime = Date.now();
+		await auditService.logConfirmationCreation(
+			user,
+			caseNumber,
+			confirmationData.confirmationId,
+			'success',
+			[],
+			undefined, // Original examiner UID not available in this context
+			{
+				processingTimeMs: endTime - startTime,
+				fileSizeBytes: 0, // Not applicable for confirmation creation
+			},
+			originalImageId,
+			originalImageFileName,
+			confirmationData.badgeId,
+		);
+
+		auditService.endWorkflow();
+
+		return true;
+	} catch (error) {
+		console.error('Failed to store confirmation:', error);
+
+		// Log failed confirmation creation
+		const endTime = Date.now();
+		await auditService.logConfirmationCreation(
+			user,
+			caseNumber,
+			confirmationData?.confirmationId || 'unknown',
+			'failure',
+			[error instanceof Error ? error.message : 'Unknown error'],
+			undefined,
+			{
+				processingTimeMs: endTime - startTime,
+				fileSizeBytes: 0,
+			},
+			originalImageId || currentImageId, // Use originalImageId if available, fallback to currentImageId
+			originalImageFileName,
+			confirmationData?.badgeId,
+		);
+
+		auditService.endWorkflow();
+
+		return false;
+	}
 }
 
 /**
  * Get all confirmations for a case (useful for the original analyst)
  */
-export async function getCaseConfirmations(
-  user: User,
-  caseNumber: string
-): Promise<CaseConfirmations | null> {
-  try {
-    const caseData = await getCaseData(user, caseNumber) as CaseDataWithConfirmations;
-    if (!caseData) {
-      console.error('Case not found');
-      return null;
-    }
+export async function getCaseConfirmations(user: User, caseNumber: string): Promise<CaseConfirmations | null> {
+	try {
+		const caseData = (await getCaseData(user, caseNumber)) as CaseDataWithConfirmations;
+		if (!caseData) {
+			console.error('Case not found');
+			return null;
+		}
 
-    return caseData.confirmations || null;
-
-  } catch (error) {
-    console.error('Failed to get case confirmations:', error);
-    return null;
-  }
+		return caseData.confirmations || null;
+	} catch (error) {
+		console.error('Failed to get case confirmations:', error);
+		return null;
+	}
 }
 
 /**
  * Get case data with forensic manifest information if available
  */
 export async function getCaseDataWithManifest(
-  user: User,
-  caseNumber: string
+	user: User,
+	caseNumber: string,
 ): Promise<{ confirmations: CaseConfirmations | null; forensicManifestCreatedAt?: string; originalCaseOwnerUid?: string }> {
-  try {
-    const caseData = await getCaseData(user, caseNumber) as CaseDataWithConfirmations & { forensicManifestCreatedAt?: string };
-    if (!caseData) {
-      console.error('Case not found');
-      return { confirmations: null };
-    }
-    
-    return {
-      confirmations: caseData.confirmations || null,
-      forensicManifestCreatedAt: caseData.forensicManifestCreatedAt,
-      originalCaseOwnerUid: caseData.originalCaseOwnerUid
-    };
+	try {
+		const caseData = (await getCaseData(user, caseNumber)) as CaseDataWithConfirmations & { forensicManifestCreatedAt?: string };
+		if (!caseData) {
+			console.error('Case not found');
+			return { confirmations: null };
+		}
 
-  } catch (error) {
-    console.error('Failed to get case data with manifest:', error);
-    return { confirmations: null };
-  }
+		return {
+			confirmations: caseData.confirmations || null,
+			forensicManifestCreatedAt: caseData.forensicManifestCreatedAt,
+			originalCaseOwnerUid: caseData.originalCaseOwnerUid,
+		};
+	} catch (error) {
+		console.error('Failed to get case data with manifest:', error);
+		return { confirmations: null };
+	}
 }
 
 /**
  * Get confirmations for a specific original image ID
  */
-export async function getImageConfirmations(
-  user: User,
-  caseNumber: string,
-  originalImageId: string
-): Promise<ConfirmationData[]> {
-  try {
-    const confirmations = await getCaseConfirmations(user, caseNumber);
-    return confirmations?.[originalImageId] || [];
-  } catch (error) {
-    console.error('Failed to get image confirmations:', error);
-    return [];
-  }
+export async function getImageConfirmations(user: User, caseNumber: string, originalImageId: string): Promise<ConfirmationData[]> {
+	try {
+		const confirmations = await getCaseConfirmations(user, caseNumber);
+		return confirmations?.[originalImageId] || [];
+	} catch (error) {
+		console.error('Failed to get image confirmations:', error);
+		return [];
+	}
 }
 
 /**
  * Exports confirmation data as a JSON file with SHA256 hash for forensic integrity
  */
-export async function exportConfirmationData(
-  user: User, 
-  caseNumber: string
-): Promise<void> {
-  const startTime = Date.now();
-  let signatureKeyId: string | undefined;
-  let signaturePresent = false;
-  let signatureValid = false;
-  
-  try {
-    // Start audit workflow
-    auditService.startWorkflow(caseNumber);
-    
-    // Get all confirmation data and forensic manifest info for the case
-    const { confirmations: caseConfirmations, forensicManifestCreatedAt, originalCaseOwnerUid } = await getCaseDataWithManifest(user, caseNumber);
-    
-    if (!caseConfirmations || Object.keys(caseConfirmations).length === 0) {
-      throw new Error('No confirmation data found for this case');
-    }
+export async function exportConfirmationData(user: User, caseNumber: string): Promise<void> {
+	const startTime = Date.now();
+	let signatureKeyId: string | undefined;
+	let signaturePresent = false;
+	let signatureValid = false;
 
-    // Get user metadata for export (same as case exports)
-    let userMetadata: {
-      exportedBy: string;
-      exportedByUid: string;
-      exportedByName: string;
-      exportedByCompany: string;
-      exportedByBadgeId?: string;
-    } = {
-      exportedBy: user.email || 'Unknown User',
-      exportedByUid: user.uid,
-      exportedByName: user.displayName || 'N/A',
-      exportedByCompany: 'N/A'
-    };
+	try {
+		// Start audit workflow
+		auditService.startWorkflow(caseNumber);
 
-    try {
-      const userData = await getUserData(user);
-      if (userData) {
-        userMetadata = {
-          exportedBy: user.email || 'Unknown User',
-          exportedByUid: userData.uid,
-          exportedByName: `${userData.firstName} ${userData.lastName}`.trim(),
-          exportedByCompany: userData.company,
-          ...(userData.badgeId ? { exportedByBadgeId: userData.badgeId } : {})
-        };
-      }
-    } catch (error) {
-      console.warn('Failed to fetch user data for confirmation export metadata:', error);
-    }
+		// Get all confirmation data and forensic manifest info for the case
+		const {
+			confirmations: caseConfirmations,
+			forensicManifestCreatedAt,
+			originalCaseOwnerUid,
+		} = await getCaseDataWithManifest(user, caseNumber);
 
-    // Try to get the forensic manifest createdAt timestamp from the original case export
-    const originalExportCreatedAt: string | undefined = forensicManifestCreatedAt;
-    
-    if (!originalExportCreatedAt) {
-      console.warn(`No forensic manifest timestamp found for case ${caseNumber}. This case may have been imported before forensic linking was implemented, or the original export did not include a forensic manifest.`);
-    }
+		if (!caseConfirmations || Object.keys(caseConfirmations).length === 0) {
+			throw new Error('No confirmation data found for this case');
+		}
 
-    // Create export data with metadata
-    const exportData = {
-      metadata: {
-        caseNumber,
-        exportDate: new Date().toISOString(),
-        ...userMetadata,
-        totalConfirmations: Object.keys(caseConfirmations).length,
-        version: '2.0',
-        ...(originalExportCreatedAt && { originalExportCreatedAt }),
-        ...(originalCaseOwnerUid && { originalCaseOwnerUid })
-      },
-      confirmations: caseConfirmations
-    };
+		// Get user metadata for export (same as case exports)
+		let userMetadata: {
+			exportedBy: string;
+			exportedByUid: string;
+			exportedByName: string;
+			exportedByCompany: string;
+			exportedByBadgeId?: string;
+		} = {
+			exportedBy: user.email || 'Unknown User',
+			exportedByUid: user.uid,
+			exportedByName: user.displayName || 'N/A',
+			exportedByCompany: 'N/A',
+		};
 
-    // Convert to JSON string for hash calculation
-    const jsonString = JSON.stringify(exportData, null, 2);
-    
-    // Calculate SHA-256 hash for data integrity using secure version for forensic data
-    const hash = await calculateSHA256Secure(jsonString);
-    
-    // Add hash prior to signing
-    const unsignedExportData: ConfirmationImportData = {
-      ...exportData,
-      metadata: {
-        ...exportData.metadata,
-        hash: hash.toUpperCase()
-      }
-    };
+		try {
+			const userData = await getUserData(user);
+			if (userData) {
+				userMetadata = {
+					exportedBy: user.email || 'Unknown User',
+					exportedByUid: userData.uid,
+					exportedByName: `${userData.firstName} ${userData.lastName}`.trim(),
+					exportedByCompany: userData.company,
+					...(userData.badgeId ? { exportedByBadgeId: userData.badgeId } : {}),
+				};
+			}
+		} catch (error) {
+			console.warn('Failed to fetch user data for confirmation export metadata:', error);
+		}
 
-    // Request server-side signature to prevent tamper-by-rehash attacks
-    const signingResult = await signConfirmationData(user, caseNumber, unsignedExportData);
-    signaturePresent = true;
-    signatureValid = true;
-    signatureKeyId = signingResult.signature.keyId;
+		// Try to get the forensic manifest createdAt timestamp from the original case export
+		const originalExportCreatedAt: string | undefined = forensicManifestCreatedAt;
 
-    const finalExportData: ConfirmationImportData = {
-      ...unsignedExportData,
-      metadata: {
-        ...unsignedExportData.metadata,
-        signatureVersion: signingResult.signatureVersion,
-        signature: signingResult.signature
-      }
-    };
+		if (!originalExportCreatedAt) {
+			console.warn(
+				`No forensic manifest timestamp found for case ${caseNumber}. This case may have been imported before forensic linking was implemented, or the original export did not include a forensic manifest.`,
+			);
+		}
 
-    const finalJsonString = JSON.stringify(finalExportData, null, 2);
+		// Create export data with metadata
+		const exportData = {
+			metadata: {
+				caseNumber,
+				exportDate: new Date().toISOString(),
+				...userMetadata,
+				totalConfirmations: Object.keys(caseConfirmations).length,
+				version: '2.0',
+				...(originalExportCreatedAt && { originalExportCreatedAt }),
+				...(originalCaseOwnerUid && { originalCaseOwnerUid }),
+			},
+			confirmations: caseConfirmations,
+		};
 
-    // Use local timezone for filename timestamp
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const timestampString = `${year}${month}${day}-${hours}${minutes}${seconds}`;
+		// Convert to JSON string for hash calculation
+		const jsonString = JSON.stringify(exportData, null, 2);
 
-    const confirmationFileName = `confirmation-data-${caseNumber}-${timestampString}.json`;
+		// Calculate SHA-256 hash for data integrity using secure version for forensic data
+		const hash = await calculateSHA256Secure(jsonString);
 
-    const keyFromSignature = getVerificationPublicKey(signingResult.signature.keyId);
-    const currentKey = getCurrentPublicSigningKeyDetails();
-    const publicKeyPem = keyFromSignature ?? currentKey.publicKeyPem;
-    const publicKeyFileName = createPublicSigningKeyFileName(
-      keyFromSignature ? signingResult.signature.keyId : currentKey.keyId
-    );
+		// Add hash prior to signing
+		const unsignedExportData: ConfirmationImportData = {
+			...exportData,
+			metadata: {
+				...exportData.metadata,
+				hash: hash.toUpperCase(),
+			},
+		};
 
-    if (!publicKeyPem || publicKeyPem.trim().length === 0) {
-      throw new Error('No public signing key is configured for confirmation export packaging.');
-    }
+		// Request server-side signature to prevent tamper-by-rehash attacks
+		const signingResult = await signConfirmationData(user, caseNumber, unsignedExportData);
+		signaturePresent = true;
+		signatureValid = true;
+		signatureKeyId = signingResult.signature.keyId;
 
-    const JSZip = (await import('jszip')).default;
-    const zip = new JSZip();
-    const normalizedPem = publicKeyPem.endsWith('\n') ? publicKeyPem : `${publicKeyPem}\n`;
+		const finalExportData: ConfirmationImportData = {
+			...unsignedExportData,
+			metadata: {
+				...unsignedExportData.metadata,
+				signatureVersion: signingResult.signatureVersion,
+				signature: signingResult.signature,
+			},
+		};
 
-    const encKeyDetails = getCurrentEncryptionPublicKeyDetails();
-    if (!encKeyDetails.publicKeyPem || !encKeyDetails.keyId) {
-      throw new Error(
-        'Confirmation export encryption is mandatory. Your Striae instance does not have a configured encryption public key. ' +
-        'Please contact your administrator to set up export encryption.'
-      );
-    }
+		const finalJsonString = JSON.stringify(finalExportData, null, 2);
 
-    let encryptedConfirmationContent: string | Uint8Array;
-    let encryptionManifestJson: string;
+		// Use local timezone for filename timestamp
+		const now = new Date();
+		const year = now.getFullYear();
+		const month = String(now.getMonth() + 1).padStart(2, '0');
+		const day = String(now.getDate()).padStart(2, '0');
+		const hours = String(now.getHours()).padStart(2, '0');
+		const minutes = String(now.getMinutes()).padStart(2, '0');
+		const seconds = String(now.getSeconds()).padStart(2, '0');
+		const timestampString = `${year}${month}${day}-${hours}${minutes}${seconds}`;
 
-    try {
-      const encryptionResult = await encryptExportDataWithAllImages(
-        finalJsonString,
-        [],
-        encKeyDetails.publicKeyPem,
-        encKeyDetails.keyId
-      );
+		const confirmationFileName = `confirmation-data-${caseNumber}-${timestampString}.json`;
 
-      encryptedConfirmationContent = encryptionResult.ciphertext;
-      encryptionManifestJson = JSON.stringify(encryptionResult.encryptionManifest, null, 2);
-    } catch (error) {
-      console.error('Confirmation export encryption failed:', error);
-      throw new Error(`Failed to encrypt confirmation export: ${error instanceof Error ? error.message : 'Unknown error'}`, { cause: error });
-    }
+		const keyFromSignature = getVerificationPublicKey(signingResult.signature.keyId);
+		const currentKey = getCurrentPublicSigningKeyDetails();
+		const publicKeyPem = keyFromSignature ?? currentKey.publicKeyPem;
+		const publicKeyFileName = createPublicSigningKeyFileName(keyFromSignature ? signingResult.signature.keyId : currentKey.keyId);
 
-    zip.file(confirmationFileName, encryptedConfirmationContent);
-    zip.file(publicKeyFileName, normalizedPem);
-    zip.file('ENCRYPTION_MANIFEST.json', encryptionManifestJson);
+		if (!publicKeyPem || publicKeyPem.trim().length === 0) {
+			throw new Error('No public signing key is configured for confirmation export packaging.');
+		}
 
-    // Bundle the reviewing examiner's full case-scoped audit trail (signed + encrypted, best-effort).
-    if (originalExportCreatedAt) {
-      try {
-        const reviewerEntries = await fetchAllCaseEntriesForExport(
-          user,
-          caseNumber,
-          originalExportCreatedAt,
-          new Date().toISOString(),
-          { forceOwnEntries: true }
-        );
+		const JSZip = (await import('jszip')).default;
+		const zip = new JSZip();
+		const normalizedPem = publicKeyPem.endsWith('\n') ? publicKeyPem : `${publicKeyPem}\n`;
 
-        if (reviewerEntries.length > 0) {
-          const signedAuditTrailJson = await buildSignedConfirmationAuditTrail(user, caseNumber, reviewerEntries);
-          const auditEncryptionResult = await encryptExportDataWithAllImages(
-            signedAuditTrailJson,
-            [],
-            encKeyDetails.publicKeyPem,
-            encKeyDetails.keyId
-          );
-          zip.file('audit/confirmation-audit-trail.json', auditEncryptionResult.ciphertext);
-          zip.file(
-            'audit/audit-encryption-manifest.json',
-            JSON.stringify(auditEncryptionResult.encryptionManifest, null, 2)
-          );
-        }
-      } catch (auditBundleError) {
-        console.warn('Failed to bundle reviewer audit trail into confirmation export:', auditBundleError);
-      }
-    } else {
-      console.warn(`Skipping reviewer audit trail bundling for case ${caseNumber} because the original export timestamp is unavailable.`);
-    }
+		const encKeyDetails = getCurrentEncryptionPublicKeyDetails();
+		if (!encKeyDetails.publicKeyPem || !encKeyDetails.keyId) {
+			throw new Error(
+				'Confirmation export encryption is mandatory. Your Striae instance does not have a configured encryption public key. ' +
+					'Please contact your administrator to set up export encryption.',
+			);
+		}
 
-    const zipBlob = await zip.generateAsync({
-      type: 'blob',
-      compression: 'DEFLATE',
-      compressionOptions: { level: 6 }
-    });
+		let encryptedConfirmationContent: string | Uint8Array;
+		let encryptionManifestJson: string;
 
-    const exportFileName = `confirmation-export-${caseNumber}-${timestampString}-encrypted.zip`;
+		try {
+			const encryptionResult = await encryptExportDataWithAllImages(finalJsonString, [], encKeyDetails.publicKeyPem, encKeyDetails.keyId);
 
-    // Create download
-    const url = URL.createObjectURL(zipBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    
-    a.download = exportFileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    console.log(`Confirmation export ZIP generated for case ${caseNumber}`);
-    
-    // Log successful confirmation export
-    const endTime = Date.now();
-    const confirmationCount = Object.keys(caseConfirmations).length;
-    await auditService.logConfirmationExport(
-      user,
-      caseNumber,
-      exportFileName,
-      confirmationCount,
-      'success',
-      [],
-      undefined, // Original examiner UID not available here
-      {
-        processingTimeMs: endTime - startTime,
-        fileSizeBytes: zipBlob.size,
-        validationStepsCompleted: confirmationCount,
-        validationStepsFailed: 0
-      },
-      {
-        present: signaturePresent,
-        valid: signatureValid,
-        keyId: signatureKeyId
-      }
-    );
-    
-    auditService.endWorkflow();
-    
-  } catch (error) {
-    console.error('Failed to export confirmation data:', error);
-    
-    // Log failed confirmation export
-    const endTime = Date.now();
-    await auditService.logConfirmationExport(
-      user,
-      caseNumber,
-      `confirmation-export-${caseNumber}-error.zip`,
-      0,
-      'failure',
-      [error instanceof Error ? error.message : 'Unknown error'],
-      undefined,
-      {
-        processingTimeMs: endTime - startTime,
-        fileSizeBytes: 0
-      },
-      {
-        present: signaturePresent,
-        valid: signatureValid,
-        keyId: signatureKeyId
-      }
-    );
-    
-    auditService.endWorkflow();
-    
-    throw error;
-  }
+			encryptedConfirmationContent = encryptionResult.ciphertext;
+			encryptionManifestJson = JSON.stringify(encryptionResult.encryptionManifest, null, 2);
+		} catch (error) {
+			console.error('Confirmation export encryption failed:', error);
+			throw new Error(`Failed to encrypt confirmation export: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+				cause: error,
+			});
+		}
+
+		zip.file(confirmationFileName, encryptedConfirmationContent);
+		zip.file(publicKeyFileName, normalizedPem);
+		zip.file('ENCRYPTION_MANIFEST.json', encryptionManifestJson);
+
+		// Bundle the reviewing examiner's full case-scoped audit trail (signed + encrypted, best-effort).
+		if (originalExportCreatedAt) {
+			try {
+				const reviewerEntries = await fetchAllCaseEntriesForExport(user, caseNumber, originalExportCreatedAt, new Date().toISOString(), {
+					forceOwnEntries: true,
+				});
+
+				if (reviewerEntries.length > 0) {
+					const signedAuditTrailJson = await buildSignedConfirmationAuditTrail(user, caseNumber, reviewerEntries);
+					const auditEncryptionResult = await encryptExportDataWithAllImages(
+						signedAuditTrailJson,
+						[],
+						encKeyDetails.publicKeyPem,
+						encKeyDetails.keyId,
+					);
+					zip.file('audit/confirmation-audit-trail.json', auditEncryptionResult.ciphertext);
+					zip.file('audit/audit-encryption-manifest.json', JSON.stringify(auditEncryptionResult.encryptionManifest, null, 2));
+				}
+			} catch (auditBundleError) {
+				console.warn('Failed to bundle reviewer audit trail into confirmation export:', auditBundleError);
+			}
+		} else {
+			console.warn(`Skipping reviewer audit trail bundling for case ${caseNumber} because the original export timestamp is unavailable.`);
+		}
+
+		const zipBlob = await zip.generateAsync({
+			type: 'blob',
+			compression: 'DEFLATE',
+			compressionOptions: { level: 6 },
+		});
+
+		const exportFileName = `confirmation-export-${caseNumber}-${timestampString}-encrypted.zip`;
+
+		// Create download
+		const url = URL.createObjectURL(zipBlob);
+		const a = document.createElement('a');
+		a.href = url;
+
+		a.download = exportFileName;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+
+		console.log(`Confirmation export ZIP generated for case ${caseNumber}`);
+
+		// Log successful confirmation export
+		const endTime = Date.now();
+		const confirmationCount = Object.keys(caseConfirmations).length;
+		await auditService.logConfirmationExport(
+			user,
+			caseNumber,
+			exportFileName,
+			confirmationCount,
+			'success',
+			[],
+			undefined, // Original examiner UID not available here
+			{
+				processingTimeMs: endTime - startTime,
+				fileSizeBytes: zipBlob.size,
+				validationStepsCompleted: confirmationCount,
+				validationStepsFailed: 0,
+			},
+			{
+				present: signaturePresent,
+				valid: signatureValid,
+				keyId: signatureKeyId,
+			},
+		);
+
+		auditService.endWorkflow();
+	} catch (error) {
+		console.error('Failed to export confirmation data:', error);
+
+		// Log failed confirmation export
+		const endTime = Date.now();
+		await auditService.logConfirmationExport(
+			user,
+			caseNumber,
+			`confirmation-export-${caseNumber}-error.zip`,
+			0,
+			'failure',
+			[error instanceof Error ? error.message : 'Unknown error'],
+			undefined,
+			{
+				processingTimeMs: endTime - startTime,
+				fileSizeBytes: 0,
+			},
+			{
+				present: signaturePresent,
+				valid: signatureValid,
+				keyId: signatureKeyId,
+			},
+		);
+
+		auditService.endWorkflow();
+
+		throw error;
+	}
 }

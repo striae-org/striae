@@ -22,6 +22,12 @@ export interface PendingCaseCleanupMarker {
 	 * belongs to may still be active.
 	 */
 	authDeletionComplete: boolean;
+	/**
+	 * True once Firebase Auth deletion alone is confirmed, set durably before
+	 * USER_DB.delete runs so a later failure still leaves the sweep a signal
+	 * that the account is gone, instead of a marker stuck at authDeletionComplete: false.
+	 */
+	firebaseAuthDeleted?: boolean;
 }
 
 export function markerKeyFor(userUid: string): string {
@@ -48,6 +54,10 @@ function isPendingCaseCleanupMarker(value: unknown): value is PendingCaseCleanup
 	}
 
 	if (candidate.authDeletionComplete !== undefined && typeof candidate.authDeletionComplete !== 'boolean') {
+		return false;
+	}
+
+	if (candidate.firebaseAuthDeleted !== undefined && typeof candidate.firebaseAuthDeleted !== 'boolean') {
 		return false;
 	}
 
@@ -147,7 +157,10 @@ export async function readPendingCleanupMarker(
 			return null;
 		}
 
-		return { marker: { ...parsed, authDeletionComplete: parsed.authDeletionComplete ?? false }, etag: file.etag };
+		return {
+			marker: { ...parsed, authDeletionComplete: parsed.authDeletionComplete ?? false, firebaseAuthDeleted: parsed.firebaseAuthDeleted ?? false },
+			etag: file.etag,
+		};
 	} catch (error) {
 		console.warn(`Unable to read pending-cleanup marker ${key}, skipping this run:`, error);
 		return null;
@@ -171,6 +184,27 @@ export async function markPendingCleanupAuthDeletionComplete(env: Env, userUid: 
 	}
 
 	const wrote = await writePendingCleanupMarkerIfUnchanged(env, { ...read.marker, authDeletionComplete: true }, read.etag);
+	return wrote !== null;
+}
+
+/**
+ * Flags a marker once Firebase Auth deletion alone has finalized, ahead of
+ * USER_DB.delete, so a failure after this point still leaves the sweep a
+ * durable signal that the account's auth user is already gone. Returns false
+ * if there was no marker to flag or a concurrent writer replaced it since it
+ * was last read.
+ */
+export async function markPendingCleanupFirebaseAuthDeleted(env: Env, userUid: string): Promise<boolean> {
+	const read = await readPendingCleanupMarker(env, markerKeyFor(userUid));
+	if (!read) {
+		return false;
+	}
+
+	if (read.marker.firebaseAuthDeleted) {
+		return true;
+	}
+
+	const wrote = await writePendingCleanupMarkerIfUnchanged(env, { ...read.marker, firebaseAuthDeleted: true }, read.etag);
 	return wrote !== null;
 }
 
@@ -234,4 +268,110 @@ export async function tombstonePendingCleanupMarkerIfUnchanged(env: Env, key: st
 	});
 
 	return result !== null;
+}
+
+/**
+ * Writes a marker only if no object currently exists at its key, via the
+ * standard `If-None-Match: *` conditional header, so a concurrent creator for
+ * the same user is detected as a conflict instead of silently overwritten.
+ */
+export async function writePendingCleanupMarkerIfAbsent(env: Env, marker: PendingCaseCleanupMarker): Promise<string | null> {
+	if (!env.DATA_AT_REST_ENCRYPTION_PUBLIC_KEY || !env.DATA_AT_REST_ENCRYPTION_KEY_ID) {
+		console.error(
+			`CRITICAL: data-at-rest encryption is not configured; refusing to write plaintext pending-cleanup marker for user ${marker.userUid}`,
+		);
+		return null;
+	}
+
+	try {
+		const encryptedPayload = await encryptJsonForStorage(
+			JSON.stringify(marker),
+			env.DATA_AT_REST_ENCRYPTION_PUBLIC_KEY,
+			env.DATA_AT_REST_ENCRYPTION_KEY_ID,
+		);
+
+		const result = await env.STRIAE_DATA.put(markerKeyFor(marker.userUid), encryptedPayload.ciphertext, {
+			onlyIf: new Headers({ 'if-none-match': '*' }),
+			customMetadata: {
+				algorithm: encryptedPayload.envelope.algorithm,
+				encryptionVersion: encryptedPayload.envelope.encryptionVersion,
+				keyId: encryptedPayload.envelope.keyId,
+				dataIv: encryptedPayload.envelope.dataIv,
+				wrappedKey: encryptedPayload.envelope.wrappedKey,
+			},
+		});
+
+		return result?.etag ?? null;
+	} catch (error) {
+		console.error(
+			`CRITICAL: failed to persist pending-cleanup marker for user ${marker.userUid}; orphaned data may be undiscoverable: ${
+				error instanceof Error ? error.message : 'unknown error'
+			}`,
+		);
+		return null;
+	}
+}
+
+function mergeFailedCases(
+	existing: { caseNumber: string; message: string }[],
+	incoming: { caseNumber: string; message: string }[],
+): { caseNumber: string; message: string }[] {
+	const merged = new Map(existing.map((entry) => [entry.caseNumber, entry]));
+	for (const entry of incoming) {
+		merged.set(entry.caseNumber, entry);
+	}
+
+	return Array.from(merged.values());
+}
+
+const MAX_MERGE_ATTEMPTS = 5;
+
+/**
+ * Records a failed account-deletion attempt's case/confirmation-summary
+ * failures into the user's pending-cleanup marker, merging into whatever
+ * marker (if any) another concurrent deletion attempt for the same user has
+ * already written instead of unconditionally overwriting it. Retries the
+ * read-merge-write cycle a bounded number of times against concurrent
+ * writers before giving up.
+ */
+export async function recordPendingCleanupFailure(
+	env: Env,
+	userUid: string,
+	update: { failedCases: { caseNumber: string; message: string }[]; pendingConfirmationSummary: boolean },
+): Promise<boolean> {
+	const key = markerKeyFor(userUid);
+
+	for (let attempt = 0; attempt < MAX_MERGE_ATTEMPTS; attempt++) {
+		const existing = await readPendingCleanupMarker(env, key);
+
+		if (!existing) {
+			const marker: PendingCaseCleanupMarker = {
+				userUid,
+				recordedAt: new Date().toISOString(),
+				failedCases: update.failedCases,
+				pendingConfirmationSummary: update.pendingConfirmationSummary,
+				attempts: 0,
+				authDeletionComplete: false,
+			};
+
+			if ((await writePendingCleanupMarkerIfAbsent(env, marker)) !== null) {
+				return true;
+			}
+			continue;
+		}
+
+		const merged: PendingCaseCleanupMarker = {
+			...existing.marker,
+			recordedAt: new Date().toISOString(),
+			failedCases: mergeFailedCases(existing.marker.failedCases, update.failedCases),
+			pendingConfirmationSummary: existing.marker.pendingConfirmationSummary || update.pendingConfirmationSummary,
+		};
+
+		if ((await writePendingCleanupMarkerIfUnchanged(env, merged, existing.etag)) !== null) {
+			return true;
+		}
+	}
+
+	console.error(`CRITICAL: could not durably record pending-cleanup marker for user ${userUid} after concurrent write conflicts`);
+	return false;
 }

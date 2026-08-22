@@ -32,7 +32,7 @@ Third-party attribution summary
 
 Audit notes
 
-- Audit date: 2026-08-11
+- Audit date: 2026-08-22
 - Scope: npm production dependencies only
 - Method: license-checker audit of the locked production tree
   (npm ci --omit=dev from package-lock.json)

@@ -1,225 +1,225 @@
 /* Layout */
 .sidebar {
-  position: relative;
-  width: 300px;
-  min-width: 250px;
-  height: calc(100% - 60px);
-  display: flex;
-  flex-direction: column;
-  background-color: #f8f9fa;
-  border-right: 1px solid #dee2e6;
-  padding: 0.25rem 1rem 0.875rem;
-  overflow: hidden;
-  flex-shrink: 0;
-  box-sizing: border-box;
+	position: relative;
+	width: 300px;
+	min-width: 250px;
+	height: calc(100% - 60px);
+	display: flex;
+	flex-direction: column;
+	background-color: #f8f9fa;
+	border-right: 1px solid #dee2e6;
+	padding: 0.25rem 1rem 0.875rem;
+	overflow: hidden;
+	flex-shrink: 0;
+	box-sizing: border-box;
 }
 
 /* Footer Button */
 .footerButton {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  width: calc(300px - 3rem);
-  padding: 0.75rem 1rem;
-  background-color: #0d6efd;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+	position: fixed;
+	bottom: 1.5rem;
+	left: 1.5rem;
+	width: calc(300px - 3rem);
+	padding: 0.75rem 1rem;
+	background-color: #0d6efd;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	text-align: center;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	z-index: 10;
 }
 
 /* Footer Section */
 .footerSection {
-  width: 300px;
-  min-width: 250px;
-  height: 60px;
-  background-color: #f8f9fa;
-  border-right: 1px solid #dee2e6;
-  border-top: 1px solid #dee2e6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 1.5rem;
-  box-sizing: border-box;
+	width: 300px;
+	min-width: 250px;
+	height: 60px;
+	background-color: #f8f9fa;
+	border-right: 1px solid #dee2e6;
+	border-top: 1px solid #dee2e6;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 1.5rem;
+	box-sizing: border-box;
 }
 
 .footerSectionButton {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	width: 100%;
+	padding: 0.75rem 1rem;
+	background-color: #6c757d;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	text-align: center;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .footerButton:hover {
-  background-color: #0b5ed7;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+	background-color: #0b5ed7;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .footerSectionButton:hover {
-  background-color: #5c636a;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+	background-color: #5c636a;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Footer Modal */
 .footerModalOverlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  cursor: default;
+	position: fixed;
+	inset: 0;
+	background-color: rgba(0, 0, 0, 0.75);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+	cursor: default;
 }
 
 .footerModal {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  max-width: 600px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  cursor: default;
+	background: white;
+	border-radius: 8px;
+	padding: 2rem;
+	max-width: 600px;
+	width: 90%;
+	max-height: 80vh;
+	overflow-y: auto;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+	cursor: default;
 }
 
 .footerModalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  border-bottom: 1px solid #dee2e6;
-  padding-bottom: 1rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 2rem;
+	border-bottom: 1px solid #dee2e6;
+	padding-bottom: 1rem;
 }
 
 .footerModalTitle {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #212529;
-  margin: 0;
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: #212529;
+	margin: 0;
 }
 
 .footerModalClose {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #6c757d;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+	background: none;
+	border: none;
+	font-size: 1.5rem;
+	cursor: pointer;
+	color: #6c757d;
+	padding: 0.5rem;
+	border-radius: 4px;
+	transition: background-color 0.2s;
 }
 
 .footerModalClose:hover {
-  background-color: #f8f9fa;
+	background-color: #f8f9fa;
 }
 
 .footerModalContent {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
 }
 
 .footerModalLinks {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 1rem;
 }
 
 .footerModalLink {
-  display: block;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  text-decoration: none;
-  color: #212529;
-  transition: all 0.2s;
-  text-align: center;
-  font-weight: 500;
+	display: block;
+	padding: 1rem;
+	background-color: #f8f9fa;
+	border: 1px solid #dee2e6;
+	border-radius: 6px;
+	text-decoration: none;
+	color: #212529;
+	transition: all 0.2s;
+	text-align: center;
+	font-weight: 500;
 }
 
 .footerModalLink:hover {
-  background-color: #e9ecef;
-  color: #495057;
-  text-decoration: none;
-  transform: translateY(-1px);
+	background-color: #e9ecef;
+	color: #495057;
+	text-decoration: none;
+	transform: translateY(-1px);
 }
 
 .footerModalCopyright {
-  text-align: center;
-  color: #6c757d;
-  font-size: 0.875rem;
-  padding-top: 1rem;
-  border-top: 1px solid #dee2e6;
-  margin-top: 1rem;
+	text-align: center;
+	color: #6c757d;
+	font-size: 0.875rem;
+	padding-top: 1rem;
+	border-top: 1px solid #dee2e6;
+	margin-top: 1rem;
 }
 
 .link {
-  color: #6c757d;
-  text-decoration: none;
+	color: #6c757d;
+	text-decoration: none;
 }
 
 .link:hover {
-  color: #495057;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 3px;
+	color: #495057;
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	text-underline-offset: 3px;
 }
 
 .licenseLinkButton {
-  border: none;
-  background: none;
-  padding: 0;
-  margin: 0;
-  color: #6c757d;
-  text-decoration: none;
-  font-size: 0.875rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: color var(--durationS) var(--bezierFastoutSlowin);
+	border: none;
+	background: none;
+	padding: 0;
+	margin: 0;
+	color: #6c757d;
+	text-decoration: none;
+	font-size: 0.875rem;
+	font-family: inherit;
+	cursor: pointer;
+	transition: color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .licenseLinkButton:hover {
-  color: #495057;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 3px;
+	color: #495057;
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	text-underline-offset: 3px;
 }
 
 /* Hash Button */
 .hashButton {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: #6c757d;
-  color: white;
-  border: none;
-  border-radius: var(--spaceXS);
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
-  cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  box-shadow: 0 1px 3px color-mix(in lab, #6c757d 30%, transparent);
-  box-sizing: border-box;
-  margin-top: 0.5rem;
+	width: 100%;
+	padding: 0.75rem 1rem;
+	background: #6c757d;
+	color: white;
+	border: none;
+	border-radius: var(--spaceXS);
+	font-size: var(--fontSizeBodyS);
+	font-weight: var(--fontWeightMedium);
+	cursor: pointer;
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	box-shadow: 0 1px 3px color-mix(in lab, #6c757d 30%, transparent);
+	box-sizing: border-box;
+	margin-top: 0.5rem;
 }
 
 .hashButton:hover {
-  background: #5c636a;
-  box-shadow: 0 2px 6px color-mix(in lab, #6c757d 40%, transparent);
+	background: #5c636a;
+	box-shadow: 0 2px 6px color-mix(in lab, #6c757d 40%, transparent);
 }

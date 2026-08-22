@@ -8,12 +8,12 @@
  * @returns Unique alphanumeric string
  */
 export function generateUniqueId(length: number = 10): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	let result = '';
+	for (let i = 0; i < length; i++) {
+		result += chars.charAt(Math.floor(Math.random() * chars.length));
+	}
+	return result;
 }
 
 /**
@@ -21,7 +21,7 @@ export function generateUniqueId(length: number = 10): string {
  * @returns Confirmation ID in format: CONF-XXXXXXXXXX
  */
 export function generateConfirmationId(): string {
-  return `CONF-${generateUniqueId(10)}`;
+	return `CONF-${generateUniqueId(10)}`;
 }
 
 /**
@@ -30,9 +30,9 @@ export function generateConfirmationId(): string {
  * @returns Workflow ID in format: caseNumber-timestamp-random
  */
 export function generateWorkflowId(caseNumber: string): string {
-  const timestamp = Date.now().toString(36);
-  const random = generateUniqueId(8);
-  return `${caseNumber}-${timestamp}-${random}`;
+	const timestamp = Date.now().toString(36);
+	const random = generateUniqueId(8);
+	return `${caseNumber}-${timestamp}-${random}`;
 }
 
 /**
@@ -40,5 +40,5 @@ export function generateWorkflowId(caseNumber: string): string {
  * @returns UUID v4 string
  */
 export function generateAuditEntryId(): string {
-  return crypto.randomUUID();
+	return crypto.randomUUID();
 }

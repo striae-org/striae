@@ -1,79 +1,79 @@
 .colorSelector {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  width: fit-content;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	width: fit-content;
 }
 
 .colorHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 .toggleButton {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s;
+	padding: 0.25rem 0.5rem;
+	font-size: 0.8rem;
+	border: 1px solid #ced4da;
+	border-radius: 4px;
+	background: white;
+	cursor: pointer;
+	transition: all 0.2s;
 }
 
 .toggleButton:hover {
-  background: #f8f9fa;
-  border-color: #adb5bd;
+	background: #f8f9fa;
+	border-color: #adb5bd;
 }
 
 .toggleButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+	cursor: not-allowed;
+	opacity: 0.6;
 }
 
 .colorWheel {
-  width: 180px;
-  height: 40px;
-  padding: 0;
-  border: 2px solid #ced4da;
-  border-radius: 4px;
-  cursor: pointer;
+	width: 180px;
+	height: 40px;
+	padding: 0;
+	border: 2px solid #ced4da;
+	border-radius: 4px;
+	cursor: pointer;
 }
 
 .colorWheel:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+	cursor: not-allowed;
+	opacity: 0.6;
 }
 
 .colorGrid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.5rem;
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 0.5rem;
 }
 
 .colorSwatch {
-  width: 30px;
-  height: 30px;
-  border: 2px solid #ced4da;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: transform 0.2s;
+	width: 30px;
+	height: 30px;
+	border: 2px solid #ced4da;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: transform 0.2s;
 }
 
 .colorSwatch:hover {
-  transform: scale(1.1);
+	transform: scale(1.1);
 }
 
 .colorSwatch:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+	cursor: not-allowed;
+	opacity: 0.6;
 }
 
 .colorSwatch:disabled:hover {
-  transform: none;
+	transform: none;
 }
 
 .colorSwatch.selected {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+	border-color: #0d6efd;
+	box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }

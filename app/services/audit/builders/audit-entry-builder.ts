@@ -2,35 +2,35 @@ import { type CreateAuditEntryParams, type ValidationAuditEntry } from '~/types'
 import { generateAuditEntryId } from '~/utils/common';
 
 export const buildValidationAuditEntry = (
-  params: CreateAuditEntryParams,
-  timestamp: string = new Date().toISOString()
+	params: CreateAuditEntryParams,
+	timestamp: string = new Date().toISOString(),
 ): ValidationAuditEntry => {
-  return {
-    entryId: generateAuditEntryId(),
-    timestamp,
-    userId: params.userId,
-    userEmail: params.userEmail,
-    action: params.action,
-    result: params.result,
-    details: {
-      fileName: params.fileName,
-      fileType: params.fileType,
-      hashValid: params.hashValid,
-      validationErrors: params.validationErrors || [],
-      caseNumber: params.caseNumber,
-      confirmationId: params.confirmationId,
-      originalExaminerUid: params.originalExaminerUid,
-      reviewingExaminerUid: params.reviewingExaminerUid,
-      reviewerBadgeId: params.reviewerBadgeId,
-      workflowPhase: params.workflowPhase,
-      securityChecks: params.securityChecks,
-      performanceMetrics: params.performanceMetrics,
-      caseDetails: params.caseDetails,
-      fileDetails: params.fileDetails,
-      annotationDetails: params.annotationDetails,
-      sessionDetails: params.sessionDetails,
-      securityDetails: params.securityDetails,
-      userProfileDetails: params.userProfileDetails
-    }
-  };
+	return {
+		entryId: generateAuditEntryId(),
+		timestamp,
+		userId: params.userId,
+		userEmail: params.userEmail,
+		action: params.action,
+		result: params.result,
+		details: {
+			fileName: params.fileName,
+			fileType: params.fileType,
+			hashValid: params.hashValid,
+			validationErrors: params.validationErrors || [],
+			caseNumber: params.caseNumber,
+			confirmationId: params.confirmationId,
+			originalExaminerUid: params.originalExaminerUid,
+			reviewingExaminerUid: params.reviewingExaminerUid,
+			reviewerBadgeId: params.reviewerBadgeId,
+			workflowPhase: params.workflowPhase,
+			securityChecks: params.securityChecks,
+			performanceMetrics: params.performanceMetrics,
+			caseDetails: params.caseDetails,
+			fileDetails: params.fileDetails,
+			annotationDetails: params.annotationDetails,
+			sessionDetails: params.sessionDetails,
+			securityDetails: params.securityDetails,
+			userProfileDetails: params.userProfileDetails,
+		},
+	};
 };

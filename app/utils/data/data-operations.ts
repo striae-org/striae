@@ -8,11 +8,11 @@
 export * from './operations';
 
 export {
-  getConfirmationSummaryTelemetry,
-  resetConfirmationSummaryTelemetry,
-  type CaseConfirmationSummary,
-  type ConfirmationSummaryEnsureOptions,
-  type ConfirmationSummaryTelemetry,
-  type FileConfirmationSummary,
-  type UserConfirmationSummaryDocument
+	getConfirmationSummaryTelemetry,
+	resetConfirmationSummaryTelemetry,
+	type CaseConfirmationSummary,
+	type ConfirmationSummaryEnsureOptions,
+	type ConfirmationSummaryTelemetry,
+	type FileConfirmationSummary,
+	type UserConfirmationSummaryDocument,
 } from './confirmation-summary/summary-core';

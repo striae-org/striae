@@ -2,7 +2,7 @@ import { deleteFirebaseAuthUser } from '../firebase/admin';
 import { readUserRecord } from '../storage/user-records';
 import type { AccountDeletionProgressEvent, AccountDeletionResult, Env } from '../types';
 import { readCaseFileIds } from './case-data-reader';
-import { markPendingCleanupAuthDeletionComplete, writePendingCleanupMarker } from './pending-cleanup-marker';
+import { markPendingCleanupAuthDeletionComplete, markPendingCleanupFirebaseAuthDeleted, recordPendingCleanupFailure } from './pending-cleanup-marker';
 
 export async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): Promise<void> {
 	const encodedUserId = encodeURIComponent(userUid);
@@ -34,7 +34,10 @@ export async function deleteSingleCase(env: Env, userUid: string, caseNumber: st
 	} while (dataCursor !== undefined);
 
 	if (dataKeys.includes(caseDataKey)) {
-		// readCaseFileIds is best-effort and never throws, so deletion always proceeds below.
+		// readCaseFileIds throws if the record isn't validly encrypted, which aborts this
+		// case's cleanup below (caught by the per-case try/catch in executeUserDeletion and
+		// retried via the pending-cleanup marker) rather than deleting files/data based on
+		// an unknown/unverifiable set of references.
 		for (const fileId of await readCaseFileIds(env, caseDataKey)) {
 			fileIds.add(fileId);
 		}
@@ -141,13 +144,11 @@ export async function executeUserDeletion(
 	const pendingCleanup = caseCleanupErrors.length > 0 || pendingConfirmationSummary;
 
 	if (pendingCleanup) {
-		const markerRecorded = await writePendingCleanupMarker(env, {
-			userUid,
-			recordedAt: new Date().toISOString(),
+		// Merges into any marker a concurrent deletion attempt for this same user already
+		// wrote, instead of unconditionally overwriting it and losing its failed cases.
+		const markerRecorded = await recordPendingCleanupFailure(env, userUid, {
 			failedCases: failedCaseDetails,
 			pendingConfirmationSummary,
-			attempts: 0,
-			authDeletionComplete: false,
 		});
 
 		if (!markerRecorded) {
@@ -163,6 +164,18 @@ export async function executeUserDeletion(
 	}
 
 	await deleteFirebaseAuthUser(env, userUid);
+
+	if (pendingCleanup) {
+		// Recorded before USER_DB.delete so a failure past this point still leaves the
+		// sweep a durable signal that the account's auth user is already gone.
+		const flaggedFirebaseDeleted = await markPendingCleanupFirebaseAuthDeleted(env, userUid);
+		if (!flaggedFirebaseDeleted) {
+			console.error(
+				`CRITICAL: account ${userUid}'s Firebase Auth user was deleted but its pending-cleanup marker could not be flagged; the sweep will fall back to a live Firebase lookup.`,
+			);
+		}
+	}
+
 	await env.USER_DB.delete(userUid);
 
 	if (pendingCleanup) {

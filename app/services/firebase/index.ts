@@ -1,13 +1,13 @@
 import { initializeApp } from 'firebase/app';
-import { 
-    getAuth,
-    setPersistence,
-    browserSessionPersistence,
-    //connectAuthEmulator,    
- } from 'firebase/auth';
+import {
+	getAuth,
+	setPersistence,
+	browserSessionPersistence,
+	//connectAuthEmulator,
+} from 'firebase/auth';
 import firebaseConfig from '~/config/firebase';
 
-export const app = initializeApp(firebaseConfig, "Striae");
+export const app = initializeApp(firebaseConfig, 'Striae');
 export const auth = getAuth(app);
 
 setPersistence(auth, browserSessionPersistence);

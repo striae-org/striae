@@ -1,531 +1,523 @@
 /* ─── MFA Enrollment ────────────────────────────────────────────────────── */
 
 .overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-  cursor: default;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.75);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	padding: 1rem;
+	cursor: default;
 }
 
 .enrollmentModal {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  cursor: default;
+	background: white;
+	border-radius: 12px;
+	padding: 2rem;
+	max-width: 500px;
+	width: 100%;
+	max-height: 90vh;
+	overflow-y: auto;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+	cursor: default;
 }
 
 .header {
-  text-align: center;
-  margin-bottom: 2rem;
+	text-align: center;
+	margin-bottom: 2rem;
 }
 
 .header h2 {
-  color: #333;
-  margin: 0 0 1rem 0;
-  font-size: 1.5rem;
-  font-weight: 600;
+	color: #333;
+	margin: 0 0 1rem 0;
+	font-size: 1.5rem;
+	font-weight: 600;
 }
 
 .header p {
-  color: #666;
-  margin: 0;
-  line-height: 1.5;
+	color: #666;
+	margin: 0;
+	line-height: 1.5;
 }
 
 .content {
-  margin-bottom: 2rem;
+	margin-bottom: 2rem;
 }
 
 .phoneStep,
 .codeStep,
 .totpStep {
-  text-align: center;
+	text-align: center;
 }
 
 .phoneStep h3,
 .codeStep h3,
 .totpStep h3 {
-  color: #333;
-  margin: 1rem 0 1rem 0;
-  font-size: 1.2rem;
-  font-weight: 500;
+	color: #333;
+	margin: 1rem 0 1rem 0;
+	font-size: 1.2rem;
+	font-weight: 500;
 }
 
 .enrollmentInput {
-  width: 100%;
-  padding: 1rem;
-  border: 2px solid #e1e5e9;
-  border-radius: 8px;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  transition: border-color 0.2s ease;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 1rem;
+	border: 2px solid #e1e5e9;
+	border-radius: 8px;
+	font-size: 1rem;
+	margin-bottom: 1rem;
+	transition: border-color 0.2s ease;
+	box-sizing: border-box;
 }
 
 .enrollmentInput:focus {
-  outline: none;
-  border-color: #4285f4;
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+	outline: none;
+	border-color: #4285f4;
+	box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
 }
 
 .enrollmentInput:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
+	background-color: #f5f5f5;
+	cursor: not-allowed;
 }
 
 .note {
-  color: #666;
-  font-size: 0.9rem;
-  margin: 0 0 1.5rem 0;
-  line-height: 1.4;
+	color: #666;
+	font-size: 0.9rem;
+	margin: 0 0 1.5rem 0;
+	line-height: 1.4;
 }
 
 .buttonGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
 }
 
 .primaryButton {
-  background-color: #4285f4;
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  width: 100%;
-  box-sizing: border-box;
+	background-color: #4285f4;
+	color: white;
+	border: none;
+	padding: 1rem 2rem;
+	border-radius: 8px;
+	font-size: 1rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .primaryButton:hover:not(:disabled) {
-  background-color: #3367d6;
+	background-color: #3367d6;
 }
 
 .primaryButton:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+	background-color: #ccc;
+	cursor: not-allowed;
 }
 
 .enrollmentSecondaryButton {
-  background-color: transparent;
-  color: #4285f4;
-  border: 2px solid #4285f4;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-  box-sizing: border-box;
+	background-color: transparent;
+	color: #4285f4;
+	border: 2px solid #4285f4;
+	padding: 0.75rem 1.5rem;
+	border-radius: 8px;
+	font-size: 0.9rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .enrollmentSecondaryButton:hover:not(:disabled) {
-  background-color: #4285f4;
-  color: white;
+	background-color: #4285f4;
+	color: white;
 }
 
 .enrollmentSecondaryButton:disabled {
-  border-color: #ccc;
-  color: #ccc;
-  cursor: not-allowed;
+	border-color: #ccc;
+	color: #ccc;
+	cursor: not-allowed;
 }
 
 .resendTimer {
-  color: #999;
-  font-size: 0.9rem;
-  margin: 0;
-  text-align: center;
+	color: #999;
+	font-size: 0.9rem;
+	margin: 0;
+	text-align: center;
 }
 
 /* ─── Method Choice (TOTP vs SMS) ───────────────────────────────────────── */
 
 .methodChoice {
-  text-align: center;
+	text-align: center;
 }
 
 .methodChoice h3 {
-  color: #333;
-  margin: 0 0 1.25rem 0;
-  font-size: 1.1rem;
-  font-weight: 500;
+	color: #333;
+	margin: 0 0 1.25rem 0;
+	font-size: 1.1rem;
+	font-weight: 500;
 }
 
 .methodButton {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  padding: 1rem 1.25rem;
-  margin-bottom: 0.75rem;
-  background: #fff;
-  border: 2px solid #e1e5e9;
-  border-radius: 8px;
-  cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-  box-sizing: border-box;
-  text-align: left;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	width: 100%;
+	padding: 1rem 1.25rem;
+	margin-bottom: 0.75rem;
+	background: #fff;
+	border: 2px solid #e1e5e9;
+	border-radius: 8px;
+	cursor: pointer;
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+	box-sizing: border-box;
+	text-align: left;
 }
 
 .methodButton:hover {
-  border-color: #4285f4;
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+	border-color: #4285f4;
+	box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
 }
 
 .methodButtonTitle {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.2rem;
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #333;
+	margin-bottom: 0.2rem;
 }
 
 .methodButtonDesc {
-  font-size: 0.8rem;
-  color: #666;
+	font-size: 0.8rem;
+	color: #666;
 }
 
 /* ─── TOTP QR Code ──────────────────────────────────────────────────────── */
 
 .qrCodeContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 1rem;
 }
 
 .qrCodeImage {
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 0.5rem;
-  background: #fff;
-  margin-bottom: 0.5rem;
+	border: 1px solid #e1e5e9;
+	border-radius: 8px;
+	padding: 0.5rem;
+	background: #fff;
+	margin-bottom: 0.5rem;
 }
 
 .secretKeyDisplay {
-  background: #f5f5f5;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-  text-align: center;
+	background: #f5f5f5;
+	border: 1px solid #e1e5e9;
+	border-radius: 8px;
+	padding: 0.75rem 1rem;
+	margin-bottom: 1rem;
+	text-align: center;
 }
 
 .secretKey {
-  display: block;
-  font-family: monospace;
-  font-size: 0.95rem;
-  letter-spacing: 0.1em;
-  word-break: break-all;
-  color: #333;
-  margin-top: 0.25rem;
-  user-select: all;
+	display: block;
+	font-family: monospace;
+	font-size: 0.95rem;
+	letter-spacing: 0.1em;
+	word-break: break-all;
+	color: #333;
+	margin-top: 0.25rem;
+	user-select: all;
 }
 
 .footer {
-  border-top: 1px solid #e1e5e9;
-  padding-top: 1.5rem;
-  text-align: center;
+	border-top: 1px solid #e1e5e9;
+	padding-top: 1.5rem;
+	text-align: center;
 }
 
 .skipButton {
-  background-color: transparent;
-  color: #666;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: color 0.2s ease;
+	background-color: transparent;
+	color: #666;
+	border: none;
+	padding: 0.75rem 1.5rem;
+	border-radius: 8px;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: color 0.2s ease;
 }
 
 .skipButton:hover:not(:disabled) {
-  color: #333;
-  text-decoration: underline;
+	color: #333;
+	text-decoration: underline;
 }
 
 .skipButton:disabled {
-  color: #ccc;
-  cursor: not-allowed;
+	color: #ccc;
+	cursor: not-allowed;
 }
 
 /* ─── MFA Verification ──────────────────────────────────────────────────── */
 
 .container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  cursor: default;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+	cursor: default;
 }
 
 .modal {
-  background: white;
-  border-radius: var(--spaceXS);
-  padding: var(--space2XL);
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 var(--spaceM) var(--spaceXL) rgba(0, 0, 0, 0.2);
-  cursor: default;
+	background: white;
+	border-radius: var(--spaceXS);
+	padding: var(--space2XL);
+	width: 100%;
+	max-width: 400px;
+	box-shadow: 0 var(--spaceM) var(--spaceXL) rgba(0, 0, 0, 0.2);
+	cursor: default;
 }
 
 .title {
-  text-align: center;
-  color: var(--textTitle);
-  margin-bottom: var(--spaceXL);
-  font-size: var(--fontSizeH4);
+	text-align: center;
+	color: var(--textTitle);
+	margin-bottom: var(--spaceXL);
+	font-size: var(--fontSizeH4);
 }
 
 .hintSelection {
-  margin-bottom: var(--spaceL);
+	margin-bottom: var(--spaceL);
 }
 
 .label {
-  display: block;
-  margin-bottom: var(--spaceS);
-  font-weight: 600;
-  color: var(--textBody);
+	display: block;
+	margin-bottom: var(--spaceS);
+	font-weight: 600;
+	color: var(--textBody);
 }
 
 .select {
-  width: 100%;
-  padding: var(--spaceM);
-  border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
-  border-radius: var(--spaceXS);
-  font-size: var(--fontSizeBodyM);
-  background: white;
-  transition: border-color var(--durationS) var(--bezierFastoutSlowin);
-  box-sizing: border-box;
+	width: 100%;
+	padding: var(--spaceM);
+	border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
+	border-radius: var(--spaceXS);
+	font-size: var(--fontSizeBodyM);
+	background: white;
+	transition: border-color var(--durationS) var(--bezierFastoutSlowin);
+	box-sizing: border-box;
 }
 
 .select:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 25%, transparent);
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 25%, transparent);
 }
 
 .description {
-  text-align: center;
-  color: var(--textLight);
-  margin-bottom: var(--spaceL);
-  line-height: 1.5;
+	text-align: center;
+	color: var(--textLight);
+	margin-bottom: var(--spaceL);
+	line-height: 1.5;
 }
 
 .sendCode,
 .verifyCode {
-  text-align: center;
+	text-align: center;
 }
 
 .input {
-  width: 100%;
-  padding: var(--spaceM);
-  border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
-  border-radius: var(--spaceXS);
-  font-size: var(--fontSizeBodyM);
-  text-align: center;
-  font-family: monospace;
-  letter-spacing: 2px;
-  margin-bottom: var(--spaceL);
-  transition: border-color var(--durationS) var(--bezierFastoutSlowin);
-  box-sizing: border-box;
+	width: 100%;
+	padding: var(--spaceM);
+	border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
+	border-radius: var(--spaceXS);
+	font-size: var(--fontSizeBodyM);
+	text-align: center;
+	font-family: monospace;
+	letter-spacing: 2px;
+	margin-bottom: var(--spaceL);
+	transition: border-color var(--durationS) var(--bezierFastoutSlowin);
+	box-sizing: border-box;
 }
 
 .input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 25%, transparent);
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 25%, transparent);
 }
 
 .button {
-  width: 100%;
-  padding: var(--spaceM) var(--spaceL);
-  border-radius: var(--spaceXS);
-  font-size: var(--fontSizeBodyS);
-  cursor: pointer;
-  background-color: var(--primary);
-  color: var(--white);
-  border: none;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  margin-bottom: var(--spaceM);
-  box-sizing: border-box;
+	width: 100%;
+	padding: var(--spaceM) var(--spaceL);
+	border-radius: var(--spaceXS);
+	font-size: var(--fontSizeBodyS);
+	cursor: pointer;
+	background-color: var(--primary);
+	color: var(--white);
+	border: none;
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	margin-bottom: var(--spaceM);
+	box-sizing: border-box;
 }
 
 .button:hover:not(:disabled) {
-  background-color: color-mix(in lab, var(--primary) 85%, var(--black));
+	background-color: color-mix(in lab, var(--primary) 85%, var(--black));
 }
 
 .button:disabled {
-  background-color: color-mix(in lab, var(--background) 95%, transparent);
-  color: var(--textLight);
-  cursor: not-allowed;
+	background-color: color-mix(in lab, var(--background) 95%, transparent);
+	color: var(--textLight);
+	cursor: not-allowed;
 }
 
 .buttons {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceS);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceS);
 }
 
 .secondaryButton {
-  padding: var(--spaceS) var(--spaceM);
-  border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
-  border-radius: var(--spaceXS);
-  background: transparent;
-  cursor: pointer;
-  font-size: var(--fontSizeBodyS);
-  color: var(--textBody);
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  box-sizing: border-box;
-  width: 100%;
+	padding: var(--spaceS) var(--spaceM);
+	border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
+	border-radius: var(--spaceXS);
+	background: transparent;
+	cursor: pointer;
+	font-size: var(--fontSizeBodyS);
+	color: var(--textBody);
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	box-sizing: border-box;
+	width: 100%;
 }
 
 .secondaryButton:hover:not(:disabled) {
-  background-color: color-mix(in lab, var(--background) 95%, transparent);
-  border-color: color-mix(in lab, var(--text) 30%, transparent);
+	background-color: color-mix(in lab, var(--background) 95%, transparent);
+	border-color: color-mix(in lab, var(--text) 30%, transparent);
 }
 
 .actions {
-  margin-top: var(--spaceL);
-  text-align: center;
+	margin-top: var(--spaceL);
+	text-align: center;
 }
 
 .cancelButton {
-  padding: var(--spaceS) var(--spaceL);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: var(--fontSizeBodyS);
-  color: var(--textLight);
-  transition: color var(--durationS) var(--bezierFastoutSlowin);
+	padding: var(--spaceS) var(--spaceL);
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	font-size: var(--fontSizeBodyS);
+	color: var(--textLight);
+	transition: color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .cancelButton:hover {
-  color: var(--textBody);
+	color: var(--textBody);
 }
 
 #recaptcha-container {
-  margin-top: var(--spaceM);
+	margin-top: var(--spaceM);
 }
 
 /* ─── Shared ────────────────────────────────────────────────────────────── */
 
 .signOutContainer {
-  margin-top: var(--spaceL);
-  padding-top: var(--spaceL);
-  border-top: 1px solid var(--borderLight);
-  text-align: center;
+	margin-top: var(--spaceL);
+	padding-top: var(--spaceL);
+	border-top: 1px solid var(--borderLight);
+	text-align: center;
 }
 
 .signOutText {
-  color: var(--textLight);
-  font-size: var(--fontSizeSmall);
-  margin-bottom: var(--spaceM);
+	color: var(--textLight);
+	font-size: var(--fontSizeSmall);
+	margin-bottom: var(--spaceM);
 }
 
 .errorMessage {
-  background: linear-gradient(
-    135deg,
-    color-mix(in lab, var(--error) 12%, transparent),
-    color-mix(in lab, var(--error) 8%, transparent)
-  );
-  border: 1px solid color-mix(in lab, var(--error) 30%, transparent);
-  border-left: 4px solid var(--error);
-  color: color-mix(in lab, var(--error) 90%, var(--black));
-  padding: var(--spaceL);
-  border-radius: var(--spaceS);
-  font-size: var(--fontSizeBodyS);
-  margin-bottom: var(--spaceL);
-  text-align: left;
-  line-height: 1.4;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 16px color-mix(in lab, var(--text) 10%, transparent);
-  animation: slideInError var(--durationM) var(--bezierFastoutSlowin);
+	background: linear-gradient(135deg, color-mix(in lab, var(--error) 12%, transparent), color-mix(in lab, var(--error) 8%, transparent));
+	border: 1px solid color-mix(in lab, var(--error) 30%, transparent);
+	border-left: 4px solid var(--error);
+	color: color-mix(in lab, var(--error) 90%, var(--black));
+	padding: var(--spaceL);
+	border-radius: var(--spaceS);
+	font-size: var(--fontSizeBodyS);
+	margin-bottom: var(--spaceL);
+	text-align: left;
+	line-height: 1.4;
+	position: relative;
+	overflow: hidden;
+	box-shadow: 0 4px 16px color-mix(in lab, var(--text) 10%, transparent);
+	animation: slideInError var(--durationM) var(--bezierFastoutSlowin);
 }
 
 .errorMessage::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--error),
-    color-mix(in lab, var(--error) 60%, transparent)
-  );
-  animation: shimmer 2s ease-in-out infinite;
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: linear-gradient(90deg, var(--error), color-mix(in lab, var(--error) 60%, transparent));
+	animation: shimmer 2s ease-in-out infinite;
 }
 
 .errorMessage:empty {
-  display: none;
+	display: none;
 }
 
 /* ─── Animations ────────────────────────────────────────────────────────── */
 
 @keyframes slideInError {
-  from {
-    opacity: 0;
-    transform: translateY(calc(-1 * var(--spaceM))) scaleY(0.8);
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scaleY(1);
-    max-height: 200px;
-    padding-top: var(--spaceL);
-    padding-bottom: var(--spaceL);
-    margin-top: 0;
-    margin-bottom: var(--spaceL);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(calc(-1 * var(--spaceM))) scaleY(0.8);
+		max-height: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scaleY(1);
+		max-height: 200px;
+		padding-top: var(--spaceL);
+		padding-bottom: var(--spaceL);
+		margin-top: 0;
+		margin-bottom: var(--spaceL);
+	}
 }
 
 @keyframes shimmer {
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: translateX(-100%);
-  }
-  50% {
-    opacity: 1;
-    transform: translateX(100%);
-  }
+	0%,
+	100% {
+		opacity: 0.6;
+		transform: translateX(-100%);
+	}
+	50% {
+		opacity: 1;
+		transform: translateX(100%);
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .errorMessage {
-    animation: none;
-  }
+	.errorMessage {
+		animation: none;
+	}
 
-  .errorMessage::before {
-    animation: none;
-  }
+	.errorMessage::before {
+		animation: none;
+	}
 }

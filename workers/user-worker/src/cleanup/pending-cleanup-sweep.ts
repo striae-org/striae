@@ -1,5 +1,6 @@
 import { deleteSingleCase, deleteUserConfirmationSummary } from './account-deletion';
 import { getDataAtRestPrivateKeyRegistry } from './case-data-reader';
+import { checkFirebaseAuthUserExists } from '../firebase/admin';
 import {
 	PENDING_CLEANUP_PREFIX,
 	readPendingCleanupMarker,
@@ -14,6 +15,7 @@ export interface PendingCleanupSweepResult {
 	stillFailing: number;
 	conflicted: number;
 	awaitingFinalization: number;
+	verifiedByFirebaseLookup: number;
 }
 
 /**
@@ -26,6 +28,7 @@ export async function sweepPendingCaseCleanup(env: Env): Promise<PendingCleanupS
 	let stillFailing = 0;
 	let conflicted = 0;
 	let awaitingFinalization = 0;
+	let verifiedByFirebaseLookup = 0;
 	let cursor: string | undefined;
 	// Fetched once and reused for every marker instead of refetching per key.
 	const keyRegistry = await getDataAtRestPrivateKeyRegistry(env);
@@ -41,18 +44,44 @@ export async function sweepPendingCaseCleanup(env: Env): Promise<PendingCleanupS
 
 			const { marker, etag } = read;
 			processed += 1;
-			if (!marker.authDeletionComplete) {
-				// Account deletion hasn't finalized (or failed) yet, so the account may
-				// still be active. Leave the marker and its case data untouched.
-				awaitingFinalization += 1;
-				continue;
+			let sweepableMarker = marker;
+			if (!sweepableMarker.authDeletionComplete) {
+				if (!sweepableMarker.firebaseAuthDeleted) {
+					let firebaseUserExists: boolean;
+					try {
+						firebaseUserExists = await checkFirebaseAuthUserExists(env, sweepableMarker.userUid);
+					} catch (error) {
+						console.warn(`Unable to verify Firebase Auth status for ${sweepableMarker.userUid}, leaving marker pending:`, error);
+						awaitingFinalization += 1;
+						continue;
+					}
+
+					if (firebaseUserExists) {
+						// Account deletion hasn't finalized (or failed) yet, so the account may
+						// still be active. Leave the marker and its case data untouched.
+						awaitingFinalization += 1;
+						continue;
+					}
+
+					verifiedByFirebaseLookup += 1;
+				}
+
+				// Firebase Auth deletion is confirmed (via the stage flag or the lookup above);
+				// retry USER_DB.delete in case it never ran, and self-heal the marker so later
+				// passes skip straight to the fast path.
+				try {
+					await env.USER_DB.delete(sweepableMarker.userUid);
+				} catch (error) {
+					console.warn(`Unable to clean up USER_DB record for ${sweepableMarker.userUid} during pending-cleanup sweep:`, error);
+				}
+
+				sweepableMarker = { ...sweepableMarker, firebaseAuthDeleted: true, authDeletionComplete: true };
 			}
 
-			
 			const remainingFailedCases: { caseNumber: string; message: string }[] = [];
-			for (const { caseNumber } of marker.failedCases) {
+			for (const { caseNumber } of sweepableMarker.failedCases) {
 				try {
-					await deleteSingleCase(env, marker.userUid, caseNumber);
+					await deleteSingleCase(env, sweepableMarker.userUid, caseNumber);
 				} catch (error) {
 					remainingFailedCases.push({
 						caseNumber,
@@ -62,9 +91,9 @@ export async function sweepPendingCaseCleanup(env: Env): Promise<PendingCleanupS
 			}
 
 			let pendingConfirmationSummary = false;
-			if (marker.pendingConfirmationSummary) {
+			if (sweepableMarker.pendingConfirmationSummary) {
 				try {
-					await deleteUserConfirmationSummary(env, marker.userUid);
+					await deleteUserConfirmationSummary(env, sweepableMarker.userUid);
 				} catch {
 					pendingConfirmationSummary = true;
 				}
@@ -85,10 +114,10 @@ export async function sweepPendingCaseCleanup(env: Env): Promise<PendingCleanupS
 			const wrote = await writePendingCleanupMarkerIfUnchanged(
 				env,
 				{
-					...marker,
+					...sweepableMarker,
 					failedCases: remainingFailedCases,
 					pendingConfirmationSummary,
-					attempts: marker.attempts + 1,
+					attempts: sweepableMarker.attempts + 1,
 					lastAttemptAt: new Date().toISOString(),
 				},
 				etag,
@@ -106,7 +135,7 @@ export async function sweepPendingCaseCleanup(env: Env): Promise<PendingCleanupS
 		cursor = listed.truncated ? listed.cursor : undefined;
 	} while (cursor !== undefined);
 
-	return { processed, resolved, stillFailing, conflicted, awaitingFinalization };
+	return { processed, resolved, stillFailing, conflicted, awaitingFinalization, verifiedByFirebaseLookup };
 }
 
 export async function runPendingCaseCleanupSweep(env: Env): Promise<void> {
@@ -114,6 +143,8 @@ export async function runPendingCaseCleanupSweep(env: Env): Promise<void> {
 		const result = await sweepPendingCaseCleanup(env);
 		if (result.stillFailing > 0 || result.conflicted > 0) {
 			console.warn('Pending-cleanup sweep completed with unresolved/conflicted markers:', result);
+		} else if (result.verifiedByFirebaseLookup > 0) {
+			console.warn('Pending-cleanup sweep resolved markers via Firebase lookup fallback (stage flag was missing/unset):', result);
 		} else if (result.processed > 0) {
 			console.log('Pending-cleanup sweep resolved all markers:', result);
 		}

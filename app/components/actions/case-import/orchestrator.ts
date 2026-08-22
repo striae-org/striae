@@ -1,31 +1,27 @@
 import type { User } from 'firebase/auth';
 import {
-  type ImportOptions,
-  type ImportResult,
-  type ReadOnlyCaseMetadata,
-  type FileData,
-  type OtherFileData,
-  type BundledAuditTrailData,
-  type ValidationAuditEntry,
-  type CaseExportData
+	type ImportOptions,
+	type ImportResult,
+	type ReadOnlyCaseMetadata,
+	type FileData,
+	type OtherFileData,
+	type BundledAuditTrailData,
+	type ValidationAuditEntry,
+	type CaseExportData,
 } from '~/types';
 import { checkExistingCase, validateCaseNumber } from '../case-manage';
-import {
-  type SignedForensicManifest,
-  verifyCasePackageIntegrity,
-  getVerificationPublicKey
-} from '~/utils/forensics';
+import { type SignedForensicManifest, verifyCasePackageIntegrity, getVerificationPublicKey } from '~/utils/forensics';
 import type { EncryptionManifest } from '~/utils/forensics/export-encryption';
 import { deleteFile } from '../image-manage';
 import { deleteOtherFile } from '../other-files-manage';
 import { parseImportZip } from './zip-processing';
-import { 
-  checkReadOnlyCaseExists, 
-  deleteReadOnlyCase, 
-  storeCaseDataInR2, 
-  addReadOnlyCaseToUser,
-  removeReadOnlyCase,
-  listReadOnlyCases
+import {
+	checkReadOnlyCaseExists,
+	deleteReadOnlyCase,
+	storeCaseDataInR2,
+	addReadOnlyCaseToUser,
+	removeReadOnlyCase,
+	listReadOnlyCases,
 } from './storage-operations';
 import { uploadImageBlob, uploadOtherFileBlob } from './image-operations';
 import { importAnnotations } from './annotation-import';
@@ -37,701 +33,675 @@ import { validateCaseExporterUidForImport } from './validation';
  * Track the state of an import operation for cleanup purposes
  */
 interface ImportState {
-  uploadedFiles: FileData[];
-  uploadedOtherFiles: OtherFileData[];
-  caseDataStored: boolean;
-  userProfileUpdated: boolean;
-  caseNumber: string;
+	uploadedFiles: FileData[];
+	uploadedOtherFiles: OtherFileData[];
+	caseDataStored: boolean;
+	userProfileUpdated: boolean;
+	caseNumber: string;
 }
 
 interface BundledAuditTrailFile {
-  metadata?: {
-    exportTimestamp?: string;
-    totalEntries?: number;
-  };
-  auditTrail?: {
-    entries?: ValidationAuditEntry[];
-  };
+	metadata?: {
+		exportTimestamp?: string;
+		totalEntries?: number;
+	};
+	auditTrail?: {
+		entries?: ValidationAuditEntry[];
+	};
 }
 
 function isEncryptionManifest(value: unknown): value is EncryptionManifest {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
+	if (!value || typeof value !== 'object') {
+		return false;
+	}
 
-  const candidate = value as Partial<EncryptionManifest>;
-  return (
-    typeof candidate.encryptionVersion === 'string' &&
-    typeof candidate.algorithm === 'string' &&
-    typeof candidate.keyId === 'string' &&
-    typeof candidate.wrappedKey === 'string' &&
-    typeof candidate.dataIv === 'string' &&
-    (Array.isArray(candidate.encryptedFiles) || Array.isArray(candidate.encryptedImages))
-  );
+	const candidate = value as Partial<EncryptionManifest>;
+	return (
+		typeof candidate.encryptionVersion === 'string' &&
+		typeof candidate.algorithm === 'string' &&
+		typeof candidate.keyId === 'string' &&
+		typeof candidate.wrappedKey === 'string' &&
+		typeof candidate.dataIv === 'string' &&
+		(Array.isArray(candidate.encryptedFiles) || Array.isArray(candidate.encryptedImages))
+	);
 }
 
 function normalizePemForComparison(pem: string): string {
-  return pem
-    .replace(/\\n/g, '\n')
-    .replace(/\r/g, '')
-    .replace(/\s+/g, '')
-    .trim();
+	return pem.replace(/\\n/g, '\n').replace(/\r/g, '').replace(/\s+/g, '').trim();
 }
 
 function enforcePackagedPemMatchesTrustedSigningKey(
-  signatureKeyId: string,
-  packagedVerificationPublicKeyPem: string,
-  packageType: 'case package' | 'confirmation package'
+	signatureKeyId: string,
+	packagedVerificationPublicKeyPem: string,
+	packageType: 'case package' | 'confirmation package',
 ): void {
-  const trustedVerificationPublicKeyPem = getVerificationPublicKey(signatureKeyId);
+	const trustedVerificationPublicKeyPem = getVerificationPublicKey(signatureKeyId);
 
-  if (!trustedVerificationPublicKeyPem) {
-    return;
-  }
+	if (!trustedVerificationPublicKeyPem) {
+		return;
+	}
 
-  const trustedNormalized = normalizePemForComparison(trustedVerificationPublicKeyPem);
-  const packagedNormalized = normalizePemForComparison(packagedVerificationPublicKeyPem);
+	const trustedNormalized = normalizePemForComparison(trustedVerificationPublicKeyPem);
+	const packagedNormalized = normalizePemForComparison(packagedVerificationPublicKeyPem);
 
-  if (trustedNormalized !== packagedNormalized) {
-    throw new Error(
-      `Security validation failed: the bundled public signing key in this ${packageType} does not match the trusted configured key for key ID "${signatureKeyId}". ` +
-      'The package may have been tampered with and cannot be imported.'
-    );
-  }
+	if (trustedNormalized !== packagedNormalized) {
+		throw new Error(
+			`Security validation failed: the bundled public signing key in this ${packageType} does not match the trusted configured key for key ID "${signatureKeyId}". ` +
+				'The package may have been tampered with and cannot be imported.',
+		);
+	}
 }
 
 function extractBundledAuditTrailData(
-  bundledAuditFiles: {
-    auditTrailContent?: string;
-    auditSignatureContent?: string;
-  } | undefined
+	bundledAuditFiles:
+		| {
+				auditTrailContent?: string;
+				auditSignatureContent?: string;
+		  }
+		| undefined,
 ): BundledAuditTrailData | undefined {
-  if (!bundledAuditFiles?.auditTrailContent) {
-    return undefined;
-  }
+	if (!bundledAuditFiles?.auditTrailContent) {
+		return undefined;
+	}
 
-  try {
-    const parsed = JSON.parse(bundledAuditFiles.auditTrailContent) as BundledAuditTrailFile;
-    const entries = parsed.auditTrail?.entries;
+	try {
+		const parsed = JSON.parse(bundledAuditFiles.auditTrailContent) as BundledAuditTrailFile;
+		const entries = parsed.auditTrail?.entries;
 
-    if (!Array.isArray(entries)) {
-      return undefined;
-    }
+		if (!Array.isArray(entries)) {
+			return undefined;
+		}
 
-    return {
-      source: 'archive-bundle',
-      importedAt: new Date().toISOString(),
-      exportTimestamp: parsed.metadata?.exportTimestamp,
-      totalEntries: typeof parsed.metadata?.totalEntries === 'number'
-        ? parsed.metadata.totalEntries
-        : entries.length,
-      entries
-    };
-  } catch {
-    return undefined;
-  }
+		return {
+			source: 'archive-bundle',
+			importedAt: new Date().toISOString(),
+			exportTimestamp: parsed.metadata?.exportTimestamp,
+			totalEntries: typeof parsed.metadata?.totalEntries === 'number' ? parsed.metadata.totalEntries : entries.length,
+			entries,
+		};
+	} catch {
+		return undefined;
+	}
 }
 
 /**
  * Clean up partially imported data when an import fails
  */
 async function cleanupPartialImport(
-  user: User, 
-  state: ImportState,
-  onProgress?: (stage: string, progress: number, details?: string) => void
+	user: User,
+	state: ImportState,
+	onProgress?: (stage: string, progress: number, details?: string) => void,
 ): Promise<string[]> {
-  const cleanupWarnings: string[] = [];
-  
-  try {
-    onProgress?.('Cleaning up partial import', 0, 'Starting cleanup...');
-    
-    // Step 1: Remove user profile entry if it was added
-    if (state.userProfileUpdated) {
-      try {
-        onProgress?.('Cleaning up partial import', 25, 'Removing user profile entry...');
-        const removeSuccess = await removeReadOnlyCase(user, state.caseNumber);
-        if (!removeSuccess) {
-          cleanupWarnings.push('Failed to remove case from user profile during cleanup');
-        }
-      } catch (error) {
-        cleanupWarnings.push(`Error removing user profile entry: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    }
-    
-    // Step 2: Delete case data from R2 if it was stored
-    if (state.caseDataStored) {
-      try {
-        onProgress?.('Cleaning up partial import', 50, 'Removing case data...');
-        // Use the full deleteReadOnlyCase function to remove all R2 data
-        const deleteSuccess = await deleteReadOnlyCase(user, state.caseNumber);
-        if (!deleteSuccess) {
-          cleanupWarnings.push('Failed to remove case data during cleanup');
-        }
-      } catch (error) {
-        cleanupWarnings.push(`Error removing case data: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    }
-    
-    // Step 3: Delete uploaded images
-    if (state.uploadedFiles.length > 0) {
-      onProgress?.('Cleaning up partial import', 75, `Deleting ${state.uploadedFiles.length} uploaded images...`);
-      
-      const deletePromises = state.uploadedFiles.map(async (file, index) => {
-        try {
-          await deleteFile(user, state.caseNumber, file.id);
-        } catch (error) {
-          cleanupWarnings.push(`Failed to delete image ${file.originalFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-        
-        // Update progress for image deletion
-        const progress = 75 + (index / state.uploadedFiles.length) * 25;
-        onProgress?.('Cleaning up partial import', progress, `Deleted ${index + 1}/${state.uploadedFiles.length} images`);
-      });
-      
-      await Promise.all(deletePromises);
-    }
+	const cleanupWarnings: string[] = [];
 
-    if (state.uploadedOtherFiles.length > 0) {
-      const deletePromises = state.uploadedOtherFiles.map(async (file) => {
-        try {
-          await deleteOtherFile(
-            user,
-            state.caseNumber,
-            file.id,
-            'Partial import cleanup - associated file deletion',
-            {
-              skipValidation: true,
-              skipCaseDataUpdate: true,
-              suppressAudit: true
-            }
-          );
-        } catch (error) {
-          cleanupWarnings.push(`Failed to delete associated file ${file.originalFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-      });
+	try {
+		onProgress?.('Cleaning up partial import', 0, 'Starting cleanup...');
 
-      await Promise.all(deletePromises);
-    }
-    
-    onProgress?.('Cleaning up partial import', 100, 'Cleanup completed');
-    
-  } catch (error) {
-    cleanupWarnings.push(`Cleanup process failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-  
-  return cleanupWarnings;
+		// Step 1: Remove user profile entry if it was added
+		if (state.userProfileUpdated) {
+			try {
+				onProgress?.('Cleaning up partial import', 25, 'Removing user profile entry...');
+				const removeSuccess = await removeReadOnlyCase(user, state.caseNumber);
+				if (!removeSuccess) {
+					cleanupWarnings.push('Failed to remove case from user profile during cleanup');
+				}
+			} catch (error) {
+				cleanupWarnings.push(`Error removing user profile entry: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			}
+		}
+
+		// Step 2: Delete case data from R2 if it was stored
+		if (state.caseDataStored) {
+			try {
+				onProgress?.('Cleaning up partial import', 50, 'Removing case data...');
+				// Use the full deleteReadOnlyCase function to remove all R2 data
+				const deleteSuccess = await deleteReadOnlyCase(user, state.caseNumber);
+				if (!deleteSuccess) {
+					cleanupWarnings.push('Failed to remove case data during cleanup');
+				}
+			} catch (error) {
+				cleanupWarnings.push(`Error removing case data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			}
+		}
+
+		// Step 3: Delete uploaded images
+		if (state.uploadedFiles.length > 0) {
+			onProgress?.('Cleaning up partial import', 75, `Deleting ${state.uploadedFiles.length} uploaded images...`);
+
+			const deletePromises = state.uploadedFiles.map(async (file, index) => {
+				try {
+					await deleteFile(user, state.caseNumber, file.id);
+				} catch (error) {
+					cleanupWarnings.push(
+						`Failed to delete image ${file.originalFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+					);
+				}
+
+				// Update progress for image deletion
+				const progress = 75 + (index / state.uploadedFiles.length) * 25;
+				onProgress?.('Cleaning up partial import', progress, `Deleted ${index + 1}/${state.uploadedFiles.length} images`);
+			});
+
+			await Promise.all(deletePromises);
+		}
+
+		if (state.uploadedOtherFiles.length > 0) {
+			const deletePromises = state.uploadedOtherFiles.map(async (file) => {
+				try {
+					await deleteOtherFile(user, state.caseNumber, file.id, 'Partial import cleanup - associated file deletion', {
+						skipValidation: true,
+						skipCaseDataUpdate: true,
+						suppressAudit: true,
+					});
+				} catch (error) {
+					cleanupWarnings.push(
+						`Failed to delete associated file ${file.originalFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+					);
+				}
+			});
+
+			await Promise.all(deletePromises);
+		}
+
+		onProgress?.('Cleaning up partial import', 100, 'Cleanup completed');
+	} catch (error) {
+		cleanupWarnings.push(`Cleanup process failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+	}
+
+	return cleanupWarnings;
 }
 
 /**
  * Main function to import a case for read-only viewing
  */
 export async function importCaseForReview(
-  user: User,
-  zipFile: File,
-  options: ImportOptions = {},
-  onProgress?: (stage: string, progress: number, details?: string) => void
+	user: User,
+	zipFile: File,
+	options: ImportOptions = {},
+	onProgress?: (stage: string, progress: number, details?: string) => void,
 ): Promise<ImportResult> {
-  const startTime = Date.now();
-  
-  const result: ImportResult = {
-    success: false,
-    caseNumber: '',
-    isReadOnly: true,
-    filesImported: 0,
-    annotationsImported: 0,
-    errors: [],
-    warnings: []
-  };
-  
-  // Track import state for cleanup purposes
-  const importState: ImportState = {
-    uploadedFiles: [],
-    uploadedOtherFiles: [],
-    caseDataStored: false,
-    userProfileUpdated: false,
-    caseNumber: ''
-  };
-  
-  let hashValidationPassed = false;
-  let signatureValidationPassed = false;
-  let signatureKeyId: string | undefined;
-  let parsedForensicManifest: SignedForensicManifest | undefined;
-  let exporterUidValidationPassed = false;
-  
-  try {
-    onProgress?.('Parsing ZIP file', 10, 'Extracting archive contents...');
-    
-    // Step 1: Parse ZIP file
-    const {
-      caseData: initialCaseData,
-      imageIdMapping,
-      isArchivedExport,
-      bundledAuditFiles,
-      metadata,
-      cleanedContent: initialCleanedContent,
-      packagedVerificationPublicKeyPem,
-      encryptionManifest,
-      encryptedDataBase64,
-      encryptedFiles,
-      dataFileName
-    } = await parseImportZip(zipFile);
+	const startTime = Date.now();
 
-    // Step 1.2: Decrypt export — all imports are encrypted (fail closed if manifest is missing)
-    let caseData = initialCaseData;
-    let cleanedContent = initialCleanedContent || '';
-    let imageFiles: { [filename: string]: Blob } = {};
-    let associatedFiles: { [filename: string]: Blob } = {};
-    let resolvedBundledAuditFiles = bundledAuditFiles;
+	const result: ImportResult = {
+		success: false,
+		caseNumber: '',
+		isReadOnly: true,
+		filesImported: 0,
+		annotationsImported: 0,
+		errors: [],
+		warnings: [],
+	};
 
-    if (!isEncryptionManifest(encryptionManifest) || !encryptedDataBase64) {
-      throw new Error(
-        'This case package is not encrypted. Only encrypted case packages exported from Striae can be imported.'
-      );
-    }
+	// Track import state for cleanup purposes
+	const importState: ImportState = {
+		uploadedFiles: [],
+		uploadedOtherFiles: [],
+		caseDataStored: false,
+		userProfileUpdated: false,
+		caseNumber: '',
+	};
 
-    onProgress?.('Decrypting export', 11, 'Decrypting case data and images...');
-    try {
-      const decryptResult = await decryptExportBatch(
-        user,
-        encryptionManifest,
-        encryptedDataBase64,
-        encryptedFiles ?? {}
-      );
+	let hashValidationPassed = false;
+	let signatureValidationPassed = false;
+	let signatureKeyId: string | undefined;
+	let parsedForensicManifest: SignedForensicManifest | undefined;
+	let exporterUidValidationPassed = false;
 
-      cleanedContent = decryptResult.plaintext;
-      const parsedCaseData = JSON.parse(cleanedContent) as unknown;
-      caseData = parsedCaseData as CaseExportData;
+	try {
+		onProgress?.('Parsing ZIP file', 10, 'Extracting archive contents...');
 
-      const decryptedFiles = decryptResult.decryptedImages;
-      const decryptedAuditTrailBlob = decryptedFiles['audit/case-audit-trail.json'];
-      const decryptedAuditSignatureBlob = decryptedFiles['audit/case-audit-signature.json'];
+		// Step 1: Parse ZIP file
+		const {
+			caseData: initialCaseData,
+			imageIdMapping,
+			isArchivedExport,
+			bundledAuditFiles,
+			metadata,
+			cleanedContent: initialCleanedContent,
+			packagedVerificationPublicKeyPem,
+			encryptionManifest,
+			encryptedDataBase64,
+			encryptedFiles,
+			dataFileName,
+		} = await parseImportZip(zipFile);
 
-      if (decryptedAuditTrailBlob || decryptedAuditSignatureBlob) {
-        resolvedBundledAuditFiles = {
-          ...(resolvedBundledAuditFiles ?? {}),
-          auditTrailContent: decryptedAuditTrailBlob
-            ? await decryptedAuditTrailBlob.text()
-            : resolvedBundledAuditFiles?.auditTrailContent,
-          auditSignatureContent: decryptedAuditSignatureBlob
-            ? await decryptedAuditSignatureBlob.text()
-            : resolvedBundledAuditFiles?.auditSignatureContent
-        };
-      }
+		// Step 1.2: Decrypt export — all imports are encrypted (fail closed if manifest is missing)
+		let caseData = initialCaseData;
+		let cleanedContent = initialCleanedContent || '';
+		let imageFiles: { [filename: string]: Blob } = {};
+		let associatedFiles: { [filename: string]: Blob } = {};
+		let resolvedBundledAuditFiles = bundledAuditFiles;
 
-      imageFiles = Object.fromEntries(
-        Object.entries(decryptedFiles)
-          .filter(([filename]) => filename.startsWith('images/'))
-          .map(([filename, blob]) => [filename.replace(/^images\//, ''), blob])
-      );
+		if (!isEncryptionManifest(encryptionManifest) || !encryptedDataBase64) {
+			throw new Error('This case package is not encrypted. Only encrypted case packages exported from Striae can be imported.');
+		}
 
-      associatedFiles = Object.fromEntries(
-        Object.entries(decryptedFiles)
-          .filter(([filename]) => filename.startsWith('files/'))
-          .map(([filename, blob]) => [filename.replace(/^files\//, ''), blob])
-      );
+		onProgress?.('Decrypting export', 11, 'Decrypting case data and images...');
+		try {
+			const decryptResult = await decryptExportBatch(user, encryptionManifest, encryptedDataBase64, encryptedFiles ?? {});
 
-      onProgress?.(
-        'Decryption successful',
-        13,
-        `Decrypted case data, ${Object.keys(imageFiles).length} images, and ${Object.keys(associatedFiles).length} associated files`
-      );
-    } catch (decryptError) {
-      throw new Error(
-        `Failed to decrypt export: ${decryptError instanceof Error ? decryptError.message : 'Unknown error'}. ` +
-        'Ensure your Striae instance has export encryption configured.',
-        { cause: decryptError }
-      );
-    }
+			cleanedContent = decryptResult.plaintext;
+			const parsedCaseData = JSON.parse(cleanedContent) as unknown;
+			caseData = parsedCaseData as CaseExportData;
 
-    await validateCaseExporterUidForImport(caseData, user);
-    exporterUidValidationPassed = true;
+			const decryptedFiles = decryptResult.decryptedImages;
+			const decryptedAuditTrailBlob = decryptedFiles['audit/case-audit-trail.json'];
+			const decryptedAuditSignatureBlob = decryptedFiles['audit/case-audit-signature.json'];
 
-    // Now validate case number and format
-    if (!caseData.metadata?.caseNumber) {
-      throw new Error('Invalid case data: missing case number');
-    }
+			if (decryptedAuditTrailBlob || decryptedAuditSignatureBlob) {
+				resolvedBundledAuditFiles = {
+					...(resolvedBundledAuditFiles ?? {}),
+					auditTrailContent: decryptedAuditTrailBlob ? await decryptedAuditTrailBlob.text() : resolvedBundledAuditFiles?.auditTrailContent,
+					auditSignatureContent: decryptedAuditSignatureBlob
+						? await decryptedAuditSignatureBlob.text()
+						: resolvedBundledAuditFiles?.auditSignatureContent,
+				};
+			}
 
-    if (!validateCaseNumber(caseData.metadata.caseNumber)) {
-      throw new Error(`Invalid case number format: ${caseData.metadata.caseNumber}`);
-    }
+			imageFiles = Object.fromEntries(
+				Object.entries(decryptedFiles)
+					.filter(([filename]) => filename.startsWith('images/'))
+					.map(([filename, blob]) => [filename.replace(/^images\//, ''), blob]),
+			);
 
-    // Validate that the data file name matches the decrypted case number — fail closed if it doesn't.
-    // Guards against corrupt archives and cases where parseImportZip returned a mismatched file.
-    if (dataFileName) {
-      const dataFileLeaf = dataFileName.split('/').filter(Boolean).pop()?.toLowerCase() ?? '';
-      const expectedDataFile = `${caseData.metadata.caseNumber.toLowerCase()}_data.json`;
-      if (dataFileLeaf !== expectedDataFile) {
-        throw new Error(
-          `Data file name does not match case number. ` +
-          `Expected "${expectedDataFile}", found "${dataFileLeaf}". ` +
-          'The archive may be corrupt or tampered.'
-        );
-      }
-    }
+			associatedFiles = Object.fromEntries(
+				Object.entries(decryptedFiles)
+					.filter(([filename]) => filename.startsWith('files/'))
+					.map(([filename, blob]) => [filename.replace(/^files\//, ''), blob]),
+			);
 
-    // Enforce designated reviewer before any writes occur.
-    // This mirrors previewCaseImport enforcement and cannot be bypassed by
-    // skipping preview or submitting a modified client request.
-    const designatedReviewerEmail = caseData.metadata.designatedReviewerEmail;
-    if (designatedReviewerEmail) {
-      if (!user.email) {
-        throw new Error(
-          'Your account does not have an email address. This case export is restricted to a designated reviewer and cannot be imported.'
-        );
-      }
-      if (user.email.toLowerCase() !== designatedReviewerEmail.toLowerCase()) {
-        throw new Error(
-          `This case export is restricted to the designated reviewer (${designatedReviewerEmail}). ` +
-          'You are not authorized to import this case.'
-        );
-      }
-    }
+			onProgress?.(
+				'Decryption successful',
+				13,
+				`Decrypted case data, ${Object.keys(imageFiles).length} images, and ${Object.keys(associatedFiles).length} associated files`,
+			);
+		} catch (decryptError) {
+			throw new Error(
+				`Failed to decrypt export: ${decryptError instanceof Error ? decryptError.message : 'Unknown error'}. ` +
+					'Ensure your Striae instance has export encryption configured.',
+				{ cause: decryptError },
+			);
+		}
 
-    const resolvedIsArchivedExport =
-      isArchivedExport ||
-      caseData.metadata.archived === true ||
-      (typeof caseData.metadata.archivedAt === 'string' && caseData.metadata.archivedAt.trim().length > 0);
+		await validateCaseExporterUidForImport(caseData, user);
+		exporterUidValidationPassed = true;
 
-    parsedForensicManifest = metadata?.forensicManifest as SignedForensicManifest | undefined;
+		// Now validate case number and format
+		if (!caseData.metadata?.caseNumber) {
+			throw new Error('Invalid case data: missing case number');
+		}
 
-    const manifestSignatureKeyId = parsedForensicManifest?.signature?.keyId;
-    if (
-      typeof packagedVerificationPublicKeyPem === 'string' &&
-      packagedVerificationPublicKeyPem.trim().length > 0 &&
-      typeof manifestSignatureKeyId === 'string' &&
-      manifestSignatureKeyId.trim().length > 0
-    ) {
-      enforcePackagedPemMatchesTrustedSigningKey(
-        manifestSignatureKeyId,
-        packagedVerificationPublicKeyPem,
-        'case package'
-      );
-    }
+		if (!validateCaseNumber(caseData.metadata.caseNumber)) {
+			throw new Error(`Invalid case number format: ${caseData.metadata.caseNumber}`);
+		}
 
-    result.caseNumber = caseData.metadata.caseNumber;
-    importState.caseNumber = result.caseNumber;
-    
-    // Start audit workflow
-    auditService.startWorkflow(result.caseNumber);
-    
-    // Step 1.1: Clean up any existing read-only cases (only one allowed at a time)
-    onProgress?.('Checking existing read-only cases', 12, 'Cleaning up previous imports...');
-    try {
-      const existingReadOnlyCases = await listReadOnlyCases(user);
-      if (existingReadOnlyCases.length > 0) {
-        console.log(`Found ${existingReadOnlyCases.length} existing read-only case(s). Cleaning up before new import.`);
-        
-        // Delete all existing read-only cases (data and user references)
-        const deletePromises = existingReadOnlyCases.map(async (existingCase: ReadOnlyCaseMetadata) => {
-          try {
-            await deleteReadOnlyCase(user, existingCase.caseNumber);
-            console.log(`Cleaned up existing read-only case: ${existingCase.caseNumber}`);
-          } catch (error) {
-            console.warn(`Failed to clean up existing read-only case ${existingCase.caseNumber}:`, error);
-            // Don't throw here - just warn, as we want to proceed with the new import
-          }
-        });
-        
-        await Promise.all(deletePromises);
-      }
-    } catch (error) {
-      console.warn('Error during pre-import cleanup of existing read-only cases:', error);
-      // Don't fail the import due to cleanup issues
-    }
-    
-    // Step 1.5: Validate hash if forensic metadata exists
-    if (parsedForensicManifest && cleanedContent) {
-      onProgress?.('Validating comprehensive integrity', 15, 'Checking all file hashes...');
+		// Validate that the data file name matches the decrypted case number — fail closed if it doesn't.
+		// Guards against corrupt archives and cases where parseImportZip returned a mismatched file.
+		if (dataFileName) {
+			const dataFileLeaf = dataFileName.split('/').filter(Boolean).pop()?.toLowerCase() ?? '';
+			const expectedDataFile = `${caseData.metadata.caseNumber.toLowerCase()}_data.json`;
+			if (dataFileLeaf !== expectedDataFile) {
+				throw new Error(
+					`Data file name does not match case number. ` +
+						`Expected "${expectedDataFile}", found "${dataFileLeaf}". ` +
+						'The archive may be corrupt or tampered.',
+				);
+			}
+		}
 
-      const imageBlobs: { [filename: string]: Blob } = {};
-      for (const [filename, blob] of Object.entries(imageFiles)) {
-        imageBlobs[`images/${filename}`] = blob;
-      }
+		// Enforce designated reviewer before any writes occur.
+		// This mirrors previewCaseImport enforcement and cannot be bypassed by
+		// skipping preview or submitting a modified client request.
+		const designatedReviewerEmail = caseData.metadata.designatedReviewerEmail;
+		if (designatedReviewerEmail) {
+			if (!user.email) {
+				throw new Error(
+					'Your account does not have an email address. This case export is restricted to a designated reviewer and cannot be imported.',
+				);
+			}
+			if (user.email.toLowerCase() !== designatedReviewerEmail.toLowerCase()) {
+				throw new Error(
+					`This case export is restricted to the designated reviewer (${designatedReviewerEmail}). ` +
+						'You are not authorized to import this case.',
+				);
+			}
+		}
 
-      for (const [filename, blob] of Object.entries(associatedFiles)) {
-        imageBlobs[`files/${filename}`] = blob;
-      }
+		const resolvedIsArchivedExport =
+			isArchivedExport ||
+			caseData.metadata.archived === true ||
+			(typeof caseData.metadata.archivedAt === 'string' && caseData.metadata.archivedAt.trim().length > 0);
 
-      const casePackageResult = await verifyCasePackageIntegrity({
-        cleanedContent,
-        imageFiles: imageBlobs,
-        forensicManifest: parsedForensicManifest,
-        bundledAuditFiles: resolvedBundledAuditFiles
-      });
+		parsedForensicManifest = metadata?.forensicManifest as SignedForensicManifest | undefined;
 
-      signatureValidationPassed = casePackageResult.signatureResult.isValid;
-      signatureKeyId = casePackageResult.signatureResult.keyId;
+		const manifestSignatureKeyId = parsedForensicManifest?.signature?.keyId;
+		if (
+			typeof packagedVerificationPublicKeyPem === 'string' &&
+			packagedVerificationPublicKeyPem.trim().length > 0 &&
+			typeof manifestSignatureKeyId === 'string' &&
+			manifestSignatureKeyId.trim().length > 0
+		) {
+			enforcePackagedPemMatchesTrustedSigningKey(manifestSignatureKeyId, packagedVerificationPublicKeyPem, 'case package');
+		}
 
-      if (!casePackageResult.signatureResult.isValid) {
-        throw new Error(
-          'Manifest signature validation failed. Import cannot proceed.'
-        );
-      }
+		result.caseNumber = caseData.metadata.caseNumber;
+		importState.caseNumber = result.caseNumber;
 
-      if (casePackageResult.bundledAuditVerification) {
-        throw new Error(
-          `${casePackageResult.bundledAuditVerification.message} Import cannot proceed.`
-        );
-      }
+		// Start audit workflow
+		auditService.startWorkflow(result.caseNumber);
 
-      if (!casePackageResult.integrityResult.isValid) {
-        throw new Error(
-          'Comprehensive integrity validation failed. Import cannot proceed.'
-        );
-      }
-      
-      hashValidationPassed = true;
-      onProgress?.(
-        'Complete integrity verified',
-        18,
-        `Integrity validation passed. Signature verified${signatureKeyId ? ` (${signatureKeyId})` : ''}`
-      );
-      
-    } else {
-      // No forensic manifest found - cannot import
-      throw new Error(
-        'No forensic manifest found in case export. This case export does not support comprehensive ' +
-        'integrity validation and cannot be imported. Please re-export the case with forensic protection enabled.'
-      );
-    }
-    
-    onProgress?.('Validating case data', 20, `Case: ${result.caseNumber}`);
-    
-    // Step 2a: Check if case already exists in user's regular cases (original analyst)
-    const existingRegularCase = await checkExistingCase(user, result.caseNumber);
-    if (existingRegularCase && !resolvedIsArchivedExport) {
-      throw new Error(`Case "${result.caseNumber}" already exists in your case list. You cannot import a case for review if you were the original analyst.`);
-    }
-    if (existingRegularCase && resolvedIsArchivedExport) {
-      throw new Error(`Cannot import this archived case because "${result.caseNumber}" already exists in your regular case list. Delete the regular case before importing this archive.`);
-    }
-    
-    // Step 2b: Check if read-only case already exists
-    const existingCase = await checkReadOnlyCaseExists(user, result.caseNumber);
-    if (existingCase && !options.overwriteExisting) {
-      throw new Error(`Read-only case "${result.caseNumber}" already exists. Use overwriteExisting option to replace it.`);
-    }
-    
-    if (existingCase) {
-      result.warnings?.push('Overwriting existing read-only case');
-      
-      // Step 2c: Clean up existing read-only case data before importing new data
-      onProgress?.('Cleaning up existing case', 25, 'Removing existing case data...');
-      const cleanupSuccess = await deleteReadOnlyCase(user, result.caseNumber);
-      if (!cleanupSuccess) {
-        result.warnings?.push('Some existing case data may not have been fully cleaned up');
-      }
-    }
-    
-    const totalImages = Object.keys(imageFiles).length;
-    const totalOtherFiles = Object.keys(associatedFiles).length;
-    const totalFilesToUpload = totalImages + totalOtherFiles;
+		// Step 1.1: Clean up any existing read-only cases (only one allowed at a time)
+		onProgress?.('Checking existing read-only cases', 12, 'Cleaning up previous imports...');
+		try {
+			const existingReadOnlyCases = await listReadOnlyCases(user);
+			if (existingReadOnlyCases.length > 0) {
+				console.log(`Found ${existingReadOnlyCases.length} existing read-only case(s). Cleaning up before new import.`);
 
-    onProgress?.('Uploading files', 30, 'Processing image files...');
-    
-    // Step 3: Upload all image files and create original image ID to new file ID mapping
-    const originalImageIdMapping = new Map<string, string>(); // originalImageId -> newFileId
-    const importedFiles = [];
-    const importedOtherFiles: OtherFileData[] = [];
-    
-    let uploadedImageCount = 0;
-    let uploadedOtherCount = 0;
-    
-    for (const [exportFilename, blob] of Object.entries(imageFiles)) {
-      try {
-        // Get the original image ID from the filename
-        const originalImageId = imageIdMapping[exportFilename];
-        
-        if (!originalImageId) {
-          console.warn(`Could not extract image ID from filename: ${exportFilename}`);
-          continue;
-        }
-        
-        // Find the original file entry to get the actual original filename
-        const originalFileEntry = caseData.files.find(f => f.fileData.id === originalImageId);
-        const originalFilename = originalFileEntry?.fileData.originalFilename || exportFilename;
-        
-        const fileData = await uploadImageBlob(user, blob, originalFilename, originalFileEntry?.fileData.uploadedAt, (fname, progress) => {
-          const overallProgress = 30 + (uploadedImageCount / totalImages) * 40 + (progress / totalImages) * 0.4;
-          const uploadedTotal = uploadedImageCount + uploadedOtherCount;
-          onProgress?.('Uploading files', overallProgress, `Uploading ${fname} (${uploadedTotal + 1}/${totalFilesToUpload})...`);
-        });
-        
-        // Map original image ID to new file ID
-        originalImageIdMapping.set(originalImageId, fileData.id);
-        
-        importedFiles.push(fileData);
-        importState.uploadedFiles.push(fileData);
-        uploadedImageCount++;
-        const uploadedTotal = uploadedImageCount + uploadedOtherCount;
-        
-        const overallProgress = 30 + (uploadedImageCount / totalImages) * 40;
-        onProgress?.('Uploading files', overallProgress, `Uploaded ${uploadedTotal}/${totalFilesToUpload} files`);
-        
-      } catch (error) {
-        result.errors?.push(`Failed to upload ${exportFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    }
+				// Delete all existing read-only cases (data and user references)
+				const deletePromises = existingReadOnlyCases.map(async (existingCase: ReadOnlyCaseMetadata) => {
+					try {
+						await deleteReadOnlyCase(user, existingCase.caseNumber);
+						console.log(`Cleaned up existing read-only case: ${existingCase.caseNumber}`);
+					} catch (error) {
+						console.warn(`Failed to clean up existing read-only case ${existingCase.caseNumber}:`, error);
+						// Don't throw here - just warn, as we want to proceed with the new import
+					}
+				});
 
-    if (Object.keys(associatedFiles).length > 0) {
-      onProgress?.('Uploading files', 71, 'Processing non-image files...');
+				await Promise.all(deletePromises);
+			}
+		} catch (error) {
+			console.warn('Error during pre-import cleanup of existing read-only cases:', error);
+			// Don't fail the import due to cleanup issues
+		}
 
-      const originalOtherFileById = new Map(
-        (caseData.otherFiles || []).map((entry) => [entry.fileData.id, entry.fileData])
-      );
-      
+		// Step 1.5: Validate hash if forensic metadata exists
+		if (parsedForensicManifest && cleanedContent) {
+			onProgress?.('Validating comprehensive integrity', 15, 'Checking all file hashes...');
 
-      for (const [exportFilename, blob] of Object.entries(associatedFiles)) {
-        try {
-          const originalFileIdMatch = exportFilename.match(/__(\w+)\.[^./]+$/);
-          const originalFileId = originalFileIdMatch ? originalFileIdMatch[1] : undefined;
-          const originalFileEntry = originalFileId ? originalOtherFileById.get(originalFileId) : undefined;
-          const originalFilename = originalFileEntry?.originalFilename || exportFilename;
+			const imageBlobs: { [filename: string]: Blob } = {};
+			for (const [filename, blob] of Object.entries(imageFiles)) {
+				imageBlobs[`images/${filename}`] = blob;
+			}
 
-          const fileData = await uploadOtherFileBlob(user, blob, originalFilename, originalFileEntry?.uploadedAt, (fname, progress) => {
-            const overallProgress = 71 + (uploadedOtherCount / totalOtherFiles) * 4 + (progress / totalOtherFiles) * 0.04;
-            const uploadedTotal = uploadedImageCount + uploadedOtherCount;
-            onProgress?.('Uploading files', overallProgress, `Uploading ${fname} (${uploadedTotal + 1}/${totalFilesToUpload})...`);
-          });
+			for (const [filename, blob] of Object.entries(associatedFiles)) {
+				imageBlobs[`files/${filename}`] = blob;
+			}
 
-          importedOtherFiles.push(fileData);
-          importState.uploadedOtherFiles.push(fileData);
-          uploadedOtherCount++;
-          const uploadedTotal = uploadedImageCount + uploadedOtherCount;
+			const casePackageResult = await verifyCasePackageIntegrity({
+				cleanedContent,
+				imageFiles: imageBlobs,
+				forensicManifest: parsedForensicManifest,
+				bundledAuditFiles: resolvedBundledAuditFiles,
+			});
 
-          const overallProgress = 71 + (uploadedOtherCount / totalOtherFiles) * 4;
-          onProgress?.('Uploading files', overallProgress, `Uploaded ${uploadedTotal}/${totalFilesToUpload} files`);
-        } catch (error) {
-          result.errors?.push(`Failed to upload associated file ${exportFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-      }
-    }
-    
-    result.filesImported = importedFiles.length + importedOtherFiles.length;
-    
-    if (result.filesImported === 0) {
-      throw new Error('No associated files were successfully uploaded');
-    }
-    
-    onProgress?.('Storing case data', 75, 'Creating case structure...');
-    
-    // Step 4: Store case data in R2
-    await storeCaseDataInR2(
-      user,
-      result.caseNumber,
-      caseData,
-      importedFiles,
-      importedOtherFiles,
-      originalImageIdMapping,
-      parsedForensicManifest,
-      resolvedIsArchivedExport,
-      resolvedIsArchivedExport ? extractBundledAuditTrailData(resolvedBundledAuditFiles) : undefined
-    );
-    importState.caseDataStored = true;
-    
-    onProgress?.('Importing annotations', 85, 'Processing annotations...');
-    
-    // Step 5: Import annotations
-    result.annotationsImported = await importAnnotations(user, result.caseNumber, caseData, originalImageIdMapping);
-    
-    onProgress?.('Updating user profile', 95, 'Finalizing import...');
-    
-    // Step 6: Add read-only case to user profile
-    const caseMetadata: ReadOnlyCaseMetadata = {
-      caseNumber: result.caseNumber,
-      importedAt: new Date().toISOString(),
-      originalExportDate: caseData.metadata.exportDate,
-      originalExportedBy: caseData.metadata.exportedBy || 'Unknown',
-      originalExportedByUid: caseData.metadata.exportedByUid,
-      sourceHash: parsedForensicManifest?.manifestHash,
-      sourceManifestVersion: parsedForensicManifest?.manifestVersion,
-      sourceSignatureKeyId: parsedForensicManifest?.signature?.keyId,
-      sourceSignatureValid: signatureValidationPassed,
-      isReadOnly: true
-    };
-    
-    await addReadOnlyCaseToUser(user, caseMetadata);
-    importState.userProfileUpdated = true;
-    
-    onProgress?.('Import complete', 100, 'Case successfully imported for review');
-    
-    result.success = true;
-    
-    // Log successful case import
-    const endTime = Date.now();
-    await auditService.logCaseImport(
-      user,
-      result.caseNumber,
-      zipFile.name,
-      'success',
-      hashValidationPassed,
-      [],
-      undefined, // Don't use for self-confirmation prevention for read-only imports
-      {
-        processingTimeMs: endTime - startTime,
-        fileSizeBytes: zipFile.size,
-        validationStepsCompleted: result.filesImported + result.annotationsImported,
-        validationStepsFailed: 0
-      },
-      exporterUidValidationPassed,
-      {
-        present: !!parsedForensicManifest,
-        valid: signatureValidationPassed,
-        keyId: signatureKeyId
-      }
-    );
-    
-    auditService.endWorkflow();
-    
-    return result;
-    
-  } catch (error) {
-    console.error('Case import failed:', error);
-    result.success = false;
-    result.errors?.push(error instanceof Error ? error.message : 'Unknown error occurred during import');
-    
-    // Log failed case import
-    const endTime = Date.now();
-    await auditService.logCaseImport(
-      user,
-      result.caseNumber || 'unknown',
-      zipFile.name,
-      'failure',
-      hashValidationPassed, // Use actual hash validation result even for failures
-      result.errors || [],
-      undefined, // Don't use for self-confirmation prevention for read-only imports
-      {
-        processingTimeMs: endTime - startTime,
-        fileSizeBytes: zipFile.size
-      },
-      exporterUidValidationPassed,
-      {
-        present: !!parsedForensicManifest,
-        valid: signatureValidationPassed,
-        keyId: signatureKeyId
-      }
-    );
-    
-    auditService.endWorkflow();
-    
-    // Cleanup any partially imported data
-    if (importState.uploadedFiles.length > 0 || importState.caseDataStored || importState.userProfileUpdated) {
-      console.log('Import failed, cleaning up partial data...');
-      try {
-        const cleanupWarnings = await cleanupPartialImport(user, importState, onProgress);
-        if (cleanupWarnings.length > 0) {
-          result.warnings?.push(...cleanupWarnings);
-          console.warn('Cleanup completed with warnings:', cleanupWarnings);
-        } else {
-          console.log('Cleanup completed successfully');
-        }
-      } catch (cleanupError) {
-        const cleanupErrorMsg = `Cleanup failed: ${cleanupError instanceof Error ? cleanupError.message : 'Unknown cleanup error'}`;
-        result.warnings?.push(cleanupErrorMsg);
-        console.error('Cleanup failed:', cleanupError);
-      }
-    }
-    
-    return result;
-  }
+			signatureValidationPassed = casePackageResult.signatureResult.isValid;
+			signatureKeyId = casePackageResult.signatureResult.keyId;
+
+			if (!casePackageResult.signatureResult.isValid) {
+				throw new Error('Manifest signature validation failed. Import cannot proceed.');
+			}
+
+			if (casePackageResult.bundledAuditVerification) {
+				throw new Error(`${casePackageResult.bundledAuditVerification.message} Import cannot proceed.`);
+			}
+
+			if (!casePackageResult.integrityResult.isValid) {
+				throw new Error('Comprehensive integrity validation failed. Import cannot proceed.');
+			}
+
+			hashValidationPassed = true;
+			onProgress?.(
+				'Complete integrity verified',
+				18,
+				`Integrity validation passed. Signature verified${signatureKeyId ? ` (${signatureKeyId})` : ''}`,
+			);
+		} else {
+			// No forensic manifest found - cannot import
+			throw new Error(
+				'No forensic manifest found in case export. This case export does not support comprehensive ' +
+					'integrity validation and cannot be imported. Please re-export the case with forensic protection enabled.',
+			);
+		}
+
+		onProgress?.('Validating case data', 20, `Case: ${result.caseNumber}`);
+
+		// Step 2a: Check if case already exists in user's regular cases (original analyst)
+		const existingRegularCase = await checkExistingCase(user, result.caseNumber);
+		if (existingRegularCase && !resolvedIsArchivedExport) {
+			throw new Error(
+				`Case "${result.caseNumber}" already exists in your case list. You cannot import a case for review if you were the original analyst.`,
+			);
+		}
+		if (existingRegularCase && resolvedIsArchivedExport) {
+			throw new Error(
+				`Cannot import this archived case because "${result.caseNumber}" already exists in your regular case list. Delete the regular case before importing this archive.`,
+			);
+		}
+
+		// Step 2b: Check if read-only case already exists
+		const existingCase = await checkReadOnlyCaseExists(user, result.caseNumber);
+		if (existingCase && !options.overwriteExisting) {
+			throw new Error(`Read-only case "${result.caseNumber}" already exists. Use overwriteExisting option to replace it.`);
+		}
+
+		if (existingCase) {
+			result.warnings?.push('Overwriting existing read-only case');
+
+			// Step 2c: Clean up existing read-only case data before importing new data
+			onProgress?.('Cleaning up existing case', 25, 'Removing existing case data...');
+			const cleanupSuccess = await deleteReadOnlyCase(user, result.caseNumber);
+			if (!cleanupSuccess) {
+				result.warnings?.push('Some existing case data may not have been fully cleaned up');
+			}
+		}
+
+		const totalImages = Object.keys(imageFiles).length;
+		const totalOtherFiles = Object.keys(associatedFiles).length;
+		const totalFilesToUpload = totalImages + totalOtherFiles;
+
+		onProgress?.('Uploading files', 30, 'Processing image files...');
+
+		// Step 3: Upload all image files and create original image ID to new file ID mapping
+		const originalImageIdMapping = new Map<string, string>(); // originalImageId -> newFileId
+		const importedFiles = [];
+		const importedOtherFiles: OtherFileData[] = [];
+
+		let uploadedImageCount = 0;
+		let uploadedOtherCount = 0;
+
+		for (const [exportFilename, blob] of Object.entries(imageFiles)) {
+			try {
+				// Get the original image ID from the filename
+				const originalImageId = imageIdMapping[exportFilename];
+
+				if (!originalImageId) {
+					console.warn(`Could not extract image ID from filename: ${exportFilename}`);
+					continue;
+				}
+
+				// Find the original file entry to get the actual original filename
+				const originalFileEntry = caseData.files.find((f) => f.fileData.id === originalImageId);
+				const originalFilename = originalFileEntry?.fileData.originalFilename || exportFilename;
+
+				const fileData = await uploadImageBlob(user, blob, originalFilename, originalFileEntry?.fileData.uploadedAt, (fname, progress) => {
+					const overallProgress = 30 + (uploadedImageCount / totalImages) * 40 + (progress / totalImages) * 0.4;
+					const uploadedTotal = uploadedImageCount + uploadedOtherCount;
+					onProgress?.('Uploading files', overallProgress, `Uploading ${fname} (${uploadedTotal + 1}/${totalFilesToUpload})...`);
+				});
+
+				// Map original image ID to new file ID
+				originalImageIdMapping.set(originalImageId, fileData.id);
+
+				importedFiles.push(fileData);
+				importState.uploadedFiles.push(fileData);
+				uploadedImageCount++;
+				const uploadedTotal = uploadedImageCount + uploadedOtherCount;
+
+				const overallProgress = 30 + (uploadedImageCount / totalImages) * 40;
+				onProgress?.('Uploading files', overallProgress, `Uploaded ${uploadedTotal}/${totalFilesToUpload} files`);
+			} catch (error) {
+				result.errors?.push(`Failed to upload ${exportFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			}
+		}
+
+		if (Object.keys(associatedFiles).length > 0) {
+			onProgress?.('Uploading files', 71, 'Processing non-image files...');
+
+			const originalOtherFileById = new Map((caseData.otherFiles || []).map((entry) => [entry.fileData.id, entry.fileData]));
+
+			for (const [exportFilename, blob] of Object.entries(associatedFiles)) {
+				try {
+					const originalFileIdMatch = exportFilename.match(/__(\w+)\.[^./]+$/);
+					const originalFileId = originalFileIdMatch ? originalFileIdMatch[1] : undefined;
+					const originalFileEntry = originalFileId ? originalOtherFileById.get(originalFileId) : undefined;
+					const originalFilename = originalFileEntry?.originalFilename || exportFilename;
+
+					const fileData = await uploadOtherFileBlob(user, blob, originalFilename, originalFileEntry?.uploadedAt, (fname, progress) => {
+						const overallProgress = 71 + (uploadedOtherCount / totalOtherFiles) * 4 + (progress / totalOtherFiles) * 0.04;
+						const uploadedTotal = uploadedImageCount + uploadedOtherCount;
+						onProgress?.('Uploading files', overallProgress, `Uploading ${fname} (${uploadedTotal + 1}/${totalFilesToUpload})...`);
+					});
+
+					importedOtherFiles.push(fileData);
+					importState.uploadedOtherFiles.push(fileData);
+					uploadedOtherCount++;
+					const uploadedTotal = uploadedImageCount + uploadedOtherCount;
+
+					const overallProgress = 71 + (uploadedOtherCount / totalOtherFiles) * 4;
+					onProgress?.('Uploading files', overallProgress, `Uploaded ${uploadedTotal}/${totalFilesToUpload} files`);
+				} catch (error) {
+					result.errors?.push(
+						`Failed to upload associated file ${exportFilename}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+					);
+				}
+			}
+		}
+
+		result.filesImported = importedFiles.length + importedOtherFiles.length;
+
+		if (result.filesImported === 0) {
+			throw new Error('No associated files were successfully uploaded');
+		}
+
+		onProgress?.('Storing case data', 75, 'Creating case structure...');
+
+		// Step 4: Store case data in R2
+		await storeCaseDataInR2(
+			user,
+			result.caseNumber,
+			caseData,
+			importedFiles,
+			importedOtherFiles,
+			originalImageIdMapping,
+			parsedForensicManifest,
+			resolvedIsArchivedExport,
+			resolvedIsArchivedExport ? extractBundledAuditTrailData(resolvedBundledAuditFiles) : undefined,
+		);
+		importState.caseDataStored = true;
+
+		onProgress?.('Importing annotations', 85, 'Processing annotations...');
+
+		// Step 5: Import annotations
+		result.annotationsImported = await importAnnotations(user, result.caseNumber, caseData, originalImageIdMapping);
+
+		onProgress?.('Updating user profile', 95, 'Finalizing import...');
+
+		// Step 6: Add read-only case to user profile
+		const caseMetadata: ReadOnlyCaseMetadata = {
+			caseNumber: result.caseNumber,
+			importedAt: new Date().toISOString(),
+			originalExportDate: caseData.metadata.exportDate,
+			originalExportedBy: caseData.metadata.exportedBy || 'Unknown',
+			originalExportedByUid: caseData.metadata.exportedByUid,
+			sourceHash: parsedForensicManifest?.manifestHash,
+			sourceManifestVersion: parsedForensicManifest?.manifestVersion,
+			sourceSignatureKeyId: parsedForensicManifest?.signature?.keyId,
+			sourceSignatureValid: signatureValidationPassed,
+			isReadOnly: true,
+		};
+
+		await addReadOnlyCaseToUser(user, caseMetadata);
+		importState.userProfileUpdated = true;
+
+		onProgress?.('Import complete', 100, 'Case successfully imported for review');
+
+		result.success = true;
+
+		// Log successful case import
+		const endTime = Date.now();
+		await auditService.logCaseImport(
+			user,
+			result.caseNumber,
+			zipFile.name,
+			'success',
+			hashValidationPassed,
+			[],
+			undefined, // Don't use for self-confirmation prevention for read-only imports
+			{
+				processingTimeMs: endTime - startTime,
+				fileSizeBytes: zipFile.size,
+				validationStepsCompleted: result.filesImported + result.annotationsImported,
+				validationStepsFailed: 0,
+			},
+			exporterUidValidationPassed,
+			{
+				present: !!parsedForensicManifest,
+				valid: signatureValidationPassed,
+				keyId: signatureKeyId,
+			},
+		);
+
+		auditService.endWorkflow();
+
+		return result;
+	} catch (error) {
+		console.error('Case import failed:', error);
+		result.success = false;
+		result.errors?.push(error instanceof Error ? error.message : 'Unknown error occurred during import');
+
+		// Log failed case import
+		const endTime = Date.now();
+		await auditService.logCaseImport(
+			user,
+			result.caseNumber || 'unknown',
+			zipFile.name,
+			'failure',
+			hashValidationPassed, // Use actual hash validation result even for failures
+			result.errors || [],
+			undefined, // Don't use for self-confirmation prevention for read-only imports
+			{
+				processingTimeMs: endTime - startTime,
+				fileSizeBytes: zipFile.size,
+			},
+			exporterUidValidationPassed,
+			{
+				present: !!parsedForensicManifest,
+				valid: signatureValidationPassed,
+				keyId: signatureKeyId,
+			},
+		);
+
+		auditService.endWorkflow();
+
+		// Cleanup any partially imported data
+		if (importState.uploadedFiles.length > 0 || importState.caseDataStored || importState.userProfileUpdated) {
+			console.log('Import failed, cleaning up partial data...');
+			try {
+				const cleanupWarnings = await cleanupPartialImport(user, importState, onProgress);
+				if (cleanupWarnings.length > 0) {
+					result.warnings?.push(...cleanupWarnings);
+					console.warn('Cleanup completed with warnings:', cleanupWarnings);
+				} else {
+					console.log('Cleanup completed successfully');
+				}
+			} catch (cleanupError) {
+				const cleanupErrorMsg = `Cleanup failed: ${cleanupError instanceof Error ? cleanupError.message : 'Unknown cleanup error'}`;
+				result.warnings?.push(cleanupErrorMsg);
+				console.error('Cleanup failed:', cleanupError);
+			}
+		}
+
+		return result;
+	}
 }

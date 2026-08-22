@@ -55,6 +55,10 @@ async function collectReferencedFileIds(
 			}
 
 			const batch = candidateKeys.slice(i, i + REFERENCE_SCAN_CONCURRENCY);
+			// readCaseFileIds throws for a record that isn't validly encrypted; that
+			// rejection propagates out of collectReferencedFileIds/sweepOrphanedFiles
+			// and is caught by runOrphanSweep, so this run deletes nothing rather than
+			// treating an unverifiable record as having no file references.
 			const batchResults = await Promise.all(batch.map((key) => readCaseFileIds(env, key, keyRegistry)));
 
 			for (const fileIds of batchResults) {

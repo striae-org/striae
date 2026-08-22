@@ -19,15 +19,15 @@ const serviceAccountPath = resolve(__dirname, '../app/config/admin-service.json'
 
 let serviceAccount;
 try {
-  serviceAccount = require(serviceAccountPath);
+	serviceAccount = require(serviceAccountPath);
 } catch {
-  console.error(`\n❌ Could not load service account key from:\n   ${serviceAccountPath}`);
-  console.error('\nMake sure app/config/admin-service.json exists (it is gitignored).');
-  process.exit(1);
+	console.error(`\n❌ Could not load service account key from:\n   ${serviceAccountPath}`);
+	console.error('\nMake sure app/config/admin-service.json exists (it is gitignored).');
+	process.exit(1);
 }
 
 if (getApps().length === 0) {
-  initializeApp({ credential: cert(serviceAccount) });
+	initializeApp({ credential: cert(serviceAccount) });
 }
 
 const auth = getAuth();
@@ -35,23 +35,23 @@ const auth = getAuth();
 console.log('\n🔑 Enabling TOTP MFA provider...');
 
 try {
-  await auth.projectConfigManager().updateProjectConfig({
-    multiFactorConfig: {
-      providerConfigs: [
-        {
-          state: 'ENABLED',
-          totpProviderConfig: {
-            adjacentIntervals: 0,
-          },
-        },
-      ],
-    },
-  });
+	await auth.projectConfigManager().updateProjectConfig({
+		multiFactorConfig: {
+			providerConfigs: [
+				{
+					state: 'ENABLED',
+					totpProviderConfig: {
+						adjacentIntervals: 0,
+					},
+				},
+			],
+		},
+	});
 
-  console.log('✅ TOTP MFA provider enabled successfully.');
-  console.log('   adjacentIntervals: 0 (accepts only the current TOTP interval; no adjacent interval tolerance)');
+	console.log('✅ TOTP MFA provider enabled successfully.');
+	console.log('   adjacentIntervals: 0 (accepts only the current TOTP interval; no adjacent interval tolerance)');
 } catch (err) {
-  console.error('\n❌ Failed to enable TOTP MFA provider:');
-  console.error(err?.message ?? err);
-  process.exit(1);
+	console.error('\n❌ Failed to enable TOTP MFA provider:');
+	console.error(err?.message ?? err);
+	process.exit(1);
 }

@@ -1,15 +1,15 @@
 .signOutButton {
-  padding: 0.5rem 1rem;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  align-self: flex-start;
+	padding: 0.5rem 1rem;
+	background-color: #dc3545;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	font-size: 0.85rem;
+	cursor: pointer;
+	transition: all 0.2s;
+	align-self: flex-start;
 }
 
 .signOutButton:hover {
-  background-color: #bb2d3b;
+	background-color: #bb2d3b;
 }

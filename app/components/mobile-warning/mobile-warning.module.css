@@ -1,80 +1,80 @@
 @layer layout {
-  .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    background: var(--background);
-    align-items: center;
-    justify-content: center;
-    padding: var(--spaceXL);
-  }
+	.overlay {
+		display: none;
+		position: fixed;
+		inset: 0;
+		z-index: 10000;
+		background: var(--background);
+		align-items: center;
+		justify-content: center;
+		padding: var(--spaceXL);
+	}
 
-  .backdrop {
-    appearance: none;
-    position: absolute;
-    inset: 0;
-    background: transparent;
-    border: none;
-    cursor: default;
-  }
+	.backdrop {
+		appearance: none;
+		position: absolute;
+		inset: 0;
+		background: transparent;
+		border: none;
+		cursor: default;
+	}
 
-  .content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    max-width: 420px;
-    gap: var(--spaceL);
-  }
+	.content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		max-width: 420px;
+		gap: var(--spaceL);
+	}
 
-  .icon {
-    color: var(--primary);
-  }
+	.icon {
+		color: var(--primary);
+	}
 
-  .title {
-    font-size: var(--fontSizeH4);
-    font-weight: var(--fontWeightBold);
-    color: var(--textTitle);
-    line-height: var(--lineHeightTitle);
-    margin: 0;
-  }
+	.title {
+		font-size: var(--fontSizeH4);
+		font-weight: var(--fontWeightBold);
+		color: var(--textTitle);
+		line-height: var(--lineHeightTitle);
+		margin: 0;
+	}
 
-  .message {
-    font-size: var(--fontSizeBodyS);
-    color: var(--textBody);
-    line-height: var(--lineHeightBody);
-    margin: 0;
-  }
+	.message {
+		font-size: var(--fontSizeBodyS);
+		color: var(--textBody);
+		line-height: var(--lineHeightBody);
+		margin: 0;
+	}
 
-  .dismissButton {
-    appearance: none;
-    background-color: var(--primary);
-    border: 1px solid var(--primary);
-    border-radius: var(--radiusM);
-    color: var(--white);
-    cursor: pointer;
-    font-size: var(--fontSizeBodyS);
-    font-weight: var(--fontWeightMedium);
-    padding: var(--spaceM) var(--spaceXL);
-    transition:
-      background-color var(--durationS) var(--bezierFastoutSlowin),
-      border-color var(--durationS) var(--bezierFastoutSlowin);
-  }
+	.dismissButton {
+		appearance: none;
+		background-color: var(--primary);
+		border: 1px solid var(--primary);
+		border-radius: var(--radiusM);
+		color: var(--white);
+		cursor: pointer;
+		font-size: var(--fontSizeBodyS);
+		font-weight: var(--fontWeightMedium);
+		padding: var(--spaceM) var(--spaceXL);
+		transition:
+			background-color var(--durationS) var(--bezierFastoutSlowin),
+			border-color var(--durationS) var(--bezierFastoutSlowin);
+	}
 
-  .dismissButton:hover {
-    background-color: color-mix(in lab, var(--primary) 82%, var(--black));
-    border-color: color-mix(in lab, var(--primary) 82%, var(--black));
-  }
+	.dismissButton:hover {
+		background-color: color-mix(in lab, var(--primary) 82%, var(--black));
+		border-color: color-mix(in lab, var(--primary) 82%, var(--black));
+	}
 
-  .dismissButton:focus-visible {
-    outline: 3px solid color-mix(in lab, var(--white) 65%, var(--primary));
-    outline-offset: 3px;
-  }
+	.dismissButton:focus-visible {
+		outline: 3px solid color-mix(in lab, var(--white) 65%, var(--primary));
+		outline-offset: 3px;
+	}
 
-  @media (max-width: 1024px) {
-    .overlay {
-      display: flex;
-    }
-  }
+	@media (max-width: 1024px) {
+		.overlay {
+			display: flex;
+		}
+	}
 }

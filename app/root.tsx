@@ -1,17 +1,6 @@
 import type { LinksFunction } from 'react-router';
-import {
-  Links,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-  isRouteErrorResponse,
-  useRouteError,
-  useMatches,
-} from 'react-router';
-import { 
-  ThemeProvider,
-  themeStyles 
-} from '~/components/theme-provider/theme-provider';
+import { Links, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useRouteError, useMatches } from 'react-router';
+import { ThemeProvider, themeStyles } from '~/components/theme-provider/theme-provider';
 import { AuthProvider } from '~/components/auth/auth-provider';
 import { MobileWarning } from '~/components/mobile-warning/mobile-warning';
 import { auth } from '~/services/firebase';
@@ -19,143 +8,133 @@ import styles from '~/styles/root.module.css';
 import './global.css';
 
 export const links: LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous" as const,
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-  },
+	{ rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+	{
+		rel: 'preconnect',
+		href: 'https://fonts.gstatic.com',
+		crossOrigin: 'anonymous' as const,
+	},
+	{
+		rel: 'stylesheet',
+		href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
+	},
 ];
 
 type AppTheme = 'dark' | 'light';
 
 interface ThemeHandle {
-  theme?: AppTheme;
+	theme?: AppTheme;
 }
 
 const DEFAULT_THEME: AppTheme = 'light';
 
 const isAppTheme = (value: unknown): value is AppTheme => {
-  return value === 'dark' || value === 'light';
+	return value === 'dark' || value === 'light';
 };
 
 const resolveRouteTheme = (matches: ReturnType<typeof useMatches>): AppTheme => {
-  for (let index = matches.length - 1; index >= 0; index -= 1) {
-    const routeHandle = matches[index].handle as ThemeHandle | undefined;
+	for (let index = matches.length - 1; index >= 0; index -= 1) {
+		const routeHandle = matches[index].handle as ThemeHandle | undefined;
 
-    if (isAppTheme(routeHandle?.theme)) {
-      return routeHandle.theme;
-    }
-  }
+		if (isAppTheme(routeHandle?.theme)) {
+			return routeHandle.theme;
+		}
+	}
 
-  return DEFAULT_THEME;
+	return DEFAULT_THEME;
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const matches = useMatches();
-  const theme = resolveRouteTheme(matches);
+	const matches = useMatches();
+	const theme = resolveRouteTheme(matches);
 
-  return (
-    <html lang="en" data-theme={theme}>
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="robots" content="noindex, nofollow" />
-        <style>{themeStyles}</style>
-        <Links />
-      </head>
-      <body className="flex flex-col h-screen w-full overflow-x-hidden">
-        <ThemeProvider theme={theme} className="">
-        <MobileWarning />
-        <main>
-          {children}
-        </main>
-        </ThemeProvider>        
-        <Scripts />
-        <ScrollRestoration />
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" data-theme={theme}>
+			<head>
+				<meta charSet="utf-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1" />
+				<meta name="robots" content="noindex, nofollow" />
+				<style>{themeStyles}</style>
+				<Links />
+			</head>
+			<body className="flex flex-col h-screen w-full overflow-x-hidden">
+				<ThemeProvider theme={theme} className="">
+					<MobileWarning />
+					<main>{children}</main>
+				</ThemeProvider>
+				<Scripts />
+				<ScrollRestoration />
+			</body>
+		</html>
+	);
 }
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <Outlet />
-    </AuthProvider>
-  );
+	return (
+		<AuthProvider>
+			<Outlet />
+		</AuthProvider>
+	);
 }
 
 const LOGIN_REDIRECT_PATH = '/';
 
 const errorActionStyle = {
-  alignItems: 'center',
-  appearance: 'none',
-  backgroundColor: '#0d6efd',
-  border: '1px solid #0b5ed7',
-  borderRadius: '8px',
-  color: '#ffffff',
-  cursor: 'pointer',
-  display: 'inline-flex',
-  fontSize: '1rem',
-  fontWeight: 600,
-  justifyContent: 'center',
-  lineHeight: 1,
-  marginTop: '1rem',
-  minWidth: '220px',
-  padding: '0.9rem 1.6rem',
-  textDecoration: 'none',
+	alignItems: 'center',
+	appearance: 'none',
+	backgroundColor: '#0d6efd',
+	border: '1px solid #0b5ed7',
+	borderRadius: '8px',
+	color: '#ffffff',
+	cursor: 'pointer',
+	display: 'inline-flex',
+	fontSize: '1rem',
+	fontWeight: 600,
+	justifyContent: 'center',
+	lineHeight: 1,
+	marginTop: '1rem',
+	minWidth: '220px',
+	padding: '0.9rem 1.6rem',
+	textDecoration: 'none',
 } as const;
 
 async function returnToLogin() {
-  try {
-    await auth.signOut();
-  } catch (error) {
-    console.error('Error boundary sign out failed:', error);
-  } finally {
-    if (typeof window !== 'undefined') {
-      localStorage.clear();
-      window.location.href = LOGIN_REDIRECT_PATH;
-    }
-  }
+	try {
+		await auth.signOut();
+	} catch (error) {
+		console.error('Error boundary sign out failed:', error);
+	} finally {
+		if (typeof window !== 'undefined') {
+			localStorage.clear();
+			window.location.href = LOGIN_REDIRECT_PATH;
+		}
+	}
 }
 
 export function ErrorBoundary() {
-  const error = useRouteError();
+	const error = useRouteError();
 
-  if (isRouteErrorResponse(error)) {
-    const statusText = error.statusText || 'Unexpected error';
+	if (isRouteErrorResponse(error)) {
+		const statusText = error.statusText || 'Unexpected error';
 
-    return (
-      <div className={styles.errorContainer}>
-        <div className={styles.errorTitle}>{error.status}</div>
-        <p className={styles.errorMessage}>{statusText}</p>
-        <button
-          type="button"
-          onClick={() => void returnToLogin()}
-          style={errorActionStyle}
-          className={styles.errorLink}>
-          Return to Login
-        </button>
-      </div>
-    );
-  }
+		return (
+			<div className={styles.errorContainer}>
+				<div className={styles.errorTitle}>{error.status}</div>
+				<p className={styles.errorMessage}>{statusText}</p>
+				<button type="button" onClick={() => void returnToLogin()} style={errorActionStyle} className={styles.errorLink}>
+					Return to Login
+				</button>
+			</div>
+		);
+	}
 
-  return (
-    <div className={styles.errorContainer}>
-      <div className={styles.errorTitle}>500</div>
-      <p className={styles.errorMessage}>Something went wrong. Please try again later.</p>
-      <button
-        type="button"
-        onClick={() => void returnToLogin()}
-        style={errorActionStyle}
-        className={styles.errorLink}>
-        Return to Login
-      </button>
-    </div>
-  );
+	return (
+		<div className={styles.errorContainer}>
+			<div className={styles.errorTitle}>500</div>
+			<p className={styles.errorMessage}>Something went wrong. Please try again later.</p>
+			<button type="button" onClick={() => void returnToLogin()} style={errorActionStyle} className={styles.errorLink}>
+				Return to Login
+			</button>
+		</div>
+	);
 }

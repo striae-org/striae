@@ -1,880 +1,848 @@
 /* Case Management */
 .caseSection {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  height: 100%;
-  min-height: 0;
-  margin-bottom: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	height: 100%;
+	min-height: 0;
+	margin-bottom: 0;
 }
 
 .caseSection h4 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 1rem;
+	font-size: 1.3rem;
+	font-weight: 600;
+	color: #495057;
+	margin-bottom: 1rem;
 }
 
 .limitsInfo {
-  font-size: 0.85rem;
-  color: #6c757d;
-  background-color: #f8f9fa;
-  padding: 0.5rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  border-left: 3px solid #fd0d0d;
+	font-size: 0.85rem;
+	color: #6c757d;
+	background-color: #f8f9fa;
+	padding: 0.5rem;
+	border-radius: 4px;
+	margin-bottom: 1rem;
+	border-left: 3px solid #fd0d0d;
 }
 
 .limitReached {
-  background-color: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 4px;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-  color: #856404;
-  font-size: 0.85rem;
-  text-align: center;
+	background-color: #fff3cd;
+	border: 1px solid #ffeaa7;
+	border-radius: 4px;
+	padding: 0.5rem;
+	margin-bottom: 1rem;
+	color: #856404;
+	font-size: 0.85rem;
+	text-align: center;
 }
 
 .caseInput {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
 }
 
 .caseInput input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1.5px solid #ced4da;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.75rem;
+	border: 1.5px solid #ced4da;
+	border-radius: 6px;
+	font-size: 0.9rem;
+	transition: border-color 0.2s;
+	box-sizing: border-box;
 }
 
 .caseInput input:focus {
-  outline: none;
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+	outline: none;
+	border-color: #0d6efd;
+	box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }
 
 /* Buttons */
 .caseInput button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 0.5rem;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: #4a90e2;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	margin-top: 0.5rem;
+	box-sizing: border-box;
 }
 
 .caseInput button:hover:not(:disabled) {
-  background-color: #357abd;
+	background-color: #357abd;
 }
 
 .caseInput button:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
+	background-color: #e9ecef;
+	color: #6c757d;
+	cursor: not-allowed;
 }
 
 .caseLoad button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #198754;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 0.5rem;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: #198754;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	margin-top: 0.5rem;
+	box-sizing: border-box;
 }
 
 .caseLoad button:hover:not(:disabled) {
-  background-color: #105032;
+	background-color: #105032;
 }
 
 .caseLoad button:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
+	background-color: #e9ecef;
+	color: #6c757d;
+	cursor: not-allowed;
 }
 
 .listButton {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 0.5rem;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: #6c757d;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	margin-top: 0.5rem;
+	box-sizing: border-box;
 }
 
 .listButton:hover {
-  background-color: #5c636a;
+	background-color: #5c636a;
 }
 
 .exportButton {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background-color: #0d6efd;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-sizing: border-box;
-  box-shadow: 0 1px 3px rgba(13, 110, 253, 0.3);
-  margin-bottom: 1rem;
+	width: 100%;
+	padding: 0.75rem 1rem;
+	background-color: #0d6efd;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	box-sizing: border-box;
+	box-shadow: 0 1px 3px rgba(13, 110, 253, 0.3);
+	margin-bottom: 1rem;
 }
 
 .exportButton:hover {
-  background-color: #0b5ed7;
-  box-shadow: 0 2px 6px rgba(13, 110, 253, 0.4);
+	background-color: #0b5ed7;
+	box-shadow: 0 2px 6px rgba(13, 110, 253, 0.4);
 }
 
 .filesModalSection {
-  margin: 0.25rem 0 0;
+	margin: 0.25rem 0 0;
 }
 
 .filesModalButton {
-  width: 100%;
-  padding: 0.625rem 0.75rem;
-  background-color: #17a2b8;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.625rem 0.75rem;
+	background-color: #17a2b8;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: all 0.2s;
+	box-sizing: border-box;
 }
 
 .filesModalButton:hover:not(:disabled) {
-  background-color: #138496;
+	background-color: #138496;
 }
 
 .filesModalButton:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-  opacity: 0.6;
+	background-color: #6c757d;
+	cursor: not-allowed;
+	opacity: 0.6;
 }
 
 /* Status Messages */
 .success {
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 4px;
-  color: #198754;
-  background-color: rgba(25, 135, 84, 0.1);
+	font-size: 0.875rem;
+	margin-top: 0.5rem;
+	padding: 0.5rem;
+	border-radius: 4px;
+	color: #198754;
+	background-color: rgba(25, 135, 84, 0.1);
 }
 
 /* Files Section */
 .filesSection {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 0.625rem;
-  min-height: 0;
-  margin-top: 0.25rem;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.625rem;
+	min-height: 0;
+	margin-top: 0.25rem;
 }
 
 .filesSection h4 {
-  margin-bottom: 0;
-  font-size: 1.1rem;
-  font-weight: 900;
-  text-align: center;
+	margin-bottom: 0;
+	font-size: 1.1rem;
+	font-weight: 900;
+	text-align: center;
 }
 
 .emptyCaseHeader {
-  margin-top: 0.75rem;
+	margin-top: 0.75rem;
 }
 
 .openCaseButton {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.75rem 1rem;
+	background-color: var(--primary);
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 600;
+	font-size: 0.95rem;
+	cursor: pointer;
+	transition: all 0.2s;
+	box-sizing: border-box;
 }
 
 .openCaseButton:hover {
-  background-color: color-mix(in lab, var(--primary) 85%, var(--black));
+	background-color: color-mix(in lab, var(--primary) 85%, var(--black));
 }
 
 .fileListPlaceholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 5rem;
-  padding: 0.875rem;
-  border: 1px dashed #dee2e6;
-  border-radius: 6px;
-  background: #f8f9fa;
-  color: #6c757d;
-  font-size: 0.875rem;
-  text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 5rem;
+	padding: 0.875rem;
+	border: 1px dashed #dee2e6;
+	border-radius: 6px;
+	background: #f8f9fa;
+	color: #6c757d;
+	font-size: 0.875rem;
+	text-align: center;
 }
 
 .emptyState {
-  color: #6c757d;
-  font-size: 0.9rem;
-  text-align: center;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border: 1px dashed #dee2e6;
-  border-radius: 6px;
-  margin: 1rem 0;
+	color: #6c757d;
+	font-size: 0.9rem;
+	text-align: center;
+	padding: 1.5rem;
+	background: #f8f9fa;
+	border: 1px dashed #dee2e6;
+	border-radius: 6px;
+	margin: 1rem 0;
 }
 
 .fileList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  overflow: hidden;
-  flex: 1;
-  min-height: 0;
-  max-height: none;
-  overflow-y: auto;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	border: 1px solid #dee2e6;
+	border-radius: 6px;
+	overflow: hidden;
+	flex: 1;
+	min-height: 0;
+	max-height: none;
+	overflow-y: auto;
 }
 
 .fileListMessage {
-  padding: 0.875rem;
-  color: #6c757d;
-  font-size: 0.875rem;
-  text-align: center;
-  background: #f8f9fa;
+	padding: 0.875rem;
+	color: #6c757d;
+	font-size: 0.875rem;
+	text-align: center;
+	background: #f8f9fa;
 }
 
 .fileList::-webkit-scrollbar {
-  width: 6px;
+	width: 6px;
 }
 
 .fileList::-webkit-scrollbar-track {
-  background: #f1f1f1;
+	background: #f1f1f1;
 }
 
 .fileList::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
+	background: #c1c1c1;
+	border-radius: 3px;
 }
 
 .fileList::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+	background: #a8a8a8;
 }
 
 .fileItem {
-  display: flex;
-  align-items: center;
-  padding: 0.375rem 0.625rem;
-  border-bottom: 1px solid #dee2e6;
-  background: white;
-  transition: background-color 0.2s;
+	display: flex;
+	align-items: center;
+	padding: 0.375rem 0.625rem;
+	border-bottom: 1px solid #dee2e6;
+	background: white;
+	transition: background-color 0.2s;
 }
 
 .fileButton {
-  flex: 1;
-  text-align: left;
-  padding: 0.375rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.875rem;
+	flex: 1;
+	text-align: left;
+	padding: 0.375rem;
+	background: none;
+	border: none;
+	cursor: pointer;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 0.875rem;
 }
 
 .fileItem:last-child {
-  border-bottom: none;
+	border-bottom: none;
 }
 
 .fileItem:hover {
-  background-color: #f8f9fa;
+	background-color: #f8f9fa;
 }
 
 .fileItem.active {
-  background-color: color-mix(in lab, var(--background) 90%, transparent);
-  font-weight: var(--fontWeightMedium);
+	background-color: color-mix(in lab, var(--background) 90%, transparent);
+	font-weight: var(--fontWeightMedium);
 }
 
-.fileItem[role="button"] {
-  cursor: pointer;
+.fileItem[role='button'] {
+	cursor: pointer;
 }
 
-.fileItem[role="button"]:hover {
-  background-color: #e9ecef;
+.fileItem[role='button']:hover {
+	background-color: #e9ecef;
 }
 
-.fileItem[role="button"]:active {
-  background-color: #dee2e6;
+.fileItem[role='button']:active {
+	background-color: #dee2e6;
 }
 
 /* Files and Case Management */
 
 .fileName {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 /* Rename and Delete Cases */
 
 .caseRename {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
 }
 
 .caseRename input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1.5px solid #ced4da;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.75rem;
+	border: 1.5px solid #ced4da;
+	border-radius: 6px;
+	font-size: 0.9rem;
+	transition: border-color 0.2s;
+	box-sizing: border-box;
 }
 
 .caseRename input:focus {
-  outline: none;
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+	outline: none;
+	border-color: #0d6efd;
+	box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }
 
 /* Buttons */
 .caseRename button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #ffc107;
-  color: #000;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: #ffc107;
+	color: #000;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
 }
 
 .caseRename button:hover:not(:disabled) {
-  background-color: #ffca2c;
+	background-color: #ffca2c;
 }
 
 .caseRename button:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
+	background-color: #e9ecef;
+	color: #6c757d;
+	cursor: not-allowed;
 }
 
 .deleteButton {
-  margin-left: auto;
-  background: none;
-  border: none;
-  color: #dc3545;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 0.375rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 28px;
-  height: 28px;
+	margin-left: auto;
+	background: none;
+	border: none;
+	color: #dc3545;
+	font-size: 1rem;
+	cursor: pointer;
+	padding: 0.375rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 28px;
+	height: 28px;
 }
 
 .deleteButton:hover {
-  color: #bd2130;
-  background-color: rgba(220, 53, 69, 0.1);
-  border-radius: 4px;
+	color: #bd2130;
+	background-color: rgba(220, 53, 69, 0.1);
+	border-radius: 4px;
 }
 
 .deleteCaseSection {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 2px solid #e9ecef;
+	margin-top: 2rem;
+	padding-top: 1rem;
+	border-top: 2px solid #e9ecef;
 }
 
 .deleteWarningButton {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: #dc3545;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
 }
 
 .deleteWarningButton:hover:not(:disabled) {
-  background-color: #bd2130;
+	background-color: #bd2130;
 }
 
 .deleteWarningButton:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
+	background-color: #e9ecef;
+	color: #6c757d;
+	cursor: not-allowed;
 }
 
 .clearReadOnlyButton {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #6f42c1;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: #6f42c1;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
 }
 
 .clearReadOnlyButton:hover:not(:disabled) {
-  background-color: #5a359a;
+	background-color: #5a359a;
 }
 
 .clearReadOnlyButton:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
+	background-color: #e9ecef;
+	color: #6c757d;
+	cursor: not-allowed;
 }
 
 /* Notes Toggle */
 
 .sidebarToggle {
-  margin-top: 0;
-  padding: 0;
+	margin-top: 0;
+	padding: 0;
 }
 
 .sidebarToggle button {
-  width: 100%;
-  padding: 0.625rem 0.75rem;
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
+	width: 100%;
+	padding: 0.625rem 0.75rem;
+	background-color: var(--primary);
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: all 0.2s;
 }
 
 .sidebarToggle button:hover:not(:disabled) {
-  background-color: color-mix(in lab, var(--primary) 85%, var(--black));
+	background-color: color-mix(in lab, var(--primary) 85%, var(--black));
 }
 
 .sidebarToggle button:disabled {
-  background-color: var(--backgroundLight);
-  color: var(--textLight);
-  cursor: not-allowed;
+	background-color: var(--backgroundLight);
+	color: var(--textLight);
+	cursor: not-allowed;
 }
 
 .sidebarToggle .confirmationExportButton {
-  width: 100%;
-  padding: 0.625rem 0.75rem;
-  background-color: #198754;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
+	width: 100%;
+	padding: 0.625rem 0.75rem;
+	background-color: #198754;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 600;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: all 0.2s;
 }
 
 .sidebarToggle .confirmationExportButton:hover:not(:disabled) {
-  background-color: #146c43;
+	background-color: #146c43;
 }
 
 .sidebarToggle .confirmationExportButton:disabled {
-  background-color: var(--backgroundLight);
-  color: var(--textLight);
-  cursor: not-allowed;
+	background-color: var(--backgroundLight);
+	color: var(--textLight);
+	cursor: not-allowed;
 }
 
 /* Case Actions Section */
 .caseActionsSection {
-  margin-top: 1.5rem;
-  border-top: 1px solid #dee2e6;
-  padding-top: 1rem;
+	margin-top: 1.5rem;
+	border-top: 1px solid #dee2e6;
+	padding-top: 1rem;
 }
 
 .caseActionsButton {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #0d6efd;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-bottom: 0.75rem;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: #0d6efd;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	margin-bottom: 0.75rem;
 }
 
 .caseActionsButton:hover:not(:disabled) {
-  background-color: #0b5ed7;
+	background-color: #0b5ed7;
 }
 
 .caseActionsButton:disabled {
-  background-color: var(--backgroundLight);
-  color: var(--textLight);
-  cursor: not-allowed;
-  opacity: 0.6;
+	background-color: var(--backgroundLight);
+	color: var(--textLight);
+	cursor: not-allowed;
+	opacity: 0.6;
 }
 
 .caseActionsButton:disabled:hover {
-  background-color: var(--backgroundLight);
-  transform: none;
+	background-color: var(--backgroundLight);
+	transform: none;
 }
 
 .caseActionsButton:active {
-  transform: translateY(0);
+	transform: translateY(0);
 }
 
 .caseActionsToggle {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: rgba(212, 0, 0, 0.7);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-bottom: 0.75rem;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: rgba(212, 0, 0, 0.7);
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	margin-bottom: 0.75rem;
 }
 
 .caseActionsToggle:hover {
-  background-color: rgba(180, 0, 0, 0.9);
+	background-color: rgba(180, 0, 0, 0.9);
 }
 
 .caseActionsToggle:disabled {
-  background-color: var(--backgroundLight);
-  color: var(--textLight);
-  cursor: not-allowed;
-  opacity: 0.6;
+	background-color: var(--backgroundLight);
+	color: var(--textLight);
+	cursor: not-allowed;
+	opacity: 0.6;
 }
 
 .caseActionsToggle:disabled:hover {
-  background-color: var(--backgroundLight);
-  transform: none;
+	background-color: var(--backgroundLight);
+	transform: none;
 }
 
 .caseActionsToggle:active {
-  transform: translateY(0);
+	transform: translateY(0);
 }
 
 .caseActionsContent {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #dee2e6;
+	margin-top: 1rem;
+	padding: 1rem;
+	background-color: #f8f9fa;
+	border-radius: 6px;
+	border: 1px solid #dee2e6;
 }
 
 .exportSection {
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #dee2e6;
+	margin-bottom: 1rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid #dee2e6;
 }
 
 .exportButton {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #198754;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: #198754;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
 }
 
 .exportButton:hover:not(:disabled) {
-  background-color: #157347;
+	background-color: #157347;
 }
 
 .exportButton:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
+	background-color: #e9ecef;
+	color: #6c757d;
+	cursor: not-allowed;
 }
 
 .renameDeleteSection {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #dee2e6;
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 1px solid #dee2e6;
 }
 
 .caseActionsContent .caseRename {
-  margin-bottom: 1rem;
+	margin-bottom: 1rem;
 }
 
 .caseActionsContent .caseRename input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.5rem;
+	border: 1px solid #ced4da;
+	border-radius: 4px;
+	margin-bottom: 0.5rem;
+	box-sizing: border-box;
 }
 
 .caseActionsContent .caseRename button {
-  width: 100%;
-  padding: 0.5rem;
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+	width: 100%;
+	padding: 0.5rem;
+	background-color: #6c757d;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.2s;
 }
 
 .caseActionsContent .caseRename button:hover:not(:disabled) {
-  background-color: #5a6268;
+	background-color: #5a6268;
 }
 
 .caseActionsContent .caseRename button:disabled {
-  background-color: #adb5bd;
-  cursor: not-allowed;
+	background-color: #adb5bd;
+	cursor: not-allowed;
 }
 
 .caseActionsContent .deleteCaseSection button {
-  width: 100%;
-  padding: 0.5rem;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+	width: 100%;
+	padding: 0.5rem;
+	background-color: #dc3545;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.2s;
 }
 
 .caseActionsContent .deleteCaseSection button:hover:not(:disabled) {
-  background-color: #c82333;
+	background-color: #c82333;
 }
 
 .caseActionsContent .deleteCaseSection button:disabled {
-  background-color: #f5c6cb;
-  cursor: not-allowed;
+	background-color: #f5c6cb;
+	cursor: not-allowed;
 }
 
 /* Error Messages - now in component modules */
 .error {
-  font-size: 0.875rem;
-  color: #dc3545;
-  background-color: rgba(220, 53, 69, 0.1);
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 4px;
+	font-size: 0.875rem;
+	color: #dc3545;
+	background-color: rgba(220, 53, 69, 0.1);
+	margin-top: 0.5rem;
+	padding: 0.5rem;
+	border-radius: 4px;
 }
 
 .auditTrailSection {
-  margin-top: 1rem;
+	margin-top: 1rem;
 }
 
 .auditTrailButton {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #6f42c1;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: #6f42c1;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
 }
 
 .auditTrailButton:hover:not(:disabled) {
-  background-color: #5a359a;
+	background-color: #5a359a;
 }
 
 .auditTrailButton:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
+	background-color: #e9ecef;
+	color: #6c757d;
+	cursor: not-allowed;
 }
 
 /* Case Header Container */
 .caseHeader {
-  /* Normal case header styling (no background) */
-  margin-top: 0.75rem;
+	/* Normal case header styling (no background) */
+	margin-top: 0.75rem;
 }
 
 .readOnlyContainer {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 4px;
-  padding: 0.625rem 0.75rem;
-  margin-top: 0.75rem;
-  margin-bottom: 0;
+	background: #fff3cd;
+	border: 1px solid #ffeaa7;
+	border-radius: 4px;
+	padding: 0.625rem 0.75rem;
+	margin-top: 0.75rem;
+	margin-bottom: 0;
 }
 
 .caseNumber {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
+	margin: 0;
+	font-size: 0.95rem;
+	font-weight: 600;
 }
 
 /* Case Confirmation Status Indicators */
 .caseNumber.caseNotConfirmed {
-  background-color: #fffacd;
-  padding: 0.625rem 0.75rem;
-  border-radius: 4px;
-  margin: 0;
+	background-color: #fffacd;
+	padding: 0.625rem 0.75rem;
+	border-radius: 4px;
+	margin: 0;
 }
 
 .caseNumber.caseConfirmed {
-  background-color: #c8e6c9;
-  padding: 0.625rem 0.75rem;
-  border-radius: 4px;
-  margin: 0;
+	background-color: #c8e6c9;
+	padding: 0.625rem 0.75rem;
+	border-radius: 4px;
+	margin: 0;
 }
 
 /* Read-Only Badge */
 .readOnlyBadge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-align: center;
-  color: #856404;
-  margin-top: 0.25rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-align: center;
+	color: #856404;
+	margin-top: 0.25rem;
 }
 /* Confirmation Status Indicators */
 .fileItemNotConfirmed {
-  background-color: color-mix(
-    in lab,
-    var(--warning) 15%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--warning) 15%, var(--backgroundLight));
 }
 
 .fileItemNotConfirmed:hover {
-  background-color: color-mix(
-    in lab,
-    var(--warning) 20%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--warning) 20%, var(--backgroundLight));
 }
 
 .fileItem.active.fileItemNotConfirmed {
-  background-color: color-mix(
-    in lab,
-    var(--warning) 15%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--warning) 15%, var(--backgroundLight));
 }
 
 .fileItem.active.fileItemNotConfirmed:hover {
-  background-color: color-mix(
-    in lab,
-    var(--warning) 20%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--warning) 20%, var(--backgroundLight));
 }
 
 .fileItemConfirmed {
-  background-color: color-mix(
-    in lab,
-    var(--success) 20%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--success) 20%, var(--backgroundLight));
 }
 
 .fileItemConfirmed:hover {
-  background-color: color-mix(
-    in lab,
-    var(--success) 28%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--success) 28%, var(--backgroundLight));
 }
 
 .fileItem.active.fileItemConfirmed {
-  background-color: color-mix(
-    in lab,
-    var(--success) 20%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--success) 20%, var(--backgroundLight));
 }
 
 .fileItem.active.fileItemConfirmed:hover {
-  background-color: color-mix(
-    in lab,
-    var(--success) 28%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--success) 28%, var(--backgroundLight));
 }
 
 /* Switch/Cancel Case buttons */
 .switchCaseButton {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #198754;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 0.5rem;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.75rem;
+	background-color: #198754;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	margin-top: 0.5rem;
+	box-sizing: border-box;
 }
 
 .switchCaseButton:hover:not(:disabled) {
-  background-color: #105032;
+	background-color: #105032;
 }
 
 .switchCaseButton:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
+	background-color: #e9ecef;
+	color: #6c757d;
+	cursor: not-allowed;
 }
 
 .cancelSwitchButton {
-  width: 100%;
-  padding: 0.75rem;
-  margin-top: 0.75rem;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.75rem;
+	margin-top: 0.75rem;
+	background-color: #dc3545;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	box-sizing: border-box;
 }
 
 .cancelSwitchButton:hover:not(:disabled) {
-  background-color: #bd2130;
+	background-color: #bd2130;
 }
 
 .cancelSwitchButton:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
+	background-color: #e9ecef;
+	color: #6c757d;
+	cursor: not-allowed;
 }
 
 .cancelSwitchButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+	opacity: 0.6;
+	cursor: not-allowed;
 }

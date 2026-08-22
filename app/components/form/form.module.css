@@ -1,436 +1,424 @@
 /* Form Layout */
 .form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceM);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceM);
 }
 
 .fieldWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceXS);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceXS);
 }
 
 .label {
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
-  color: var(--textTitle);
+	font-size: var(--fontSizeBodyS);
+	font-weight: var(--fontWeightMedium);
+	color: var(--textTitle);
 }
 
 /* Input Styling */
 .input,
 .textarea,
 .select {
-  padding: var(--spaceM);
-  border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
-  border-radius: var(--spaceXS);
-  font-size: var(--fontSizeBodyS);
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  font-family: inherit;
+	padding: var(--spaceM);
+	border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
+	border-radius: var(--spaceXS);
+	font-size: var(--fontSizeBodyS);
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	font-family: inherit;
 }
 
 .input:focus,
 .textarea:focus,
 .select:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 25%, transparent);
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 25%, transparent);
 }
 
 .input:disabled,
 .textarea:disabled,
 .select:disabled {
-  background-color: color-mix(in lab, var(--background) 95%, transparent);
-  cursor: not-allowed;
+	background-color: color-mix(in lab, var(--background) 95%, transparent);
+	cursor: not-allowed;
 }
 
 /* Select Specific */
 .select {
-  background-color: var(--background);
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right var(--spaceM) center;
-  background-size: 16px;
-  padding-right: calc(var(--spaceM) + 24px);
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  cursor: pointer;
+	background-color: var(--background);
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+	background-repeat: no-repeat;
+	background-position: right var(--spaceM) center;
+	background-size: 16px;
+	padding-right: calc(var(--spaceM) + 24px);
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	cursor: pointer;
 }
 
 .select:hover:not(:disabled) {
-  border-color: color-mix(in lab, var(--primary) 60%, transparent);
+	border-color: color-mix(in lab, var(--primary) 60%, transparent);
 }
 
 .select:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+	opacity: 0.6;
+	cursor: not-allowed;
 }
 
 /* Textarea Specific */
 .textarea {
-  min-height: 120px;
-  resize: vertical;
+	min-height: 120px;
+	resize: vertical;
 }
 
 /* Button Styling */
 .button {
-  padding: var(--spaceM) var(--spaceL);
-  border-radius: var(--spaceXS);
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
-  cursor: pointer;
-  border: none;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  text-decoration: none;
-  display: inline-block;
-  text-align: center;
+	padding: var(--spaceM) var(--spaceL);
+	border-radius: var(--spaceXS);
+	font-size: var(--fontSizeBodyS);
+	font-weight: var(--fontWeightMedium);
+	cursor: pointer;
+	border: none;
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	text-decoration: none;
+	display: inline-block;
+	text-align: center;
 }
 
 .buttonPrimary {
-  background-color: var(--primary);
-  color: var(--white);
+	background-color: var(--primary);
+	color: var(--white);
 }
 
 .buttonPrimary:hover:not(:disabled) {
-  background-color: color-mix(in lab, var(--primary) 85%, var(--black));
+	background-color: color-mix(in lab, var(--primary) 85%, var(--black));
 }
 
 .buttonSecondary {
-  background-color: transparent;
-  border: 1px solid var(--primary);
-  color: var(--primary);
+	background-color: transparent;
+	border: 1px solid var(--primary);
+	color: var(--primary);
 }
 
 .buttonSecondary:hover:not(:disabled) {
-  background-color: color-mix(in lab, var(--primary) 10%, transparent);
+	background-color: color-mix(in lab, var(--primary) 10%, transparent);
 }
 
 .buttonSuccess {
-  background-color: var(--success);
-  color: var(--white);
+	background-color: var(--success);
+	color: var(--white);
 }
 
 .buttonSuccess:hover:not(:disabled) {
-  background-color: color-mix(in lab, var(--success) 85%, var(--black));
+	background-color: color-mix(in lab, var(--success) 85%, var(--black));
 }
 
 .buttonError {
-  background-color: var(--error);
-  color: var(--white);
+	background-color: var(--error);
+	color: var(--white);
 }
 
 .buttonError:hover:not(:disabled) {
-  background-color: color-mix(in lab, var(--error) 85%, var(--black));
+	background-color: color-mix(in lab, var(--error) 85%, var(--black));
 }
 
 .buttonAudit {
-  background-color: #6f42c1;
-  color: var(--white);
+	background-color: #6f42c1;
+	color: var(--white);
 }
 
 .buttonAudit:hover:not(:disabled) {
-  background-color: #5a359a;
+	background-color: #5a359a;
 }
 
 .button:disabled {
-  background-color: color-mix(in lab, var(--background) 95%, transparent);
-  color: var(--textLight);
-  cursor: not-allowed;
+	background-color: color-mix(in lab, var(--background) 95%, transparent);
+	color: var(--textLight);
+	cursor: not-allowed;
 }
 
 /* Toggle/Checkbox Styling */
 .toggleWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceXS);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceXS);
 }
 
 .toggle {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spaceM);
-  margin: var(--spaceM) 0;
-  cursor: pointer;
+	display: flex;
+	align-items: flex-start;
+	gap: var(--spaceM);
+	margin: var(--spaceM) 0;
+	cursor: pointer;
 }
 
-.toggle input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--text);
-  border-radius: 3px;
-  margin: 0;
-  cursor: pointer;
-  position: relative;
-  background: var(--background);
-  flex-shrink: 0;
-  margin-top: 2px;
+.toggle input[type='checkbox'] {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 18px;
+	height: 18px;
+	border: 2px solid var(--text);
+	border-radius: 3px;
+	margin: 0;
+	cursor: pointer;
+	position: relative;
+	background: var(--background);
+	flex-shrink: 0;
+	margin-top: 2px;
 }
 
-.toggle input[type="checkbox"]:checked {
-  background: var(--primary);
-  border-color: var(--primary);
+.toggle input[type='checkbox']:checked {
+	background: var(--primary);
+	border-color: var(--primary);
 }
 
-.toggle input[type="checkbox"]:checked::after {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 2px;
-  width: 4px;
-  height: 8px;
-  border: solid var(--white);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+.toggle input[type='checkbox']:checked::after {
+	content: '';
+	position: absolute;
+	left: 5px;
+	top: 2px;
+	width: 4px;
+	height: 8px;
+	border: solid var(--white);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
 }
 
-.toggle input[type="checkbox"]:hover {
-  border-color: var(--primary);
+.toggle input[type='checkbox']:hover {
+	border-color: var(--primary);
 }
 
-.toggle input[type="checkbox"]:disabled {
-  background: var(--backgroundLight);
-  border-color: var(--textLight);
-  cursor: not-allowed;
+.toggle input[type='checkbox']:disabled {
+	background: var(--backgroundLight);
+	border-color: var(--textLight);
+	cursor: not-allowed;
 }
 
 .toggle span {
-  font-size: var(--fontSizeBodyXS);
-  line-height: var(--lineHeightBody);
-  color: var(--textBody);
+	font-size: var(--fontSizeBodyXS);
+	line-height: var(--lineHeightBody);
+	color: var(--textBody);
 }
 
 /* Message Styling */
 .errorMessage,
 .successMessage {
-  text-align: left;
-  padding: var(--spaceL) var(--spaceL) calc(var(--spaceL) + var(--spaceS));
-  border-radius: var(--spaceS);
-  margin: var(--spaceM) 0;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 16px color-mix(in lab, var(--text) 10%, transparent);
-  backdrop-filter: blur(8px);
-  animation: slideIn var(--durationM) var(--bezierFastoutSlowin);
-  transform-origin: top;
-  border-left: 4px solid;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceS);
+	text-align: left;
+	padding: var(--spaceL) var(--spaceL) calc(var(--spaceL) + var(--spaceS));
+	border-radius: var(--spaceS);
+	margin: var(--spaceM) 0;
+	position: relative;
+	overflow: hidden;
+	box-shadow: 0 4px 16px color-mix(in lab, var(--text) 10%, transparent);
+	backdrop-filter: blur(8px);
+	animation: slideIn var(--durationM) var(--bezierFastoutSlowin);
+	transform-origin: top;
+	border-left: 4px solid;
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceS);
 }
 
 .errorMessage {
-  background: linear-gradient(
-    135deg,
-    color-mix(in lab, var(--error) 12%, transparent),
-    color-mix(in lab, var(--error) 8%, transparent)
-  );
-  border: 1px solid color-mix(in lab, var(--error) 30%, transparent);
-  border-left-color: var(--error);
-  color: color-mix(in lab, var(--error) 90%, var(--black));
+	background: linear-gradient(135deg, color-mix(in lab, var(--error) 12%, transparent), color-mix(in lab, var(--error) 8%, transparent));
+	border: 1px solid color-mix(in lab, var(--error) 30%, transparent);
+	border-left-color: var(--error);
+	color: color-mix(in lab, var(--error) 90%, var(--black));
 }
 
 .errorMessage::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--error),
-    color-mix(in lab, var(--error) 60%, transparent)
-  );
-  animation: shimmer 2s ease-in-out infinite;
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: linear-gradient(90deg, var(--error), color-mix(in lab, var(--error) 60%, transparent));
+	animation: shimmer 2s ease-in-out infinite;
 }
 
 .successMessage {
-  background: linear-gradient(
-    135deg,
-    color-mix(in lab, var(--success) 12%, transparent),
-    color-mix(in lab, var(--success) 8%, transparent)
-  );
-  border: 1px solid color-mix(in lab, var(--success) 30%, transparent);
-  border-left-color: var(--success);
-  color: color-mix(in lab, var(--success) 90%, var(--black));
-  box-shadow: 0 4px 20px color-mix(in lab, var(--success) 20%, transparent);
+	background: linear-gradient(
+		135deg,
+		color-mix(in lab, var(--success) 12%, transparent),
+		color-mix(in lab, var(--success) 8%, transparent)
+	);
+	border: 1px solid color-mix(in lab, var(--success) 30%, transparent);
+	border-left-color: var(--success);
+	color: color-mix(in lab, var(--success) 90%, var(--black));
+	box-shadow: 0 4px 20px color-mix(in lab, var(--success) 20%, transparent);
 }
 
 .successMessage::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--success),
-    color-mix(in lab, var(--success) 60%, transparent)
-  );
-  animation: shimmer 2s ease-in-out infinite;
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: linear-gradient(90deg, var(--success), color-mix(in lab, var(--success) 60%, transparent));
+	animation: shimmer 2s ease-in-out infinite;
 }
 
 .errorMessage h2,
 .successMessage h2 {
-  font-size: var(--fontSizeH4);
-  font-weight: var(--fontWeightSemibold);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--spaceS);
+	font-size: var(--fontSizeH4);
+	font-weight: var(--fontWeightSemibold);
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: var(--spaceS);
 }
 
 .errorMessage h2::before {
-  content: "⚠️";
-  font-size: var(--fontSizeH5);
-  animation: pulse 2s ease-in-out infinite;
+	content: '⚠️';
+	font-size: var(--fontSizeH5);
+	animation: pulse 2s ease-in-out infinite;
 }
 
 .successMessage h2::before {
-  content: "✅";
-  font-size: var(--fontSizeH5);
-  animation: bounce 1s ease-in-out;
+	content: '✅';
+	font-size: var(--fontSizeH5);
+	animation: bounce 1s ease-in-out;
 }
 
 .errorMessage p,
 .successMessage p {
-  font-size: var(--fontSizeBodyS);
-  line-height: var(--lineHeightBody);
-  margin: 0;
-  opacity: 0.9;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+	font-size: var(--fontSizeBodyS);
+	line-height: var(--lineHeightBody);
+	margin: 0;
+	opacity: 0.9;
+	white-space: normal;
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 .successMessage p {
-  color: color-mix(in lab, var(--success) 85%, var(--black));
+	color: color-mix(in lab, var(--success) 85%, var(--black));
 }
 
 /* Field Error Styling */
 .error {
-  color: var(--error);
-  text-align: left;
-  margin: var(--spaceXS) 0 var(--spaceS) 0;
-  font-size: var(--fontSizeBodyXS);
-  padding: var(--spaceS) var(--spaceM);
-  background: color-mix(in lab, var(--error) 8%, transparent);
-  border-radius: var(--spaceXS);
-  border-left: 3px solid var(--error);
-  animation: slideIn var(--durationS) var(--bezierFastoutSlowin);
-  position: relative;
-  overflow: hidden;
+	color: var(--error);
+	text-align: left;
+	margin: var(--spaceXS) 0 var(--spaceS) 0;
+	font-size: var(--fontSizeBodyXS);
+	padding: var(--spaceS) var(--spaceM);
+	background: color-mix(in lab, var(--error) 8%, transparent);
+	border-radius: var(--spaceXS);
+	border-left: 3px solid var(--error);
+	animation: slideIn var(--durationS) var(--bezierFastoutSlowin);
+	position: relative;
+	overflow: hidden;
 }
 
 .error::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--error);
-  animation: errorPulse 1.5s ease-in-out infinite;
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 3px;
+	background: var(--error);
+	animation: errorPulse 1.5s ease-in-out infinite;
 }
 
 /* Animations */
 @keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(calc(-1 * var(--spaceM))) scaleY(0.8);
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scaleY(1);
-    max-height: 200px;
-    padding-top: var(--spaceL);
-    padding-bottom: calc(var(--spaceL) + var(--spaceS));
-    margin-top: var(--spaceM);
-    margin-bottom: var(--spaceM);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(calc(-1 * var(--spaceM))) scaleY(0.8);
+		max-height: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scaleY(1);
+		max-height: 200px;
+		padding-top: var(--spaceL);
+		padding-bottom: calc(var(--spaceL) + var(--spaceS));
+		margin-top: var(--spaceM);
+		margin-bottom: var(--spaceM);
+	}
 }
 
 @keyframes shimmer {
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: translateX(-100%);
-  }
-  50% {
-    opacity: 1;
-    transform: translateX(100%);
-  }
+	0%,
+	100% {
+		opacity: 0.6;
+		transform: translateX(-100%);
+	}
+	50% {
+		opacity: 1;
+		transform: translateX(100%);
+	}
 }
 
 @keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+	50% {
+		transform: scale(1.1);
+		opacity: 0.8;
+	}
 }
 
 @keyframes bounce {
-  0%,
-  20%,
-  53%,
-  80%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  40%,
-  43% {
-    transform: translate3d(0, -4px, 0) scale(1.1);
-  }
-  70% {
-    transform: translate3d(0, -2px, 0) scale(1.05);
-  }
-  90% {
-    transform: translate3d(0, -1px, 0) scale(1.02);
-  }
+	0%,
+	20%,
+	53%,
+	80%,
+	100% {
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	40%,
+	43% {
+		transform: translate3d(0, -4px, 0) scale(1.1);
+	}
+	70% {
+		transform: translate3d(0, -2px, 0) scale(1.05);
+	}
+	90% {
+		transform: translate3d(0, -1px, 0) scale(1.02);
+	}
 }
 
 @keyframes errorPulse {
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 0 0 color-mix(in lab, var(--error) 40%, transparent);
-  }
-  50% {
-    opacity: 0.7;
-    box-shadow: 0 0 0 4px color-mix(in lab, var(--error) 20%, transparent);
-  }
+	0%,
+	100% {
+		opacity: 1;
+		box-shadow: 0 0 0 0 color-mix(in lab, var(--error) 40%, transparent);
+	}
+	50% {
+		opacity: 0.7;
+		box-shadow: 0 0 0 4px color-mix(in lab, var(--error) 20%, transparent);
+	}
 }
 
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .errorMessage,
-  .successMessage,
-  .error {
-    animation: none;
-  }
+	.errorMessage,
+	.successMessage,
+	.error {
+		animation: none;
+	}
 
-  .errorMessage::before,
-  .successMessage::before,
-  .error::before {
-    animation: none;
-  }
+	.errorMessage::before,
+	.successMessage::before,
+	.error::before {
+		animation: none;
+	}
 
-  .errorMessage h2::before,
-  .successMessage h2::before {
-    animation: none;
-  }
+	.errorMessage h2::before,
+	.successMessage h2::before {
+		animation: none;
+	}
 }

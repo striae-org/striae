@@ -113,10 +113,12 @@ function extractFileIdsFromCaseData(caseData: StoredCaseData): string[] {
 }
 
 /**
- * Reads the file IDs referenced by a case-data record, tolerating legacy
- * plaintext records and any decrypt/parse failure. Never throws; callers
- * that need to proceed with deletion or a sweep regardless of record state
- * can treat an empty array as "no known references" rather than an error.
+ * Reads the file IDs referenced by a case-data record. Only [] returns from
+ * genuine ambiguity about the object's existence/body (not found, or an I/O
+ * failure reading it). This deployment has no unencrypted case data, so a
+ * record with a missing/invalid envelope, or one that fails to decrypt/parse,
+ * throws instead of returning [] — callers must not treat that as "no known
+ * references" and must fail closed (abort deletion/sweep for that record).
  */
 export async function readCaseFileIds(env: Env, caseDataKey: string, keyRegistry?: PrivateKeyRegistry): Promise<string[]> {
 	let file: R2ObjectBody | null;
@@ -131,23 +133,9 @@ export async function readCaseFileIds(env: Env, caseDataKey: string, keyRegistry
 		return [];
 	}
 
-	let atRestEnvelope: DataAtRestEnvelope | null;
-	try {
-		atRestEnvelope = extractDataAtRestEnvelope(file);
-	} catch (error) {
-		console.warn(`Unable to read case data envelope metadata for ${caseDataKey}, continuing without file references:`, error);
-		return [];
-	}
-
+	const atRestEnvelope = extractDataAtRestEnvelope(file);
 	if (!atRestEnvelope) {
-		// Legacy/plaintext record with no envelope; best-effort parse so callers still proceed.
-		try {
-			const parsed = JSON.parse(await file.text()) as StoredCaseData;
-			return extractFileIdsFromCaseData(parsed);
-		} catch (error) {
-			console.warn(`Unable to read legacy case data for ${caseDataKey}, continuing without file references:`, error);
-			return [];
-		}
+		throw new Error(`Case data ${caseDataKey} is missing a valid data-at-rest envelope; refusing to treat it as plaintext.`);
 	}
 
 	let ciphertext: ArrayBuffer;
@@ -159,14 +147,8 @@ export async function readCaseFileIds(env: Env, caseDataKey: string, keyRegistry
 		return [];
 	}
 
-	try {
-		const registry = keyRegistry ?? (await getDataAtRestPrivateKeyRegistry(env));
-		const fileText = await decryptWithKeyRegistry(ciphertext, atRestEnvelope, registry);
-		const parsed = JSON.parse(fileText) as StoredCaseData;
-		return extractFileIdsFromCaseData(parsed);
-	} catch (error) {
-		// Never let a decrypt/parse failure block the caller's cleanup/sweep logic.
-		console.warn(`Unable to decrypt/parse case data for ${caseDataKey}, continuing without file references:`, error);
-		return [];
-	}
+	const registry = keyRegistry ?? (await getDataAtRestPrivateKeyRegistry(env));
+	const fileText = await decryptWithKeyRegistry(ciphertext, atRestEnvelope, registry);
+	const parsed = JSON.parse(fileText) as StoredCaseData;
+	return extractFileIdsFromCaseData(parsed);
 }

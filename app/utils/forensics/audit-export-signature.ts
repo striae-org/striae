@@ -1,8 +1,4 @@
-import {
-  type ForensicManifestSignature,
-  FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
-  type ManifestSignatureVerificationResult
-} from './SHA256';
+import { type ForensicManifestSignature, FORENSIC_MANIFEST_SIGNATURE_ALGORITHM, type ManifestSignatureVerificationResult } from './SHA256';
 import { verifySignaturePayload } from './signature-utils';
 
 export const AUDIT_EXPORT_SIGNATURE_VERSION = '2.0';
@@ -14,108 +10,106 @@ export type AuditExportType = 'trail';
 export type AuditExportScopeType = 'case' | 'user';
 
 export interface AuditExportSigningPayload {
-  signatureVersion: string;
-  exportFormat: AuditExportFormat;
-  exportType: AuditExportType;
-  scopeType: AuditExportScopeType;
-  scopeIdentifier: string;
-  generatedAt: string;
-  totalEntries: number;
-  hash: string;
+	signatureVersion: string;
+	exportFormat: AuditExportFormat;
+	exportType: AuditExportType;
+	scopeType: AuditExportScopeType;
+	scopeIdentifier: string;
+	generatedAt: string;
+	totalEntries: number;
+	hash: string;
 }
 
-export function isValidAuditExportSigningPayload(
-  payload: Partial<AuditExportSigningPayload>
-): payload is AuditExportSigningPayload {
-  if (!payload) {
-    return false;
-  }
+export function isValidAuditExportSigningPayload(payload: Partial<AuditExportSigningPayload>): payload is AuditExportSigningPayload {
+	if (!payload) {
+		return false;
+	}
 
-  if (payload.signatureVersion !== AUDIT_EXPORT_SIGNATURE_VERSION) {
-    return false;
-  }
+	if (payload.signatureVersion !== AUDIT_EXPORT_SIGNATURE_VERSION) {
+		return false;
+	}
 
-  if (payload.exportFormat !== 'json') {
-    return false;
-  }
+	if (payload.exportFormat !== 'json') {
+		return false;
+	}
 
-  if (payload.exportType !== 'trail') {
-    return false;
-  }
+	if (payload.exportType !== 'trail') {
+		return false;
+	}
 
-  if (payload.scopeType !== 'case' && payload.scopeType !== 'user') {
-    return false;
-  }
+	if (payload.scopeType !== 'case' && payload.scopeType !== 'user') {
+		return false;
+	}
 
-  if (typeof payload.scopeIdentifier !== 'string' || payload.scopeIdentifier.trim().length === 0) {
-    return false;
-  }
+	if (typeof payload.scopeIdentifier !== 'string' || payload.scopeIdentifier.trim().length === 0) {
+		return false;
+	}
 
-  if (typeof payload.generatedAt !== 'string' || Number.isNaN(Date.parse(payload.generatedAt))) {
-    return false;
-  }
+	if (typeof payload.generatedAt !== 'string' || Number.isNaN(Date.parse(payload.generatedAt))) {
+		return false;
+	}
 
-  if (typeof payload.totalEntries !== 'number' || payload.totalEntries < 0) {
-    return false;
-  }
+	if (typeof payload.totalEntries !== 'number' || payload.totalEntries < 0) {
+		return false;
+	}
 
-  if (typeof payload.hash !== 'string' || !SHA256_HEX_REGEX.test(payload.hash)) {
-    return false;
-  }
+	if (typeof payload.hash !== 'string' || !SHA256_HEX_REGEX.test(payload.hash)) {
+		return false;
+	}
 
-  return true;
+	return true;
 }
 
 export function createAuditExportSigningPayload(payload: AuditExportSigningPayload): string {
-  const canonicalPayload = {
-    signatureVersion: payload.signatureVersion,
-    exportFormat: payload.exportFormat,
-    exportType: payload.exportType,
-    scopeType: payload.scopeType,
-    scopeIdentifier: payload.scopeIdentifier,
-    generatedAt: payload.generatedAt,
-    totalEntries: payload.totalEntries,
-    hash: payload.hash.toUpperCase()
-  };
+	const canonicalPayload = {
+		signatureVersion: payload.signatureVersion,
+		exportFormat: payload.exportFormat,
+		exportType: payload.exportType,
+		scopeType: payload.scopeType,
+		scopeIdentifier: payload.scopeIdentifier,
+		generatedAt: payload.generatedAt,
+		totalEntries: payload.totalEntries,
+		hash: payload.hash.toUpperCase(),
+	};
 
-  return JSON.stringify(canonicalPayload);
+	return JSON.stringify(canonicalPayload);
 }
 
 export async function verifyAuditExportSignature(
-  payload: Partial<AuditExportSigningPayload>,
-  signature?: ForensicManifestSignature,
-  verificationPublicKeyPem?: string
+	payload: Partial<AuditExportSigningPayload>,
+	signature?: ForensicManifestSignature,
+	verificationPublicKeyPem?: string,
 ): Promise<ManifestSignatureVerificationResult> {
-  if (!signature) {
-    return {
-      isValid: false,
-      error: 'Missing audit export signature'
-    };
-  }
+	if (!signature) {
+		return {
+			isValid: false,
+			error: 'Missing audit export signature',
+		};
+	}
 
-  if (!isValidAuditExportSigningPayload(payload)) {
-    return {
-      isValid: false,
-      keyId: signature.keyId,
-      error: 'Audit export signature metadata is malformed'
-    };
-  }
+	if (!isValidAuditExportSigningPayload(payload)) {
+		return {
+			isValid: false,
+			keyId: signature.keyId,
+			error: 'Audit export signature metadata is malformed',
+		};
+	}
 
-  const signingPayload = createAuditExportSigningPayload(payload);
+	const signingPayload = createAuditExportSigningPayload(payload);
 
-  return verifySignaturePayload(
-    signingPayload,
-    signature,
-    FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
-    {
-      unsupportedAlgorithmPrefix: 'Unsupported audit export signature algorithm',
-      missingKeyOrValueError: 'Missing audit export signature key ID or value',
-      noVerificationKeyPrefix: 'No verification key configured for key ID',
-      invalidPublicKeyError: 'Audit export signature verification failed: invalid public key',
-      verificationFailedError: 'Audit export signature verification failed'
-    },
-    {
-      verificationPublicKeyPem
-    }
-  );
+	return verifySignaturePayload(
+		signingPayload,
+		signature,
+		FORENSIC_MANIFEST_SIGNATURE_ALGORITHM,
+		{
+			unsupportedAlgorithmPrefix: 'Unsupported audit export signature algorithm',
+			missingKeyOrValueError: 'Missing audit export signature key ID or value',
+			noVerificationKeyPrefix: 'No verification key configured for key ID',
+			invalidPublicKeyError: 'Audit export signature verification failed: invalid public key',
+			verificationFailedError: 'Audit export signature verification failed',
+		},
+		{
+			verificationPublicKeyPem,
+		},
+	);
 }

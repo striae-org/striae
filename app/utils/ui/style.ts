@@ -2,11 +2,11 @@
  * Media query breakpoints
  */
 export const media: { [key: string]: number } = {
-  desktop: 2560,    // 4K/2K displays
-  laptop: 1920,     // FHD displays
-  tablet: 1024,     // iPad Pro/Large tablets
-  mobile: 768,      // Phones landscape/Small tablets
-  mobileS: 480,     // Phones portrait
+	desktop: 2560, // 4K/2K displays
+	laptop: 1920, // FHD displays
+	tablet: 1024, // iPad Pro/Large tablets
+	mobile: 768, // Phones landscape/Small tablets
+	mobileS: 480, // Phones portrait
 };
 
 /**
@@ -39,45 +39,44 @@ export const numToMs = (num: number): string => `${num}ms`;
  * Convert an rgb theme property (e.g. rgbBlack: '0 0 0')
  * to values that can be spread into a ThreeJS Color class
  */
-export const rgbToThreeColor = (rgb: string): number[] =>
-  rgb?.split(' ').map(value => Number(value) / 255) || [];
+export const rgbToThreeColor = (rgb: string): number[] => rgb?.split(' ').map((value) => Number(value) / 255) || [];
 
 /**
  * Convert a JS object into `--` prefixed css custom properties.
  * Optionally pass a second param for normal styles
  */
 export function cssProps(
-  props: { [key: string]: string | number },
-  style: { [key: string]: string | number } = {}
+	props: { [key: string]: string | number },
+	style: { [key: string]: string | number } = {},
 ): { [key: string]: string | number } {
-  const result: { [key: string]: string | number } = {};
+	const result: { [key: string]: string | number } = {};
 
-  const keys = Object.keys(props);
+	const keys = Object.keys(props);
 
-  for (const key of keys) {
-    let value = props[key];
+	for (const key of keys) {
+		let value = props[key];
 
-    if (typeof value === 'number' && key === 'delay') {
-      value = numToMs(value);
-    }
+		if (typeof value === 'number' && key === 'delay') {
+			value = numToMs(value);
+		}
 
-    if (typeof value === 'number' && key !== 'opacity') {
-      value = numToPx(value);
-    }
+		if (typeof value === 'number' && key !== 'opacity') {
+			value = numToPx(value);
+		}
 
-    if (typeof value === 'number' && key === 'opacity') {
-      value = `${value * 100}%`;
-    }
+		if (typeof value === 'number' && key === 'opacity') {
+			value = `${value * 100}%`;
+		}
 
-    result[`--${key}`] = value;
-  }
+		result[`--${key}`] = value;
+	}
 
-  return { ...result, ...style };
+	return { ...result, ...style };
 }
 
 /**
  * Concatenate classNames together
  */
 export function classes(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(' ');
+	return classes.filter(Boolean).join(' ');
 }

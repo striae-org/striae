@@ -11,77 +11,73 @@ import { validateExporterUid, validateConfirmationHash, validateConfirmationSign
 import { auditService } from '~/services/audit';
 
 interface CaseDataFile {
-  id: string;
-  originalFilename?: string;
+	id: string;
+	originalFilename?: string;
 }
 
 interface CaseDataResponse {
-  files?: CaseDataFile[];
-  originalImageIds?: Record<string, string>;
-  archived?: boolean;
+	files?: CaseDataFile[];
+	originalImageIds?: Record<string, string>;
+	archived?: boolean;
 }
 
 type AnnotationImportData = Record<string, unknown> & {
-  confirmationData?: unknown;
-  updatedAt?: string;
+	confirmationData?: unknown;
+	updatedAt?: string;
 };
 
 function getNonEmptyString(value: unknown): string | null {
-  if (typeof value !== 'string') {
-    return null;
-  }
+	if (typeof value !== 'string') {
+		return null;
+	}
 
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : null;
 }
 
 function resolveConfirmationImportOwnerUid(confirmationData: ConfirmationImportData): string | null {
-  return getNonEmptyString(confirmationData.metadata.originalCaseOwnerUid);
+	return getNonEmptyString(confirmationData.metadata.originalCaseOwnerUid);
 }
 
 function normalizePemForComparison(pem: string): string {
-  return pem
-    .replace(/\\n/g, '\n')
-    .replace(/\r/g, '')
-    .replace(/\s+/g, '')
-    .trim();
+	return pem.replace(/\\n/g, '\n').replace(/\r/g, '').replace(/\s+/g, '').trim();
 }
 
 function enforcePackagedPemMatchesTrustedSigningKey(
-  signatureKeyId: string,
-  packagedVerificationPublicKeyPem: string,
-  packageType: 'case package' | 'confirmation package'
+	signatureKeyId: string,
+	packagedVerificationPublicKeyPem: string,
+	packageType: 'case package' | 'confirmation package',
 ): void {
-  const trustedVerificationPublicKeyPem = getVerificationPublicKey(signatureKeyId);
+	const trustedVerificationPublicKeyPem = getVerificationPublicKey(signatureKeyId);
 
-  if (!trustedVerificationPublicKeyPem) {
-    return;
-  }
+	if (!trustedVerificationPublicKeyPem) {
+		return;
+	}
 
-  const trustedNormalized = normalizePemForComparison(trustedVerificationPublicKeyPem);
-  const packagedNormalized = normalizePemForComparison(packagedVerificationPublicKeyPem);
+	const trustedNormalized = normalizePemForComparison(trustedVerificationPublicKeyPem);
+	const packagedNormalized = normalizePemForComparison(packagedVerificationPublicKeyPem);
 
-  if (trustedNormalized !== packagedNormalized) {
-    throw new Error(
-      `Security validation failed: the bundled public signing key in this ${packageType} does not match the trusted configured key for key ID "${signatureKeyId}". ` +
-      'The package may have been tampered with and cannot be imported.'
-    );
-  }
+	if (trustedNormalized !== packagedNormalized) {
+		throw new Error(
+			`Security validation failed: the bundled public signing key in this ${packageType} does not match the trusted configured key for key ID "${signatureKeyId}". ` +
+				'The package may have been tampered with and cannot be imported.',
+		);
+	}
 }
 
 function isEncryptionManifest(value: unknown): value is EncryptionManifest {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
+	if (!value || typeof value !== 'object') {
+		return false;
+	}
 
-  const candidate = value as Partial<EncryptionManifest>;
-  return (
-    typeof candidate.encryptionVersion === 'string' &&
-    typeof candidate.algorithm === 'string' &&
-    typeof candidate.keyId === 'string' &&
-    typeof candidate.wrappedKey === 'string' &&
-    typeof candidate.dataIv === 'string'
-  );
+	const candidate = value as Partial<EncryptionManifest>;
+	return (
+		typeof candidate.encryptionVersion === 'string' &&
+		typeof candidate.algorithm === 'string' &&
+		typeof candidate.keyId === 'string' &&
+		typeof candidate.wrappedKey === 'string' &&
+		typeof candidate.dataIv === 'string'
+	);
 }
 
 /**
@@ -90,602 +86,555 @@ function isEncryptionManifest(value: unknown): value is EncryptionManifest {
  * invariant. Fails closed with a clear message before decryptExportBatch is called.
  */
 function validateConfirmationEncryptionManifest(manifest: EncryptionManifest): void {
-  if (
-    !manifest.encryptionVersion ||
-    !manifest.algorithm ||
-    !manifest.keyId ||
-    !manifest.wrappedKey ||
-    !manifest.dataIv
-  ) {
-    throw new Error(
-      'Malformed encryption manifest: one or more required fields (encryptionVersion, algorithm, keyId, wrappedKey, dataIv) are missing.'
-    );
-  }
+	if (!manifest.encryptionVersion || !manifest.algorithm || !manifest.keyId || !manifest.wrappedKey || !manifest.dataIv) {
+		throw new Error(
+			'Malformed encryption manifest: one or more required fields (encryptionVersion, algorithm, keyId, wrappedKey, dataIv) are missing.',
+		);
+	}
 
-  // Confirmation packages must never carry image payloads. Reject any manifest
-  // that references encrypted images — this indicates a wrong package type or
-  // a tampered/malformed file.
-  const candidate = manifest as unknown as Record<string, unknown>;
-  const encryptedImages = candidate['encryptedImages'];
-  const encryptedFiles = candidate['encryptedFiles'];
-  if (
-    (encryptedImages !== undefined &&
-      (typeof encryptedImages !== 'object' ||
-        Object.keys(encryptedImages as object).length > 0)) ||
-    (encryptedFiles !== undefined &&
-      (typeof encryptedFiles !== 'object' ||
-        Object.keys(encryptedFiles as object).length > 0))
-  ) {
-    throw new Error(
-      'Invalid confirmation package: this manifest contains encrypted file references. ' +
-      'Confirmation packages must not include file payloads. The file may be a case export or may have been tampered with.'
-    );
-  }
+	// Confirmation packages must never carry image payloads. Reject any manifest
+	// that references encrypted images — this indicates a wrong package type or
+	// a tampered/malformed file.
+	const candidate = manifest as unknown as Record<string, unknown>;
+	const encryptedImages = candidate['encryptedImages'];
+	const encryptedFiles = candidate['encryptedFiles'];
+	if (
+		(encryptedImages !== undefined && (typeof encryptedImages !== 'object' || Object.keys(encryptedImages as object).length > 0)) ||
+		(encryptedFiles !== undefined && (typeof encryptedFiles !== 'object' || Object.keys(encryptedFiles as object).length > 0))
+	) {
+		throw new Error(
+			'Invalid confirmation package: this manifest contains encrypted file references. ' +
+				'Confirmation packages must not include file payloads. The file may be a case export or may have been tampered with.',
+		);
+	}
 }
 
 /**
  * Ensures that the audit bundle's scope matches the expected case number.
  */
-function ensureAuditBundleScopeMatchesCase(
-  expectedCaseNumber: string,
-  scopeIdentifier?: string,
-  auditTrailCaseNumber?: string
-): void {
-  const normalizedExpected = expectedCaseNumber.trim();
-  const normalizedScopeIdentifier = typeof scopeIdentifier === 'string' ? scopeIdentifier.trim() : '';
-  const normalizedAuditTrailCaseNumber = typeof auditTrailCaseNumber === 'string' ? auditTrailCaseNumber.trim() : '';
+function ensureAuditBundleScopeMatchesCase(expectedCaseNumber: string, scopeIdentifier?: string, auditTrailCaseNumber?: string): void {
+	const normalizedExpected = expectedCaseNumber.trim();
+	const normalizedScopeIdentifier = typeof scopeIdentifier === 'string' ? scopeIdentifier.trim() : '';
+	const normalizedAuditTrailCaseNumber = typeof auditTrailCaseNumber === 'string' ? auditTrailCaseNumber.trim() : '';
 
-  if (!normalizedScopeIdentifier) {
-    throw new Error(
-      'Invalid confirmation audit bundle: signed scope identifier is missing. '
-      + 'The bundle cannot be safely merged into this case.'
-    );
-  }
+	if (!normalizedScopeIdentifier) {
+		throw new Error(
+			'Invalid confirmation audit bundle: signed scope identifier is missing. ' + 'The bundle cannot be safely merged into this case.',
+		);
+	}
 
-  if (normalizedScopeIdentifier !== normalizedExpected) {
-    throw new Error(
-      `Invalid confirmation audit bundle: signed scope case "${normalizedScopeIdentifier}" does not match target case "${normalizedExpected}".`
-    );
-  }
+	if (normalizedScopeIdentifier !== normalizedExpected) {
+		throw new Error(
+			`Invalid confirmation audit bundle: signed scope case "${normalizedScopeIdentifier}" does not match target case "${normalizedExpected}".`,
+		);
+	}
 
-  if (!normalizedAuditTrailCaseNumber) {
-    throw new Error(
-      'Invalid confirmation audit bundle: audit trail case number is missing. '
-      + 'The bundle cannot be safely merged into this case.'
-    );
-  }
+	if (!normalizedAuditTrailCaseNumber) {
+		throw new Error(
+			'Invalid confirmation audit bundle: audit trail case number is missing. ' + 'The bundle cannot be safely merged into this case.',
+		);
+	}
 
-  if (normalizedAuditTrailCaseNumber !== normalizedExpected) {
-    throw new Error(
-      `Invalid confirmation audit bundle: audit trail case "${normalizedAuditTrailCaseNumber}" does not match target case "${normalizedExpected}".`
-    );
-  }
+	if (normalizedAuditTrailCaseNumber !== normalizedExpected) {
+		throw new Error(
+			`Invalid confirmation audit bundle: audit trail case "${normalizedAuditTrailCaseNumber}" does not match target case "${normalizedExpected}".`,
+		);
+	}
 }
 
 /**
  * Import confirmation data from JSON file
  */
 export async function importConfirmationData(
-  user: User,
-  confirmationFile: File,
-  onProgress?: (stage: string, progress: number, details?: string) => void
+	user: User,
+	confirmationFile: File,
+	onProgress?: (stage: string, progress: number, details?: string) => void,
 ): Promise<ConfirmationImportResult> {
-  const startTime = Date.now();
-  let hashValid = false;
-  let signatureValid = false;
-  let signaturePresent = false;
-  let signatureKeyId: string | undefined;
-  let confirmationDataForAudit: ConfirmationImportData | null = null;
-  let confirmationJsonFileNameForAudit = confirmationFile.name;
-  const confirmedFileNames = new Set<string>();
-  
-  const result: ConfirmationImportResult = {
-    success: false,
-    caseNumber: '',
-    confirmationsImported: 0,
-    imagesUpdated: 0,
-    errors: [],
-    warnings: []
-  };
+	const startTime = Date.now();
+	let hashValid = false;
+	let signatureValid = false;
+	let signaturePresent = false;
+	let signatureKeyId: string | undefined;
+	let confirmationDataForAudit: ConfirmationImportData | null = null;
+	let confirmationJsonFileNameForAudit = confirmationFile.name;
+	const confirmedFileNames = new Set<string>();
 
-  try {
-    onProgress?.('Reading confirmation file', 10, 'Loading confirmation package...');
+	const result: ConfirmationImportResult = {
+		success: false,
+		caseNumber: '',
+		confirmationsImported: 0,
+		imagesUpdated: 0,
+		errors: [],
+		warnings: [],
+	};
 
-    const packageData = await extractConfirmationImportPackage(confirmationFile);
+	try {
+		onProgress?.('Reading confirmation file', 10, 'Loading confirmation package...');
 
-    let confirmationData = packageData.confirmationData;
-    let confirmationJsonContent = packageData.confirmationJsonContent;
-    const confirmationFileName = packageData.confirmationFileName;
+		const packageData = await extractConfirmationImportPackage(confirmationFile);
 
-    // All confirmation imports are encrypted — fail closed if manifest is missing
-    if (!packageData.encryptionManifest || !packageData.encryptedDataBase64) {
-      throw new Error(
-        'This confirmation package is not encrypted. Only encrypted confirmation packages exported from Striae can be imported.'
-      );
-    }
+		let confirmationData = packageData.confirmationData;
+		let confirmationJsonContent = packageData.confirmationJsonContent;
+		const confirmationFileName = packageData.confirmationFileName;
 
-    if (!isEncryptionManifest(packageData.encryptionManifest)) {
-      throw new Error('Invalid encryption manifest format.');
-    }
+		// All confirmation imports are encrypted — fail closed if manifest is missing
+		if (!packageData.encryptionManifest || !packageData.encryptedDataBase64) {
+			throw new Error(
+				'This confirmation package is not encrypted. Only encrypted confirmation packages exported from Striae can be imported.',
+			);
+		}
 
-    // Enforce confirmation-specific manifest shape before attempting decryption
-    validateConfirmationEncryptionManifest(packageData.encryptionManifest);
+		if (!isEncryptionManifest(packageData.encryptionManifest)) {
+			throw new Error('Invalid encryption manifest format.');
+		}
 
-    onProgress?.('Decrypting confirmation data', 15, 'Decrypting exported confirmation...');
-    try {
-      const decryptResult = await decryptExportBatch(
-        user,
-        packageData.encryptionManifest,
-        packageData.encryptedDataBase64,
-        {}
-      );
+		// Enforce confirmation-specific manifest shape before attempting decryption
+		validateConfirmationEncryptionManifest(packageData.encryptionManifest);
 
-      const decryptedJsonString = decryptResult.plaintext;
-      confirmationData = JSON.parse(decryptedJsonString) as ConfirmationImportData;
-      confirmationJsonContent = decryptedJsonString;
-    } catch (error) {
-      throw new Error(
-        `Failed to decrypt confirmation data: ${error instanceof Error ? error.message : 'Unknown decryption error'}`,
-        { cause: error }
-      );
-    }
+		onProgress?.('Decrypting confirmation data', 15, 'Decrypting exported confirmation...');
+		try {
+			const decryptResult = await decryptExportBatch(user, packageData.encryptionManifest, packageData.encryptedDataBase64, {});
 
-    confirmationDataForAudit = confirmationData;
-    confirmationJsonFileNameForAudit = confirmationFileName;
-    result.caseNumber = confirmationData.metadata.caseNumber;
+			const decryptedJsonString = decryptResult.plaintext;
+			confirmationData = JSON.parse(decryptedJsonString) as ConfirmationImportData;
+			confirmationJsonContent = decryptedJsonString;
+		} catch (error) {
+			throw new Error(`Failed to decrypt confirmation data: ${error instanceof Error ? error.message : 'Unknown decryption error'}`, {
+				cause: error,
+			});
+		}
 
-    const confirmationSignatureKeyId = confirmationData.metadata.signature?.keyId;
-    if (
-      typeof packageData.packagedVerificationPublicKeyPem === 'string' &&
-      packageData.packagedVerificationPublicKeyPem.trim().length > 0 &&
-      typeof confirmationSignatureKeyId === 'string' &&
-      confirmationSignatureKeyId.trim().length > 0
-    ) {
-      enforcePackagedPemMatchesTrustedSigningKey(
-        confirmationSignatureKeyId,
-        packageData.packagedVerificationPublicKeyPem,
-        'confirmation package'
-      );
-    }
-    
-    // Start audit workflow
-    auditService.startWorkflow(result.caseNumber);
+		confirmationDataForAudit = confirmationData;
+		confirmationJsonFileNameForAudit = confirmationFileName;
+		result.caseNumber = confirmationData.metadata.caseNumber;
 
-    onProgress?.('Validating hash', 20, 'Verifying data integrity...');
+		const confirmationSignatureKeyId = confirmationData.metadata.signature?.keyId;
+		if (
+			typeof packageData.packagedVerificationPublicKeyPem === 'string' &&
+			packageData.packagedVerificationPublicKeyPem.trim().length > 0 &&
+			typeof confirmationSignatureKeyId === 'string' &&
+			confirmationSignatureKeyId.trim().length > 0
+		) {
+			enforcePackagedPemMatchesTrustedSigningKey(
+				confirmationSignatureKeyId,
+				packageData.packagedVerificationPublicKeyPem,
+				'confirmation package',
+			);
+		}
 
-    // Validate hash
-    hashValid = await validateConfirmationHash(confirmationJsonContent, confirmationData.metadata.hash);
-    if (!hashValid) {
-      throw new Error('Confirmation data hash validation failed. The file may have been tampered with or corrupted.');
-    }
+		// Start audit workflow
+		auditService.startWorkflow(result.caseNumber);
 
-    onProgress?.('Validating signature', 30, 'Verifying signed confirmation metadata...');
+		onProgress?.('Validating hash', 20, 'Verifying data integrity...');
 
-    const signatureResult = await validateConfirmationSignatureFile(confirmationData);
-    signaturePresent = !!confirmationData.metadata.signature;
-    signatureValid = signatureResult.isValid;
-    signatureKeyId = signatureResult.keyId;
-    if (!signatureResult.isValid) {
-      throw new Error(
-        `Confirmation signature validation failed: ${signatureResult.error || 'Unknown signature error'}`
-      );
-    }
+		// Validate hash
+		hashValid = await validateConfirmationHash(confirmationJsonContent, confirmationData.metadata.hash);
+		if (!hashValid) {
+			throw new Error('Confirmation data hash validation failed. The file may have been tampered with or corrupted.');
+		}
 
-    onProgress?.('Validating exporter', 40, 'Checking exporter credentials...');
+		onProgress?.('Validating signature', 30, 'Verifying signed confirmation metadata...');
 
-    // Validate exporter UID exists and is not current user
-    const validation = await validateExporterUid(confirmationData.metadata.exportedByUid, user);
-    
-    if (!validation.exists) {
-      throw new Error(`Reviewer does not exist in the user database.`);
-    }
-    
-    if (validation.isSelf) {
-      throw new Error('You cannot import confirmation data that you exported yourself.');
-    }
+		const signatureResult = await validateConfirmationSignatureFile(confirmationData);
+		signaturePresent = !!confirmationData.metadata.signature;
+		signatureValid = signatureResult.isValid;
+		signatureKeyId = signatureResult.keyId;
+		if (!signatureResult.isValid) {
+			throw new Error(`Confirmation signature validation failed: ${signatureResult.error || 'Unknown signature error'}`);
+		}
 
-    // Validate that this confirmation package was intended for the current user.
-    // Fail closed: originalCaseOwnerUid must be present and must match current user.
-    const confirmationOwnerUid = resolveConfirmationImportOwnerUid(confirmationData);
-    if (!confirmationOwnerUid) {
-      throw new Error(
-        'Invalid confirmation package: missing owner identity metadata. ' +
-        'Only packages bound to an original case owner can be imported.'
-      );
-    }
+		onProgress?.('Validating exporter', 40, 'Checking exporter credentials...');
 
-    if (confirmationOwnerUid !== user.uid) {
-      throw new Error(
-        'This confirmation package was not exported for your case. It can only be imported by the original case owner.'
-      );
-    }
+		// Validate exporter UID exists and is not current user
+		const validation = await validateExporterUid(confirmationData.metadata.exportedByUid, user);
 
-    onProgress?.('Validating case', 50, 'Checking case exists...');
+		if (!validation.exists) {
+			throw new Error(`Reviewer does not exist in the user database.`);
+		}
 
-    // Check if case exists in user's regular cases
-    const caseExists = await checkExistingCase(user, result.caseNumber);
-    if (!caseExists) {
-      throw new Error(`Case "${result.caseNumber}" does not exist in your case list. You can only import confirmations for your own cases.`);
-    }
+		if (validation.isSelf) {
+			throw new Error('You cannot import confirmation data that you exported yourself.');
+		}
 
-    onProgress?.('Processing confirmations', 60, 'Validating timestamps and updating annotations...');
+		// Validate that this confirmation package was intended for the current user.
+		// Fail closed: originalCaseOwnerUid must be present and must match current user.
+		const confirmationOwnerUid = resolveConfirmationImportOwnerUid(confirmationData);
+		if (!confirmationOwnerUid) {
+			throw new Error(
+				'Invalid confirmation package: missing owner identity metadata. ' +
+					'Only packages bound to an original case owner can be imported.',
+			);
+		}
 
-    // Get case data to find image IDs
-    const caseResponse = await fetchDataApi(
-      user,
-      `/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/data.json`,
-      {
-        method: 'GET'
-      }
-    );
+		if (confirmationOwnerUid !== user.uid) {
+			throw new Error('This confirmation package was not exported for your case. It can only be imported by the original case owner.');
+		}
 
-    if (!caseResponse.ok) {
-      throw new Error(`Failed to fetch case data: ${caseResponse.status}`);
-    }
+		onProgress?.('Validating case', 50, 'Checking case exists...');
 
-    const caseData = await caseResponse.json() as CaseDataResponse;
+		// Check if case exists in user's regular cases
+		const caseExists = await checkExistingCase(user, result.caseNumber);
+		if (!caseExists) {
+			throw new Error(
+				`Case "${result.caseNumber}" does not exist in your case list. You can only import confirmations for your own cases.`,
+			);
+		}
 
-    if (caseData.archived) {
-      throw new Error('Cannot import confirmations into an archived case.');
-    }
-    
-    // Build mapping from original image IDs to current image IDs
-    const imageIdMapping = new Map<string, string>();
-    
-    // If the case has originalImageIds mapping (from read-only import), use that
-    if (caseData.originalImageIds) {
-      for (const [originalId, currentId] of Object.entries(caseData.originalImageIds)) {
-        imageIdMapping.set(originalId, currentId as string);
-      }
-    } else {
-      // For regular cases, assume original IDs match current IDs
-      for (const file of caseData.files || []) {
-        imageIdMapping.set(file.id, file.id);
-      }
-    }
+		onProgress?.('Processing confirmations', 60, 'Validating timestamps and updating annotations...');
 
-    let processedCount = 0;
-    const totalConfirmations = Object.keys(confirmationData.confirmations).length;
+		// Get case data to find image IDs
+		const caseResponse = await fetchDataApi(user, `/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/data.json`, {
+			method: 'GET',
+		});
 
-    // Process each confirmation
-    for (const [originalImageId, confirmations] of Object.entries(confirmationData.confirmations)) {
-      const currentImageId = imageIdMapping.get(originalImageId);
-      
-      if (!currentImageId) {
-        result.warnings?.push(`Could not find image with original ID: ${originalImageId}`);
-        continue;
-      }
+		if (!caseResponse.ok) {
+			throw new Error(`Failed to fetch case data: ${caseResponse.status}`);
+		}
 
-      // Get the original filename for user-friendly messages
-      const currentFile = (caseData.files || []).find((file) => file.id === currentImageId);
-      const displayFilename = currentFile?.originalFilename || currentImageId;
+		const caseData = (await caseResponse.json()) as CaseDataResponse;
 
-      // Get current annotation data for this image
-      const annotationResponse = await fetchDataApi(
-        user,
-        `/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`,
-        {
-          method: 'GET'
-        }
-      );
+		if (caseData.archived) {
+			throw new Error('Cannot import confirmations into an archived case.');
+		}
 
-      let annotationData: AnnotationImportData = {};
-      if (annotationResponse.ok) {
-        annotationData = await annotationResponse.json() as AnnotationImportData;
-      }
+		// Build mapping from original image IDs to current image IDs
+		const imageIdMapping = new Map<string, string>();
 
-      // Check if confirmation data already exists
-      if (annotationData.confirmationData) {
-        result.warnings?.push(`Image ${displayFilename} already has confirmation data - skipping`);
-        continue;
-      }
+		// If the case has originalImageIds mapping (from read-only import), use that
+		if (caseData.originalImageIds) {
+			for (const [originalId, currentId] of Object.entries(caseData.originalImageIds)) {
+				imageIdMapping.set(originalId, currentId as string);
+			}
+		} else {
+			// For regular cases, assume original IDs match current IDs
+			for (const file of caseData.files || []) {
+				imageIdMapping.set(file.id, file.id);
+			}
+		}
 
-      // Validate that annotations haven't been modified after original export
-      const importedConfirmationData = confirmations.length > 0 ? confirmations[0] : null;
-      if (importedConfirmationData && confirmationData.metadata.originalExportCreatedAt && annotationData.updatedAt) {
-        const originalExportDate = new Date(confirmationData.metadata.originalExportCreatedAt);
-        const annotationUpdatedAt = new Date(annotationData.updatedAt);
-        
-        if (annotationUpdatedAt > originalExportDate) {
-          // Format timestamps in user's timezone
-          const formattedExportDate = originalExportDate.toLocaleString();
-          const formattedUpdatedDate = annotationUpdatedAt.toLocaleString();
-          
-          result.errors?.push(
-            `Cannot import confirmation for image "${displayFilename}" (${importedConfirmationData.confirmationId}). ` +
-            `The annotations were last modified at ${formattedUpdatedDate} which is after ` +
-            `the original case export date of ${formattedExportDate}. ` +
-            `Confirmations can only be imported for images that haven't been modified since the original export.`
-          );
-          continue; // Skip this image and continue with others
-        }
-      } else if (importedConfirmationData && !confirmationData.metadata.originalExportCreatedAt) {
-        // Block legacy confirmation data without forensic linking
-        result.errors?.push(
-          `Cannot import confirmation for image "${displayFilename}" (${importedConfirmationData.confirmationId}). ` +
-          `This confirmation data lacks forensic timestamp linking and cannot be validated. ` +
-          `Only confirmation exports with complete forensic metadata are accepted.`
-        );
-        continue; // Skip this image and continue with others
-      }
+		let processedCount = 0;
+		const totalConfirmations = Object.keys(confirmationData.confirmations).length;
 
-      // Set confirmationData from the imported confirmations (use the first/most recent one)
-      const updatedAnnotationData = {
-        ...annotationData,
-        // Ensure includeConfirmation remains true (original analyst requested confirmation)
-        includeConfirmation: true,
-        // Set the confirmation data from import (single object, no array needed)
-        confirmationData: importedConfirmationData
-      };
+		// Process each confirmation
+		for (const [originalImageId, confirmations] of Object.entries(confirmationData.confirmations)) {
+			const currentImageId = imageIdMapping.get(originalImageId);
 
-      // Save updated annotation data
-      const saveResponse = await fetchDataApi(
-        user,
-        `/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(updatedAnnotationData)
-        }
-      );
+			if (!currentImageId) {
+				result.warnings?.push(`Could not find image with original ID: ${originalImageId}`);
+				continue;
+			}
 
-      if (saveResponse.ok) {
-        result.imagesUpdated++;
-        result.confirmationsImported += confirmations.length;
-        confirmedFileNames.add(displayFilename);
+			// Get the original filename for user-friendly messages
+			const currentFile = (caseData.files || []).find((file) => file.id === currentImageId);
+			const displayFilename = currentFile?.originalFilename || currentImageId;
 
-        try {
-          await upsertFileConfirmationSummary(
-            user,
-            result.caseNumber,
-            currentImageId,
-            updatedAnnotationData as AnnotationData
-          );
-        } catch (summaryError) {
-          console.warn(
-            `Failed to update confirmation summary for imported confirmation ${result.caseNumber}/${currentImageId}:`,
-            summaryError
-          );
-        }
-        
-        // Audit log successful confirmation import
-        try {
-          await auditService.logConfirmationImport(
-            user,
-            result.caseNumber,
-            displayFilename,
-            'success',
-            true,
-            confirmations.length,
-            [displayFilename]
-          );
-        } catch (auditError) {
-          console.error('Failed to log confirmation import audit:', auditError);
-        }
-      } else {
-        result.warnings?.push(`Failed to update image ${displayFilename}: ${saveResponse.status}`);
-        
-        // Audit log failed confirmation import
-        try {
-          await auditService.logConfirmationImport(
-            user,
-            result.caseNumber,
-            displayFilename,
-            'failure',
-            false,
-            0,
-            [],
-            [`Failed to update image ${displayFilename}: ${saveResponse.status}`]
-          );
-        } catch (auditError) {
-          console.error('Failed to log failed confirmation import audit:', auditError);
-        }
-      }
+			// Get current annotation data for this image
+			const annotationResponse = await fetchDataApi(
+				user,
+				`/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`,
+				{
+					method: 'GET',
+				},
+			);
 
-      processedCount++;
-      const progress = 60 + (processedCount / totalConfirmations) * 35;
-      onProgress?.('Processing confirmations', progress, `Updated ${result.imagesUpdated} images...`);
-    }
+			let annotationData: AnnotationImportData = {};
+			if (annotationResponse.ok) {
+				annotationData = (await annotationResponse.json()) as AnnotationImportData;
+			}
 
-    const blockedCount = (result.errors?.length || 0);
-    const successMessage = blockedCount > 0 
-      ? `Imported ${result.confirmationsImported} confirmations, ${blockedCount} blocked`
-      : `Successfully imported ${result.confirmationsImported} confirmations`;
-    
-    onProgress?.('Import complete', 100, successMessage);
+			// Check if confirmation data already exists
+			if (annotationData.confirmationData) {
+				result.warnings?.push(`Image ${displayFilename} already has confirmation data - skipping`);
+				continue;
+			}
 
-    // If there were errors (blocked confirmations), include that in the result message
-    if (result.errors && result.errors.length > 0) {
-      result.success = result.confirmationsImported > 0; // Success if at least one confirmation was imported
-    } else {
-      result.success = true;
-    }
-    
-    // Log confirmation import audit event
-    const endTime = Date.now();
-    await auditService.logConfirmationImport(
-      user,
-      result.caseNumber,
-      confirmationJsonFileNameForAudit,
-      result.success ? (result.errors && result.errors.length > 0 ? 'warning' : 'success') : 'failure',
-      hashValid,
-      result.confirmationsImported, // Successfully imported confirmations
-      Array.from(confirmedFileNames).sort((left, right) => left.localeCompare(right)),
-      result.errors || [],
-      confirmationData.metadata.exportedByUid,
-      {
-        processingTimeMs: endTime - startTime,
-        fileSizeBytes: confirmationFile.size,
-        validationStepsCompleted: result.confirmationsImported, // Successfully imported
-        validationStepsFailed: result.errors ? result.errors.length : 0
-      },
-      true, // exporterUidValidated - true for successful imports
-      confirmationData.metadata.totalConfirmations, // Total confirmations in file
-      {
-        present: signaturePresent,
-        valid: signatureValid,
-        keyId: signatureKeyId
-      },
-      confirmationData.metadata.exportedByBadgeId // Reviewer's badge/ID number
-    );
+			// Validate that annotations haven't been modified after original export
+			const importedConfirmationData = confirmations.length > 0 ? confirmations[0] : null;
+			if (importedConfirmationData && confirmationData.metadata.originalExportCreatedAt && annotationData.updatedAt) {
+				const originalExportDate = new Date(confirmationData.metadata.originalExportCreatedAt);
+				const annotationUpdatedAt = new Date(annotationData.updatedAt);
 
-    // Merge the reviewing examiner's bundled audit trail into the original examiner's live
-    // case audit trail — best-effort, and only when the confirmation import actually succeeded.
-    if (
-      result.success &&
-      result.confirmationsImported > 0 &&
-      packageData.auditBundleEncryptedDataBase64 &&
-      packageData.auditBundleEncryptionManifest &&
-      isEncryptionManifest(packageData.auditBundleEncryptionManifest)
-    ) {
-      try {
-        const auditDecryptResult = await decryptExportBatch(
-          user,
-          packageData.auditBundleEncryptionManifest,
-          packageData.auditBundleEncryptedDataBase64,
-          {}
-        );
+				if (annotationUpdatedAt > originalExportDate) {
+					// Format timestamps in user's timezone
+					const formattedExportDate = originalExportDate.toLocaleString();
+					const formattedUpdatedDate = annotationUpdatedAt.toLocaleString();
 
-        const verifiedBundle = await verifyConfirmationAuditTrail(
-          auditDecryptResult.plaintext
-        );
+					result.errors?.push(
+						`Cannot import confirmation for image "${displayFilename}" (${importedConfirmationData.confirmationId}). ` +
+							`The annotations were last modified at ${formattedUpdatedDate} which is after ` +
+							`the original case export date of ${formattedExportDate}. ` +
+							`Confirmations can only be imported for images that haven't been modified since the original export.`,
+					);
+					continue; // Skip this image and continue with others
+				}
+			} else if (importedConfirmationData && !confirmationData.metadata.originalExportCreatedAt) {
+				// Block legacy confirmation data without forensic linking
+				result.errors?.push(
+					`Cannot import confirmation for image "${displayFilename}" (${importedConfirmationData.confirmationId}). ` +
+						`This confirmation data lacks forensic timestamp linking and cannot be validated. ` +
+						`Only confirmation exports with complete forensic metadata are accepted.`,
+				);
+				continue; // Skip this image and continue with others
+			}
 
-        ensureAuditBundleScopeMatchesCase(
-          result.caseNumber,
-          verifiedBundle.scopeIdentifier,
-          verifiedBundle.auditTrailCaseNumber
-        );
+			// Set confirmationData from the imported confirmations (use the first/most recent one)
+			const updatedAnnotationData = {
+				...annotationData,
+				// Ensure includeConfirmation remains true (original analyst requested confirmation)
+				includeConfirmation: true,
+				// Set the confirmation data from import (single object, no array needed)
+				confirmationData: importedConfirmationData,
+			};
 
-        if (verifiedBundle.entries.length > 0) {
-          const bundle: ConfirmationAuditBundle = {
-            source: 'confirmation-bundle',
-            importedAt: new Date().toISOString(),
-            exportTimestamp: verifiedBundle.exportTimestamp,
-            totalEntries: verifiedBundle.totalEntries ?? verifiedBundle.entries.length,
-            reviewingExaminerUid: confirmationData.metadata.exportedByUid,
-            reviewingExaminerName: confirmationData.metadata.exportedByName,
-            reviewingExaminerBadgeId: confirmationData.metadata.exportedByBadgeId,
-            confirmationFileName,
-            entries: verifiedBundle.entries
-          };
+			// Save updated annotation data
+			const saveResponse = await fetchDataApi(
+				user,
+				`/${encodeURIComponent(user.uid)}/${encodeURIComponent(result.caseNumber)}/${encodeURIComponent(currentImageId)}/data.json`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(updatedAnnotationData),
+				},
+			);
 
-          const liveCaseData = await getCaseData(user, result.caseNumber);
-          if (liveCaseData) {
-            const existingTrails = liveCaseData.confirmationAuditTrails ?? [];
-            const alreadyImported = existingTrails.some(
-              (trail) =>
-                trail.reviewingExaminerUid === bundle.reviewingExaminerUid &&
-                trail.exportTimestamp === bundle.exportTimestamp
-            );
+			if (saveResponse.ok) {
+				result.imagesUpdated++;
+				result.confirmationsImported += confirmations.length;
+				confirmedFileNames.add(displayFilename);
 
-            if (!alreadyImported) {
-              await updateCaseData(user, result.caseNumber, {
-                ...liveCaseData,
-                confirmationAuditTrails: [...existingTrails, bundle]
-              });
-            }
-          }
-        }
-      } catch (auditMergeError) {
-        console.warn('Failed to merge reviewer audit trail into case audit trail:', auditMergeError);
-      }
-    }
+				try {
+					await upsertFileConfirmationSummary(user, result.caseNumber, currentImageId, updatedAnnotationData as AnnotationData);
+				} catch (summaryError) {
+					console.warn(
+						`Failed to update confirmation summary for imported confirmation ${result.caseNumber}/${currentImageId}:`,
+						summaryError,
+					);
+				}
 
-    auditService.endWorkflow();
-    
-    return result;
+				// Audit log successful confirmation import
+				try {
+					await auditService.logConfirmationImport(user, result.caseNumber, displayFilename, 'success', true, confirmations.length, [
+						displayFilename,
+					]);
+				} catch (auditError) {
+					console.error('Failed to log confirmation import audit:', auditError);
+				}
+			} else {
+				result.warnings?.push(`Failed to update image ${displayFilename}: ${saveResponse.status}`);
 
-  } catch (error) {
-    console.error('Confirmation import failed:', error);
-    result.success = false;
-    result.errors?.push(error instanceof Error ? error.message : 'Unknown error occurred during confirmation import');
-    
-    // Log failed confirmation import
-    const endTime = Date.now();
-    
-    // Determine what validation failed based on error message - each check is independent
-    let hashValidForAudit = hashValid;
-    let exporterUidValidatedForAudit = true;
-    let reviewingExaminerUidForAudit: string | undefined = undefined;
-    let reviewerBadgeIdForAudit: string | undefined = undefined;
-    let totalConfirmationsForAudit = 0; // Default to 0 for failed imports
-    let signaturePresentForAudit = signaturePresent;
-    let signatureValidForAudit = signatureValid;
-    let signatureKeyIdForAudit = signatureKeyId;
-    
-    const auditConfirmationData = confirmationDataForAudit;
+				// Audit log failed confirmation import
+				try {
+					await auditService.logConfirmationImport(
+						user,
+						result.caseNumber,
+						displayFilename,
+						'failure',
+						false,
+						0,
+						[],
+						[`Failed to update image ${displayFilename}: ${saveResponse.status}`],
+					);
+				} catch (auditError) {
+					console.error('Failed to log failed confirmation import audit:', auditError);
+				}
+			}
 
-    // First, try to extract basic metadata for audit purposes (if file is parseable)
-    if (auditConfirmationData) {
-      reviewingExaminerUidForAudit = auditConfirmationData.metadata?.exportedByUid;
-      reviewerBadgeIdForAudit = auditConfirmationData.metadata?.exportedByBadgeId;
-      totalConfirmationsForAudit = auditConfirmationData.metadata?.totalConfirmations || 0;
-      if (auditConfirmationData.metadata?.signature) {
-        signaturePresentForAudit = true;
-        signatureKeyIdForAudit = auditConfirmationData.metadata.signature.keyId;
-      }
-    } else {
-      try {
-        const extracted = await extractConfirmationImportPackage(confirmationFile);
-        reviewingExaminerUidForAudit = extracted.confirmationData.metadata?.exportedByUid;
-        reviewerBadgeIdForAudit = extracted.confirmationData.metadata?.exportedByBadgeId;
-        totalConfirmationsForAudit = extracted.confirmationData.metadata?.totalConfirmations || 0;
-        confirmationJsonFileNameForAudit = extracted.confirmationFileName;
-        if (extracted.confirmationData.metadata?.signature) {
-          signaturePresentForAudit = true;
-          signatureKeyIdForAudit = extracted.confirmationData.metadata.signature.keyId;
-        }
-      } catch {
-        // If we can't parse the file, keep undefined/default values
-      }
-    }
+			processedCount++;
+			const progress = 60 + (processedCount / totalConfirmations) * 35;
+			onProgress?.('Processing confirmations', progress, `Updated ${result.imagesUpdated} images...`);
+		}
 
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    if (errorMessage.includes('hash validation failed')) {
-      // Hash failed - only flag file integrity, don't affect other validations
-      hashValidForAudit = false;
-      // We still pass reviewingExaminerUid if we could extract it for audit purposes
-      // exporterUidValidatedForAudit stays true - we didn't test this validation
-    } else if (errorMessage.includes('signature validation failed') || errorMessage.includes('Missing confirmation signature')) {
-      signatureValidForAudit = false;
-    } else if (errorMessage.includes('does not exist in the user database')) {
-      // Exporter UID validation failed - only flag this check
-      exporterUidValidatedForAudit = false;
-      // Hash validation would have passed to get this far, so hashValidForAudit stays true
-      // We still pass reviewingExaminerUid even though validation failed (for audit trail)
-    } else if (errorMessage.includes('cannot import confirmation data that you exported yourself')) {
-      // Self-confirmation attempt - all validations technically passed except the self-check
-      // reviewingExaminerUidForAudit already extracted above
-    }
-    
-    await auditService.logConfirmationImport(
-      user,
-      result.caseNumber || 'unknown',
-      confirmationJsonFileNameForAudit,
-      'failure',
-      hashValidForAudit,
-      0, // No confirmations successfully imported for failures
-      [],
-      result.errors || [],
-      reviewingExaminerUidForAudit,
-      {
-        processingTimeMs: endTime - startTime,
-        fileSizeBytes: confirmationFile.size
-      },
-      exporterUidValidatedForAudit,
-      totalConfirmationsForAudit, // Total confirmations in file (when extractable)
-      {
-        present: signaturePresentForAudit,
-        valid: signatureValidForAudit,
-        keyId: signatureKeyIdForAudit
-      },
-      reviewerBadgeIdForAudit // Reviewer's badge/ID number (when extractable)
-    );
-    
-    auditService.endWorkflow();
-    
-    return result;
-  }
+		const blockedCount = result.errors?.length || 0;
+		const successMessage =
+			blockedCount > 0
+				? `Imported ${result.confirmationsImported} confirmations, ${blockedCount} blocked`
+				: `Successfully imported ${result.confirmationsImported} confirmations`;
+
+		onProgress?.('Import complete', 100, successMessage);
+
+		// If there were errors (blocked confirmations), include that in the result message
+		if (result.errors && result.errors.length > 0) {
+			result.success = result.confirmationsImported > 0; // Success if at least one confirmation was imported
+		} else {
+			result.success = true;
+		}
+
+		// Log confirmation import audit event
+		const endTime = Date.now();
+		await auditService.logConfirmationImport(
+			user,
+			result.caseNumber,
+			confirmationJsonFileNameForAudit,
+			result.success ? (result.errors && result.errors.length > 0 ? 'warning' : 'success') : 'failure',
+			hashValid,
+			result.confirmationsImported, // Successfully imported confirmations
+			Array.from(confirmedFileNames).sort((left, right) => left.localeCompare(right)),
+			result.errors || [],
+			confirmationData.metadata.exportedByUid,
+			{
+				processingTimeMs: endTime - startTime,
+				fileSizeBytes: confirmationFile.size,
+				validationStepsCompleted: result.confirmationsImported, // Successfully imported
+				validationStepsFailed: result.errors ? result.errors.length : 0,
+			},
+			true, // exporterUidValidated - true for successful imports
+			confirmationData.metadata.totalConfirmations, // Total confirmations in file
+			{
+				present: signaturePresent,
+				valid: signatureValid,
+				keyId: signatureKeyId,
+			},
+			confirmationData.metadata.exportedByBadgeId, // Reviewer's badge/ID number
+		);
+
+		// Merge the reviewing examiner's bundled audit trail into the original examiner's live
+		// case audit trail — best-effort, and only when the confirmation import actually succeeded.
+		if (
+			result.success &&
+			result.confirmationsImported > 0 &&
+			packageData.auditBundleEncryptedDataBase64 &&
+			packageData.auditBundleEncryptionManifest &&
+			isEncryptionManifest(packageData.auditBundleEncryptionManifest)
+		) {
+			try {
+				const auditDecryptResult = await decryptExportBatch(
+					user,
+					packageData.auditBundleEncryptionManifest,
+					packageData.auditBundleEncryptedDataBase64,
+					{},
+				);
+
+				const verifiedBundle = await verifyConfirmationAuditTrail(auditDecryptResult.plaintext);
+
+				ensureAuditBundleScopeMatchesCase(result.caseNumber, verifiedBundle.scopeIdentifier, verifiedBundle.auditTrailCaseNumber);
+
+				if (verifiedBundle.entries.length > 0) {
+					const bundle: ConfirmationAuditBundle = {
+						source: 'confirmation-bundle',
+						importedAt: new Date().toISOString(),
+						exportTimestamp: verifiedBundle.exportTimestamp,
+						totalEntries: verifiedBundle.totalEntries ?? verifiedBundle.entries.length,
+						reviewingExaminerUid: confirmationData.metadata.exportedByUid,
+						reviewingExaminerName: confirmationData.metadata.exportedByName,
+						reviewingExaminerBadgeId: confirmationData.metadata.exportedByBadgeId,
+						confirmationFileName,
+						entries: verifiedBundle.entries,
+					};
+
+					const liveCaseData = await getCaseData(user, result.caseNumber);
+					if (liveCaseData) {
+						const existingTrails = liveCaseData.confirmationAuditTrails ?? [];
+						const alreadyImported = existingTrails.some(
+							(trail) => trail.reviewingExaminerUid === bundle.reviewingExaminerUid && trail.exportTimestamp === bundle.exportTimestamp,
+						);
+
+						if (!alreadyImported) {
+							await updateCaseData(user, result.caseNumber, {
+								...liveCaseData,
+								confirmationAuditTrails: [...existingTrails, bundle],
+							});
+						}
+					}
+				}
+			} catch (auditMergeError) {
+				console.warn('Failed to merge reviewer audit trail into case audit trail:', auditMergeError);
+			}
+		}
+
+		auditService.endWorkflow();
+
+		return result;
+	} catch (error) {
+		console.error('Confirmation import failed:', error);
+		result.success = false;
+		result.errors?.push(error instanceof Error ? error.message : 'Unknown error occurred during confirmation import');
+
+		// Log failed confirmation import
+		const endTime = Date.now();
+
+		// Determine what validation failed based on error message - each check is independent
+		let hashValidForAudit = hashValid;
+		let exporterUidValidatedForAudit = true;
+		let reviewingExaminerUidForAudit: string | undefined = undefined;
+		let reviewerBadgeIdForAudit: string | undefined = undefined;
+		let totalConfirmationsForAudit = 0; // Default to 0 for failed imports
+		let signaturePresentForAudit = signaturePresent;
+		let signatureValidForAudit = signatureValid;
+		let signatureKeyIdForAudit = signatureKeyId;
+
+		const auditConfirmationData = confirmationDataForAudit;
+
+		// First, try to extract basic metadata for audit purposes (if file is parseable)
+		if (auditConfirmationData) {
+			reviewingExaminerUidForAudit = auditConfirmationData.metadata?.exportedByUid;
+			reviewerBadgeIdForAudit = auditConfirmationData.metadata?.exportedByBadgeId;
+			totalConfirmationsForAudit = auditConfirmationData.metadata?.totalConfirmations || 0;
+			if (auditConfirmationData.metadata?.signature) {
+				signaturePresentForAudit = true;
+				signatureKeyIdForAudit = auditConfirmationData.metadata.signature.keyId;
+			}
+		} else {
+			try {
+				const extracted = await extractConfirmationImportPackage(confirmationFile);
+				reviewingExaminerUidForAudit = extracted.confirmationData.metadata?.exportedByUid;
+				reviewerBadgeIdForAudit = extracted.confirmationData.metadata?.exportedByBadgeId;
+				totalConfirmationsForAudit = extracted.confirmationData.metadata?.totalConfirmations || 0;
+				confirmationJsonFileNameForAudit = extracted.confirmationFileName;
+				if (extracted.confirmationData.metadata?.signature) {
+					signaturePresentForAudit = true;
+					signatureKeyIdForAudit = extracted.confirmationData.metadata.signature.keyId;
+				}
+			} catch {
+				// If we can't parse the file, keep undefined/default values
+			}
+		}
+
+		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+		if (errorMessage.includes('hash validation failed')) {
+			// Hash failed - only flag file integrity, don't affect other validations
+			hashValidForAudit = false;
+			// We still pass reviewingExaminerUid if we could extract it for audit purposes
+			// exporterUidValidatedForAudit stays true - we didn't test this validation
+		} else if (errorMessage.includes('signature validation failed') || errorMessage.includes('Missing confirmation signature')) {
+			signatureValidForAudit = false;
+		} else if (errorMessage.includes('does not exist in the user database')) {
+			// Exporter UID validation failed - only flag this check
+			exporterUidValidatedForAudit = false;
+			// Hash validation would have passed to get this far, so hashValidForAudit stays true
+			// We still pass reviewingExaminerUid even though validation failed (for audit trail)
+		} else if (errorMessage.includes('cannot import confirmation data that you exported yourself')) {
+			// Self-confirmation attempt - all validations technically passed except the self-check
+			// reviewingExaminerUidForAudit already extracted above
+		}
+
+		await auditService.logConfirmationImport(
+			user,
+			result.caseNumber || 'unknown',
+			confirmationJsonFileNameForAudit,
+			'failure',
+			hashValidForAudit,
+			0, // No confirmations successfully imported for failures
+			[],
+			result.errors || [],
+			reviewingExaminerUidForAudit,
+			{
+				processingTimeMs: endTime - startTime,
+				fileSizeBytes: confirmationFile.size,
+			},
+			exporterUidValidatedForAudit,
+			totalConfirmationsForAudit, // Total confirmations in file (when extractable)
+			{
+				present: signaturePresentForAudit,
+				valid: signatureValidForAudit,
+				keyId: signatureKeyIdForAudit,
+			},
+			reviewerBadgeIdForAudit, // Reviewer's badge/ID number (when extractable)
+		);
+
+		auditService.endWorkflow();
+
+		return result;
+	}
 }
