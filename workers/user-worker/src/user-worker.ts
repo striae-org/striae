@@ -1,5 +1,6 @@
 import { requireUserKvReadConfig, requireUserKvWriteConfig } from './auth';
 import { runOrphanSweep } from './cleanup/orphan-sweep';
+import { runPendingCaseCleanupSweep } from './cleanup/pending-cleanup-sweep';
 import { USER_CASES_SEGMENT } from './config';
 import {
   handleAddCases,
@@ -67,6 +68,7 @@ export default {
   },
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(runPendingCaseCleanupSweep(env));
     ctx.waitUntil(runOrphanSweep(env));
   }
 };

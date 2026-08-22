@@ -6,7 +6,9 @@ function getNonEmptyString(value: unknown): string | null {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
 }
 
-async function getDataAtRestPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegistry> {
+// Exported so batch callers (e.g. the orphan sweep) can fetch this once and
+// reuse it across many records instead of refetching per case-data key.
+export async function getDataAtRestPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegistry> {
   return fetchKeyRegistryFromR2(
     env.STRIAE_CONFIG,
     'data-at-rest',
@@ -75,9 +77,8 @@ function extractDataAtRestEnvelope(file: R2ObjectBody): DataAtRestEnvelope | nul
 async function decryptCaseDataWithRegistry(
   ciphertext: ArrayBuffer,
   envelope: DataAtRestEnvelope,
-  env: Env
+  keyRegistry: PrivateKeyRegistry
 ): Promise<string> {
-  const keyRegistry = await getDataAtRestPrivateKeyRegistry(env);
   const candidates = buildPrivateKeyCandidates(getNonEmptyString(envelope.keyId), keyRegistry);
   let lastError: unknown;
 
@@ -122,13 +123,30 @@ function extractFileIdsFromCaseData(caseData: StoredCaseData): string[] {
  * that need to proceed with deletion or a sweep regardless of record state
  * can treat an empty array as "no known references" rather than an error.
  */
-export async function readCaseFileIds(env: Env, caseDataKey: string): Promise<string[]> {
-  const file = await env.STRIAE_DATA.get(caseDataKey);
+export async function readCaseFileIds(
+  env: Env,
+  caseDataKey: string,
+  keyRegistry?: PrivateKeyRegistry
+): Promise<string[]> {
+  let file: R2ObjectBody | null;
+  try {
+    file = await env.STRIAE_DATA.get(caseDataKey);
+  } catch (error) {
+    console.warn(`Unable to read case data object for ${caseDataKey}, continuing without file references:`, error);
+    return [];
+  }
+
   if (!file) {
     return [];
   }
 
-  const atRestEnvelope = extractDataAtRestEnvelope(file);
+  let atRestEnvelope: DataAtRestEnvelope | null;
+  try {
+    atRestEnvelope = extractDataAtRestEnvelope(file);
+  } catch (error) {
+    console.warn(`Unable to read case data envelope metadata for ${caseDataKey}, continuing without file references:`, error);
+    return [];
+  }
 
   if (!atRestEnvelope) {
     // Legacy/plaintext record with no envelope; best-effort parse so callers still proceed.
@@ -141,8 +159,18 @@ export async function readCaseFileIds(env: Env, caseDataKey: string): Promise<st
     }
   }
 
+  let ciphertext: ArrayBuffer;
   try {
-    const fileText = await decryptCaseDataWithRegistry(await file.arrayBuffer(), atRestEnvelope, env);
+    ciphertext = await file.arrayBuffer();
+  } catch (error) {
+    // Distinguish a body-read failure from a decrypt/parse failure below.
+    console.warn(`Unable to read case data body for ${caseDataKey}, continuing without file references:`, error);
+    return [];
+  }
+
+  try {
+    const registry = keyRegistry ?? (await getDataAtRestPrivateKeyRegistry(env));
+    const fileText = await decryptCaseDataWithRegistry(ciphertext, atRestEnvelope, registry);
     const parsed = JSON.parse(fileText) as StoredCaseData;
     return extractFileIdsFromCaseData(parsed);
   } catch (error) {

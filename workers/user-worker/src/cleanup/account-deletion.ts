@@ -1,9 +1,10 @@
 import { deleteFirebaseAuthUser } from '../firebase/admin';
 import { readUserRecord } from '../storage/user-records';
-import type { AccountDeletionProgressEvent, Env } from '../types';
+import type { AccountDeletionProgressEvent, AccountDeletionResult, Env } from '../types';
 import { readCaseFileIds } from './case-data-reader';
+import { writePendingCleanupMarker } from './pending-cleanup-marker';
 
-async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): Promise<void> {
+export async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): Promise<void> {
   const encodedUserId = encodeURIComponent(userUid);
   const encodedCaseNumber = encodeURIComponent(caseNumber);
   const casePrefix = `${encodedUserId}/${encodedCaseNumber}/`;
@@ -62,7 +63,7 @@ async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): 
   }
 }
 
-async function deleteUserConfirmationSummary(env: Env, userUid: string): Promise<void> {
+export async function deleteUserConfirmationSummary(env: Env, userUid: string): Promise<void> {
   const encodedUserId = encodeURIComponent(userUid);
   const key = `${encodedUserId}/meta/confirmation-status.json`;
 
@@ -77,7 +78,7 @@ export async function executeUserDeletion(
   env: Env,
   userUid: string,
   reportProgress?: (progress: AccountDeletionProgressEvent) => void
-): Promise<{ success: boolean; message: string; totalCases: number; completedCases: number }> {
+): Promise<AccountDeletionResult> {
   const userData = await readUserRecord(env, userUid);
   if (userData === null) {
     throw new Error('User not found');
@@ -89,6 +90,7 @@ export async function executeUserDeletion(
   const totalCases = allCaseNumbers.length;
   let completedCases = 0;
   const caseCleanupErrors: string[] = [];
+  const failedCaseDetails: { caseNumber: string; message: string }[] = [];
 
   reportProgress?.({
     event: 'start',
@@ -110,6 +112,7 @@ export async function executeUserDeletion(
     } catch (error) {
       caseDeletionError = error instanceof Error ? error.message : `Case cleanup failed for ${caseNumber}`;
       caseCleanupErrors.push(caseDeletionError);
+      failedCaseDetails.push({ caseNumber, message: caseDeletionError });
       console.error(`Case cleanup error for ${caseNumber}:`, error);
     }
 
@@ -125,21 +128,42 @@ export async function executeUserDeletion(
     });
   }
 
-  if (caseCleanupErrors.length > 0) {
-    // R2 delete-call failures are logged but must not block auth/user record removal.
-    console.error(`Account deletion for ${userUid} proceeding despite incomplete case cleanup: ${caseCleanupErrors.join(' | ')}`);
+  let pendingConfirmationSummary = false;
+  try {
+    await deleteUserConfirmationSummary(env, userUid);
+  } catch (error) {
+    pendingConfirmationSummary = true;
+    console.error(`Confirmation summary cleanup failed for ${userUid}, deferring to pending-cleanup sweep:`, error);
   }
 
-  await deleteUserConfirmationSummary(env, userUid);
+  const pendingCleanup = caseCleanupErrors.length > 0 || pendingConfirmationSummary;
+
+  if (pendingCleanup) {
+    const markerRecorded = await writePendingCleanupMarker(env, {
+      userUid,
+      recordedAt: new Date().toISOString(),
+      failedCases: failedCaseDetails,
+      pendingConfirmationSummary,
+      attempts: 0
+    });
+
+    if (!markerRecorded) {
+      // Without a durable marker, finalizing would orphan case data with no account left to find it.
+      throw new Error('Account deletion blocked: cleanup failed and the durable cleanup marker could not be recorded. Please retry account deletion.');
+    }
+
+    console.error(`Account deletion for ${userUid} proceeding with pending-cleanup marker recorded: ${caseCleanupErrors.join(' | ') || 'confirmation summary only'}`);
+  }
 
   await deleteFirebaseAuthUser(env, userUid);
   await env.USER_DB.delete(userUid);
 
   return {
-    success: caseCleanupErrors.length === 0,
-    message: caseCleanupErrors.length === 0
-      ? 'Account successfully deleted'
-      : `Account deleted; some case data cleanup failed and may require manual review: ${caseCleanupErrors.join(' | ')}`,
+    success: true,
+    pendingCleanup,
+    message: pendingCleanup
+      ? `Account deleted; some cleanup was deferred and queued for automatic retry: ${caseCleanupErrors.join(' | ') || 'confirmation summary metadata'}`
+      : 'Account successfully deleted',
     totalCases,
     completedCases
   };

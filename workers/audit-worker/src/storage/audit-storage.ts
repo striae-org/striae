@@ -20,6 +20,8 @@ export function isValidAuditEntry(entry: unknown): entry is AuditEntry {
   return (
     typeof candidate === 'object' &&
     candidate !== null &&
+    typeof candidate.entryId === 'string' &&
+    candidate.entryId.trim().length > 0 &&
     typeof candidate.timestamp === 'string' &&
     typeof candidate.userId === 'string' &&
     typeof candidate.action === 'string'
@@ -80,7 +82,7 @@ export async function appendAuditEntry(
   filename: string,
   newEntry: AuditEntry,
   env: Env
-): Promise<number> {
+): Promise<{ entryCount: number; deduped: boolean }> {
   try {
     const existingFile = await bucket.get(filename);
     let entries: AuditEntry[] = [];
@@ -89,9 +91,15 @@ export async function appendAuditEntry(
       entries = await readAuditEntriesFromObject(existingFile, env);
     }
 
+    // Retry-safe: a previously committed entry with the same entryId is not re-appended
+    const isDuplicate = entries.some((entry) => entry.entryId === newEntry.entryId);
+    if (isDuplicate) {
+      return { entryCount: entries.length, deduped: true };
+    }
+
     entries.push(newEntry);
     await writeAuditEntriesToObject(bucket, filename, entries, env);
-    return entries.length;
+    return { entryCount: entries.length, deduped: false };
   } catch (error) {
     console.error('Error appending audit entry:', error);
     throw error;

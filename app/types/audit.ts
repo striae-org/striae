@@ -32,6 +32,7 @@ export type AuditFileType =
  * Based on the specification in confirmations-guide.md
  */
 export interface ValidationAuditEntry {
+  entryId: string; // Stable idempotency key generated once per logical event, used by the worker to dedupe retried persist attempts
   timestamp: string;
   userId: string;
   userEmail: string;

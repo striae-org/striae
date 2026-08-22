@@ -1,10 +1,12 @@
 import { type CreateAuditEntryParams, type ValidationAuditEntry } from '~/types';
+import { generateAuditEntryId } from '~/utils/common';
 
 export const buildValidationAuditEntry = (
   params: CreateAuditEntryParams,
   timestamp: string = new Date().toISOString()
 ): ValidationAuditEntry => {
   return {
+    entryId: generateAuditEntryId(),
     timestamp,
     userId: params.userId,
     userEmail: params.userEmail,

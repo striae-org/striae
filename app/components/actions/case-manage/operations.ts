@@ -16,6 +16,7 @@ import {
 } from '~/utils/data';
 import { type CaseData, type CaseExportData, type ValidationAuditEntry } from '~/types';
 import { auditService } from '~/services/audit';
+import { generateAuditEntryId } from '~/utils/common';
 import { loadCaseExportActions } from '~/utils/data/operations/case-export-loader';
 import { buildArchivePackage } from './archive-package-builder';
 import { deleteFileWithoutAudit } from './delete-helpers';
@@ -662,6 +663,7 @@ export const archiveCase = async (
     };
     const caseJsonContent = JSON.stringify(archivedExportData, null, 2);
     const archiveAuditEntry: ValidationAuditEntry = {
+      entryId: generateAuditEntryId(),
       timestamp: archivedAt,
       userId: user.uid,
       userEmail: user.email || '',

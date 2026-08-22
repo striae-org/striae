@@ -1,5 +1,5 @@
 import type { Env } from '../types';
-import { readCaseFileIds } from './case-data-reader';
+import { getDataAtRestPrivateKeyRegistry, readCaseFileIds } from './case-data-reader';
 
 const CASE_DATA_KEY_SUFFIX = '/data.json';
 
@@ -7,11 +7,15 @@ const CASE_DATA_KEY_SUFFIX = '/data.json';
 // so a short grace period avoids flagging in-flight uploads as orphans.
 const DEFAULT_MIN_AGE_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_FILE_OBJECTS_PER_RUN = 20000;
+const DEFAULT_MAX_DATA_KEYS_PER_RUN = 20000;
+// Decrypts/reads case-data records concurrently instead of one at a time.
+const REFERENCE_SCAN_CONCURRENCY = 25;
 
 export interface OrphanSweepOptions {
   dryRun?: boolean;
   minAgeMs?: number;
   maxFileObjectsPerRun?: number;
+  maxDataKeysPerRun?: number;
 }
 
 export interface OrphanSweepResult {
@@ -23,31 +27,49 @@ export interface OrphanSweepResult {
   deletionErrors: string[];
   dryRun: boolean;
   truncated: boolean;
+  dataScanTruncated: boolean;
 }
 
-async function collectReferencedFileIds(env: Env): Promise<{ referenced: Set<string>; scannedDataKeys: number }> {
+async function collectReferencedFileIds(
+  env: Env,
+  maxDataKeysPerRun: number
+): Promise<{ referenced: Set<string>; scannedDataKeys: number; truncated: boolean }> {
   const referenced = new Set<string>();
+  // Fetched once and reused for every record instead of refetching per case-data key.
+  const keyRegistry = await getDataAtRestPrivateKeyRegistry(env);
   let scannedDataKeys = 0;
+  let truncated = false;
   let cursor: string | undefined;
 
-  do {
+  dataLoop: do {
     const listed = await env.STRIAE_DATA.list({ cursor, limit: 1000 });
+    const candidateKeys = listed.objects
+      .map((obj) => obj.key)
+      .filter((key) => key.endsWith(CASE_DATA_KEY_SUFFIX));
 
-    for (const obj of listed.objects) {
-      if (!obj.key.endsWith(CASE_DATA_KEY_SUFFIX)) {
-        continue;
+    for (let i = 0; i < candidateKeys.length; i += REFERENCE_SCAN_CONCURRENCY) {
+      if (scannedDataKeys >= maxDataKeysPerRun) {
+        truncated = true;
+        break dataLoop;
       }
 
-      scannedDataKeys += 1;
-      for (const fileId of await readCaseFileIds(env, obj.key)) {
-        referenced.add(fileId);
+      const batch = candidateKeys.slice(i, i + REFERENCE_SCAN_CONCURRENCY);
+      const batchResults = await Promise.all(
+        batch.map((key) => readCaseFileIds(env, key, keyRegistry))
+      );
+
+      for (const fileIds of batchResults) {
+        for (const fileId of fileIds) {
+          referenced.add(fileId);
+        }
       }
+      scannedDataKeys += batch.length;
     }
 
     cursor = listed.truncated ? listed.cursor : undefined;
-  } while (cursor !== undefined);
+  } while (cursor !== undefined && !truncated);
 
-  return { referenced, scannedDataKeys };
+  return { referenced, scannedDataKeys, truncated };
 }
 
 /**
@@ -59,8 +81,16 @@ export async function sweepOrphanedFiles(env: Env, options: OrphanSweepOptions =
   const dryRun = options.dryRun ?? false;
   const minAgeMs = options.minAgeMs ?? DEFAULT_MIN_AGE_MS;
   const maxFileObjectsPerRun = options.maxFileObjectsPerRun ?? DEFAULT_MAX_FILE_OBJECTS_PER_RUN;
+  const maxDataKeysPerRun = options.maxDataKeysPerRun ?? DEFAULT_MAX_DATA_KEYS_PER_RUN;
 
-  const { referenced, scannedDataKeys } = await collectReferencedFileIds(env);
+  const { referenced, scannedDataKeys, truncated: dataScanTruncated } = await collectReferencedFileIds(
+    env,
+    maxDataKeysPerRun
+  );
+  // A truncated reference scan means "referenced" may be missing case records we
+  // haven't reached yet, so treat this run as read-only to avoid deleting files
+  // that are actually still referenced by an unscanned case.
+  const skipDeletions = dryRun || dataScanTruncated;
 
   const now = Date.now();
   let scannedFileObjects = 0;
@@ -90,7 +120,7 @@ export async function sweepOrphanedFiles(env: Env, options: OrphanSweepOptions =
       }
 
       orphanCandidates += 1;
-      if (dryRun) {
+      if (skipDeletions) {
         continue;
       }
 
@@ -113,14 +143,17 @@ export async function sweepOrphanedFiles(env: Env, options: OrphanSweepOptions =
     deleted,
     deletionErrors,
     dryRun,
-    truncated
+    truncated,
+    dataScanTruncated
   };
 }
 
 export async function runOrphanSweep(env: Env): Promise<void> {
   try {
     const result = await sweepOrphanedFiles(env);
-    if (result.deletionErrors.length > 0 || result.orphanCandidates > 0) {
+    if (result.dataScanTruncated) {
+      console.warn('Orphaned file sweep: reference scan truncated, deletions skipped this run:', result);
+    } else if (result.deletionErrors.length > 0 || result.orphanCandidates > 0) {
       console.warn('Orphaned file sweep completed with findings:', result);
     } else {
       console.log('Orphaned file sweep completed, no orphans found:', result);

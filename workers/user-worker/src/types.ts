@@ -32,6 +32,7 @@ export type DecryptionTelemetryOutcome = 'primary-hit' | 'fallback-hit' | 'all-f
 
 export interface SuccessResponse {
   success: boolean;
+  pendingCleanup?: boolean;
   message?: string;
 }
 
@@ -105,7 +106,16 @@ export interface AccountDeletionProgressEvent {
   completedCases: number;
   currentCaseNumber?: string;
   success?: boolean;
+  pendingCleanup?: boolean;
   message?: string;
+}
+
+export interface AccountDeletionResult {
+  success: boolean;
+  message: string;
+  totalCases: number;
+  completedCases: number;
+  pendingCleanup: boolean;
 }
 
 export interface GoogleOAuthTokenResponse {

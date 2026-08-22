@@ -16,12 +16,14 @@ interface PersistAuditEntryResponse {
   success: boolean;
   entryCount: number;
   filename: string;
+  deduped?: boolean;
 }
 
 type PersistAuditEntryResult =
   | {
       ok: true;
       entryCount: number;
+      deduped: boolean;
     }
   | {
       ok: false;
@@ -87,6 +89,7 @@ export async function persistAuditEntryForUser(
   const result = (await response.json()) as PersistAuditEntryResponse;
   return {
     ok: true,
-    entryCount: result.entryCount
+    entryCount: result.entryCount,
+    deduped: result.deduped ?? false
   };
 }

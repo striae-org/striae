@@ -22,6 +22,7 @@ export interface PrivateKeyRegistry {
 export type DecryptionTelemetryOutcome = 'primary-hit' | 'fallback-hit' | 'all-failed';
 
 export interface AuditEntry {
+  entryId: string;
   timestamp: string;
   userId: string;
   action: string;
@@ -32,6 +33,7 @@ export interface SuccessResponse {
   success: boolean;
   entryCount?: number;
   filename?: string;
+  deduped?: boolean;
 }
 
 export interface ErrorResponse {

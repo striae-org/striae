@@ -25,7 +25,7 @@ export async function handleAuditRequest(
     const auditEntry: unknown = await request.json();
 
     if (!isValidAuditEntry(auditEntry)) {
-      return respond({ error: 'Invalid audit entry structure. Required fields: timestamp, userId, action' }, 400);
+      return respond({ error: 'Invalid audit entry structure. Required fields: entryId, timestamp, userId, action' }, 400);
     }
 
     if (auditEntry.userId !== userId) {
@@ -35,11 +35,12 @@ export async function handleAuditRequest(
     const filename = generateAuditFileName(userId);
 
     try {
-      const entryCount = await appendAuditEntry(bucket, filename, auditEntry, env);
+      const { entryCount, deduped } = await appendAuditEntry(bucket, filename, auditEntry, env);
       return respond({
         success: true,
         entryCount,
-        filename
+        filename,
+        deduped
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';

@@ -53,7 +53,7 @@ import {
 } from './builders/index';
 
 type AttemptPersistResult =
-  | { ok: true; entryCount: number }
+  | { ok: true; entryCount: number; deduped: boolean }
   | { ok: false; status?: number; errorData?: unknown; error?: unknown };
 
 /**
@@ -1158,7 +1158,7 @@ class AuditService {
         return { ok: false, status: persistResult.status, errorData: persistResult.errorData };
       }
 
-      return { ok: true, entryCount: persistResult.entryCount };
+      return { ok: true, entryCount: persistResult.entryCount, deduped: persistResult.deduped };
     } catch (error) {
       return { ok: false, error };
     }
@@ -1171,7 +1171,11 @@ class AuditService {
     const firstAttempt = await this.attemptPersist(entry);
 
     if (firstAttempt.ok) {
-      console.log(`🔍 Audit: Entry persisted (${firstAttempt.entryCount} total entries)`);
+      if (firstAttempt.deduped) {
+        console.log(`🔍 Audit: Entry already persisted, duplicate suppressed by worker (entryId ${entry.entryId})`);
+      } else {
+        console.log(`🔍 Audit: Entry persisted (${firstAttempt.entryCount} total entries)`);
+      }
       return;
     }
 
@@ -1193,7 +1197,11 @@ class AuditService {
       const result = await this.attemptPersist(entry);
 
       if (result.ok) {
-        console.log(`🔍 Audit: Entry persisted on attempt ${attemptNumber} (${result.entryCount} total entries)`);
+        if (result.deduped) {
+          console.log(`🔍 Audit: Attempt ${attemptNumber} found entry already persisted, duplicate suppressed by worker (entryId ${entry.entryId})`);
+        } else {
+          console.log(`🔍 Audit: Entry persisted on attempt ${attemptNumber} (${result.entryCount} total entries)`);
+        }
         return;
       }
 

@@ -34,3 +34,11 @@ export function generateWorkflowId(caseNumber: string): string {
   const random = generateUniqueId(8);
   return `${caseNumber}-${timestamp}-${random}`;
 }
+
+/**
+ * Generate a stable idempotency key for an audit entry, used to dedupe retried persist attempts
+ * @returns UUID v4 string
+ */
+export function generateAuditEntryId(): string {
+  return crypto.randomUUID();
+}

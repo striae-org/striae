@@ -92,6 +92,7 @@ export async function handleDeleteUser(
 
     return respond({
       success: result.success,
+      pendingCleanup: result.pendingCleanup,
       message: result.message
     });
   } catch (error) {
@@ -100,6 +101,13 @@ export async function handleDeleteUser(
 
     if (errorMessage === 'User not found') {
       return respond({ error: 'User not found' }, 404);
+    }
+
+    if (errorMessage.startsWith('Account deletion blocked:')) {
+      return respond({
+        success: false,
+        message: errorMessage
+      }, 503);
     }
 
     return respond({
@@ -133,6 +141,7 @@ export function handleDeleteUserWithProgress(
           totalCases: result.totalCases,
           completedCases: result.completedCases,
           success: result.success,
+          pendingCleanup: result.pendingCleanup,
           message: result.message
         });
       } catch (error) {
