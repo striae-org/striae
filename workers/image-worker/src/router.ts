@@ -5,48 +5,44 @@ import { handleImageUpload } from './handlers/upload-image';
 import type { CreateResponse, Env } from './types';
 import { parsePathSegments } from './utils/path-utils';
 
-export async function routeImageWorkerRequest(
-  request: Request,
-  env: Env,
-  respond: CreateResponse
-): Promise<Response> {
-  const requestUrl = new URL(request.url);
-  const pathSegments = parsePathSegments(requestUrl.pathname);
-  if (!pathSegments) {
-    return respond({ error: 'Invalid image path encoding' }, 400);
-  }
+export async function routeImageWorkerRequest(request: Request, env: Env, respond: CreateResponse): Promise<Response> {
+	const requestUrl = new URL(request.url);
+	const pathSegments = parsePathSegments(requestUrl.pathname);
+	if (!pathSegments) {
+		return respond({ error: 'Invalid image path encoding' }, 400);
+	}
 
-  switch (request.method) {
-    case 'POST': {
-      if (pathSegments.length === 0) {
-        return handleImageUpload(request, env, respond);
-      }
+	switch (request.method) {
+		case 'POST': {
+			if (pathSegments.length === 0) {
+				return handleImageUpload(request, env, respond);
+			}
 
-      if (pathSegments.length === 2 && pathSegments[1] === 'signed-url') {
-        return handleSignedUrlMinting(request, env, pathSegments[0], respond);
-      }
+			if (pathSegments.length === 2 && pathSegments[1] === 'signed-url') {
+				return handleSignedUrlMinting(request, env, pathSegments[0], respond);
+			}
 
-      return respond({ error: 'Not found' }, 404);
-    }
+			return respond({ error: 'Not found' }, 404);
+		}
 
-    case 'GET': {
-      const fileId = pathSegments.length === 1 ? pathSegments[0] : null;
-      if (!fileId) {
-        return respond({ error: 'Image ID is required' }, 400);
-      }
+		case 'GET': {
+			const fileId = pathSegments.length === 1 ? pathSegments[0] : null;
+			if (!fileId) {
+				return respond({ error: 'Image ID is required' }, 400);
+			}
 
-      return handleImageServing(request, env, fileId, respond);
-    }
+			return handleImageServing(request, env, fileId, respond);
+		}
 
-    case 'DELETE': {
-      if (pathSegments.length !== 1) {
-        return respond({ error: 'Not found' }, 404);
-      }
+		case 'DELETE': {
+			if (pathSegments.length !== 1) {
+				return respond({ error: 'Not found' }, 404);
+			}
 
-      return handleImageDelete(request, env, respond);
-    }
+			return handleImageDelete(request, env, respond);
+		}
 
-    default:
-      return respond({ error: 'Method not allowed' }, 405);
-  }
+		default:
+			return respond({ error: 'Method not allowed' }, 405);
+	}
 }

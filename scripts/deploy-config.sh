@@ -29,6 +29,7 @@ update_env=false
 show_help=false
 validate_only=false
 force_rotate_keys=false
+refresh_templates=false
 for arg in "$@"; do
     case "$arg" in
         -h|--help)
@@ -42,6 +43,9 @@ for arg in "$@"; do
             ;;
         --force-rotate-keys)
             force_rotate_keys=true
+            ;;
+        --refresh-templates)
+            refresh_templates=true
             ;;
         *)
             echo -e "${RED}❌ Unknown option: $arg${NC}"
@@ -61,19 +65,34 @@ if [ "$force_rotate_keys" = "true" ] && [ "$validate_only" = "true" ]; then
     exit 1
 fi
 
+if [ "$refresh_templates" = "true" ] && [ "$validate_only" = "true" ]; then
+    echo -e "${RED}❌ --refresh-templates and --validate-only cannot be used together${NC}"
+    exit 1
+fi
+
 if [ "$show_help" = "true" ]; then
-    echo "Usage: bash ./scripts/deploy-config.sh [--update-env] [--validate-only] [--force-rotate-keys]"
+    echo "Usage: bash ./scripts/deploy-config.sh [--update-env] [--refresh-templates] [--validate-only] [--force-rotate-keys]"
     echo ""
     echo "Options:"
-    echo "  --update-env   Reset .env from .env.example and overwrite configs"
-    echo "  --validate-only Validate current .env and generated config files without modifying them"
+    echo "  --update-env        Reset .env from .env.example and overwrite configs"
+    echo "  --refresh-templates Regenerate worker wrangler.jsonc/toml, app/config/firebase.ts, and"
+    echo "                      app/config/config.json from the current *.example templates (picks"
+    echo "                      up new template fields), then reapply values from the existing .env."
+    echo "                      Does not reset .env. config.json's key-rotation history is rebuilt"
+    echo "                      from the *_PUBLIC_KEYS_JSON registries in .env, so no history is lost."
+    echo "                      Does not touch app/config/inactivity.ts (a user-owned preference file)"
+    echo "  --validate-only     Validate current .env and generated config files without modifying them"
     echo "  --force-rotate-keys Force regeneration of all encryption/signing key pairs without prompts"
-    echo "  -h, --help     Show this help message"
+    echo "  -h, --help          Show this help message"
     exit 0
 fi
 
 if [ "$update_env" = "true" ]; then
     echo -e "${YELLOW}⚠️  Update-env mode: overwriting configs and resetting .env values from template${NC}"
+fi
+
+if [ "$refresh_templates" = "true" ]; then
+    echo -e "${YELLOW}⚠️  Refresh-templates mode: worker wrangler configs, wrangler.toml, firebase.ts, and config.json will be regenerated from templates and reapplied from the existing .env${NC}"
 fi
 
 if [ "$force_rotate_keys" = "true" ]; then
@@ -209,6 +228,9 @@ if [ "$validate_only" = "true" ]; then
     exit 0
 fi
 
+# Backfill any public key history from an existing app/config/config.json into the
+# .env registries before copy_example_configs can overwrite that file.
+migrate_public_key_registries_from_config_json
 
 # Copy example configuration files
 copy_example_configs

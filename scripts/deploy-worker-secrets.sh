@@ -105,8 +105,16 @@ build_user_worker_secret_list() {
         "REGISTRY_ENCRYPTION_KEY"
     )
 
-    # DATA_AT_REST_ENCRYPTION_PRIVATE_KEY and KEY_ID are now fetched from
-    # encrypted R2 registries; only the active key ID override is needed.
+    # DATA_AT_REST_ENCRYPTION_PRIVATE_KEY is fetched from the encrypted R2
+    # registry; the public key/key ID are still needed directly so the user
+    # worker can encrypt pending-cleanup markers written to STRIAE_DATA.
+    if [ -n "${DATA_AT_REST_ENCRYPTION_PUBLIC_KEY:-}" ]; then
+        secrets+=("DATA_AT_REST_ENCRYPTION_PUBLIC_KEY")
+    fi
+
+    if [ -n "${DATA_AT_REST_ENCRYPTION_KEY_ID:-}" ]; then
+        secrets+=("DATA_AT_REST_ENCRYPTION_KEY_ID")
+    fi
 
     if [ -n "${DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID:-}" ]; then
         secrets+=("DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID")

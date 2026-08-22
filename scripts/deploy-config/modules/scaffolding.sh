@@ -26,12 +26,34 @@ copy_example_configs() {
         while IFS= read -r source_file; do
             local relative_path
             local destination_file
+            local force_overwrite
             relative_path="${source_file#app/config-example/}"
             destination_file="app/config/$relative_path"
+            force_overwrite="false"
+
+            # Never let admin-service.json be recreated from the example template here;
+            # it is handled exclusively by the backup/restore logic around this loop.
+            if [ "$relative_path" = "admin-service.json" ]; then
+                continue
+            fi
 
             mkdir -p "$(dirname "$destination_file")"
 
-            if [ "$update_env" = "true" ] || [ ! -f "$destination_file" ]; then
+            if [ "$update_env" = "true" ]; then
+                force_overwrite="true"
+            elif [ "$refresh_templates" = "true" ]; then
+                # config.json's key-rotation history now lives in the *_PUBLIC_KEYS_JSON
+                # registries in .env (rebuilt by update_wrangler_configs on every run), so
+                # it, like firebase.ts, is safe to blindly regenerate from the template.
+                # inactivity.ts remains excluded as a user-owned preference file.
+                case "$relative_path" in
+                    firebase.ts|config.json)
+                        force_overwrite="true"
+                        ;;
+                esac
+            fi
+
+            if [ "$force_overwrite" = "true" ] || [ ! -f "$destination_file" ]; then
                 cp "$source_file" "$destination_file"
                 copied_config_files=$((copied_config_files + 1))
             else
@@ -67,7 +89,7 @@ copy_example_configs() {
     echo -e "${YELLOW}  Copying worker configuration files...${NC}"
 
     cd workers/user-worker
-    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
+    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ "$refresh_templates" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
         cp wrangler.jsonc.example wrangler.jsonc
         echo -e "${GREEN}    ✅ user-worker: wrangler.jsonc created from example${NC}"
     elif [ -f "wrangler.jsonc" ]; then
@@ -75,7 +97,7 @@ copy_example_configs() {
     fi
 
     cd ../data-worker
-    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
+    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ "$refresh_templates" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
         cp wrangler.jsonc.example wrangler.jsonc
         echo -e "${GREEN}    ✅ data-worker: wrangler.jsonc created from example${NC}"
     elif [ -f "wrangler.jsonc" ]; then
@@ -83,7 +105,7 @@ copy_example_configs() {
     fi
 
     cd ../audit-worker
-    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
+    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ "$refresh_templates" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
         cp wrangler.jsonc.example wrangler.jsonc
         echo -e "${GREEN}    ✅ audit-worker: wrangler.jsonc created from example${NC}"
     elif [ -f "wrangler.jsonc" ]; then
@@ -91,7 +113,7 @@ copy_example_configs() {
     fi
 
     cd ../image-worker
-    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
+    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ "$refresh_templates" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
         cp wrangler.jsonc.example wrangler.jsonc
         echo -e "${GREEN}    ✅ image-worker: wrangler.jsonc created from example${NC}"
     elif [ -f "wrangler.jsonc" ]; then
@@ -99,7 +121,7 @@ copy_example_configs() {
     fi
 
     cd ../files-worker
-    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
+    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ "$refresh_templates" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
         cp wrangler.jsonc.example wrangler.jsonc
         echo -e "${GREEN}    ✅ files-worker: wrangler.jsonc created from example${NC}"
     elif [ -f "wrangler.jsonc" ]; then
@@ -107,7 +129,7 @@ copy_example_configs() {
     fi
 
     cd ../pdf-worker
-    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
+    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ "$refresh_templates" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
         cp wrangler.jsonc.example wrangler.jsonc
         echo -e "${GREEN}    ✅ pdf-worker: wrangler.jsonc created from example${NC}"
     elif [ -f "wrangler.jsonc" ]; then
@@ -115,7 +137,7 @@ copy_example_configs() {
     fi
 
     cd ../lists-worker
-    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
+    if [ -f "wrangler.jsonc.example" ] && { [ "$update_env" = "true" ] || [ "$refresh_templates" = "true" ] || [ ! -f "wrangler.jsonc" ]; }; then
         cp wrangler.jsonc.example wrangler.jsonc
         echo -e "${GREEN}    ✅ lists-worker: wrangler.jsonc created from example${NC}"
     elif [ -f "wrangler.jsonc" ]; then
@@ -126,7 +148,7 @@ copy_example_configs() {
     cd ../..
 
     # Copy main wrangler.toml from example
-    if [ -f "wrangler.toml.example" ] && { [ "$update_env" = "true" ] || [ ! -f "wrangler.toml" ]; }; then
+    if [ -f "wrangler.toml.example" ] && { [ "$update_env" = "true" ] || [ "$refresh_templates" = "true" ] || [ ! -f "wrangler.toml" ]; }; then
         cp wrangler.toml.example wrangler.toml
         echo -e "${GREEN}    ✅ root: wrangler.toml created from example${NC}"
     elif [ -f "wrangler.toml" ]; then
@@ -260,21 +282,26 @@ for (const varName of requiredEnvVars) {
 
 config.url = 'https://' + process.env.PAGES_CUSTOM_DOMAIN;
 
+function buildPublicKeyMap(registryJsonEnvVar, currentKeyId, currentPublicKeyPem) {
+    let keys = {};
+    try {
+        const parsed = JSON.parse(process.env[registryJsonEnvVar] || '{}');
+        if (parsed && typeof parsed === 'object' && parsed.keys && typeof parsed.keys === 'object') {
+            keys = { ...parsed.keys };
+        }
+    } catch (_) {}
+    // Ensure the current active key is always present even if the registry write hasn't happened yet.
+    keys[currentKeyId] = currentPublicKeyPem;
+    return keys;
+}
+
 config.manifest_signing_key_id = process.env.MANIFEST_SIGNING_KEY_ID;
 config.manifest_signing_public_key = process.env.MANIFEST_SIGNING_PUBLIC_KEY.replace(/\\\\n/g, '\n');
-
-if (!config.manifest_signing_public_keys || typeof config.manifest_signing_public_keys !== 'object') {
-    config.manifest_signing_public_keys = {};
-}
-config.manifest_signing_public_keys[process.env.MANIFEST_SIGNING_KEY_ID] = config.manifest_signing_public_key;
+config.manifest_signing_public_keys = buildPublicKeyMap('MANIFEST_SIGNING_PUBLIC_KEYS_JSON', process.env.MANIFEST_SIGNING_KEY_ID, config.manifest_signing_public_key);
 
 config.export_encryption_key_id = process.env.EXPORT_ENCRYPTION_KEY_ID;
 config.export_encryption_public_key = process.env.EXPORT_ENCRYPTION_PUBLIC_KEY.replace(/\\\\n/g, '\n');
-
-if (!config.export_encryption_public_keys || typeof config.export_encryption_public_keys !== 'object') {
-    config.export_encryption_public_keys = {};
-}
-config.export_encryption_public_keys[process.env.EXPORT_ENCRYPTION_KEY_ID] = config.export_encryption_public_key;
+config.export_encryption_public_keys = buildPublicKeyMap('EXPORT_ENCRYPTION_PUBLIC_KEYS_JSON', process.env.EXPORT_ENCRYPTION_KEY_ID, config.export_encryption_public_key);
 
 fs.writeFileSync(path, JSON.stringify(config, null, 2) + '\n', 'utf8');
 " "app/config/config.json"; then

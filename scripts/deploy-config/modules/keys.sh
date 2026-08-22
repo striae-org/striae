@@ -110,6 +110,7 @@ configure_manifest_signing_credentials() {
     restore_env_var_from_backup_if_missing "MANIFEST_SIGNING_KEY_ID"
     restore_env_var_from_backup_if_missing "MANIFEST_SIGNING_KEYS_JSON"
     restore_env_var_from_backup_if_missing "MANIFEST_SIGNING_ACTIVE_KEY_ID"
+    restore_env_var_from_backup_if_missing "MANIFEST_SIGNING_PUBLIC_KEYS_JSON"
 
     if [ -z "$MANIFEST_SIGNING_PRIVATE_KEY" ] || is_placeholder "$MANIFEST_SIGNING_PRIVATE_KEY" || [ -z "$MANIFEST_SIGNING_PUBLIC_KEY" ] || is_placeholder "$MANIFEST_SIGNING_PUBLIC_KEY"; then
         should_generate="true"
@@ -147,6 +148,7 @@ configure_manifest_signing_credentials() {
     fi
 
     update_private_key_registry "MANIFEST_SIGNING_KEYS_JSON" "MANIFEST_SIGNING_ACTIVE_KEY_ID" "$MANIFEST_SIGNING_KEY_ID" "$MANIFEST_SIGNING_PRIVATE_KEY" "manifest signing"
+    update_public_key_registry "MANIFEST_SIGNING_PUBLIC_KEYS_JSON" "$MANIFEST_SIGNING_KEY_ID" "$MANIFEST_SIGNING_PUBLIC_KEY" "manifest signing"
 
     echo ""
 }
@@ -193,6 +195,7 @@ configure_export_encryption_credentials() {
     restore_env_var_from_backup_if_missing "EXPORT_ENCRYPTION_KEY_ID"
     restore_env_var_from_backup_if_missing "EXPORT_ENCRYPTION_KEYS_JSON"
     restore_env_var_from_backup_if_missing "EXPORT_ENCRYPTION_ACTIVE_KEY_ID"
+    restore_env_var_from_backup_if_missing "EXPORT_ENCRYPTION_PUBLIC_KEYS_JSON"
 
     if [ -z "$EXPORT_ENCRYPTION_PRIVATE_KEY" ] || is_placeholder "$EXPORT_ENCRYPTION_PRIVATE_KEY" || [ -z "$EXPORT_ENCRYPTION_PUBLIC_KEY" ] || is_placeholder "$EXPORT_ENCRYPTION_PUBLIC_KEY"; then
         should_generate="true"
@@ -230,6 +233,7 @@ configure_export_encryption_credentials() {
     fi
 
     update_private_key_registry "EXPORT_ENCRYPTION_KEYS_JSON" "EXPORT_ENCRYPTION_ACTIVE_KEY_ID" "$EXPORT_ENCRYPTION_KEY_ID" "$EXPORT_ENCRYPTION_PRIVATE_KEY" "export encryption"
+    update_public_key_registry "EXPORT_ENCRYPTION_PUBLIC_KEYS_JSON" "$EXPORT_ENCRYPTION_KEY_ID" "$EXPORT_ENCRYPTION_PUBLIC_KEY" "export encryption"
 
     echo ""
 }

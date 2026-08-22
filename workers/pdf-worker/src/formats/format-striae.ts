@@ -3,78 +3,81 @@ import { ICON_256 } from '../assets/generated-assets';
 import { buildRepeatedChromePdfOptions, escapeHtml } from '../report-layout';
 
 export const renderReport: ReportRenderer = (data: PDFGenerationData): string => {
-  const { imageUrl, annotationData, activeAnnotations } = data;
-  const annotationsSet = new Set(activeAnnotations);
-  const hasImage = Boolean(imageUrl && imageUrl !== '/clear.jpg');
-  const safeText = (value: unknown): string => escapeHtml(String(value ?? ''));
-  const leftAdditionalNotes = annotationData?.leftAdditionalNotes?.trim() || '';
-  const rightAdditionalNotes = annotationData?.rightAdditionalNotes?.trim() || '';
-  const generalAdditionalNotes = annotationData?.additionalNotes?.trim() || '';
-  const hasSideAdditionalNotes = Boolean(leftAdditionalNotes || rightAdditionalNotes);
-  const hasGeneralAdditionalNotes = Boolean(generalAdditionalNotes);
-  const hasAdditionalNotes = hasSideAdditionalNotes || hasGeneralAdditionalNotes;
-  const hasConfirmationOrNotes = Boolean(annotationData && ((annotationData.includeConfirmation === true) || hasAdditionalNotes));
-  const notesShouldStartNewPage = hasImage || annotationData?.includeConfirmation === true;
+	const { imageUrl, annotationData, activeAnnotations } = data;
+	const annotationsSet = new Set(activeAnnotations);
+	const hasImage = Boolean(imageUrl && imageUrl !== '/clear.jpg');
+	const safeText = (value: unknown): string => escapeHtml(String(value ?? ''));
+	const leftAdditionalNotes = annotationData?.leftAdditionalNotes?.trim() || '';
+	const rightAdditionalNotes = annotationData?.rightAdditionalNotes?.trim() || '';
+	const generalAdditionalNotes = annotationData?.additionalNotes?.trim() || '';
+	const hasSideAdditionalNotes = Boolean(leftAdditionalNotes || rightAdditionalNotes);
+	const hasGeneralAdditionalNotes = Boolean(generalAdditionalNotes);
+	const hasAdditionalNotes = hasSideAdditionalNotes || hasGeneralAdditionalNotes;
+	const hasConfirmationOrNotes = Boolean(annotationData && (annotationData.includeConfirmation === true || hasAdditionalNotes));
+	const notesShouldStartNewPage = hasImage || annotationData?.includeConfirmation === true;
 
-  // Programmatically determine if a color is dark and needs a light background
-  const needsLightBackground = (color: string | undefined): boolean => {
-    if (!color) return false;
-    
-    // Handle named colors
-    const namedColors: Record<string, string> = {
-      'black': '#000000',
-      'white': '#ffffff',
-      'red': '#ff0000',
-      'green': '#008000',
-      'blue': '#0000ff',
-      'yellow': '#ffff00',
-      'cyan': '#00ffff',
-      'magenta': '#ff00ff',
-      'silver': '#c0c0c0',
-      'gray': '#808080',
-      'maroon': '#800000',
-      'olive': '#808000',
-      'lime': '#00ff00',
-      'aqua': '#00ffff',
-      'teal': '#008080',
-      'navy': '#000080',
-      'fuchsia': '#ff00ff',
-      'purple': '#800080'
-    };
-    
-    let hexColor = color.toLowerCase().trim();
-    
-    // Convert named color to hex
-    if (namedColors[hexColor]) {
-      hexColor = namedColors[hexColor];
-    }
-    
-    // Remove # if present
-    hexColor = hexColor.replace('#', '');
-    
-    // Handle 3-digit hex codes
-    if (hexColor.length === 3) {
-      hexColor = hexColor.split('').map(char => char + char).join('');
-    }
-    
-    // Validate hex color
-    if (!/^[0-9a-f]{6}$/i.test(hexColor)) {
-      return false; // Invalid color, don't apply background
-    }
-    
-    // Convert to RGB
-    const r = parseInt(hexColor.substr(0, 2), 16);
-    const g = parseInt(hexColor.substr(2, 2), 16);
-    const b = parseInt(hexColor.substr(4, 2), 16);
-    
-    // Calculate relative luminance using WCAG formula
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    
-    // Colors with luminance < 0.5 are considered dark
-    return luminance < 0.5;
-  };
-  
-  return `
+	// Programmatically determine if a color is dark and needs a light background
+	const needsLightBackground = (color: string | undefined): boolean => {
+		if (!color) return false;
+
+		// Handle named colors
+		const namedColors: Record<string, string> = {
+			black: '#000000',
+			white: '#ffffff',
+			red: '#ff0000',
+			green: '#008000',
+			blue: '#0000ff',
+			yellow: '#ffff00',
+			cyan: '#00ffff',
+			magenta: '#ff00ff',
+			silver: '#c0c0c0',
+			gray: '#808080',
+			maroon: '#800000',
+			olive: '#808000',
+			lime: '#00ff00',
+			aqua: '#00ffff',
+			teal: '#008080',
+			navy: '#000080',
+			fuchsia: '#ff00ff',
+			purple: '#800080',
+		};
+
+		let hexColor = color.toLowerCase().trim();
+
+		// Convert named color to hex
+		if (namedColors[hexColor]) {
+			hexColor = namedColors[hexColor];
+		}
+
+		// Remove # if present
+		hexColor = hexColor.replace('#', '');
+
+		// Handle 3-digit hex codes
+		if (hexColor.length === 3) {
+			hexColor = hexColor
+				.split('')
+				.map((char) => char + char)
+				.join('');
+		}
+
+		// Validate hex color
+		if (!/^[0-9a-f]{6}$/i.test(hexColor)) {
+			return false; // Invalid color, don't apply background
+		}
+
+		// Convert to RGB
+		const r = parseInt(hexColor.substr(0, 2), 16);
+		const g = parseInt(hexColor.substr(2, 2), 16);
+		const b = parseInt(hexColor.substr(4, 2), 16);
+
+		// Calculate relative luminance using WCAG formula
+		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+		// Colors with luminance < 0.5 are considered dark
+		return luminance < 0.5;
+	};
+
+	return `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -381,18 +384,26 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
   <body>
     <div class="report-body">
     
-    ${hasImage ? `
-    ${annotationData && annotationsSet?.has('index') && annotationData.indexType === 'number' && annotationData.indexNumber ? `
+    ${
+			hasImage
+				? `
+    ${
+			annotationData && annotationsSet?.has('index') && annotationData.indexType === 'number' && annotationData.indexNumber
+				? `
     <div class="index-section">
       Index: ${safeText(annotationData.indexNumber)}
     </div>
-    ` : ''}
+    `
+				: ''
+		}
     
     <div class="image-container">
       <div class="image-wrapper">
         <img src="${imageUrl}" alt="Comparison Image" ${annotationData && annotationsSet?.has('index') && annotationData.indexType === 'color' && annotationData.indexColor ? `class="image-with-border" style="border: 5px solid ${annotationData.indexColor};"` : ''} />
 
-        ${annotationData && annotationsSet?.has('number') ? `
+        ${
+					annotationData && annotationsSet?.has('number')
+						? `
         <div class="annotations-overlay">
           <div class="left-annotation" style="${needsLightBackground(annotationData.caseFontColor || '#FFDE21') ? 'background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(0, 0, 0, 0.2); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);' : ''}">
             <div class="case-text" style="color: ${annotationData.caseFontColor || '#FFDE21'};">
@@ -405,11 +416,17 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
             </div>
           </div>
         </div>
-        ` : ''}
+        `
+						: ''
+				}
 
-        ${annotationData && annotationsSet?.has('box') && annotationData.boxAnnotations ? `
+        ${
+					annotationData && annotationsSet?.has('box') && annotationData.boxAnnotations
+						? `
         <div class="annotations-overlay">
-          ${annotationData.boxAnnotations.map(box => `
+          ${annotationData.boxAnnotations
+						.map(
+							(box) => `
             <div class="box-annotation" style="
               left: ${box.x}%;
               top: ${box.y}%;
@@ -417,59 +434,81 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
               height: ${box.height}%;
               border-color: ${box.color};
             "></div>
-          `).join('')}
+          `,
+						)
+						.join('')}
         </div>
-        ` : ''}
+        `
+						: ''
+				}
       </div>
     </div>
       
     <div class="below-image-annotations">
-        ${annotationData && annotationsSet?.has('id') ? `
+        ${
+					annotationData && annotationsSet?.has('id')
+						? `
         <div class="support-level-annotation">
           <div class="support-level-text" style="color: ${annotationData.supportLevel === 'ID' ? '#28a745' : annotationData.supportLevel === 'Exclusion' ? '#dc3545' : '#ffc107'}; background: ${annotationData.supportLevel === 'Inconclusive' ? 'rgba(120, 120, 120, 0.95)' : 'rgba(240, 240, 240, 0.95)'};">
             ${safeText(annotationData.supportLevel === 'ID' ? 'Identification' : annotationData.supportLevel)}
           </div>
         </div>
-        ` : '<div class="support-level-annotation"></div>'}
+        `
+						: '<div class="support-level-annotation"></div>'
+				}
         
-        ${annotationData && annotationsSet?.has('item') ? `
+        ${
+					annotationData && annotationsSet?.has('item')
+						? `
         <div class="class-annotation">
           <div class="class-text-annotation">
             ${(() => {
-              const leftValue = annotationData.leftCustomClass || annotationData.leftItemType;
-              const rightValue = annotationData.rightCustomClass || annotationData.rightItemType;
-              const displayValue =
-                leftValue && rightValue && leftValue !== rightValue
-                  ? `${leftValue} / ${rightValue}`
-                  : leftValue || rightValue;
-              const leftClassNote = annotationData.leftClassNote?.trim();
-              const rightClassNote = annotationData.rightClassNote?.trim();
-              const displayClassNote =
-                leftClassNote && rightClassNote && leftClassNote !== rightClassNote
-                  ? `${leftClassNote} / ${rightClassNote}`
-                  : leftClassNote || rightClassNote;
-              return safeText(displayValue || '') + (displayClassNote ? ` (${safeText(displayClassNote)})` : '');
-            })()}
+							const leftValue = annotationData.leftCustomClass || annotationData.leftItemType;
+							const rightValue = annotationData.rightCustomClass || annotationData.rightItemType;
+							const displayValue =
+								leftValue && rightValue && leftValue !== rightValue ? `${leftValue} / ${rightValue}` : leftValue || rightValue;
+							const leftClassNote = annotationData.leftClassNote?.trim();
+							const rightClassNote = annotationData.rightClassNote?.trim();
+							const displayClassNote =
+								leftClassNote && rightClassNote && leftClassNote !== rightClassNote
+									? `${leftClassNote} / ${rightClassNote}`
+									: leftClassNote || rightClassNote;
+							return safeText(displayValue || '') + (displayClassNote ? ` (${safeText(displayClassNote)})` : '');
+						})()}
           </div>
         </div>
-        ` : '<div class="class-annotation"></div>'}
+        `
+						: '<div class="class-annotation"></div>'
+				}
         
-        ${annotationData && annotationsSet?.has('item') && (annotationData.leftHasSubclass || annotationData.rightHasSubclass) ? `
+        ${
+					annotationData && annotationsSet?.has('item') && (annotationData.leftHasSubclass || annotationData.rightHasSubclass)
+						? `
         <div class="subclass-annotation">
           <div class="subclass-text">
             POTENTIAL SUBCLASS
           </div>
         </div>
-        ` : '<div class="subclass-annotation"></div>'}
+        `
+						: '<div class="subclass-annotation"></div>'
+				}
       </div>
     </div>
-    ` : ''}
+    `
+				: ''
+		}
     
-    ${hasConfirmationOrNotes ? `
+    ${
+			hasConfirmationOrNotes
+				? `
     <div class="confirmation-section">
-      ${annotationData && (annotationData.includeConfirmation === true) ? `
+      ${
+				annotationData && annotationData.includeConfirmation === true
+					? `
         <div class="confirmation-summary">
-        ${annotationData.confirmationData ? `
+        ${
+					annotationData.confirmationData
+						? `
         <div class="confirmation-data">
           <div class="confirmation-title">IDENTIFICATION CONFIRMED</div>
           <div class="confirmation-field">
@@ -485,21 +524,31 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
             <div class="confirmation-id">ID: ${safeText(annotationData.confirmationData.confirmationId)}</div>
           </div>
         </div>
-        ` : `
+        `
+						: `
         <div class="confirmation-box">
           <div class="confirmation-label">Confirmation by:</div>
           <div class="confirmation-line"></div>
           <div class="confirmation-date-label">Date:</div>
           <div class="confirmation-line"></div>
         </div>
-        `}
+        `
+				}
         </div>
-      ` : ''}
+      `
+					: ''
+			}
 
-      ${annotationData && annotationsSet?.has('notes') && hasAdditionalNotes ? `
+      ${
+				annotationData && annotationsSet?.has('notes') && hasAdditionalNotes
+					? `
       <section class="${notesShouldStartNewPage ? 'notes-page' : ''}">
-        ${hasSideAdditionalNotes ? `
-          ${leftAdditionalNotes && rightAdditionalNotes ? `
+        ${
+					hasSideAdditionalNotes
+						? `
+          ${
+						leftAdditionalNotes && rightAdditionalNotes
+							? `
             <div class="additional-notes-grid">
               <div class="additional-notes-section additional-notes-section--half">
                 <h2 class="additional-notes-title">Additional Notes (L)</h2>
@@ -510,24 +559,36 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
                 <p class="additional-notes-body">${escapeHtml(rightAdditionalNotes)}</p>
               </div>
             </div>
-          ` : `
+          `
+							: `
             <div class="additional-notes-section">
               <h2 class="additional-notes-title">Additional Notes (${leftAdditionalNotes ? 'L' : 'R'})</h2>
               <p class="additional-notes-body">${escapeHtml(leftAdditionalNotes || rightAdditionalNotes)}</p>
             </div>
-          `}
-        ` : ''}
+          `
+					}
+        `
+						: ''
+				}
 
-        ${hasGeneralAdditionalNotes ? `
+        ${
+					hasGeneralAdditionalNotes
+						? `
           <div class="additional-notes-section" style="margin-top: ${hasSideAdditionalNotes ? '12px' : '0'};">
             <h2 class="additional-notes-title">Additional Notes (General)</h2>
             <p class="additional-notes-body">${escapeHtml(generalAdditionalNotes)}</p>
           </div>
-        ` : ''}
+        `
+						: ''
+				}
       </section>
-      ` : ''}
+      `
+					: ''
+			}
     </div>
-    ` : ''}
+    `
+				: ''
+		}
     
     </div>
   </body>
@@ -536,20 +597,29 @@ export const renderReport: ReportRenderer = (data: PDFGenerationData): string =>
 };
 
 export const getPdfOptions: ReportPdfOptionsBuilder = (data: PDFGenerationData) => {
-  return buildRepeatedChromePdfOptions({
-    headerLeft: data.currentDate,
-    headerRight: data.caseNumber,
-    headerDetailLeftLabel: [data.annotationData?.leftCase, data.annotationData?.leftItem, data.annotationData?.leftMagnification].filter(Boolean).join(' / ')
-      ? 'Left Case / Item / (Mag X)'
-      : undefined,
-    headerDetailLeft: [data.annotationData?.leftCase, data.annotationData?.leftItem, data.annotationData?.leftMagnification].filter(Boolean).join(' / ') || undefined,
-    headerDetailRightLabel: [data.annotationData?.rightCase, data.annotationData?.rightItem, data.annotationData?.rightMagnification].filter(Boolean).join(' / ')
-      ? 'Right Case / Item / (Mag X)'
-      : undefined,
-    headerDetailRight: [data.annotationData?.rightCase, data.annotationData?.rightItem, data.annotationData?.rightMagnification].filter(Boolean).join(' / ') || undefined,
-    footerLeft: 'Notes formatted by Striae',
-    footerCenter: data.userCompany,
-    footerRight: data.notesUpdatedFormatted ? `Notes updated ${data.notesUpdatedFormatted}` : undefined,
-    footerLeftImageSrc: ICON_256,
-  });
+	return buildRepeatedChromePdfOptions({
+		headerLeft: data.currentDate,
+		headerRight: data.caseNumber,
+		headerDetailLeftLabel: [data.annotationData?.leftCase, data.annotationData?.leftItem, data.annotationData?.leftMagnification]
+			.filter(Boolean)
+			.join(' / ')
+			? 'Left Case / Item / (Mag X)'
+			: undefined,
+		headerDetailLeft:
+			[data.annotationData?.leftCase, data.annotationData?.leftItem, data.annotationData?.leftMagnification].filter(Boolean).join(' / ') ||
+			undefined,
+		headerDetailRightLabel: [data.annotationData?.rightCase, data.annotationData?.rightItem, data.annotationData?.rightMagnification]
+			.filter(Boolean)
+			.join(' / ')
+			? 'Right Case / Item / (Mag X)'
+			: undefined,
+		headerDetailRight:
+			[data.annotationData?.rightCase, data.annotationData?.rightItem, data.annotationData?.rightMagnification]
+				.filter(Boolean)
+				.join(' / ') || undefined,
+		footerLeft: 'Notes formatted by Striae',
+		footerCenter: data.userCompany,
+		footerRight: data.notesUpdatedFormatted ? `Notes updated ${data.notesUpdatedFormatted}` : undefined,
+		footerLeftImageSrc: ICON_256,
+	});
 };

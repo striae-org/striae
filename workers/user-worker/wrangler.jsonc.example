@@ -16,6 +16,12 @@
     "crons": ["0 3 * * *"]
   },
 
+  // Raised alongside the orphan-sweep per-run caps; decrypting many case-data
+  // records during the scheduled sweep is CPU-bound, not just I/O-bound.
+  "limits": {
+    "cpu_ms": 300000
+  },
+
    "kv_namespaces": [
     {
       "binding": "USER_DB",
