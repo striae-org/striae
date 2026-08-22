@@ -3,325 +3,300 @@ import type { ConfirmationImportData } from '~/types';
 
 import { fetchDataApi } from '../../api';
 import {
-  AUDIT_EXPORT_SIGNATURE_VERSION,
-  type AuditExportSigningPayload,
-  isValidAuditExportSigningPayload
+	AUDIT_EXPORT_SIGNATURE_VERSION,
+	type AuditExportSigningPayload,
+	isValidAuditExportSigningPayload,
 } from '../../forensics/audit-export-signature';
 import { CONFIRMATION_SIGNATURE_VERSION } from '../../forensics/confirmation-signature';
-import {
-  type ForensicManifestData,
-  type ForensicManifestSignature,
-  FORENSIC_MANIFEST_VERSION
-} from '../../forensics/SHA256';
+import { type ForensicManifestData, type ForensicManifestSignature, FORENSIC_MANIFEST_VERSION } from '../../forensics/SHA256';
 import { getEncryptedManifestEntries, type EncryptionManifest } from '../../forensics/export-encryption';
 import { canAccessCase, validateUserSession } from '../permissions';
-import type {
-  AuditExportSigningResponse,
-  ConfirmationSigningResponse,
-  ManifestSigningResponse
-} from './types';
+import type { AuditExportSigningResponse, ConfirmationSigningResponse, ManifestSigningResponse } from './types';
 
 /**
  * Request a server-side signature for a forensic manifest.
  */
 export const signForensicManifest = async (
-  user: User,
-  caseNumber: string,
-  manifest: ForensicManifestData
+	user: User,
+	caseNumber: string,
+	manifest: ForensicManifestData,
 ): Promise<ManifestSigningResponse> => {
-  try {
-    if (typeof manifest.caseNumber !== 'string' || manifest.caseNumber.trim().length === 0) {
-      throw new Error('Manifest signing request requires manifest.caseNumber');
-    }
+	try {
+		if (typeof manifest.caseNumber !== 'string' || manifest.caseNumber.trim().length === 0) {
+			throw new Error('Manifest signing request requires manifest.caseNumber');
+		}
 
-    if (manifest.caseNumber !== caseNumber) {
-      throw new Error('Manifest case number must match the requested signing case number');
-    }
+		if (manifest.caseNumber !== caseNumber) {
+			throw new Error('Manifest case number must match the requested signing case number');
+		}
 
-    const sessionValidation = await validateUserSession(user);
-    if (!sessionValidation.valid) {
-      throw new Error(`Session validation failed: ${sessionValidation.reason}`);
-    }
+		const sessionValidation = await validateUserSession(user);
+		if (!sessionValidation.valid) {
+			throw new Error(`Session validation failed: ${sessionValidation.reason}`);
+		}
 
-    const accessCheck = await canAccessCase(user, caseNumber);
-    if (!accessCheck.allowed) {
-      throw new Error(`Manifest signing denied: ${accessCheck.reason}`);
-    }
+		const accessCheck = await canAccessCase(user, caseNumber);
+		if (!accessCheck.allowed) {
+			throw new Error(`Manifest signing denied: ${accessCheck.reason}`);
+		}
 
-    const response = await fetchDataApi(user, '/api/forensic/sign-manifest', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        userId: user.uid,
-        caseNumber,
-        manifest
-      })
-    });
+		const response = await fetchDataApi(user, '/api/forensic/sign-manifest', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				userId: user.uid,
+				caseNumber,
+				manifest,
+			}),
+		});
 
-    const responseData = await response.json().catch(() => null) as {
-      success?: boolean;
-      error?: string;
-      manifestVersion?: string;
-      signature?: ForensicManifestSignature;
-    } | null;
+		const responseData = (await response.json().catch(() => null)) as {
+			success?: boolean;
+			error?: string;
+			manifestVersion?: string;
+			signature?: ForensicManifestSignature;
+		} | null;
 
-    if (!response.ok) {
-      throw new Error(
-        responseData?.error ||
-        `Failed to sign forensic manifest: ${response.status} ${response.statusText}`
-      );
-    }
+		if (!response.ok) {
+			throw new Error(responseData?.error || `Failed to sign forensic manifest: ${response.status} ${response.statusText}`);
+		}
 
-    if (!responseData?.success || !responseData.signature || !responseData.manifestVersion) {
-      throw new Error('Invalid manifest signing response from data worker');
-    }
+		if (!responseData?.success || !responseData.signature || !responseData.manifestVersion) {
+			throw new Error('Invalid manifest signing response from data worker');
+		}
 
-    if (responseData.manifestVersion !== FORENSIC_MANIFEST_VERSION) {
-      throw new Error(
-        `Unexpected manifest version from signer: ${responseData.manifestVersion}`
-      );
-    }
+		if (responseData.manifestVersion !== FORENSIC_MANIFEST_VERSION) {
+			throw new Error(`Unexpected manifest version from signer: ${responseData.manifestVersion}`);
+		}
 
-    return {
-      manifestVersion: responseData.manifestVersion,
-      signature: responseData.signature
-    };
-  } catch (error) {
-    console.error(`Error signing forensic manifest for ${caseNumber}:`, error);
-    throw error;
-  }
+		return {
+			manifestVersion: responseData.manifestVersion,
+			signature: responseData.signature,
+		};
+	} catch (error) {
+		console.error(`Error signing forensic manifest for ${caseNumber}:`, error);
+		throw error;
+	}
 };
 
 /**
  * Request a server-side signature for confirmation export data.
  */
 export const signConfirmationData = async (
-  user: User,
-  caseNumber: string,
-  confirmationData: ConfirmationImportData
+	user: User,
+	caseNumber: string,
+	confirmationData: ConfirmationImportData,
 ): Promise<ConfirmationSigningResponse> => {
-  try {
-    const sessionValidation = await validateUserSession(user);
-    if (!sessionValidation.valid) {
-      throw new Error(`Session validation failed: ${sessionValidation.reason}`);
-    }
+	try {
+		const sessionValidation = await validateUserSession(user);
+		if (!sessionValidation.valid) {
+			throw new Error(`Session validation failed: ${sessionValidation.reason}`);
+		}
 
-    const accessCheck = await canAccessCase(user, caseNumber);
-    if (!accessCheck.allowed) {
-      throw new Error(`Confirmation signing denied: ${accessCheck.reason}`);
-    }
+		const accessCheck = await canAccessCase(user, caseNumber);
+		if (!accessCheck.allowed) {
+			throw new Error(`Confirmation signing denied: ${accessCheck.reason}`);
+		}
 
-    const response = await fetchDataApi(user, '/api/forensic/sign-confirmation', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        userId: user.uid,
-        caseNumber,
-        confirmationData,
-        signatureVersion: CONFIRMATION_SIGNATURE_VERSION
-      })
-    });
+		const response = await fetchDataApi(user, '/api/forensic/sign-confirmation', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				userId: user.uid,
+				caseNumber,
+				confirmationData,
+				signatureVersion: CONFIRMATION_SIGNATURE_VERSION,
+			}),
+		});
 
-    const responseData = await response.json().catch(() => null) as {
-      success?: boolean;
-      error?: string;
-      signatureVersion?: string;
-      signature?: ForensicManifestSignature;
-    } | null;
+		const responseData = (await response.json().catch(() => null)) as {
+			success?: boolean;
+			error?: string;
+			signatureVersion?: string;
+			signature?: ForensicManifestSignature;
+		} | null;
 
-    if (!response.ok) {
-      throw new Error(
-        responseData?.error ||
-        `Failed to sign confirmation data: ${response.status} ${response.statusText}`
-      );
-    }
+		if (!response.ok) {
+			throw new Error(responseData?.error || `Failed to sign confirmation data: ${response.status} ${response.statusText}`);
+		}
 
-    if (!responseData?.success || !responseData.signature || !responseData.signatureVersion) {
-      throw new Error('Invalid confirmation signing response from data worker');
-    }
+		if (!responseData?.success || !responseData.signature || !responseData.signatureVersion) {
+			throw new Error('Invalid confirmation signing response from data worker');
+		}
 
-    if (responseData.signatureVersion !== CONFIRMATION_SIGNATURE_VERSION) {
-      throw new Error(
-        `Unexpected confirmation signature version from signer: ${responseData.signatureVersion}`
-      );
-    }
+		if (responseData.signatureVersion !== CONFIRMATION_SIGNATURE_VERSION) {
+			throw new Error(`Unexpected confirmation signature version from signer: ${responseData.signatureVersion}`);
+		}
 
-    return {
-      signatureVersion: responseData.signatureVersion,
-      signature: responseData.signature
-    };
-  } catch (error) {
-    console.error(`Error signing confirmation data for ${caseNumber}:`, error);
-    throw error;
-  }
+		return {
+			signatureVersion: responseData.signatureVersion,
+			signature: responseData.signature,
+		};
+	} catch (error) {
+		console.error(`Error signing confirmation data for ${caseNumber}:`, error);
+		throw error;
+	}
 };
 
 /**
  * Request a server-side signature for audit export metadata.
  */
 export const signAuditExportData = async (
-  user: User,
-  auditExport: AuditExportSigningPayload,
-  options: { caseNumber?: string } = {}
+	user: User,
+	auditExport: AuditExportSigningPayload,
+	options: { caseNumber?: string } = {},
 ): Promise<AuditExportSigningResponse> => {
-  try {
-    const sessionValidation = await validateUserSession(user);
-    if (!sessionValidation.valid) {
-      throw new Error(`Session validation failed: ${sessionValidation.reason}`);
-    }
+	try {
+		const sessionValidation = await validateUserSession(user);
+		if (!sessionValidation.valid) {
+			throw new Error(`Session validation failed: ${sessionValidation.reason}`);
+		}
 
-    if (!isValidAuditExportSigningPayload(auditExport)) {
-      throw new Error('Invalid audit export payload for signing');
-    }
+		if (!isValidAuditExportSigningPayload(auditExport)) {
+			throw new Error('Invalid audit export payload for signing');
+		}
 
-    const caseNumber = options.caseNumber;
-    if (caseNumber) {
-      const accessCheck = await canAccessCase(user, caseNumber);
-      if (!accessCheck.allowed) {
-        throw new Error(`Audit export signing denied: ${accessCheck.reason}`);
-      }
-    }
+		const caseNumber = options.caseNumber;
+		if (caseNumber) {
+			const accessCheck = await canAccessCase(user, caseNumber);
+			if (!accessCheck.allowed) {
+				throw new Error(`Audit export signing denied: ${accessCheck.reason}`);
+			}
+		}
 
-    const response = await fetchDataApi(user, '/api/forensic/sign-audit-export', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        userId: user.uid,
-        caseNumber,
-        auditExport,
-        signatureVersion: AUDIT_EXPORT_SIGNATURE_VERSION
-      })
-    });
+		const response = await fetchDataApi(user, '/api/forensic/sign-audit-export', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				userId: user.uid,
+				caseNumber,
+				auditExport,
+				signatureVersion: AUDIT_EXPORT_SIGNATURE_VERSION,
+			}),
+		});
 
-    const responseData = await response.json().catch(() => null) as {
-      success?: boolean;
-      error?: string;
-      signatureVersion?: string;
-      signature?: ForensicManifestSignature;
-    } | null;
+		const responseData = (await response.json().catch(() => null)) as {
+			success?: boolean;
+			error?: string;
+			signatureVersion?: string;
+			signature?: ForensicManifestSignature;
+		} | null;
 
-    if (!response.ok) {
-      throw new Error(
-        responseData?.error ||
-        `Failed to sign audit export data: ${response.status} ${response.statusText}`
-      );
-    }
+		if (!response.ok) {
+			throw new Error(responseData?.error || `Failed to sign audit export data: ${response.status} ${response.statusText}`);
+		}
 
-    if (!responseData?.success || !responseData.signature || !responseData.signatureVersion) {
-      throw new Error('Invalid audit export signing response from data worker');
-    }
+		if (!responseData?.success || !responseData.signature || !responseData.signatureVersion) {
+			throw new Error('Invalid audit export signing response from data worker');
+		}
 
-    if (responseData.signatureVersion !== AUDIT_EXPORT_SIGNATURE_VERSION) {
-      throw new Error(
-        `Unexpected audit export signature version from signer: ${responseData.signatureVersion}`
-      );
-    }
+		if (responseData.signatureVersion !== AUDIT_EXPORT_SIGNATURE_VERSION) {
+			throw new Error(`Unexpected audit export signature version from signer: ${responseData.signatureVersion}`);
+		}
 
-    return {
-      signatureVersion: responseData.signatureVersion,
-      signature: responseData.signature
-    };
-  } catch (error) {
-    console.error('Error signing audit export data:', error);
-    throw error;
-  }
+		return {
+			signatureVersion: responseData.signatureVersion,
+			signature: responseData.signature,
+		};
+	} catch (error) {
+		console.error('Error signing audit export data:', error);
+		throw error;
+	}
 };
 
 /**
  * Request batch decryption of export data file and associated files from the data worker
  */
 export const decryptExportBatch = async (
-  user: User,
-  encryptionManifest: EncryptionManifest,
-  encryptedDataBase64: string,
-  encryptedFileMap: Record<string, string>
+	user: User,
+	encryptionManifest: EncryptionManifest,
+	encryptedDataBase64: string,
+	encryptedFileMap: Record<string, string>,
 ): Promise<{ plaintext: string; decryptedImages: Record<string, Blob> }> => {
-  try {
-    const sessionValidation = await validateUserSession(user);
-    if (!sessionValidation.valid) {
-      throw new Error(`Session validation failed: ${sessionValidation.reason}`);
-    }
+	try {
+		const sessionValidation = await validateUserSession(user);
+		if (!sessionValidation.valid) {
+			throw new Error(`Session validation failed: ${sessionValidation.reason}`);
+		}
 
-    // Convert encrypted file map to array format expected by worker, including per-file IV from manifest.
-    const manifestEntries = getEncryptedManifestEntries(encryptionManifest);
-    const encryptedFiles = Object.entries(encryptedFileMap).map(([filename, encryptedData]) => {
-      const manifestEntry = manifestEntries.find((entry) => entry.filename === filename);
-      return {
-        filename,
-        encryptedData,
-        iv: manifestEntry?.iv
-      };
-    });
+		// Convert encrypted file map to array format expected by worker, including per-file IV from manifest.
+		const manifestEntries = getEncryptedManifestEntries(encryptionManifest);
+		const encryptedFiles = Object.entries(encryptedFileMap).map(([filename, encryptedData]) => {
+			const manifestEntry = manifestEntries.find((entry) => entry.filename === filename);
+			return {
+				filename,
+				encryptedData,
+				iv: manifestEntry?.iv,
+			};
+		});
 
-    const response = await fetchDataApi(user, '/api/forensic/decrypt-export', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        userId: user.uid,
-        wrappedKey: encryptionManifest.wrappedKey,
-        dataIv: encryptionManifest.dataIv,
-        encryptedData: encryptedDataBase64,
-        encryptedFiles,
-        keyId: encryptionManifest.keyId
-      })
-    });
+		const response = await fetchDataApi(user, '/api/forensic/decrypt-export', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				userId: user.uid,
+				wrappedKey: encryptionManifest.wrappedKey,
+				dataIv: encryptionManifest.dataIv,
+				encryptedData: encryptedDataBase64,
+				encryptedFiles,
+				keyId: encryptionManifest.keyId,
+			}),
+		});
 
-    const responseData = await response.json().catch(() => null) as {
-      success?: boolean;
-      error?: string;
-      plaintext?: string;
-      decryptedImages?: Array<{ filename: string; data: string }>;
-    } | null;
+		const responseData = (await response.json().catch(() => null)) as {
+			success?: boolean;
+			error?: string;
+			plaintext?: string;
+			decryptedImages?: Array<{ filename: string; data: string }>;
+		} | null;
 
-    if (!response.ok) {
-      const errorMessage = responseData?.error || `Failed to decrypt export: ${response.status} ${response.statusText}`;
-      
-      // Special handling for encrypted exports without configured key
-      if (response.status === 400 && errorMessage.includes('not configured')) {
-        throw new Error(
-          'This export is encrypted. To import it, your Striae instance must have EXPORT_ENCRYPTION_PRIVATE_KEY configured.'
-        );
-      }
+		if (!response.ok) {
+			const errorMessage = responseData?.error || `Failed to decrypt export: ${response.status} ${response.statusText}`;
 
-      throw new Error(errorMessage);
-    }
+			// Special handling for encrypted exports without configured key
+			if (response.status === 400 && errorMessage.includes('not configured')) {
+				throw new Error('This export is encrypted. To import it, your Striae instance must have EXPORT_ENCRYPTION_PRIVATE_KEY configured.');
+			}
 
-    if (!responseData?.success || !responseData.plaintext) {
-      throw new Error('Invalid decrypt response from data worker');
-    }
+			throw new Error(errorMessage);
+		}
 
-    // Convert decrypted file base64 data back to Blobs
-    const decryptedImages: Record<string, Blob> = {};
-    if (Array.isArray(responseData.decryptedImages)) {
-      for (const imageEntry of responseData.decryptedImages) {
-        try {
-          const binaryString = atob(imageEntry.data);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-          decryptedImages[imageEntry.filename] = new Blob([bytes]);
-        } catch (error) {
-          console.error(`Failed to convert decrypted image ${imageEntry.filename}:`, error);
-          throw new Error(`Failed to convert decrypted image: ${imageEntry.filename}`, { cause: error });
-        }
-      }
-    }
+		if (!responseData?.success || !responseData.plaintext) {
+			throw new Error('Invalid decrypt response from data worker');
+		}
 
-    return {
-      plaintext: responseData.plaintext,
-      decryptedImages
-    };
-  } catch (error) {
-    console.error('Error decrypting export batch:', error);
-    throw error;
-  }
+		// Convert decrypted file base64 data back to Blobs
+		const decryptedImages: Record<string, Blob> = {};
+		if (Array.isArray(responseData.decryptedImages)) {
+			for (const imageEntry of responseData.decryptedImages) {
+				try {
+					const binaryString = atob(imageEntry.data);
+					const bytes = new Uint8Array(binaryString.length);
+					for (let i = 0; i < binaryString.length; i++) {
+						bytes[i] = binaryString.charCodeAt(i);
+					}
+					decryptedImages[imageEntry.filename] = new Blob([bytes]);
+				} catch (error) {
+					console.error(`Failed to convert decrypted image ${imageEntry.filename}:`, error);
+					throw new Error(`Failed to convert decrypted image: ${imageEntry.filename}`, { cause: error });
+				}
+			}
+		}
+
+		return {
+			plaintext: responseData.plaintext,
+			decryptedImages,
+		};
+	} catch (error) {
+		console.error('Error decrypting export batch:', error);
+		throw error;
+	}
 };

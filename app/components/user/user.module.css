@@ -2,664 +2,662 @@
 
 /* Modal Overlay & Container */
 .modalOverlay {
-  position: fixed;
-  inset: 0;
-  background-color: color-mix(in lab, var(--background) 50%, transparent);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: var(--zIndex5);
-  cursor: default;
-  transition: background-color var(--durationM) var(--bezierFastoutSlowin);
+	position: fixed;
+	inset: 0;
+	background-color: color-mix(in lab, var(--background) 50%, transparent);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: var(--zIndex5);
+	cursor: default;
+	transition: background-color var(--durationM) var(--bezierFastoutSlowin);
 }
 
 .modal {
-  background: var(--backgroundLight);
-  border-radius: var(--spaceXS);
-  width: 90%;
-  max-width: 500px;
-  max-height: min(90vh, 90vw);
-  box-shadow: 0 var(--spaceXS) var(--spaceL)
-    color-mix(in lab, var(--black) 10%, transparent);
-  display: flex;
-  flex-direction: column;
-  transition: background-color var(--durationM) var(--bezierFastoutSlowin);
-  overflow: hidden;
-  cursor: default;
+	background: var(--backgroundLight);
+	border-radius: var(--spaceXS);
+	width: 90%;
+	max-width: 500px;
+	max-height: min(90vh, 90vw);
+	box-shadow: 0 var(--spaceXS) var(--spaceL) color-mix(in lab, var(--black) 10%, transparent);
+	display: flex;
+	flex-direction: column;
+	transition: background-color var(--durationM) var(--bezierFastoutSlowin);
+	overflow: hidden;
+	cursor: default;
 }
 
 /* Modal Header */
 .modalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spaceL);
-  font-size: var(--fontSizeBodyL);
-  border-bottom: 1px solid color-mix(in lab, var(--text) 10%, transparent);
-  color: var(--textTitle);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: var(--spaceL);
+	font-size: var(--fontSizeBodyL);
+	border-bottom: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+	color: var(--textTitle);
 }
 
 .modalHeader h1 {
-  font-size: var(--fontSizeBodyM);
-  margin: 0;
-  font-weight: var(--fontWeightMedium);
+	font-size: var(--fontSizeBodyM);
+	margin: 0;
+	font-weight: var(--fontWeightMedium);
 }
 
 /* Close Button */
 .closeButton {
-  background: none;
-  border: none;
-  font-size: var(--fontSizeH5);
-  cursor: pointer;
-  padding: var(--spaceS);
-  color: var(--textLight);
-  transition: color var(--durationS) var(--bezierFastoutSlowin);
+	background: none;
+	border: none;
+	font-size: var(--fontSizeH5);
+	cursor: pointer;
+	padding: var(--spaceS);
+	color: var(--textLight);
+	transition: color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .closeButton:hover {
-  color: var(--text);
+	color: var(--text);
 }
 
 /* Form & Form Groups */
 .form {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  gap: var(--spaceL);
-  width: 100%;
-  max-width: 100%;
-  padding: var(--spaceL);
-  margin: 0 auto;
-  box-sizing: border-box;
-  overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	gap: var(--spaceL);
+	width: 100%;
+	max-width: 100%;
+	padding: var(--spaceL);
+	margin: 0 auto;
+	box-sizing: border-box;
+	overflow-y: auto;
 }
 
 .formGroup {
-  margin-bottom: var(--spaceXS);
+	margin-bottom: var(--spaceXS);
 }
 
 .formGroup label {
-  display: block;
-  margin-bottom: var(--spaceS);
-  color: var(--textBody);
+	display: block;
+	margin-bottom: var(--spaceS);
+	color: var(--textBody);
 }
 
 /* Readonly Input Styling (for company/email fields) */
 .input {
-  width: 100%;
-  padding: var(--spaceM);
-  border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
-  border-radius: var(--spaceXS);
-  font-size: var(--fontSizeBodyS);
-  background: var(--backgroundLight);
-  color: var(--textBody);
-  box-sizing: border-box;
+	width: 100%;
+	padding: var(--spaceM);
+	border: 1.5px solid color-mix(in lab, var(--text) 20%, transparent);
+	border-radius: var(--spaceXS);
+	font-size: var(--fontSizeBodyS);
+	background: var(--backgroundLight);
+	color: var(--textBody);
+	box-sizing: border-box;
 }
 
 .input:disabled {
-  background-color: color-mix(in lab, var(--background) 95%, transparent);
-  cursor: not-allowed;
+	background-color: color-mix(in lab, var(--background) 95%, transparent);
+	cursor: not-allowed;
 }
 
 /* Helper Text */
 .helpText {
-  font-size: var(--fontSizeBodyXS);
-  color: var(--textLight);
-  margin-top: var(--spaceXS);
-  line-height: 1.4;
+	font-size: var(--fontSizeBodyXS);
+	color: var(--textLight);
+	margin-top: var(--spaceXS);
+	line-height: 1.4;
 }
 
 /* Button Group */
 .buttonGroup {
-  display: flex;
-  gap: var(--spaceS);
-  margin-top: var(--spaceL);
+	display: flex;
+	gap: var(--spaceS);
+	margin-top: var(--spaceL);
 }
 
 .mfaVerificationSection {
-  margin-top: var(--spaceM);
+	margin-top: var(--spaceM);
 }
 
 .mfaReauthSection {
-  margin-top: var(--spaceM);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceS);
+	margin-top: var(--spaceM);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceS);
 }
 
 .mfaReauthSection label {
-  color: var(--textBody);
+	color: var(--textBody);
 }
 
 .mfaButtonGroup {
-  display: flex;
-  gap: var(--spaceS);
-  flex-wrap: wrap;
-  margin-top: var(--spaceS);
+	display: flex;
+	gap: var(--spaceS);
+	flex-wrap: wrap;
+	margin-top: var(--spaceS);
 }
 
 .resendTimer {
-  margin: 0;
-  font-size: var(--fontSizeBodyXS);
-  color: var(--textLight);
-  display: inline-flex;
-  align-items: center;
+	margin: 0;
+	font-size: var(--fontSizeBodyXS);
+	color: var(--textLight);
+	display: inline-flex;
+	align-items: center;
 }
 
 .recaptchaContainer {
-  height: 0;
-  overflow: hidden;
+	height: 0;
+	overflow: hidden;
 }
 
 /* ─── Section label (replaces bare <label> for non-input groups) ─────────── */
 .sectionLabel {
-  display: block;
-  font-weight: 600;
-  color: var(--textTitle);
-  margin-bottom: var(--spaceS);
+	display: block;
+	font-weight: 600;
+	color: var(--textTitle);
+	margin-bottom: var(--spaceS);
 }
 
 /* ─── Enrolled MFA Factors List ─────────────────────────────────────────── */
 
 .enrolledFactorsList {
-  list-style: none;
-  margin: var(--spaceS) 0 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceS);
+	list-style: none;
+	margin: var(--spaceS) 0 0 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceS);
 }
 
 .enrolledFactorItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spaceM);
-  padding: var(--spaceM);
-  border: 1px solid color-mix(in lab, var(--text) 12%, transparent);
-  border-radius: var(--spaceXS);
-  background: color-mix(in lab, var(--background) 97%, transparent);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--spaceM);
+	padding: var(--spaceM);
+	border: 1px solid color-mix(in lab, var(--text) 12%, transparent);
+	border-radius: var(--spaceXS);
+	background: color-mix(in lab, var(--background) 97%, transparent);
 }
 
 .enrolledFactorInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
 }
 
 .enrolledFactorLabel {
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
-  color: var(--textTitle);
+	font-size: var(--fontSizeBodyS);
+	font-weight: var(--fontWeightMedium);
+	color: var(--textTitle);
 }
 
 .enrolledFactorName {
-  font-size: var(--fontSizeBodyXS);
-  color: var(--textBody);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+	font-size: var(--fontSizeBodyXS);
+	color: var(--textBody);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .enrolledFactorDate {
-  font-size: var(--fontSizeBodyXS);
-  color: var(--textLight);
+	font-size: var(--fontSizeBodyXS);
+	color: var(--textLight);
 }
 
 .enrolledFactorsNote {
-  font-size: var(--fontSizeBodyXS);
-  color: var(--textLight);
-  margin: var(--spaceXS) 0 0 0;
+	font-size: var(--fontSizeBodyXS);
+	color: var(--textLight);
+	margin: var(--spaceXS) 0 0 0;
 }
 
 /* Delete Button (error variant) */
 .deleteButton {
-  background-color: var(--error);
-  color: var(--white);
-  border: none;
-  padding: var(--spaceM) var(--spaceL);
-  border-radius: var(--spaceXS);
-  font-weight: var(--fontWeightMedium);
-  cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  margin-top: var(--spaceXL);
-  width: 100%;
-  font-size: var(--fontSizeBodyS);
+	background-color: var(--error);
+	color: var(--white);
+	border: none;
+	padding: var(--spaceM) var(--spaceL);
+	border-radius: var(--spaceXS);
+	font-weight: var(--fontWeightMedium);
+	cursor: pointer;
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	margin-top: var(--spaceXL);
+	width: 100%;
+	font-size: var(--fontSizeBodyS);
 }
 
 .deleteButton:hover:not(:disabled) {
-  background-color: color-mix(in lab, var(--error) 85%, var(--black));
+	background-color: color-mix(in lab, var(--error) 85%, var(--black));
 }
 
 .deleteButton:focus {
-  outline: 2px solid var(--error);
-  outline-offset: 2px;
+	outline: 2px solid var(--error);
+	outline-offset: 2px;
 }
 
 .deleteNotice {
-  margin-top: var(--spaceXL);
-  font-size: var(--fontSizeBodyXS);
-  text-align: center;
-  color: var(--textLight);
+	margin-top: var(--spaceXL);
+	font-size: var(--fontSizeBodyXS);
+	text-align: center;
+	color: var(--textLight);
 }
 
 .deleteLink {
-  color: var(--error);
-  text-decoration: underline;
-  transition: color var(--durationS) var(--bezierFastoutSlowin);
+	color: var(--error);
+	text-decoration: underline;
+	transition: color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .deleteLink:hover {
-  color: color-mix(in lab, var(--error) 85%, var(--black));
+	color: color-mix(in lab, var(--error) 85%, var(--black));
 }
 
 /* ─── Delete Account ────────────────────────────────────────────────────── */
 
 .deleteAccountModal {
-  background: var(--backgroundLight);
-  border-radius: var(--spaceXS);
-  width: 90%;
-  max-width: 600px;
-  box-shadow: 0 var(--spaceXS) var(--spaceL)
-    color-mix(in lab, var(--black) 10%, transparent);
-  transition: background-color var(--durationM) var(--bezierFastoutSlowin);
-  overflow: hidden;
-  max-height: 90vh;
-  overflow-y: auto;
-  cursor: default;
+	background: var(--backgroundLight);
+	border-radius: var(--spaceXS);
+	width: 90%;
+	max-width: 600px;
+	box-shadow: 0 var(--spaceXS) var(--spaceL) color-mix(in lab, var(--black) 10%, transparent);
+	transition: background-color var(--durationM) var(--bezierFastoutSlowin);
+	overflow: hidden;
+	max-height: 90vh;
+	overflow-y: auto;
+	cursor: default;
 }
 
 .dangerModalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spaceL);
-  border-bottom: 2px solid var(--error);
-  background-color: color-mix(in lab, var(--error) 5%, transparent);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: var(--spaceL);
+	border-bottom: 2px solid var(--error);
+	background-color: color-mix(in lab, var(--error) 5%, transparent);
 }
 
 .dangerTitle {
-  font-size: var(--fontSizeBodyL);
-  margin: 0;
-  font-weight: var(--fontWeightMedium);
-  color: var(--error);
+	font-size: var(--fontSizeBodyL);
+	margin: 0;
+	font-weight: var(--fontWeightMedium);
+	color: var(--error);
 }
 
 .dangerCloseButton {
-  background: none;
-  border: none;
-  font-size: var(--fontSizeH5);
-  cursor: pointer;
-  padding: var(--spaceS);
-  color: var(--textLight);
-  transition: color var(--durationS) var(--bezierFastoutSlowin);
+	background: none;
+	border: none;
+	font-size: var(--fontSizeH5);
+	cursor: pointer;
+	padding: var(--spaceS);
+	color: var(--textLight);
+	transition: color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .dangerCloseButton:hover {
-  color: var(--error);
+	color: var(--error);
 }
 
 .modalContent {
-  padding: var(--spaceL);
+	padding: var(--spaceL);
 }
 
 .divider {
-  height: 1px;
-  background-color: color-mix(in lab, var(--text) 15%, transparent);
-  margin: var(--spaceL) 0;
+	height: 1px;
+	background-color: color-mix(in lab, var(--text) 15%, transparent);
+	margin: var(--spaceL) 0;
 }
 
 .userInfo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceM);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceM);
 }
 
 .infoRow {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceXS);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceXS);
 }
 
 .label {
-  font-weight: var(--fontWeightMedium);
-  color: var(--textTitle);
-  font-size: var(--fontSizeBodyS);
+	font-weight: var(--fontWeightMedium);
+	color: var(--textTitle);
+	font-size: var(--fontSizeBodyS);
 }
 
 .value {
-  color: var(--textBody);
-  font-size: var(--fontSizeBodyS);
-  padding: var(--spaceS);
-  background-color: color-mix(in lab, var(--text) 5%, transparent);
-  border-radius: var(--spaceXS);
-  border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
-  font-family: monospace;
-  word-break: break-all;
+	color: var(--textBody);
+	font-size: var(--fontSizeBodyS);
+	padding: var(--spaceS);
+	background-color: color-mix(in lab, var(--text) 5%, transparent);
+	border-radius: var(--spaceXS);
+	border: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+	font-family: monospace;
+	word-break: break-all;
 }
 
 .warningSection {
-  text-align: center;
+	text-align: center;
 }
 
 .warningText {
-  color: var(--error);
-  font-weight: var(--fontWeightMedium);
-  font-size: var(--fontSizeBodyM);
-  line-height: 1.5;
-  margin: 0;
-  padding: var(--spaceL);
-  background-color: color-mix(in lab, var(--error) 8%, transparent);
-  border: 1px solid color-mix(in lab, var(--error) 25%, transparent);
-  border-radius: var(--spaceXS);
+	color: var(--error);
+	font-weight: var(--fontWeightMedium);
+	font-size: var(--fontSizeBodyM);
+	line-height: 1.5;
+	margin: 0;
+	padding: var(--spaceL);
+	background-color: color-mix(in lab, var(--error) 8%, transparent);
+	border: 1px solid color-mix(in lab, var(--error) 25%, transparent);
+	border-radius: var(--spaceXS);
 }
 
 .progressSection {
-  margin: var(--spaceL) 0;
-  padding: var(--spaceM);
-  border-radius: var(--spaceXS);
-  border: 1px solid color-mix(in lab, var(--error) 25%, transparent);
-  background-color: color-mix(in lab, var(--error) 8%, transparent);
+	margin: var(--spaceL) 0;
+	padding: var(--spaceM);
+	border-radius: var(--spaceXS);
+	border: 1px solid color-mix(in lab, var(--error) 25%, transparent);
+	background-color: color-mix(in lab, var(--error) 8%, transparent);
 }
 
 .progressHeader {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--spaceM);
-  margin-bottom: var(--spaceS);
+	display: flex;
+	justify-content: space-between;
+	gap: var(--spaceM);
+	margin-bottom: var(--spaceS);
 }
 
 .progressTitle {
-  margin: 0;
-  color: var(--error);
-  font-weight: var(--fontWeightMedium);
-  font-size: var(--fontSizeBodyS);
+	margin: 0;
+	color: var(--error);
+	font-weight: var(--fontWeightMedium);
+	font-size: var(--fontSizeBodyS);
 }
 
 .progressMeta {
-  margin: 0;
-  color: var(--textBody);
-  font-size: var(--fontSizeBodyS);
+	margin: 0;
+	color: var(--textBody);
+	font-size: var(--fontSizeBodyS);
 }
 
 .progressTrack {
-  width: 100%;
-  height: var(--spaceM);
-  border-radius: var(--spaceXL);
-  overflow: hidden;
-  background-color: color-mix(in lab, var(--error) 18%, transparent);
-  border: 1px solid color-mix(in lab, var(--error) 25%, transparent);
+	width: 100%;
+	height: var(--spaceM);
+	border-radius: var(--spaceXL);
+	overflow: hidden;
+	background-color: color-mix(in lab, var(--error) 18%, transparent);
+	border: 1px solid color-mix(in lab, var(--error) 25%, transparent);
 }
 
 .progressFill {
-  height: 100%;
-  width: 0;
-  background-color: var(--error);
-  transition: width var(--durationS) var(--bezierFastoutSlowin);
+	height: 100%;
+	width: 0;
+	background-color: var(--error);
+	transition: width var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .progressStatus {
-  margin: var(--spaceS) 0 0;
-  color: var(--error);
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
-  word-break: break-word;
+	margin: var(--spaceS) 0 0;
+	color: var(--error);
+	font-size: var(--fontSizeBodyS);
+	font-weight: var(--fontWeightMedium);
+	word-break: break-word;
 }
 
 .errorMessage {
-  background-color: color-mix(in lab, var(--error) 10%, transparent);
-  color: var(--error);
-  border: 1px solid color-mix(in lab, var(--error) 25%, transparent);
-  padding: var(--spaceM);
-  border-radius: var(--spaceXS);
-  margin: var(--spaceL) 0;
-  text-align: center;
+	background-color: color-mix(in lab, var(--error) 10%, transparent);
+	color: var(--error);
+	border: 1px solid color-mix(in lab, var(--error) 25%, transparent);
+	padding: var(--spaceM);
+	border-radius: var(--spaceXS);
+	margin: var(--spaceL) 0;
+	text-align: center;
 }
 
 .errorMessage p {
-  margin: 0;
-  font-weight: var(--fontWeightMedium);
+	margin: 0;
+	font-weight: var(--fontWeightMedium);
 }
 
 .successMessage {
-  background-color: color-mix(in lab, var(--accent) 10%, transparent);
-  color: var(--accent);
-  border: 1px solid color-mix(in lab, var(--accent) 25%, transparent);
-  padding: var(--spaceM);
-  border-radius: var(--spaceXS);
-  margin: var(--spaceL) 0;
-  text-align: center;
+	background-color: color-mix(in lab, var(--accent) 10%, transparent);
+	color: var(--accent);
+	border: 1px solid color-mix(in lab, var(--accent) 25%, transparent);
+	padding: var(--spaceM);
+	border-radius: var(--spaceXS);
+	margin: var(--spaceL) 0;
+	text-align: center;
 }
 
 .successMessage p {
-  margin: 0;
-  font-weight: var(--fontWeightMedium);
+	margin: 0;
+	font-weight: var(--fontWeightMedium);
 }
 
 .successMessage p:first-child {
-  margin-bottom: var(--spaceS);
+	margin-bottom: var(--spaceS);
 }
 
 .confirmationForm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceL);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceL);
 }
 
 .deleteFormGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceS);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceS);
 }
 
 .formLabel {
-  font-weight: var(--fontWeightMedium);
-  color: var(--textTitle);
-  font-size: var(--fontSizeBodyS);
+	font-weight: var(--fontWeightMedium);
+	color: var(--textTitle);
+	font-size: var(--fontSizeBodyS);
 }
 
 .confirmationInput {
-  width: 100%;
-  padding: var(--spaceM);
-  border: 2px solid color-mix(in lab, var(--error) 30%, transparent);
-  border-radius: var(--spaceXS);
-  font-size: var(--fontSizeBodyS);
-  background: var(--backgroundLight);
-  color: var(--textBody);
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  box-sizing: border-box;
-  font-family: monospace;
+	width: 100%;
+	padding: var(--spaceM);
+	border: 2px solid color-mix(in lab, var(--error) 30%, transparent);
+	border-radius: var(--spaceXS);
+	font-size: var(--fontSizeBodyS);
+	background: var(--backgroundLight);
+	color: var(--textBody);
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	box-sizing: border-box;
+	font-family: monospace;
 }
 
 .confirmationInput:focus {
-  outline: none;
-  border-color: var(--error);
-  box-shadow: 0 0 0 2px color-mix(in lab, var(--error) 25%, transparent);
+	outline: none;
+	border-color: var(--error);
+	box-shadow: 0 0 0 2px color-mix(in lab, var(--error) 25%, transparent);
 }
 
 .confirmationInput::placeholder {
-  color: var(--textLight);
-  font-family: inherit;
+	color: var(--textLight);
+	font-family: inherit;
 }
 
 .deleteAccountButton {
-  background-color: var(--error);
-  color: var(--white);
-  border: none;
-  padding: var(--spaceL) var(--spaceXL);
-  border-radius: var(--spaceXS);
-  font-weight: var(--fontWeightMedium);
-  font-size: var(--fontSizeBodyM);
-  cursor: pointer;
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
-  margin-top: var(--spaceL);
-  width: 100%;
+	background-color: var(--error);
+	color: var(--white);
+	border: none;
+	padding: var(--spaceL) var(--spaceXL);
+	border-radius: var(--spaceXS);
+	font-weight: var(--fontWeightMedium);
+	font-size: var(--fontSizeBodyM);
+	cursor: pointer;
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
+	margin-top: var(--spaceL);
+	width: 100%;
 }
 
 .deleteAccountButton:hover:not(:disabled) {
-  background-color: color-mix(in lab, var(--error) 85%, var(--black));
+	background-color: color-mix(in lab, var(--error) 85%, var(--black));
 }
 
 .deleteAccountButton:focus:not(:disabled) {
-  outline: 2px solid var(--error);
-  outline-offset: 2px;
+	outline: 2px solid var(--error);
+	outline-offset: 2px;
 }
 
 .deleteAccountButton:disabled {
-  background-color: color-mix(in lab, var(--text) 20%, transparent);
-  color: var(--textLight);
-  cursor: not-allowed;
+	background-color: color-mix(in lab, var(--text) 20%, transparent);
+	color: var(--textLight);
+	cursor: not-allowed;
 }
 
 /* ─── Inactivity Warning ────────────────────────────────────────────────── */
 
 .inactivityOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  backdrop-filter: blur(2px);
-  cursor: default;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.8);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 9999;
+	backdrop-filter: blur(2px);
+	cursor: default;
 }
 
 .inactivityModal {
-  position: relative;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 2rem;
-  max-width: 400px;
-  width: 90%;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  border: 1px solid #e0e0e0;
-  animation: inactivitySlideIn 0.3s ease-out;
-  cursor: default;
+	position: relative;
+	background: #ffffff;
+	border-radius: 12px;
+	padding: 2rem;
+	max-width: 400px;
+	width: 90%;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+	border: 1px solid #e0e0e0;
+	animation: inactivitySlideIn 0.3s ease-out;
+	cursor: default;
 }
 
 @keyframes inactivitySlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(-20px) scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
 }
 
 .inactivityHeader {
-  text-align: center;
-  margin-bottom: 1.5rem;
+	text-align: center;
+	margin-bottom: 1.5rem;
 }
 
 .inactivityHeader h3 {
-  color: #1a1a1a;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
+	color: #1a1a1a;
+	font-size: 1.25rem;
+	font-weight: 600;
+	margin: 0;
 }
 
 .inactivityContent {
-  text-align: center;
-  margin-bottom: 2rem;
+	text-align: center;
+	margin-bottom: 2rem;
 }
 
 .inactivityContent p {
-  color: #4a4a4a;
-  margin: 0 0 1rem 0;
-  line-height: 1.5;
-  font-size: 1rem;
+	color: #4a4a4a;
+	margin: 0 0 1rem 0;
+	line-height: 1.5;
+	font-size: 1rem;
 }
 
 .countdown {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #dc3545;
-  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
-  background: rgba(220, 53, 69, 0.1);
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem 0;
-  border: 2px solid rgba(220, 53, 69, 0.2);
+	font-size: 2rem;
+	font-weight: bold;
+	color: #dc3545;
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	background: rgba(220, 53, 69, 0.1);
+	padding: 1rem;
+	border-radius: 8px;
+	margin: 1rem 0;
+	border: 2px solid rgba(220, 53, 69, 0.2);
 }
 
 .inactivityActions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
 }
 
 .extendButton,
 .signOutButton {
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  border: none;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
+	padding: 0.75rem 1.5rem;
+	border-radius: 6px;
+	border: none;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 0.9rem;
 }
 
 .extendButton {
-  background: #007bff;
-  color: white;
+	background: #007bff;
+	color: white;
 }
 
 .extendButton:hover {
-  background: #0056b3;
+	background: #0056b3;
 }
 
 .signOutButton {
-  background: transparent;
-  color: #6c757d;
-  border: 1px solid #dee2e6;
+	background: transparent;
+	color: #6c757d;
+	border: 1px solid #dee2e6;
 }
 
 .signOutButton:hover {
-  background: #f8f9fa;
-  color: #495057;
-  border-color: #adb5bd;
+	background: #f8f9fa;
+	color: #495057;
+	border-color: #adb5bd;
 }
 
 .extendButton:focus,
 .signOutButton:focus {
-  outline: 2px solid #007bff;
-  outline-offset: 2px;
+	outline: 2px solid #007bff;
+	outline-offset: 2px;
 }
 
 @media (prefers-color-scheme: dark) {
-  .inactivityOverlay {
-    background-color: rgba(0, 0, 0, 0.9);
-  }
+	.inactivityOverlay {
+		background-color: rgba(0, 0, 0, 0.9);
+	}
 
-  .inactivityModal {
-    background: #2d2d2d;
-    border-color: #404040;
-  }
+	.inactivityModal {
+		background: #2d2d2d;
+		border-color: #404040;
+	}
 
-  .inactivityHeader h3 {
-    color: #ffffff;
-  }
+	.inactivityHeader h3 {
+		color: #ffffff;
+	}
 
-  .inactivityContent p {
-    color: #cccccc;
-  }
+	.inactivityContent p {
+		color: #cccccc;
+	}
 
-  .signOutButton {
-    color: #adb5bd;
-    border-color: #6c757d;
-  }
+	.signOutButton {
+		color: #adb5bd;
+		border-color: #6c757d;
+	}
 
-  .signOutButton:hover {
-    background: #404040;
-    color: #ffffff;
-    border-color: #adb5bd;
-  }
+	.signOutButton:hover {
+		background: #404040;
+		color: #ffffff;
+		border-color: #adb5bd;
+	}
 }

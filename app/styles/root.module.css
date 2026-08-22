@@ -1,58 +1,58 @@
 @layer layout {
-  .errorContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: var(--space2XL);
-    text-align: center;
-    background: var(--background);
-  }
+	.errorContainer {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		min-height: 100vh;
+		padding: var(--space2XL);
+		text-align: center;
+		background: var(--background);
+	}
 
-  .errorTitle {
-    font-size: var(--fontSizeH0);
-    font-weight: var(--fontWeightBold);
-    color: var(--textTitle);
-    margin-bottom: var(--spaceXL);
-    line-height: 1;
-  }
+	.errorTitle {
+		font-size: var(--fontSizeH0);
+		font-weight: var(--fontWeightBold);
+		color: var(--textTitle);
+		margin-bottom: var(--spaceXL);
+		line-height: 1;
+	}
 
-  .errorMessage {
-    font-size: var(--fontSizeH4);
-    color: var(--textBody);
-    margin: var(--spaceL) 0 var(--spaceXL);
-    max-width: 600px;
-  }
+	.errorMessage {
+		font-size: var(--fontSizeH4);
+		color: var(--textBody);
+		margin: var(--spaceL) 0 var(--spaceXL);
+		max-width: 600px;
+	}
 
-  .errorLink {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    transition:
-      background-color var(--durationS) var(--bezierFastoutSlowin),
-      border-color var(--durationS) var(--bezierFastoutSlowin),
-      color var(--durationS) var(--bezierFastoutSlowin);
-  }
+	.errorLink {
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		transition:
+			background-color var(--durationS) var(--bezierFastoutSlowin),
+			border-color var(--durationS) var(--bezierFastoutSlowin),
+			color var(--durationS) var(--bezierFastoutSlowin);
+	}
 
-  .errorLink:hover {
-    background-color: color-mix(in lab, var(--primary) 82%, var(--black));
-    border-color: color-mix(in lab, var(--primary) 58%, var(--black));
-    color: var(--white);
-    text-decoration: none;
-  }
+	.errorLink:hover {
+		background-color: color-mix(in lab, var(--primary) 82%, var(--black));
+		border-color: color-mix(in lab, var(--primary) 58%, var(--black));
+		color: var(--white);
+		text-decoration: none;
+	}
 
-  .errorLink:focus-visible {
-    outline: 3px solid color-mix(in lab, var(--white) 65%, var(--primary));
-    outline-offset: 3px;
-  }
+	.errorLink:focus-visible {
+		outline: 3px solid color-mix(in lab, var(--white) 65%, var(--primary));
+		outline-offset: 3px;
+	}
 
-  @media (max-width: 768px) {
-    .errorTitle {
-      font-size: var(--fontSizeH1);
-    }
+	@media (max-width: 768px) {
+		.errorTitle {
+			font-size: var(--fontSizeH1);
+		}
 
-    .errorMessage {
-      font-size: var(--fontSizeBodyL);
-    }
-  }
+		.errorMessage {
+			font-size: var(--fontSizeBodyL);
+		}
+	}
 }

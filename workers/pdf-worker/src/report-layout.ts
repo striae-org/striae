@@ -1,18 +1,18 @@
 import type { ReportPdfOptions } from './report-types';
 
 interface ReportChromeTemplateConfig {
-  headerLeft?: string;
-  headerCenter?: string;
-  headerRight?: string;
-  headerDetailLeft?: string;
-  headerDetailLeftLabel?: string;
-  headerDetailRight?: string;
-  headerDetailRightLabel?: string;
-  footerLeft?: string;
-  footerCenter?: string;
-  footerRight?: string;
-  footerLeftImageSrc?: string;
-  includePageNumbers?: boolean;
+	headerLeft?: string;
+	headerCenter?: string;
+	headerRight?: string;
+	headerDetailLeft?: string;
+	headerDetailLeftLabel?: string;
+	headerDetailRight?: string;
+	headerDetailRightLabel?: string;
+	footerLeft?: string;
+	footerCenter?: string;
+	footerRight?: string;
+	footerLeftImageSrc?: string;
+	includePageNumbers?: boolean;
 }
 
 const HEADER_TEMPLATE_STYLES = `
@@ -152,51 +152,44 @@ const FOOTER_TEMPLATE_STYLES = `
 `;
 
 export function escapeHtml(value: string | undefined): string {
-  if (!value) {
-    return '';
-  }
+	if (!value) {
+		return '';
+	}
 
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+	return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function renderTemplateCell(value: string | undefined, className: string): string {
-  const content = value && value.trim().length > 0 ? escapeHtml(value.trim()) : '&nbsp;';
-  return `<div class="${className}">${content}</div>`;
+	const content = value && value.trim().length > 0 ? escapeHtml(value.trim()) : '&nbsp;';
+	return `<div class="${className}">${content}</div>`;
 }
 
 function renderDetailCell(label: string | undefined, value: string | undefined, className: string): string {
-  if (!value || value.trim().length === 0) {
-    return `<div class="${className}">&nbsp;</div>`;
-  }
+	if (!value || value.trim().length === 0) {
+		return `<div class="${className}">&nbsp;</div>`;
+	}
 
-  const labelContent = label && label.trim().length > 0
-    ? `<div class="report-header__detail-label">${escapeHtml(label.trim())}</div>`
-    : '';
+	const labelContent = label && label.trim().length > 0 ? `<div class="report-header__detail-label">${escapeHtml(label.trim())}</div>` : '';
 
-  return `<div class="${className}">${labelContent}<div class="report-header__detail-value">${escapeHtml(value.trim())}</div></div>`;
+	return `<div class="${className}">${labelContent}<div class="report-header__detail-value">${escapeHtml(value.trim())}</div></div>`;
 }
 
 export function buildRepeatedChromePdfOptions(config: ReportChromeTemplateConfig): Partial<ReportPdfOptions> {
-  const hasHeaderDetails = Boolean(
-    (config.headerDetailLeft && config.headerDetailLeft.trim().length > 0) ||
-    (config.headerDetailRight && config.headerDetailRight.trim().length > 0)
-  );
+	const hasHeaderDetails = Boolean(
+		(config.headerDetailLeft && config.headerDetailLeft.trim().length > 0) ||
+		(config.headerDetailRight && config.headerDetailRight.trim().length > 0),
+	);
 
-  const headerDetails = hasHeaderDetails
-    ? `
+	const headerDetails = hasHeaderDetails
+		? `
       <div class="report-header__details">
         ${renderDetailCell(config.headerDetailLeftLabel, config.headerDetailLeft, 'report-header__detail report-header__detail--left')}
         ${renderDetailCell(config.headerDetailRightLabel, config.headerDetailRight, 'report-header__detail report-header__detail--right')}
       </div>
     `
-    : '';
+		: '';
 
-  const headerTemplate = `
+	const headerTemplate = `
     ${HEADER_TEMPLATE_STYLES}
     <div class="report-header">
       <div class="report-header__content">
@@ -208,27 +201,29 @@ export function buildRepeatedChromePdfOptions(config: ReportChromeTemplateConfig
     </div>
   `;
 
-  const footerLeftContent = config.footerLeft && config.footerLeft.trim().length > 0
-    ? `<span>${escapeHtml(config.footerLeft.trim())}</span>`
-    : '<span>&nbsp;</span>';
+	const footerLeftContent =
+		config.footerLeft && config.footerLeft.trim().length > 0
+			? `<span>${escapeHtml(config.footerLeft.trim())}</span>`
+			: '<span>&nbsp;</span>';
 
-  const footerIcon = config.footerLeftImageSrc
-    ? `<img class="report-footer__icon" src="${escapeHtml(config.footerLeftImageSrc)}" alt="" />`
-    : '';
+	const footerIcon = config.footerLeftImageSrc
+		? `<img class="report-footer__icon" src="${escapeHtml(config.footerLeftImageSrc)}" alt="" />`
+		: '';
 
-  const footerRightText = config.footerRight && config.footerRight.trim().length > 0
-    ? `<span>${escapeHtml(config.footerRight.trim())}</span>`
-    : '';
+	const footerRightText =
+		config.footerRight && config.footerRight.trim().length > 0 ? `<span>${escapeHtml(config.footerRight.trim())}</span>` : '';
 
-  const footerPageCount = config.includePageNumbers === false
-    ? ''
-    : `<span class="report-footer__page-count">Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>`;
+	const footerPageCount =
+		config.includePageNumbers === false
+			? ''
+			: `<span class="report-footer__page-count">Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>`;
 
-  const footerRightContent = footerRightText && footerPageCount
-    ? `${footerRightText}<span class="report-footer__separator">|</span>${footerPageCount}`
-    : footerRightText || footerPageCount || '&nbsp;';
+	const footerRightContent =
+		footerRightText && footerPageCount
+			? `${footerRightText}<span class="report-footer__separator">|</span>${footerPageCount}`
+			: footerRightText || footerPageCount || '&nbsp;';
 
-  const footerTemplate = `
+	const footerTemplate = `
     ${FOOTER_TEMPLATE_STYLES}
     <div class="report-footer">
       <div class="report-footer__content">
@@ -239,13 +234,13 @@ export function buildRepeatedChromePdfOptions(config: ReportChromeTemplateConfig
     </div>
   `;
 
-  return {
-    displayHeaderFooter: true,
-    headerTemplate,
-    footerTemplate,
-    margin: {
-      top: hasHeaderDetails ? '1.6in' : '1.15in',
-      bottom: '0.8in',
-    },
-  };
+	return {
+		displayHeaderFooter: true,
+		headerTemplate,
+		footerTemplate,
+		margin: {
+			top: hasHeaderDetails ? '1.6in' : '1.15in',
+			bottom: '0.8in',
+		},
+	};
 }

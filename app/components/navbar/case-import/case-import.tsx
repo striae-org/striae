@@ -1,490 +1,439 @@
 import { use, useState, useEffect, useRef, useCallback } from 'react';
 import { AuthContext } from '~/contexts/auth.context';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
-import {
-  ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE,
-  IMPORT_FILE_TYPE_NOT_ALLOWED,
-  IMPORT_FILE_TYPE_NOT_SUPPORTED
-} from '~/utils/ui';
-import { 
-  listReadOnlyCases, 
-  deleteReadOnlyCase
-} from '~/components/actions/case-review';
+import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE, IMPORT_FILE_TYPE_NOT_ALLOWED, IMPORT_FILE_TYPE_NOT_SUPPORTED } from '~/utils/ui';
+import { listReadOnlyCases, deleteReadOnlyCase } from '~/components/actions/case-review';
 import { listCases } from '~/components/actions/case-manage';
+import { type ImportResult, type ConfirmationImportResult } from '~/types';
 import {
-  type ImportResult,  
-  type ConfirmationImportResult
-} from '~/types';
-import {
-  FileSelector,
-  CasePreviewSection,
-  ConfirmationPreviewSection,
-  ProgressSection,
-  ExistingCaseSection,
-  ConfirmationDialog,
-  useImportState,
-  useFilePreview,
-  useImportExecution,
-  isValidImportFile,
-  resolveImportType,
-  resetFileInput
+	FileSelector,
+	CasePreviewSection,
+	ConfirmationPreviewSection,
+	ProgressSection,
+	ExistingCaseSection,
+	ConfirmationDialog,
+	useImportState,
+	useFilePreview,
+	useImportExecution,
+	isValidImportFile,
+	resolveImportType,
+	resetFileInput,
 } from './index';
 import styles from './case-import.module.css';
 
 interface CaseImportProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onImportComplete?: (result: ImportResult | ConfirmationImportResult) => void;
+	isOpen: boolean;
+	onClose: () => void;
+	onImportComplete?: (result: ImportResult | ConfirmationImportResult) => void;
 }
 
-export const CaseImport = ({ 
-  isOpen, 
-  onClose, 
-  onImportComplete 
-}: CaseImportProps) => {
-  const { user } = use(AuthContext);
-  
-  // Use our custom hooks
-  const {
-    importState,
-    messages,
-    importProgress,
-    clearMessages,
-    setError,
-    setSuccess,
-    updateImportState,
-    resetImportState,
-    setImportProgress
-  } = useImportState();
-  const canDismissOverlay = !importState.isImporting && !importState.isClearing;
-  const {
-    requestClose,
-    overlayProps,
-    getCloseButtonProps
-  } = useOverlayDismiss({
-    isOpen,
-    onClose,
-    canDismiss: canDismissOverlay
-  });
-  
-  const [existingReadOnlyCase, setExistingReadOnlyCase] = useState<string | null>(null);
-  const [isArchivedRegularCaseImportBlocked, setIsArchivedRegularCaseImportBlocked] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Clear import selection state (used by preview hook on validation failure)
-  const clearImportSelection = useCallback(() => {
-    updateImportState({ selectedFile: null, importType: null });
-    setIsArchivedRegularCaseImportBlocked(false);
-    resetFileInput(fileInputRef);
-  }, [updateImportState]);
+export const CaseImport = ({ isOpen, onClose, onImportComplete }: CaseImportProps) => {
+	const { user } = use(AuthContext);
 
-  // File preview hook
-  const {
-    casePreview,
-    confirmationPreview,
-    loadCasePreview,
-    loadConfirmationPreview,
-    clearPreviews
-  } = useFilePreview(
-    user,
-    setError,
-    (loading) => updateImportState({ isLoadingPreview: loading }),
-    clearImportSelection
-  );
+	// Use our custom hooks
+	const {
+		importState,
+		messages,
+		importProgress,
+		clearMessages,
+		setError,
+		setSuccess,
+		updateImportState,
+		resetImportState,
+		setImportProgress,
+	} = useImportState();
+	const canDismissOverlay = !importState.isImporting && !importState.isClearing;
+	const { requestClose, overlayProps, getCloseButtonProps } = useOverlayDismiss({
+		isOpen,
+		onClose,
+		canDismiss: canDismissOverlay,
+	});
 
-  // Clear import data helper used by UI actions.
-  const clearImportData = useCallback(() => {
-    clearImportSelection();
-    clearPreviews();
-  }, [clearImportSelection, clearPreviews]);
+	const [existingReadOnlyCase, setExistingReadOnlyCase] = useState<string | null>(null);
+	const [isArchivedRegularCaseImportBlocked, setIsArchivedRegularCaseImportBlocked] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Import execution hook
-  const { executeImport } = useImportExecution({
-    user,
-    selectedFile: importState.selectedFile,
-    importType: importState.importType,
-    setImportProgress,
-    clearMessages,
-    setError,
-    setSuccess,
-    setIsImporting: (importing) => updateImportState({ isImporting: importing }),
-    onImportComplete,
-    onUpdateExistingCase: setExistingReadOnlyCase,
-    onClose
-  });
+	// Clear import selection state (used by preview hook on validation failure)
+	const clearImportSelection = useCallback(() => {
+		updateImportState({ selectedFile: null, importType: null });
+		setIsArchivedRegularCaseImportBlocked(false);
+		resetFileInput(fileInputRef);
+	}, [updateImportState]);
 
-  // Check for existing read-only cases
-  const checkForExistingReadOnlyCase = useCallback(async () => {
-    if (!user) return;
-    
-    try {
-      const readOnlyCases = await listReadOnlyCases(user);
-      setExistingReadOnlyCase(readOnlyCases.length > 0 ? readOnlyCases[0].caseNumber : null);
-    } catch (error) {
-      console.error('Error checking existing read-only cases:', error);
-    }
-  }, [user]);
+	// File preview hook
+	const { casePreview, confirmationPreview, loadCasePreview, loadConfirmationPreview, clearPreviews } = useFilePreview(
+		user,
+		setError,
+		(loading) => updateImportState({ isLoadingPreview: loading }),
+		clearImportSelection,
+	);
 
-  // Clear existing read-only case
-  const clearExistingReadOnlyCase = useCallback(async () => {
-    if (!user || !existingReadOnlyCase) return;
-    
-    updateImportState({ isClearing: true });
-    
-    try {
-      const clearedCaseName = existingReadOnlyCase;
-      const deleteSuccess = await deleteReadOnlyCase(user, clearedCaseName);
-      const remainingReadOnlyCases = await listReadOnlyCases(user);
-      const stillExists = remainingReadOnlyCases.some((caseMeta) => caseMeta.caseNumber === clearedCaseName);
+	// Clear import data helper used by UI actions.
+	const clearImportData = useCallback(() => {
+		clearImportSelection();
+		clearPreviews();
+	}, [clearImportSelection, clearPreviews]);
 
-      setExistingReadOnlyCase(remainingReadOnlyCases.length > 0 ? remainingReadOnlyCases[0].caseNumber : null);
+	// Import execution hook
+	const { executeImport } = useImportExecution({
+		user,
+		selectedFile: importState.selectedFile,
+		importType: importState.importType,
+		setImportProgress,
+		clearMessages,
+		setError,
+		setSuccess,
+		setIsImporting: (importing) => updateImportState({ isImporting: importing }),
+		onImportComplete,
+		onUpdateExistingCase: setExistingReadOnlyCase,
+		onClose,
+	});
 
-      if (!deleteSuccess || stillExists) {
-        setError(
-          `Failed to fully clear read-only case "${clearedCaseName}". ` +
-          'Please try again. If this was an archived import that overlaps a regular case, verify that all case images are accessible before retrying.'
-        );
-        return;
-      }
+	// Check for existing read-only cases
+	const checkForExistingReadOnlyCase = useCallback(async () => {
+		if (!user) return;
 
-      setSuccess(`Removed read-only case "${clearedCaseName}"`);
-      
-      onImportComplete?.({ 
-        success: true,
-        caseNumber: '',
-        isReadOnly: false,
-        filesImported: 0,
-        annotationsImported: 0,
-        errors: [],
-        warnings: []
-      });
-      
-    } catch (error) {
-      console.error('Error clearing existing read-only case:', error);
-      setError(error instanceof Error ? error.message : 'Failed to clear existing case');
-    } finally {
-      updateImportState({ isClearing: false });
-    }
-  }, [user, existingReadOnlyCase, updateImportState, setSuccess, setError, onImportComplete]);
+		try {
+			const readOnlyCases = await listReadOnlyCases(user);
+			setExistingReadOnlyCase(readOnlyCases.length > 0 ? readOnlyCases[0].caseNumber : null);
+		} catch (error) {
+			console.error('Error checking existing read-only cases:', error);
+		}
+	}, [user]);
 
-  // Handle file selection
-  const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+	// Clear existing read-only case
+	const clearExistingReadOnlyCase = useCallback(async () => {
+		if (!user || !existingReadOnlyCase) return;
 
-    // Clear any existing messages when selecting a new file
-    clearMessages();
+		updateImportState({ isClearing: true });
 
-    if (!isValidImportFile(file)) {
-      setError(IMPORT_FILE_TYPE_NOT_ALLOWED);
-      clearImportData();
-      return;
-    }
+		try {
+			const clearedCaseName = existingReadOnlyCase;
+			const deleteSuccess = await deleteReadOnlyCase(user, clearedCaseName);
+			const remainingReadOnlyCases = await listReadOnlyCases(user);
+			const stillExists = remainingReadOnlyCases.some((caseMeta) => caseMeta.caseNumber === clearedCaseName);
 
-    const importType = await resolveImportType(file);
-    if (!importType) {
-      setError(IMPORT_FILE_TYPE_NOT_SUPPORTED);
-      clearImportData();
-      return;
-    }
+			setExistingReadOnlyCase(remainingReadOnlyCases.length > 0 ? remainingReadOnlyCases[0].caseNumber : null);
 
-    updateImportState({ 
-      selectedFile: file, 
-      importType 
-    });
-    clearPreviews();
-    
-    // Load preview based on import type
-    if (importType === 'case') {
-      await loadCasePreview(file);
-    } else if (importType === 'confirmation') {
-      await loadConfirmationPreview(file);
-    }
-  }, [clearMessages, clearImportData, setError, updateImportState, clearPreviews, loadCasePreview, loadConfirmationPreview]);
+			if (!deleteSuccess || stillExists) {
+				setError(
+					`Failed to fully clear read-only case "${clearedCaseName}". ` +
+						'Please try again. If this was an archived import that overlaps a regular case, verify that all case images are accessible before retrying.',
+				);
+				return;
+			}
 
-  // Handle direct file selection (for drag and drop)
-  const handleFileSelectDirect = useCallback(async (file: File) => {
-    // Clear any existing messages when selecting a new file
-    clearMessages();
+			setSuccess(`Removed read-only case "${clearedCaseName}"`);
 
-    if (!isValidImportFile(file)) {
-      setError(IMPORT_FILE_TYPE_NOT_ALLOWED);
-      clearImportData();
-      return;
-    }
+			onImportComplete?.({
+				success: true,
+				caseNumber: '',
+				isReadOnly: false,
+				filesImported: 0,
+				annotationsImported: 0,
+				errors: [],
+				warnings: [],
+			});
+		} catch (error) {
+			console.error('Error clearing existing read-only case:', error);
+			setError(error instanceof Error ? error.message : 'Failed to clear existing case');
+		} finally {
+			updateImportState({ isClearing: false });
+		}
+	}, [user, existingReadOnlyCase, updateImportState, setSuccess, setError, onImportComplete]);
 
-    const importType = await resolveImportType(file);
-    if (!importType) {
-      setError(IMPORT_FILE_TYPE_NOT_SUPPORTED);
-      clearImportData();
-      return;
-    }
+	// Handle file selection
+	const handleFileSelect = useCallback(
+		async (event: React.ChangeEvent<HTMLInputElement>) => {
+			const file = event.target.files?.[0];
+			if (!file) return;
 
-    updateImportState({ 
-      selectedFile: file, 
-      importType 
-    });
-    clearPreviews();
-    
-    // Load preview based on import type
-    if (importType === 'case') {
-      await loadCasePreview(file);
-    } else if (importType === 'confirmation') {
-      await loadConfirmationPreview(file);
-    }
-  }, [clearMessages, clearImportData, setError, updateImportState, clearPreviews, loadCasePreview, loadConfirmationPreview]);
+			// Clear any existing messages when selecting a new file
+			clearMessages();
 
-  // Handle import action
-  const handleImport = useCallback(() => {
-    if (!user || !importState.selectedFile || !importState.importType) return;
+			if (!isValidImportFile(file)) {
+				setError(IMPORT_FILE_TYPE_NOT_ALLOWED);
+				clearImportData();
+				return;
+			}
 
-    if (importState.importType === 'case' && isArchivedRegularCaseImportBlocked) {
-      return;
-    }
-    
-    // For case imports, show confirmation dialog with preview
-    // For confirmation imports, proceed directly to import
-    if (importState.importType === 'case') {
-      if (!casePreview) return;
-      updateImportState({ showConfirmation: true });
-    } else {
-      // Direct import for confirmations
-      executeImport();
-    }
-  }, [
-    user,
-    importState.selectedFile,
-    importState.importType,
-    isArchivedRegularCaseImportBlocked,
-    casePreview,
-    updateImportState,
-    executeImport,
-  ]);
+			const importType = await resolveImportType(file);
+			if (!importType) {
+				setError(IMPORT_FILE_TYPE_NOT_SUPPORTED);
+				clearImportData();
+				return;
+			}
 
-  const handleCancelImport = useCallback(() => {
-    updateImportState({ showConfirmation: false });
-    clearImportData();
-  }, [updateImportState, clearImportData]);
+			updateImportState({
+				selectedFile: file,
+				importType,
+			});
+			clearPreviews();
 
-  const handleModalCancel = useCallback(() => {
-    clearImportData();
-    requestClose();
-  }, [clearImportData, requestClose]);
+			// Load preview based on import type
+			if (importType === 'case') {
+				await loadCasePreview(file);
+			} else if (importType === 'confirmation') {
+				await loadConfirmationPreview(file);
+			}
+		},
+		[clearMessages, clearImportData, setError, updateImportState, clearPreviews, loadCasePreview, loadConfirmationPreview],
+	);
 
-  // Effects
-  useEffect(() => {
-    if (user && isOpen) {
-      checkForExistingReadOnlyCase();
-    }
-  }, [user, isOpen, checkForExistingReadOnlyCase]);
+	// Handle direct file selection (for drag and drop)
+	const handleFileSelectDirect = useCallback(
+		async (file: File) => {
+			// Clear any existing messages when selecting a new file
+			clearMessages();
 
-  useEffect(() => {
-    let isMounted = true;
+			if (!isValidImportFile(file)) {
+				setError(IMPORT_FILE_TYPE_NOT_ALLOWED);
+				clearImportData();
+				return;
+			}
 
-    const checkArchivedRegularCaseRisk = async () => {
-      if (
-        !user ||
-        !isOpen ||
-        importState.importType !== 'case' ||
-        !casePreview?.archived ||
-        !casePreview.caseNumber
-      ) {
-        if (isMounted) {
-          setIsArchivedRegularCaseImportBlocked(false);
-        }
-        return;
-      }
+			const importType = await resolveImportType(file);
+			if (!importType) {
+				setError(IMPORT_FILE_TYPE_NOT_SUPPORTED);
+				clearImportData();
+				return;
+			}
 
-      try {
-        const regularCases = await listCases(user);
-        if (isMounted) {
-          const hasConflict = regularCases.includes(casePreview.caseNumber);
-          setIsArchivedRegularCaseImportBlocked(hasConflict);
-        }
-      } catch {
-        if (isMounted) {
-          setIsArchivedRegularCaseImportBlocked(false);
-        }
-      }
-    };
+			updateImportState({
+				selectedFile: file,
+				importType,
+			});
+			clearPreviews();
 
-    void checkArchivedRegularCaseRisk();
+			// Load preview based on import type
+			if (importType === 'case') {
+				await loadCasePreview(file);
+			} else if (importType === 'confirmation') {
+				await loadConfirmationPreview(file);
+			}
+		},
+		[clearMessages, clearImportData, setError, updateImportState, clearPreviews, loadCasePreview, loadConfirmationPreview],
+	);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [
-    user,
-    isOpen,
-    importState.importType,
-    casePreview?.archived,
-    casePreview?.caseNumber,
-  ]);
+	// Handle import action
+	const handleImport = useCallback(() => {
+		if (!user || !importState.selectedFile || !importState.importType) return;
 
-  // Reset state when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      resetImportState();
-    }
-  }, [isOpen, resetImportState]);
+		if (importState.importType === 'case' && isArchivedRegularCaseImportBlocked) {
+			return;
+		}
 
-  // Handle confirmation import
-  const handleConfirmImport = useCallback(() => {
-    if (isArchivedRegularCaseImportBlocked) {
-      return;
-    }
+		// For case imports, show confirmation dialog with preview
+		// For confirmation imports, proceed directly to import
+		if (importState.importType === 'case') {
+			if (!casePreview) return;
+			updateImportState({ showConfirmation: true });
+		} else {
+			// Direct import for confirmations
+			executeImport();
+		}
+	}, [
+		user,
+		importState.selectedFile,
+		importState.importType,
+		isArchivedRegularCaseImportBlocked,
+		casePreview,
+		updateImportState,
+		executeImport,
+	]);
 
-    executeImport();
-    updateImportState({ showConfirmation: false });
-  }, [
-    isArchivedRegularCaseImportBlocked,
-    executeImport,
-    updateImportState,
-  ]);
+	const handleCancelImport = useCallback(() => {
+		updateImportState({ showConfirmation: false });
+		clearImportData();
+	}, [updateImportState, clearImportData]);
 
-  if (!isOpen) return null;
+	const handleModalCancel = useCallback(() => {
+		clearImportData();
+		requestClose();
+	}, [clearImportData, requestClose]);
 
-  return (
-    <>
-      <div
-        className={styles.overlay}
-        aria-label="Close case import dialog"
-        {...overlayProps}
-      >
-        <div className={styles.modal}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>Import Case or Confirmations</h2>
-          <button
-            className={styles.closeButton}
-            {...getCloseButtonProps({ ariaLabel: 'Close case import dialog' })}
-          >
-            ×
-          </button>
-        </div>
-        
-        <div className={styles.content}>
-          <div className={styles.fieldGroup}>
-            
-            {/* Existing read-only case section */}
-            <ExistingCaseSection 
-              existingReadOnlyCase={existingReadOnlyCase}
-              selectedFile={importState.selectedFile}
-              onClear={clearExistingReadOnlyCase}
-              isClearing={importState.isClearing}
-              isImporting={importState.isImporting}
-            />
-            
-            {/* File selector */}
-            <FileSelector
-              selectedFile={importState.selectedFile}
-              onFileSelect={handleFileSelect}
-              onFileSelectDirect={handleFileSelectDirect}
-              isDisabled={importState.isImporting || importState.isClearing}
-              onClear={clearImportData}
-            />
+	// Effects
+	useEffect(() => {
+		if (user && isOpen) {
+			checkForExistingReadOnlyCase();
+		}
+	}, [user, isOpen, checkForExistingReadOnlyCase]);
 
-            {/* Import type indicator and preview */}
-            {importState.selectedFile && importState.importType && (
-              <div className={styles.importTypeSection}>
-                <div className={styles.importTypeIndicator}>
-                  <strong>Import Type:</strong> {importState.importType === 'case' ? 'Case Import' : 'Confirmation Import'}
-                </div>
-                
-                {importState.importType === 'case' && (
-                  <CasePreviewSection 
-                    casePreview={casePreview} 
-                    isLoadingPreview={importState.isLoadingPreview} 
-                    isArchivedRegularCaseImportBlocked={isArchivedRegularCaseImportBlocked}
-                  />
-                )}
-                
-                {importState.importType === 'confirmation' && (
-                  <ConfirmationPreviewSection 
-                    confirmationPreview={confirmationPreview} 
-                    isLoadingPreview={importState.isLoadingPreview} 
-                  />
-                )}
-              </div>
-            )}
+	useEffect(() => {
+		let isMounted = true;
 
-            {/* Import progress */}
-            <ProgressSection importProgress={importProgress} />
+		const checkArchivedRegularCaseRisk = async () => {
+			if (!user || !isOpen || importState.importType !== 'case' || !casePreview?.archived || !casePreview.caseNumber) {
+				if (isMounted) {
+					setIsArchivedRegularCaseImportBlocked(false);
+				}
+				return;
+			}
 
-            {/* Success message */}
-            {messages.success && (
-              <div className={styles.success}>
-                {messages.success}
-              </div>
-            )}
+			try {
+				const regularCases = await listCases(user);
+				if (isMounted) {
+					const hasConflict = regularCases.includes(casePreview.caseNumber);
+					setIsArchivedRegularCaseImportBlocked(hasConflict);
+				}
+			} catch {
+				if (isMounted) {
+					setIsArchivedRegularCaseImportBlocked(false);
+				}
+			}
+		};
 
-            {/* Error message */}
-            {messages.error && (
-              <div className={styles.error}>
-                {messages.error}
-              </div>
-            )}
+		void checkArchivedRegularCaseRisk();
 
-            {/* Action buttons */}
-            <div className={styles.buttonGroup}>
-              <button
-                className={styles.importButton}
-                onClick={handleImport}
-                disabled={
-                  !importState.selectedFile || 
-                  !importState.importType ||
-                  importState.isImporting || 
-                  importState.isClearing || 
-                  importState.isLoadingPreview ||
-                  (importState.importType === 'case' && isArchivedRegularCaseImportBlocked) ||
-                  (importState.importType === 'case' && (!casePreview || casePreview.hashValid === false))
-                }
-              >
-                {importState.isImporting ? 'Importing...' : 
-                 importState.importType === 'confirmation' ? 'Import Confirmations' : 'Import Case'}
-              </button>
-              
-              <button
-                className={styles.cancelButton}
-                onClick={handleModalCancel}
-                disabled={importState.isImporting || importState.isClearing}
-              >
-                Cancel
-              </button>
-            </div>
+		return () => {
+			isMounted = false;
+		};
+	}, [user, isOpen, importState.importType, casePreview?.archived, casePreview?.caseNumber]);
 
-            {/* Instructions */}
-            <div className={styles.instructions}>
-              <h3 className={styles.instructionsTitle}>Case Review Instructions:</h3>
-              <ul className={styles.instructionsList}>
-                <li>Only case ZIP packages exported from Striae are accepted</li>
-                <li>Only one case can be reviewed at a time</li>
-                <li>Imported cases are read-only and cannot be modified</li>
-                <li>Integrity and signature validation are enforced during import</li>
-                <li>Importing will automatically replace any existing review case</li>
-              </ul>
-              <br />
-              <h3 className={styles.instructionsTitle}>Confirmation Import Instructions:</h3>
-              <ul className={styles.instructionsList}>
-                <li>Confirmation imports accept only encrypted confirmation ZIP packages exported from Striae</li>
-                <li>Only one confirmation file can be imported at a time</li>
-                <li>Confirmed images will become read-only and cannot be modified</li>
-                <li>If an image has a pre-existing confirmation, it will be skipped</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+	// Reset state when modal closes
+	useEffect(() => {
+		if (!isOpen) {
+			resetImportState();
+		}
+	}, [isOpen, resetImportState]);
 
-    {/* Confirmation Dialog */}
-    <ConfirmationDialog 
-      showConfirmation={importState.showConfirmation}
-      casePreview={casePreview}
-      isArchivedRegularCaseImportBlocked={isArchivedRegularCaseImportBlocked}
-      archivedRegularCaseBlockMessage={ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE}
-      onConfirm={handleConfirmImport}
-      onCancel={handleCancelImport}
-    />
-    </>
-  );
+	// Handle confirmation import
+	const handleConfirmImport = useCallback(() => {
+		if (isArchivedRegularCaseImportBlocked) {
+			return;
+		}
+
+		executeImport();
+		updateImportState({ showConfirmation: false });
+	}, [isArchivedRegularCaseImportBlocked, executeImport, updateImportState]);
+
+	if (!isOpen) return null;
+
+	return (
+		<>
+			<div className={styles.overlay} aria-label="Close case import dialog" {...overlayProps}>
+				<div className={styles.modal}>
+					<div className={styles.header}>
+						<h2 className={styles.title}>Import Case or Confirmations</h2>
+						<button className={styles.closeButton} {...getCloseButtonProps({ ariaLabel: 'Close case import dialog' })}>
+							×
+						</button>
+					</div>
+
+					<div className={styles.content}>
+						<div className={styles.fieldGroup}>
+							{/* Existing read-only case section */}
+							<ExistingCaseSection
+								existingReadOnlyCase={existingReadOnlyCase}
+								selectedFile={importState.selectedFile}
+								onClear={clearExistingReadOnlyCase}
+								isClearing={importState.isClearing}
+								isImporting={importState.isImporting}
+							/>
+
+							{/* File selector */}
+							<FileSelector
+								selectedFile={importState.selectedFile}
+								onFileSelect={handleFileSelect}
+								onFileSelectDirect={handleFileSelectDirect}
+								isDisabled={importState.isImporting || importState.isClearing}
+								onClear={clearImportData}
+							/>
+
+							{/* Import type indicator and preview */}
+							{importState.selectedFile && importState.importType && (
+								<div className={styles.importTypeSection}>
+									<div className={styles.importTypeIndicator}>
+										<strong>Import Type:</strong> {importState.importType === 'case' ? 'Case Import' : 'Confirmation Import'}
+									</div>
+
+									{importState.importType === 'case' && (
+										<CasePreviewSection
+											casePreview={casePreview}
+											isLoadingPreview={importState.isLoadingPreview}
+											isArchivedRegularCaseImportBlocked={isArchivedRegularCaseImportBlocked}
+										/>
+									)}
+
+									{importState.importType === 'confirmation' && (
+										<ConfirmationPreviewSection confirmationPreview={confirmationPreview} isLoadingPreview={importState.isLoadingPreview} />
+									)}
+								</div>
+							)}
+
+							{/* Import progress */}
+							<ProgressSection importProgress={importProgress} />
+
+							{/* Success message */}
+							{messages.success && <div className={styles.success}>{messages.success}</div>}
+
+							{/* Error message */}
+							{messages.error && <div className={styles.error}>{messages.error}</div>}
+
+							{/* Action buttons */}
+							<div className={styles.buttonGroup}>
+								<button
+									className={styles.importButton}
+									onClick={handleImport}
+									disabled={
+										!importState.selectedFile ||
+										!importState.importType ||
+										importState.isImporting ||
+										importState.isClearing ||
+										importState.isLoadingPreview ||
+										(importState.importType === 'case' && isArchivedRegularCaseImportBlocked) ||
+										(importState.importType === 'case' && (!casePreview || casePreview.hashValid === false))
+									}
+								>
+									{importState.isImporting
+										? 'Importing...'
+										: importState.importType === 'confirmation'
+											? 'Import Confirmations'
+											: 'Import Case'}
+								</button>
+
+								<button
+									className={styles.cancelButton}
+									onClick={handleModalCancel}
+									disabled={importState.isImporting || importState.isClearing}
+								>
+									Cancel
+								</button>
+							</div>
+
+							{/* Instructions */}
+							<div className={styles.instructions}>
+								<h3 className={styles.instructionsTitle}>Case Review Instructions:</h3>
+								<ul className={styles.instructionsList}>
+									<li>Only case ZIP packages exported from Striae are accepted</li>
+									<li>Only one case can be reviewed at a time</li>
+									<li>Imported cases are read-only and cannot be modified</li>
+									<li>Integrity and signature validation are enforced during import</li>
+									<li>Importing will automatically replace any existing review case</li>
+								</ul>
+								<br />
+								<h3 className={styles.instructionsTitle}>Confirmation Import Instructions:</h3>
+								<ul className={styles.instructionsList}>
+									<li>Confirmation imports accept only encrypted confirmation ZIP packages exported from Striae</li>
+									<li>Only one confirmation file can be imported at a time</li>
+									<li>Confirmed images will become read-only and cannot be modified</li>
+									<li>If an image has a pre-existing confirmation, it will be skipped</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Confirmation Dialog */}
+			<ConfirmationDialog
+				showConfirmation={importState.showConfirmation}
+				casePreview={casePreview}
+				isArchivedRegularCaseImportBlocked={isArchivedRegularCaseImportBlocked}
+				archivedRegularCaseBlockMessage={ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE}
+				onConfirm={handleConfirmImport}
+				onCancel={handleCancelImport}
+			/>
+		</>
+	);
 };

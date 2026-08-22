@@ -1,12 +1,12 @@
 import { type AuditFileType } from '~/types';
 
 export const getAuditFileTypeFromMime = (mimeType: string): AuditFileType => {
-  if (mimeType.startsWith('image/')) return 'image-file';
-  if (mimeType === 'application/pdf') return 'pdf-document';
-  if (mimeType === 'application/json') return 'json-data';
-  return 'unknown';
+	if (mimeType.startsWith('image/')) return 'image-file';
+	if (mimeType === 'application/pdf') return 'pdf-document';
+	if (mimeType === 'application/json') return 'json-data';
+	return 'unknown';
 };
 
 export const isImageMimeType = (mimeType: string): boolean => {
-  return mimeType.startsWith('image/');
+	return mimeType.startsWith('image/');
 };

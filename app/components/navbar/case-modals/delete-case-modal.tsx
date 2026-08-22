@@ -2,77 +2,56 @@ import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import styles from './case-modal-shared.module.css';
 
 interface DeleteCaseModalProps {
-  isOpen: boolean;
-  currentCase: string;
-  isSubmitting?: boolean;
-  onClose: () => void;
-  onSubmit: () => Promise<void>;
+	isOpen: boolean;
+	currentCase: string;
+	isSubmitting?: boolean;
+	onClose: () => void;
+	onSubmit: () => Promise<void>;
 }
 
-export const DeleteCaseModal = ({
-  isOpen,
-  currentCase,
-  isSubmitting = false,
-  onClose,
-  onSubmit,
-}: DeleteCaseModalProps) => {
-  const isCloseBlocked = isSubmitting;
+export const DeleteCaseModal = ({ isOpen, currentCase, isSubmitting = false, onClose, onSubmit }: DeleteCaseModalProps) => {
+	const isCloseBlocked = isSubmitting;
 
-  const {
-    requestClose,
-    overlayProps,
-    getCloseButtonProps,
-  } = useOverlayDismiss({
-    isOpen,
-    onClose,
-    canDismiss: !isCloseBlocked,
-  });
+	const { requestClose, overlayProps, getCloseButtonProps } = useOverlayDismiss({
+		isOpen,
+		onClose,
+		canDismiss: !isCloseBlocked,
+	});
 
-  if (!isOpen) {
-    return null;
-  }
+	if (!isOpen) {
+		return null;
+	}
 
-  return (
-    <div
-      className={styles.overlay}
-      aria-label="Close delete case dialog"
-      {...overlayProps}
-    >
-      <div className={`${styles.modal} ${styles.modalLarge}`} role="dialog" aria-modal="true" aria-label="Delete Case">
-        <button {...getCloseButtonProps({ ariaLabel: 'Close delete case dialog' })}>
-          ×
-        </button>
+	return (
+		<div className={styles.overlay} aria-label="Close delete case dialog" {...overlayProps}>
+			<div className={`${styles.modal} ${styles.modalLarge}`} role="dialog" aria-modal="true" aria-label="Delete Case">
+				<button {...getCloseButtonProps({ ariaLabel: 'Close delete case dialog' })}>×</button>
 
-        <h3 className={styles.title}>Delete Case</h3>
-        <p className={styles.subtitle}>Case: {currentCase}</p>
+				<h3 className={styles.title}>Delete Case</h3>
+				<p className={styles.subtitle}>Case: {currentCase}</p>
 
-        <div className={styles.warningPanel}>
-          <p>This action permanently deletes the case and all associated files.</p>
-          <p>This operation cannot be undone.</p>
-          <p>Any image assets that are already missing will be skipped automatically.</p>
-        </div>
+				<div className={styles.warningPanel}>
+					<p>This action permanently deletes the case and all associated files.</p>
+					<p>This operation cannot be undone.</p>
+					<p>Any image assets that are already missing will be skipped automatically.</p>
+				</div>
 
-        <div className={styles.actions}>
-          <button
-            type="button"
-            className={styles.cancelButton}
-            onClick={requestClose}
-            disabled={isCloseBlocked}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className={`${styles.confirmButton} ${styles.confirmButtonDanger}`}
-            onClick={() => {
-              void onSubmit();
-            }}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Deleting...' : 'Confirm Delete'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+				<div className={styles.actions}>
+					<button type="button" className={styles.cancelButton} onClick={requestClose} disabled={isCloseBlocked}>
+						Cancel
+					</button>
+					<button
+						type="button"
+						className={`${styles.confirmButton} ${styles.confirmButtonDanger}`}
+						onClick={() => {
+							void onSubmit();
+						}}
+						disabled={isSubmitting}
+					>
+						{isSubmitting ? 'Deleting...' : 'Confirm Delete'}
+					</button>
+				</div>
+			</div>
+		</div>
+	);
 };

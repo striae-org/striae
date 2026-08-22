@@ -4,860 +4,798 @@ import type { User } from 'firebase/auth';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import { useCaseListPreferences, DEFAULT_CASES_MODAL_PREFERENCES } from '~/hooks/useCaseListPreferences';
 import {
-  type CasesModalCaseItem,
-  type CasesModalSortBy,
-  type CasesModalConfirmationFilter,
-  getCasesForModal,
+	type CasesModalCaseItem,
+	type CasesModalSortBy,
+	type CasesModalConfirmationFilter,
+	getCasesForModal,
 } from '~/utils/data/case-filters';
-import {
-  archiveCase,
-  deleteCase,
-  renameCase,
-  validateCaseNumber,
-} from '~/components/actions/case-manage';
+import { archiveCase, deleteCase, renameCase, validateCaseNumber } from '~/components/actions/case-manage';
 import { RenameCaseModal } from './rename-case-modal';
 import { ArchiveCaseModal } from './archive-case-modal';
 import { DeleteCaseModal } from './delete-case-modal';
 import {
-  ensureCaseConfirmationSummary,
-  getCaseData,
-  getConfirmationSummaryDocument,
-  getUserCases,
-  getUserReadOnlyCases,
-  type UserConfirmationSummaryDocument,
+	ensureCaseConfirmationSummary,
+	getCaseData,
+	getConfirmationSummaryDocument,
+	getUserCases,
+	getUserReadOnlyCases,
+	type UserConfirmationSummaryDocument,
 } from '~/utils/data';
 import { fetchFiles } from '~/components/actions/image-manage';
 import styles from './all-cases-modal.module.css';
 
 interface CasesModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSelectCase: (caseNum: string) => void;
-  onCurrentCaseDeleted?: () => void;
-  currentCase: string;
-  user: User;
-  confirmationSaveVersion?: number;
-  initialConfirmationSummary?: UserConfirmationSummaryDocument;
+	isOpen: boolean;
+	onClose: () => void;
+	onSelectCase: (caseNum: string) => void;
+	onCurrentCaseDeleted?: () => void;
+	currentCase: string;
+	user: User;
+	confirmationSaveVersion?: number;
+	initialConfirmationSummary?: UserConfirmationSummaryDocument;
 }
 
 interface CaseConfirmationStatus {
-  [caseNum: string]: { includeConfirmation: boolean; isConfirmed: boolean };
+	[caseNum: string]: { includeConfirmation: boolean; isConfirmed: boolean };
 }
 
 const CASES_PER_PAGE = 10;
 
 const DEFAULT_CONFIRMATION_STATUS = {
-  includeConfirmation: false,
-  isConfirmed: false,
+	includeConfirmation: false,
+	isConfirmed: false,
 };
 
 const getCaseUpdatedLabel = (createdAt: string): string => {
-  const parsed = Date.parse(createdAt);
+	const parsed = Date.parse(createdAt);
 
-  if (Number.isNaN(parsed)) {
-    return 'Date unavailable';
-  }
+	if (Number.isNaN(parsed)) {
+		return 'Date unavailable';
+	}
 
-  return new Date(parsed).toLocaleDateString();
+	return new Date(parsed).toLocaleDateString();
 };
 
 export const CasesModal = ({
-  isOpen,
-  onClose,
-  onSelectCase,
-  onCurrentCaseDeleted,
-  currentCase,
-  user,
-  confirmationSaveVersion = 0,
-  initialConfirmationSummary,
+	isOpen,
+	onClose,
+	onSelectCase,
+	onCurrentCaseDeleted,
+	currentCase,
+	user,
+	confirmationSaveVersion = 0,
+	initialConfirmationSummary,
 }: CasesModalProps) => {
-  const [allCases, setAllCases] = useState<CasesModalCaseItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRunningAction, setIsRunningAction] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
-  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; message: string } | null>(null);
-  const [error, setError] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState(0);
-  const [selectedCaseNumber, setSelectedCaseNumber] = useState<string | null>(currentCase || null);
-  const [focusedIndex, setFocusedIndex] = useState(0);
-  const caseRowRef = useRef<Array<HTMLDivElement | null>>([]);
-  const {
-    preferences,
-    setSortBy,
-    setConfirmationFilter,
-    setShowArchivedOnly,
-    resetPreferences,
-  } = useCaseListPreferences();
-  const {
-    requestClose,
-    overlayProps,
-    getCloseButtonProps
-  } = useOverlayDismiss({
-    isOpen,
-    onClose
-  });
-  const [caseConfirmationStatus, setCaseConfirmationStatus] = useState<CaseConfirmationStatus>({});
-  const caseConfirmationStatusRef = useRef<CaseConfirmationStatus>({});
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  useEffect(() => {
-    caseConfirmationStatusRef.current = caseConfirmationStatus;
-  }, [caseConfirmationStatus]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    let isCancelled = false;
-
-    const load = async () => {
-      setIsLoading(true);
-      setError('');
-
-      try {
-        const [ownedCases, readOnlyCases] = await Promise.all([
-          getUserCases(user),
-          getUserReadOnlyCases(user),
-        ]);
-
-        const ownedCaseEntries = await Promise.all(
-          ownedCases.map(async (entry) => {
-            const caseData = await getCaseData(user, entry.caseNumber).catch(() => null);
-
-            return {
-              caseNumber: entry.caseNumber,
-              createdAt: entry.createdAt,
-              archived: caseData?.archived === true,
-              isReadOnly: false,
-            } as CasesModalCaseItem;
-          })
-        );
-
-        const readOnlyEntries: CasesModalCaseItem[] = readOnlyCases.map((entry) => ({
-          caseNumber: entry.caseNumber,
-          createdAt: entry.importedAt,
-          archived: false,
-          isReadOnly: true,
-        }));
-
-        const mergedCasesMap = new Map<string, CasesModalCaseItem>();
-        [...ownedCaseEntries, ...readOnlyEntries].forEach((entry) => {
-          if (!mergedCasesMap.has(entry.caseNumber)) {
-            mergedCasesMap.set(entry.caseNumber, entry);
-          }
-        });
-
-        if (!isCancelled) {
-          setAllCases(Array.from(mergedCasesMap.values()));
-          setSelectedCaseNumber((previous) => previous ?? (currentCase || null));
-          setIsLoading(false);
-        }
-      } catch (err) {
-        console.error('Failed to load cases:', err);
-        if (!isCancelled) {
-          setError('Failed to load cases');
-          setIsLoading(false);
-        }
-      }
-    };
-
-    void load();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [isOpen, user, currentCase, refreshKey]);
-
-  const archiveScopedCases = useMemo(() => {
-    if (preferences.showArchivedOnly) {
-      return allCases.filter((entry) => entry.archived && !entry.isReadOnly);
-    }
-
-    return allCases.filter((entry) => !entry.isReadOnly);
-  }, [allCases, preferences.showArchivedOnly]);
-
-  const visibleCases = useMemo(() => {
-    const baseCases = getCasesForModal(allCases, preferences, caseConfirmationStatus);
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-
-    if (!normalizedQuery) {
-      return baseCases;
-    }
-
-    return baseCases.filter((entry) =>
-      entry.caseNumber.toLowerCase().includes(normalizedQuery)
-    );
-  }, [allCases, preferences, caseConfirmationStatus, searchQuery]);
-
-  const totalRegularCases = useMemo(
-    () => allCases.filter((entry) => !entry.isReadOnly).length,
-    [allCases]
-  );
-
-  const totalPages = Math.max(1, Math.ceil(visibleCases.length / CASES_PER_PAGE));
-  const effectiveCurrentPage = Math.min(currentPage, totalPages - 1);
-
-  const paginatedCases = visibleCases.slice(
-    effectiveCurrentPage * CASES_PER_PAGE,
-    (effectiveCurrentPage + 1) * CASES_PER_PAGE
-  );
-
-  const hasCustomPreferences =
-    preferences.sortBy !== DEFAULT_CASES_MODAL_PREFERENCES.sortBy ||
-    preferences.confirmationFilter !== DEFAULT_CASES_MODAL_PREFERENCES.confirmationFilter ||
-    preferences.showArchivedOnly !== DEFAULT_CASES_MODAL_PREFERENCES.showArchivedOnly;
-
-  const selectedCase = useMemo(
-    () => allCases.find((entry) => entry.caseNumber === selectedCaseNumber) ?? null,
-    [allCases, selectedCaseNumber]
-  );
-
-  // Derived from the memo — naturally null when the selected case no longer exists in allCases.
-  const effectiveSelectedCaseNumber = selectedCase?.caseNumber ?? null;
-
-  const canRenameSelectedCase = Boolean(
-    selectedCase && !selectedCase.archived && !selectedCase.isReadOnly
-  );
-
-  const canArchiveSelectedCase = Boolean(
-    selectedCase && !selectedCase.archived && !selectedCase.isReadOnly
-  );
-
-  const canDeleteSelectedCase = Boolean(
-    selectedCase && !selectedCase.isReadOnly
-  );
-
-  const deleteSelectedCaseTitle = !selectedCase
-    ? 'Select a case to delete.'
-    : selectedCase.isReadOnly
-      ? 'Read-only review cases cannot be deleted here. Use Clear RO Case under Case Management first.'
-      : undefined;
-
-  const effectiveFocusedIndex = paginatedCases.length === 0 ? 0 : Math.min(focusedIndex, paginatedCases.length - 1);
-
-  const hydrateCaseConfirmationStatuses = useCallback(async (
-    caseNumbers: string[],
-    forceRefresh = false
-  ) => {
-    const caseNumbersToHydrate = forceRefresh
-      ? caseNumbers
-      : caseNumbers.filter((caseNum) => !caseConfirmationStatusRef.current[caseNum]);
-
-    if (caseNumbersToHydrate.length === 0) {
-      return;
-    }
-
-    const caseStatusPromises = caseNumbersToHydrate.map(async (caseNum) => {
-      try {
-        const files = await fetchFiles(user, caseNum);
-        const caseSummary = await ensureCaseConfirmationSummary(
-          user,
-          caseNum,
-          files,
-          forceRefresh ? { forceRefresh: true } : undefined
-        );
-
-        return {
-          caseNum,
-          includeConfirmation: caseSummary.includeConfirmation,
-          isConfirmed: caseSummary.isConfirmed,
-        };
-      } catch (err) {
-        console.error(`Error fetching confirmation status for case ${caseNum}:`, err);
-        return {
-          caseNum,
-          includeConfirmation: false,
-          isConfirmed: false,
-        };
-      }
-    });
-
-    const results = await Promise.all(caseStatusPromises);
-
-    setCaseConfirmationStatus((previous) => {
-      const next = { ...previous };
-
-      results.forEach((result) => {
-        next[result.caseNum] = {
-          includeConfirmation: result.includeConfirmation,
-          isConfirmed: result.isConfirmed,
-        };
-      });
-
-      return next;
-    });
-  }, [user]);
-
-  // Fetch confirmation status only for currently visible paginated cases
-  useEffect(() => {
-    let isCancelled = false;
-
-    const loadConfirmationSummary = async () => {
-      if (!isOpen) {
-        return;
-      }
-
-      // Use the pre-fetched summary when available. Save-version changes are
-      // handled below by rebuilding every listed case from its annotations.
-      const summary =
-        initialConfirmationSummary
-          ? initialConfirmationSummary
-          : await getConfirmationSummaryDocument(user).catch((err) => {
-              console.error('Failed to load confirmation summary:', err);
-              return null;
-            });
-
-      if (!summary || isCancelled) {
-        return;
-      }
-
-      const statuses: CaseConfirmationStatus = {};
-      for (const [caseNum, entry] of Object.entries(summary.cases)) {
-        statuses[caseNum] = {
-          includeConfirmation: entry.includeConfirmation,
-          isConfirmed: entry.isConfirmed
-        };
-      }
-
-      setCaseConfirmationStatus(statuses);
-    };
-
-    loadConfirmationSummary();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [isOpen, user, initialConfirmationSummary]);
-
-  useEffect(() => {
-    if (!isOpen || confirmationSaveVersion === 0 || allCases.length === 0) {
-      return;
-    }
-
-    void hydrateCaseConfirmationStatuses(
-      allCases.map((entry) => entry.caseNumber),
-      true
-    );
-  }, [isOpen, confirmationSaveVersion, allCases, hydrateCaseConfirmationStatuses]);
-
-  useEffect(() => {
-    if (!isOpen || paginatedCases.length === 0) {
-      return;
-    }
-
-    void hydrateCaseConfirmationStatuses(paginatedCases.map((entry) => entry.caseNumber));
-  }, [isOpen, paginatedCases, hydrateCaseConfirmationStatuses]);
-
-  useEffect(() => {
-    if (!isOpen || preferences.confirmationFilter === 'all' || archiveScopedCases.length === 0) {
-      return;
-    }
-
-    void hydrateCaseConfirmationStatuses(archiveScopedCases.map((entry) => entry.caseNumber));
-  }, [
-    isOpen,
-    preferences.confirmationFilter,
-    archiveScopedCases,
-    hydrateCaseConfirmationStatuses,
-  ]);
-
-  const handleSelectCase = (caseNum: string, index: number) => {
-    setSelectedCaseNumber(caseNum);
-    setFocusedIndex(index);
-  };
-
-  const handleOpenSelectedCase = () => {
-    if (!effectiveSelectedCaseNumber) {
-      return;
-    }
-
-    onSelectCase(effectiveSelectedCaseNumber);
-    requestClose();
-  };
-
-  const handleRenameSelectedCase = async () => {
-    if (!selectedCase || !canRenameSelectedCase) {
-      setActionNotice({
-        type: 'warning',
-        message: 'Selected case cannot be renamed.',
-      });
-      return;
-    }
-
-    setActionNotice(null);
-    setIsRenameModalOpen(true);
-  };
-
-  const handleRenameSelectedCaseSubmit = async (nextCaseName: string) => {
-    if (!selectedCase) {
-      setActionNotice({
-        type: 'error',
-        message: 'No selected case to rename.',
-      });
-      return;
-    }
-
-    const nextCaseNumber = nextCaseName.trim();
-    if (!nextCaseNumber) {
-      setActionNotice({
-        type: 'error',
-        message: 'Provide a new case number.',
-      });
-      return;
-    }
-
-    if (!validateCaseNumber(nextCaseNumber)) {
-      setActionNotice({
-        type: 'error',
-        message: 'Invalid case number format.',
-      });
-      return;
-    }
-
-    setIsRunningAction(true);
-    setActionNotice(null);
-
-    try {
-      await renameCase(user, selectedCase.caseNumber, nextCaseNumber);
-      setSelectedCaseNumber(nextCaseNumber);
-      setIsRenameModalOpen(false);
-
-      if (selectedCase.caseNumber === currentCase) {
-        onSelectCase(nextCaseNumber);
-      }
-
-      setRefreshKey((k) => k + 1);
-      setActionNotice({
-        type: 'success',
-        message: `Case renamed to ${nextCaseNumber}.`,
-      });
-    } catch (renameError) {
-      setActionNotice({
-        type: 'error',
-        message: renameError instanceof Error ? renameError.message : 'Failed to rename case.',
-      });
-    } finally {
-      setIsRunningAction(false);
-    }
-  };
-
-  const handleArchiveSelectedCase = async () => {
-    if (!selectedCase || !canArchiveSelectedCase) {
-      setActionNotice({
-        type: 'warning',
-        message: 'Selected case cannot be archived.',
-      });
-      return;
-    }
-
-    setActionNotice(null);
-    setIsArchiveModalOpen(true);
-  };
-
-  const handleArchiveSelectedCaseSubmit = async (archiveReason: string) => {
-    if (!selectedCase) {
-      setActionNotice({
-        type: 'error',
-        message: 'No selected case to archive.',
-      });
-      return;
-    }
-
-    setIsRunningAction(true);
-    setActionNotice(null);
-
-    try {
-      await archiveCase(user, selectedCase.caseNumber, archiveReason);
-      setIsArchiveModalOpen(false);
-
-      if (selectedCase.caseNumber === currentCase) {
-        onSelectCase(selectedCase.caseNumber);
-      }
-
-      setRefreshKey((k) => k + 1);
-      setActionNotice({
-        type: 'success',
-        message: 'Case archived successfully.',
-      });
-    } catch (archiveError) {
-      setActionNotice({
-        type: 'error',
-        message: archiveError instanceof Error ? archiveError.message : 'Failed to archive case.',
-      });
-    } finally {
-      setIsRunningAction(false);
-    }
-  };
-
-  const handleDeleteSelectedCase = async () => {
-    if (!selectedCase || !canDeleteSelectedCase) {
-      const isReadOnlyReviewSelection = selectedCase?.isReadOnly === true;
-
-      setActionNotice({
-        type: 'warning',
-        message: isReadOnlyReviewSelection
-          ? 'Read-only review cases cannot be deleted here. Use Clear RO Case under Case Management first.'
-          : 'Selected case cannot be deleted.',
-      });
-      return;
-    }
-
-    setActionNotice(null);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleDeleteSelectedCaseSubmit = async () => {
-    if (!selectedCase) {
-      setActionNotice({
-        type: 'error',
-        message: 'No selected case to delete.',
-      });
-      return;
-    }
-
-    setIsRunningAction(true);
-    setActionNotice(null);
-
-    try {
-      const wasCurrentCase = selectedCase.caseNumber === currentCase;
-      const deleteResult = await deleteCase(user, selectedCase.caseNumber);
-      setSelectedCaseNumber(null);
-      setIsDeleteModalOpen(false);
-      setRefreshKey((k) => k + 1);
-
-      if (wasCurrentCase) {
-        onCurrentCaseDeleted?.();
-      }
-
-      if (deleteResult.missingImages.length > 0) {
-        setActionNotice({
-          type: 'warning',
-          message: `Case deleted. ${deleteResult.missingImages.length} image(s) were missing and skipped.`,
-        });
-      } else {
-        setActionNotice({
-          type: 'success',
-          message: 'Case deleted successfully.',
-        });
-      }
-    } catch (deleteError) {
-      setActionNotice({
-        type: 'error',
-        message: deleteError instanceof Error ? deleteError.message : 'Failed to delete case.',
-      });
-    } finally {
-      setIsRunningAction(false);
-    }
-  };
-
-  const handleRowKeyDown = (
-    event: React.KeyboardEvent<HTMLDivElement>,
-    caseNum: string,
-    index: number
-  ) => {
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      const nextIndex = Math.min(index + 1, paginatedCases.length - 1);
-      setFocusedIndex(nextIndex);
-      window.requestAnimationFrame(() => {
-        caseRowRef.current[nextIndex]?.focus();
-      });
-      return;
-    }
-
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      const nextIndex = Math.max(index - 1, 0);
-      setFocusedIndex(nextIndex);
-      window.requestAnimationFrame(() => {
-        caseRowRef.current[nextIndex]?.focus();
-      });
-      return;
-    }
-
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleSelectCase(caseNum, index);
-      return;
-    }
-
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      requestClose();
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div
-      className={styles.modalOverlay}
-      aria-label="Close cases dialog"
-      {...overlayProps}
-    >
-      <div className={styles.modal}>
-        <header className={styles.modalHeader}>
-          <h2>All Cases</h2>
-          <button className={styles.closeButton} {...getCloseButtonProps({ ariaLabel: 'Close cases dialog' })}>&times;</button>
-        </header>
-
-        <div className={styles.modalContent}>
-          {isLoading ? (
-            <p className={styles.loading}>Loading cases...</p>
-          ) : error ? (
-            <p className={styles.error}>{error}</p>
-          ) : allCases.length === 0 ? (
-            <p className={styles.emptyState}>No cases found</p>
-          ) : (
-            <>
-              <section className={styles.controlsSection} aria-label="Case list controls">
-                <div className={styles.controlGroup}>
-                  <label htmlFor="cases-sort">Sort</label>
-                  <select
-                    id="cases-sort"
-                    value={preferences.sortBy}
-                    onChange={(event) => setSortBy(event.target.value as CasesModalSortBy)}
-                  >
-                    <option value="recent">Most Recent</option>
-                    <option value="alphabetical">Numerical/Alphabetical</option>
-                  </select>
-                </div>
-
-                <div className={styles.controlGroup}>
-                  <label htmlFor="cases-confirmation-filter">Confirmation Status</label>
-                  <select
-                    id="cases-confirmation-filter"
-                    value={preferences.confirmationFilter}
-                    onChange={(event) =>
-                      setConfirmationFilter(event.target.value as CasesModalConfirmationFilter)
-                    }
-                  >
-                    <option value="all">All Cases</option>
-                    <option value="pending">Pending Confirmation</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="none-requested">None Requested</option>
-                  </select>
-                </div>
-
-                <label className={styles.archiveToggle}>
-                  <input
-                    type="checkbox"
-                    checked={preferences.showArchivedOnly}
-                    onChange={(event) => setShowArchivedOnly(event.target.checked)}
-                  />
-                  Archived only
-                </label>
-
-                <button
-                  type="button"
-                  className={styles.resetButton}
-                  onClick={resetPreferences}
-                  disabled={!hasCustomPreferences && searchQuery.trim().length === 0}
-                >
-                  Reset
-                </button>
-              </section>
-
-              <div className={styles.searchSection}>
-                <label htmlFor="case-search">Search case number</label>
-                <input
-                  id="case-search"
-                  type="text"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Type to filter case numbers"
-                  className={styles.searchInput}
-                />
-              </div>
-
-              <p className={styles.caseCount}>
-                {visibleCases.length} shown of {totalRegularCases} total cases
-              </p>
-
-              {actionNotice && (
-                <p
-                  className={`${styles.actionNotice} ${
-                    actionNotice.type === 'error'
-                      ? styles.actionNoticeError
-                      : actionNotice.type === 'warning'
-                        ? styles.actionNoticeWarning
-                        : styles.actionNoticeSuccess
-                  }`}
-                >
-                  {actionNotice.message}
-                </p>
-              )}
-
-              {visibleCases.length === 0 ? (
-                <p className={styles.emptyState}>No cases match your filters</p>
-              ) : (
-                <ul className={styles.casesList} role="listbox" aria-label="Cases list">
-                  {paginatedCases.map((caseEntry, index) => {
-                    const caseNum = caseEntry.caseNumber;
-                    const confirmationStatus = caseConfirmationStatus[caseNum] || DEFAULT_CONFIRMATION_STATUS;
-                    const isSelected = effectiveSelectedCaseNumber === caseNum;
-                    const confirmationLabel = confirmationStatus.includeConfirmation
-                      ? confirmationStatus.isConfirmed
-                        ? 'Confirmed'
-                        : 'Pending'
-                      : 'None Requested';
-
-                    let confirmationClass = '';
-
-                    if (confirmationStatus.includeConfirmation) {
-                      confirmationClass = confirmationStatus.isConfirmed
-                        ? styles.caseItemConfirmed
-                        : styles.caseItemNotConfirmed;
-                    }
-
-                    return (
-                      <li key={caseNum}>
-                        <div
-                          ref={(node) => {
-                            caseRowRef.current[index] = node;
-                          }}
-                          role="option"
-                          aria-selected={isSelected}
-                          tabIndex={effectiveFocusedIndex === index ? 0 : -1}
-                          className={`${styles.caseItem} ${isSelected ? styles.active : ''}`}
-                          onClick={() => handleSelectCase(caseNum, index)}
-                          onFocus={() => setFocusedIndex(index)}
-                          onKeyDown={(event) => handleRowKeyDown(event, caseNum, index)}
-                        >
-                          <div className={styles.caseDetails}>
-                            <input
-                              type="text"
-                              readOnly
-                              value={caseNum}
-                              className={styles.caseNumberInput}
-                              aria-label={`Case number ${caseNum}`}
-                              onClick={(event) => event.stopPropagation()}
-                            />
-                            <span className={styles.caseMetaText}>
-                              Created: {getCaseUpdatedLabel(caseEntry.createdAt)}
-                            </span>
-                          </div>
-
-                          <div className={styles.badgeColumn}>
-                            {caseEntry.archived && (
-                              <span
-                                className={`${styles.confirmationBadge} ${styles.archivedBadge}`}
-                                aria-label="Archived case"
-                              >
-                                Archived
-                              </span>
-                            )}
-                            <span
-                              className={`${styles.confirmationBadge} ${confirmationClass}`}
-                              aria-label={`Confirmation status: ${confirmationLabel}`}
-                            >
-                              {confirmationLabel}
-                            </span>
-                          </div>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </>
-          )}
-        </div>
-
-        <div className={styles.footerActions}>
-          <div className={styles.maintenanceActions}>
-            <button
-              type="button"
-              className={styles.secondaryActionButton}
-              onClick={() => {
-                setSearchQuery('');
-                resetPreferences();
-              }}
-              disabled={isRunningAction}
-            >
-              Clear Filters
-            </button>
-            <button
-              type="button"
-              className={`${styles.secondaryActionButton} ${styles.renameActionButton}`}
-              onClick={handleRenameSelectedCase}
-              disabled={!canRenameSelectedCase || isRunningAction}
-            >
-              Rename Selected
-            </button>
-            <button
-              type="button"
-              className={`${styles.secondaryActionButton} ${styles.archiveActionButton}`}
-              onClick={handleArchiveSelectedCase}
-              disabled={!canArchiveSelectedCase || isRunningAction}
-            >
-              Archive Selected
-            </button>
-            <button
-              type="button"
-              className={`${styles.secondaryActionButton} ${styles.deleteActionButton}`}
-              onClick={handleDeleteSelectedCase}
-              disabled={!canDeleteSelectedCase || isRunningAction}
-              title={deleteSelectedCaseTitle}
-            >
-              Delete Selected
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className={styles.openSelectedButton}
-            onClick={handleOpenSelectedCase}
-            disabled={!effectiveSelectedCaseNumber || isRunningAction}
-          >
-            {isRunningAction ? 'Working...' : 'Open Selected Case'}
-          </button>
-
-          {totalPages > 1 && (
-            <div className={styles.pagination}>
-              <button
-                onClick={() => setCurrentPage(p => p - 1)}
-                disabled={effectiveCurrentPage === 0}
-              >
-                Previous
-              </button>
-              <span>{effectiveCurrentPage + 1} of {totalPages} ({visibleCases.length} filtered cases)</span>
-              <button
-                onClick={() => setCurrentPage(p => p + 1)}
-                disabled={effectiveCurrentPage === totalPages - 1}
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <RenameCaseModal
-        isOpen={isRenameModalOpen}
-        currentCase={selectedCase?.caseNumber || ''}
-        isSubmitting={isRunningAction}
-        onClose={() => setIsRenameModalOpen(false)}
-        onSubmit={handleRenameSelectedCaseSubmit}
-      />
-
-      <ArchiveCaseModal
-        isOpen={isArchiveModalOpen}
-        currentCase={selectedCase?.caseNumber || ''}
-        isSubmitting={isRunningAction}
-        onClose={() => setIsArchiveModalOpen(false)}
-        onSubmit={handleArchiveSelectedCaseSubmit}
-      />
-
-      <DeleteCaseModal
-        isOpen={isDeleteModalOpen}
-        currentCase={selectedCase?.caseNumber || ''}
-        isSubmitting={isRunningAction}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onSubmit={handleDeleteSelectedCaseSubmit}
-      />
-    </div>
-  );
+	const [allCases, setAllCases] = useState<CasesModalCaseItem[]>([]);
+	const [isLoading, setIsLoading] = useState(false);
+	const [isRunningAction, setIsRunningAction] = useState(false);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+	const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; message: string } | null>(null);
+	const [error, setError] = useState<string>('');
+	const [currentPage, setCurrentPage] = useState(0);
+	const [selectedCaseNumber, setSelectedCaseNumber] = useState<string | null>(currentCase || null);
+	const [focusedIndex, setFocusedIndex] = useState(0);
+	const caseRowRef = useRef<Array<HTMLDivElement | null>>([]);
+	const { preferences, setSortBy, setConfirmationFilter, setShowArchivedOnly, resetPreferences } = useCaseListPreferences();
+	const { requestClose, overlayProps, getCloseButtonProps } = useOverlayDismiss({
+		isOpen,
+		onClose,
+	});
+	const [caseConfirmationStatus, setCaseConfirmationStatus] = useState<CaseConfirmationStatus>({});
+	const caseConfirmationStatusRef = useRef<CaseConfirmationStatus>({});
+	const [refreshKey, setRefreshKey] = useState(0);
+
+	useEffect(() => {
+		caseConfirmationStatusRef.current = caseConfirmationStatus;
+	}, [caseConfirmationStatus]);
+
+	useEffect(() => {
+		if (!isOpen) return;
+
+		let isCancelled = false;
+
+		const load = async () => {
+			setIsLoading(true);
+			setError('');
+
+			try {
+				const [ownedCases, readOnlyCases] = await Promise.all([getUserCases(user), getUserReadOnlyCases(user)]);
+
+				const ownedCaseEntries = await Promise.all(
+					ownedCases.map(async (entry) => {
+						const caseData = await getCaseData(user, entry.caseNumber).catch(() => null);
+
+						return {
+							caseNumber: entry.caseNumber,
+							createdAt: entry.createdAt,
+							archived: caseData?.archived === true,
+							isReadOnly: false,
+						} as CasesModalCaseItem;
+					}),
+				);
+
+				const readOnlyEntries: CasesModalCaseItem[] = readOnlyCases.map((entry) => ({
+					caseNumber: entry.caseNumber,
+					createdAt: entry.importedAt,
+					archived: false,
+					isReadOnly: true,
+				}));
+
+				const mergedCasesMap = new Map<string, CasesModalCaseItem>();
+				[...ownedCaseEntries, ...readOnlyEntries].forEach((entry) => {
+					if (!mergedCasesMap.has(entry.caseNumber)) {
+						mergedCasesMap.set(entry.caseNumber, entry);
+					}
+				});
+
+				if (!isCancelled) {
+					setAllCases(Array.from(mergedCasesMap.values()));
+					setSelectedCaseNumber((previous) => previous ?? (currentCase || null));
+					setIsLoading(false);
+				}
+			} catch (err) {
+				console.error('Failed to load cases:', err);
+				if (!isCancelled) {
+					setError('Failed to load cases');
+					setIsLoading(false);
+				}
+			}
+		};
+
+		void load();
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [isOpen, user, currentCase, refreshKey]);
+
+	const archiveScopedCases = useMemo(() => {
+		if (preferences.showArchivedOnly) {
+			return allCases.filter((entry) => entry.archived && !entry.isReadOnly);
+		}
+
+		return allCases.filter((entry) => !entry.isReadOnly);
+	}, [allCases, preferences.showArchivedOnly]);
+
+	const visibleCases = useMemo(() => {
+		const baseCases = getCasesForModal(allCases, preferences, caseConfirmationStatus);
+		const normalizedQuery = searchQuery.trim().toLowerCase();
+
+		if (!normalizedQuery) {
+			return baseCases;
+		}
+
+		return baseCases.filter((entry) => entry.caseNumber.toLowerCase().includes(normalizedQuery));
+	}, [allCases, preferences, caseConfirmationStatus, searchQuery]);
+
+	const totalRegularCases = useMemo(() => allCases.filter((entry) => !entry.isReadOnly).length, [allCases]);
+
+	const totalPages = Math.max(1, Math.ceil(visibleCases.length / CASES_PER_PAGE));
+	const effectiveCurrentPage = Math.min(currentPage, totalPages - 1);
+
+	const paginatedCases = visibleCases.slice(effectiveCurrentPage * CASES_PER_PAGE, (effectiveCurrentPage + 1) * CASES_PER_PAGE);
+
+	const hasCustomPreferences =
+		preferences.sortBy !== DEFAULT_CASES_MODAL_PREFERENCES.sortBy ||
+		preferences.confirmationFilter !== DEFAULT_CASES_MODAL_PREFERENCES.confirmationFilter ||
+		preferences.showArchivedOnly !== DEFAULT_CASES_MODAL_PREFERENCES.showArchivedOnly;
+
+	const selectedCase = useMemo(
+		() => allCases.find((entry) => entry.caseNumber === selectedCaseNumber) ?? null,
+		[allCases, selectedCaseNumber],
+	);
+
+	// Derived from the memo — naturally null when the selected case no longer exists in allCases.
+	const effectiveSelectedCaseNumber = selectedCase?.caseNumber ?? null;
+
+	const canRenameSelectedCase = Boolean(selectedCase && !selectedCase.archived && !selectedCase.isReadOnly);
+
+	const canArchiveSelectedCase = Boolean(selectedCase && !selectedCase.archived && !selectedCase.isReadOnly);
+
+	const canDeleteSelectedCase = Boolean(selectedCase && !selectedCase.isReadOnly);
+
+	const deleteSelectedCaseTitle = !selectedCase
+		? 'Select a case to delete.'
+		: selectedCase.isReadOnly
+			? 'Read-only review cases cannot be deleted here. Use Clear RO Case under Case Management first.'
+			: undefined;
+
+	const effectiveFocusedIndex = paginatedCases.length === 0 ? 0 : Math.min(focusedIndex, paginatedCases.length - 1);
+
+	const hydrateCaseConfirmationStatuses = useCallback(
+		async (caseNumbers: string[], forceRefresh = false) => {
+			const caseNumbersToHydrate = forceRefresh
+				? caseNumbers
+				: caseNumbers.filter((caseNum) => !caseConfirmationStatusRef.current[caseNum]);
+
+			if (caseNumbersToHydrate.length === 0) {
+				return;
+			}
+
+			const caseStatusPromises = caseNumbersToHydrate.map(async (caseNum) => {
+				try {
+					const files = await fetchFiles(user, caseNum);
+					const caseSummary = await ensureCaseConfirmationSummary(user, caseNum, files, forceRefresh ? { forceRefresh: true } : undefined);
+
+					return {
+						caseNum,
+						includeConfirmation: caseSummary.includeConfirmation,
+						isConfirmed: caseSummary.isConfirmed,
+					};
+				} catch (err) {
+					console.error(`Error fetching confirmation status for case ${caseNum}:`, err);
+					return {
+						caseNum,
+						includeConfirmation: false,
+						isConfirmed: false,
+					};
+				}
+			});
+
+			const results = await Promise.all(caseStatusPromises);
+
+			setCaseConfirmationStatus((previous) => {
+				const next = { ...previous };
+
+				results.forEach((result) => {
+					next[result.caseNum] = {
+						includeConfirmation: result.includeConfirmation,
+						isConfirmed: result.isConfirmed,
+					};
+				});
+
+				return next;
+			});
+		},
+		[user],
+	);
+
+	// Fetch confirmation status only for currently visible paginated cases
+	useEffect(() => {
+		let isCancelled = false;
+
+		const loadConfirmationSummary = async () => {
+			if (!isOpen) {
+				return;
+			}
+
+			// Use the pre-fetched summary when available. Save-version changes are
+			// handled below by rebuilding every listed case from its annotations.
+			const summary = initialConfirmationSummary
+				? initialConfirmationSummary
+				: await getConfirmationSummaryDocument(user).catch((err) => {
+						console.error('Failed to load confirmation summary:', err);
+						return null;
+					});
+
+			if (!summary || isCancelled) {
+				return;
+			}
+
+			const statuses: CaseConfirmationStatus = {};
+			for (const [caseNum, entry] of Object.entries(summary.cases)) {
+				statuses[caseNum] = {
+					includeConfirmation: entry.includeConfirmation,
+					isConfirmed: entry.isConfirmed,
+				};
+			}
+
+			setCaseConfirmationStatus(statuses);
+		};
+
+		loadConfirmationSummary();
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [isOpen, user, initialConfirmationSummary]);
+
+	useEffect(() => {
+		if (!isOpen || confirmationSaveVersion === 0 || allCases.length === 0) {
+			return;
+		}
+
+		void hydrateCaseConfirmationStatuses(
+			allCases.map((entry) => entry.caseNumber),
+			true,
+		);
+	}, [isOpen, confirmationSaveVersion, allCases, hydrateCaseConfirmationStatuses]);
+
+	useEffect(() => {
+		if (!isOpen || paginatedCases.length === 0) {
+			return;
+		}
+
+		void hydrateCaseConfirmationStatuses(paginatedCases.map((entry) => entry.caseNumber));
+	}, [isOpen, paginatedCases, hydrateCaseConfirmationStatuses]);
+
+	useEffect(() => {
+		if (!isOpen || preferences.confirmationFilter === 'all' || archiveScopedCases.length === 0) {
+			return;
+		}
+
+		void hydrateCaseConfirmationStatuses(archiveScopedCases.map((entry) => entry.caseNumber));
+	}, [isOpen, preferences.confirmationFilter, archiveScopedCases, hydrateCaseConfirmationStatuses]);
+
+	const handleSelectCase = (caseNum: string, index: number) => {
+		setSelectedCaseNumber(caseNum);
+		setFocusedIndex(index);
+	};
+
+	const handleOpenSelectedCase = () => {
+		if (!effectiveSelectedCaseNumber) {
+			return;
+		}
+
+		onSelectCase(effectiveSelectedCaseNumber);
+		requestClose();
+	};
+
+	const handleRenameSelectedCase = async () => {
+		if (!selectedCase || !canRenameSelectedCase) {
+			setActionNotice({
+				type: 'warning',
+				message: 'Selected case cannot be renamed.',
+			});
+			return;
+		}
+
+		setActionNotice(null);
+		setIsRenameModalOpen(true);
+	};
+
+	const handleRenameSelectedCaseSubmit = async (nextCaseName: string) => {
+		if (!selectedCase) {
+			setActionNotice({
+				type: 'error',
+				message: 'No selected case to rename.',
+			});
+			return;
+		}
+
+		const nextCaseNumber = nextCaseName.trim();
+		if (!nextCaseNumber) {
+			setActionNotice({
+				type: 'error',
+				message: 'Provide a new case number.',
+			});
+			return;
+		}
+
+		if (!validateCaseNumber(nextCaseNumber)) {
+			setActionNotice({
+				type: 'error',
+				message: 'Invalid case number format.',
+			});
+			return;
+		}
+
+		setIsRunningAction(true);
+		setActionNotice(null);
+
+		try {
+			await renameCase(user, selectedCase.caseNumber, nextCaseNumber);
+			setSelectedCaseNumber(nextCaseNumber);
+			setIsRenameModalOpen(false);
+
+			if (selectedCase.caseNumber === currentCase) {
+				onSelectCase(nextCaseNumber);
+			}
+
+			setRefreshKey((k) => k + 1);
+			setActionNotice({
+				type: 'success',
+				message: `Case renamed to ${nextCaseNumber}.`,
+			});
+		} catch (renameError) {
+			setActionNotice({
+				type: 'error',
+				message: renameError instanceof Error ? renameError.message : 'Failed to rename case.',
+			});
+		} finally {
+			setIsRunningAction(false);
+		}
+	};
+
+	const handleArchiveSelectedCase = async () => {
+		if (!selectedCase || !canArchiveSelectedCase) {
+			setActionNotice({
+				type: 'warning',
+				message: 'Selected case cannot be archived.',
+			});
+			return;
+		}
+
+		setActionNotice(null);
+		setIsArchiveModalOpen(true);
+	};
+
+	const handleArchiveSelectedCaseSubmit = async (archiveReason: string) => {
+		if (!selectedCase) {
+			setActionNotice({
+				type: 'error',
+				message: 'No selected case to archive.',
+			});
+			return;
+		}
+
+		setIsRunningAction(true);
+		setActionNotice(null);
+
+		try {
+			await archiveCase(user, selectedCase.caseNumber, archiveReason);
+			setIsArchiveModalOpen(false);
+
+			if (selectedCase.caseNumber === currentCase) {
+				onSelectCase(selectedCase.caseNumber);
+			}
+
+			setRefreshKey((k) => k + 1);
+			setActionNotice({
+				type: 'success',
+				message: 'Case archived successfully.',
+			});
+		} catch (archiveError) {
+			setActionNotice({
+				type: 'error',
+				message: archiveError instanceof Error ? archiveError.message : 'Failed to archive case.',
+			});
+		} finally {
+			setIsRunningAction(false);
+		}
+	};
+
+	const handleDeleteSelectedCase = async () => {
+		if (!selectedCase || !canDeleteSelectedCase) {
+			const isReadOnlyReviewSelection = selectedCase?.isReadOnly === true;
+
+			setActionNotice({
+				type: 'warning',
+				message: isReadOnlyReviewSelection
+					? 'Read-only review cases cannot be deleted here. Use Clear RO Case under Case Management first.'
+					: 'Selected case cannot be deleted.',
+			});
+			return;
+		}
+
+		setActionNotice(null);
+		setIsDeleteModalOpen(true);
+	};
+
+	const handleDeleteSelectedCaseSubmit = async () => {
+		if (!selectedCase) {
+			setActionNotice({
+				type: 'error',
+				message: 'No selected case to delete.',
+			});
+			return;
+		}
+
+		setIsRunningAction(true);
+		setActionNotice(null);
+
+		try {
+			const wasCurrentCase = selectedCase.caseNumber === currentCase;
+			const deleteResult = await deleteCase(user, selectedCase.caseNumber);
+			setSelectedCaseNumber(null);
+			setIsDeleteModalOpen(false);
+			setRefreshKey((k) => k + 1);
+
+			if (wasCurrentCase) {
+				onCurrentCaseDeleted?.();
+			}
+
+			if (deleteResult.missingImages.length > 0) {
+				setActionNotice({
+					type: 'warning',
+					message: `Case deleted. ${deleteResult.missingImages.length} image(s) were missing and skipped.`,
+				});
+			} else {
+				setActionNotice({
+					type: 'success',
+					message: 'Case deleted successfully.',
+				});
+			}
+		} catch (deleteError) {
+			setActionNotice({
+				type: 'error',
+				message: deleteError instanceof Error ? deleteError.message : 'Failed to delete case.',
+			});
+		} finally {
+			setIsRunningAction(false);
+		}
+	};
+
+	const handleRowKeyDown = (event: React.KeyboardEvent<HTMLDivElement>, caseNum: string, index: number) => {
+		if (event.key === 'ArrowDown') {
+			event.preventDefault();
+			const nextIndex = Math.min(index + 1, paginatedCases.length - 1);
+			setFocusedIndex(nextIndex);
+			window.requestAnimationFrame(() => {
+				caseRowRef.current[nextIndex]?.focus();
+			});
+			return;
+		}
+
+		if (event.key === 'ArrowUp') {
+			event.preventDefault();
+			const nextIndex = Math.max(index - 1, 0);
+			setFocusedIndex(nextIndex);
+			window.requestAnimationFrame(() => {
+				caseRowRef.current[nextIndex]?.focus();
+			});
+			return;
+		}
+
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			handleSelectCase(caseNum, index);
+			return;
+		}
+
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			requestClose();
+		}
+	};
+
+	if (!isOpen) return null;
+
+	return (
+		<div className={styles.modalOverlay} aria-label="Close cases dialog" {...overlayProps}>
+			<div className={styles.modal}>
+				<header className={styles.modalHeader}>
+					<h2>All Cases</h2>
+					<button className={styles.closeButton} {...getCloseButtonProps({ ariaLabel: 'Close cases dialog' })}>
+						&times;
+					</button>
+				</header>
+
+				<div className={styles.modalContent}>
+					{isLoading ? (
+						<p className={styles.loading}>Loading cases...</p>
+					) : error ? (
+						<p className={styles.error}>{error}</p>
+					) : allCases.length === 0 ? (
+						<p className={styles.emptyState}>No cases found</p>
+					) : (
+						<>
+							<section className={styles.controlsSection} aria-label="Case list controls">
+								<div className={styles.controlGroup}>
+									<label htmlFor="cases-sort">Sort</label>
+									<select
+										id="cases-sort"
+										value={preferences.sortBy}
+										onChange={(event) => setSortBy(event.target.value as CasesModalSortBy)}
+									>
+										<option value="recent">Most Recent</option>
+										<option value="alphabetical">Numerical/Alphabetical</option>
+									</select>
+								</div>
+
+								<div className={styles.controlGroup}>
+									<label htmlFor="cases-confirmation-filter">Confirmation Status</label>
+									<select
+										id="cases-confirmation-filter"
+										value={preferences.confirmationFilter}
+										onChange={(event) => setConfirmationFilter(event.target.value as CasesModalConfirmationFilter)}
+									>
+										<option value="all">All Cases</option>
+										<option value="pending">Pending Confirmation</option>
+										<option value="confirmed">Confirmed</option>
+										<option value="none-requested">None Requested</option>
+									</select>
+								</div>
+
+								<label className={styles.archiveToggle}>
+									<input
+										type="checkbox"
+										checked={preferences.showArchivedOnly}
+										onChange={(event) => setShowArchivedOnly(event.target.checked)}
+									/>
+									Archived only
+								</label>
+
+								<button
+									type="button"
+									className={styles.resetButton}
+									onClick={resetPreferences}
+									disabled={!hasCustomPreferences && searchQuery.trim().length === 0}
+								>
+									Reset
+								</button>
+							</section>
+
+							<div className={styles.searchSection}>
+								<label htmlFor="case-search">Search case number</label>
+								<input
+									id="case-search"
+									type="text"
+									value={searchQuery}
+									onChange={(event) => setSearchQuery(event.target.value)}
+									placeholder="Type to filter case numbers"
+									className={styles.searchInput}
+								/>
+							</div>
+
+							<p className={styles.caseCount}>
+								{visibleCases.length} shown of {totalRegularCases} total cases
+							</p>
+
+							{actionNotice && (
+								<p
+									className={`${styles.actionNotice} ${
+										actionNotice.type === 'error'
+											? styles.actionNoticeError
+											: actionNotice.type === 'warning'
+												? styles.actionNoticeWarning
+												: styles.actionNoticeSuccess
+									}`}
+								>
+									{actionNotice.message}
+								</p>
+							)}
+
+							{visibleCases.length === 0 ? (
+								<p className={styles.emptyState}>No cases match your filters</p>
+							) : (
+								<ul className={styles.casesList} role="listbox" aria-label="Cases list">
+									{paginatedCases.map((caseEntry, index) => {
+										const caseNum = caseEntry.caseNumber;
+										const confirmationStatus = caseConfirmationStatus[caseNum] || DEFAULT_CONFIRMATION_STATUS;
+										const isSelected = effectiveSelectedCaseNumber === caseNum;
+										const confirmationLabel = confirmationStatus.includeConfirmation
+											? confirmationStatus.isConfirmed
+												? 'Confirmed'
+												: 'Pending'
+											: 'None Requested';
+
+										let confirmationClass = '';
+
+										if (confirmationStatus.includeConfirmation) {
+											confirmationClass = confirmationStatus.isConfirmed ? styles.caseItemConfirmed : styles.caseItemNotConfirmed;
+										}
+
+										return (
+											<li key={caseNum}>
+												<div
+													ref={(node) => {
+														caseRowRef.current[index] = node;
+													}}
+													role="option"
+													aria-selected={isSelected}
+													tabIndex={effectiveFocusedIndex === index ? 0 : -1}
+													className={`${styles.caseItem} ${isSelected ? styles.active : ''}`}
+													onClick={() => handleSelectCase(caseNum, index)}
+													onFocus={() => setFocusedIndex(index)}
+													onKeyDown={(event) => handleRowKeyDown(event, caseNum, index)}
+												>
+													<div className={styles.caseDetails}>
+														<input
+															type="text"
+															readOnly
+															value={caseNum}
+															className={styles.caseNumberInput}
+															aria-label={`Case number ${caseNum}`}
+															onClick={(event) => event.stopPropagation()}
+														/>
+														<span className={styles.caseMetaText}>Created: {getCaseUpdatedLabel(caseEntry.createdAt)}</span>
+													</div>
+
+													<div className={styles.badgeColumn}>
+														{caseEntry.archived && (
+															<span className={`${styles.confirmationBadge} ${styles.archivedBadge}`} aria-label="Archived case">
+																Archived
+															</span>
+														)}
+														<span
+															className={`${styles.confirmationBadge} ${confirmationClass}`}
+															aria-label={`Confirmation status: ${confirmationLabel}`}
+														>
+															{confirmationLabel}
+														</span>
+													</div>
+												</div>
+											</li>
+										);
+									})}
+								</ul>
+							)}
+						</>
+					)}
+				</div>
+
+				<div className={styles.footerActions}>
+					<div className={styles.maintenanceActions}>
+						<button
+							type="button"
+							className={styles.secondaryActionButton}
+							onClick={() => {
+								setSearchQuery('');
+								resetPreferences();
+							}}
+							disabled={isRunningAction}
+						>
+							Clear Filters
+						</button>
+						<button
+							type="button"
+							className={`${styles.secondaryActionButton} ${styles.renameActionButton}`}
+							onClick={handleRenameSelectedCase}
+							disabled={!canRenameSelectedCase || isRunningAction}
+						>
+							Rename Selected
+						</button>
+						<button
+							type="button"
+							className={`${styles.secondaryActionButton} ${styles.archiveActionButton}`}
+							onClick={handleArchiveSelectedCase}
+							disabled={!canArchiveSelectedCase || isRunningAction}
+						>
+							Archive Selected
+						</button>
+						<button
+							type="button"
+							className={`${styles.secondaryActionButton} ${styles.deleteActionButton}`}
+							onClick={handleDeleteSelectedCase}
+							disabled={!canDeleteSelectedCase || isRunningAction}
+							title={deleteSelectedCaseTitle}
+						>
+							Delete Selected
+						</button>
+					</div>
+
+					<button
+						type="button"
+						className={styles.openSelectedButton}
+						onClick={handleOpenSelectedCase}
+						disabled={!effectiveSelectedCaseNumber || isRunningAction}
+					>
+						{isRunningAction ? 'Working...' : 'Open Selected Case'}
+					</button>
+
+					{totalPages > 1 && (
+						<div className={styles.pagination}>
+							<button onClick={() => setCurrentPage((p) => p - 1)} disabled={effectiveCurrentPage === 0}>
+								Previous
+							</button>
+							<span>
+								{effectiveCurrentPage + 1} of {totalPages} ({visibleCases.length} filtered cases)
+							</span>
+							<button onClick={() => setCurrentPage((p) => p + 1)} disabled={effectiveCurrentPage === totalPages - 1}>
+								Next
+							</button>
+						</div>
+					)}
+				</div>
+			</div>
+
+			<RenameCaseModal
+				isOpen={isRenameModalOpen}
+				currentCase={selectedCase?.caseNumber || ''}
+				isSubmitting={isRunningAction}
+				onClose={() => setIsRenameModalOpen(false)}
+				onSubmit={handleRenameSelectedCaseSubmit}
+			/>
+
+			<ArchiveCaseModal
+				isOpen={isArchiveModalOpen}
+				currentCase={selectedCase?.caseNumber || ''}
+				isSubmitting={isRunningAction}
+				onClose={() => setIsArchiveModalOpen(false)}
+				onSubmit={handleArchiveSelectedCaseSubmit}
+			/>
+
+			<DeleteCaseModal
+				isOpen={isDeleteModalOpen}
+				currentCase={selectedCase?.caseNumber || ''}
+				isSubmitting={isRunningAction}
+				onClose={() => setIsDeleteModalOpen(false)}
+				onSubmit={handleDeleteSelectedCaseSubmit}
+			/>
+		</div>
+	);
 };

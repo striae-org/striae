@@ -1,221 +1,219 @@
 .toolbarContainer {
-  position: relative;
+	position: relative;
 }
 
 .toolbar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceS);
-  padding: var(--spaceS);
-  background: var(--background);
-  border-radius: 5px;
-  box-shadow: 0 var(--spaceXS) var(--spaceM)
-    color-mix(in lab, var(--black) 10%, transparent);
-  height: auto;
-  overflow: hidden;
-  transition: opacity var(--durationM) var(--bezierFastoutSlowin);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceS);
+	padding: var(--spaceS);
+	background: var(--background);
+	border-radius: 5px;
+	box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
+	height: auto;
+	overflow: hidden;
+	transition: opacity var(--durationM) var(--bezierFastoutSlowin);
 }
 
 .toggleButton {
-  height: 40px;
-  flex-shrink: 0;
-  margin-bottom: var(--spaceM);
+	height: 40px;
+	flex-shrink: 0;
+	margin-bottom: var(--spaceM);
 }
 
 .toolbarContent {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceS);
-  height: auto;
-  transition: opacity var(--durationM) var(--bezierFastoutSlowin);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceS);
+	height: auto;
+	transition: opacity var(--durationM) var(--bezierFastoutSlowin);
 }
 
 .hidden {
-  height: calc(50px + (var(--spaceS) * 2));
-  opacity: 0.3;
+	height: calc(50px + (var(--spaceS) * 2));
+	opacity: 0.3;
 }
 
 .hidden .toolbarContent {
-  opacity: 0;
-  pointer-events: none;
-  height: 0;
-  overflow: hidden;
+	opacity: 0;
+	pointer-events: none;
+	height: 0;
+	overflow: hidden;
 }
 
 /* ─── Color Selector ────────────────────────────────────────────────────── */
 
 .toolbarColorSelector {
-  position: absolute;
-  left: calc(100% + var(--spaceM));
-  bottom: 0;
-  background: var(--background);
-  border-radius: 5px;
-  box-shadow: 0 var(--spaceXS) var(--spaceM)
-    color-mix(in lab, var(--black) 10%, transparent);
-  padding: var(--spaceS);
-  width: 200px;
-  z-index: 50;
+	position: absolute;
+	left: calc(100% + var(--spaceM));
+	bottom: 0;
+	background: var(--background);
+	border-radius: 5px;
+	box-shadow: 0 var(--spaceXS) var(--spaceM) color-mix(in lab, var(--black) 10%, transparent);
+	padding: var(--spaceS);
+	width: 200px;
+	z-index: 50;
 }
 
 .colorSelectorHeader {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin-bottom: var(--spaceS);
-  padding-bottom: var(--spaceXS);
-  border-bottom: 1px solid var(--border);
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	margin-bottom: var(--spaceS);
+	padding-bottom: var(--spaceXS);
+	border-bottom: 1px solid var(--border);
 }
 
 .colorSelectorTitle {
-  font-size: var(--fontSizeS);
-  font-weight: 600;
-  color: var(--foreground);
+	font-size: var(--fontSizeS);
+	font-weight: 600;
+	color: var(--foreground);
 }
 
 .colorSelectorActions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceXS);
-  margin-top: var(--spaceS);
-  padding-top: var(--spaceS);
-  border-top: 1px solid var(--border);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceXS);
+	margin-top: var(--spaceS);
+	padding-top: var(--spaceS);
+	border-top: 1px solid var(--border);
 }
 
 .actionButton {
-  width: 100%;
-  min-height: 38px;
-  border: none;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: var(--fontSizeS);
-  font-weight: 600;
-  color: white;
-  transition: background-color var(--durationS) var(--bezierFastoutSlowin);
+	width: 100%;
+	min-height: 38px;
+	border: none;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	font-size: var(--fontSizeS);
+	font-weight: 600;
+	color: white;
+	transition: background-color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .colorSelectorConfirmButton {
-  background: var(--success);
+	background: var(--success);
 }
 
 .colorSelectorConfirmButton:hover {
-  background: color-mix(in lab, var(--success) 80%, var(--black));
+	background: color-mix(in lab, var(--success) 80%, var(--black));
 }
 
 .colorSelectorCancelButton {
-  background: var(--error);
+	background: var(--error);
 }
 
 .colorSelectorCancelButton:hover {
-  background: color-mix(in lab, var(--error) 80%, var(--black));
+	background: color-mix(in lab, var(--error) 80%, var(--black));
 }
 
 .colorSelectorContent {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceS);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceS);
 }
 
 .toggleSection {
-  display: flex;
-  justify-content: center;
+	display: flex;
+	justify-content: center;
 }
 
 .colorToggleButton {
-  background: var(--backgroundSecondary);
-  color: var(--foreground);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: var(--spaceXS) var(--spaceS);
-  cursor: pointer;
-  font-size: var(--fontSizeBodyXS);
+	background: var(--backgroundSecondary);
+	color: var(--foreground);
+	border: 1px solid var(--border);
+	border-radius: 3px;
+	padding: var(--spaceXS) var(--spaceS);
+	cursor: pointer;
+	font-size: var(--fontSizeBodyXS);
 }
 
 .colorToggleButton:hover {
-  background: var(--backgroundTertiary);
+	background: var(--backgroundTertiary);
 }
 
 .colorWheelSection {
-  display: flex;
-  justify-content: center;
+	display: flex;
+	justify-content: center;
 }
 
 .colorWheel {
-  width: 60px;
-  height: 40px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  cursor: pointer;
+	width: 60px;
+	height: 40px;
+	border: 1px solid var(--border);
+	border-radius: 3px;
+	cursor: pointer;
 }
 
 .colorGrid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--spaceXS);
-  padding: var(--spaceXS);
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: var(--spaceXS);
+	padding: var(--spaceXS);
 }
 
 .colorSwatch {
-  width: 28px;
-  height: 28px;
-  border: 2px solid var(--border);
-  border-radius: 3px;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.2s ease;
+	width: 28px;
+	height: 28px;
+	border: 2px solid var(--border);
+	border-radius: 3px;
+	cursor: pointer;
+	position: relative;
+	transition: all 0.2s ease;
 }
 
 .colorSwatch:hover {
-  transform: scale(1.1);
-  border-color: var(--foreground);
+	transform: scale(1.1);
+	border-color: var(--foreground);
 }
 
 .colorSwatch.selected {
-  border-color: var(--foreground);
-  border-width: 3px;
-  box-shadow:
-    0 0 0 2px var(--background),
-    0 0 0 4px var(--foreground);
-  transform: scale(1.15);
-  position: relative;
+	border-color: var(--foreground);
+	border-width: 3px;
+	box-shadow:
+		0 0 0 2px var(--background),
+		0 0 0 4px var(--foreground);
+	transform: scale(1.15);
+	position: relative;
 }
 
 .colorSwatch.selected::after {
-  content: "✓";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: var(--foreground);
-  font-weight: bold;
-  font-size: 14px;
-  text-shadow:
-    0 0 3px var(--background),
-    0 0 6px var(--background);
-  pointer-events: none;
+	content: '✓';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: var(--foreground);
+	font-weight: bold;
+	font-size: 14px;
+	text-shadow:
+		0 0 3px var(--background),
+		0 0 6px var(--background);
+	pointer-events: none;
 }
 
 .preview {
-  display: flex;
-  align-items: center;
-  gap: var(--spaceS);
-  padding: var(--spaceXS);
-  background: var(--backgroundSecondary);
-  border-radius: 3px;
+	display: flex;
+	align-items: center;
+	gap: var(--spaceS);
+	padding: var(--spaceXS);
+	background: var(--backgroundSecondary);
+	border-radius: 3px;
 }
 
 .previewLabel {
-  font-size: var(--fontSizeBodyXS);
-  color: var(--foreground);
-  font-weight: 500;
+	font-size: var(--fontSizeBodyXS);
+	color: var(--foreground);
+	font-weight: 500;
 }
 
 .previewSwatch {
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  flex-shrink: 0;
+	width: 20px;
+	height: 20px;
+	border: 1px solid var(--border);
+	border-radius: 2px;
+	flex-shrink: 0;
 }

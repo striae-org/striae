@@ -18,7 +18,7 @@ const LEAK_MARKERS = [
 	'FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY',
 	'private_key_id',
 	'client_x509_cert_url',
-	'admin-service.json'
+	'admin-service.json',
 ];
 
 function listFiles(dir) {
@@ -53,7 +53,7 @@ function relative(filePath) {
 function runGitCheck() {
 	const result = spawnSync('git', ['ls-files', '--error-unmatch', ADMIN_SERVICE_PATH], {
 		cwd: ROOT,
-		encoding: 'utf8'
+		encoding: 'utf8',
 	});
 	return result.status === 0;
 }
@@ -101,18 +101,12 @@ function main() {
 
 	const sourceOffenders = scanSourceImports();
 	if (sourceOffenders.length > 0) {
-		failures.push(
-			`Client source references admin-service credentials: ${sourceOffenders.join(', ')}`
-		);
+		failures.push(`Client source references admin-service credentials: ${sourceOffenders.join(', ')}`);
 	}
 
 	const publicFindings = scanLeakMarkers(PUBLIC_DIR);
 	if (publicFindings.length > 0) {
-		failures.push(
-			`Leak markers found in public assets: ${publicFindings
-				.map((entry) => `${entry.file} [${entry.marker}]`)
-				.join(', ')}`
-		);
+		failures.push(`Leak markers found in public assets: ${publicFindings.map((entry) => `${entry.file} [${entry.marker}]`).join(', ')}`);
 	}
 
 	if (!fs.existsSync(BUILD_CLIENT_DIR)) {
@@ -125,9 +119,7 @@ function main() {
 		const clientFindings = scanLeakMarkers(BUILD_CLIENT_DIR);
 		if (clientFindings.length > 0) {
 			failures.push(
-				`Leak markers found in build/client assets: ${clientFindings
-					.map((entry) => `${entry.file} [${entry.marker}]`)
-					.join(', ')}`
+				`Leak markers found in build/client assets: ${clientFindings.map((entry) => `${entry.file} [${entry.marker}]`).join(', ')}`,
 			);
 		}
 	}

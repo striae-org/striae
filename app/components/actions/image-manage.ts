@@ -5,298 +5,267 @@ import type { CaseData, FileData, ImageAccessResult, ImageUploadResponse } from 
 import { auditService } from '~/services/audit';
 
 export interface DeleteFileResult {
-  imageMissing: boolean;
-  fileName: string;
+	imageMissing: boolean;
+	fileName: string;
 }
 
 export interface DeleteFileOptions {
-  skipValidation?: boolean;
-  skipCaseDataUpdate?: boolean;
-  suppressAudit?: boolean;
+	skipValidation?: boolean;
+	skipCaseDataUpdate?: boolean;
+	suppressAudit?: boolean;
 }
 
-export const fetchFiles = async (
-  user: User, 
-  caseNumber: string, 
-  options?: { skipValidation?: boolean }
-): Promise<FileData[]> => {
-  const caseData = await getCaseData(user, caseNumber, { skipValidation: options?.skipValidation });
-  return caseData?.files || [];
+export const fetchFiles = async (user: User, caseNumber: string, options?: { skipValidation?: boolean }): Promise<FileData[]> => {
+	const caseData = await getCaseData(user, caseNumber, { skipValidation: options?.skipValidation });
+	return caseData?.files || [];
 };
 
 export const uploadFile = async (
-  user: User, 
-  caseNumber: string, 
-  file: File, 
-  onProgress?: (progress: number) => void
+	user: User,
+	caseNumber: string,
+	file: File,
+	onProgress?: (progress: number) => void,
 ): Promise<FileData> => {
-  const startTime = Date.now();
-  
-  // First, get current files to check count
-  const currentFiles = await fetchFiles(user, caseNumber);
-  
-  // Check if user can upload another file
-  const permission = await canUploadFile(user, currentFiles.length);
-  if (!permission.canUpload) {
-    // Log permission denied
-    try {
-      await auditService.logFileUpload(
-        user,
-        file.name,
-        file.size,
-        file.type,
-        'file-picker',
-        caseNumber,
-        'failure',
-        Date.now() - startTime
-      );
-    } catch (auditError) {
-      console.error('Failed to log file upload permission denial:', auditError);
-    }
-    throw new Error(permission.reason || 'You cannot upload more files to this case.');
-  }
+	const startTime = Date.now();
 
-  try {
-    const imageData: ImageUploadResponse = await uploadImageApi(user, file, onProgress);
-    const uploadedImageId = imageData.result?.id;
-    if (!uploadedImageId) {
-      throw new Error('Upload failed');
-    }
+	// First, get current files to check count
+	const currentFiles = await fetchFiles(user, caseNumber);
 
-    const newFile: FileData = {
-      id: uploadedImageId,
-      originalFilename: file.name,
-      uploadedAt: new Date().toISOString()
-    };
+	// Check if user can upload another file
+	const permission = await canUploadFile(user, currentFiles.length);
+	if (!permission.canUpload) {
+		// Log permission denied
+		try {
+			await auditService.logFileUpload(user, file.name, file.size, file.type, 'file-picker', caseNumber, 'failure', Date.now() - startTime);
+		} catch (auditError) {
+			console.error('Failed to log file upload permission denial:', auditError);
+		}
+		throw new Error(permission.reason || 'You cannot upload more files to this case.');
+	}
 
-    // Update case data using centralized function
-    const existingData = await getCaseData(user, caseNumber);
-    if (!existingData) {
-      throw new Error('Case not found');
-    }
+	try {
+		const imageData: ImageUploadResponse = await uploadImageApi(user, file, onProgress);
+		const uploadedImageId = imageData.result?.id;
+		if (!uploadedImageId) {
+			throw new Error('Upload failed');
+		}
 
-    const updatedData = {
-      ...existingData,
-      files: [...(existingData.files || []), newFile]
-    };
+		const newFile: FileData = {
+			id: uploadedImageId,
+			originalFilename: file.name,
+			uploadedAt: new Date().toISOString(),
+		};
 
-    await updateCaseData(user, caseNumber, updatedData);
+		// Update case data using centralized function
+		const existingData = await getCaseData(user, caseNumber);
+		if (!existingData) {
+			throw new Error('Case not found');
+		}
 
-    // Log successful file upload
-    try {
-      await auditService.logFileUpload(
-        user,
-        file.name,
-        file.size,
-        file.type,
-        'file-picker',
-        caseNumber,
-        'success',
-        Date.now() - startTime,
-        uploadedImageId
-      );
-    } catch (auditError) {
-      console.error('Failed to log successful file upload:', auditError);
-    }
+		const updatedData = {
+			...existingData,
+			files: [...(existingData.files || []), newFile],
+		};
 
-    console.log(`✅ File uploaded: ${file.name} (${file.size} bytes) (${Date.now() - startTime}ms)`);
-    return newFile;
-  } catch (error) {
-    // Log failed file upload
-    try {
-      await auditService.logFileUpload(
-        user,
-        file.name,
-        file.size,
-        file.type,
-        'file-picker',
-        caseNumber,
-        'failure',
-        Date.now() - startTime
-      );
-    } catch (auditError) {
-      console.error('Failed to log file upload failure:', auditError);
-    }
+		await updateCaseData(user, caseNumber, updatedData);
 
-    throw error;
-  }
+		// Log successful file upload
+		try {
+			await auditService.logFileUpload(
+				user,
+				file.name,
+				file.size,
+				file.type,
+				'file-picker',
+				caseNumber,
+				'success',
+				Date.now() - startTime,
+				uploadedImageId,
+			);
+		} catch (auditError) {
+			console.error('Failed to log successful file upload:', auditError);
+		}
+
+		console.log(`✅ File uploaded: ${file.name} (${file.size} bytes) (${Date.now() - startTime}ms)`);
+		return newFile;
+	} catch (error) {
+		// Log failed file upload
+		try {
+			await auditService.logFileUpload(user, file.name, file.size, file.type, 'file-picker', caseNumber, 'failure', Date.now() - startTime);
+		} catch (auditError) {
+			console.error('Failed to log file upload failure:', auditError);
+		}
+
+		throw error;
+	}
 };
 
 export const deleteFile = async (
-  user: User,
-  caseNumber: string,
-  fileId: string,
-  deleteReason: string = 'User-requested deletion via file list',
-  options: DeleteFileOptions = {}
+	user: User,
+	caseNumber: string,
+	fileId: string,
+	deleteReason: string = 'User-requested deletion via file list',
+	options: DeleteFileOptions = {},
 ): Promise<DeleteFileResult> => {
-  const startTime = Date.now();
-  
-  // Get file info for audit logging (outside try block so it's available in catch)
-  let fileName = fileId; // Default to fileId
-  let fileToDelete: FileData | undefined;
-  
-  try {
-    // Get the case data using centralized function
-    const caseData = await getCaseData(user, caseNumber, {
-      skipValidation: options.skipValidation === true
-    });
-    if (!caseData) {
-      throw new Error('Case not found');
-    }
-    
-    fileToDelete = (caseData.files || []).find((f: FileData) => f.id === fileId);
-    fileName = fileToDelete?.originalFilename || fileId;
-    const fileSize = 0; // We don't store file size, so use 0
+	const startTime = Date.now();
 
-    let imageDeleteFailed = false;
-    let imageMissing = false;
-    let imageDeleteError = '';
+	// Get file info for audit logging (outside try block so it's available in catch)
+	let fileName = fileId; // Default to fileId
+	let fileToDelete: FileData | undefined;
 
-    // Attempt to delete image file
-    const imageResponse = await fetchImageApi(user, `/${encodeURIComponent(fileId)}`, {
-      method: 'DELETE'
-    });
+	try {
+		// Get the case data using centralized function
+		const caseData = await getCaseData(user, caseNumber, {
+			skipValidation: options.skipValidation === true,
+		});
+		if (!caseData) {
+			throw new Error('Case not found');
+		}
 
-    // Handle image deletion response
-    if (!imageResponse.ok) {
-      if (imageResponse.status === 404) {
-        // Image already doesn't exist - proceed with data cleanup
-        console.warn(`Image ${fileId} not found (404) - proceeding with data cleanup`);
-        imageMissing = true;
-      } else {
-        // Other errors should still fail the operation
-        imageDeleteFailed = true;
-        imageDeleteError = `Failed to delete image: ${imageResponse.statusText}`;
-      }
-    }
+		fileToDelete = (caseData.files || []).find((f: FileData) => f.id === fileId);
+		fileName = fileToDelete?.originalFilename || fileId;
+		const fileSize = 0; // We don't store file size, so use 0
 
-    // If image deletion failed with non-404 error, don't proceed with data cleanup
-    if (imageDeleteFailed) {
-      throw new Error(imageDeleteError);
-    }
+		let imageDeleteFailed = false;
+		let imageMissing = false;
+		let imageDeleteError = '';
 
-    // Clean up data files regardless of image deletion success/404
-    // Try to delete notes file using centralized function
-    try {
-      await deleteFileAnnotations(user, caseNumber, fileId, {
-        skipValidation: options.skipValidation === true
-      });
-    } catch (error) {
-      // Ignore 404 errors - notes file might not exist
-      console.log('Notes file deletion result:', error);
-    }
+		// Attempt to delete image file
+		const imageResponse = await fetchImageApi(user, `/${encodeURIComponent(fileId)}`, {
+			method: 'DELETE',
+		});
 
-    if (options.skipCaseDataUpdate !== true) {
-      // Update case data.json to remove file reference using centralized function
-      const updatedData: CaseData = {
-        ...caseData,
-        files: (caseData.files || []).filter((f: FileData) => f.id !== fileId)
-      };
+		// Handle image deletion response
+		if (!imageResponse.ok) {
+			if (imageResponse.status === 404) {
+				// Image already doesn't exist - proceed with data cleanup
+				console.warn(`Image ${fileId} not found (404) - proceeding with data cleanup`);
+				imageMissing = true;
+			} else {
+				// Other errors should still fail the operation
+				imageDeleteFailed = true;
+				imageDeleteError = `Failed to delete image: ${imageResponse.statusText}`;
+			}
+		}
 
-      await updateCaseData(user, caseNumber, updatedData);
-    }
+		// If image deletion failed with non-404 error, don't proceed with data cleanup
+		if (imageDeleteFailed) {
+			throw new Error(imageDeleteError);
+		}
 
-    // Log successful file deletion
-    const endTime = Date.now();
-    if (options.suppressAudit !== true) {
-      try {
-        await auditService.logFileDeletion(
-          user,
-          fileName,
-          fileSize,
-          deleteReason,
-          caseNumber,
-          fileId,
-          fileToDelete?.originalFilename
-        );
-      } catch (auditError) {
-        console.error('Failed to log file deletion:', auditError);
-      }
-    }
+		// Clean up data files regardless of image deletion success/404
+		// Try to delete notes file using centralized function
+		try {
+			await deleteFileAnnotations(user, caseNumber, fileId, {
+				skipValidation: options.skipValidation === true,
+			});
+		} catch (error) {
+			// Ignore 404 errors - notes file might not exist
+			console.log('Notes file deletion result:', error);
+		}
 
-    console.log(`✅ File deleted: ${fileName} (${endTime - startTime}ms)`);
-    return {
-      imageMissing,
-      fileName
-    };
-    
-  } catch (error) {
-    // Log failed file deletion
-    const endTime = Date.now();
-    if (options.suppressAudit !== true) {
-      try {
-        await auditService.logEvent({
-          userId: user.uid,
-          userEmail: user.email || '',
-          action: 'file-delete',
-          result: 'failure',
-          fileName: fileName, // Now uses the original filename
-          fileType: 'unknown',
-          validationErrors: [error instanceof Error ? error.message : 'Unknown error'],
-          caseNumber,
-          fileDetails: {
-            fileId: fileId,
-            fileSize: 0,
-            deleteReason: 'Failed deletion attempt',
-            originalFileName: fileToDelete?.originalFilename
-          },
-          performanceMetrics: {
-            processingTimeMs: endTime - startTime,
-            fileSizeBytes: 0
-          }
-        });
-      } catch (auditError) {
-        console.error('Failed to log file deletion failure:', auditError);
-      }
-    }
-    
-    console.error('Error in deleteFile:', error);
-    throw error;
-  }
+		if (options.skipCaseDataUpdate !== true) {
+			// Update case data.json to remove file reference using centralized function
+			const updatedData: CaseData = {
+				...caseData,
+				files: (caseData.files || []).filter((f: FileData) => f.id !== fileId),
+			};
+
+			await updateCaseData(user, caseNumber, updatedData);
+		}
+
+		// Log successful file deletion
+		const endTime = Date.now();
+		if (options.suppressAudit !== true) {
+			try {
+				await auditService.logFileDeletion(user, fileName, fileSize, deleteReason, caseNumber, fileId, fileToDelete?.originalFilename);
+			} catch (auditError) {
+				console.error('Failed to log file deletion:', auditError);
+			}
+		}
+
+		console.log(`✅ File deleted: ${fileName} (${endTime - startTime}ms)`);
+		return {
+			imageMissing,
+			fileName,
+		};
+	} catch (error) {
+		// Log failed file deletion
+		const endTime = Date.now();
+		if (options.suppressAudit !== true) {
+			try {
+				await auditService.logEvent({
+					userId: user.uid,
+					userEmail: user.email || '',
+					action: 'file-delete',
+					result: 'failure',
+					fileName: fileName, // Now uses the original filename
+					fileType: 'unknown',
+					validationErrors: [error instanceof Error ? error.message : 'Unknown error'],
+					caseNumber,
+					fileDetails: {
+						fileId: fileId,
+						fileSize: 0,
+						deleteReason: 'Failed deletion attempt',
+						originalFileName: fileToDelete?.originalFilename,
+					},
+					performanceMetrics: {
+						processingTimeMs: endTime - startTime,
+						fileSizeBytes: 0,
+					},
+				});
+			} catch (auditError) {
+				console.error('Failed to log file deletion failure:', auditError);
+			}
+		}
+
+		console.error('Error in deleteFile:', error);
+		throw error;
+	}
 };
 
 export const getImageUrl = async (
-  user: User,
-  fileData: FileData,
-  caseNumber: string,
-  accessReason?: string
+	user: User,
+	fileData: FileData,
+	caseNumber: string,
+	accessReason?: string,
 ): Promise<ImageAccessResult> => {
-  const startTime = Date.now();
-  const defaultAccessReason = accessReason || 'Image viewer access';
+	const startTime = Date.now();
+	const defaultAccessReason = accessReason || 'Image viewer access';
 
-  try {
-    const signedUrlResponse = await createSignedImageUrlApi(user, fileData.id);
+	try {
+		const signedUrlResponse = await createSignedImageUrlApi(user, fileData.id);
 
-    await auditService.logFileAccess(
-      user,
-      fileData.originalFilename || fileData.id,
-      fileData.id,
-      'signed-url',
-      caseNumber,
-      'success',
-      Date.now() - startTime,
-      defaultAccessReason,
-      fileData.originalFilename
-    );
+		await auditService.logFileAccess(
+			user,
+			fileData.originalFilename || fileData.id,
+			fileData.id,
+			'signed-url',
+			caseNumber,
+			'success',
+			Date.now() - startTime,
+			defaultAccessReason,
+			fileData.originalFilename,
+		);
 
-    return {
-      url: signedUrlResponse.result.url,
-      revoke: () => {},
-      urlType: 'signed',
-      expiresAt: signedUrlResponse.result.expiresAt
-    };
-  } catch (error) {
-    await auditService.logFileAccess(
-      user,
-      fileData.originalFilename || fileData.id,
-      fileData.id,
-      'signed-url',
-      caseNumber,
-      'failure',
-      Date.now() - startTime,
-      `Unexpected error during ${accessReason || 'image access'}`,
-      fileData.originalFilename
-    );
-    throw error;
-  }
+		return {
+			url: signedUrlResponse.result.url,
+			revoke: () => {},
+			urlType: 'signed',
+			expiresAt: signedUrlResponse.result.expiresAt,
+		};
+	} catch (error) {
+		await auditService.logFileAccess(
+			user,
+			fileData.originalFilename || fileData.id,
+			fileData.id,
+			'signed-url',
+			caseNumber,
+			'failure',
+			Date.now() - startTime,
+			`Unexpected error during ${accessReason || 'image access'}`,
+			fileData.originalFilename,
+		);
+		throw error;
+	}
 };

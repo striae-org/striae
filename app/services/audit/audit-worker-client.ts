@@ -2,91 +2,90 @@ import { type ValidationAuditEntry } from '~/types';
 import { fetchAuditApi } from './audit-api-client';
 
 interface FetchAuditEntriesParams {
-  userId: string;
-  startDate?: string;
-  endDate?: string;
+	userId: string;
+	startDate?: string;
+	endDate?: string;
 }
 
 interface FetchAuditEntriesResponse {
-  entries: ValidationAuditEntry[];
-  total: number;
+	entries: ValidationAuditEntry[];
+	total: number;
 }
 
 interface PersistAuditEntryResponse {
-  success: boolean;
-  entryCount: number;
-  filename: string;
+	success: boolean;
+	entryCount: number;
+	filename: string;
+	deduped?: boolean;
 }
 
 type PersistAuditEntryResult =
-  | {
-      ok: true;
-      entryCount: number;
-    }
-  | {
-      ok: false;
-      status: number;
-      errorData: unknown;
-    };
+	| {
+			ok: true;
+			entryCount: number;
+			deduped: boolean;
+	  }
+	| {
+			ok: false;
+			status: number;
+			errorData: unknown;
+	  };
 
-export async function fetchAuditEntriesForUser(
-  params: FetchAuditEntriesParams
-): Promise<ValidationAuditEntry[] | null> {
-  const searchParams = new URLSearchParams();
-  searchParams.set('userId', params.userId);
+export async function fetchAuditEntriesForUser(params: FetchAuditEntriesParams): Promise<ValidationAuditEntry[] | null> {
+	const searchParams = new URLSearchParams();
+	searchParams.set('userId', params.userId);
 
-  if (params.startDate) {
-    searchParams.set('startDate', params.startDate);
-  }
+	if (params.startDate) {
+		searchParams.set('startDate', params.startDate);
+	}
 
-  if (params.endDate) {
-    searchParams.set('endDate', params.endDate);
-  }
+	if (params.endDate) {
+		searchParams.set('endDate', params.endDate);
+	}
 
-  const requestPath = `/audit/?${searchParams.toString()}`;
+	const requestPath = `/audit/?${searchParams.toString()}`;
 
-  const response = await fetchAuditApi(requestPath, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json'
-    }
-  });
+	const response = await fetchAuditApi(requestPath, {
+		method: 'GET',
+		headers: {
+			Accept: 'application/json',
+		},
+	});
 
-  if (!response.ok) {
-    return null;
-  }
+	if (!response.ok) {
+		return null;
+	}
 
-  const result = (await response.json()) as FetchAuditEntriesResponse;
-  return result.entries;
+	const result = (await response.json()) as FetchAuditEntriesResponse;
+	return result.entries;
 }
 
-export async function persistAuditEntryForUser(
-  entry: ValidationAuditEntry
-): Promise<PersistAuditEntryResult> {
-  const searchParams = new URLSearchParams();
-  searchParams.set('userId', entry.userId);
-  const requestPath = `/audit/?${searchParams.toString()}`;
+export async function persistAuditEntryForUser(entry: ValidationAuditEntry): Promise<PersistAuditEntryResult> {
+	const searchParams = new URLSearchParams();
+	searchParams.set('userId', entry.userId);
+	const requestPath = `/audit/?${searchParams.toString()}`;
 
-  const response = await fetchAuditApi(requestPath, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(entry)
-  });
+	const response = await fetchAuditApi(requestPath, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(entry),
+	});
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    return {
-      ok: false,
-      status: response.status,
-      errorData
-    };
-  }
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({}));
+		return {
+			ok: false,
+			status: response.status,
+			errorData,
+		};
+	}
 
-  const result = (await response.json()) as PersistAuditEntryResponse;
-  return {
-    ok: true,
-    entryCount: result.entryCount
-  };
+	const result = (await response.json()) as PersistAuditEntryResponse;
+	return {
+		ok: true,
+		entryCount: result.entryCount,
+		deduped: result.deduped ?? false,
+	};
 }

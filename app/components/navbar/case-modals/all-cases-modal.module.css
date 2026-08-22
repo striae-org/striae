@@ -1,523 +1,482 @@
 .modalOverlay {
-  position: fixed;
-  inset: 0;
-  background-color: color-mix(in lab, var(--background) 50%, transparent);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: var(--zIndex5);
-  cursor: default;
-  transition: background-color var(--durationM) var(--bezierFastoutSlowin);
+	position: fixed;
+	inset: 0;
+	background-color: color-mix(in lab, var(--background) 50%, transparent);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: var(--zIndex5);
+	cursor: default;
+	transition: background-color var(--durationM) var(--bezierFastoutSlowin);
 }
 
 .modal {
-  position: relative;
-  background: var(--backgroundLight);
-  border-radius: var(--spaceXS);
-  overflow: hidden;
-  width: 90%;
-  max-width: var(--maxWidthL);
-  max-height: 80vh;
-  box-shadow: 0 var(--spaceXS) var(--spaceL)
-    color-mix(in lab, var(--black) 10%, transparent);
-  cursor: default;
-  transition: background-color var(--durationM) var(--bezierFastoutSlowin);
-  display: flex;
-  flex-direction: column;
+	position: relative;
+	background: var(--backgroundLight);
+	border-radius: var(--spaceXS);
+	overflow: hidden;
+	width: 90%;
+	max-width: var(--maxWidthL);
+	max-height: 80vh;
+	box-shadow: 0 var(--spaceXS) var(--spaceL) color-mix(in lab, var(--black) 10%, transparent);
+	cursor: default;
+	transition: background-color var(--durationM) var(--bezierFastoutSlowin);
+	display: flex;
+	flex-direction: column;
 }
 
 .modalHeader {
-  display: flex;
-  font-size: var(--fontSizeBodyL);
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spaceL);
-  border-bottom: 1px solid color-mix(in lab, var(--text) 10%, transparent);
-  color: var(--textTitle);
-  flex-shrink: 0;
+	display: flex;
+	font-size: var(--fontSizeBodyL);
+	justify-content: space-between;
+	align-items: center;
+	padding: var(--spaceL);
+	border-bottom: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+	color: var(--textTitle);
+	flex-shrink: 0;
 }
 
 .modalContent {
-  padding: var(--spaceL);
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceM);
+	padding: var(--spaceL);
+	overflow-y: auto;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceM);
 }
 
 .closeButton {
-  background: none;
-  border: none;
-  font-size: var(--fontSizeH5);
-  cursor: pointer;
-  padding: var(--spaceS);
-  color: var(--textLight);
-  transition: color var(--durationS) var(--bezierFastoutSlowin);
+	background: none;
+	border: none;
+	font-size: var(--fontSizeH5);
+	cursor: pointer;
+	padding: var(--spaceS);
+	color: var(--textLight);
+	transition: color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .closeButton:hover {
-  color: var(--text);
+	color: var(--text);
 }
 
 .controlsSection {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--spaceM);
-  align-items: end;
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: var(--spaceM);
+	align-items: end;
 }
 
 .controlGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceXS);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceXS);
 }
 
 .controlGroup label {
-  color: var(--textTitle);
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
+	color: var(--textTitle);
+	font-size: var(--fontSizeBodyS);
+	font-weight: var(--fontWeightMedium);
 }
 
 .controlGroup select {
-  width: 100%;
-  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
-  border-radius: var(--spaceXS);
-  background: var(--backgroundLight);
-  color: var(--textBody);
-  padding: var(--spaceS) var(--spaceM);
-  font-size: var(--fontSizeBodyS);
+	width: 100%;
+	border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+	border-radius: var(--spaceXS);
+	background: var(--backgroundLight);
+	color: var(--textBody);
+	padding: var(--spaceS) var(--spaceM);
+	font-size: var(--fontSizeBodyS);
 }
 
 .controlGroup select:focus {
-  outline: 2px solid color-mix(in lab, var(--primary) 30%, transparent);
-  outline-offset: 1px;
+	outline: 2px solid color-mix(in lab, var(--primary) 30%, transparent);
+	outline-offset: 1px;
 }
 
 .archiveToggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spaceS);
-  color: var(--textBody);
-  font-size: var(--fontSizeBodyS);
+	display: inline-flex;
+	align-items: center;
+	gap: var(--spaceS);
+	color: var(--textBody);
+	font-size: var(--fontSizeBodyS);
 }
 
 .archiveToggle input {
-  width: var(--spaceM);
-  height: var(--spaceM);
-  accent-color: var(--primary);
+	width: var(--spaceM);
+	height: var(--spaceM);
+	accent-color: var(--primary);
 }
 
 .resetButton {
-  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
-  border-radius: var(--spaceXS);
-  background: var(--backgroundLight);
-  color: var(--textBody);
-  padding: var(--spaceS) var(--spaceM);
-  font-size: var(--fontSizeBodyS);
-  cursor: pointer;
+	border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+	border-radius: var(--spaceXS);
+	background: var(--backgroundLight);
+	color: var(--textBody);
+	padding: var(--spaceS) var(--spaceM);
+	font-size: var(--fontSizeBodyS);
+	cursor: pointer;
 }
 
 .resetButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+	cursor: not-allowed;
+	opacity: 0.5;
 }
 
 .caseCount {
-  margin: 0;
-  font-size: var(--fontSizeBodyS);
-  color: var(--textLight);
+	margin: 0;
+	font-size: var(--fontSizeBodyS);
+	color: var(--textLight);
 }
 
 .searchSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceXS);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceXS);
 }
 
 .searchSection label {
-  color: var(--textTitle);
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
+	color: var(--textTitle);
+	font-size: var(--fontSizeBodyS);
+	font-weight: var(--fontWeightMedium);
 }
 
 .searchInput {
-  width: 100%;
-  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
-  border-radius: var(--spaceXS);
-  background: var(--backgroundLight);
-  color: var(--textBody);
-  padding: var(--spaceS) var(--spaceM);
-  font-size: var(--fontSizeBodyS);
+	width: 100%;
+	border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+	border-radius: var(--spaceXS);
+	background: var(--backgroundLight);
+	color: var(--textBody);
+	padding: var(--spaceS) var(--spaceM);
+	font-size: var(--fontSizeBodyS);
 }
 
 .searchInput:focus {
-  outline: 2px solid color-mix(in lab, var(--primary) 30%, transparent);
-  outline-offset: 1px;
+	outline: 2px solid color-mix(in lab, var(--primary) 30%, transparent);
+	outline-offset: 1px;
 }
 
 .actionNotice {
-  margin: 0;
-  border-radius: var(--spaceXS);
-  padding: var(--spaceS) var(--spaceM);
-  font-size: var(--fontSizeBodyS);
-  border: 1px solid transparent;
+	margin: 0;
+	border-radius: var(--spaceXS);
+	padding: var(--spaceS) var(--spaceM);
+	font-size: var(--fontSizeBodyS);
+	border: 1px solid transparent;
 }
 
 .actionNoticeSuccess {
-  background: color-mix(in lab, var(--success) 15%, var(--backgroundLight));
-  color: var(--textBody);
-  border-color: color-mix(in lab, var(--success) 35%, transparent);
+	background: color-mix(in lab, var(--success) 15%, var(--backgroundLight));
+	color: var(--textBody);
+	border-color: color-mix(in lab, var(--success) 35%, transparent);
 }
 
 .actionNoticeWarning {
-  background: color-mix(in lab, var(--warning) 18%, var(--backgroundLight));
-  color: var(--textBody);
-  border-color: color-mix(in lab, var(--warning) 40%, transparent);
+	background: color-mix(in lab, var(--warning) 18%, var(--backgroundLight));
+	color: var(--textBody);
+	border-color: color-mix(in lab, var(--warning) 40%, transparent);
 }
 
 .actionNoticeError {
-  background: color-mix(in lab, var(--error) 16%, var(--backgroundLight));
-  color: var(--error);
-  border-color: color-mix(in lab, var(--error) 30%, transparent);
+	background: color-mix(in lab, var(--error) 16%, var(--backgroundLight));
+	color: var(--error);
+	border-color: color-mix(in lab, var(--error) 30%, transparent);
 }
 
 .casesList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceM);
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceM);
 }
 
 .caseItem {
-  width: 100%;
-  padding: var(--spaceM);
-  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
-  border-radius: var(--spaceXS);
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: var(--spaceM);
-  background: var(--backgroundLight);
-  cursor: pointer;
-  color: var(--textBody);
-  transition:
-    border-color var(--durationS) var(--bezierFastoutSlowin),
-    background-color var(--durationS) var(--bezierFastoutSlowin),
-    box-shadow var(--durationS) var(--bezierFastoutSlowin);
+	width: 100%;
+	padding: var(--spaceM);
+	border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+	border-radius: var(--spaceXS);
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: var(--spaceM);
+	background: var(--backgroundLight);
+	cursor: pointer;
+	color: var(--textBody);
+	transition:
+		border-color var(--durationS) var(--bezierFastoutSlowin),
+		background-color var(--durationS) var(--bezierFastoutSlowin),
+		box-shadow var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .caseItem:hover {
-  background-color: color-mix(in lab, var(--background) 95%, transparent);
+	background-color: color-mix(in lab, var(--background) 95%, transparent);
 }
 
 .caseItem:focus {
-  outline: none;
-  border-color: color-mix(in lab, var(--primary) 60%, transparent);
-  box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 18%, transparent);
+	outline: none;
+	border-color: color-mix(in lab, var(--primary) 60%, transparent);
+	box-shadow: 0 0 0 2px color-mix(in lab, var(--primary) 18%, transparent);
 }
 
 .caseItem.active {
-  border-color: color-mix(in lab, var(--primary) 55%, transparent);
-  box-shadow:
-    inset 4px 0 0 color-mix(in lab, var(--primary) 55%, transparent),
-    0 0 0 1px color-mix(in lab, var(--primary) 16%, transparent);
+	border-color: color-mix(in lab, var(--primary) 55%, transparent);
+	box-shadow:
+		inset 4px 0 0 color-mix(in lab, var(--primary) 55%, transparent),
+		0 0 0 1px color-mix(in lab, var(--primary) 16%, transparent);
 }
 
 .caseDetails {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spaceXS);
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--spaceXS);
 }
 
 .caseNumberInput {
-  width: 100%;
-  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
-  border-radius: var(--spaceXS);
-  background: var(--backgroundLight);
-  color: var(--textBody);
-  font-size: var(--fontSizeBodyM);
-  padding: var(--spaceS) var(--spaceM);
+	width: 100%;
+	border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+	border-radius: var(--spaceXS);
+	background: var(--backgroundLight);
+	color: var(--textBody);
+	font-size: var(--fontSizeBodyM);
+	padding: var(--spaceS) var(--spaceM);
 }
 
 .caseMetaText {
-  color: var(--textLight);
-  font-size: var(--fontSizeBodyS);
+	color: var(--textLight);
+	font-size: var(--fontSizeBodyS);
 }
 
 .confirmationBadge {
-  justify-self: end;
-  border-radius: var(--spaceXS);
-  padding: var(--spaceXS) var(--spaceS);
-  font-size: var(--fontSizeBodyS);
-  font-weight: var(--fontWeightMedium);
-  color: var(--textBody);
-  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
-  white-space: nowrap;
+	justify-self: end;
+	border-radius: var(--spaceXS);
+	padding: var(--spaceXS) var(--spaceS);
+	font-size: var(--fontSizeBodyS);
+	font-weight: var(--fontWeightMedium);
+	color: var(--textBody);
+	border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+	white-space: nowrap;
 }
 
 .badgeColumn {
-  justify-self: end;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--spaceXS);
+	justify-self: end;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: var(--spaceXS);
 }
 
 .archivedBadge {
-  background-color: color-mix(in lab, #6c757d 18%, var(--backgroundLight));
-  border-color: color-mix(in lab, #6c757d 30%, transparent);
+	background-color: color-mix(in lab, #6c757d 18%, var(--backgroundLight));
+	border-color: color-mix(in lab, #6c757d 30%, transparent);
 }
 
 .footerActions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spaceM);
-  padding: var(--spaceL);
-  border-top: 1px solid color-mix(in lab, var(--text) 10%, transparent);
-  background: var(--backgroundLight);
-  flex-shrink: 0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: var(--spaceM);
+	padding: var(--spaceL);
+	border-top: 1px solid color-mix(in lab, var(--text) 10%, transparent);
+	background: var(--backgroundLight);
+	flex-shrink: 0;
 }
 
 .maintenanceActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spaceS);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spaceS);
 }
 
 .secondaryActionButton {
-  border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
-  border-radius: var(--spaceXS);
-  background: var(--backgroundLight);
-  color: var(--textBody);
-  padding: var(--spaceS) var(--spaceM);
-  font-size: var(--fontSizeBodyS);
-  cursor: pointer;
-  transition: background-color var(--durationS) var(--bezierFastoutSlowin);
+	border: 1px solid color-mix(in lab, var(--text) 15%, transparent);
+	border-radius: var(--spaceXS);
+	background: var(--backgroundLight);
+	color: var(--textBody);
+	padding: var(--spaceS) var(--spaceM);
+	font-size: var(--fontSizeBodyS);
+	cursor: pointer;
+	transition: background-color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .secondaryActionButton:hover:not(:disabled) {
-  background: color-mix(in lab, var(--background) 94%, transparent);
+	background: color-mix(in lab, var(--background) 94%, transparent);
 }
 
 .secondaryActionButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+	cursor: not-allowed;
+	opacity: 0.5;
 }
 
 .renameActionButton {
-  background: color-mix(in lab, #ffc107 16%, #ffffff);
-  color: #7a5a00;
-  border-color: color-mix(in lab, #ffc107 30%, transparent);
+	background: color-mix(in lab, #ffc107 16%, #ffffff);
+	color: #7a5a00;
+	border-color: color-mix(in lab, #ffc107 30%, transparent);
 }
 
 .renameActionButton:hover:not(:disabled) {
-  background: color-mix(in lab, #ffc107 22%, #ffffff);
-  border-color: color-mix(in lab, #ffc107 36%, transparent);
+	background: color-mix(in lab, #ffc107 22%, #ffffff);
+	border-color: color-mix(in lab, #ffc107 36%, transparent);
 }
 
 .archiveActionButton {
-  background: color-mix(in lab, #6c757d 15%, #ffffff);
-  color: #495057;
-  border-color: color-mix(in lab, #6c757d 28%, transparent);
+	background: color-mix(in lab, #6c757d 15%, #ffffff);
+	color: #495057;
+	border-color: color-mix(in lab, #6c757d 28%, transparent);
 }
 
 .archiveActionButton:hover:not(:disabled) {
-  background: color-mix(in lab, #6c757d 21%, #ffffff);
+	background: color-mix(in lab, #6c757d 21%, #ffffff);
 }
 
 .deleteActionButton {
-  border-color: color-mix(in lab, var(--error) 25%, transparent);
-  color: var(--error);
+	border-color: color-mix(in lab, var(--error) 25%, transparent);
+	color: var(--error);
 }
 
 .deleteActionButton:hover:not(:disabled) {
-  background: color-mix(in lab, var(--error) 12%, var(--backgroundLight));
+	background: color-mix(in lab, var(--error) 12%, var(--backgroundLight));
 }
 
 .openSelectedButton {
-  background: var(--primary);
-  color: var(--white);
-  border: none;
-  border-radius: var(--spaceXS);
-  padding: var(--spaceS) var(--spaceL);
-  font-size: var(--fontSizeBodyS);
-  cursor: pointer;
-  transition: background-color var(--durationS) var(--bezierFastoutSlowin);
+	background: var(--primary);
+	color: var(--white);
+	border: none;
+	border-radius: var(--spaceXS);
+	padding: var(--spaceS) var(--spaceL);
+	font-size: var(--fontSizeBodyS);
+	cursor: pointer;
+	transition: background-color var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .openSelectedButton:hover:not(:disabled) {
-  background: color-mix(in lab, var(--primary) 85%, var(--black));
+	background: color-mix(in lab, var(--primary) 85%, var(--black));
 }
 
 .openSelectedButton:disabled {
-  background: color-mix(in lab, var(--text) 20%, transparent);
-  color: var(--textLight);
-  cursor: not-allowed;
+	background: color-mix(in lab, var(--text) 20%, transparent);
+	color: var(--textLight);
+	cursor: not-allowed;
 }
 
 .pagination {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: var(--spaceM);
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: var(--spaceM);
 }
 
 .pagination button {
-  background: var(--primary);
-  color: var(--white);
-  border: none;
-  padding: var(--spaceS) var(--spaceM);
-  border-radius: var(--spaceXS);
-  cursor: pointer;
-  font-size: var(--fontSizeBodyS);
-  transition: all var(--durationS) var(--bezierFastoutSlowin);
+	background: var(--primary);
+	color: var(--white);
+	border: none;
+	padding: var(--spaceS) var(--spaceM);
+	border-radius: var(--spaceXS);
+	cursor: pointer;
+	font-size: var(--fontSizeBodyS);
+	transition: all var(--durationS) var(--bezierFastoutSlowin);
 }
 
 .pagination button:hover:not(:disabled) {
-  background: color-mix(in lab, var(--primary) 85%, var(--black));
+	background: color-mix(in lab, var(--primary) 85%, var(--black));
 }
 
 .pagination button:disabled {
-  background: color-mix(in lab, var(--text) 20%, transparent);
-  color: var(--textLight);
-  cursor: not-allowed;
+	background: color-mix(in lab, var(--text) 20%, transparent);
+	color: var(--textLight);
+	cursor: not-allowed;
 }
 
 .pagination span {
-  font-size: var(--fontSizeBodyS);
-  color: var(--textBody);
-  font-weight: var(--fontWeightMedium);
+	font-size: var(--fontSizeBodyS);
+	color: var(--textBody);
+	font-weight: var(--fontWeightMedium);
 }
 
 .loading,
 .error,
 .emptyState {
-  text-align: center;
-  padding: var(--spaceXL);
-  color: var(--textLight);
+	text-align: center;
+	padding: var(--spaceXL);
+	color: var(--textLight);
 }
 
 .error {
-  color: var(--error);
+	color: var(--error);
 }
 
 /* Case Confirmation Status Indicators */
 .caseItemNotConfirmed {
-  background-color: color-mix(
-    in lab,
-    var(--warning) 15%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--warning) 15%, var(--backgroundLight));
 }
 
 .confirmationBadge.caseItemNotConfirmed {
-  background-color: color-mix(
-    in lab,
-    var(--warning) 22%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--warning) 22%, var(--backgroundLight));
 }
 
 .caseItemNotConfirmed:hover {
-  background-color: color-mix(
-    in lab,
-    var(--warning) 20%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--warning) 20%, var(--backgroundLight));
 }
 
 .caseItem.active.caseItemNotConfirmed {
-  background-color: color-mix(
-    in lab,
-    var(--warning) 15%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--warning) 15%, var(--backgroundLight));
 }
 
 .caseItem.active.caseItemNotConfirmed:hover {
-  background-color: color-mix(
-    in lab,
-    var(--warning) 20%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--warning) 20%, var(--backgroundLight));
 }
 
 .caseItemConfirmed {
-  background-color: color-mix(
-    in lab,
-    var(--success) 20%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--success) 20%, var(--backgroundLight));
 }
 
 .confirmationBadge.caseItemConfirmed {
-  background-color: color-mix(
-    in lab,
-    var(--success) 28%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--success) 28%, var(--backgroundLight));
 }
 
 .caseItemConfirmed:hover {
-  background-color: color-mix(
-    in lab,
-    var(--success) 28%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--success) 28%, var(--backgroundLight));
 }
 
 .caseItem.active.caseItemConfirmed {
-  background-color: color-mix(
-    in lab,
-    var(--success) 20%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--success) 20%, var(--backgroundLight));
 }
 
 .caseItem.active.caseItemConfirmed:hover {
-  background-color: color-mix(
-    in lab,
-    var(--success) 28%,
-    var(--backgroundLight)
-  );
+	background-color: color-mix(in lab, var(--success) 28%, var(--backgroundLight));
 }
 
 @media (max-width: 900px) {
-  .controlsSection {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+	.controlsSection {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
 
-  .caseItem {
-    grid-template-columns: 1fr;
-  }
+	.caseItem {
+		grid-template-columns: 1fr;
+	}
 
-  .confirmationBadge {
-    grid-column: 1 / -1;
-    justify-self: start;
-  }
+	.confirmationBadge {
+		grid-column: 1 / -1;
+		justify-self: start;
+	}
 
-  .badgeColumn {
-    grid-column: 1 / -1;
-    justify-self: start;
-    align-items: flex-start;
-  }
+	.badgeColumn {
+		grid-column: 1 / -1;
+		justify-self: start;
+		align-items: flex-start;
+	}
 
-  .footerActions {
-    flex-direction: column;
-    align-items: stretch;
-  }
+	.footerActions {
+		flex-direction: column;
+		align-items: stretch;
+	}
 
-  .maintenanceActions {
-    width: 100%;
-  }
+	.maintenanceActions {
+		width: 100%;
+	}
 
-  .pagination {
-    justify-content: space-between;
-  }
+	.pagination {
+		justify-content: space-between;
+	}
 }

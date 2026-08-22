@@ -2,15 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { auth } from '~/services/firebase';
 import {
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    onAuthStateChanged,
-    sendEmailVerification,
-  type User,
-    updateProfile,
-    getMultiFactorResolver,
-    type MultiFactorResolver,
-    type MultiFactorError
+	signInWithEmailAndPassword,
+	createUserWithEmailAndPassword,
+	onAuthStateChanged,
+	sendEmailVerification,
+	type User,
+	updateProfile,
+	getMultiFactorResolver,
+	type MultiFactorResolver,
+	type MultiFactorError,
 } from 'firebase/auth';
 import { PasswordReset } from '~/routes/auth/passwordReset';
 import { EmailVerification } from '~/routes/auth/emailVerification';
@@ -31,692 +31,667 @@ import type { UserData } from '~/types';
 const SUPPORTED_EMAIL_ACTION_MODES = new Set(['resetPassword', 'verifyEmail']);
 
 const getUserFirstName = (user: User): string => {
-  const displayName = user.displayName?.trim();
-  if (displayName) {
-    const [firstName] = displayName.split(/\s+/);
-    if (firstName) {
-      return firstName;
-    }
-  }
+	const displayName = user.displayName?.trim();
+	if (displayName) {
+		const [firstName] = displayName.split(/\s+/);
+		if (firstName) {
+			return firstName;
+		}
+	}
 
-  const emailPrefix = user.email?.split('@')[0]?.trim();
-  if (emailPrefix) {
-    return emailPrefix;
-  }
+	const emailPrefix = user.email?.split('@')[0]?.trim();
+	if (emailPrefix) {
+		return emailPrefix;
+	}
 
-  return 'User';
+	return 'User';
 };
 
 export const Login = () => {
-  const [searchParams] = useSearchParams();
-  const shouldShowWelcomeToastRef = useRef(false);
+	const [searchParams] = useSearchParams();
+	const shouldShowWelcomeToastRef = useRef(false);
 
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [welcomeToastMessage, setWelcomeToastMessage] = useState('');
-  const [welcomeToastType, setWelcomeToastType] = useState<'success' | 'warning'>('success');
-  const [isWelcomeToastVisible, setIsWelcomeToastVisible] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isCheckingUser, setIsCheckingUser] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [passwordStrength, setPasswordStrength] = useState('');
-  const [isResetting, setIsResetting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [company, setCompany] = useState('');
-  const [badgeId, setBadgeId] = useState('');
-  const [confirmPasswordValue, setConfirmPasswordValue] = useState('');
-  
-  const [year] = useState(() => new Date().getFullYear());
-  const appVersion = getAppVersion();
+	const [error, setError] = useState('');
+	const [success, setSuccess] = useState('');
+	const [welcomeToastMessage, setWelcomeToastMessage] = useState('');
+	const [welcomeToastType, setWelcomeToastType] = useState<'success' | 'warning'>('success');
+	const [isWelcomeToastVisible, setIsWelcomeToastVisible] = useState(false);
+	const [isLogin, setIsLogin] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
+	const [isCheckingUser, setIsCheckingUser] = useState(false);
+	const [user, setUser] = useState<User | null>(null);
+	const [passwordStrength, setPasswordStrength] = useState('');
+	const [isResetting, setIsResetting] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [isClient, setIsClient] = useState(false);
+	const [firstName, setFirstName] = useState('');
+	const [lastName, setLastName] = useState('');
+	const [company, setCompany] = useState('');
+	const [badgeId, setBadgeId] = useState('');
+	const [confirmPasswordValue, setConfirmPasswordValue] = useState('');
 
-  // MFA state
-  const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
-  const [showMfaVerification, setShowMfaVerification] = useState(false);
-  const [showMfaEnrollment, setShowMfaEnrollment] = useState(false);
+	const [year] = useState(() => new Date().getFullYear());
+	const appVersion = getAppVersion();
 
-  const actionMode = searchParams.get('mode');
-  const actionCode = searchParams.get('oobCode');
-  const continueUrl = searchParams.get('continueUrl');
-  const actionLang = searchParams.get('lang');
+	// MFA state
+	const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
+	const [showMfaVerification, setShowMfaVerification] = useState(false);
+	const [showMfaEnrollment, setShowMfaEnrollment] = useState(false);
 
-  const shouldHandleEmailAction = Boolean(
-    actionMode &&
-    actionCode &&
-    SUPPORTED_EMAIL_ACTION_MODES.has(actionMode)
-  );
+	const actionMode = searchParams.get('mode');
+	const actionCode = searchParams.get('oobCode');
+	const continueUrl = searchParams.get('continueUrl');
+	const actionLang = searchParams.get('lang');
 
-  // Check if we're on the client side
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+	const shouldHandleEmailAction = Boolean(actionMode && actionCode && SUPPORTED_EMAIL_ACTION_MODES.has(actionMode));
 
-  // Email validation with regex and registration gateway allowlist check
-  const validateRegistrationEmail = async (email: string): Promise<{ valid: boolean; message?: string }> => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+	// Check if we're on the client side
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
 
-    if (!emailRegex.test(email)) {
-      return { valid: false };
-    }
+	// Warn once an audit entry exhausts all write retries; the underlying action already completed.
+	useEffect(() => {
+		const unsubscribe = auditService.subscribeToPersistFailures(() => {
+			setWelcomeToastType('warning');
+			setWelcomeToastMessage(
+				'An audit entry could not be saved after multiple attempts. Your action was completed, but it may be missing from the audit trail.',
+			);
+			setIsWelcomeToastVisible(true);
+		});
+		return unsubscribe;
+	}, []);
 
-    try {
-      const response = await fetch(`/api/auth/can-register?email=${encodeURIComponent(email)}`);
-      if (response.status === 403) {
-        return {
-          valid: false,
-          message: 'Registration is limited to Striae membership. You may join at https://join.striae.org.'
-        };
-      }
-    } catch {
-      // Fail open on network error — server-side PUT guard provides defense-in-depth
-    }
+	// Email validation with regex and registration gateway allowlist check
+	const validateRegistrationEmail = async (email: string): Promise<{ valid: boolean; message?: string }> => {
+		const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-    return { valid: true };
-  };
+		if (!emailRegex.test(email)) {
+			return { valid: false };
+		}
 
-  const checkPasswordStrength = (password: string, confirmPassword?: string): boolean => {
-    const normalizedConfirmPassword = confirmPassword ?? '';
-    if (password.length === 0 && normalizedConfirmPassword.length === 0) {
-      setPasswordStrength('');
-      return false;
-    }
+		try {
+			const response = await fetch(`/api/auth/can-register?email=${encodeURIComponent(email)}`);
+			if (response.status === 403) {
+				return {
+					valid: false,
+					message: 'Registration is limited to Striae membership. You may join at https://join.striae.org.',
+				};
+			}
+		} catch {
+			// Fail open on network error — server-side PUT guard provides defense-in-depth
+		}
 
-    const policy = evaluatePasswordPolicy(password, confirmPassword);
+		return { valid: true };
+	};
 
-    setPasswordStrength(
-      `Password must contain:
+	const checkPasswordStrength = (password: string, confirmPassword?: string): boolean => {
+		const normalizedConfirmPassword = confirmPassword ?? '';
+		if (password.length === 0 && normalizedConfirmPassword.length === 0) {
+			setPasswordStrength('');
+			return false;
+		}
+
+		const policy = evaluatePasswordPolicy(password, confirmPassword);
+
+		setPasswordStrength(
+			`Password must contain:
       ${!policy.hasMinLength ? '❌' : '✅'} At least 10 characters
       ${!policy.hasUpperCase ? '❌' : '✅'} Capital letters
       ${!policy.hasNumber ? '❌' : '✅'} Numbers
-      ${!policy.hasSpecialChar ? '❌' : '✅'} Special characters${confirmPassword !== undefined ? `
-      ${!policy.passwordsMatch ? '❌' : '✅'} Passwords must match` : ''}`
-    );
-    
-    return policy.isStrong;
-  };  
+      ${!policy.hasSpecialChar ? '❌' : '✅'} Special characters${
+				confirmPassword !== undefined
+					? `
+      ${!policy.passwordsMatch ? '❌' : '✅'} Passwords must match`
+					: ''
+			}`,
+		);
 
-  // Check if user exists in the USER_DB using centralized function
-  const checkUserExists = async (currentUser: User): Promise<UserData | null> => {
-    try {
-      return await getUserData(currentUser);
-    } catch (error) {
-      console.error('Error checking user existence:', error);
-      // On network/API errors, throw error to prevent login
-      throw new Error('System error. Please try logging in at a later time.', { cause: error });
-    }
-  };
+		return policy.isStrong;
+	};
 
-  // Add proper sign out handling
-  const handleSignOut = async () => {
-    try {
-      await auth.signOut();      
-      setUser(null);
-      setIsLoading(false);
-      setShowMfaEnrollment(false);
-      setShowMfaVerification(false);
-      setMfaResolver(null);
-      setIsWelcomeToastVisible(false);
-      setWelcomeToastType('success');
-      shouldShowWelcomeToastRef.current = false;
-    } catch (err) {
-      console.error('Sign out error:', err);
-    }
-  };
+	// Check if user exists in the USER_DB using centralized function
+	const checkUserExists = async (currentUser: User): Promise<UserData | null> => {
+		try {
+			return await getUserData(currentUser);
+		} catch (error) {
+			console.error('Error checking user existence:', error);
+			// On network/API errors, throw error to prevent login
+			throw new Error('System error. Please try logging in at a later time.', { cause: error });
+		}
+	};
 
-   useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (user) => {
-   if (user) {
-      let currentUser = user;
+	// Add proper sign out handling
+	const handleSignOut = async () => {
+		try {
+			await auth.signOut();
+			setUser(null);
+			setIsLoading(false);
+			setShowMfaEnrollment(false);
+			setShowMfaVerification(false);
+			setMfaResolver(null);
+			setIsWelcomeToastVisible(false);
+			setWelcomeToastType('success');
+			shouldShowWelcomeToastRef.current = false;
+		} catch (err) {
+			console.error('Sign out error:', err);
+		}
+	};
 
-      // Refresh auth profile so emailVerified is accurate right after email verification.
-      try {
-        await currentUser.reload();
-        if (auth.currentUser) {
-          currentUser = auth.currentUser;
-        }
-      } catch (reloadError) {
-        console.error('Failed to refresh user verification status:', reloadError);
-      }
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, async (user) => {
+			if (user) {
+				let currentUser = user;
 
-      setUser(currentUser);
-      
-      if (!currentUser.emailVerified) {
-        // Don't sign out immediately - let them see the verification prompt
-        setError('');
-        setSuccess('Please verify your email before continuing. Check your inbox for the verification link.');
-        setShowMfaEnrollment(false);
-        setIsCheckingUser(false);
-        return;
-      }      
-      
-      // Check if user exists in the USER_DB
-      setIsCheckingUser(true);
-      try {
-        const userData = await checkUserExists(currentUser);
-        setIsCheckingUser(false);
-        
-        if (!userData) {
-          handleSignOut();
-          setError('This account does not exist or has been deleted');
-          return;
-        }
-      } catch (error) {
-        setIsCheckingUser(false);
-        handleSignOut();
-        setError(error instanceof Error ? error.message : 'System error. Please try logging in at a later time.');
-        return;
-      }
-      
-      // Check if user has MFA enrolled
-      if (!userHasMFA(currentUser)) {
-        // User has no MFA factors enrolled - require enrollment
-        setShowMfaEnrollment(true);
-        return;
-      }
-      
-      console.log("User signed in:", currentUser.email);
-      setShowMfaEnrollment(false);
+				// Refresh auth profile so emailVerified is accurate right after email verification.
+				try {
+					await currentUser.reload();
+					if (auth.currentUser) {
+						currentUser = auth.currentUser;
+					}
+				} catch (reloadError) {
+					console.error('Failed to refresh user verification status:', reloadError);
+				}
 
-      if (shouldShowWelcomeToastRef.current) {
-        setWelcomeToastType('success');
-        setWelcomeToastMessage(`Welcome to Striae, ${getUserFirstName(currentUser)}!`);
-        setIsWelcomeToastVisible(true);
-        shouldShowWelcomeToastRef.current = false;
-      }
-      
-      // Log successful login audit
-      try {
-        const sessionId = `session_${currentUser.uid}_${Date.now()}_${generateUniqueId(8)}`;
-        await auditService.logUserLogin(
-          currentUser,
-          sessionId,
-          'firebase',
-          navigator.userAgent
-        );
-      } catch (auditError) {
-        console.error('Failed to log user login audit:', auditError);
-        // Continue with login even if audit logging fails
-      }      
-    } else {
-      setUser(null);
-      setShowMfaEnrollment(false);
-      setIsCheckingUser(false);
-      setIsWelcomeToastVisible(false);
-      setWelcomeToastType('success');
-      shouldShowWelcomeToastRef.current = false;
-    }
-  });
+				setUser(currentUser);
 
-   return () => unsubscribe();
-}, []);
+				if (!currentUser.emailVerified) {
+					// Don't sign out immediately - let them see the verification prompt
+					setError('');
+					setSuccess('Please verify your email before continuing. Check your inbox for the verification link.');
+					setShowMfaEnrollment(false);
+					setIsCheckingUser(false);
+					return;
+				}
 
-  useEffect(() => {
-    if (shouldHandleEmailAction) {
-      return;
-    }
+				// Check if user exists in the USER_DB
+				setIsCheckingUser(true);
+				try {
+					const userData = await checkUserExists(currentUser);
+					setIsCheckingUser(false);
 
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      return;
-    }
+					if (!userData) {
+						handleSignOut();
+						setError('This account does not exist or has been deleted');
+						return;
+					}
+				} catch (error) {
+					setIsCheckingUser(false);
+					handleSignOut();
+					setError(error instanceof Error ? error.message : 'System error. Please try logging in at a later time.');
+					return;
+				}
 
-    let isMounted = true;
+				// Check if user has MFA enrolled
+				if (!userHasMFA(currentUser)) {
+					// User has no MFA factors enrolled - require enrollment
+					setShowMfaEnrollment(true);
+					return;
+				}
 
-    const syncMfaAfterEmailAction = async () => {
-      try {
-        await currentUser.reload();
-        const refreshedUser = auth.currentUser ?? currentUser;
+				console.log('User signed in:', currentUser.email);
+				setShowMfaEnrollment(false);
 
-        if (!isMounted) {
-          return;
-        }
+				if (shouldShowWelcomeToastRef.current) {
+					setWelcomeToastType('success');
+					setWelcomeToastMessage(`Welcome to Striae, ${getUserFirstName(currentUser)}!`);
+					setIsWelcomeToastVisible(true);
+					shouldShowWelcomeToastRef.current = false;
+				}
 
-        setUser(refreshedUser);
+				// Log successful login audit
+				try {
+					const sessionId = `session_${currentUser.uid}_${Date.now()}_${generateUniqueId(8)}`;
+					await auditService.logUserLogin(currentUser, sessionId, 'firebase', navigator.userAgent);
+				} catch (auditError) {
+					console.error('Failed to log user login audit:', auditError);
+					// Continue with login even if audit logging fails
+				}
+			} else {
+				setUser(null);
+				setShowMfaEnrollment(false);
+				setIsCheckingUser(false);
+				setIsWelcomeToastVisible(false);
+				setWelcomeToastType('success');
+				shouldShowWelcomeToastRef.current = false;
+			}
+		});
 
-        if (!refreshedUser.emailVerified) {
-          return;
-        }
+		return () => unsubscribe();
+	}, []);
 
-        setShowMfaEnrollment(!userHasMFA(refreshedUser));
-      } catch (refreshError) {
-        console.error('Failed to sync MFA state after email action:', refreshError);
-      }
-    };
+	useEffect(() => {
+		if (shouldHandleEmailAction) {
+			return;
+		}
 
-    void syncMfaAfterEmailAction();
+		const currentUser = auth.currentUser;
+		if (!currentUser) {
+			return;
+		}
 
-    return () => {
-      isMounted = false;
-    };
-  }, [shouldHandleEmailAction]);
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setError('');
-  setSuccess('');
+		let isMounted = true;
 
-  const formData = new FormData(e.currentTarget as HTMLFormElement);
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-  const confirmPassword = formData.get('confirmPassword') as string;
-  // Use state values for these fields instead of FormData
-  const formFirstName = firstName;
-  const formLastName = lastName;
-  const formCompany = company;
-  const formBadgeId = badgeId;
+		const syncMfaAfterEmailAction = async () => {
+			try {
+				await currentUser.reload();
+				const refreshedUser = auth.currentUser ?? currentUser;
 
-  try {
-    if (!isLogin) {
-      const emailValidation = await validateRegistrationEmail(email);
-      if (!emailValidation.valid) {
-        setError(emailValidation.message ?? 'Please enter a valid email address');
-        setIsLoading(false);
-        return;
-      }
+				if (!isMounted) {
+					return;
+				}
 
-      if (password !== confirmPassword) {
-        setError('Passwords do not match');
-        setIsLoading(false);
-        return;
-      }
-      
-      if (!checkPasswordStrength(password)) {
-        setError('Password does not meet requirements');
-        setIsLoading(false);
-        return;
-      }
-    }
+				setUser(refreshedUser);
 
-    if (!isLogin) {
-      // Registration
-      const createCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(createCredential.user, {
-        displayName: `${formFirstName} ${formLastName}`
-      });
+				if (!refreshedUser.emailVerified) {
+					return;
+				}
 
-      const companyName = formCompany.trim();
+				setShowMfaEnrollment(!userHasMFA(refreshedUser));
+			} catch (refreshError) {
+				console.error('Failed to sync MFA state after email action:', refreshError);
+			}
+		};
 
-      // Create user data using centralized function
-      await createUser(
-        createCredential.user,
-        formFirstName,
-        formLastName,
-        companyName || '',
-        true,
-        formBadgeId.trim()
-      );
+		void syncMfaAfterEmailAction();
 
-      // Log user registration audit event
-      try {
-        await auditService.logUserRegistration(
-          createCredential.user,
-          formFirstName,
-          formLastName,
-          companyName || '',
-          'email-password',
-          navigator.userAgent
-        );
-      } catch (auditError) {
-        console.error('Failed to log user registration audit:', auditError);
-        // Continue with registration flow even if audit logging fails
-      }
+		return () => {
+			isMounted = false;
+		};
+	}, [shouldHandleEmailAction]);
 
-      await sendEmailVerification(createCredential.user, buildActionCodeSettings());
-      
-      // Log email verification sent audit event
-      try {
-        // This logs that we sent the verification email, not that it was verified
-        // The actual verification happens when user clicks the email link
-        await auditService.logEmailVerification(
-          createCredential.user,
-          'pending', // Status pending until user clicks verification link
-          'email-link',
-          1, // First attempt
-          undefined, // No sessionId during registration
-          navigator.userAgent,
-          [] // No errors since we successfully sent the email
-        );
-      } catch (auditError) {
-        console.error('Failed to log email verification audit:', auditError);
-        // Continue with registration flow even if audit logging fails
-      }
-      
-      setError('');
-      setSuccess('Account created successfully! Please check your email to verify your account.');
-      // Don't sign out - let user stay logged in but unverified to see verification screen
-    } else {
-      // Login
-      shouldShowWelcomeToastRef.current = true;
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (loginError: unknown) {
-        // Check if it's a Firebase Auth error with MFA requirement
-        if (
-          loginError && 
-          typeof loginError === 'object' && 
-          'code' in loginError && 
-          loginError.code === 'auth/multi-factor-auth-required'
-        ) {
-          // Handle MFA requirement
-          const resolver = getMultiFactorResolver(auth, loginError as MultiFactorError);
-          setMfaResolver(resolver);
-          setShowMfaVerification(true);
-          setIsLoading(false);
-          return;
-        }
-        shouldShowWelcomeToastRef.current = false;
-        throw loginError; // Re-throw non-MFA errors
-      }
-    }
-  } catch (err) {
-    shouldShowWelcomeToastRef.current = false;
-    const { message } = handleAuthError(err);
-    setError(message);
-    
-    // Log security violation for failed authentication attempts
-    try {
-      // Extract error details for audit
-      const errorCode = err && typeof err === 'object' && 'code' in err ? err.code : 'unknown';
-      const isAuthError = typeof errorCode === 'string' && errorCode.startsWith('auth/');
-      
-      if (isAuthError) {
-        // Determine severity based on error type
-        let severity: 'low' | 'medium' | 'high' | 'critical' = 'medium';
-        let incidentType: 'unauthorized-access' | 'brute-force' | 'privilege-escalation' = 'unauthorized-access';
-        
-        if (errorCode === 'auth/too-many-requests') {
-          severity = 'high';
-          incidentType = 'brute-force';
-        } else if (errorCode === 'auth/user-disabled') {
-          severity = 'critical';
-        }
-        
-        await auditService.logSecurityViolation(
-          null, // No user object for failed auth
-          incidentType,
-          severity,
-          `Failed authentication attempt: ${errorCode} - ${message}`,
-          'authentication-endpoint',
-          true // Blocked by system
-        );
-      }
-    } catch (auditError) {
-      console.error('Failed to log security violation audit:', auditError);
-      // Continue with error flow even if audit logging fails
-    }
-  } finally {
-    setIsLoading(false);
-  }
-};
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setIsLoading(true);
+		setError('');
+		setSuccess('');
 
-  // MFA handlers
-  const handleMfaSuccess = () => {
-    setShowMfaVerification(false);
-    setMfaResolver(null);
-    // The auth state listener will handle the rest
-  };
+		const formData = new FormData(e.currentTarget as HTMLFormElement);
+		const email = formData.get('email') as string;
+		const password = formData.get('password') as string;
+		const confirmPassword = formData.get('confirmPassword') as string;
+		// Use state values for these fields instead of FormData
+		const formFirstName = firstName;
+		const formLastName = lastName;
+		const formCompany = company;
+		const formBadgeId = badgeId;
 
-  const handleMfaError = (errorMessage: string) => {
-    setError(errorMessage);
-  };
+		try {
+			if (!isLogin) {
+				const emailValidation = await validateRegistrationEmail(email);
+				if (!emailValidation.valid) {
+					setError(emailValidation.message ?? 'Please enter a valid email address');
+					setIsLoading(false);
+					return;
+				}
 
-  const handleMfaCancel = () => {
-    setShowMfaVerification(false);
-    setMfaResolver(null);
-    setError('Authentication cancelled');
-  };
+				if (password !== confirmPassword) {
+					setError('Passwords do not match');
+					setIsLoading(false);
+					return;
+				}
 
-  // MFA enrollment handlers
-  const handleMfaEnrollmentSuccess = () => {
-    setShowMfaEnrollment(false);
-    setError('');
-    // The auth state listener will re-evaluate the user's MFA status
-  };
+				if (!checkPasswordStrength(password)) {
+					setError('Password does not meet requirements');
+					setIsLoading(false);
+					return;
+				}
+			}
 
-  const handleMfaEnrollmentError = (errorMessage: string) => {
-    setError(errorMessage);
-  };
+			if (!isLogin) {
+				// Registration
+				const createCredential = await createUserWithEmailAndPassword(auth, email, password);
+				await updateProfile(createCredential.user, {
+					displayName: `${formFirstName} ${formLastName}`,
+				});
 
-  return (
-    <>
-      {shouldHandleEmailAction ? (
-        <EmailActionHandler
-          mode={actionMode}
-          oobCode={actionCode}
-          continueUrl={continueUrl}
-          lang={actionLang}
-        />
-      ) : user ? (
-        user.emailVerified ? (
-          <Striae user={user} />
-        ) : (
-          <EmailVerification 
-            user={user}            
-            error={error}
-            success={success}
-            onError={setError}
-            onSuccess={setSuccess}
-            onSignOut={handleSignOut}            
-          />
-        )
-      ) : isResetting ? (
-        <PasswordReset onBack={() => setIsResetting(false)}/>
-      ) : (
-        <div className={styles.container}>
-          <Link 
-            viewTransition
-            prefetch="intent"
-            to="/" 
-            className={styles.logoLink}>
-            <div className={styles.logo} />
-          </Link>
-          <div className={styles.formWrapper}>
-            <h1 className={styles.title}>{isLogin ? 'Login to Striae' : 'Register a Striae Account'}</h1>
-            
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <input
-                type="email"
-                name="email"
-                placeholder={isLogin ? "Email" : "Email Address"}
-                autoComplete="email"
-                className={styles.input}
-                required
-                disabled={isLoading}
-              />
-              <div className={styles.passwordField}>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="Password"
-                  autoComplete={isLogin ? "current-password" : "new-password"}
-                  className={styles.input}
-                  required
-                  disabled={isLoading}
-                  onChange={(e) => !isLogin && checkPasswordStrength(e.target.value, confirmPasswordValue)}
-                />
-                <button
-                  type="button"
-                  className={styles.passwordToggle}
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  <Icon icon={showPassword ? "eye-off" : "eye"} />
-                </button>
-              </div>
-              
-              {!isLogin && (
-                <>
-                  <div className={styles.passwordField}>
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      placeholder="Confirm Password"
-                      autoComplete="new-password"
-                      className={styles.input}
-                      required
-                      disabled={isLoading}
-                      value={confirmPasswordValue}
-                      onChange={(e) => {
-                        setConfirmPasswordValue(e.target.value);
-                        const passwordInput = (e.target.form?.elements.namedItem('password') as HTMLInputElement);
-                        if (passwordInput) {
-                          checkPasswordStrength(passwordInput.value, e.target.value);
-                        }
-                      }}
-                    />
-                    <button
-                      type="button"
-                      className={styles.passwordToggle}
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
-                    >
-                      <Icon icon={showConfirmPassword ? "eye-off" : "eye"} />
-                    </button>
-                  </div>
-                  
-                  <input
-                    type="text"
-                    name="firstName"
-                    required
-                    placeholder="First Name (required)"
-                    autoComplete="given-name"
-                    className={styles.input}
-                    disabled={isLoading}
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    name="lastName"
-                    required
-                    placeholder="Last Name (required)"
-                    autoComplete="family-name"
-                    className={styles.input}
-                    disabled={isLoading}
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    name="company"
-                    required
-                    placeholder="Company/Lab (required)"
-                    autoComplete="organization"
-                    className={styles.input}
-                    disabled={isLoading}
-                    value={company}
-                    onChange={(e) => setCompany(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    name="badgeId"
-                    required
-                    placeholder="Badge/ID # (required)"
-                    autoComplete="off"
-                    className={styles.input}
-                    disabled={isLoading}
-                    value={badgeId}
-                    onChange={(e) => setBadgeId(e.target.value)}
-                  />                      
-                  {passwordStrength && (
-                    <div className={styles.passwordStrength}>
-                      <pre>{passwordStrength}</pre>
-                    </div>
-                  )}
-                </>
-              )}
-              
-              {isLogin && (
-                <button 
-                  type="button"
-                  onClick={() => setIsResetting(true)}
-                  className={styles.resetLink}
-                >
-                  Forgot Password?
-                </button>
-              )}
-              
-              {error && <p className={styles.error}>{error}</p>}
-              {success && <p className={styles.success}>{success}</p>}
-              
-              <button 
-                type="submit" 
-                className={styles.button}
-                disabled={isLoading || isCheckingUser}
-              >
-                {isCheckingUser
-                  ? 'Verifying account...'
-                  : isLoading
-                    ? 'Loading...'
-                    : isLogin
-                      ? 'Login'
-                      : 'Register'}
-              </button>
-            </form>
-            
-            <p className={styles.toggle}>
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <button 
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setShowPassword(false);
-                  setShowConfirmPassword(false);
-                  setPasswordStrength('');
-                  setError('');
-                  setFirstName('');
-                  setLastName('');
-                  setCompany('');
-                  setBadgeId('');
-                  setConfirmPasswordValue('');
-                }}
-                className={styles.toggleButton}
-                disabled={isLoading || isCheckingUser}
-              >
-                {isLogin ? 'Register' : 'Login'}
-              </button>
-            </p>
-            <div className={styles.legalNotice}>
-              <a href={`https://github.com/striae-org/striae/releases/tag/v${appVersion}`} className={styles.legalNoticeLink} target="_blank" rel="noopener noreferrer">Striae v{appVersion}</a> © {year}.{' '}
-              Licensed under Apache 2.0.<br />Patent Pending.
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {!shouldHandleEmailAction && isClient && showMfaVerification && mfaResolver && (
-        <MFAVerification 
-          resolver={mfaResolver}
-          onSuccess={handleMfaSuccess}
-          onError={handleMfaError}
-          onCancel={handleMfaCancel}
-        />
-      )}
-      
-      {!shouldHandleEmailAction && isClient && showMfaEnrollment && user && (
-        <MFAEnrollment 
-          user={user}
-          onSuccess={handleMfaEnrollmentSuccess}
-          onError={handleMfaEnrollmentError}
-          mandatory={true}
-        />
-      )}
+				const companyName = formCompany.trim();
 
-      {!shouldHandleEmailAction && (
-        <Toast
-          message={welcomeToastMessage}
-          type={welcomeToastType}
-          isVisible={isWelcomeToastVisible}
-          onClose={() => setIsWelcomeToastVisible(false)}
-        />
-      )}
-      
-    </>
-  );
+				// Create user data using centralized function
+				await createUser(createCredential.user, formFirstName, formLastName, companyName || '', true, formBadgeId.trim());
+
+				// Log user registration audit event
+				try {
+					await auditService.logUserRegistration(
+						createCredential.user,
+						formFirstName,
+						formLastName,
+						companyName || '',
+						'email-password',
+						navigator.userAgent,
+					);
+				} catch (auditError) {
+					console.error('Failed to log user registration audit:', auditError);
+					// Continue with registration flow even if audit logging fails
+				}
+
+				await sendEmailVerification(createCredential.user, buildActionCodeSettings());
+
+				// Log email verification sent audit event
+				try {
+					// This logs that we sent the verification email, not that it was verified
+					// The actual verification happens when user clicks the email link
+					await auditService.logEmailVerification(
+						createCredential.user,
+						'pending', // Status pending until user clicks verification link
+						'email-link',
+						1, // First attempt
+						undefined, // No sessionId during registration
+						navigator.userAgent,
+						[], // No errors since we successfully sent the email
+					);
+				} catch (auditError) {
+					console.error('Failed to log email verification audit:', auditError);
+					// Continue with registration flow even if audit logging fails
+				}
+
+				setError('');
+				setSuccess('Account created successfully! Please check your email to verify your account.');
+				// Don't sign out - let user stay logged in but unverified to see verification screen
+			} else {
+				// Login
+				shouldShowWelcomeToastRef.current = true;
+				try {
+					await signInWithEmailAndPassword(auth, email, password);
+				} catch (loginError: unknown) {
+					// Check if it's a Firebase Auth error with MFA requirement
+					if (
+						loginError &&
+						typeof loginError === 'object' &&
+						'code' in loginError &&
+						loginError.code === 'auth/multi-factor-auth-required'
+					) {
+						// Handle MFA requirement
+						const resolver = getMultiFactorResolver(auth, loginError as MultiFactorError);
+						setMfaResolver(resolver);
+						setShowMfaVerification(true);
+						setIsLoading(false);
+						return;
+					}
+					shouldShowWelcomeToastRef.current = false;
+					throw loginError; // Re-throw non-MFA errors
+				}
+			}
+		} catch (err) {
+			shouldShowWelcomeToastRef.current = false;
+			const { message } = handleAuthError(err);
+			setError(message);
+
+			// Log security violation for failed authentication attempts
+			try {
+				// Extract error details for audit
+				const errorCode = err && typeof err === 'object' && 'code' in err ? err.code : 'unknown';
+				const isAuthError = typeof errorCode === 'string' && errorCode.startsWith('auth/');
+
+				if (isAuthError) {
+					// Determine severity based on error type
+					let severity: 'low' | 'medium' | 'high' | 'critical' = 'medium';
+					let incidentType: 'unauthorized-access' | 'brute-force' | 'privilege-escalation' = 'unauthorized-access';
+
+					if (errorCode === 'auth/too-many-requests') {
+						severity = 'high';
+						incidentType = 'brute-force';
+					} else if (errorCode === 'auth/user-disabled') {
+						severity = 'critical';
+					}
+
+					await auditService.logSecurityViolation(
+						null, // No user object for failed auth
+						incidentType,
+						severity,
+						`Failed authentication attempt: ${errorCode} - ${message}`,
+						'authentication-endpoint',
+						true, // Blocked by system
+					);
+				}
+			} catch (auditError) {
+				console.error('Failed to log security violation audit:', auditError);
+				// Continue with error flow even if audit logging fails
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	// MFA handlers
+	const handleMfaSuccess = () => {
+		setShowMfaVerification(false);
+		setMfaResolver(null);
+		// The auth state listener will handle the rest
+	};
+
+	const handleMfaError = (errorMessage: string) => {
+		setError(errorMessage);
+	};
+
+	const handleMfaCancel = () => {
+		setShowMfaVerification(false);
+		setMfaResolver(null);
+		setError('Authentication cancelled');
+	};
+
+	// MFA enrollment handlers
+	const handleMfaEnrollmentSuccess = () => {
+		setShowMfaEnrollment(false);
+		setError('');
+		// The auth state listener will re-evaluate the user's MFA status
+	};
+
+	const handleMfaEnrollmentError = (errorMessage: string) => {
+		setError(errorMessage);
+	};
+
+	return (
+		<>
+			{shouldHandleEmailAction ? (
+				<EmailActionHandler mode={actionMode} oobCode={actionCode} continueUrl={continueUrl} lang={actionLang} />
+			) : user ? (
+				user.emailVerified ? (
+					<Striae user={user} />
+				) : (
+					<EmailVerification
+						user={user}
+						error={error}
+						success={success}
+						onError={setError}
+						onSuccess={setSuccess}
+						onSignOut={handleSignOut}
+					/>
+				)
+			) : isResetting ? (
+				<PasswordReset onBack={() => setIsResetting(false)} />
+			) : (
+				<div className={styles.container}>
+					<Link viewTransition prefetch="intent" to="/" className={styles.logoLink}>
+						<div className={styles.logo} />
+					</Link>
+					<div className={styles.formWrapper}>
+						<h1 className={styles.title}>{isLogin ? 'Login to Striae' : 'Register a Striae Account'}</h1>
+
+						<form onSubmit={handleSubmit} className={styles.form}>
+							<input
+								type="email"
+								name="email"
+								placeholder={isLogin ? 'Email' : 'Email Address'}
+								autoComplete="email"
+								className={styles.input}
+								required
+								disabled={isLoading}
+							/>
+							<div className={styles.passwordField}>
+								<input
+									type={showPassword ? 'text' : 'password'}
+									name="password"
+									placeholder="Password"
+									autoComplete={isLogin ? 'current-password' : 'new-password'}
+									className={styles.input}
+									required
+									disabled={isLoading}
+									onChange={(e) => !isLogin && checkPasswordStrength(e.target.value, confirmPasswordValue)}
+								/>
+								<button
+									type="button"
+									className={styles.passwordToggle}
+									onClick={() => setShowPassword(!showPassword)}
+									aria-label={showPassword ? 'Hide password' : 'Show password'}
+								>
+									<Icon icon={showPassword ? 'eye-off' : 'eye'} />
+								</button>
+							</div>
+
+							{!isLogin && (
+								<>
+									<div className={styles.passwordField}>
+										<input
+											type={showConfirmPassword ? 'text' : 'password'}
+											name="confirmPassword"
+											placeholder="Confirm Password"
+											autoComplete="new-password"
+											className={styles.input}
+											required
+											disabled={isLoading}
+											value={confirmPasswordValue}
+											onChange={(e) => {
+												setConfirmPasswordValue(e.target.value);
+												const passwordInput = e.target.form?.elements.namedItem('password') as HTMLInputElement;
+												if (passwordInput) {
+													checkPasswordStrength(passwordInput.value, e.target.value);
+												}
+											}}
+										/>
+										<button
+											type="button"
+											className={styles.passwordToggle}
+											onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+											aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+										>
+											<Icon icon={showConfirmPassword ? 'eye-off' : 'eye'} />
+										</button>
+									</div>
+
+									<input
+										type="text"
+										name="firstName"
+										required
+										placeholder="First Name (required)"
+										autoComplete="given-name"
+										className={styles.input}
+										disabled={isLoading}
+										value={firstName}
+										onChange={(e) => setFirstName(e.target.value)}
+									/>
+									<input
+										type="text"
+										name="lastName"
+										required
+										placeholder="Last Name (required)"
+										autoComplete="family-name"
+										className={styles.input}
+										disabled={isLoading}
+										value={lastName}
+										onChange={(e) => setLastName(e.target.value)}
+									/>
+									<input
+										type="text"
+										name="company"
+										required
+										placeholder="Company/Lab (required)"
+										autoComplete="organization"
+										className={styles.input}
+										disabled={isLoading}
+										value={company}
+										onChange={(e) => setCompany(e.target.value)}
+									/>
+									<input
+										type="text"
+										name="badgeId"
+										required
+										placeholder="Badge/ID # (required)"
+										autoComplete="off"
+										className={styles.input}
+										disabled={isLoading}
+										value={badgeId}
+										onChange={(e) => setBadgeId(e.target.value)}
+									/>
+									{passwordStrength && (
+										<div className={styles.passwordStrength}>
+											<pre>{passwordStrength}</pre>
+										</div>
+									)}
+								</>
+							)}
+
+							{isLogin && (
+								<button type="button" onClick={() => setIsResetting(true)} className={styles.resetLink}>
+									Forgot Password?
+								</button>
+							)}
+
+							{error && <p className={styles.error}>{error}</p>}
+							{success && <p className={styles.success}>{success}</p>}
+
+							<button type="submit" className={styles.button} disabled={isLoading || isCheckingUser}>
+								{isCheckingUser ? 'Verifying account...' : isLoading ? 'Loading...' : isLogin ? 'Login' : 'Register'}
+							</button>
+						</form>
+
+						<p className={styles.toggle}>
+							{isLogin ? "Don't have an account? " : 'Already have an account? '}
+							<button
+								onClick={() => {
+									setIsLogin(!isLogin);
+									setShowPassword(false);
+									setShowConfirmPassword(false);
+									setPasswordStrength('');
+									setError('');
+									setFirstName('');
+									setLastName('');
+									setCompany('');
+									setBadgeId('');
+									setConfirmPasswordValue('');
+								}}
+								className={styles.toggleButton}
+								disabled={isLoading || isCheckingUser}
+							>
+								{isLogin ? 'Register' : 'Login'}
+							</button>
+						</p>
+						<div className={styles.legalNotice}>
+							<a
+								href={`https://github.com/striae-org/striae/releases/tag/v${appVersion}`}
+								className={styles.legalNoticeLink}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Striae v{appVersion}
+							</a>{' '}
+							© {year}. Licensed under Apache 2.0.
+							<br />
+							Patent Pending.
+						</div>
+					</div>
+				</div>
+			)}
+
+			{!shouldHandleEmailAction && isClient && showMfaVerification && mfaResolver && (
+				<MFAVerification resolver={mfaResolver} onSuccess={handleMfaSuccess} onError={handleMfaError} onCancel={handleMfaCancel} />
+			)}
+
+			{!shouldHandleEmailAction && isClient && showMfaEnrollment && user && (
+				<MFAEnrollment user={user} onSuccess={handleMfaEnrollmentSuccess} onError={handleMfaEnrollmentError} mandatory={true} />
+			)}
+
+			{!shouldHandleEmailAction && (
+				<Toast
+					message={welcomeToastMessage}
+					type={welcomeToastType}
+					isVisible={isWelcomeToastVisible}
+					onClose={() => setIsWelcomeToastVisible(false)}
+				/>
+			)}
+		</>
+	);
 };
 
 export default Login;

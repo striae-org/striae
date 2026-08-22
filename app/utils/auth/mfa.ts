@@ -9,7 +9,7 @@ import { multiFactor, PhoneMultiFactorGenerator, TotpMultiFactorGenerator, type 
  * @returns boolean indicating if user has any MFA factors enrolled
  */
 export const userHasMFA = (user: User): boolean => {
-  return multiFactor(user).enrolledFactors.length > 0;
+	return multiFactor(user).enrolledFactors.length > 0;
 };
 
 /**
@@ -18,7 +18,7 @@ export const userHasMFA = (user: User): boolean => {
  * @returns number of enrolled MFA factors
  */
 export const getMFAFactorCount = (user: User): number => {
-  return multiFactor(user).enrolledFactors.length;
+	return multiFactor(user).enrolledFactors.length;
 };
 
 /**
@@ -27,46 +27,42 @@ export const getMFAFactorCount = (user: User): number => {
  * @returns array of MFA factor information
  */
 export const getMFAFactors = (user: User) => {
-  return multiFactor(user).enrolledFactors.map(factor => ({
-    uid: factor.uid,
-    factorId: factor.factorId,
-    displayName: factor.displayName,
-    enrollmentTime: factor.enrollmentTime
-  }));
+	return multiFactor(user).enrolledFactors.map((factor) => ({
+		uid: factor.uid,
+		factorId: factor.factorId,
+		displayName: factor.displayName,
+		enrollmentTime: factor.enrollmentTime,
+	}));
 };
 
 /**
  * Get enrolled TOTP factors for a user
  */
 export const getTotpFactors = (user: User) => {
-  return multiFactor(user).enrolledFactors.filter(
-    (factor) => factor.factorId === TotpMultiFactorGenerator.FACTOR_ID
-  );
+	return multiFactor(user).enrolledFactors.filter((factor) => factor.factorId === TotpMultiFactorGenerator.FACTOR_ID);
 };
 
 /**
  * Check if a user has TOTP MFA enrolled
  */
 export const hasTotpEnrolled = (user: User): boolean => {
-  return getTotpFactors(user).length > 0;
+	return getTotpFactors(user).length > 0;
 };
 
 /**
  * Get enrolled Phone/SMS factors for a user
  */
 export const getPhoneMfaFactors = (user: User) => {
-  return multiFactor(user).enrolledFactors.filter(
-    (factor) => factor.factorId === PhoneMultiFactorGenerator.FACTOR_ID
-  );
+	return multiFactor(user).enrolledFactors.filter((factor) => factor.factorId === PhoneMultiFactorGenerator.FACTOR_ID);
 };
 
 /**
  * Return a human-readable label for a factorId
  */
 export const getMfaMethodLabel = (factorId: string): string => {
-  if (factorId === TotpMultiFactorGenerator.FACTOR_ID) return 'Authenticator App';
-  if (factorId === PhoneMultiFactorGenerator.FACTOR_ID) return 'Phone (SMS)';
-  return 'Unknown Method';
+	if (factorId === TotpMultiFactorGenerator.FACTOR_ID) return 'Authenticator App';
+	if (factorId === PhoneMultiFactorGenerator.FACTOR_ID) return 'Phone (SMS)';
+	return 'Unknown Method';
 };
 
 /*

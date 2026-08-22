@@ -2,332 +2,304 @@ import type { User } from 'firebase/auth';
 import { type AnnotationData, type ItemType } from '~/types';
 
 export interface FileConfirmationSummary {
-  includeConfirmation: boolean;
-  isConfirmed: boolean;
-  updatedAt: string;
-  itemType?: ItemType;
-  leftItemType?: ItemType;
-  rightItemType?: ItemType;
+	includeConfirmation: boolean;
+	isConfirmed: boolean;
+	updatedAt: string;
+	leftItemType?: ItemType;
+	rightItemType?: ItemType;
 }
 
 export interface CaseConfirmationSummary {
-  includeConfirmation: boolean;
-  isConfirmed: boolean;
-  updatedAt: string;
-  filesById: Record<string, FileConfirmationSummary>;
+	includeConfirmation: boolean;
+	isConfirmed: boolean;
+	updatedAt: string;
+	filesById: Record<string, FileConfirmationSummary>;
 }
 
 export interface UserConfirmationSummaryDocument {
-  version: number;
-  updatedAt: string;
-  cases: Record<string, CaseConfirmationSummary>;
+	version: number;
+	updatedAt: string;
+	cases: Record<string, CaseConfirmationSummary>;
 }
 
 export interface ConfirmationSummaryEnsureOptions {
-  forceRefresh?: boolean;
-  maxAgeMs?: number;
-  /**
-   * Pre-fetched summary document to use instead of fetching from the data worker.
-   * Useful when the document has already been fetched in a parallel request, such as
-   * during initial case load, to avoid a redundant round-trip.
-   */
-  prefetchedSummary?: UserConfirmationSummaryDocument;
+	forceRefresh?: boolean;
+	maxAgeMs?: number;
+	/**
+	 * Pre-fetched summary document to use instead of fetching from the data worker.
+	 * Useful when the document has already been fetched in a parallel request, such as
+	 * during initial case load, to avoid a redundant round-trip.
+	 */
+	prefetchedSummary?: UserConfirmationSummaryDocument;
 }
 
 export interface ConfirmationSummaryTelemetry {
-  ensureCalls: number;
-  caseCacheHits: number;
-  caseMisses: number;
-  forceRefreshCalls: number;
-  staleCaseRefreshes: number;
-  staleFileRefreshes: number;
-  missingFileRefreshes: number;
-  removedFileEntries: number;
-  refreshedFileEntries: number;
-  summaryWrites: number;
+	ensureCalls: number;
+	caseCacheHits: number;
+	caseMisses: number;
+	forceRefreshCalls: number;
+	staleCaseRefreshes: number;
+	staleFileRefreshes: number;
+	missingFileRefreshes: number;
+	removedFileEntries: number;
+	refreshedFileEntries: number;
+	summaryWrites: number;
 }
 
 export const CONFIRMATION_SUMMARY_VERSION = 1;
-export const DEFAULT_CONFIRMATION_SUMMARY_MAX_AGE_MS = 5 * 60 * 1000;
+export const DEFAULT_CONFIRMATION_SUMMARY_MAX_AGE_MS = 60 * 60 * 1000;
 
 const CONFIRMATION_SUMMARY_LOG_INTERVAL = 25;
 
 const confirmationSummaryTelemetry: ConfirmationSummaryTelemetry = {
-  ensureCalls: 0,
-  caseCacheHits: 0,
-  caseMisses: 0,
-  forceRefreshCalls: 0,
-  staleCaseRefreshes: 0,
-  staleFileRefreshes: 0,
-  missingFileRefreshes: 0,
-  removedFileEntries: 0,
-  refreshedFileEntries: 0,
-  summaryWrites: 0
+	ensureCalls: 0,
+	caseCacheHits: 0,
+	caseMisses: 0,
+	forceRefreshCalls: 0,
+	staleCaseRefreshes: 0,
+	staleFileRefreshes: 0,
+	missingFileRefreshes: 0,
+	removedFileEntries: 0,
+	refreshedFileEntries: 0,
+	summaryWrites: 0,
 };
 
 export function getConfirmationSummaryTelemetry(): ConfirmationSummaryTelemetry {
-  return { ...confirmationSummaryTelemetry };
+	return { ...confirmationSummaryTelemetry };
 }
 
 export function resetConfirmationSummaryTelemetry(): void {
-  for (const key of Object.keys(confirmationSummaryTelemetry) as Array<keyof ConfirmationSummaryTelemetry>) {
-    confirmationSummaryTelemetry[key] = 0;
-  }
+	for (const key of Object.keys(confirmationSummaryTelemetry) as Array<keyof ConfirmationSummaryTelemetry>) {
+		confirmationSummaryTelemetry[key] = 0;
+	}
 }
 
 function getGlobalDebugFlag(): boolean {
-  const globalScope = globalThis as unknown as {
-    __STRIAE_DEBUG_CONFIRMATION_CACHE__?: boolean;
-  };
+	const globalScope = globalThis as unknown as {
+		__STRIAE_DEBUG_CONFIRMATION_CACHE__?: boolean;
+	};
 
-  return globalScope.__STRIAE_DEBUG_CONFIRMATION_CACHE__ === true;
+	return globalScope.__STRIAE_DEBUG_CONFIRMATION_CACHE__ === true;
 }
 
 function getLocalStorageDebugFlag(): boolean {
-  if (typeof window === 'undefined' || !window.localStorage) {
-    return false;
-  }
+	if (typeof window === 'undefined' || !window.localStorage) {
+		return false;
+	}
 
-  try {
-    return window.localStorage.getItem('striae.debug.confirmationCache') === 'true';
-  } catch {
-    return false;
-  }
+	try {
+		return window.localStorage.getItem('striae.debug.confirmationCache') === 'true';
+	} catch {
+		return false;
+	}
 }
 
 function shouldLogConfirmationSummaryTelemetry(): boolean {
-  return getGlobalDebugFlag() || getLocalStorageDebugFlag();
+	return getGlobalDebugFlag() || getLocalStorageDebugFlag();
 }
 
 function maybeLogConfirmationSummaryTelemetrySnapshot(): void {
-  if (!shouldLogConfirmationSummaryTelemetry()) {
-    return;
-  }
+	if (!shouldLogConfirmationSummaryTelemetry()) {
+		return;
+	}
 
-  if (
-    confirmationSummaryTelemetry.ensureCalls === 0 ||
-    confirmationSummaryTelemetry.ensureCalls % CONFIRMATION_SUMMARY_LOG_INTERVAL !== 0
-  ) {
-    return;
-  }
+	if (
+		confirmationSummaryTelemetry.ensureCalls === 0 ||
+		confirmationSummaryTelemetry.ensureCalls % CONFIRMATION_SUMMARY_LOG_INTERVAL !== 0
+	) {
+		return;
+	}
 
-  const totalCaseLookups =
-    confirmationSummaryTelemetry.caseCacheHits + confirmationSummaryTelemetry.caseMisses;
-  const caseCacheHitRate =
-    totalCaseLookups > 0
-      ? Math.round((confirmationSummaryTelemetry.caseCacheHits / totalCaseLookups) * 100)
-      : 0;
+	const totalCaseLookups = confirmationSummaryTelemetry.caseCacheHits + confirmationSummaryTelemetry.caseMisses;
+	const caseCacheHitRate = totalCaseLookups > 0 ? Math.round((confirmationSummaryTelemetry.caseCacheHits / totalCaseLookups) * 100) : 0;
 
-  console.info('[confirmation-cache] summary', {
-    ensureCalls: confirmationSummaryTelemetry.ensureCalls,
-    caseCacheHitRate,
-    caseCacheHits: confirmationSummaryTelemetry.caseCacheHits,
-    caseMisses: confirmationSummaryTelemetry.caseMisses,
-    forceRefreshCalls: confirmationSummaryTelemetry.forceRefreshCalls,
-    staleCaseRefreshes: confirmationSummaryTelemetry.staleCaseRefreshes,
-    missingFileRefreshes: confirmationSummaryTelemetry.missingFileRefreshes,
-    staleFileRefreshes: confirmationSummaryTelemetry.staleFileRefreshes,
-    refreshedFileEntries: confirmationSummaryTelemetry.refreshedFileEntries,
-    removedFileEntries: confirmationSummaryTelemetry.removedFileEntries,
-    summaryWrites: confirmationSummaryTelemetry.summaryWrites
-  });
+	console.info('[confirmation-cache] summary', {
+		ensureCalls: confirmationSummaryTelemetry.ensureCalls,
+		caseCacheHitRate,
+		caseCacheHits: confirmationSummaryTelemetry.caseCacheHits,
+		caseMisses: confirmationSummaryTelemetry.caseMisses,
+		forceRefreshCalls: confirmationSummaryTelemetry.forceRefreshCalls,
+		staleCaseRefreshes: confirmationSummaryTelemetry.staleCaseRefreshes,
+		missingFileRefreshes: confirmationSummaryTelemetry.missingFileRefreshes,
+		staleFileRefreshes: confirmationSummaryTelemetry.staleFileRefreshes,
+		refreshedFileEntries: confirmationSummaryTelemetry.refreshedFileEntries,
+		removedFileEntries: confirmationSummaryTelemetry.removedFileEntries,
+		summaryWrites: confirmationSummaryTelemetry.summaryWrites,
+	});
 }
 
 export function trackEnsureCall(): void {
-  confirmationSummaryTelemetry.ensureCalls += 1;
-  maybeLogConfirmationSummaryTelemetrySnapshot();
+	confirmationSummaryTelemetry.ensureCalls += 1;
+	maybeLogConfirmationSummaryTelemetrySnapshot();
 }
 
 export function trackCaseMiss(): void {
-  confirmationSummaryTelemetry.caseMisses += 1;
+	confirmationSummaryTelemetry.caseMisses += 1;
 }
 
 export function trackCaseHit(): void {
-  confirmationSummaryTelemetry.caseCacheHits += 1;
+	confirmationSummaryTelemetry.caseCacheHits += 1;
 }
 
 export function trackForceRefreshCall(): void {
-  confirmationSummaryTelemetry.forceRefreshCalls += 1;
+	confirmationSummaryTelemetry.forceRefreshCalls += 1;
 }
 
 export function trackStaleCaseRefresh(): void {
-  confirmationSummaryTelemetry.staleCaseRefreshes += 1;
+	confirmationSummaryTelemetry.staleCaseRefreshes += 1;
 }
 
 export function trackMissingFileRefresh(): void {
-  confirmationSummaryTelemetry.missingFileRefreshes += 1;
+	confirmationSummaryTelemetry.missingFileRefreshes += 1;
 }
 
 export function trackStaleFileRefresh(): void {
-  confirmationSummaryTelemetry.staleFileRefreshes += 1;
+	confirmationSummaryTelemetry.staleFileRefreshes += 1;
 }
 
 export function trackRemovedFileEntry(): void {
-  confirmationSummaryTelemetry.removedFileEntries += 1;
+	confirmationSummaryTelemetry.removedFileEntries += 1;
 }
 
 export function trackRefreshedFileEntry(): void {
-  confirmationSummaryTelemetry.refreshedFileEntries += 1;
+	confirmationSummaryTelemetry.refreshedFileEntries += 1;
 }
 
 export function trackSummaryWrite(): void {
-  confirmationSummaryTelemetry.summaryWrites += 1;
+	confirmationSummaryTelemetry.summaryWrites += 1;
 }
 
 export function getIsoNow(): string {
-  return new Date().toISOString();
+	return new Date().toISOString();
 }
 
 export function createEmptyConfirmationSummary(): UserConfirmationSummaryDocument {
-  return {
-    version: CONFIRMATION_SUMMARY_VERSION,
-    updatedAt: getIsoNow(),
-    cases: {}
-  };
+	return {
+		version: CONFIRMATION_SUMMARY_VERSION,
+		updatedAt: getIsoNow(),
+		cases: {},
+	};
 }
 
 export function buildConfirmationSummaryPath(user: User): string {
-  return `/${encodeURIComponent(user.uid)}/meta/confirmation-status.json`;
+	return `/${encodeURIComponent(user.uid)}/meta/confirmation-status.json`;
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === 'object' && !Array.isArray(value);
+	return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
 function normalizeFileConfirmationSummary(value: unknown): FileConfirmationSummary {
-  if (!isPlainObject(value)) {
-    return {
-      includeConfirmation: false,
-      isConfirmed: false,
-      updatedAt: getIsoNow()
-    };
-  }
+	if (!isPlainObject(value)) {
+		return {
+			includeConfirmation: false,
+			isConfirmed: false,
+			updatedAt: getIsoNow(),
+		};
+	}
 
-  // Support both new 'itemType' and legacy 'classType' properties
-  const itemType = value.itemType ?? value.classType;
-  const normalizedItemType = typeof itemType === 'string' && ['Bullet', 'Cartridge Case', 'Shotshell', 'Other'].includes(itemType) ? (itemType as ItemType) : undefined;
-  const normalizedLeftItemType =
-    typeof value.leftItemType === 'string' && ['Bullet', 'Cartridge Case', 'Shotshell', 'Other'].includes(value.leftItemType)
-      ? (value.leftItemType as ItemType)
-      : undefined;
-  const normalizedRightItemType =
-    typeof value.rightItemType === 'string' && ['Bullet', 'Cartridge Case', 'Shotshell', 'Other'].includes(value.rightItemType)
-      ? (value.rightItemType as ItemType)
-      : undefined;
+	const normalizedLeftItemType =
+		typeof value.leftItemType === 'string' && ['Bullet', 'Cartridge Case', 'Shotshell', 'Other'].includes(value.leftItemType)
+			? (value.leftItemType as ItemType)
+			: undefined;
+	const normalizedRightItemType =
+		typeof value.rightItemType === 'string' && ['Bullet', 'Cartridge Case', 'Shotshell', 'Other'].includes(value.rightItemType)
+			? (value.rightItemType as ItemType)
+			: undefined;
 
-  const summary: FileConfirmationSummary = {
-    includeConfirmation: value.includeConfirmation === true,
-    isConfirmed: value.isConfirmed === true,
-    updatedAt: typeof value.updatedAt === 'string' && value.updatedAt.length > 0 ? value.updatedAt : getIsoNow()
-  };
+	const summary: FileConfirmationSummary = {
+		includeConfirmation: value.includeConfirmation === true,
+		isConfirmed: value.isConfirmed === true,
+		updatedAt: typeof value.updatedAt === 'string' && value.updatedAt.length > 0 ? value.updatedAt : getIsoNow(),
+	};
 
-  if (normalizedItemType) {
-    summary.itemType = normalizedItemType;
-  }
+	if (normalizedLeftItemType) {
+		summary.leftItemType = normalizedLeftItemType;
+	}
 
-  if (normalizedLeftItemType) {
-    summary.leftItemType = normalizedLeftItemType;
-  }
+	if (normalizedRightItemType) {
+		summary.rightItemType = normalizedRightItemType;
+	}
 
-  if (normalizedRightItemType) {
-    summary.rightItemType = normalizedRightItemType;
-  }
-
-  return summary;
+	return summary;
 }
 
 export function isStaleTimestamp(timestamp: string, maxAgeMs: number): boolean {
-  const parsed = Date.parse(timestamp);
-  if (Number.isNaN(parsed)) {
-    return true;
-  }
+	const parsed = Date.parse(timestamp);
+	if (Number.isNaN(parsed)) {
+		return true;
+	}
 
-  return Date.now() - parsed > maxAgeMs;
+	return Date.now() - parsed > maxAgeMs;
 }
 
 export function computeCaseConfirmationAggregate(filesById: Record<string, FileConfirmationSummary>): {
-  includeConfirmation: boolean;
-  isConfirmed: boolean;
+	includeConfirmation: boolean;
+	isConfirmed: boolean;
 } {
-  const statuses = Object.values(filesById);
-  const filesRequiringConfirmation = statuses.filter((entry) => entry.includeConfirmation);
-  const includeConfirmation = filesRequiringConfirmation.length > 0;
-  const isConfirmed = includeConfirmation ? filesRequiringConfirmation.every((entry) => entry.isConfirmed) : false;
+	const statuses = Object.values(filesById);
+	const filesRequiringConfirmation = statuses.filter((entry) => entry.includeConfirmation);
+	const includeConfirmation = filesRequiringConfirmation.length > 0;
+	const isConfirmed = includeConfirmation ? filesRequiringConfirmation.every((entry) => entry.isConfirmed) : false;
 
-  return {
-    includeConfirmation,
-    isConfirmed
-  };
+	return {
+		includeConfirmation,
+		isConfirmed,
+	};
 }
 
 export function toFileConfirmationSummary(annotationData: AnnotationData | null): FileConfirmationSummary {
-  const includeConfirmation = annotationData?.includeConfirmation === true;
-  const leftItemType = annotationData?.leftItemType || annotationData?.itemType || (annotationData?.classType as ItemType | undefined);
-  const rightItemType = annotationData?.rightItemType;
+	const includeConfirmation = annotationData?.includeConfirmation === true;
+	const leftItemType = annotationData?.leftItemType;
+	const rightItemType = annotationData?.rightItemType;
 
-  const summary: FileConfirmationSummary = {
-    includeConfirmation,
-    isConfirmed: includeConfirmation && !!annotationData?.confirmationData,
-    updatedAt: getIsoNow()
-  };
+	const summary: FileConfirmationSummary = {
+		includeConfirmation,
+		isConfirmed: includeConfirmation && !!annotationData?.confirmationData,
+		updatedAt: getIsoNow(),
+	};
 
-  if (leftItemType) {
-    summary.leftItemType = leftItemType;
-  }
+	if (leftItemType) {
+		summary.leftItemType = leftItemType;
+	}
 
-  if (rightItemType) {
-    summary.rightItemType = rightItemType;
-  }
+	if (rightItemType) {
+		summary.rightItemType = rightItemType;
+	}
 
-  // Keep legacy single-value item type for existing consumers.
-  if (leftItemType) {
-    summary.itemType = leftItemType;
-  } else if (rightItemType) {
-    summary.itemType = rightItemType;
-  }
-
-  return summary;
+	return summary;
 }
 
 export function normalizeConfirmationSummaryDocument(payload: unknown): UserConfirmationSummaryDocument {
-  if (!isPlainObject(payload) || !isPlainObject(payload.cases)) {
-    return createEmptyConfirmationSummary();
-  }
+	if (!isPlainObject(payload) || !isPlainObject(payload.cases)) {
+		return createEmptyConfirmationSummary();
+	}
 
-  const normalizedCases: Record<string, CaseConfirmationSummary> = {};
+	const normalizedCases: Record<string, CaseConfirmationSummary> = {};
 
-  for (const [caseNumber, rawCaseEntry] of Object.entries(payload.cases)) {
-    if (!isPlainObject(rawCaseEntry) || !isPlainObject(rawCaseEntry.filesById)) {
-      continue;
-    }
+	for (const [caseNumber, rawCaseEntry] of Object.entries(payload.cases)) {
+		if (!isPlainObject(rawCaseEntry) || !isPlainObject(rawCaseEntry.filesById)) {
+			continue;
+		}
 
-    const filesById: Record<string, FileConfirmationSummary> = {};
-    for (const [fileId, rawFileEntry] of Object.entries(rawCaseEntry.filesById)) {
-      filesById[fileId] = normalizeFileConfirmationSummary(rawFileEntry);
-    }
+		const filesById: Record<string, FileConfirmationSummary> = {};
+		for (const [fileId, rawFileEntry] of Object.entries(rawCaseEntry.filesById)) {
+			filesById[fileId] = normalizeFileConfirmationSummary(rawFileEntry);
+		}
 
-    const aggregate = computeCaseConfirmationAggregate(filesById);
+		const aggregate = computeCaseConfirmationAggregate(filesById);
 
-    normalizedCases[caseNumber] = {
-      includeConfirmation: aggregate.includeConfirmation,
-      isConfirmed: aggregate.isConfirmed,
-      updatedAt:
-        typeof rawCaseEntry.updatedAt === 'string' && rawCaseEntry.updatedAt.length > 0
-          ? rawCaseEntry.updatedAt
-          : getIsoNow(),
-      filesById
-    };
-  }
+		normalizedCases[caseNumber] = {
+			includeConfirmation: aggregate.includeConfirmation,
+			isConfirmed: aggregate.isConfirmed,
+			updatedAt: typeof rawCaseEntry.updatedAt === 'string' && rawCaseEntry.updatedAt.length > 0 ? rawCaseEntry.updatedAt : getIsoNow(),
+			filesById,
+		};
+	}
 
-  return {
-    version:
-      typeof payload.version === 'number' && Number.isFinite(payload.version)
-        ? payload.version
-        : CONFIRMATION_SUMMARY_VERSION,
-    updatedAt:
-      typeof payload.updatedAt === 'string' && payload.updatedAt.length > 0
-        ? payload.updatedAt
-        : getIsoNow(),
-    cases: normalizedCases
-  };
+	return {
+		version: typeof payload.version === 'number' && Number.isFinite(payload.version) ? payload.version : CONFIRMATION_SUMMARY_VERSION,
+		updatedAt: typeof payload.updatedAt === 'string' && payload.updatedAt.length > 0 ? payload.updatedAt : getIsoNow(),
+		cases: normalizedCases,
+	};
 }

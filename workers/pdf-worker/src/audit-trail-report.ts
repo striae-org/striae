@@ -4,71 +4,71 @@ import { buildRepeatedChromePdfOptions, escapeHtml } from './report-layout';
 const safeText = (value: unknown): string => escapeHtml(String(value ?? ''));
 
 const formatTimestamp = (timestamp: string, timezone?: string): string => {
-  const parsed = new Date(timestamp);
-  if (Number.isNaN(parsed.getTime())) {
-    return timestamp;
-  }
+	const parsed = new Date(timestamp);
+	if (Number.isNaN(parsed.getTime())) {
+		return timestamp;
+	}
 
-  if (!timezone) {
-    return parsed.toISOString();
-  }
+	if (!timezone) {
+		return parsed.toISOString();
+	}
 
-  try {
-      const parts = new Intl.DateTimeFormat('en-US', {
-        timeZone: timezone,
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-        timeZoneName: 'short'
-      }).formatToParts(parsed);
+	try {
+		const parts = new Intl.DateTimeFormat('en-US', {
+			timeZone: timezone,
+			month: '2-digit',
+			day: '2-digit',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit',
+			hour12: false,
+			timeZoneName: 'short',
+		}).formatToParts(parsed);
 
-      const get = (type: string): string => parts.find(p => p.type === type)?.value ?? '';
-      return `${get('month')}/${get('day')}/${get('year')} ${get('hour')}:${get('minute')}:${get('second')} ${get('timeZoneName')}`;
-  } catch {
-    return parsed.toISOString();
-  }
+		const get = (type: string): string => parts.find((p) => p.type === type)?.value ?? '';
+		return `${get('month')}/${get('day')}/${get('year')} ${get('hour')}:${get('minute')}:${get('second')} ${get('timeZoneName')}`;
+	} catch {
+		return parsed.toISOString();
+	}
 };
 
 const renderEntryDetailsSummary = (entry: Record<string, unknown>): string => {
-  const details = (entry.details ?? {}) as Record<string, unknown>;
-  const caseNumber = typeof details.caseNumber === 'string' ? details.caseNumber : '';
-  const workflowPhase = typeof details.workflowPhase === 'string' ? details.workflowPhase : '';
-  const fileName = typeof details.fileName === 'string' ? details.fileName : '';
+	const details = (entry.details ?? {}) as Record<string, unknown>;
+	const caseNumber = typeof details.caseNumber === 'string' ? details.caseNumber : '';
+	const workflowPhase = typeof details.workflowPhase === 'string' ? details.workflowPhase : '';
+	const fileName = typeof details.fileName === 'string' ? details.fileName : '';
 
-  const summaryRows = [
-    caseNumber ? `<div><strong>Case:</strong> ${safeText(caseNumber)}</div>` : '',
-    workflowPhase ? `<div><strong>Phase:</strong> ${safeText(workflowPhase)}</div>` : '',
-    fileName ? `<div><strong>File:</strong> ${safeText(fileName)}</div>` : ''
-  ].filter(Boolean);
+	const summaryRows = [
+		caseNumber ? `<div><strong>Case:</strong> ${safeText(caseNumber)}</div>` : '',
+		workflowPhase ? `<div><strong>Phase:</strong> ${safeText(workflowPhase)}</div>` : '',
+		fileName ? `<div><strong>File:</strong> ${safeText(fileName)}</div>` : '',
+	].filter(Boolean);
 
-  if (summaryRows.length === 0) {
-    return '<div class="entry-meta-muted">No structured summary fields available.</div>';
-  }
+	if (summaryRows.length === 0) {
+		return '<div class="entry-meta-muted">No structured summary fields available.</div>';
+	}
 
-  return summaryRows.join('');
+	return summaryRows.join('');
 };
 
 const renderRawJsonAppendix = (entry: unknown): string => {
-  if (entry === null || entry === undefined) {
-    return '';
-  }
+	if (entry === null || entry === undefined) {
+		return '';
+	}
 
-  let rawJson: string;
-  try {
-    rawJson = JSON.stringify(entry, null, 2) ?? '';
-  } catch {
-    return '';
-  }
+	let rawJson: string;
+	try {
+		rawJson = JSON.stringify(entry, null, 2) ?? '';
+	} catch {
+		return '';
+	}
 
-  if (!rawJson) {
-    return '';
-  }
+	if (!rawJson) {
+		return '';
+	}
 
-  return `
+	return `
     <div class="entry-raw-json">
       <div class="entry-raw-label">Raw JSON Entry</div>
       <pre>${escapeHtml(rawJson)}</pre>
@@ -76,33 +76,33 @@ const renderRawJsonAppendix = (entry: unknown): string => {
   `;
 };
 
-export const isAuditTrailReportMode = (data: PDFGenerationData): boolean =>
-  data.reportMode === 'audit-trail';
+export const isAuditTrailReportMode = (data: PDFGenerationData): boolean => data.reportMode === 'audit-trail';
 
 export const getAuditTrailPayload = (data: PDFGenerationData): AuditTrailReportPayload => {
-  const payload = data.auditTrailReport;
+	const payload = data.auditTrailReport;
 
-  if (!payload) {
-    throw new Error('Audit trail report payload is required when reportMode is audit-trail');
-  }
+	if (!payload) {
+		throw new Error('Audit trail report payload is required when reportMode is audit-trail');
+	}
 
-  return payload;
+	return payload;
 };
 
 export const renderAuditTrailReport = (data: PDFGenerationData): string => {
-  const payload = getAuditTrailPayload(data);
-  const entries = payload.entries || [];
-  const timezone = data.userTimezone;
+	const payload = getAuditTrailPayload(data);
+	const entries = payload.entries || [];
+	const timezone = data.userTimezone;
 
-  const entrySections = entries.map((entry, index) => {
-    const entryRecord = entry as Record<string, unknown>;
-    const timestamp = typeof entryRecord.timestamp === 'string' ? entryRecord.timestamp : 'unknown';
-    const action = typeof entryRecord.action === 'string' ? entryRecord.action : 'unknown';
-    const result = typeof entryRecord.result === 'string' ? entryRecord.result : 'unknown';
-    const userEmail = typeof entryRecord.userEmail === 'string' ? entryRecord.userEmail : 'unknown';
-    const userId = typeof entryRecord.userId === 'string' ? entryRecord.userId : 'unknown';
+	const entrySections = entries
+		.map((entry, index) => {
+			const entryRecord = entry as Record<string, unknown>;
+			const timestamp = typeof entryRecord.timestamp === 'string' ? entryRecord.timestamp : 'unknown';
+			const action = typeof entryRecord.action === 'string' ? entryRecord.action : 'unknown';
+			const result = typeof entryRecord.result === 'string' ? entryRecord.result : 'unknown';
+			const userEmail = typeof entryRecord.userEmail === 'string' ? entryRecord.userEmail : 'unknown';
+			const userId = typeof entryRecord.userId === 'string' ? entryRecord.userId : 'unknown';
 
-    return `
+			return `
       <section class="entry-section">
         <h3 class="entry-title">Entry ${index + 1} of ${entries.length}</h3>
         <div class="entry-core-grid">
@@ -118,9 +118,10 @@ export const renderAuditTrailReport = (data: PDFGenerationData): string => {
         ${renderRawJsonAppendix(entry)}
       </section>
     `;
-  }).join('');
+		})
+		.join('');
 
-  return `
+	return `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -234,20 +235,20 @@ export const renderAuditTrailReport = (data: PDFGenerationData): string => {
 };
 
 export const getAuditTrailPdfOptions = (data: PDFGenerationData): Partial<ReportPdfOptions> => {
-  const payload = getAuditTrailPayload(data);
+	const payload = getAuditTrailPayload(data);
 
-  return {
-    format: 'letter',
-    ...buildRepeatedChromePdfOptions({
-      headerLeft: data.currentDate,
-      headerCenter: 'Case Audit Trail Report',
-      headerRight: `Case ${payload.caseNumber}`,
-      headerDetailLeft: `Entries ${payload.totalEntries}`,
-      headerDetailRight: `Part ${payload.chunkIndex}/${payload.totalChunks}`,
-      footerLeft: 'Striae Audit Export',
-      footerCenter: payload.exportedAt,
-      footerRight: `Case ${payload.caseNumber}`,
-      includePageNumbers: true
-    })
-  };
+	return {
+		format: 'letter',
+		...buildRepeatedChromePdfOptions({
+			headerLeft: data.currentDate,
+			headerCenter: 'Case Audit Trail Report',
+			headerRight: `Case ${payload.caseNumber}`,
+			headerDetailLeft: `Entries ${payload.totalEntries}`,
+			headerDetailRight: `Part ${payload.chunkIndex}/${payload.totalChunks}`,
+			footerLeft: 'Striae Audit Export',
+			footerCenter: payload.exportedAt,
+			footerRight: `Case ${payload.caseNumber}`,
+			includePageNumbers: true,
+		}),
+	};
 };

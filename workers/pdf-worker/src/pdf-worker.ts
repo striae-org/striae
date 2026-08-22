@@ -2,219 +2,211 @@ import type { PDFGenerationData, PDFGenerationRequest, ReportModule, ReportPdfOp
 import { getAuditTrailPdfOptions, isAuditTrailReportMode, renderAuditTrailReport } from './audit-trail-report';
 
 interface Env {
-  ACCOUNT_ID?: string;
-  BROWSER_API_TOKEN?: string;
+	ACCOUNT_ID?: string;
+	BROWSER_API_TOKEN?: string;
 }
 
 const BROWSER_PDF_TIMEOUT_MS = 90_000;
 const BROWSER_RENDERING_API_BASE = 'https://api.cloudflare.com/client/v4/accounts';
 
 const DEFAULT_PDF_OPTIONS: ReportPdfOptions = {
-  printBackground: true,
-  format: 'letter',
-  margin: {
-    top: '0.5in',
-    bottom: '0.5in',
-    left: '0.5in',
-    right: '0.5in',
-  },
+	printBackground: true,
+	format: 'letter',
+	margin: {
+		top: '0.5in',
+		bottom: '0.5in',
+		left: '0.5in',
+		right: '0.5in',
+	},
 };
 
 function resolvePdfOptions(overrides?: Partial<ReportPdfOptions>): ReportPdfOptions {
-  return {
-    ...DEFAULT_PDF_OPTIONS,
-    ...overrides,
-    margin: {
-      ...DEFAULT_PDF_OPTIONS.margin,
-      ...overrides?.margin,
-    },
-  };
+	return {
+		...DEFAULT_PDF_OPTIONS,
+		...overrides,
+		margin: {
+			...DEFAULT_PDF_OPTIONS.margin,
+			...overrides?.margin,
+		},
+	};
 }
 
 const reportModuleLoaders: Record<string, () => Promise<ReportModule>> = {
-  // Default Striae report format module
-  striae: () => import('./formats/format-striae'),
-  // Additional formats can be added here
-  primershear: () => import('./formats/format-primer-shear'),
-
+	// Default Striae report format module
+	striae: () => import('./formats/format-striae'),
+	// Additional formats can be added here
+	primershear: () => import('./formats/format-primer-shear'),
 };
 
 function isTimeoutError(error: unknown): boolean {
-  return error instanceof Error && (
-    error.name === 'AbortError' ||
-    error.name === 'TimeoutError' ||
-    /timed out/i.test(error.message)
-  );
+	return error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError' || /timed out/i.test(error.message));
 }
 
 function jsonResponse(body: unknown, status: number): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'content-type': 'application/json' },
-  });
+	return new Response(JSON.stringify(body), {
+		status,
+		headers: { 'content-type': 'application/json' },
+	});
 }
 
 class MissingSecretError extends Error {
-  readonly secretKey: string;
+	readonly secretKey: string;
 
-  constructor(key: string) {
-    super(`Worker is missing required secret: ${key}`);
-    this.name = 'MissingSecretError';
-    this.secretKey = key;
-  }
+	constructor(key: string) {
+		super(`Worker is missing required secret: ${key}`);
+		this.name = 'MissingSecretError';
+		this.secretKey = key;
+	}
 }
 
 function getRequiredSecret(value: string | undefined, name: string): string {
-  if (typeof value !== 'string') {
-    throw new MissingSecretError(name);
-  }
+	if (typeof value !== 'string') {
+		throw new MissingSecretError(name);
+	}
 
-  const normalized = value.trim();
-  if (!normalized) {
-    throw new MissingSecretError(name);
-  }
+	const normalized = value.trim();
+	if (!normalized) {
+		throw new MissingSecretError(name);
+	}
 
-  return normalized;
+	return normalized;
 }
 
 function resolveReportRequest(payload: unknown): PDFGenerationRequest {
-  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-    throw new Error('Request body must be a JSON object');
-  }
+	if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+		throw new Error('Request body must be a JSON object');
+	}
 
-  const record = payload as Record<string, unknown>;
-  if (typeof record.reportFormat !== 'string' || record.reportFormat.trim().length === 0) {
-    throw new Error('Request body must include a non-empty reportFormat');
-  }
+	const record = payload as Record<string, unknown>;
+	if (typeof record.reportFormat !== 'string' || record.reportFormat.trim().length === 0) {
+		throw new Error('Request body must include a non-empty reportFormat');
+	}
 
-  if (!record.data || typeof record.data !== 'object' || Array.isArray(record.data)) {
-    throw new Error('Request body must include a data object');
-  }
+	if (!record.data || typeof record.data !== 'object' || Array.isArray(record.data)) {
+		throw new Error('Request body must include a data object');
+	}
 
-  const data = record.data as Record<string, unknown>;
-  if (typeof data.currentDate !== 'string' || data.currentDate.trim().length === 0) {
-    throw new Error('Request body data must include a non-empty currentDate');
-  }
+	const data = record.data as Record<string, unknown>;
+	if (typeof data.currentDate !== 'string' || data.currentDate.trim().length === 0) {
+		throw new Error('Request body data must include a non-empty currentDate');
+	}
 
-  return {
-    reportFormat: record.reportFormat.trim().toLowerCase(),
-    data: record.data as PDFGenerationData,
-  };
+	return {
+		reportFormat: record.reportFormat.trim().toLowerCase(),
+		data: record.data as PDFGenerationData,
+	};
 }
 
 async function renderReport(reportFormat: string, data: PDFGenerationData): Promise<{ html: string; pdfOptions: ReportPdfOptions }> {
-  if (isAuditTrailReportMode(data)) {
-    return {
-      html: renderAuditTrailReport(data),
-      pdfOptions: resolvePdfOptions(getAuditTrailPdfOptions(data)),
-    };
-  }
+	if (isAuditTrailReportMode(data)) {
+		return {
+			html: renderAuditTrailReport(data),
+			pdfOptions: resolvePdfOptions(getAuditTrailPdfOptions(data)),
+		};
+	}
 
-  const loader = reportModuleLoaders[reportFormat];
+	const loader = reportModuleLoaders[reportFormat];
 
-  if (!loader) {
-    const supportedFormats = Object.keys(reportModuleLoaders).sort().join(', ');
-    throw new Error(`Unsupported report format "${reportFormat}". Supported formats: ${supportedFormats}`);
-  }
+	if (!loader) {
+		const supportedFormats = Object.keys(reportModuleLoaders).sort().join(', ');
+		throw new Error(`Unsupported report format "${reportFormat}". Supported formats: ${supportedFormats}`);
+	}
 
-  const reportModule = await loader();
-  return {
-    html: reportModule.renderReport(data),
-    pdfOptions: resolvePdfOptions(reportModule.getPdfOptions?.(data)),
-  };
+	const reportModule = await loader();
+	return {
+		html: reportModule.renderReport(data),
+		pdfOptions: resolvePdfOptions(reportModule.getPdfOptions?.(data)),
+	};
 }
 
 async function renderPdfViaRestEndpoint(env: Env, html: string, pdfOptions: ReportPdfOptions): Promise<Response> {
-  const accountId = getRequiredSecret(env.ACCOUNT_ID, 'ACCOUNT_ID');
-  const browserApiToken = getRequiredSecret(env.BROWSER_API_TOKEN, 'BROWSER_API_TOKEN');
+	const accountId = getRequiredSecret(env.ACCOUNT_ID, 'ACCOUNT_ID');
+	const browserApiToken = getRequiredSecret(env.BROWSER_API_TOKEN, 'BROWSER_API_TOKEN');
 
-  const endpoint = `${BROWSER_RENDERING_API_BASE}/${accountId}/browser-rendering/pdf`;
-  const requestBody = JSON.stringify({
-    html,
-    pdfOptions,
-  });
+	const endpoint = `${BROWSER_RENDERING_API_BASE}/${accountId}/browser-rendering/pdf`;
+	const requestBody = JSON.stringify({
+		html,
+		pdfOptions,
+	});
 
-  let endpointResponse: Response;
+	let endpointResponse: Response;
 
-  try {
-    endpointResponse = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${browserApiToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: requestBody,
-      signal: AbortSignal.timeout(BROWSER_PDF_TIMEOUT_MS),
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown browser endpoint error';
-    return jsonResponse(
-      {
-        error: 'Unable to reach Browser Rendering endpoint',
-        endpoint,
-        message,
-      },
-      isTimeoutError(error) ? 504 : 502
-    );
-  }
+	try {
+		endpointResponse = await fetch(endpoint, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${browserApiToken}`,
+				'Content-Type': 'application/json',
+			},
+			body: requestBody,
+			signal: AbortSignal.timeout(BROWSER_PDF_TIMEOUT_MS),
+		});
+	} catch (error) {
+		const message = error instanceof Error ? error.message : 'Unknown browser endpoint error';
+		return jsonResponse(
+			{
+				error: 'Unable to reach Browser Rendering endpoint',
+				endpoint,
+				message,
+			},
+			isTimeoutError(error) ? 504 : 502,
+		);
+	}
 
-  if (!endpointResponse.ok) {
-    const failureText = await endpointResponse.text().catch(() => '');
-    return jsonResponse(
-      {
-        error: 'Browser Rendering endpoint returned an error',
-        endpoint,
-        status: endpointResponse.status,
-        details: failureText.slice(0, 512) || endpointResponse.statusText || 'Unknown endpoint failure',
-      },
-      endpointResponse.status === 504 ? 504 : 502
-    );
-  }
+	if (!endpointResponse.ok) {
+		const failureText = await endpointResponse.text().catch(() => '');
+		return jsonResponse(
+			{
+				error: 'Browser Rendering endpoint returned an error',
+				endpoint,
+				status: endpointResponse.status,
+				details: failureText.slice(0, 512) || endpointResponse.statusText || 'Unknown endpoint failure',
+			},
+			endpointResponse.status === 504 ? 504 : 502,
+		);
+	}
 
-  const responseHeaders = new Headers(endpointResponse.headers);
-  if (!responseHeaders.has('content-type')) {
-    responseHeaders.set('content-type', 'application/pdf');
-  }
+	const responseHeaders = new Headers(endpointResponse.headers);
+	if (!responseHeaders.has('content-type')) {
+		responseHeaders.set('content-type', 'application/pdf');
+	}
 
-  if (!responseHeaders.has('cache-control')) {
-    responseHeaders.set('cache-control', 'no-store');
-  }
+	if (!responseHeaders.has('cache-control')) {
+		responseHeaders.set('cache-control', 'no-store');
+	}
 
-  return new Response(endpointResponse.body, {
-    status: endpointResponse.status,
-    statusText: endpointResponse.statusText,
-    headers: responseHeaders,
-  });
+	return new Response(endpointResponse.body, {
+		status: endpointResponse.status,
+		statusText: endpointResponse.statusText,
+		headers: responseHeaders,
+	});
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    if (request.method === 'POST') {
-      try {
-        const payload = await request.json() as unknown;
-        const { reportFormat, data } = resolveReportRequest(payload);
-        const document = await renderReport(reportFormat, data);
+	async fetch(request: Request, env: Env): Promise<Response> {
+		if (request.method === 'POST') {
+			try {
+				const payload = (await request.json()) as unknown;
+				const { reportFormat, data } = resolveReportRequest(payload);
+				const document = await renderReport(reportFormat, data);
 
-        return await renderPdfViaRestEndpoint(env, document.html, document.pdfOptions);
-      } catch (error) {
-        if (error instanceof MissingSecretError) {
-          console.error(`[pdf-worker] Configuration error: ${error.message}`);
-          return jsonResponse(
-            { error: 'Worker configuration error', missing_secret: error.secretKey },
-            502
-          );
-        }
+				return await renderPdfViaRestEndpoint(env, document.html, document.pdfOptions);
+			} catch (error) {
+				if (error instanceof MissingSecretError) {
+					console.error(`[pdf-worker] Configuration error: ${error.message}`);
+					return jsonResponse({ error: 'Worker configuration error', missing_secret: error.secretKey }, 502);
+				}
 
-        if (isTimeoutError(error)) {
-          const timeoutMessage = error instanceof Error ? error.message : 'PDF generation timed out';
-          return jsonResponse({ error: timeoutMessage }, 504);
-        }
+				if (isTimeoutError(error)) {
+					const timeoutMessage = error instanceof Error ? error.message : 'PDF generation timed out';
+					return jsonResponse({ error: timeoutMessage }, 504);
+				}
 
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        return jsonResponse({ error: errorMessage }, 500);
-      }
-    }
+				const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+				return jsonResponse({ error: errorMessage }, 500);
+			}
+		}
 
-    return jsonResponse({ error: 'Method not allowed' }, 405);
-  },
+		return jsonResponse({ error: 'Method not allowed' }, 405);
+	},
 };

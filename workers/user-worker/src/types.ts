@@ -1,42 +1,44 @@
 export interface Env {
-  USER_DB: KVNamespace;
-  STRIAE_DATA: R2Bucket;
-  STRIAE_FILES: R2Bucket;
-  STRIAE_CONFIG: R2Bucket;
-  REGISTRY_ENCRYPTION_KEY: string;
-  DATA_AT_REST_ENCRYPTION_PRIVATE_KEY?: string;
-  DATA_AT_REST_ENCRYPTION_KEY_ID?: string;
-  DATA_AT_REST_ENCRYPTION_KEYS_JSON?: string;
-  DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID?: string;
-  PROJECT_ID: string;
-  FIREBASE_SERVICE_ACCOUNT_EMAIL: string;
-  FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY: string;
-  USER_KV_ENCRYPTION_PRIVATE_KEY: string;
-  USER_KV_ENCRYPTION_PUBLIC_KEY: string;
-  USER_KV_ENCRYPTION_KEY_ID: string;
-  USER_KV_ENCRYPTION_KEYS_JSON?: string;
-  USER_KV_ENCRYPTION_ACTIVE_KEY_ID?: string;
+	USER_DB: KVNamespace;
+	STRIAE_DATA: R2Bucket;
+	STRIAE_FILES: R2Bucket;
+	STRIAE_CONFIG: R2Bucket;
+	REGISTRY_ENCRYPTION_KEY: string;
+	DATA_AT_REST_ENCRYPTION_PRIVATE_KEY?: string;
+	DATA_AT_REST_ENCRYPTION_PUBLIC_KEY?: string;
+	DATA_AT_REST_ENCRYPTION_KEY_ID?: string;
+	DATA_AT_REST_ENCRYPTION_KEYS_JSON?: string;
+	DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID?: string;
+	PROJECT_ID: string;
+	FIREBASE_SERVICE_ACCOUNT_EMAIL: string;
+	FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY: string;
+	USER_KV_ENCRYPTION_PRIVATE_KEY: string;
+	USER_KV_ENCRYPTION_PUBLIC_KEY: string;
+	USER_KV_ENCRYPTION_KEY_ID: string;
+	USER_KV_ENCRYPTION_KEYS_JSON?: string;
+	USER_KV_ENCRYPTION_ACTIVE_KEY_ID?: string;
 }
 
 export interface KeyRegistryPayload {
-  activeKeyId?: unknown;
-  keys?: unknown;
+	activeKeyId?: unknown;
+	keys?: unknown;
 }
 
 export interface PrivateKeyRegistry {
-  activeKeyId: string | null;
-  keys: Record<string, string>;
+	activeKeyId: string | null;
+	keys: Record<string, string>;
 }
 
 export type DecryptionTelemetryOutcome = 'primary-hit' | 'fallback-hit' | 'all-failed';
 
 export interface SuccessResponse {
-  success: boolean;
-  message?: string;
+	success: boolean;
+	pendingCleanup?: boolean;
+	message?: string;
 }
 
 export interface ErrorResponse {
-  error: string;
+	error: string;
 }
 
 export type APIResponse = SuccessResponse | ErrorResponse | UserData;
@@ -44,80 +46,89 @@ export type APIResponse = SuccessResponse | ErrorResponse | UserData;
 export type CreateResponse = (data: APIResponse, status?: number) => Response;
 
 export interface CaseItem {
-  caseNumber: string;
-  caseName?: string;
-  [key: string]: unknown;
+	caseNumber: string;
+	caseName?: string;
+	[key: string]: unknown;
 }
 
 export interface ReadOnlyCaseItem {
-  caseNumber: string;
-  caseName?: string;
-  [key: string]: unknown;
+	caseNumber: string;
+	caseName?: string;
+	[key: string]: unknown;
 }
 
 export interface UserData {
-  uid: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  company: string;
-  badgeId?: string;
-  permitted: boolean;
-  cases: CaseItem[];
-  readOnlyCases?: ReadOnlyCaseItem[];
-  createdAt?: string;
-  updatedAt?: string;
+	uid: string;
+	email: string;
+	firstName: string;
+	lastName: string;
+	company: string;
+	badgeId?: string;
+	permitted: boolean;
+	cases: CaseItem[];
+	readOnlyCases?: ReadOnlyCaseItem[];
+	createdAt?: string;
+	updatedAt?: string;
 }
 
 export interface StoredCaseFileData {
-  id?: unknown;
-  fileData?: {
-    id?: unknown;
-  };
+	id?: unknown;
+	fileData?: {
+		id?: unknown;
+	};
 }
 
 export interface StoredCaseData {
-  files?: StoredCaseFileData[];
-  otherFiles?: StoredCaseFileData[];
+	files?: StoredCaseFileData[];
+	otherFiles?: StoredCaseFileData[];
 }
 
 export interface UserRequestData {
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  company?: string;
-  badgeId?: string;
-  permitted?: boolean;
-  readOnlyCases?: ReadOnlyCaseItem[];
+	email?: string;
+	firstName?: string;
+	lastName?: string;
+	company?: string;
+	badgeId?: string;
+	permitted?: boolean;
+	readOnlyCases?: ReadOnlyCaseItem[];
 }
 
 export interface AddCasesRequest {
-  cases: CaseItem[];
+	cases: CaseItem[];
 }
 
 export interface DeleteCasesRequest {
-  casesToDelete: string[];
+	casesToDelete: string[];
 }
 
 export interface AccountDeletionProgressEvent {
-  event: 'start' | 'case-start' | 'case-complete' | 'complete' | 'error';
-  totalCases: number;
-  completedCases: number;
-  currentCaseNumber?: string;
-  success?: boolean;
-  message?: string;
+	event: 'start' | 'case-start' | 'case-complete' | 'complete' | 'error';
+	totalCases: number;
+	completedCases: number;
+	currentCaseNumber?: string;
+	success?: boolean;
+	pendingCleanup?: boolean;
+	message?: string;
+}
+
+export interface AccountDeletionResult {
+	success: boolean;
+	message: string;
+	totalCases: number;
+	completedCases: number;
+	pendingCleanup: boolean;
 }
 
 export interface GoogleOAuthTokenResponse {
-  access_token?: string;
-  error?: string;
-  error_description?: string;
+	access_token?: string;
+	error?: string;
+	error_description?: string;
 }
 
 export interface FirebaseDeleteAccountErrorResponse {
-  error?: {
-    message?: string;
-  };
+	error?: {
+		message?: string;
+	};
 }
 
 export type ResponseHeaders = Record<string, string>;

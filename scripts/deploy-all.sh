@@ -4,7 +4,8 @@
 # STRIAE COMPLETE DEPLOYMENT SCRIPT
 # ======================================
 # This script deploys the entire Striae application:
-# 1. Configuration setup (copy configs, replace placeholders)
+# 1. Configuration setup (copy configs, replace placeholders, refresh generated
+#    wrangler.jsonc/wrangler.toml/firebase.ts from templates via --refresh-templates)
 # 2. Worker dependencies installation
 # 3. Wrangler types generation
 # 4. Workers (all 7 workers)
@@ -34,6 +35,40 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 trap 'echo -e "\n${RED}❌ deploy-all.sh failed near line ${LINENO}${NC}"' ERR
+
+redeploy_only=false
+for arg in "$@"; do
+    case "$arg" in
+        -r|--redeploy-only)
+            redeploy_only=true
+            ;;
+        -h|--help)
+            echo "Usage: deploy-all.sh [--redeploy-only]"
+            echo ""
+            echo "  --redeploy-only, -r   Redeploy workers and Pages using the existing"
+            echo "                        configuration only. Skips configuration setup"
+            echo "                        (deploy-config), but still uploads key"
+            echo "                        registries and deploys worker/Pages secrets."
+            echo "                        Normal (non-redeploy-only) runs pass"
+            echo "                        --refresh-templates to deploy-config.sh so"
+            echo "                        already-initialized deployments regenerate"
+            echo "                        wrangler.jsonc/wrangler.toml/firebase.ts from"
+            echo "                        the current templates."
+            echo "  -h, --help            Show this help message."
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}❌ Unknown option: $arg${NC}"
+            echo "Use --help to see supported options."
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$redeploy_only" = "true" ]; then
+    echo -e "${YELLOW}🔁 Redeploy-only mode: configuration setup (deploy-config) will NOT be changed.${NC}"
+    echo ""
+fi
 
 require_command() {
     local cmd=$1
@@ -84,14 +119,19 @@ echo ""
 # Step 1: Configuration Setup
 echo -e "${PURPLE}Step 1/8: Configuration Setup${NC}"
 echo "------------------------------"
-echo -e "${YELLOW}⚙️  Setting up configuration files and replacing placeholders...${NC}"
-if ! bash "$SCRIPT_DIR/deploy-config.sh"; then
-    echo -e "${RED}❌ Configuration setup failed!${NC}"
-    echo -e "${YELLOW}Please check your .env file and configuration before proceeding.${NC}"
-    exit 1
+if [ "$redeploy_only" = "true" ]; then
+    echo -e "${YELLOW}⏭️  Skipping configuration setup (redeploy-only mode)${NC}"
+else
+    echo -e "${YELLOW}⚙️  Setting up configuration files and replacing placeholders...${NC}"
+    echo -e "${YELLOW}   (using --refresh-templates so already-initialized deployments pick up new template fields)${NC}"
+    if ! bash "$SCRIPT_DIR/deploy-config.sh" --refresh-templates; then
+        echo -e "${RED}❌ Configuration setup failed!${NC}"
+        echo -e "${YELLOW}Please check your .env file and configuration before proceeding.${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✅ Configuration setup completed successfully${NC}"
+    run_config_checkpoint
 fi
-echo -e "${GREEN}✅ Configuration setup completed successfully${NC}"
-run_config_checkpoint
 echo ""
 
 # Step 2: Install Worker Dependencies
@@ -175,12 +215,14 @@ echo ""
 
 # Step 8: Deploy Pages
 echo -e "${PURPLE}Step 8/8: Deploying Pages${NC}"
-echo "--------------------------"echo -e "${YELLOW}🛡️ Running admin-service security guard before Pages deployment...${NC}"
+echo "--------------------------"
+echo -e "${YELLOW}🛡️ Running admin-service security guard before Pages deployment...${NC}"
 if ! npm run security:admin-service-guard; then
     echo -e "${RED}❌ Admin-service security guard failed!${NC}"
     exit 1
 fi
-echo -e "${GREEN}✅ Admin-service security guard passed${NC}"echo -e "${YELLOW}🌐 Building and deploying Pages...${NC}"
+echo -e "${GREEN}✅ Admin-service security guard passed${NC}"
+echo -e "${YELLOW}🌐 Building and deploying Pages...${NC}"
 if ! npm run deploy-pages; then
     echo -e "${RED}❌ Pages deployment failed!${NC}"
     exit 1
@@ -197,9 +239,13 @@ echo -e "${BLUE}Deployed Components:${NC}"
 echo "  ✅ Worker dependencies (npm install)"
 echo "  ✅ Wrangler types (root + all workers)"
 echo "  ✅ 7 Cloudflare Workers"
+echo "  ✅ Cloudflare Pages frontend"
+echo "  ✅ Key registries"
 echo "  ✅ Worker environment variables"
 echo "  ✅ Pages environment variables"
-echo "  ✅ Cloudflare Pages frontend"
+if [ "$redeploy_only" = "true" ]; then
+    echo "  ⏭️  Configuration setup (skipped - redeploy-only mode)"
+fi
 echo ""
 echo -e "${BLUE}Next Steps:${NC}"
 echo "  1. Test your application endpoints"
