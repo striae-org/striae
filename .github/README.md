@@ -20,6 +20,12 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-22] - *[Patch Release v10.1.1](https://github.com/striae-org/striae/releases/tag/v10.1.1)* — *Manifest Signing Authorization Fix + UI Refinements*
+
+- **🔐 Manifest Signing Authorization Fix (Security/Reliability Fix)** - Fixed a follow-up gap from the v10.0.0/v9.0.0 forensic signing authorization hardening: the data worker's server-side case-authorization check calls the user worker, but the required `USER_WORKER` service binding was missing from `wrangler.jsonc`, causing forensic manifest/confirmation/audit-export signing requests to fail with an opaque 502. Added the binding and wired `USER_WORKER_NAME` into deploy-config scaffolding/validation so it's generated correctly on fresh deploys.
+- **🎨 UI Refinements** - Fixed `supportLevel`/`subClass` label positioning on the canvas and route layout, and removed the audit-write-failure warning toast from the login screen (it remains active in the main workspace).
+- **🛠️ Deploy Script Fix** - Fixed Firebase config placeholder replacement in deploy-config scripts to match single- or double-quoted tokens.
+
 ## [2026-08-21] - *[Minor Release v10.1.0](https://github.com/striae-org/striae/releases/tag/v10.1.0)* — *Data Entry Enhancements + Legacy Type Removal + Unencrypted Fallback Removal*
 
 - **📝 Data Entry Enhancements** - Added a shotshell length field, consolidated shot size data entry with custom/other support, and added an 'RN' bullet type option.
