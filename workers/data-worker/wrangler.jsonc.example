@@ -23,5 +23,12 @@
     }
   ],
 
+  "services": [
+    {
+      "binding": "USER_WORKER",
+      "service": "USER_WORKER_NAME"
+    }
+  ],
+
   "placement": { "mode": "smart" }
 }
