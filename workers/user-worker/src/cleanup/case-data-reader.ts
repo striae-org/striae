@@ -1,6 +1,7 @@
 import { decryptJsonFromStorage, type DataAtRestEnvelope } from '../encryption-utils';
 import type { Env, PrivateKeyRegistry, StoredCaseData } from '../types';
 import { fetchKeyRegistryFromR2 } from '../../../../shared/registry/r2-key-registry';
+import { buildPrivateKeyCandidates } from '../../../../shared/registry/key-candidates';
 
 function getNonEmptyString(value: unknown): string | null {
 	return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
@@ -10,37 +11,6 @@ function getNonEmptyString(value: unknown): string | null {
 // reuse it across many records instead of refetching per case-data key.
 export async function getDataAtRestPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegistry> {
 	return fetchKeyRegistryFromR2(env.STRIAE_CONFIG, 'data-at-rest', env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID, env.REGISTRY_ENCRYPTION_KEY);
-}
-
-function buildPrivateKeyCandidates(
-	recordKeyId: string | null,
-	registry: PrivateKeyRegistry,
-): Array<{ keyId: string; privateKeyPem: string }> {
-	const candidates: Array<{ keyId: string; privateKeyPem: string }> = [];
-	const seen = new Set<string>();
-
-	const appendCandidate = (candidateKeyId: string | null): void => {
-		if (!candidateKeyId || seen.has(candidateKeyId)) {
-			return;
-		}
-
-		const privateKeyPem = registry.keys[candidateKeyId];
-		if (!privateKeyPem) {
-			return;
-		}
-
-		seen.add(candidateKeyId);
-		candidates.push({ keyId: candidateKeyId, privateKeyPem });
-	};
-
-	appendCandidate(recordKeyId);
-	appendCandidate(registry.activeKeyId);
-
-	for (const keyId of Object.keys(registry.keys)) {
-		appendCandidate(keyId);
-	}
-
-	return candidates;
 }
 
 export function extractDataAtRestEnvelope(file: R2ObjectBody): DataAtRestEnvelope | null {

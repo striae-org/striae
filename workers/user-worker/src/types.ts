@@ -24,12 +24,7 @@ export interface KeyRegistryPayload {
 	keys?: unknown;
 }
 
-export interface PrivateKeyRegistry {
-	activeKeyId: string | null;
-	keys: Record<string, string>;
-}
-
-export type DecryptionTelemetryOutcome = 'primary-hit' | 'fallback-hit' | 'all-failed';
+export type { PrivateKeyRegistry, DecryptionTelemetryOutcome } from '../../../shared/registry/key-candidates';
 
 export interface SuccessResponse {
 	success: boolean;

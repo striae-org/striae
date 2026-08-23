@@ -1,66 +1,16 @@
 import { decryptExportData, decryptImageBlob, decryptJsonFromStorage, type DataAtRestEnvelope } from '../encryption-utils';
-import type { DecryptionTelemetryOutcome, Env, ExportDecryptionContext, PrivateKeyRegistry } from '../types';
+import type { Env, ExportDecryptionContext, PrivateKeyRegistry } from '../types';
 import { fetchKeyRegistryFromR2 } from '../../../../shared/registry/r2-key-registry';
+import { buildPrivateKeyCandidates, logKeyRegistryDecryptionTelemetry } from '../../../../shared/registry/key-candidates';
 
 export function getNonEmptyString(value: unknown): string | null {
 	return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
 }
 
-function buildPrivateKeyCandidates(
-	recordKeyId: string | null,
-	registry: PrivateKeyRegistry,
-): Array<{ keyId: string; privateKeyPem: string }> {
-	const candidates: Array<{ keyId: string; privateKeyPem: string }> = [];
-	const seen = new Set<string>();
-
-	const appendCandidate = (candidateKeyId: string | null): void => {
-		if (!candidateKeyId || seen.has(candidateKeyId)) {
-			return;
-		}
-
-		const privateKeyPem = registry.keys[candidateKeyId];
-		if (!privateKeyPem) {
-			return;
-		}
-
-		seen.add(candidateKeyId);
-		candidates.push({ keyId: candidateKeyId, privateKeyPem });
-	};
-
-	appendCandidate(recordKeyId);
-	appendCandidate(registry.activeKeyId);
-
-	for (const keyId of Object.keys(registry.keys)) {
-		appendCandidate(keyId);
-	}
-
-	return candidates;
-}
-
-function logRegistryDecryptionTelemetry(input: {
+function logRegistryDecryptionTelemetry(input: Parameters<typeof logKeyRegistryDecryptionTelemetry>[0] & {
 	scope: 'data-at-rest' | 'export-data' | 'export-image';
-	recordKeyId: string | null;
-	selectedKeyId: string | null;
-	attemptCount: number;
-	outcome: DecryptionTelemetryOutcome;
-	reason?: string;
 }): void {
-	const details = {
-		scope: input.scope,
-		recordKeyId: input.recordKeyId,
-		selectedKeyId: input.selectedKeyId,
-		attemptCount: input.attemptCount,
-		fallbackUsed: input.outcome === 'fallback-hit',
-		outcome: input.outcome,
-		reason: input.reason ?? null,
-	};
-
-	if (input.outcome === 'all-failed') {
-		console.warn('Key registry decryption failed', details);
-		return;
-	}
-
-	console.info('Key registry decryption resolved', details);
+	logKeyRegistryDecryptionTelemetry(input);
 }
 
 async function getDataAtRestPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegistry> {

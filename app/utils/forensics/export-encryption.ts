@@ -1,4 +1,8 @@
 import paths from '~/config/config.json';
+import { base64UrlEncode, base64UrlDecode } from '../../../shared/crypto/base64url';
+import { createAesGcmKey, wrapAesKey } from '../../../shared/crypto/rsa-oaep-public';
+
+export { base64UrlDecode };
 
 export const EXPORT_ENCRYPTION_VERSION = '1.0';
 export const EXPORT_ENCRYPTION_ALGORITHM = 'RSA-OAEP-AES-256-GCM';
@@ -36,63 +40,8 @@ type ManifestEncryptionConfig = {
 	export_encryption_public_keys?: Record<string, string>;
 };
 
-function base64UrlEncode(value: Uint8Array): string {
-	let binary = '';
-	for (const byte of value) {
-		binary += String.fromCharCode(byte);
-	}
-
-	return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-}
-
-export function base64UrlDecode(value: string): Uint8Array {
-	const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
-	const padding = '='.repeat((4 - (normalized.length % 4)) % 4);
-	const decoded = atob(normalized + padding);
-	const bytes = new Uint8Array(decoded.length);
-
-	for (let i = 0; i < decoded.length; i += 1) {
-		bytes[i] = decoded.charCodeAt(i);
-	}
-
-	return bytes;
-}
-
 function normalizePemPublicKey(pem: string): string {
 	return pem.replace(/\\n/g, '\n').trim();
-}
-
-function publicKeyPemToArrayBuffer(publicKeyPem: string): ArrayBuffer {
-	const normalized = normalizePemPublicKey(publicKeyPem);
-	const pemBody = normalized.replace('-----BEGIN PUBLIC KEY-----', '').replace('-----END PUBLIC KEY-----', '').replace(/\s+/g, '');
-
-	if (!pemBody) {
-		throw new Error('Encryption public key is invalid');
-	}
-
-	const binary = atob(pemBody);
-	const bytes = new Uint8Array(binary.length);
-
-	for (let index = 0; index < binary.length; index += 1) {
-		bytes[index] = binary.charCodeAt(index);
-	}
-
-	return bytes.buffer;
-}
-
-async function importRsaOaepPublicKey(publicKeyPem: string): Promise<CryptoKey> {
-	const key = await crypto.subtle.importKey(
-		'spki',
-		publicKeyPemToArrayBuffer(publicKeyPem),
-		{
-			name: 'RSA-OAEP',
-			hash: 'SHA-256',
-		},
-		false,
-		['encrypt'],
-	);
-
-	return key;
 }
 
 export function getCurrentEncryptionPublicKeyDetails(): PublicEncryptionKeyDetails {
@@ -160,11 +109,7 @@ function getEncryptionPublicKey(keyId: string): string | null {
  * Generate a shared AES-256-GCM key for all exports in one batch
  */
 export async function generateSharedAesKey(): Promise<CryptoKey> {
-	return crypto.subtle.generateKey(
-		{ name: 'AES-GCM', length: 256 },
-		true, // extractable for wrapping
-		['encrypt', 'decrypt'],
-	);
+	return createAesGcmKey(['encrypt', 'decrypt']);
 }
 
 /**
@@ -208,15 +153,7 @@ export async function encryptImageWithSharedKey(
  * Wrap AES key with RSA-OAEP public key
  */
 export async function wrapAesKeyWithPublicKey(aesKey: CryptoKey, publicKeyPem: string): Promise<string> {
-	const rsaPublicKey = await importRsaOaepPublicKey(publicKeyPem);
-
-	// Export the AES key to raw format
-	const rawAesKey = await crypto.subtle.exportKey('raw', aesKey);
-
-	// Wrap the raw AES key with RSA-OAEP
-	const wrappedKey = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, rsaPublicKey, rawAesKey);
-
-	return base64UrlEncode(new Uint8Array(wrappedKey));
+	return wrapAesKey(aesKey, publicKeyPem);
 }
 
 /**

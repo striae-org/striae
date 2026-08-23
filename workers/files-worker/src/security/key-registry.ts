@@ -1,10 +1,7 @@
 import { decryptBinaryFromStorage, type DataAtRestEnvelope } from '../encryption-utils';
-import type { DecryptionTelemetryOutcome, Env, PrivateKeyRegistry } from '../types';
+import type { Env, PrivateKeyRegistry } from '../types';
 import { fetchKeyRegistryFromR2 } from '../../../../shared/registry/r2-key-registry';
-
-function getNonEmptyString(value: unknown): string | null {
-	return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
-}
+import { buildPrivateKeyCandidates, logKeyRegistryDecryptionTelemetry } from '../../../../shared/registry/key-candidates';
 
 export function requireEncryptionUploadConfig(env: Env): void {
 	if (!env.DATA_AT_REST_ENCRYPTION_PUBLIC_KEY || !env.DATA_AT_REST_ENCRYPTION_KEY_ID) {
@@ -22,59 +19,6 @@ async function getDataAtRestPrivateKeyRegistry(env: Env): Promise<PrivateKeyRegi
 	return fetchKeyRegistryFromR2(env.STRIAE_CONFIG, 'data-at-rest', env.DATA_AT_REST_ENCRYPTION_ACTIVE_KEY_ID, env.REGISTRY_ENCRYPTION_KEY);
 }
 
-function buildPrivateKeyCandidates(recordKeyId: string, registry: PrivateKeyRegistry): Array<{ keyId: string; privateKeyPem: string }> {
-	const candidates: Array<{ keyId: string; privateKeyPem: string }> = [];
-	const seen = new Set<string>();
-
-	const appendCandidate = (candidateKeyId: string | null): void => {
-		if (!candidateKeyId || seen.has(candidateKeyId)) {
-			return;
-		}
-
-		const privateKeyPem = registry.keys[candidateKeyId];
-		if (!privateKeyPem) {
-			return;
-		}
-
-		seen.add(candidateKeyId);
-		candidates.push({ keyId: candidateKeyId, privateKeyPem });
-	};
-
-	appendCandidate(getNonEmptyString(recordKeyId));
-	appendCandidate(registry.activeKeyId);
-
-	for (const keyId of Object.keys(registry.keys)) {
-		appendCandidate(keyId);
-	}
-
-	return candidates;
-}
-
-function logFileDecryptionTelemetry(input: {
-	recordKeyId: string;
-	selectedKeyId: string | null;
-	attemptCount: number;
-	outcome: DecryptionTelemetryOutcome;
-	reason?: string;
-}): void {
-	const details = {
-		scope: 'file-at-rest',
-		recordKeyId: input.recordKeyId,
-		selectedKeyId: input.selectedKeyId,
-		attemptCount: input.attemptCount,
-		fallbackUsed: input.outcome === 'fallback-hit',
-		outcome: input.outcome,
-		reason: input.reason ?? null,
-	};
-
-	if (input.outcome === 'all-failed') {
-		console.warn('Key registry decryption failed', details);
-		return;
-	}
-
-	console.info('Key registry decryption resolved', details);
-}
-
 export async function decryptBinaryWithRegistry(ciphertext: ArrayBuffer, envelope: DataAtRestEnvelope, env: Env): Promise<ArrayBuffer> {
 	const keyRegistry = await getDataAtRestPrivateKeyRegistry(env);
 	const candidates = buildPrivateKeyCandidates(envelope.keyId, keyRegistry);
@@ -85,7 +29,8 @@ export async function decryptBinaryWithRegistry(ciphertext: ArrayBuffer, envelop
 		const candidate = candidates[index];
 		try {
 			const plaintext = await decryptBinaryFromStorage(ciphertext, envelope, candidate.privateKeyPem);
-			logFileDecryptionTelemetry({
+			logKeyRegistryDecryptionTelemetry({
+				scope: 'file-at-rest',
 				recordKeyId: envelope.keyId,
 				selectedKeyId: candidate.keyId,
 				attemptCount: index + 1,
@@ -97,7 +42,8 @@ export async function decryptBinaryWithRegistry(ciphertext: ArrayBuffer, envelop
 		}
 	}
 
-	logFileDecryptionTelemetry({
+	logKeyRegistryDecryptionTelemetry({
+		scope: 'file-at-rest',
 		recordKeyId: envelope.keyId,
 		selectedKeyId: null,
 		attemptCount: candidates.length,
