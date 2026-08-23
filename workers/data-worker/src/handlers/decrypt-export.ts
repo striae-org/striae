@@ -14,17 +14,20 @@ import type { CreateResponse, Env } from '../types';
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
 	const bytes = new Uint8Array(buffer);
-	const chunkSize = 8192;
-	let binary = '';
+	// Multiple of 3 so each chunk encodes independently without mid-stream base64 padding.
+	const chunkSize = 8190;
+	const base64Chunks: string[] = [];
 
 	for (let i = 0; i < bytes.length; i += chunkSize) {
 		const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+		let binary = '';
 		for (let j = 0; j < chunk.length; j += 1) {
 			binary += String.fromCharCode(chunk[j]);
 		}
+		base64Chunks.push(btoa(binary));
 	}
 
-	return btoa(binary);
+	return base64Chunks.join('');
 }
 
 function emailsMatch(left: string, right: string): boolean {
