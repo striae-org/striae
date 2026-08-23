@@ -14,12 +14,7 @@ export interface KeyRegistryPayload {
 	keys?: unknown;
 }
 
-export interface PrivateKeyRegistry {
-	activeKeyId: string | null;
-	keys: Record<string, string>;
-}
-
-export type DecryptionTelemetryOutcome = 'primary-hit' | 'fallback-hit' | 'all-failed';
+export type { PrivateKeyRegistry, DecryptionTelemetryOutcome } from '../../../shared/registry/key-candidates';
 
 export interface AuditEntry {
 	entryId: string;
@@ -49,10 +44,4 @@ export type APIResponse = SuccessResponse | ErrorResponse | AuditRetrievalRespon
 
 export type CreateResponse = (data: APIResponse, status?: number) => Response;
 
-export interface DataAtRestEnvelope {
-	algorithm: string;
-	encryptionVersion: string;
-	keyId: string;
-	dataIv: string;
-	wrappedKey: string;
-}
+export type { DataAtRestEnvelope } from '../../../shared/crypto/rsa-oaep-private';

@@ -23,18 +23,13 @@ export interface KeyRegistryPayload {
 	keys?: unknown;
 }
 
-export interface PrivateKeyRegistry {
-	activeKeyId: string | null;
-	keys: Record<string, string>;
-}
+export type { PrivateKeyRegistry, DecryptionTelemetryOutcome } from '../../../shared/registry/key-candidates';
 
 export interface ExportDecryptionContext {
 	recordKeyId: string | null;
 	candidates: Array<{ keyId: string; privateKeyPem: string }>;
 	primaryKeyId: string | null;
 }
-
-export type DecryptionTelemetryOutcome = 'primary-hit' | 'fallback-hit' | 'all-failed';
 
 export interface SuccessResponse {
 	success: boolean;
