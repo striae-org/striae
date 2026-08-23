@@ -20,6 +20,14 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-22] - *[Minor Release v10.2.0](https://github.com/striae-org/striae/releases/tag/v10.2.0)* — *Encryption Modularization*
+
+- **🧩 Encryption Modularization (Internal Refactor)** - Consolidated the duplicated RSA-OAEP + AES-256-GCM primitives and key-candidate fallback logic previously copy-pasted across the audit, data, image, files, and user workers into shared `shared/crypto/` and `shared/registry/key-candidates.ts` modules. Each worker's encryption utilities are now thin wrappers preserving their own storage shape and exact error-message wording, with no changes to worker secrets, env vars, or `wrangler.jsonc` bindings.
+- **🖥️ Frontend Export Encryption** - `app/utils/forensics/export-encryption.ts` now delegates its base64url and public-key primitives to the same shared modules, keeping its public API unchanged.
+- **🧪 New Test Coverage** - Added encryption test suites for the image and files workers (previously untested) plus dedicated tests for the new shared crypto/key-candidate modules.
+- **🛠️ Deploy Script Enhancement** - `deploy-all.sh --redeploy-only` now validates existing configuration against current templates before redeploying and fails fast with guidance if it's out of date.
+- **📦 Dependency Maintenance** - Bumped `@cloudflare/workers-types` and the data worker's `@cloudflare/vitest-pool-workers`.
+
 ## [2026-08-22] - *[Patch Release v10.1.1](https://github.com/striae-org/striae/releases/tag/v10.1.1)* — *Manifest Signing Authorization Fix + UI Refinements*
 
 - **🔐 Manifest Signing Authorization Fix (Security/Reliability Fix)** - Fixed a follow-up gap from the v10.0.0/v9.0.0 forensic signing authorization hardening: the data worker's server-side case-authorization check calls the user worker, but the required `USER_WORKER` service binding was missing from `wrangler.jsonc`, causing forensic manifest/confirmation/audit-export signing requests to fail with an opaque 502. Added the binding and wired `USER_WORKER_NAME` into deploy-config scaffolding/validation so it's generated correctly on fresh deploys.
