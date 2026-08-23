@@ -268,14 +268,12 @@ export const decryptExportBatch = async (
 
 		// Convert encrypted file map to array format expected by worker, including per-file IV from manifest.
 		const manifestEntries = getEncryptedManifestEntries(encryptionManifest);
-		const encryptedFiles: EncryptedFileEntry[] = Object.entries(encryptedFileMap).map(([filename, encryptedData]) => {
-			const manifestEntry = manifestEntries.find((entry) => entry.filename === filename);
-			return {
-				filename,
-				encryptedData,
-				iv: manifestEntry?.iv,
-			};
-		});
+		const ivByFilename = new Map(manifestEntries.map((entry) => [entry.filename, entry.iv]));
+		const encryptedFiles: EncryptedFileEntry[] = Object.entries(encryptedFileMap).map(([filename, encryptedData]) => ({
+			filename,
+			encryptedData,
+			iv: ivByFilename.get(filename),
+		}));
 
 		// Always issue at least one request (for the data file) even if there are no associated files.
 		const batches = encryptedFiles.length > 0 ? chunkEncryptedFiles(encryptedFiles) : [[]];
