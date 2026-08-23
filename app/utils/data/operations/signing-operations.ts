@@ -210,6 +210,47 @@ export const signAuditExportData = async (
 	}
 };
 
+// Data worker isolates have a fixed 128MB memory limit; decrypting + base64 re-encoding every
+// file in one request can exceed that for larger exports. Cap each request's decoded payload
+// size so per-file decryption is spread across multiple requests instead of one large one.
+const MAX_DECRYPT_BATCH_DECODED_BYTES = 4 * 1024 * 1024;
+const MAX_DECRYPT_BATCH_FILE_COUNT = 20;
+
+interface EncryptedFileEntry {
+	filename: string;
+	encryptedData: string;
+	iv?: string;
+}
+
+function chunkEncryptedFiles(files: EncryptedFileEntry[]): EncryptedFileEntry[][] {
+	const batches: EncryptedFileEntry[][] = [];
+	let currentBatch: EncryptedFileEntry[] = [];
+	let currentBatchBytes = 0;
+
+	for (const file of files) {
+		// Base64 decodes to roughly 3/4 of its encoded length.
+		const estimatedBytes = Math.ceil((file.encryptedData.length * 3) / 4);
+
+		if (
+			currentBatch.length > 0 &&
+			(currentBatchBytes + estimatedBytes > MAX_DECRYPT_BATCH_DECODED_BYTES || currentBatch.length >= MAX_DECRYPT_BATCH_FILE_COUNT)
+		) {
+			batches.push(currentBatch);
+			currentBatch = [];
+			currentBatchBytes = 0;
+		}
+
+		currentBatch.push(file);
+		currentBatchBytes += estimatedBytes;
+	}
+
+	if (currentBatch.length > 0) {
+		batches.push(currentBatch);
+	}
+
+	return batches;
+}
+
 /**
  * Request batch decryption of export data file and associated files from the data worker
  */
@@ -227,72 +268,88 @@ export const decryptExportBatch = async (
 
 		// Convert encrypted file map to array format expected by worker, including per-file IV from manifest.
 		const manifestEntries = getEncryptedManifestEntries(encryptionManifest);
-		const encryptedFiles = Object.entries(encryptedFileMap).map(([filename, encryptedData]) => {
-			const manifestEntry = manifestEntries.find((entry) => entry.filename === filename);
-			return {
-				filename,
-				encryptedData,
-				iv: manifestEntry?.iv,
-			};
-		});
+		const ivByFilename = new Map(manifestEntries.map((entry) => [entry.filename, entry.iv]));
+		const encryptedFiles: EncryptedFileEntry[] = Object.entries(encryptedFileMap).map(([filename, encryptedData]) => ({
+			filename,
+			encryptedData,
+			iv: ivByFilename.get(filename),
+		}));
 
-		const response = await fetchDataApi(user, '/api/forensic/decrypt-export', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				userId: user.uid,
-				wrappedKey: encryptionManifest.wrappedKey,
-				dataIv: encryptionManifest.dataIv,
-				encryptedData: encryptedDataBase64,
-				encryptedFiles,
-				keyId: encryptionManifest.keyId,
-			}),
-		});
+		// Always issue at least one request (for the data file) even if there are no associated files.
+		const batches = encryptedFiles.length > 0 ? chunkEncryptedFiles(encryptedFiles) : [[]];
 
-		const responseData = (await response.json().catch(() => null)) as {
-			success?: boolean;
-			error?: string;
-			plaintext?: string;
-			decryptedImages?: Array<{ filename: string; data: string }>;
-		} | null;
+		let plaintext: string | undefined;
+		const decryptedImages: Record<string, Blob> = {};
 
-		if (!response.ok) {
-			const errorMessage = responseData?.error || `Failed to decrypt export: ${response.status} ${response.statusText}`;
+		for (let batchIndex = 0; batchIndex < batches.length; batchIndex += 1) {
+			const batch = batches[batchIndex];
 
-			// Special handling for encrypted exports without configured key
-			if (response.status === 400 && errorMessage.includes('not configured')) {
-				throw new Error('This export is encrypted. To import it, your Striae instance must have EXPORT_ENCRYPTION_PRIVATE_KEY configured.');
+			const response = await fetchDataApi(user, '/api/forensic/decrypt-export', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					userId: user.uid,
+					wrappedKey: encryptionManifest.wrappedKey,
+					dataIv: encryptionManifest.dataIv,
+					encryptedData: encryptedDataBase64,
+					encryptedFiles: batch,
+					keyId: encryptionManifest.keyId,
+				}),
+			});
+
+			const responseData = (await response.json().catch(() => null)) as {
+				success?: boolean;
+				error?: string;
+				plaintext?: string;
+				decryptedImages?: Array<{ filename: string; data: string }>;
+			} | null;
+
+			if (!response.ok) {
+				const errorMessage =
+					responseData?.error || `Failed to decrypt export (batch ${batchIndex + 1}/${batches.length}): ${response.status} ${response.statusText}`;
+
+				// Special handling for encrypted exports without configured key
+				if (response.status === 400 && errorMessage.includes('not configured')) {
+					throw new Error('This export is encrypted. To import it, your Striae instance must have EXPORT_ENCRYPTION_PRIVATE_KEY configured.');
+				}
+
+				throw new Error(errorMessage);
 			}
 
-			throw new Error(errorMessage);
-		}
+			if (!responseData?.success || !responseData.plaintext) {
+				throw new Error('Invalid decrypt response from data worker');
+			}
 
-		if (!responseData?.success || !responseData.plaintext) {
-			throw new Error('Invalid decrypt response from data worker');
-		}
+			if (plaintext === undefined) {
+				plaintext = responseData.plaintext;
+			}
 
-		// Convert decrypted file base64 data back to Blobs
-		const decryptedImages: Record<string, Blob> = {};
-		if (Array.isArray(responseData.decryptedImages)) {
-			for (const imageEntry of responseData.decryptedImages) {
-				try {
-					const binaryString = atob(imageEntry.data);
-					const bytes = new Uint8Array(binaryString.length);
-					for (let i = 0; i < binaryString.length; i++) {
-						bytes[i] = binaryString.charCodeAt(i);
+			// Convert decrypted file base64 data back to Blobs
+			if (Array.isArray(responseData.decryptedImages)) {
+				for (const imageEntry of responseData.decryptedImages) {
+					try {
+						const binaryString = atob(imageEntry.data);
+						const bytes = new Uint8Array(binaryString.length);
+						for (let i = 0; i < binaryString.length; i++) {
+							bytes[i] = binaryString.charCodeAt(i);
+						}
+						decryptedImages[imageEntry.filename] = new Blob([bytes]);
+					} catch (error) {
+						console.error(`Failed to convert decrypted image ${imageEntry.filename}:`, error);
+						throw new Error(`Failed to convert decrypted image: ${imageEntry.filename}`, { cause: error });
 					}
-					decryptedImages[imageEntry.filename] = new Blob([bytes]);
-				} catch (error) {
-					console.error(`Failed to convert decrypted image ${imageEntry.filename}:`, error);
-					throw new Error(`Failed to convert decrypted image: ${imageEntry.filename}`, { cause: error });
 				}
 			}
 		}
 
+		if (plaintext === undefined) {
+			throw new Error('Invalid decrypt response from data worker');
+		}
+
 		return {
-			plaintext: responseData.plaintext,
+			plaintext,
 			decryptedImages,
 		};
 	} catch (error) {

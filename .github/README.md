@@ -20,6 +20,10 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-23] - *[Patch Release v10.2.1](https://github.com/striae-org/striae/releases/tag/v10.2.1)* — *Data Worker Export Decrypt OOM Fix*
+
+- **🧠 Data Worker Export Decrypt OOM Fix (Bug Fix)** - Fixed case import failures on larger exports where the data worker's `decrypt-export` handler could crash with "Worker exceeded memory limit" while decrypting and base64 re-encoding an entire export batch in one request. `arrayBufferToBase64` now encodes each chunk directly instead of building a full-size intermediate binary string, and the client (`app/utils/data/operations/signing-operations.ts`) now splits associated files across multiple decrypt requests (capped at ~4MB decoded bytes or 20 files per batch) instead of sending the whole export in a single request.
+
 ## [2026-08-22] - *[Minor Release v10.2.0](https://github.com/striae-org/striae/releases/tag/v10.2.0)* — *Encryption Modularization*
 
 - **🧩 Encryption Modularization (Internal Refactor)** - Consolidated the duplicated RSA-OAEP + AES-256-GCM primitives and key-candidate fallback logic previously copy-pasted across the audit, data, image, files, and user workers into shared `shared/crypto/` and `shared/registry/key-candidates.ts` modules. Each worker's encryption utilities are now thin wrappers preserving their own storage shape and exact error-message wording, with no changes to worker secrets, env vars, or `wrangler.jsonc` bindings.
