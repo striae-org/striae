@@ -20,6 +20,8 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 Licensed under the [Apache License 2.0](https://github.com/striae-org/striae/blob/master/LICENSE).
 
+### Patent Notice
+
 One or more methods, systems, or features of the Striae platform are the subject of a pending patent application. Open-source code made available by Striae is licensed under the Apache 2.0 license, which includes a patent license grant for the licensed code. No patent rights beyond those expressly granted by the applicable open-source license are conveyed by use of this platform. Additional details are available in the [NOTICE](https://github.com/striae-org/striae/blob/master/NOTICE) file.
 
 ---
