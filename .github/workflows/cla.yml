@@ -25,6 +25,6 @@ jobs:
         with:
           path-to-signatures: 'signatures/version1/cla.json'
           path-to-document: 'https://github.com/striae-org/striae/blob/master/.github/CLA.md'
-          branch: 'master'
+          branch: 'cla-signatures'
           allowlist: dependabot[bot],bot*
           lock-pullrequest-aftermerge: false
