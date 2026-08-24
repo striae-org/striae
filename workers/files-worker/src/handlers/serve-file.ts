@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { decryptBinaryWithRegistry, requireEncryptionRetrievalConfig } from '../security/key-registry';
 import { requireSignedUrlConfig, verifySignedAccessToken } from '../security/signed-url';
 import type { CreateResponse, Env } from '../types';

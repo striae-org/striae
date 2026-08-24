@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { Env } from './types';
 
 export function requireUserKvReadConfig(env: Env): void {

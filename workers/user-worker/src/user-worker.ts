@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { requireUserKvReadConfig, requireUserKvWriteConfig } from './auth';
 import { runOrphanSweep } from './cleanup/orphan-sweep';
 import { runPendingCaseCleanupSweep } from './cleanup/pending-cleanup-sweep';

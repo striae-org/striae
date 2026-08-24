@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Scans src/assets/ and generates src/assets/generated-assets.ts with one named
  * export per file.  Run via:  npm run generate:assets

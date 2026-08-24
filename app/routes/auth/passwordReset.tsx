@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { sendPasswordResetEmail, signOut } from 'firebase/auth';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useState, useCallback, useRef, useEffect } from 'react';
 import styles from './mobile-warning.module.css';
 

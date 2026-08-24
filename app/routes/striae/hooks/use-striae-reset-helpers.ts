@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useCallback, type Dispatch, type SetStateAction } from 'react';
 import { type AnnotationData, type FileData, type OtherFileData } from '~/types';
 

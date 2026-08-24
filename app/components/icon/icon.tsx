@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { classes } from '~/utils/ui';
 import styles from './icon.module.css';
 import sprites from './icons.svg';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 // MFA Configuration Helper
 // This file contains utilities and documentation for managing MFA in your Firebase project
 

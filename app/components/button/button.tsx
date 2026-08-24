@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { Icon } from '../icon/icon';
 import styles from './button.module.css';
 import { classes } from '~/utils/ui';

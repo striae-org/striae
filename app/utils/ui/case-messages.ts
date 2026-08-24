@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Common messages for case import, export, and case management operations.
  * Centralizing messages prevents drift and ensures consistent user experience across the app.

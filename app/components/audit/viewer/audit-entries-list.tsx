@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useMemo, useState, type MouseEvent } from 'react';
 import { type ValidationAuditEntry } from '~/types';
 import { formatAuditTimestamp, getAuditActionIcon, getAuditStatusIcon } from './audit-viewer-utils';

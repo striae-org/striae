@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { encryptJsonForUserKv, tryParseEncryptedRecord, validateEncryptedRecord } from '../encryption-utils';
 import { decryptUserKvRecord, parseUserKvPrivateKeyRegistry } from '../registry/user-kv';
 import type { Env, UserData } from '../types';

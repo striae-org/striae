@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { DATA_AT_REST_ENCRYPTION_ALGORITHM, DATA_AT_REST_ENCRYPTION_VERSION } from '../config';
 import { decryptAuditJsonWithRegistry, encryptJsonForStorage, extractDataAtRestEnvelope } from '../crypto/data-at-rest';
 import type { AuditEntry, Env } from '../types';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '~/services/firebase';

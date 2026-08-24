@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useState, useEffect, useCallback } from 'react';
 import { multiFactor, type MultiFactorInfo, type User } from 'firebase/auth';
 import { handleAuthError } from '~/services/firebase/errors';

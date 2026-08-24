@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useCallback, useEffect, useState } from 'react';
 import type { User } from 'firebase/auth';
 import { auditService } from '~/services/audit';

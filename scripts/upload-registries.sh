@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) 2025 Stephen J. Lu
+# SPDX-License-Identifier: Apache-2.0
+
 # ===================================
 # UPLOAD KEY REGISTRIES TO R2
 # ===================================

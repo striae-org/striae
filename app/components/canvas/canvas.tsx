@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { use, useEffect, useState, useRef, useCallback } from 'react';
 import { BoxAnnotations } from './box-annotations/box-annotations';
 import { ConfirmationModal } from './confirmation/confirmation';

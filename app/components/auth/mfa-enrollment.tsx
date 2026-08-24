@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useState, useEffect, useRef } from 'react';
 import { auth } from '~/services/firebase';
 import { PhoneAuthProvider, PhoneMultiFactorGenerator, RecaptchaVerifier, multiFactor, type User } from 'firebase/auth';

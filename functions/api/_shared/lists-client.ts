@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 export type ListResult = { ok: true; list: string } | { ok: false; error: string };
 
 /**

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 // Components
 export { FileSelector } from './components/FileSelector';
 export { CasePreviewSection } from './components/CasePreviewSection';

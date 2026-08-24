@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { Form as RemixForm } from 'react-router';
 import styles from './form.module.css';
 

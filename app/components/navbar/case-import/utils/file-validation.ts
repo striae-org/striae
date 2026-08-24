@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 const CASE_EXPORT_DATA_FILE_REGEX = /_data\.json$/i;
 const CONFIRMATION_EXPORT_FILE_REGEX = /^confirmation-data-.*\.json$/i;
 const FORENSIC_MANIFEST_FILE_NAME = 'forensic_manifest.json';

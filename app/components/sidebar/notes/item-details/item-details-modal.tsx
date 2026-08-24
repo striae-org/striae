@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import type { BulletAnnotationData, CartridgeCaseAnnotationData, ShotshellAnnotationData, ItemType } from '~/types/annotations';
 import { BulletSection, CartridgeCaseSection, ShotshellSection } from './item-details-sections';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { use, useState, useEffect, useRef } from 'react';
 import { type ConfirmationData } from '~/types/annotations';
 import { AuthContext } from '~/contexts/auth.context';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { AuditViewerSummaryStats } from './audit-viewer-utils';
 import styles from '../user-audit.module.css';
 

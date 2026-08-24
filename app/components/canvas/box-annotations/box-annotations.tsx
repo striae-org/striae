@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { use, useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { type BoxAnnotation } from '~/types';
 import { AuthContext } from '~/contexts/auth.context';

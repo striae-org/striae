@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { User } from 'firebase/auth';
 import { fetchDataApi } from '~/utils/api';
 import { getUserReadOnlyCases, removeCaseConfirmationSummary, updateUserData, validateUserSession } from '~/utils/data';

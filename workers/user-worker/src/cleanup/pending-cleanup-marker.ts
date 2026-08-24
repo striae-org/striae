@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { encryptJsonForStorage, type DataAtRestEnvelope } from '../encryption-utils';
 import type { Env, PrivateKeyRegistry } from '../types';
 import { decryptWithKeyRegistry, extractDataAtRestEnvelope, getDataAtRestPrivateKeyRegistry } from './case-data-reader';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 // Audit trail types for comprehensive forensic accountability framework
 // Tracks all user actions and system events throughout the application
 

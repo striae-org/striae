@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useCallback, useMemo, useState } from 'react';
 import type { AuditAction, AuditResult, ValidationAuditEntry } from '~/types';
 import type { DateRangeFilter } from './types';

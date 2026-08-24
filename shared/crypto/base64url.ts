@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Base64url encode/decode helpers shared by the frontend app and Cloudflare Workers.
  */

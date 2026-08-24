@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type * as CaseExportActions from '~/components/actions/case-export';
 
 export type CaseExportActionsModule = typeof CaseExportActions;

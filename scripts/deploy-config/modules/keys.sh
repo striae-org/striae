@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) 2025 Stephen J. Lu
+# SPDX-License-Identifier: Apache-2.0
+
 is_admin_service_placeholder() {
     local value="$1"
     local normalized=$(echo "$value" | tr '[:upper:]' '[:lower:]')

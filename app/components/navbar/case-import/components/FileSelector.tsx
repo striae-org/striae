@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { resetFileInput } from '../utils/file-validation';
 import styles from '../case-import.module.css';

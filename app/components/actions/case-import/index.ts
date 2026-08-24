@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 // Barrel export for case import functionality
 // This maintains the same API as the original case-review.ts file
 

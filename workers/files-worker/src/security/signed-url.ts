@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { Env, SignedAccessPayload } from '../types';
 
 const DEFAULT_SIGNED_URL_TTL_SECONDS = 3600;

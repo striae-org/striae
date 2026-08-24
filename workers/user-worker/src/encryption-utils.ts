@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { base64UrlDecode, base64UrlEncode } from '../../../shared/crypto/base64url';
 import { createAesGcmKey, wrapAesKey } from '../../../shared/crypto/rsa-oaep-public';
 import {
