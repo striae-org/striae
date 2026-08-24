@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Bulk-inserts (and, with --check, verifies) SPDX license headers across tracked source files.
  * Run with: npm run add-license-headers
@@ -33,9 +36,7 @@ function isInScope(relPath) {
 }
 
 function listCandidateFiles() {
-	const tracked = execSync('git ls-files', { cwd: repoRoot, encoding: 'utf8' })
-		.split('\n')
-		.filter(Boolean);
+	const tracked = execSync('git ls-files', { cwd: repoRoot, encoding: 'utf8' }).split('\n').filter(Boolean);
 
 	return tracked.filter((relPath) => {
 		const ext = path.extname(relPath);

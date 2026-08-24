@@ -311,11 +311,14 @@ export const decryptExportBatch = async (
 
 			if (!response.ok) {
 				const errorMessage =
-					responseData?.error || `Failed to decrypt export (batch ${batchIndex + 1}/${batches.length}): ${response.status} ${response.statusText}`;
+					responseData?.error ||
+					`Failed to decrypt export (batch ${batchIndex + 1}/${batches.length}): ${response.status} ${response.statusText}`;
 
 				// Special handling for encrypted exports without configured key
 				if (response.status === 400 && errorMessage.includes('not configured')) {
-					throw new Error('This export is encrypted. To import it, your Striae instance must have EXPORT_ENCRYPTION_PRIVATE_KEY configured.');
+					throw new Error(
+						'This export is encrypted. To import it, your Striae instance must have EXPORT_ENCRYPTION_PRIVATE_KEY configured.',
+					);
 				}
 
 				throw new Error(errorMessage);

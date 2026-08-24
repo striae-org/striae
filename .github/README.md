@@ -20,6 +20,11 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-23] - *[Patch Release v10.2.3](https://github.com/striae-org/striae/releases/tag/v10.2.3)* — *License and Copyright Headers*
+
+- **📜 License and Copyright Header Rollout** - Added SPDX license and copyright headers (`Copyright (c) 2025 Stephen J. Lu`, `SPDX-License-Identifier: Apache-2.0`) to 337 in-scope source files across `app/`, `workers/`, `functions/`, `shared/`, `scripts/`, and eligible root-level config files.
+- **🛠️ Header Automation Script** - Added `scripts/add-license-headers.mjs` with matching `npm run add-license-headers` and `npm run check-license-headers` commands; `npm run lint` now also runs the header check so future files missing a header fail linting.
+
 ## [2026-08-23] - *[Patch Release v10.2.2](https://github.com/striae-org/striae/releases/tag/v10.2.2)* — *Item Details Data Entry Refinements*
 
 - **📏 Length Fields** - Added a `Length` text field to the Bullet and Cartridge Case item-details sections, carried through state, save data, and case-summary text.
