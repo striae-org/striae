@@ -185,7 +185,7 @@ export const buildItemDetailsSummary = (
 		if (cartridgeCaseData.hasEjectorMarks) rows.push('Ejector Marks: Yes');
 		if (cartridgeCaseData.hasChamberMarks) rows.push('Chamber Marks: Yes');
 		if (cartridgeCaseData.hasMagazineLipMarks) rows.push('Magazine Lip Marks: Yes');
-		if (cartridgeCaseData.hasPrimerShear) rows.push('Primer Shear: Yes');
+		if (cartridgeCaseData.hasPrimerShear) rows.push('Primer/Aperture Shear: Yes');
 		if (cartridgeCaseData.hasEjectionPortMarks) rows.push('Ejection Port Marks: Yes');
 		if (cartridgeCaseData.hasChamberingMarks) rows.push('Chambering Marks: Yes');
 		if (cartridgeCaseData.hasReloadingMarks) rows.push('Reloading Marks: Yes');

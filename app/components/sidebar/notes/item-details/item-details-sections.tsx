@@ -484,7 +484,7 @@ export const CartridgeCaseSection = ({ showHeader, isReadOnly, cartridgeCase }: 
 							checked: cartridgeCase.hasMagazineLipMarks,
 							onChange: cartridgeCase.setHasMagazineLipMarks,
 						},
-						{ key: 'primerShear', label: 'Primer Shear', checked: cartridgeCase.hasPrimerShear, onChange: cartridgeCase.setHasPrimerShear },
+						{ key: 'primerShear', label: 'Primer/Aperture Shear', checked: cartridgeCase.hasPrimerShear, onChange: cartridgeCase.setHasPrimerShear },
 						{
 							key: 'ejectionPort',
 							label: 'Ejection Port Marks',
