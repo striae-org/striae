@@ -78,7 +78,7 @@ export const SHOTSHELL_SHOT_SIZE_OPTIONS = [
 export const ALL_CALIBERS: string[] = [...PISTOL_CALIBERS, ...RIFLE_CALIBERS];
 export const BULLET_JACKET_METAL_OPTIONS = ['Cu', 'Brass', 'Ni-plated', 'Al', 'Steel', 'None'] as const;
 export const BULLET_CORE_METAL_OPTIONS = ['Pb', 'Steel', 'Solid Cu', 'Frangible'] as const;
-export const BULLET_TYPE_OPTIONS = ['FMJ', 'TMJ', 'HP', 'WC', 'RN'] as const;
+export const BULLET_TYPE_OPTIONS = ['FMJ', 'TMJ', 'HP/JHP', 'WC', 'RN'] as const;
 export const BULLET_BARREL_TYPE_OPTIONS = ['Conventional', 'Polygonal'] as const;
 export const CARTRIDGE_METAL_OPTIONS = ['Brass', 'Ni-plated', 'Al', 'Steel', 'Bi-metal'] as const;
 export const CARTRIDGE_PRIMER_TYPE_OPTIONS = ['CF', 'RF'] as const;
@@ -148,6 +148,7 @@ export const buildItemDetailsSummary = (
 			if (v) rows.push(v);
 		};
 		add(r('Caliber', bulletData.caliber));
+		add(r('Length', bulletData.length));
 		add(r('Mass', bulletData.mass));
 		add(r('Diameter', bulletData.diameter));
 		add(r('L/G Count', bulletData.lgNumber));
@@ -172,18 +173,22 @@ export const buildItemDetailsSummary = (
 			if (v) rows.push(v);
 		};
 		add(r('Caliber', cartridgeCaseData.caliber));
+		add(r('Length', cartridgeCaseData.length));
 		add(r('Brand', cartridgeCaseData.brand));
 		add(r('Metal', cartridgeCaseData.metal));
 		add(r('Primer Type', cartridgeCaseData.primerType));
 		add(r('FPI Shape', cartridgeCaseData.fpiShape));
 		add(r('Aperture Shape', cartridgeCaseData.apertureShape));
+		if (cartridgeCaseData.hasBreechfaceMarks) rows.push('Breechface Marks: Yes');
 		if (cartridgeCaseData.hasFpDrag) rows.push('FP Drag: Yes');
 		if (cartridgeCaseData.hasExtractorMarks) rows.push('Extractor Marks: Yes');
 		if (cartridgeCaseData.hasEjectorMarks) rows.push('Ejector Marks: Yes');
 		if (cartridgeCaseData.hasChamberMarks) rows.push('Chamber Marks: Yes');
 		if (cartridgeCaseData.hasMagazineLipMarks) rows.push('Magazine Lip Marks: Yes');
-		if (cartridgeCaseData.hasPrimerShear) rows.push('Primer Shear: Yes');
+		if (cartridgeCaseData.hasPrimerShear) rows.push('Primer/Aperture Shear: Yes');
 		if (cartridgeCaseData.hasEjectionPortMarks) rows.push('Ejection Port Marks: Yes');
+		if (cartridgeCaseData.hasChamberingMarks) rows.push('Chambering Marks: Yes');
+		if (cartridgeCaseData.hasReloadingMarks) rows.push('Reloading Marks: Yes');
 		pushSection('[Cartridge Case]', rows);
 	}
 
@@ -198,9 +203,12 @@ export const buildItemDetailsSummary = (
 		add(r('Metal', shotshellData.metal));
 		add(r('Brand', shotshellData.brand));
 		add(r('FPI Shape', shotshellData.fpiShape));
+		if (shotshellData.hasBreechfaceMarks) rows.push('Breechface Marks: Yes');
 		if (shotshellData.hasExtractorMarks) rows.push('Extractor Marks: Yes');
 		if (shotshellData.hasEjectorMarks) rows.push('Ejector Marks: Yes');
 		if (shotshellData.hasChamberMarks) rows.push('Chamber Marks: Yes');
+		if (shotshellData.hasChamberingMarks) rows.push('Chambering Marks: Yes');
+		if (shotshellData.hasReloadingMarks) rows.push('Reloading Marks: Yes');
 		pushSection('[Shotshell]', rows);
 	}
 

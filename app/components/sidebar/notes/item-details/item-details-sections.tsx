@@ -198,6 +198,14 @@ export const BulletSection = ({ showHeader, isReadOnly, bullet }: BulletSectionP
 			options: CALIBER_GROUPED_OPTIONS,
 		},
 		{
+			key: 'length',
+			kind: 'text',
+			label: 'Length',
+			value: bullet.length,
+			onChange: bullet.setLength,
+			placeholder: 'e.g. 1.155 in',
+		},
+		{
 			key: 'mass',
 			kind: 'text',
 			label: 'Mass',
@@ -383,6 +391,14 @@ export const CartridgeCaseSection = ({ showHeader, isReadOnly, cartridgeCase }: 
 			options: CALIBER_GROUPED_OPTIONS,
 		},
 		{
+			key: 'length',
+			kind: 'text',
+			label: 'Length',
+			value: cartridgeCase.length,
+			onChange: cartridgeCase.setLength,
+			placeholder: 'e.g. 0.754 in',
+		},
+		{
 			key: 'brand',
 			kind: 'text',
 			label: 'Brand',
@@ -447,6 +463,12 @@ export const CartridgeCaseSection = ({ showHeader, isReadOnly, cartridgeCase }: 
 			<div className={styles.itemDetailsCheckboxGroup}>
 				{renderCheckboxes(
 					[
+						{
+							key: 'breechface',
+							label: 'Breechface Marks',
+							checked: cartridgeCase.hasBreechfaceMarks,
+							onChange: cartridgeCase.setHasBreechfaceMarks,
+						},
 						{ key: 'fpDrag', label: 'FP Drag', checked: cartridgeCase.hasFpDrag, onChange: cartridgeCase.setHasFpDrag },
 						{
 							key: 'extractor',
@@ -462,12 +484,24 @@ export const CartridgeCaseSection = ({ showHeader, isReadOnly, cartridgeCase }: 
 							checked: cartridgeCase.hasMagazineLipMarks,
 							onChange: cartridgeCase.setHasMagazineLipMarks,
 						},
-						{ key: 'primerShear', label: 'Primer Shear', checked: cartridgeCase.hasPrimerShear, onChange: cartridgeCase.setHasPrimerShear },
+						{ key: 'primerShear', label: 'Primer/Aperture Shear', checked: cartridgeCase.hasPrimerShear, onChange: cartridgeCase.setHasPrimerShear },
 						{
 							key: 'ejectionPort',
 							label: 'Ejection Port Marks',
 							checked: cartridgeCase.hasEjectionPortMarks,
 							onChange: cartridgeCase.setHasEjectionPortMarks,
+						},
+						{
+							key: 'chamberingMarks',
+							label: 'Chambering Marks',
+							checked: cartridgeCase.hasChamberingMarks,
+							onChange: cartridgeCase.setHasChamberingMarks,
+						},
+						{
+							key: 'reloadingMarks',
+							label: 'Reloading Marks',
+							checked: cartridgeCase.hasReloadingMarks,
+							onChange: cartridgeCase.setHasReloadingMarks,
 						},
 					],
 					isReadOnly,
@@ -557,9 +591,27 @@ export const ShotshellSection = ({ showHeader, isReadOnly, shotshell }: Shotshel
 			<div className={styles.itemDetailsCheckboxGroup}>
 				{renderCheckboxes(
 					[
+						{
+							key: 'breechface',
+							label: 'Breechface Marks',
+							checked: shotshell.hasBreechfaceMarks,
+							onChange: shotshell.setHasBreechfaceMarks,
+						},
 						{ key: 'extractor', label: 'Extractor Marks', checked: shotshell.hasExtractorMarks, onChange: shotshell.setHasExtractorMarks },
 						{ key: 'ejector', label: 'Ejector Marks', checked: shotshell.hasEjectorMarks, onChange: shotshell.setHasEjectorMarks },
 						{ key: 'chamber', label: 'Chamber Marks', checked: shotshell.hasChamberMarks, onChange: shotshell.setHasChamberMarks },
+						{
+							key: 'chamberingMarks',
+							label: 'Chambering Marks',
+							checked: shotshell.hasChamberingMarks,
+							onChange: shotshell.setHasChamberingMarks,
+						},
+						{
+							key: 'reloadingMarks',
+							label: 'Reloading Marks',
+							checked: shotshell.hasReloadingMarks,
+							onChange: shotshell.setHasReloadingMarks,
+						},
 					],
 					isReadOnly,
 				)}

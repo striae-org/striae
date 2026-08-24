@@ -39,6 +39,7 @@ interface BuildSaveDataResult {
 export interface BulletDetailsState {
 	caliber: string;
 	caliberIsCustom: boolean;
+	length: string;
 	mass: string;
 	diameter: string;
 	lgNumber: string;
@@ -57,6 +58,7 @@ export interface BulletDetailsState {
 	calculatedDiameter: number | null;
 	setCaliber: (value: string) => void;
 	setCaliberIsCustom: (value: boolean) => void;
+	setLength: (value: string) => void;
 	setMass: (value: string) => void;
 	setDiameter: (value: string) => void;
 	setLgNumber: (value: string) => void;
@@ -76,6 +78,7 @@ export interface BulletDetailsState {
 export interface CartridgeCaseDetailsState {
 	caliber: string;
 	caliberIsCustom: boolean;
+	length: string;
 	brand: string;
 	metal: string;
 	metalIsCustom: boolean;
@@ -85,6 +88,7 @@ export interface CartridgeCaseDetailsState {
 	fpiShapeIsCustom: boolean;
 	apertureShape: string;
 	apertureShapeIsCustom: boolean;
+	hasBreechfaceMarks: boolean;
 	hasFpDrag: boolean;
 	hasExtractorMarks: boolean;
 	hasEjectorMarks: boolean;
@@ -92,8 +96,11 @@ export interface CartridgeCaseDetailsState {
 	hasMagazineLipMarks: boolean;
 	hasPrimerShear: boolean;
 	hasEjectionPortMarks: boolean;
+	hasChamberingMarks: boolean;
+	hasReloadingMarks: boolean;
 	setCaliber: (value: string) => void;
 	setCaliberIsCustom: (value: boolean) => void;
+	setLength: (value: string) => void;
 	setBrand: (value: string) => void;
 	setMetal: (value: string) => void;
 	setMetalIsCustom: (value: boolean) => void;
@@ -103,6 +110,7 @@ export interface CartridgeCaseDetailsState {
 	setFpiShapeIsCustom: (value: boolean) => void;
 	setApertureShape: (value: string) => void;
 	setApertureShapeIsCustom: (value: boolean) => void;
+	setHasBreechfaceMarks: (value: boolean) => void;
 	setHasFpDrag: (value: boolean) => void;
 	setHasExtractorMarks: (value: boolean) => void;
 	setHasEjectorMarks: (value: boolean) => void;
@@ -110,6 +118,8 @@ export interface CartridgeCaseDetailsState {
 	setHasMagazineLipMarks: (value: boolean) => void;
 	setHasPrimerShear: (value: boolean) => void;
 	setHasEjectionPortMarks: (value: boolean) => void;
+	setHasChamberingMarks: (value: boolean) => void;
+	setHasReloadingMarks: (value: boolean) => void;
 }
 
 export interface ShotshellDetailsState {
@@ -124,9 +134,12 @@ export interface ShotshellDetailsState {
 	brand: string;
 	fpiShape: string;
 	fpiShapeIsCustom: boolean;
+	hasBreechfaceMarks: boolean;
 	hasExtractorMarks: boolean;
 	hasEjectorMarks: boolean;
 	hasChamberMarks: boolean;
+	hasChamberingMarks: boolean;
+	hasReloadingMarks: boolean;
 	setGauge: (value: string) => void;
 	setGaugeIsCustom: (value: boolean) => void;
 	setShotshellLength: (value: string) => void;
@@ -138,14 +151,18 @@ export interface ShotshellDetailsState {
 	setBrand: (value: string) => void;
 	setFpiShape: (value: string) => void;
 	setFpiShapeIsCustom: (value: boolean) => void;
+	setHasBreechfaceMarks: (value: boolean) => void;
 	setHasExtractorMarks: (value: boolean) => void;
 	setHasEjectorMarks: (value: boolean) => void;
 	setHasChamberMarks: (value: boolean) => void;
+	setHasChamberingMarks: (value: boolean) => void;
+	setHasReloadingMarks: (value: boolean) => void;
 }
 
 export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellData }: UseItemDetailsStateParams) => {
 	const [bCaliber, setBCaliber] = useState(() => bulletData?.caliber || '');
 	const [bCaliberIsCustom, setBCaliberIsCustom] = useState(() => isCustomValue(bulletData?.caliber, ALL_CALIBERS));
+	const [bLength, setBLength] = useState(() => bulletData?.length || '');
 	const [bMass, setBMass] = useState(() => bulletData?.mass || '');
 	const [bDiameter, setBDiameter] = useState(() => bulletData?.diameter || '');
 	const [bLgNumber, setBLgNumber] = useState(() => (bulletData?.lgNumber !== undefined ? String(bulletData.lgNumber) : ''));
@@ -165,6 +182,7 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 
 	const [cCaliber, setCCaliber] = useState(() => cartridgeCaseData?.caliber || '');
 	const [cCaliberIsCustom, setCCaliberIsCustom] = useState(() => isCustomValue(cartridgeCaseData?.caliber, ALL_CALIBERS));
+	const [cLength, setCLength] = useState(() => cartridgeCaseData?.length || '');
 	const [cBrand, setCBrand] = useState(() => cartridgeCaseData?.brand || '');
 	const [cMetal, setCMetal] = useState(() => cartridgeCaseData?.metal || '');
 	const [cMetalIsCustom, setCMetalIsCustom] = useState(() => isCustomValue(cartridgeCaseData?.metal, CARTRIDGE_METAL_OPTIONS));
@@ -179,12 +197,15 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 		isCustomValue(cartridgeCaseData?.apertureShape, CARTRIDGE_APERTURE_SHAPE_OPTIONS),
 	);
 	const [cHasFpDrag, setCHasFpDrag] = useState(() => cartridgeCaseData?.hasFpDrag ?? false);
+	const [cHasBreechfaceMarks, setCHasBreechfaceMarks] = useState(() => cartridgeCaseData?.hasBreechfaceMarks ?? false);
 	const [cHasExtractorMarks, setCHasExtractorMarks] = useState(() => cartridgeCaseData?.hasExtractorMarks ?? false);
 	const [cHasEjectorMarks, setCHasEjectorMarks] = useState(() => cartridgeCaseData?.hasEjectorMarks ?? false);
 	const [cHasChamberMarks, setCHasChamberMarks] = useState(() => cartridgeCaseData?.hasChamberMarks ?? false);
 	const [cHasMagazineLipMarks, setCHasMagazineLipMarks] = useState(() => cartridgeCaseData?.hasMagazineLipMarks ?? false);
 	const [cHasPrimerShear, setCHasPrimerShear] = useState(() => cartridgeCaseData?.hasPrimerShear ?? false);
 	const [cHasEjectionPortMarks, setCHasEjectionPortMarks] = useState(() => cartridgeCaseData?.hasEjectionPortMarks ?? false);
+	const [cHasChamberingMarks, setCHasChamberingMarks] = useState(() => cartridgeCaseData?.hasChamberingMarks ?? false);
+	const [cHasReloadingMarks, setCHasReloadingMarks] = useState(() => cartridgeCaseData?.hasReloadingMarks ?? false);
 
 	const [sGauge, setSGauge] = useState(() => shotshellData?.gauge || '');
 	const [sGaugeIsCustom, setSGaugeIsCustom] = useState(() => isCustomValue(shotshellData?.gauge, SHOTSHELL_GAUGES));
@@ -199,9 +220,12 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 	const [sBrand, setSBrand] = useState(() => shotshellData?.brand || '');
 	const [sFpiShape, setSFpiShape] = useState(() => shotshellData?.fpiShape || '');
 	const [sFpiShapeIsCustom, setSFpiShapeIsCustom] = useState(() => isCustomValue(shotshellData?.fpiShape, CARTRIDGE_FPI_SHAPE_OPTIONS));
+	const [sHasBreechfaceMarks, setSHasBreechfaceMarks] = useState(() => shotshellData?.hasBreechfaceMarks ?? false);
 	const [sHasExtractorMarks, setSHasExtractorMarks] = useState(() => shotshellData?.hasExtractorMarks ?? false);
 	const [sHasEjectorMarks, setSHasEjectorMarks] = useState(() => shotshellData?.hasEjectorMarks ?? false);
 	const [sHasChamberMarks, setSHasChamberMarks] = useState(() => shotshellData?.hasChamberMarks ?? false);
+	const [sHasChamberingMarks, setSHasChamberingMarks] = useState(() => shotshellData?.hasChamberingMarks ?? false);
+	const [sHasReloadingMarks, setSHasReloadingMarks] = useState(() => shotshellData?.hasReloadingMarks ?? false);
 
 	const [isSaving, setIsSaving] = useState(false);
 
@@ -228,6 +252,7 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 		bulletData: showBullet
 			? {
 					caliber: bCaliber || undefined,
+					length: bLength || undefined,
 					mass: bMass || undefined,
 					diameter: bDiameter || undefined,
 					calcDiameter: calculatedDiameter !== null ? formatCalculatedDiameter(calculatedDiameter) : undefined,
@@ -244,11 +269,13 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 		cartridgeCaseData: showCartridge
 			? {
 					caliber: cCaliber || undefined,
+					length: cLength || undefined,
 					brand: cBrand || undefined,
 					metal: cMetal || undefined,
 					primerType: cPrimerType || undefined,
 					fpiShape: cFpiShape || undefined,
 					apertureShape: cApertureShape || undefined,
+					hasBreechfaceMarks: cHasBreechfaceMarks || undefined,
 					hasFpDrag: cHasFpDrag || undefined,
 					hasExtractorMarks: cHasExtractorMarks || undefined,
 					hasEjectorMarks: cHasEjectorMarks || undefined,
@@ -256,6 +283,8 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 					hasMagazineLipMarks: cHasMagazineLipMarks || undefined,
 					hasPrimerShear: cHasPrimerShear || undefined,
 					hasEjectionPortMarks: cHasEjectionPortMarks || undefined,
+					hasChamberingMarks: cHasChamberingMarks || undefined,
+					hasReloadingMarks: cHasReloadingMarks || undefined,
 				}
 			: undefined,
 		shotshellData: showShotshell
@@ -266,9 +295,12 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 					metal: sMetal || undefined,
 					brand: sBrand || undefined,
 					fpiShape: sFpiShape || undefined,
+					hasBreechfaceMarks: sHasBreechfaceMarks || undefined,
 					hasExtractorMarks: sHasExtractorMarks || undefined,
 					hasEjectorMarks: sHasEjectorMarks || undefined,
 					hasChamberMarks: sHasChamberMarks || undefined,
+					hasChamberingMarks: sHasChamberingMarks || undefined,
+					hasReloadingMarks: sHasReloadingMarks || undefined,
 				}
 			: undefined,
 	});
@@ -276,6 +308,7 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 	const bullet: BulletDetailsState = {
 		caliber: bCaliber,
 		caliberIsCustom: bCaliberIsCustom,
+		length: bLength,
 		mass: bMass,
 		diameter: bDiameter,
 		lgNumber: bLgNumber,
@@ -294,6 +327,7 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 		calculatedDiameter,
 		setCaliber: setBCaliber,
 		setCaliberIsCustom: setBCaliberIsCustom,
+		setLength: setBLength,
 		setMass: setBMass,
 		setDiameter: setBDiameter,
 		setLgNumber: setBLgNumber,
@@ -313,6 +347,7 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 	const cartridgeCase: CartridgeCaseDetailsState = {
 		caliber: cCaliber,
 		caliberIsCustom: cCaliberIsCustom,
+		length: cLength,
 		brand: cBrand,
 		metal: cMetal,
 		metalIsCustom: cMetalIsCustom,
@@ -322,6 +357,7 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 		fpiShapeIsCustom: cFpiShapeIsCustom,
 		apertureShape: cApertureShape,
 		apertureShapeIsCustom: cApertureShapeIsCustom,
+		hasBreechfaceMarks: cHasBreechfaceMarks,
 		hasFpDrag: cHasFpDrag,
 		hasExtractorMarks: cHasExtractorMarks,
 		hasEjectorMarks: cHasEjectorMarks,
@@ -329,8 +365,11 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 		hasMagazineLipMarks: cHasMagazineLipMarks,
 		hasPrimerShear: cHasPrimerShear,
 		hasEjectionPortMarks: cHasEjectionPortMarks,
+		hasChamberingMarks: cHasChamberingMarks,
+		hasReloadingMarks: cHasReloadingMarks,
 		setCaliber: setCCaliber,
 		setCaliberIsCustom: setCCaliberIsCustom,
+		setLength: setCLength,
 		setBrand: setCBrand,
 		setMetal: setCMetal,
 		setMetalIsCustom: setCMetalIsCustom,
@@ -340,6 +379,7 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 		setFpiShapeIsCustom: setCFpiShapeIsCustom,
 		setApertureShape: setCApertureShape,
 		setApertureShapeIsCustom: setCApertureShapeIsCustom,
+		setHasBreechfaceMarks: setCHasBreechfaceMarks,
 		setHasFpDrag: setCHasFpDrag,
 		setHasExtractorMarks: setCHasExtractorMarks,
 		setHasEjectorMarks: setCHasEjectorMarks,
@@ -347,6 +387,8 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 		setHasMagazineLipMarks: setCHasMagazineLipMarks,
 		setHasPrimerShear: setCHasPrimerShear,
 		setHasEjectionPortMarks: setCHasEjectionPortMarks,
+		setHasChamberingMarks: setCHasChamberingMarks,
+		setHasReloadingMarks: setCHasReloadingMarks,
 	};
 
 	const shotshell: ShotshellDetailsState = {
@@ -361,9 +403,12 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 		brand: sBrand,
 		fpiShape: sFpiShape,
 		fpiShapeIsCustom: sFpiShapeIsCustom,
+		hasBreechfaceMarks: sHasBreechfaceMarks,
 		hasExtractorMarks: sHasExtractorMarks,
 		hasEjectorMarks: sHasEjectorMarks,
 		hasChamberMarks: sHasChamberMarks,
+		hasChamberingMarks: sHasChamberingMarks,
+		hasReloadingMarks: sHasReloadingMarks,
 		setGauge: setSGauge,
 		setGaugeIsCustom: setSGaugeIsCustom,
 		setShotshellLength: setSShotshellLength,
@@ -375,9 +420,12 @@ export const useItemDetailsState = ({ bulletData, cartridgeCaseData, shotshellDa
 		setBrand: setSBrand,
 		setFpiShape: setSFpiShape,
 		setFpiShapeIsCustom: setSFpiShapeIsCustom,
+		setHasBreechfaceMarks: setSHasBreechfaceMarks,
 		setHasExtractorMarks: setSHasExtractorMarks,
 		setHasEjectorMarks: setSHasEjectorMarks,
 		setHasChamberMarks: setSHasChamberMarks,
+		setHasChamberingMarks: setSHasChamberingMarks,
+		setHasReloadingMarks: setSHasReloadingMarks,
 	};
 
 	return {

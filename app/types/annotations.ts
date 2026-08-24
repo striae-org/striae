@@ -27,6 +27,7 @@ export interface ConfirmationData {
 
 export interface BulletAnnotationData {
 	caliber?: string;
+	length?: string;
 	mass?: string;
 	diameter?: string;
 	calcDiameter?: string;
@@ -44,11 +45,13 @@ export interface BulletAnnotationData {
 
 export interface CartridgeCaseAnnotationData {
 	caliber?: string;
+	length?: string;
 	brand?: string;
 	metal?: string;
 	primerType?: string;
 	fpiShape?: string;
 	apertureShape?: string;
+	hasBreechfaceMarks?: boolean;
 	hasFpDrag?: boolean;
 	hasExtractorMarks?: boolean;
 	hasEjectorMarks?: boolean;
@@ -56,6 +59,8 @@ export interface CartridgeCaseAnnotationData {
 	hasMagazineLipMarks?: boolean;
 	hasPrimerShear?: boolean;
 	hasEjectionPortMarks?: boolean;
+	hasChamberingMarks?: boolean;
+	hasReloadingMarks?: boolean;
 }
 
 export interface ShotshellAnnotationData {
@@ -65,9 +70,12 @@ export interface ShotshellAnnotationData {
 	metal?: string;
 	brand?: string;
 	fpiShape?: string;
+	hasBreechfaceMarks?: boolean;
 	hasExtractorMarks?: boolean;
 	hasEjectorMarks?: boolean;
 	hasChamberMarks?: boolean;
+	hasChamberingMarks?: boolean;
+	hasReloadingMarks?: boolean;
 }
 
 export interface AnnotationData {
