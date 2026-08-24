@@ -54,9 +54,13 @@ Excluded (by design):
 - Use only example files as templates and provide real values in your own private environment.
 - Review release notes for security updates before deployment.
 
-## License
+## License & IP
 
-See `LICENSE`.
+See [LICENSE](https://github.com/striae-org/striae/blob/master/LICENSE).
+
+### Patent Notice
+
+One or more methods, systems, or features of the Striae platform are the subject of a pending patent application. Open-source code made available by Striae is licensed under the Apache 2.0 license, which includes a patent license grant for the licensed code. No patent rights beyond those expressly granted by the applicable open-source license are conveyed by use of this platform. Additional details are available in the [NOTICE](https://github.com/striae-org/striae/blob/master/NOTICE) file.
 
 ## Support
 
