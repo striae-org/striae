@@ -28,6 +28,12 @@ One or more methods, systems, or features of the Striae platform are the subject
 
 ## 📋 Changelog
 
+## [2026-08-24] - *[Patch Release v10.2.4](https://github.com/striae-org/striae/releases/tag/v10.2.4)* — *Patent Notice, CLA, and Contributor Signature Workflow*
+
+- **⚖️ Patent Notice** - Renamed the `License` section to `License & IP` and added a `Patent Notice` subsection to `README.md`/`.github/README.md`, plus a `Patent Pending` line (Application No. 64/110,670) to the top-level `NOTICE` file.
+- **📄 Contributor License Agreement** - Added `.github/CLA.md`, an Individual Contributor License Agreement covering copyright and patent license grants, and a GitHub Actions workflow (`.github/workflows/cla.yml`) that has contributors sign off via pull request comment, recording signatures on a dedicated `cla-signatures` branch.
+- **🤝 Contributing Guide Update** - `.github/CONTRIBUTING.md` now documents the CLA requirement and links to the signed agreement.
+
 ## [2026-08-23] - *[Patch Release v10.2.3](https://github.com/striae-org/striae/releases/tag/v10.2.3)* — *License and Copyright Headers*
 
 - **📜 License and Copyright Header Rollout** - Added SPDX license and copyright headers (`Copyright (c) 2025 Stephen J. Lu`, `SPDX-License-Identifier: Apache-2.0`) to 337 in-scope source files across `app/`, `workers/`, `functions/`, `shared/`, `scripts/`, and eligible root-level config files.
