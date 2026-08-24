@@ -148,6 +148,7 @@ export const buildItemDetailsSummary = (
 			if (v) rows.push(v);
 		};
 		add(r('Caliber', bulletData.caliber));
+		add(r('Length', bulletData.length));
 		add(r('Mass', bulletData.mass));
 		add(r('Diameter', bulletData.diameter));
 		add(r('L/G Count', bulletData.lgNumber));
@@ -172,6 +173,7 @@ export const buildItemDetailsSummary = (
 			if (v) rows.push(v);
 		};
 		add(r('Caliber', cartridgeCaseData.caliber));
+		add(r('Length', cartridgeCaseData.length));
 		add(r('Brand', cartridgeCaseData.brand));
 		add(r('Metal', cartridgeCaseData.metal));
 		add(r('Primer Type', cartridgeCaseData.primerType));
@@ -184,6 +186,8 @@ export const buildItemDetailsSummary = (
 		if (cartridgeCaseData.hasMagazineLipMarks) rows.push('Magazine Lip Marks: Yes');
 		if (cartridgeCaseData.hasPrimerShear) rows.push('Primer Shear: Yes');
 		if (cartridgeCaseData.hasEjectionPortMarks) rows.push('Ejection Port Marks: Yes');
+		if (cartridgeCaseData.hasChamberingMarks) rows.push('Chambering Marks: Yes');
+		if (cartridgeCaseData.hasReloadingMarks) rows.push('Reloading Marks: Yes');
 		pushSection('[Cartridge Case]', rows);
 	}
 
@@ -201,6 +205,8 @@ export const buildItemDetailsSummary = (
 		if (shotshellData.hasExtractorMarks) rows.push('Extractor Marks: Yes');
 		if (shotshellData.hasEjectorMarks) rows.push('Ejector Marks: Yes');
 		if (shotshellData.hasChamberMarks) rows.push('Chamber Marks: Yes');
+		if (shotshellData.hasChamberingMarks) rows.push('Chambering Marks: Yes');
+		if (shotshellData.hasReloadingMarks) rows.push('Reloading Marks: Yes');
 		pushSection('[Shotshell]', rows);
 	}
 
