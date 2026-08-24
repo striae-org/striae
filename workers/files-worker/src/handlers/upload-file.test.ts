@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { describe, expect, it } from 'vitest';
 
 import { MAX_OTHER_FILE_SIZE_BYTES, validateUploadSize } from './upload-file';

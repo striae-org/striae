@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { User } from 'firebase/auth';
 import { type ConfirmationImportData, type ConfirmationImportPreview } from '~/types';
 import type { EncryptionManifest } from '~/utils/forensics/export-encryption';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { type FileData, type OtherFileData } from './file';
 import { type AnnotationData, type ConfirmationData } from './annotations';
 import { type ValidationAuditEntry } from './audit';

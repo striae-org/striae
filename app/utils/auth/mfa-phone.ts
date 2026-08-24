@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { MultiFactorInfo } from 'firebase/auth';
 import { getValidationError } from '~/services/firebase/errors';
 

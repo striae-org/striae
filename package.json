@@ -1,6 +1,6 @@
 {
   "name": "@striae-org/striae",
-  "version": "10.2.2",
+  "version": "10.2.3",
   "private": false,
   "description": "Striae is a specialized, cloud-native platform designed to streamline forensic firearms identification by providing an intuitive environment for digital comparison image annotation, authenticated confirmations, and automated report generation.",
   "license": "Apache-2.0",
@@ -81,7 +81,9 @@
     "publish:all": "npm run publish:npm && npm run publish:github",
     "publish:all:dry-run": "npm run publish:npm:dry-run && npm run publish:github:dry-run",
     "release:check": "node -e 'const fs=require(\"fs\"); const version=require(\"./package.json\").version; const file=`.github/release-notes/RELEASE_NOTES_v${version}.md`; if (!fs.existsSync(file)) { console.error(\"Missing release notes: \" + file); process.exit(1); } console.log(\"Release notes exist for v\" + version);'",
-    "lint": "node ./scripts/run-eslint.cjs",
+    "lint": "node ./scripts/run-eslint.cjs && npm run check-license-headers",
+    "add-license-headers": "node ./scripts/add-license-headers.mjs",
+    "check-license-headers": "node ./scripts/add-license-headers.mjs --check",
     "format": "prettier --write \"app/**/*.{ts,tsx,css}\" \"functions/**/*.ts\" \"scripts/**/*.{mjs,cjs}\" \"*.{ts,js}\"",
     "format:check": "prettier --check \"app/**/*.{ts,tsx,css}\" \"functions/**/*.ts\" \"scripts/**/*.{mjs,cjs}\" \"*.{ts,js}\"",
     "start": "node ./scripts/dev.cjs && wrangler pages dev",

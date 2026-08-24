@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { DECRYPT_EXPORT_PATH, SIGN_AUDIT_EXPORT_PATH, SIGN_CONFIRMATION_PATH, SIGN_MANIFEST_PATH } from './config';
 import { handleDecryptExport } from './handlers/decrypt-export';
 import { handleSignAuditExport, handleSignConfirmation, handleSignManifest } from './handlers/signing';

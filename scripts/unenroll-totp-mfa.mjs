@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Admin script to unenroll a user's TOTP MFA factor via Firebase Admin SDK.
  * Run with: npm run unenroll-totp-mfa -- <uid>

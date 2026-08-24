@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { decryptBinaryFromStorage, type DataAtRestEnvelope } from '../encryption-utils';
 import type { Env, PrivateKeyRegistry } from '../types';
 import { fetchKeyRegistryFromR2 } from '../../../../shared/registry/r2-key-registry';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * SHA-256 utility functions for data integrity validation
  * Uses cryptographically secure SHA-256 algorithm for forensic applications

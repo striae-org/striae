@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 export interface Env {
 	STRIAE_FILES: R2Bucket;
 	STRIAE_CONFIG: R2Bucket;

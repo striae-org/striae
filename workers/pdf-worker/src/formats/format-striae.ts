@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { PDFGenerationData, ReportPdfOptionsBuilder, ReportRenderer } from '../report-types';
 import { ICON_256 } from '../assets/generated-assets';
 import { buildRepeatedChromePdfOptions, escapeHtml } from '../report-layout';

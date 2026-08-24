@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Checks whether the given email is permitted to register based on the
  * registration allowlist (a comma-separated list of allowed entries) sourced

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { User } from 'firebase/auth';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { SidebarContainer } from '~/components/sidebar/sidebar-container';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 export function parseFileId(pathname: string): string | null {
 	const encodedFileId = pathname.startsWith('/') ? pathname.slice(1) : pathname;
 	if (!encodedFileId) {

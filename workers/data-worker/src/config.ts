@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 export const SIGN_MANIFEST_PATH = '/api/forensic/sign-manifest';
 export const SIGN_CONFIRMATION_PATH = '/api/forensic/sign-confirmation';
 export const SIGN_AUDIT_EXPORT_PATH = '/api/forensic/sign-audit-export';

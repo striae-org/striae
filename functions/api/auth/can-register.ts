@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { isEmailAllowed } from '../_shared/registration-allowlist';
 import { fetchListFromWorker } from '../_shared/lists-client';
 

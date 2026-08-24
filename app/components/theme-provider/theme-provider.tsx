@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { type JSX, createContext, use } from 'react';
 import { classes, media } from '~/utils/ui';
 import { themes, tokens } from './theme';

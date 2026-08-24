@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) 2025 Stephen J. Lu
+# SPDX-License-Identifier: Apache-2.0
+
 validate_data_at_rest_encryption_settings() {
     local has_legacy_private_key=false
     local has_registry_keys_json=false

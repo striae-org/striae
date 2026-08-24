@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 // Annotation-related types and interfaces
 
 import type { ItemType, SupportLevel, IndexType } from '../../shared/types/annotation-literals';

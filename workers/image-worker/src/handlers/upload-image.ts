@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { encryptBinaryForStorage } from '../encryption-utils';
 import { requireEncryptionUploadConfig } from '../security/key-registry';
 import type { CreateResponse, Env } from '../types';

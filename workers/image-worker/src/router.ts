@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { handleImageDelete } from './handlers/delete-image';
 import { handleSignedUrlMinting } from './handlers/mint-signed-url';
 import { handleImageServing } from './handlers/serve-image';

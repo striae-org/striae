@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { type CaseData, type ReadOnlyCaseData } from '~/types';
 
 const CASE_NUMBER_REGEX = /^[A-Za-z0-9-]+$/;

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '../button/button';
 import { ToolbarColorSelector } from './toolbar-color-selector';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { handleAuditRequest } from './handlers/audit-routes';
 import type { CreateResponse, Env } from './types';
 

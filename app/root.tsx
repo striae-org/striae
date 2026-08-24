@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { LinksFunction } from 'react-router';
 import { Links, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useRouteError, useMatches } from 'react-router';
 import { ThemeProvider, themeStyles } from '~/components/theme-provider/theme-provider';

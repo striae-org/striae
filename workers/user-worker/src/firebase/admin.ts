@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { FIREBASE_IDENTITY_TOOLKIT_BASE_URL, GOOGLE_IDENTITY_TOOLKIT_SCOPE, GOOGLE_OAUTH_TOKEN_URL } from '../config';
 import type { Env, FirebaseDeleteAccountErrorResponse, GoogleOAuthTokenResponse } from '../types';
 

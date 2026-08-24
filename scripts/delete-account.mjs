@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Admin script to permanently delete a user account via the user worker's delete endpoint.
  * Run with: npm run delete-account -- <uid> --confirm [--url <base-url>]

@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Encrypts a key registry JSON file with AES-256-GCM for R2 storage.
  *

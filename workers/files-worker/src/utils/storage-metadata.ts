@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { DataAtRestEnvelope } from '../encryption-utils';
 
 export function extractEnvelope(file: R2ObjectBody): DataAtRestEnvelope | null {

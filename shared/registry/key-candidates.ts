@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Private-key candidate fallback chain + decryption telemetry, shared across
  * workers' key registries (record key -> active key -> remaining keys).

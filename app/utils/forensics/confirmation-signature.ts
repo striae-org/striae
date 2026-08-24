@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { type ConfirmationImportData } from '~/types';
 import { type ForensicManifestSignature, FORENSIC_MANIFEST_SIGNATURE_ALGORITHM, type ManifestSignatureVerificationResult } from './SHA256';
 import { verifySignaturePayload } from './signature-utils';

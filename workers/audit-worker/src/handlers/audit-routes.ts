@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { appendAuditEntry, generateAuditFileName, isValidAuditEntry, readAuditEntriesFromObject } from '../storage/audit-storage';
 import type { AuditEntry, CreateResponse, Env } from '../types';
 

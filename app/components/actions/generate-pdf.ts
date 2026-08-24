@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { type AnnotationData } from '~/types/annotations';
 import { auditService } from '~/services/audit';
 import type { User } from 'firebase/auth';

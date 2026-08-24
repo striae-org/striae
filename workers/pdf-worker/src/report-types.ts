@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import type { IndexType, SupportLevel } from '../../../shared/types/annotation-literals';
 
 export interface BoxAnnotation {

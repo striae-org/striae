@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { auth } from '~/services/firebase';
 import { auditService } from '~/services/audit';
 import { generateUniqueId } from '~/utils/common';

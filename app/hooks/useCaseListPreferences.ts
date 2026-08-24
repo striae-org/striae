@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useEffect, useState } from 'react';
 import { type CasesModalPreferences, type CasesModalSortBy, type CasesModalConfirmationFilter } from '~/utils/data/case-filters';
 

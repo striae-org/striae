@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 // User-related types and interfaces
 
 import { type ReadOnlyCaseMetadata } from './import';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 export { loadCaseExportActions, type CaseExportActionsModule } from '~/utils/data/operations/case-export-loader';
 
 export const getExportProgressLabel = (progress: number): string => {

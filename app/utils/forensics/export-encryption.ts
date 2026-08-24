@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import paths from '~/config/config.json';
 import { base64UrlEncode, base64UrlDecode } from '../../../shared/crypto/base64url';
 import { createAesGcmKey, wrapAesKey } from '../../../shared/crypto/rsa-oaep-public';

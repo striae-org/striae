@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { useEffect, type ReactNode } from 'react';
 import { useOverlayDismiss } from '~/hooks/useOverlayDismiss';
 import styles from './toast.module.css';

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { type CaseImportPreview } from '~/types';
 import { ARCHIVED_REGULAR_CASE_BLOCK_MESSAGE, ARCHIVED_SELF_IMPORT_NOTE } from '~/utils/ui';
 import styles from '../case-import.module.css';

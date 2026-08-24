@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
