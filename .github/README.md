@@ -20,6 +20,12 @@ Striae is a specialized, cloud-native platform designed to streamline forensic f
 
 ## 📋 Changelog
 
+## [2026-08-23] - *[Patch Release v10.2.2](https://github.com/striae-org/striae/releases/tag/v10.2.2)* — *Item Details Data Entry Refinements*
+
+- **📏 Length Fields** - Added a `Length` text field to the Bullet and Cartridge Case item-details sections, carried through state, save data, and case-summary text.
+- **☑️ Chambering, Reloading, and Breechface Marks** - Added `Chambering Marks` and `Reloading Marks` checkboxes to the Cartridge Case and Shotshell sections, and a `Breechface Marks` checkbox to both sections as well.
+- **🏷️ Label Clarifications** - Relabeled `Primer Shear` to `Primer/Aperture Shear` on the Cartridge Case section and relabeled the `HP` bullet type option to `HP/JHP`.
+
 ## [2026-08-23] - *[Patch Release v10.2.1](https://github.com/striae-org/striae/releases/tag/v10.2.1)* — *Data Worker Export Decrypt OOM Fix*
 
 - **🧠 Data Worker Export Decrypt OOM Fix (Bug Fix)** - Fixed case import failures on larger exports where the data worker's `decrypt-export` handler could crash with "Worker exceeded memory limit" while decrypting and base64 re-encoding an entire export batch in one request. `arrayBufferToBase64` now encodes each chunk directly instead of building a full-size intermediate binary string, and the client (`app/utils/data/operations/signing-operations.ts`) now splits associated files across multiple decrypt requests (capped at ~4MB decoded bytes or 20 files per batch) instead of sending the whole export in a single request.
