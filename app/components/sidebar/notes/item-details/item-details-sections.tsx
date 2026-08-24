@@ -463,6 +463,12 @@ export const CartridgeCaseSection = ({ showHeader, isReadOnly, cartridgeCase }: 
 			<div className={styles.itemDetailsCheckboxGroup}>
 				{renderCheckboxes(
 					[
+						{
+							key: 'breechface',
+							label: 'Breechface Marks',
+							checked: cartridgeCase.hasBreechfaceMarks,
+							onChange: cartridgeCase.setHasBreechfaceMarks,
+						},
 						{ key: 'fpDrag', label: 'FP Drag', checked: cartridgeCase.hasFpDrag, onChange: cartridgeCase.setHasFpDrag },
 						{
 							key: 'extractor',
@@ -585,6 +591,12 @@ export const ShotshellSection = ({ showHeader, isReadOnly, shotshell }: Shotshel
 			<div className={styles.itemDetailsCheckboxGroup}>
 				{renderCheckboxes(
 					[
+						{
+							key: 'breechface',
+							label: 'Breechface Marks',
+							checked: shotshell.hasBreechfaceMarks,
+							onChange: shotshell.setHasBreechfaceMarks,
+						},
 						{ key: 'extractor', label: 'Extractor Marks', checked: shotshell.hasExtractorMarks, onChange: shotshell.setHasExtractorMarks },
 						{ key: 'ejector', label: 'Ejector Marks', checked: shotshell.hasEjectorMarks, onChange: shotshell.setHasEjectorMarks },
 						{ key: 'chamber', label: 'Chamber Marks', checked: shotshell.hasChamberMarks, onChange: shotshell.setHasChamberMarks },

@@ -51,6 +51,7 @@ export interface CartridgeCaseAnnotationData {
 	primerType?: string;
 	fpiShape?: string;
 	apertureShape?: string;
+	hasBreechfaceMarks?: boolean;
 	hasFpDrag?: boolean;
 	hasExtractorMarks?: boolean;
 	hasEjectorMarks?: boolean;
@@ -69,6 +70,7 @@ export interface ShotshellAnnotationData {
 	metal?: string;
 	brand?: string;
 	fpiShape?: string;
+	hasBreechfaceMarks?: boolean;
 	hasExtractorMarks?: boolean;
 	hasEjectorMarks?: boolean;
 	hasChamberMarks?: boolean;

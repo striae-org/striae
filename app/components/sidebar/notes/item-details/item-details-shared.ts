@@ -179,6 +179,7 @@ export const buildItemDetailsSummary = (
 		add(r('Primer Type', cartridgeCaseData.primerType));
 		add(r('FPI Shape', cartridgeCaseData.fpiShape));
 		add(r('Aperture Shape', cartridgeCaseData.apertureShape));
+		if (cartridgeCaseData.hasBreechfaceMarks) rows.push('Breechface Marks: Yes');
 		if (cartridgeCaseData.hasFpDrag) rows.push('FP Drag: Yes');
 		if (cartridgeCaseData.hasExtractorMarks) rows.push('Extractor Marks: Yes');
 		if (cartridgeCaseData.hasEjectorMarks) rows.push('Ejector Marks: Yes');
@@ -202,6 +203,7 @@ export const buildItemDetailsSummary = (
 		add(r('Metal', shotshellData.metal));
 		add(r('Brand', shotshellData.brand));
 		add(r('FPI Shape', shotshellData.fpiShape));
+		if (shotshellData.hasBreechfaceMarks) rows.push('Breechface Marks: Yes');
 		if (shotshellData.hasExtractorMarks) rows.push('Extractor Marks: Yes');
 		if (shotshellData.hasEjectorMarks) rows.push('Ejector Marks: Yes');
 		if (shotshellData.hasChamberMarks) rows.push('Chamber Marks: Yes');
