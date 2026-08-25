@@ -28,6 +28,11 @@ One or more methods, systems, or features of the Striae platform are the subject
 
 ## 📋 Changelog
 
+## [2026-08-25] - *[Patch Release v10.2.5](https://github.com/striae-org/striae/releases/tag/v10.2.5)* — *RSA-3072 Key Rotation Migration + Dependency Maintenance*
+
+- **🔐 RSA-3072 Key Rotation Migration (Security)** - Added a shared `RSA_KEY_MODULUS_LENGTH=3072` constant in `scripts/deploy-config/modules/keys.sh` and updated all four self-generated RSA key-pair routines (manifest signing, export encryption, data-at-rest encryption, user KV encryption) to use RSA-3072 for newly generated keys instead of RSA-2048. Existing deployed key material is unaffected until rotated.
+- **📦 Dependency Maintenance** - Bumped `@cloudflare/vite-plugin`, `@cloudflare/workers-types`, and `wrangler` (`4.126.0`) at the root and across all six workers, with matching compatibility-date refreshes to `2026-08-25`.
+
 ## [2026-08-24] - *[Patch Release v10.2.4](https://github.com/striae-org/striae/releases/tag/v10.2.4)* — *Patent Notice, CLA, and Contributor Signature Workflow*
 
 - **⚖️ Patent Notice** - Renamed the `License` section to `License & IP` and added a `Patent Notice` subsection to `README.md`/`.github/README.md`, plus a `Patent Pending` line (Application No. 64/110,670) to the top-level `NOTICE` file.
