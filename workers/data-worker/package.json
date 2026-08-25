@@ -1,6 +1,6 @@
 {
   "name": "data-worker",
-  "version": "10.2.4",
+  "version": "10.2.5",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
