@@ -3,6 +3,10 @@
 # Copyright (c) 2025 Stephen J. Lu
 # SPDX-License-Identifier: Apache-2.0
 
+# Shared modulus length for all self-generated RSA key pairs (manifest signing,
+# export encryption, data-at-rest encryption, user KV encryption).
+RSA_KEY_MODULUS_LENGTH=3072
+
 is_admin_service_placeholder() {
     local value="$1"
     local normalized=$(echo "$value" | tr '[:upper:]' '[:lower:]')
@@ -77,7 +81,7 @@ generate_manifest_signing_key_pair() {
     private_key_file=$(mktemp)
     public_key_file=$(mktemp)
 
-    if ! node -e "const { generateKeyPairSync } = require('crypto'); const fs = require('fs'); const pair = generateKeyPairSync('rsa', { modulusLength: 2048, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); fs.writeFileSync(process.argv[1], pair.privateKey, 'utf8'); fs.writeFileSync(process.argv[2], pair.publicKey, 'utf8');" "$private_key_file" "$public_key_file"; then
+    if ! node -e "const { generateKeyPairSync } = require('crypto'); const fs = require('fs'); const pair = generateKeyPairSync('rsa', { modulusLength: ${RSA_KEY_MODULUS_LENGTH}, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); fs.writeFileSync(process.argv[1], pair.privateKey, 'utf8'); fs.writeFileSync(process.argv[2], pair.publicKey, 'utf8');" "$private_key_file" "$public_key_file"; then
         rm -f "$private_key_file" "$public_key_file"
         return 1
     fi
@@ -162,7 +166,7 @@ generate_export_encryption_key_pair() {
     private_key_file=$(mktemp)
     public_key_file=$(mktemp)
 
-    if ! node -e "const { generateKeyPairSync } = require('crypto'); const fs = require('fs'); const pair = generateKeyPairSync('rsa', { modulusLength: 2048, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); fs.writeFileSync(process.argv[1], pair.privateKey, 'utf8'); fs.writeFileSync(process.argv[2], pair.publicKey, 'utf8');" "$private_key_file" "$public_key_file"; then
+    if ! node -e "const { generateKeyPairSync } = require('crypto'); const fs = require('fs'); const pair = generateKeyPairSync('rsa', { modulusLength: ${RSA_KEY_MODULUS_LENGTH}, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); fs.writeFileSync(process.argv[1], pair.privateKey, 'utf8'); fs.writeFileSync(process.argv[2], pair.publicKey, 'utf8');" "$private_key_file" "$public_key_file"; then
         rm -f "$private_key_file" "$public_key_file"
         return 1
     fi
@@ -247,7 +251,7 @@ generate_data_at_rest_encryption_key_pair() {
     private_key_file=$(mktemp)
     public_key_file=$(mktemp)
 
-    if ! node -e "const { generateKeyPairSync } = require('crypto'); const fs = require('fs'); const pair = generateKeyPairSync('rsa', { modulusLength: 2048, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); fs.writeFileSync(process.argv[1], pair.privateKey, 'utf8'); fs.writeFileSync(process.argv[2], pair.publicKey, 'utf8');" "$private_key_file" "$public_key_file"; then
+    if ! node -e "const { generateKeyPairSync } = require('crypto'); const fs = require('fs'); const pair = generateKeyPairSync('rsa', { modulusLength: ${RSA_KEY_MODULUS_LENGTH}, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); fs.writeFileSync(process.argv[1], pair.privateKey, 'utf8'); fs.writeFileSync(process.argv[2], pair.publicKey, 'utf8');" "$private_key_file" "$public_key_file"; then
         rm -f "$private_key_file" "$public_key_file"
         return 1
     fi
@@ -279,7 +283,7 @@ generate_user_kv_encryption_key_pair() {
     private_key_file=$(mktemp)
     public_key_file=$(mktemp)
 
-    if ! node -e "const { generateKeyPairSync } = require('crypto'); const fs = require('fs'); const pair = generateKeyPairSync('rsa', { modulusLength: 2048, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); fs.writeFileSync(process.argv[1], pair.privateKey, 'utf8'); fs.writeFileSync(process.argv[2], pair.publicKey, 'utf8');" "$private_key_file" "$public_key_file"; then
+    if ! node -e "const { generateKeyPairSync } = require('crypto'); const fs = require('fs'); const pair = generateKeyPairSync('rsa', { modulusLength: ${RSA_KEY_MODULUS_LENGTH}, publicKeyEncoding: { type: 'spki', format: 'pem' }, privateKeyEncoding: { type: 'pkcs8', format: 'pem' } }); fs.writeFileSync(process.argv[1], pair.privateKey, 'utf8'); fs.writeFileSync(process.argv[2], pair.publicKey, 'utf8');" "$private_key_file" "$public_key_file"; then
         rm -f "$private_key_file" "$public_key_file"
         return 1
     fi
