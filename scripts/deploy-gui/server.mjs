@@ -78,7 +78,11 @@ function readJsonBody(req) {
 
 function sendJson(res, status, body) {
 	const payload = JSON.stringify(body);
-	res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(payload), 'Access-Control-Allow-Origin': 'null' });
+	res.writeHead(status, {
+		'Content-Type': 'application/json; charset=utf-8',
+		'Content-Length': Buffer.byteLength(payload),
+		'Access-Control-Allow-Origin': 'null',
+	});
 	res.end(payload);
 }
 
@@ -111,7 +115,11 @@ async function serveStatic(pathname, res) {
 }
 
 function handleEnvFields(res) {
-	sendJson(res, 200, { fields: ENV_FIELDS, keyPairs: KEY_PAIR_FIELDS.map(({ id, label, section }) => ({ id, label, section })), silentFields: SILENT_FIELDS });
+	sendJson(res, 200, {
+		fields: ENV_FIELDS,
+		keyPairs: KEY_PAIR_FIELDS.map(({ id, label, section }) => ({ id, label, section })),
+		silentFields: SILENT_FIELDS,
+	});
 }
 
 function handleEnvStatus(res) {
@@ -206,7 +214,9 @@ async function handleAdminServicePath(req, res) {
 		const raw = await readFile(sourcePath, 'utf8');
 		const parsed = JSON.parse(raw);
 		if (!parsed.project_id || !parsed.client_email || !parsed.private_key) {
-			return sendJson(res, 400, { error: 'File does not look like a Firebase service account key (missing project_id/client_email/private_key)' });
+			return sendJson(res, 400, {
+				error: 'File does not look like a Firebase service account key (missing project_id/client_email/private_key)',
+			});
 		}
 		await copyFile(sourcePath, ADMIN_SERVICE_PATH);
 		sendJson(res, 200, { ok: true });
