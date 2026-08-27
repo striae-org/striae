@@ -47,6 +47,21 @@ function requireField(fields, name) {
 }
 
 export const ACTIONS = [
+	// --- Setup ---
+	// This server has no dependency on root node_modules (Node built-ins only), and
+	// deploy-config.sh only needs system tools (node/sed/awk/grep/openssl), so a developer
+	// can open the GUI on a fresh clone and run this before anything else.
+	{
+		id: 'striae-install',
+		label: 'Install root dependencies',
+		description: 'Runs npm install --legacy-peer-deps for the root project (run this first on a fresh clone).',
+		group: 'Setup',
+		interactive: false,
+		destructive: false,
+		confirmType: null,
+		build: () => npmRun('striae-install'),
+	},
+
 	// --- Configuration ---
 	{
 		id: 'deploy-config',
