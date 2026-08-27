@@ -119,8 +119,14 @@ is_placeholder() {
     local value="$1"
     local normalized
 
-    normalized=$(printf '%s' "$value" | tr -d '\r' | tr '[:upper:]' '[:lower:]')
-    normalized=$(printf '%s' "$normalized" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    # Pure-bash normalization (no tr/sed subprocesses) — this runs many times per
+    # variable across a full deploy-config run, and forking external commands on
+    # Windows/Cygwin is expensive enough to cause a visible delay between prompts.
+    # Case-folding uses `shopt -s nocasematch` below instead of `${var,,}` since
+    # that expansion requires Bash 4+ and breaks on Bash 3.2 (default macOS /bin/bash).
+    normalized="${value//$'\r'/}"
+    normalized="${normalized#"${normalized%%[![:space:]]*}"}"
+    normalized="${normalized%"${normalized##*[![:space:]]}"}"
     normalized=${normalized#\"}
     normalized=${normalized%\"}
 
@@ -128,12 +134,27 @@ is_placeholder() {
         return 1
     fi
 
-    [[ "$normalized" =~ ^your_[a-z0-9_]+_here$ || \
-       "$normalized" =~ ^your-[a-z0-9-]+-here$ || \
-       "$normalized" == "placeholder" || \
-       "$normalized" == "changeme" || \
-       "$normalized" == "replace_me" || \
-       "$normalized" == "replace-me" ]]
+    local nocasematch_was_off=false
+    if ! shopt -q nocasematch; then
+        nocasematch_was_off=true
+        shopt -s nocasematch
+    fi
+
+    local result=1
+    if [[ "$normalized" =~ ^your_[a-z0-9_]+_here$ || \
+          "$normalized" =~ ^your-[a-z0-9-]+-here$ || \
+          "$normalized" == "placeholder" || \
+          "$normalized" == "changeme" || \
+          "$normalized" == "replace_me" || \
+          "$normalized" == "replace-me" ]]; then
+        result=0
+    fi
+
+    if [ "$nocasematch_was_off" = "true" ]; then
+        shopt -u nocasematch
+    fi
+
+    return $result
 }
 
 # Check if .env file exists

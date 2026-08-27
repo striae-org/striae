@@ -1,0 +1,11 @@
+{
+  "url": "http://localhost:7777",
+  "manifest_signing_key_id": "",
+  "manifest_signing_public_key": "",
+  "manifest_signing_public_keys": {},
+  "export_encryption_key_id": "",
+  "export_encryption_public_key": "",
+  "export_encryption_public_keys": {},
+  "max_cases_demo": 0,
+  "max_files_per_case_demo": 0
+}

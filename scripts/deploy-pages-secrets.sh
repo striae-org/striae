@@ -145,6 +145,15 @@ if [ -z "$PAGES_PROJECT_NAME" ] || is_placeholder "$PAGES_PROJECT_NAME"; then
     exit 1
 fi
 
+# Disambiguates the target account for `wrangler pages` commands — wrangler does not read
+# account_id from wrangler.toml for Pages subcommands, and can't prompt non-interactively.
+ACCOUNT_ID=$(strip_carriage_returns "$ACCOUNT_ID")
+if [ -z "$ACCOUNT_ID" ] || is_placeholder "$ACCOUNT_ID"; then
+    echo -e "${RED}❌ Error: ACCOUNT_ID is missing or placeholder in .env${NC}"
+    exit 1
+fi
+export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
+
 required_pages_secrets=(
     "PROJECT_ID"
     "LISTS_ADMIN_SECRET"

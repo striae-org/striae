@@ -28,6 +28,14 @@ One or more methods, systems, or features of the Striae platform are the subject
 
 ## 📋 Changelog
 
+## [2026-08-27] - *[Patch Release v10.2.6](https://github.com/striae-org/striae/releases/tag/v10.2.6)* — *Deployment GUI + Dependency Maintenance*
+
+- **🖥️ Deployment GUI (New Feature)** - Added `npm run deploy-gui`, a local-only (`127.0.0.1:3737`), dependency-free web server (`scripts/deploy-gui/`) that wraps Striae's growing collection of deployment, configuration, testing, and account/MFA utility scripts in a browser UI grouped by Setup, Configuration, Workers, Pages, Full Pipeline, Publishing, Account/MFA Utilities, Tests, and Miscellaneous. It gives developers and contributors an easier way to manage Striae deployment and development as the script inventory grows, without needing to memorize individual `npm run` commands or shell invocations; it is never wired into `deploy:all`, `build`, or CI.
+- **🔐 Safe Interactive Script Execution** - The GUI reads live `.env`/key-pair configuration status before running a script, precomputes interactive prompt answers up front for scripts like `deploy-config.sh`, restricts execution to a fixed script whitelist, and requires a random per-process session token bound to `127.0.0.1` so it can't be driven by another localhost tab.
+- **🧰 New Root Scripts** - Added `npm run striae-install` and `npm run striae-redeploy` as first-class setup/redeploy commands, both surfaced in the new GUI.
+- **🧪 Test Suite Restoration** - Restored the `tests/` directory to source control (removed from `.gitignore`) so the existing app- and worker-level test suites are versioned going forward.
+- **📦 Dependency Maintenance** - Bumped `wrangler` and other root/worker dependencies, with matching compatibility-date refreshes across all workers.
+
 ## [2026-08-25] - *[Patch Release v10.2.5](https://github.com/striae-org/striae/releases/tag/v10.2.5)* — *RSA-3072 Key Rotation Migration + Dependency Maintenance*
 
 - **🔐 RSA-3072 Key Rotation Migration (Security)** - Added a shared `RSA_KEY_MODULUS_LENGTH=3072` constant in `scripts/deploy-config/modules/keys.sh` and updated all four self-generated RSA key-pair routines (manifest signing, export encryption, data-at-rest encryption, user KV encryption) to use RSA-3072 for newly generated keys instead of RSA-2048. Existing deployed key material is unaffected until rotated.

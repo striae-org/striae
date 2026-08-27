@@ -1,6 +1,6 @@
 {
   "name": "user-worker",
-  "version": "10.2.5",
+  "version": "10.2.6",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
@@ -8,7 +8,7 @@
     "start": "wrangler dev"
   },
   "devDependencies": {
-    "wrangler": "^4.126.0"
+    "wrangler": "^4.127.0"
   },
   "allowScripts": {
     "esbuild": true,

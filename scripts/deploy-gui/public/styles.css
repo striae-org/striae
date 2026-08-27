@@ -1,0 +1,192 @@
+/*
+ * Copyright (c) 2025 Stephen J. Lu
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	background: #10141a;
+	color: #e6e8eb;
+}
+
+.banner {
+	background: #3b2f00;
+	color: #ffd873;
+	padding: 0.75rem 1.5rem;
+	display: flex;
+	gap: 0.75rem;
+	align-items: baseline;
+	border-bottom: 1px solid #5c4a00;
+	font-size: 0.9rem;
+}
+
+#app {
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 1.5rem;
+}
+
+h2 {
+	border-bottom: 1px solid #2a323d;
+	padding-bottom: 0.4rem;
+	margin-top: 2rem;
+}
+
+.action-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid #1c222b;
+}
+
+.action-info strong {
+	display: block;
+}
+
+.action-info span {
+	color: #9aa4b2;
+	font-size: 0.85rem;
+}
+
+.btn {
+	background: #2563eb;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	padding: 0.5rem 1rem;
+	cursor: pointer;
+	font-size: 0.9rem;
+	white-space: nowrap;
+}
+
+.btn:hover {
+	filter: brightness(1.1);
+}
+
+.btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.btn-secondary {
+	background: #2a323d;
+}
+
+.btn-danger {
+	background: #dc2626;
+}
+
+.field {
+	margin: 0.75rem 0;
+}
+
+.field label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 0.25rem;
+}
+
+.field .desc {
+	display: block;
+	color: #9aa4b2;
+	font-size: 0.8rem;
+	margin-bottom: 0.35rem;
+}
+
+.field input[type='text'],
+.field input[type='password'] {
+	width: 100%;
+	padding: 0.5rem;
+	border-radius: 4px;
+	border: 1px solid #2a323d;
+	background: #171c24;
+	color: #e6e8eb;
+}
+
+.field-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.section-title {
+	margin-top: 1.5rem;
+	color: #7aa2ff;
+	font-size: 1rem;
+}
+
+.form-actions {
+	display: flex;
+	gap: 0.75rem;
+	margin-top: 1.5rem;
+}
+
+.log-pane {
+	background: #05070a;
+	border: 1px solid #2a323d;
+	border-radius: 6px;
+	padding: 1rem;
+	white-space: pre-wrap;
+	word-break: break-word;
+	max-height: 420px;
+	overflow-y: auto;
+	font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+	font-size: 0.8rem;
+	margin-top: 1rem;
+}
+
+.stuck-warning {
+	background: #3b2f00;
+	color: #ffd873;
+	border: 1px solid #5c4a00;
+	border-radius: 6px;
+	padding: 0.75rem;
+	margin-top: 0.75rem;
+}
+
+.modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.6);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 10;
+}
+
+.modal {
+	background: #171c24;
+	border: 1px solid #2a323d;
+	border-radius: 8px;
+	padding: 1.5rem;
+	max-width: 420px;
+	width: 90%;
+}
+
+.modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.75rem;
+	margin-top: 1rem;
+}
+
+.pill {
+	display: inline-block;
+	font-size: 0.7rem;
+	padding: 0.1rem 0.5rem;
+	border-radius: 999px;
+	background: #2a323d;
+	margin-left: 0.5rem;
+}
+
+.pill-destructive {
+	background: #4a1414;
+	color: #ff9b9b;
+}

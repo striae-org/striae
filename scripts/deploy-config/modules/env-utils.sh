@@ -4,6 +4,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 escape_for_sed_pattern() {
+    # Fast path: variable names (the only real-world input) never contain sed
+    # metacharacters, so skip the subprocess fork entirely in that common case.
+    if [[ "$1" =~ ^[A-Za-z0-9_]+$ ]]; then
+        printf '%s' "$1"
+        return 0
+    fi
     printf '%s' "$1" | sed -e 's/[][\\.^$*+?{}|()]/\\&/g'
 }
 
@@ -40,12 +46,32 @@ dedupe_env_var_entries() {
 normalize_domain_value() {
     local domain="$1"
 
-    domain=$(printf '%s' "$domain" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    # Pure-bash trim (no sed subprocess) — see is_placeholder() for why this matters.
+    domain="${domain#"${domain%%[![:space:]]*}"}"
+    domain="${domain%"${domain##*[![:space:]]}"}"
     domain="${domain#http://}"
     domain="${domain#https://}"
     domain="${domain%/}"
 
     printf '%s' "$domain"
+}
+
+# Pure-bash ASCII lowercase (no subprocess) — ${var,,} and `local -l`/`declare -l`
+# both require Bash 4+ and break on Bash 3.2 (default macOS /bin/bash).
+to_lower_ascii() {
+    local input="$1"
+    local output="$input"
+    local upper="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    local lower="abcdefghijklmnopqrstuvwxyz"
+    local i char lower_char
+
+    for (( i=0; i<${#upper}; i++ )); do
+        char="${upper:i:1}"
+        lower_char="${lower:i:1}"
+        output="${output//$char/$lower_char}"
+    done
+
+    printf '%s' "$output"
 }
 
 normalize_worker_label_value() {
@@ -54,7 +80,7 @@ normalize_worker_label_value() {
     label=$(normalize_domain_value "$label")
     label="${label#.}"
     label="${label%.}"
-    label=$(printf '%s' "$label" | tr '[:upper:]' '[:lower:]')
+    label=$(to_lower_ascii "$label")
 
     printf '%s' "$label"
 }
@@ -66,7 +92,7 @@ is_valid_worker_label() {
 }
 
 strip_carriage_returns() {
-    printf '%s' "$1" | tr -d '\r'
+    printf '%s' "${1//$'\r'/}"
 }
 
 read_env_var_from_file() {
