@@ -17,6 +17,7 @@ vi.mock('../../../workers/data-worker/src/signature-utils', () => ({
 }));
 
 import { handleSignConfirmation } from '../../../workers/data-worker/src/handlers/signing';
+import type { Env } from '../../../workers/data-worker/src/types';
 
 describe('forensic confirmation signing authorization', () => {
 	it('rejects signing when the authenticated caller does not match the exportedByUid', async () => {

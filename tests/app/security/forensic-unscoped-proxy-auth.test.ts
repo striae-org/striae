@@ -7,6 +7,9 @@ vi.mock('../../../functions/api/_shared/firebase-auth', () => ({
 import { verifyFirebaseIdentityFromRequest } from '../../../functions/api/_shared/firebase-auth';
 import { onRequest } from '../../../functions/api/data/[[path]]';
 
+// Derived from onRequest's own (unexported) parameter type to avoid colliding with the ambient global Env.
+type ProxyEnv = Parameters<typeof onRequest>[0]['env'];
+
 describe('data proxy forensic auth forwarding', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -54,7 +57,7 @@ describe('data proxy forensic auth forwarding', () => {
 				DATA_WORKER: {
 					fetch: upstreamFetch
 				}
-			} as unknown as Env
+			} as unknown as ProxyEnv
 		});
 
 		expect(response.status).toBe(200);

@@ -56,13 +56,31 @@ normalize_domain_value() {
     printf '%s' "$domain"
 }
 
+# Pure-bash ASCII lowercase (no subprocess) — ${var,,} and `local -l`/`declare -l`
+# both require Bash 4+ and break on Bash 3.2 (default macOS /bin/bash).
+to_lower_ascii() {
+    local input="$1"
+    local output="$input"
+    local upper="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    local lower="abcdefghijklmnopqrstuvwxyz"
+    local i char lower_char
+
+    for (( i=0; i<${#upper}; i++ )); do
+        char="${upper:i:1}"
+        lower_char="${lower:i:1}"
+        output="${output//$char/$lower_char}"
+    done
+
+    printf '%s' "$output"
+}
+
 normalize_worker_label_value() {
     local label="$1"
 
     label=$(normalize_domain_value "$label")
     label="${label#.}"
     label="${label%.}"
-    label="${label,,}"
+    label=$(to_lower_ascii "$label")
 
     printf '%s' "$label"
 }

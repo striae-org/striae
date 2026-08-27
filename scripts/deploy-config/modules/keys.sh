@@ -9,9 +9,23 @@ RSA_KEY_MODULUS_LENGTH=3072
 
 is_admin_service_placeholder() {
     local value="$1"
-    local normalized="${value,,}"
 
-    [[ -z "$normalized" || "$normalized" == your-* || "$normalized" == *"your_private_key"* ]]
+    # Case-insensitive glob match instead of ${value,,} — that expansion requires
+    # Bash 4+ (as would `local -l`) and breaks on Bash 3.2 (default macOS /bin/bash).
+    local nocasematch_was_off=false
+    if ! shopt -q nocasematch; then
+        nocasematch_was_off=true
+        shopt -s nocasematch
+    fi
+
+    local result=1
+    [[ -z "$value" || "$value" == your-* || "$value" == *"your_private_key"* ]] && result=0
+
+    if [ "$nocasematch_was_off" = "true" ]; then
+        shopt -u nocasematch
+    fi
+
+    return $result
 }
 
 load_admin_service_credentials() {

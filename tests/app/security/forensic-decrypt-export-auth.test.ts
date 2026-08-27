@@ -20,6 +20,7 @@ vi.mock('../../../workers/data-worker/src/registry/key-registry', () => ({
 }));
 
 import { handleDecryptExport } from '../../../workers/data-worker/src/handlers/decrypt-export';
+import type { Env } from '../../../workers/data-worker/src/types';
 
 describe('forensic decrypt export authorization', () => {
   it('rejects decrypt requests when the claimed request user does not match the authenticated caller', async () => {

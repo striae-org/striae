@@ -21,6 +21,7 @@ import {
   handleSignManifest
 } from '../../../workers/data-worker/src/handlers/signing';
 import { requireCaseAccess } from '../../../workers/data-worker/src/forensic-authorization';
+import type { Env } from '../../../workers/data-worker/src/types';
 
 describe('forensic endpoint authorization', () => {
   it('rejects manifest signing when the authenticated caller lacks case access', async () => {
