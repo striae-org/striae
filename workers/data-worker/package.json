@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.22.0",
-    "wrangler": "^4.126.0"
+    "wrangler": "^4.127.0"
   },
   "allowScripts": {
     "esbuild": true,
