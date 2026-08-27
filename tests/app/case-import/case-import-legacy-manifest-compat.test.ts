@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import JSZip from 'jszip';
 import type { User } from 'firebase/auth';
+import type * as CaseImportValidationModule from '../../../app/components/actions/case-import/validation';
 import { importCaseForReview } from '../../../app/components/actions/case-import/orchestrator';
 import { decryptExportBatch } from '~/utils/data/operations/signing-operations';
 import { verifyCasePackageIntegrity } from '~/utils/forensics';
@@ -49,7 +50,7 @@ vi.mock('../../../app/components/actions/case-import/annotation-import', () => (
 }));
 
 vi.mock('../../../app/components/actions/case-import/validation', async () => {
-	const actual = await vi.importActual<typeof import('../../../app/components/actions/case-import/validation')>(
+	const actual = await vi.importActual<typeof CaseImportValidationModule>(
 		'../../../app/components/actions/case-import/validation'
 	);
 

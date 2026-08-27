@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import JSZip from 'jszip';
 import type { User } from 'firebase/auth';
+import type * as ForensicsModule from '~/utils/forensics';
 import { buildArchivePackage } from '../../../app/components/actions/case-manage/archive-package-builder';
 
 vi.mock('../../../app/components/actions/image-manage', () => ({
@@ -16,7 +17,7 @@ vi.mock('~/utils/data', () => ({
 }));
 
 vi.mock('~/utils/forensics', async () => {
-	const actual = await vi.importActual<typeof import('~/utils/forensics')>('~/utils/forensics');
+	const actual = await vi.importActual<typeof ForensicsModule>('~/utils/forensics');
 	return {
 		...actual,
 		generateForensicManifestSecure: vi.fn(),
