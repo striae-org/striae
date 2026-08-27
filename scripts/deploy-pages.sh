@@ -20,6 +20,29 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}📄 Striae Pages Deployment Script${NC}"
 echo "=================================="
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
+
+if [ ! -f ".env" ]; then
+    echo -e "${RED}❌ Error: .env file not found. Run deploy-config first.${NC}"
+    exit 1
+fi
+
+echo -e "${YELLOW}📖 Loading environment variables from .env...${NC}"
+set -a
+# shellcheck disable=SC1091
+source .env
+set +a
+
+# Disambiguates the target account for `wrangler pages deploy` — wrangler does not read
+# account_id from wrangler.toml for Pages subcommands, and can't prompt non-interactively.
+if [ -z "${ACCOUNT_ID:-}" ]; then
+    echo -e "${RED}❌ Error: ACCOUNT_ID is missing in .env${NC}"
+    exit 1
+fi
+export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
+
 # Deploy to Cloudflare Pages (includes build step)
 echo -e "${YELLOW}�️ Running admin-service security guard before Pages deployment...${NC}"
 if ! npm run security:admin-service-guard; then

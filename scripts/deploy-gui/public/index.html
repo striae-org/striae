@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Striae Deploy GUI (local only)</title>
+	<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+	<header class="banner">
+		<strong>⚙️ Striae Deploy GUI</strong>
+		<span>Local development tool only — wraps the existing scripts/ CLI, does not replace it.</span>
+	</header>
+
+	<main id="app">
+		<p>Loading…</p>
+	</main>
+
+	<template id="tpl-modal">
+		<div class="modal-overlay">
+			<div class="modal">
+				<h3></h3>
+				<p class="modal-desc"></p>
+				<div class="modal-confirm-input"></div>
+				<div class="modal-actions">
+					<button class="btn btn-secondary" data-role="cancel">Cancel</button>
+					<button class="btn btn-danger" data-role="confirm" disabled>Run</button>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<script>
+		window.__DEPLOY_GUI_TOKEN__ = '%%DEPLOY_GUI_TOKEN%%';
+	</script>
+	<script src="/app.js"></script>
+</body>
+</html>

@@ -74,6 +74,15 @@ fi
 
 export REGISTRY_ENCRYPTION_KEY
 
+if [ -z "${ACCOUNT_ID:-}" ]; then
+    echo -e "${RED}❌ ACCOUNT_ID is not set in .env${NC}"
+    exit 1
+fi
+
+# Disambiguates the target account for `wrangler r2 object put` — without this, wrangler
+# can't prompt (non-interactive) and fails when the authenticated user has multiple accounts.
+export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
+
 echo -e "${YELLOW}  Target bucket: ${CONFIG_BUCKET_NAME}${NC}"
 
 TEMP_DIR=$(mktemp -d)
@@ -124,11 +133,15 @@ upload_registry() {
         echo -e "${BLUE}  [dry-run] Would upload ${scope_label}: ${filename} (${size} bytes, encrypted)${NC}"
     else
         echo -e "${YELLOW}  Uploading ${scope_label}: ${filename} (${size} bytes, encrypted)...${NC}"
-        if wrangler r2 object put "${CONFIG_BUCKET_NAME}/${filename}" --file "$encrypted_filepath" --content-type "application/json" --remote 2>/dev/null; then
+        local wrangler_err_file="${TEMP_DIR}/wrangler-stderr-${filename}.log"
+        if wrangler r2 object put "${CONFIG_BUCKET_NAME}/${filename}" --file "$encrypted_filepath" --content-type "application/json" --remote 2>"$wrangler_err_file"; then
             echo -e "${GREEN}    ✅ ${filename} uploaded${NC}"
             uploaded=$((uploaded + 1))
         else
             echo -e "${RED}    ❌ Failed to upload ${filename}${NC}"
+            if [ -s "$wrangler_err_file" ]; then
+                echo -e "${RED}$(cat "$wrangler_err_file")${NC}"
+            fi
             exit 1
         fi
     fi
