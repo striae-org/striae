@@ -22,6 +22,12 @@ import path from 'node:path';
 const ENV_PATH = path.join(PROJECT_ROOT, '.env');
 const STUCK_IDLE_MS = 20_000;
 const STUCK_CHECK_INTERVAL_MS = 5_000;
+// The stdin answer batch is drained in seconds even for a full deploy-config run, so this
+// generously bounds how long the "may be waiting on an unexpected prompt" heuristic stays
+// armed. Without a bound, actions like deploy:all — interactive only for their initial
+// deploy-config phase, then many more minutes of non-interactive worker/Pages deploys —
+// would keep re-triggering a misleading prompt warning during normal long-running steps.
+const STUCK_DETECTION_WINDOW_MS = 5 * 60_000;
 
 function stripAnsi(text) {
 	// eslint-disable-next-line no-control-regex
@@ -153,6 +159,11 @@ class Runner extends EventEmitter {
 
 		const stuckInterval = setInterval(() => {
 			if (!this.activeRun || this.activeRun.id !== runId) return;
+			if (!action.interactive) return;
+			if (Date.now() - this.activeRun.startedAt > STUCK_DETECTION_WINDOW_MS) {
+				clearInterval(stuckInterval);
+				return;
+			}
 			const idleFor = Date.now() - this.activeRun.lastOutputAt;
 			if (idleFor > STUCK_IDLE_MS && !this.activeRun.stuckWarned) {
 				this.activeRun.stuckWarned = true;

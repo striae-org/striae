@@ -168,9 +168,9 @@ export const ACTIONS = [
 	{
 		id: 'deploy-all',
 		label: 'Full deployment (deploy:all)',
-		description: 'Runs the entire pipeline: config, workers, registries, secrets, pages.',
+		description: 'Runs the entire pipeline: config (--refresh-templates, prompts for values), workers, registries, secrets, pages.',
 		group: 'Full Pipeline',
-		interactive: false,
+		interactive: true,
 		destructive: true,
 		confirmType: 'type-to-confirm',
 		build: () => bashScript('scripts/deploy-all.sh'),
