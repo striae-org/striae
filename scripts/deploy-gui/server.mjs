@@ -96,7 +96,8 @@ async function serveStatic(pathname, res) {
 	const relative = pathname === '/' ? '/index.html' : pathname;
 	const resolved = path.normalize(path.join(PUBLIC_DIR, relative));
 
-	if (!resolved.startsWith(PUBLIC_DIR)) {
+	// Separator-bounded check prevents sibling-dir bypass (e.g. PUBLIC_DIR + '-evil').
+	if (resolved !== PUBLIC_DIR && !resolved.startsWith(PUBLIC_DIR + path.sep)) {
 		res.writeHead(403).end('Forbidden');
 		return;
 	}
