@@ -37,6 +37,7 @@ set +a
 
 # Disambiguates the target account for `wrangler pages deploy` — wrangler does not read
 # account_id from wrangler.toml for Pages subcommands, and can't prompt non-interactively.
+ACCOUNT_ID=$(printf '%s' "${ACCOUNT_ID:-}" | tr -d '\r')
 if [ -z "${ACCOUNT_ID:-}" ]; then
     echo -e "${RED}❌ Error: ACCOUNT_ID is missing in .env${NC}"
     exit 1
@@ -44,13 +45,13 @@ fi
 export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
 
 # Deploy to Cloudflare Pages (includes build step)
-echo -e "${YELLOW}�️ Running admin-service security guard before Pages deployment...${NC}"
+echo -e "${YELLOW}🛡️ Running admin-service security guard before Pages deployment...${NC}"
 if ! npm run security:admin-service-guard; then
     echo -e "${RED}❌ Admin-service security guard failed!${NC}"
     exit 1
 fi
 echo -e "${GREEN}✅ Admin-service security guard passed${NC}"
-echo -e "${YELLOW}�🚀 Building and deploying to Cloudflare Pages...${NC}"
+echo -e "${YELLOW}🚀 Building and deploying to Cloudflare Pages...${NC}"
 if ! npm run deploy; then
     echo -e "${RED}❌ Deployment failed!${NC}"
     exit 1

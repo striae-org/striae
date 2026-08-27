@@ -30,7 +30,7 @@ v10.2.6 introduces `npm run deploy-gui`, a local-only web GUI that wraps Striae'
 
 ### Dependency and Compatibility Maintenance
 
-- **Root Dependency Bumps** - Bumped root dependencies, including `wrangler` to `4.126.0`.
+- **Root Dependency Bumps** - Bumped root dependencies, including `wrangler` to `4.127.0`.
 - **Worker Dependency Bumps** - Bumped dependencies across all six workers (`audit-worker`, `data-worker`, `files-worker`, `image-worker`, `lists-worker`, `pdf-worker`, `user-worker`) with matching `package-lock.json` refreshes.
 - **Compatibility-Date Refresh** - Updated `compatibility_date` to the latest date in `wrangler.toml.example` and all worker `wrangler.jsonc.example` files.
 

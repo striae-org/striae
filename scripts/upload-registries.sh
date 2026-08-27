@@ -81,6 +81,7 @@ fi
 
 # Disambiguates the target account for `wrangler r2 object put` — without this, wrangler
 # can't prompt (non-interactive) and fails when the authenticated user has multiple accounts.
+ACCOUNT_ID=$(printf '%s' "$ACCOUNT_ID" | tr -d '\r')
 export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
 
 echo -e "${YELLOW}  Target bucket: ${CONFIG_BUCKET_NAME}${NC}"
