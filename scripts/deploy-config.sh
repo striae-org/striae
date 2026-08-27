@@ -119,8 +119,13 @@ is_placeholder() {
     local value="$1"
     local normalized
 
-    normalized=$(printf '%s' "$value" | tr -d '\r' | tr '[:upper:]' '[:lower:]')
-    normalized=$(printf '%s' "$normalized" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    # Pure-bash normalization (no tr/sed subprocesses) — this runs many times per
+    # variable across a full deploy-config run, and forking external commands on
+    # Windows/Cygwin is expensive enough to cause a visible delay between prompts.
+    normalized="${value//$'\r'/}"
+    normalized="${normalized,,}"
+    normalized="${normalized#"${normalized%%[![:space:]]*}"}"
+    normalized="${normalized%"${normalized##*[![:space:]]}"}"
     normalized=${normalized#\"}
     normalized=${normalized%\"}
 

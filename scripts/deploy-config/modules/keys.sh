@@ -9,7 +9,7 @@ RSA_KEY_MODULUS_LENGTH=3072
 
 is_admin_service_placeholder() {
     local value="$1"
-    local normalized=$(echo "$value" | tr '[:upper:]' '[:lower:]')
+    local normalized="${value,,}"
 
     [[ -z "$normalized" || "$normalized" == your-* || "$normalized" == *"your_private_key"* ]]
 }
