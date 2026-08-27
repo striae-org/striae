@@ -4,7 +4,7 @@
 **Period**: August 25, 2026 - August 27, 2026
 **Total Commits**: 14 (non-merge since the v10.2.5 release)
 
-## Minor Release - Deployment GUI + Dependency Maintenance
+## Patch Release - Deployment GUI + Dependency Maintenance
 
 ## Summary
 

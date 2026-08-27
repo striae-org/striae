@@ -28,7 +28,7 @@ One or more methods, systems, or features of the Striae platform are the subject
 
 ## 📋 Changelog
 
-## [2026-08-27] - *[Minor Release v10.2.6](https://github.com/striae-org/striae/releases/tag/v10.2.6)* — *Deployment GUI + Dependency Maintenance*
+## [2026-08-27] - *[Patch Release v10.2.6](https://github.com/striae-org/striae/releases/tag/v10.2.6)* — *Deployment GUI + Dependency Maintenance*
 
 - **🖥️ Deployment GUI (New Feature)** - Added `npm run deploy-gui`, a local-only (`127.0.0.1:3737`), dependency-free web server (`scripts/deploy-gui/`) that wraps Striae's growing collection of deployment, configuration, testing, and account/MFA utility scripts in a browser UI grouped by Setup, Configuration, Workers, Pages, Full Pipeline, Publishing, Account/MFA Utilities, Tests, and Miscellaneous. It gives developers and contributors an easier way to manage Striae deployment and development as the script inventory grows, without needing to memorize individual `npm run` commands or shell invocations; it is never wired into `deploy:all`, `build`, or CI.
 - **🔐 Safe Interactive Script Execution** - The GUI reads live `.env`/key-pair configuration status before running a script, precomputes interactive prompt answers up front for scripts like `deploy-config.sh`, restricts execution to a fixed script whitelist, and requires a random per-process session token bound to `127.0.0.1` so it can't be driven by another localhost tab.
