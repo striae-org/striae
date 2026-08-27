@@ -124,7 +124,7 @@ class Runner extends EventEmitter {
 		}
 
 		const action = findAction(actionId);
-		const { cmd, args } = action.build(form?.fields ?? {});
+		const { cmd, args, shell } = action.build(form?.fields ?? {});
 
 		let stdinBatch = [];
 		if (action.interactive) {
@@ -133,7 +133,7 @@ class Runner extends EventEmitter {
 		}
 
 		const runId = randomUUID();
-		const child = spawn(cmd, args, { cwd: PROJECT_ROOT, env: process.env, stdio: ['pipe', 'pipe', 'pipe'] });
+		const child = spawn(cmd, args, { cwd: PROJECT_ROOT, env: process.env, stdio: ['pipe', 'pipe', 'pipe'], shell: Boolean(shell) });
 
 		this.activeRun = { id: runId, actionId, child, startedAt: Date.now(), lastOutputAt: Date.now(), stuckWarned: false };
 

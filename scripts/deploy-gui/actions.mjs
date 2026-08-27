@@ -20,6 +20,17 @@ function bashScript(relativePath, flags = []) {
 }
 
 function npmRun(scriptName) {
+	// Node refuses to spawn .cmd/.bat files directly on Windows (throws EINVAL) unless
+	// shell:true is used, and shell:true proved unreliable in testing here (cmd.exe's PATH
+	// resolution found the wrong npm.cmd). Instead, re-invoke npm's own JS CLI through
+	// `node`, sidestepping the restriction entirely. npm_execpath is set by npm for any
+	// script it runs; server.mjs refuses to start on Windows unless it's present (i.e.
+	// always launched via `npm run deploy-gui`, never `node server.mjs` directly).
+	if (process.env.npm_execpath) {
+		return { cmd: process.execPath, args: [process.env.npm_execpath, 'run', scriptName] };
+	}
+	// Only reachable on non-Windows, where spawning `npm` directly (not a .cmd/.bat wrapper)
+	// isn't subject to the same restriction.
 	return { cmd: NPM_CMD, args: ['run', scriptName] };
 }
 

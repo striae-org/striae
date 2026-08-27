@@ -31,6 +31,14 @@ if (process.env.NODE_ENV === 'production') {
 	process.exit(1);
 }
 
+// On Windows, npm-script-based actions re-invoke npm's CLI via `node <npm_execpath>` to
+// avoid Node refusing to spawn npm.cmd directly (EINVAL) — that env var is only set when
+// npm itself launched this process, so require the documented `npm run deploy-gui` entry point.
+if (process.platform === 'win32' && !process.env.npm_execpath) {
+	console.error('❌ deploy-gui must be started with `npm run deploy-gui` on Windows (not `node server.mjs` directly).');
+	process.exit(1);
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const ENV_PATH = path.join(PROJECT_ROOT, '.env');
