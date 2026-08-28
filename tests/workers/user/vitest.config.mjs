@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { defineConfig } from 'vitest/config';
 import { cloudflareTest } from '@cloudflare/vitest-pool-workers';
 import path from 'path';

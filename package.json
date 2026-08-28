@@ -1,6 +1,6 @@
 {
   "name": "@striae-org/striae",
-  "version": "10.2.6",
+  "version": "10.2.7",
   "private": false,
   "description": "Striae is a specialized, cloud-native platform designed to streamline forensic firearms identification by providing an intuitive environment for digital comparison image annotation, authenticated confirmations, and automated report generation.",
   "license": "Apache-2.0",
@@ -136,23 +136,23 @@
     "predeploy-workers:user": "node -e \"const fs=require('fs');fs.rmSync('.wrangler/deploy',{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@react-router/cloudflare": "^8.3.0",
+    "@react-router/cloudflare": "^8.3.1",
     "firebase": "^12.18.0",
     "isbot": "^5.2.2",
     "jszip": "^3.10.1",
     "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router": "^8.3.0"
+    "react-router": "^8.3.1"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.54.1",
+    "@cloudflare/vite-plugin": "^1.54.2",
     "@cloudflare/vitest-pool-workers": "^0.22.0",
-    "@cloudflare/workers-types": "^5.20260827.1",
+    "@cloudflare/workers-types": "^5.20260828.1",
     "@eslint-react/eslint-plugin": "^5.18.6",
     "@eslint/js": "^10.0.1",
-    "@react-router/dev": "^8.3.0",
-    "@react-router/fs-routes": "^8.3.0",
+    "@react-router/dev": "^8.3.1",
+    "@react-router/fs-routes": "^8.3.1",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
@@ -169,7 +169,7 @@
     "typescript-eslint": "^8.68.0",
     "vite": "^8.2.2",
     "vitest": "^4.1.11",
-    "wrangler": "^4.127.0"
+    "wrangler": "^4.127.1"
   },
   "overrides": {
     "brace-expansion": "^5.0.9",

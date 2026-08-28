@@ -23,8 +23,8 @@ const SHELL_EXTS = new Set(['.sh']);
 
 // Root-level config files eligible for headers; everything else at repo root is out of scope.
 const ROOT_FILES = new Set(['vite.config.ts', 'react-router.config.ts', 'load-context.ts', 'eslint.config.js']);
-const IN_SCOPE_DIR_PREFIXES = ['app/', 'workers/', 'functions/', 'shared/', 'scripts/'];
-const EXCLUDED_PREFIXES = ['tests/'];
+const IN_SCOPE_DIR_PREFIXES = ['app/', 'workers/', 'functions/', 'shared/', 'scripts/', 'tests/'];
+const EXCLUDED_PREFIXES = [];
 
 const isCheckMode = process.argv.includes('--check');
 

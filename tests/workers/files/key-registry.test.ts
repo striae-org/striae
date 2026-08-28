@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Tests for workers/files-worker/src/security/key-registry.ts
  *

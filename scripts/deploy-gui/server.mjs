@@ -14,7 +14,7 @@
  */
 import http from 'node:http';
 import { readFile, copyFile, access } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { spawn } from 'node:child_process';
@@ -43,6 +43,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const ENV_PATH = path.join(PROJECT_ROOT, '.env');
 const ADMIN_SERVICE_PATH = path.join(PROJECT_ROOT, 'app', 'config', 'admin-service.json');
+
+const STRIAE_VERSION = JSON.parse(readFileSync(path.join(PROJECT_ROOT, 'package.json'), 'utf8')).version ?? 'dev';
 
 const HOST = '127.0.0.1';
 const PORT = 3737;
@@ -103,12 +105,22 @@ async function serveStatic(pathname, res) {
 	}
 
 	try {
-		let content = await readFile(resolved, 'utf8');
-		if (resolved.endsWith('index.html')) {
-			content = content.replace('%%DEPLOY_GUI_TOKEN%%', SESSION_TOKEN);
-		}
 		const ext = path.extname(resolved);
-		res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] ?? 'application/octet-stream' });
+		const contentType = MIME_TYPES[ext] ?? 'application/octet-stream';
+
+		if (resolved.endsWith('index.html')) {
+			// Only index.html needs text-mode reading for token substitution.
+			const content = (await readFile(resolved, 'utf8'))
+				.replace('%%DEPLOY_GUI_TOKEN%%', SESSION_TOKEN)
+				.replace('%%STRIAE_VERSION%%', STRIAE_VERSION);
+			res.writeHead(200, { 'Content-Type': contentType });
+			res.end(content);
+			return;
+		}
+
+		// Buffer (not utf8 text) so binary assets aren't corrupted.
+		const content = await readFile(resolved);
+		res.writeHead(200, { 'Content-Type': contentType });
 		res.end(content);
 	} catch {
 		res.writeHead(404).end('Not found');

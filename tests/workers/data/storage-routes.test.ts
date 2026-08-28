@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Env } from '../../../workers/data-worker/src/types';
 import { handleStorageRequest } from '../../../workers/data-worker/src/handlers/storage-routes';
