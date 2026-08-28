@@ -1,6 +1,6 @@
 {
   "name": "audit-worker",
-  "version": "10.2.6",
+  "version": "10.2.7",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
@@ -8,7 +8,7 @@
     "start": "wrangler dev"
   },
   "devDependencies": {
-    "wrangler": "^4.127.0"
+    "wrangler": "^4.127.1"
   },
   "allowScripts": {
     "esbuild": true,
