@@ -34,7 +34,7 @@ One or more methods, systems, or features of the Striae platform are the subject
 - **🖥️ Deploy GUI Refinements** - Removed the "Publishing" action group from the deploy GUI (publishing remains available via `npm run publish:*` directly), fixed a static-file path check bypass (Security Fix) in `server.mjs`, and removed the local deploy-gui screenshot asset now served from `striae.org`.
 - **🔐 Admin-Service Example Hardening (Security Fix)** - Replaced the exposed Firebase service-account JSON key shape in `app/config-example/admin-service.json` with a single placeholder warning message.
 - **🛠️ Deploy Script Compatibility and Reliability Fixes** - Fixed Bash 3.2 (macOS) compatibility in `deploy-config.sh`/`env-utils.sh`/`keys.sh` placeholder checks, and stripped stray CRLF from `ACCOUNT_ID` in `deploy-pages.sh` and `upload-registries.sh` before use.
-- **📦 Dependency Maintenance** - Bumped `isbot`, `@cloudflare/vite-plugin`, `@cloudflare/workers-types`, and `wrangler` (`4.127.1`) at the root and across all six workers, with matching compatibility-date refreshes.
+- **📦 Dependency Maintenance** - Bumped `react-router`/`@react-router/*` to `8.3.1`, `@cloudflare/vite-plugin`, and `@cloudflare/workers-types` at the root, and `wrangler` (`4.127.1`) at the root and across all six workers, with matching compatibility-date refreshes.
 
 ## [2026-08-27] - *[Patch Release v10.2.6](https://github.com/striae-org/striae/releases/tag/v10.2.6)* — *Deployment GUI + Dependency Maintenance*
 

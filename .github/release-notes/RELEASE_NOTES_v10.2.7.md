@@ -34,7 +34,7 @@ v10.2.7 is a small follow-up patch to v10.2.6. It adds SPDX license and copyrigh
 
 ### Dependency and Compatibility Maintenance
 
-- **Dependency Bumps** - Bumped `isbot` to `5.2.2`, `@cloudflare/vite-plugin` to `1.54.1`, `@cloudflare/workers-types` to `5.20260827.1`, and `wrangler` to `4.127.1` at the root and across all six workers, with matching `package-lock.json` refreshes.
+- **Dependency Bumps** - At the root, bumped `react-router`, `@react-router/cloudflare`, `@react-router/dev`, and `@react-router/fs-routes` to `8.3.1`, `@cloudflare/vite-plugin` to `1.54.2`, and `@cloudflare/workers-types` to `5.20260828.1`. Bumped `wrangler` to `4.127.1` at the root and across all six workers, with matching `package-lock.json` refreshes.
 - **Compatibility-Date Refresh** - Updated `compatibility_date` to `2026-08-28` in `wrangler.toml.example` and all worker `wrangler.jsonc.example` files.
 
 ## Release Statistics

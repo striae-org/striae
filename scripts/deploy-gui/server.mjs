@@ -105,12 +105,22 @@ async function serveStatic(pathname, res) {
 	}
 
 	try {
-		let content = await readFile(resolved, 'utf8');
-		if (resolved.endsWith('index.html')) {
-			content = content.replace('%%DEPLOY_GUI_TOKEN%%', SESSION_TOKEN).replace('%%STRIAE_VERSION%%', STRIAE_VERSION);
-		}
 		const ext = path.extname(resolved);
-		res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] ?? 'application/octet-stream' });
+		const contentType = MIME_TYPES[ext] ?? 'application/octet-stream';
+
+		if (resolved.endsWith('index.html')) {
+			// Only index.html needs text-mode reading for token substitution.
+			const content = (await readFile(resolved, 'utf8'))
+				.replace('%%DEPLOY_GUI_TOKEN%%', SESSION_TOKEN)
+				.replace('%%STRIAE_VERSION%%', STRIAE_VERSION);
+			res.writeHead(200, { 'Content-Type': contentType });
+			res.end(content);
+			return;
+		}
+
+		// Buffer (not utf8 text) so binary assets aren't corrupted.
+		const content = await readFile(resolved);
+		res.writeHead(200, { 'Content-Type': contentType });
 		res.end(content);
 	} catch {
 		res.writeHead(404).end('Not found');
