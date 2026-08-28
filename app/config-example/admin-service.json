@@ -1,13 +1,3 @@
 {
-  "type": "your-service-account-type",
-  "project_id": "your-project-id",
-  "private_key_id": "your-private-key-id",
-  "private_key": "your-private-key",
-  "client_email": "your-client-email",
-  "client_id": "your-client-id",
-  "auth_uri": "your-auth-uri",
-  "token_uri": "your-token-uri",
-  "auth_provider_x509_cert_url": "your-auth-provider-cert-url",
-  "client_x509_cert_url": "your-client-cert-url",
-  "universe_domain": "your-universe-domain"
+  "REPLACE THIS FILE WITH YOUR ACTUAL ADMIN SERVICE CONFIGURATION": "This is a placeholder configuration file for the admin service. Please replace it with your actual configuration settings."
 }

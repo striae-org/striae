@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import JSZip from 'jszip';
 import type { User } from 'firebase/auth';

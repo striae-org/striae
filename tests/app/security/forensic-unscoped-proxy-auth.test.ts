@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Stephen J. Lu
+// SPDX-License-Identifier: Apache-2.0
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../../../functions/api/_shared/firebase-auth', () => ({
