@@ -23,9 +23,13 @@ Third-party attribution summary
 2. Additional Apache-2.0 licensed transitive dependencies discovered in
    production dependency resolution
    - Packages include: @grpc/grpc-js, @grpc/proto-loader, long,
-     faye-websocket, websocket-driver, websocket-extensions, web-vitals
+     faye-websocket, websocket-driver, websocket-extensions, web-vitals,
+     typescript
 
 3. Multi-license packages in production dependency resolution
+   - Package: @cloudflare/workers-types
+     - License: MIT OR Apache-2.0
+     - Upstream: https://github.com/cloudflare/workerd
    - Package: jszip
      - License: MIT OR GPL-3.0-or-later
      - Upstream: https://github.com/Stuk/jszip
@@ -35,7 +39,7 @@ Third-party attribution summary
 
 Audit notes
 
-- Audit date: 2026-08-22
+- Audit date: 2026-08-29
 - Scope: npm production dependencies only
 - Method: license-checker audit of the locked production tree
   (npm ci --omit=dev from package-lock.json)

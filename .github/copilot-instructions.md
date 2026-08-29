@@ -87,7 +87,7 @@ When asked to bump to `vX.Y.Z`:
    - Include release date, covered period, and non-merge commit count. Use the previous release notes as a template. Don't rely on the previous git tag for context, as this is the development branch.
    - Summarize the release in a few sentences, then provide detailed sections for each major change.
    - Include a release statistics section with commit range, commit count, and CI status.
-4. Update changelog in `.github/README.md`.
+4. Update changelog in `.github/README.md`. Update the Socket badge version at the top of the page.
    - Add the newest release entry at the top of the Changelog section.
    - Link to the GitHub release tag URL.
 5. Update supported version info in `.github/SECURITY.md` when applicable.

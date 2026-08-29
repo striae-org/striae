@@ -3,7 +3,7 @@
 This file contains third-party license attributions for production dependencies used by Striae.
 
 - Project: Striae
-- Generated: 2026-08-22
+- Generated: 2026-08-29
 - Scope: npm production dependencies only
 - Source: license-checker audit of the locked production tree (`npm ci --omit=dev` from package-lock.json)
 
@@ -11,6 +11,7 @@ This file contains third-party license attributions for production dependencies 
 
 | Package | Version | License | Repository |
 | --- | --- | --- | --- |
+| @cloudflare/workers-types | 4.20260702.1 | MIT OR Apache-2.0 | https://github.com/cloudflare/workerd |
 | @firebase/ai | 2.15.0 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/analytics | 0.10.24 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
 | @firebase/analytics-compat | 0.2.30 | Apache-2.0 | https://github.com/firebase/firebase-js-sdk |
@@ -66,8 +67,10 @@ This file contains third-party license attributions for production dependencies 
 | @protobufjs/path | 1.1.2 | BSD-3-Clause | https://github.com/dcodeIO/protobuf.js |
 | @protobufjs/pool | 1.1.0 | BSD-3-Clause | https://github.com/dcodeIO/protobuf.js |
 | @protobufjs/utf8 | 1.1.2 | BSD-3-Clause | https://github.com/protobufjs/protobuf.js |
-| @react-router/cloudflare | 8.3.0 | MIT | https://github.com/remix-run/react-router |
-| @types/node | 26.2.0 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped |
+| @react-router/cloudflare | 8.3.1 | MIT | https://github.com/remix-run/react-router |
+| @socketregistry/isarray | 1.0.8 | MIT | https://github.com/SocketDev/socket-registry |
+| @socketregistry/safe-buffer | 1.0.9 | MIT | https://github.com/SocketDev/socket-registry |
+| @types/node | 26.4.0 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped |
 | ansi-regex | 5.0.1 | MIT | https://github.com/chalk/ansi-regex |
 | ansi-styles | 4.3.0 | MIT | https://github.com/chalk/ansi-styles |
 | camelcase | 5.3.1 | MIT | https://github.com/sindresorhus/camelcase |
@@ -90,8 +93,7 @@ This file contains third-party license attributions for production dependencies 
 | immediate | 3.0.6 | MIT | https://github.com/calvinmetcalf/immediate |
 | inherits | 2.0.4 | ISC | https://github.com/isaacs/inherits |
 | is-fullwidth-code-point | 3.0.0 | MIT | https://github.com/sindresorhus/is-fullwidth-code-point |
-| isarray | 1.0.0 | MIT | https://github.com/juliangruber/isarray |
-| isbot | 5.2.1 | Unlicense | https://github.com/omrilotan/isbot |
+| isbot | 5.2.2 | Unlicense | https://github.com/omrilotan/isbot |
 | jszip | 3.10.1 | (MIT OR GPL-3.0-or-later) | https://github.com/Stuk/jszip |
 | lie | 3.3.0 | MIT | https://github.com/calvinmetcalf/lie |
 | locate-path | 5.0.0 | MIT | https://github.com/sindresorhus/locate-path |
@@ -104,17 +106,15 @@ This file contains third-party license attributions for production dependencies 
 | path-exists | 4.0.0 | MIT | https://github.com/sindresorhus/path-exists |
 | pngjs | 5.0.0 | MIT | https://github.com/lukeapage/pngjs |
 | process-nextick-args | 2.0.1 | MIT | https://github.com/calvinmetcalf/process-nextick-args |
-| protobufjs | 7.6.5 | BSD-3-Clause | https://github.com/protobufjs/protobuf.js |
+| protobufjs | 7.6.6 | BSD-3-Clause | https://github.com/protobufjs/protobuf.js |
 | qrcode | 1.5.4 | MIT | https://github.com/soldair/node-qrcode |
 | re2js | 2.8.6 | MIT | https://github.com/le0pard/re2js |
 | react | 19.2.8 | MIT | https://github.com/react/react |
 | react-dom | 19.2.8 | MIT | https://github.com/react/react |
-| react-router | 8.3.0 | MIT | https://github.com/remix-run/react-router |
+| react-router | 8.3.1 | MIT | https://github.com/remix-run/react-router |
 | readable-stream | 2.3.8 | MIT | https://github.com/nodejs/readable-stream |
 | require-directory | 2.1.1 | MIT | https://github.com/troygoode/node-require-directory |
 | require-main-filename | 2.0.0 | ISC | https://github.com/yargs/require-main-filename |
-| safe-buffer | 5.1.2 | MIT | https://github.com/feross/safe-buffer |
-| safe-buffer | 5.2.1 | MIT | https://github.com/feross/safe-buffer |
 | scheduler | 0.27.0 | MIT | https://github.com/facebook/react |
 | set-blocking | 2.0.0 | ISC | https://github.com/yargs/set-blocking |
 | setimmediate | 1.0.5 | MIT | https://github.com/YuzuJS/setImmediate |
@@ -122,6 +122,7 @@ This file contains third-party license attributions for production dependencies 
 | string-width | 4.2.3 | MIT | https://github.com/sindresorhus/string-width |
 | strip-ansi | 6.0.1 | MIT | https://github.com/chalk/strip-ansi |
 | tslib | 2.8.1 | 0BSD | https://github.com/Microsoft/tslib |
+| typescript | 6.0.3 | Apache-2.0 | https://github.com/microsoft/TypeScript |
 | undici-types | 8.3.0 | MIT | https://github.com/nodejs/undici |
 | util-deprecate | 1.0.2 | MIT | https://github.com/TooTallNate/util-deprecate |
 | web-vitals | 4.2.4 | Apache-2.0 | https://github.com/GoogleChrome/web-vitals |
@@ -138,6 +139,150 @@ This file contains third-party license attributions for production dependencies 
 | yargs-parser | 21.1.1 | ISC | https://github.com/yargs/yargs-parser |
 
 ## License Texts
+
+### @cloudflare/workers-types@4.20260702.1
+
+- License: MIT OR Apache-2.0
+- Publisher: Cloudflare Workers DevProd Team
+- Repository: https://github.com/cloudflare/workerd
+
+```text
+# Cloudflare Workers Types
+
+> **Note**
+>
+> We now recommend using the [Wrangler CLI](https://www.npmjs.com/package/wrangler) and the `wrangler types` command to generate types based on your compatibility date _and_ compatibility flags. You can learn more about this, and how to migrate from @cloudflare/workers-types [here in our docs](https://developers.cloudflare.com/workers/languages/typescript/#generate-types).
+>
+> @cloudflare/workers-types will continue to be published on the same schedule.
+
+
+## Install
+
+```bash
+npm install -D @cloudflare/workers-types
+-- Or
+yarn add -D @cloudflare/workers-types
+```
+
+## Usage
+
+The following is a minimal `tsconfig.json` for use alongside this package:
+
+**`tsconfig.json`**
+
+```json
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext"],
+    "types": ["@cloudflare/workers-types"]
+  }
+}
+```
+
+### Compatibility dates
+
+![Entrypoints for compatibility dates](./npm/workers-types/entrypoints.svg)
+
+The Cloudflare Workers runtime manages backwards compatibility through the use of [Compatibility Dates](https://developers.cloudflare.com/workers/platform/compatibility-dates/). Using different compatibility dates affects the runtime types available to your Worker, and so it's important you specify the correct entrypoint to the `workers-types` package to match your compatibility date (which is usually set in your `wrangler.toml` configuration file). `workers-types` currently exposes the following entrypoints to choose from:
+
+- `@cloudflare/workers-types`
+
+  The default entrypoint exposes the runtime types for a compatibility date before `2021-11-03`.
+
+- `@cloudflare/workers-types/2021-11-03`
+
+  This entrypoint exposes the runtime types for a compatibility date between `2021-11-03` and `2022-01-31`.
+
+- `@cloudflare/workers-types/2022-01-31`
+
+  This entrypoint exposes the runtime types for a compatibility date between `2022-01-31` and `2022-03-21`.
+
+- `@cloudflare/workers-types/2022-03-21`
+
+  This entrypoint exposes the runtime types for a compatibility date between `2022-03-21` and `2022-08-04`.
+
+- `@cloudflare/workers-types/2022-08-04`
+
+  This entrypoint exposes the runtime types for a compatibility date between `2022-08-04` and `2022-10-31`.
+
+- `@cloudflare/workers-types/2022-10-31`
+
+  This entrypoint exposes the runtime types for a compatibility date between `2022-10-31` and `2022-11-30`.
+
+- `@cloudflare/workers-types/2022-11-30`
+
+  This entrypoint exposes the runtime types for a compatibility date between `2022-11-30` and `2023-03-01`.
+
+- `@cloudflare/workers-types/2023-03-01`
+
+  This entrypoint exposes the runtime types for a compatibility date between `2023-03-01` and `2023-07-01`.
+
+- `@cloudflare/workers-types/2023-07-01`
+
+  This entrypoint exposes the runtime types for a compatibility date after `2023-07-01`.
+
+- `@cloudflare/workers-types/experimental`
+
+  This entrypoint exposes the runtime types for the latest compatibility date. The types exposed by this entrypoint will change over time to always reflect the latest version of the Workers runtime.
+
+To use one of these entrypoints, you need to specify them in your `tsconfig.json`. For example, this is a sample `tsconfig.json` for using the `2022-08-04` entrypoint.
+
+```json
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext"],
+    "types": ["@cloudflare/workers-types/2022-08-04"]
+  }
+}
+```
+
+### Importable Types
+
+It's not always possible (or desirable) to modify the `tsconfig.json` settings for a project to include all the Cloudflare Workers types. For use cases like that, this package provides importable versions of its types, which are usable with no additional `tsconfig.json` setup. For example:
+
+```ts
+import type { Request as WorkerRequest, ExecutionContext } from "@cloudflare/workers-types/experimental"
+
+export default {
+  fetch(request: WorkerRequest, env: unknown, ctx: ExecutionContext) {
+    return new Response("OK")
+  }
+}
+```
+
+
+### Using bindings
+
+It's recommended that you create a type file for any bindings your Worker uses. Create a file named
+`worker-configuration.d.ts` in your src directory.
+
+If you're using Module Workers, it should look like this:
+```typescript
+// worker-configuration.d.ts
+interface Env {
+  MY_ENV_VAR: string;
+  MY_SECRET: string;
+  myKVNamespace: KVNamespace;
+}
+```
+For Service Workers, it should augment the global scope:
+```typescript
+// worker-configuration.d.ts
+declare global {
+  const MY_ENV_VAR: string;
+  const MY_SECRET: string;
+  const myKVNamespace: KVNamespace;
+}
+export {}
+```
+
+Wrangler can also generate this for you automatically from your `wrangler.toml` configuration file, using the `wrangler types` command.
+
+```
 
 ### @firebase/ai@2.15.0
 
@@ -1751,7 +1896,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### @react-router/cloudflare@8.3.0
+### @react-router/cloudflare@8.3.1
 
 - License: MIT
 - Repository: https://github.com/remix-run/react-router
@@ -1782,7 +1927,65 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### @types/node@26.2.0
+### @socketregistry/isarray@1.0.8
+
+- License: MIT
+- Repository: https://github.com/SocketDev/socket-registry
+
+```text
+MIT License
+
+Copyright (c) 2024 Socket Inc
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+### @socketregistry/safe-buffer@1.0.9
+
+- License: MIT
+- Repository: https://github.com/SocketDev/socket-registry
+
+```text
+MIT License
+
+Copyright (c) 2024 Socket Inc
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+### @types/node@26.4.0
 
 - License: MIT
 - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -2608,76 +2811,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### isarray@1.0.0
-
-- License: MIT
-- Publisher: Julian Gruber
-- Repository: https://github.com/juliangruber/isarray
-
-```text
-
-# isarray
-
-`Array#isArray` for older browsers.
-
-[![build status](https://secure.travis-ci.org/juliangruber/isarray.svg)](http://travis-ci.org/juliangruber/isarray)
-[![downloads](https://img.shields.io/npm/dm/isarray.svg)](https://www.npmjs.org/package/isarray)
-
-[![browser support](https://ci.testling.com/juliangruber/isarray.png)
-](https://ci.testling.com/juliangruber/isarray)
-
-## Usage
-
-```js
-var isArray = require('isarray');
-
-console.log(isArray([])); // => true
-console.log(isArray({})); // => false
-```
-
-## Installation
-
-With [npm](http://npmjs.org) do
-
-```bash
-$ npm install isarray
-```
-
-Then bundle for the browser with
-[browserify](https://github.com/substack/browserify).
-
-With [component](http://component.io) do
-
-```bash
-$ component install juliangruber/isarray
-```
-
-## License
-
-(MIT)
-
-Copyright (c) 2013 Julian Gruber &lt;julian@juliangruber.com&gt;
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-### isbot@5.2.1
+### isbot@5.2.2
 
 - License: Unlicense
 - Repository: https://github.com/omrilotan/isbot
@@ -3827,7 +3961,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.**
 ```
 
-### protobufjs@7.6.5
+### protobufjs@7.6.6
 
 - License: BSD-3-Clause
 - Publisher: Daniel Wirtz
@@ -3982,7 +4116,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### react-router@8.3.0
+### react-router@8.3.1
 
 - License: MIT
 - Publisher: Remix Software
@@ -4121,66 +4255,6 @@ LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES
 OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
 WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-```
-
-### safe-buffer@5.1.2
-
-- License: MIT
-- Publisher: Feross Aboukhadijeh
-- Repository: https://github.com/feross/safe-buffer
-
-```text
-The MIT License (MIT)
-
-Copyright (c) Feross Aboukhadijeh
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-```
-
-### safe-buffer@5.2.1
-
-- License: MIT
-- Publisher: Feross Aboukhadijeh
-- Repository: https://github.com/feross/safe-buffer
-
-```text
-The MIT License (MIT)
-
-Copyright (c) Feross Aboukhadijeh
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
 ```
 
 ### scheduler@0.27.0
@@ -4375,6 +4449,70 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
+```
+
+### typescript@6.0.3
+
+- License: Apache-2.0
+- Publisher: Microsoft Corp.
+- Repository: https://github.com/microsoft/TypeScript
+
+```text
+Apache License
+
+Version 2.0, January 2004
+
+http://www.apache.org/licenses/ 
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+1. Definitions.
+
+"License" shall mean the terms and conditions for use, reproduction, and distribution as defined by Sections 1 through 9 of this document.
+
+"Licensor" shall mean the copyright owner or entity authorized by the copyright owner that is granting the License.
+
+"Legal Entity" shall mean the union of the acting entity and all other entities that control, are controlled by, or are under common control with that entity. For the purposes of this definition, "control" means (i) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (ii) ownership of fifty percent (50%) or more of the outstanding shares, or (iii) beneficial ownership of such entity.
+
+"You" (or "Your") shall mean an individual or Legal Entity exercising permissions granted by this License.
+
+"Source" form shall mean the preferred form for making modifications, including but not limited to software source code, documentation source, and configuration files.
+
+"Object" form shall mean any form resulting from mechanical transformation or translation of a Source form, including but not limited to compiled object code, generated documentation, and conversions to other media types.
+
+"Work" shall mean the work of authorship, whether in Source or Object form, made available under the License, as indicated by a copyright notice that is included in or attached to the work (an example is provided in the Appendix below).
+
+"Derivative Works" shall mean any work, whether in Source or Object form, that is based on (or derived from) the Work and for which the editorial revisions, annotations, elaborations, or other modifications represent, as a whole, an original work of authorship. For the purposes of this License, Derivative Works shall not include works that remain separable from, or merely link (or bind by name) to the interfaces of, the Work and Derivative Works thereof.
+
+"Contribution" shall mean any work of authorship, including the original version of the Work and any modifications or additions to that Work or Derivative Works thereof, that is intentionally submitted to Licensor for inclusion in the Work by the copyright owner or by an individual or Legal Entity authorized to submit on behalf of the copyright owner. For the purposes of this definition, "submitted" means any form of electronic, verbal, or written communication sent to the Licensor or its representatives, including but not limited to communication on electronic mailing lists, source code control systems, and issue tracking systems that are managed by, or on behalf of, the Licensor for the purpose of discussing and improving the Work, but excluding communication that is conspicuously marked or otherwise designated in writing by the copyright owner as "Not a Contribution."
+
+"Contributor" shall mean Licensor and any individual or Legal Entity on behalf of whom a Contribution has been received by Licensor and subsequently incorporated within the Work.
+
+2. Grant of Copyright License. Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to reproduce, prepare Derivative Works of, publicly display, publicly perform, sublicense, and distribute the Work and such Derivative Works in Source or Object form.
+
+3. Grant of Patent License. Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable (except as stated in this section) patent license to make, have made, use, offer to sell, sell, import, and otherwise transfer the Work, where such license applies only to those patent claims licensable by such Contributor that are necessarily infringed by their Contribution(s) alone or by combination of their Contribution(s) with the Work to which such Contribution(s) was submitted. If You institute patent litigation against any entity (including a cross-claim or counterclaim in a lawsuit) alleging that the Work or a Contribution incorporated within the Work constitutes direct or contributory patent infringement, then any patent licenses granted to You under this License for that Work shall terminate as of the date such litigation is filed.
+
+4. Redistribution. You may reproduce and distribute copies of the Work or Derivative Works thereof in any medium, with or without modifications, and in Source or Object form, provided that You meet the following conditions:
+
+You must give any other recipients of the Work or Derivative Works a copy of this License; and
+
+You must cause any modified files to carry prominent notices stating that You changed the files; and
+
+You must retain, in the Source form of any Derivative Works that You distribute, all copyright, patent, trademark, and attribution notices from the Source form of the Work, excluding those notices that do not pertain to any part of the Derivative Works; and
+
+If the Work includes a "NOTICE" text file as part of its distribution, then any Derivative Works that You distribute must include a readable copy of the attribution notices contained within such NOTICE file, excluding those notices that do not pertain to any part of the Derivative Works, in at least one of the following places: within a NOTICE text file distributed as part of the Derivative Works; within the Source form or documentation, if provided along with the Derivative Works; or, within a display generated by the Derivative Works, if and wherever such third-party notices normally appear. The contents of the NOTICE file are for informational purposes only and do not modify the License. You may add Your own attribution notices within Derivative Works that You distribute, alongside or as an addendum to the NOTICE text from the Work, provided that such additional attribution notices cannot be construed as modifying the License. You may add Your own copyright statement to Your modifications and may provide additional or different license terms and conditions for use, reproduction, or distribution of Your modifications, or for any such Derivative Works as a whole, provided Your use, reproduction, and distribution of the Work otherwise complies with the conditions stated in this License.
+
+5. Submission of Contributions. Unless You explicitly state otherwise, any Contribution intentionally submitted for inclusion in the Work by You to the Licensor shall be under the terms and conditions of this License, without any additional terms or conditions. Notwithstanding the above, nothing herein shall supersede or modify the terms of any separate license agreement you may have executed with Licensor regarding such Contributions.
+
+6. Trademarks. This License does not grant permission to use the trade names, trademarks, service marks, or product names of the Licensor, except as required for reasonable and customary use in describing the origin of the Work and reproducing the content of the NOTICE file.
+
+7. Disclaimer of Warranty. Unless required by applicable law or agreed to in writing, Licensor provides the Work (and each Contributor provides its Contributions) on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for determining the appropriateness of using or redistributing the Work and assume any risks associated with Your exercise of permissions under this License.
+
+8. Limitation of Liability. In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, unless required by applicable law (such as deliberate and grossly negligent acts) or agreed to in writing, shall any Contributor be liable to You for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising as a result of this License or out of the use or inability to use the Work (including but not limited to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses), even if such Contributor has been advised of the possibility of such damages.
+
+9. Accepting Warranty or Additional Liability. While redistributing the Work or Derivative Works thereof, You may choose to offer, and charge a fee for, acceptance of support, warranty, indemnity, or other liability obligations and/or rights consistent with this License. However, in accepting such obligations, You may act only on Your own behalf and on Your sole responsibility, not on behalf of any other Contributor, and only if You agree to indemnify, defend, and hold each Contributor harmless for any liability incurred by, or claims asserted against, such Contributor by reason of your accepting any such warranty or additional liability.
+
+END OF TERMS AND CONDITIONS
 ```
 
 ### undici-types@8.3.0

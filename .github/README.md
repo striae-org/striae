@@ -2,6 +2,8 @@
 
 Striae is a specialized, cloud-native platform designed to streamline forensic firearms identification by providing an intuitive environment for digital comparison image annotation, authenticated confirmations, and automated report generation. Built with a focus on security, reliability, and user experience, Striae empowers firearms examiners to efficiently manage case data, collaborate securely, and produce comprehensive forensic reports with confidence.
 
+[![Socket Badge](https://badge.socket.dev/npm/package/@striae-org/striae/10.2.8)](https://badge.socket.dev/npm/package/@striae-org/striae/10.2.8)
+
 ## 🌐 Application URL
 
 **[Live App](https://striae.app)**
@@ -27,6 +29,14 @@ One or more methods, systems, or features of the Striae platform are the subject
 ---
 
 ## 📋 Changelog
+
+## [2026-08-29] - *[Patch Release v10.2.8](https://github.com/striae-org/striae/releases/tag/v10.2.8)* — *Deploy GUI Binary Asset Fix, npm Toolchain Peer-Dependency Correction, and License Audit Refresh*
+
+- **🖥️ Deploy GUI Binary Asset Fix (Bug Fix)** - Fixed `scripts/deploy-gui/server.mjs`'s static-file handler so only `index.html` is read in text mode (for token substitution); all other static assets are now read as a raw buffer instead of `utf8`, preventing binary asset corruption when served by the deploy GUI.
+- **📦 npm Toolchain Peer-Dependency Correction** - Removed `--legacy-peer-deps` from `npm run striae-install`/`striae-clean-install` and the license-audit reproducible-install step; pinned `wrangler` (`~4.107.1`), `@cloudflare/vite-plugin` (`~1.43.1`), `@cloudflare/vitest-pool-workers` (`~0.18.0`), and `@cloudflare/workers-types` (`^4.20260702.1`) so plain `npm install` resolves cleanly against `@react-router/cloudflare`'s v4-only `workers-types` peer requirement, with matching `overrides`/`resolutions` for several `@socketregistry/*` transitive dependency replacements.
+- **📅 Compatibility-Date Rollback** - Rolled back `compatibility_date` to `2026-07-08` in `wrangler.toml.example` and all worker `wrangler.jsonc.example` files to match the pinned Wrangler line's supported range.
+- **📜 License Audit and Lockfile Refresh** - Regenerated `THIRD_PARTY_LICENSES.md` and refreshed `package-lock.json` against the corrected dependency tree.
+- **🛠️ Release Workflow Update** - The version-bump workflow in `.github/copilot-instructions.md` now also requires bumping the Socket badge version at the top of this page alongside the changelog entry.
 
 ## [2026-08-28] - *[Patch Release v10.2.7](https://github.com/striae-org/striae/releases/tag/v10.2.7)* — *License Headers, Deploy GUI Refinements, and Admin-Service Example Hardening*
 

@@ -54,7 +54,7 @@ export const ACTIONS = [
 	{
 		id: 'striae-install',
 		label: 'Install root dependencies',
-		description: 'Runs npm install --legacy-peer-deps for the root project (run this first on a fresh clone).',
+		description: 'Runs npm install for the root project (run this first on a fresh clone).',
 		group: 'Setup',
 		interactive: false,
 		destructive: false,
