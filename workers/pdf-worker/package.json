@@ -1,6 +1,6 @@
 {
   "name": "pdf-worker",
-  "version": "10.2.7",
+  "version": "10.2.8",
   "private": true,
   "scripts": {
     "generate:assets": "node scripts/generate-assets.js",
