@@ -337,6 +337,7 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 
 		const files = caseData.files || [];
 		const associatedFiles = caseData.otherFiles || [];
+		const missingImages: string[] = [];
 
 		// Process file deletions in batches to reduce audit rate limiting
 		if (files.length > 0 || associatedFiles.length > 0) {
@@ -344,7 +345,6 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 			const BATCH_DELAY = 300; // Increased delay between batches
 			const deletedFiles: Array<{ id: string; originalFilename: string; fileSize: number }> = [];
 			const failedFiles: Array<{ id: string; originalFilename: string; error: string }> = [];
-			const missingImages: string[] = [];
 
 			console.log(`🗑️  Deleting ${files.length} files in batches of ${BATCH_SIZE}...`);
 
@@ -480,36 +480,6 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 					`Case deletion aborted: failed to delete ${failedFiles.length} file(s): ${failedFiles.map((f) => f.originalFilename).join(', ')}`,
 				);
 			}
-
-			// Remove case from user data first (so user loses access immediately)
-			await removeUserCase(user, caseNumber);
-
-			// Delete case data using centralized function (skip validation since user no longer has access)
-			await deleteCaseData(user, caseNumber, { skipValidation: true });
-
-			// Clean up confirmation status metadata for this case
-			try {
-				await removeCaseConfirmationSummary(user, caseNumber);
-			} catch (summaryError) {
-				console.warn(`Failed to remove confirmation summary for case ${caseNumber}:`, summaryError);
-			}
-
-			// Add a small delay before audit logging to reduce rate limiting
-			await new Promise((resolve) => setTimeout(resolve, 100));
-
-			// Log successful case deletion with file details
-			const endTime = Date.now();
-			await auditService.logCaseDeletion(
-				user,
-				caseNumber,
-				caseName,
-				`User-requested deletion via case actions (${fileCount} files deleted)` +
-					(missingImages.length > 0 ? `; ${missingImages.length} image(s) were already missing` : ''),
-				false, // No backup created for standard deletions
-			);
-
-			console.log(`✅ Case deleted: ${caseNumber} (${fileCount} files) (${endTime - startTime}ms)`);
-			return { missingImages };
 		}
 
 		// Remove case from user data first (so user loses access immediately)
@@ -534,12 +504,13 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 			user,
 			caseNumber,
 			caseName,
-			`User-requested deletion via case actions (${fileCount} files deleted)`,
+			`User-requested deletion via case actions (${fileCount} files deleted)` +
+				(missingImages.length > 0 ? `; ${missingImages.length} image(s) were already missing` : ''),
 			false, // No backup created for standard deletions
 		);
 
 		console.log(`✅ Case deleted: ${caseNumber} (${fileCount} files) (${endTime - startTime}ms)`);
-		return { missingImages: [] };
+		return { missingImages };
 	} catch (error) {
 		// Log failed case deletion
 		const endTime = Date.now();
