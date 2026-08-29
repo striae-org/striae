@@ -157,7 +157,7 @@ function generateThirdPartyLicenses() {
 		fs.copyFileSync(rootPackageLockPath, path.join(reproDir, 'package-lock.json'));
 
 		console.log(`Reproducing locked production tree in ${reproDir}`);
-		runNpm(['ci', '--omit=dev', '--legacy-peer-deps', '--no-audit', '--no-fund', '--ignore-scripts'], reproDir);
+		runNpm(['ci', '--omit=dev', '--no-audit', '--no-fund', '--ignore-scripts'], reproDir);
 
 		// Install the scanner in a separate directory so it never becomes part of
 		// the audited production tree.
