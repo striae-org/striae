@@ -337,7 +337,7 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 
 		const files = caseData.files || [];
 		const associatedFiles = caseData.otherFiles || [];
-		const missingImages: string[] = [];
+		const missingFiles: string[] = [];
 
 		// Process file deletions in batches to reduce audit rate limiting
 		if (files.length > 0 || associatedFiles.length > 0) {
@@ -369,7 +369,7 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 							});
 
 							if (deleteResult.imageMissing) {
-								missingImages.push(deleteResult.fileName);
+								missingFiles.push(deleteResult.fileName);
 							}
 
 							deletedFiles.push({
@@ -415,7 +415,7 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 								});
 
 								if (deleteResult.fileMissing) {
-									missingImages.push(deleteResult.fileName);
+									missingFiles.push(deleteResult.fileName);
 								}
 
 								deletedFiles.push({
@@ -505,12 +505,12 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 			caseNumber,
 			caseName,
 			`User-requested deletion via case actions (${fileCount} files deleted)` +
-				(missingImages.length > 0 ? `; ${missingImages.length} image(s) were already missing` : ''),
+				(missingFiles.length > 0 ? `; ${missingFiles.length} file(s) were already missing` : ''),
 			false, // No backup created for standard deletions
 		);
 
 		console.log(`✅ Case deleted: ${caseNumber} (${fileCount} files) (${endTime - startTime}ms)`);
-		return { missingImages };
+		return { missingFiles };
 	} catch (error) {
 		// Log failed case deletion
 		const endTime = Date.now();

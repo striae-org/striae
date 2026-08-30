@@ -100,7 +100,7 @@ describe('deleteCase associated file cleanup', () => {
 
 		const result = await deleteCase(user, 'CASE-001');
 
-		expect(result).toEqual({ missingImages: [] });
+		expect(result).toEqual({ missingFiles: [] });
 
 		expect(deleteFileWithoutAudit).toHaveBeenCalledWith(
 			expect.objectContaining({ uid: 'analyst-1' }),
