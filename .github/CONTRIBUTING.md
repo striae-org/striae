@@ -1,6 +1,10 @@
 # Contributing to Striae
 
-Want to contribute to Striae? Please contact us at [dev@striae.org](mailto:dev@striae.org).
+## Selective Contribution Policy
+
+Striae handles sensitive forensic workflows and relies on strict security measures throughout its codebase. To protect the integrity of these workflows, we moderate contributions closely and cannot accept unsolicited pull requests.
+
+If you're interested in contributing, please reach out to [dev@striae.org](mailto:dev@striae.org) before starting any work. We'll discuss the proposed change, confirm it aligns with the project's security and design requirements, and only then proceed with a pull request. PRs opened without prior contact will be closed without review or discussion.
 
 ## Contributor License Agreement
 
