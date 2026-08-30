@@ -194,7 +194,7 @@ export const AuditEntriesList = ({ entries }: AuditEntriesListProps) => {
 											<div className={styles.detailRow}>
 												<span className={styles.detailLabel}>File Size:</span>
 												<span className={styles.detailValue}>
-													{entry.details.fileDetails.fileSize
+													{typeof entry.details.fileDetails.fileSize === 'number'
 														? `${(entry.details.fileDetails.fileSize / 1024 / 1024).toFixed(2)} MB`
 														: 'N/A'}
 												</span>
