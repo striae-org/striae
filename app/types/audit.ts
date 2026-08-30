@@ -134,7 +134,7 @@ export interface SecurityCheckResults {
  */
 export interface PerformanceMetrics {
 	processingTimeMs: number;
-	fileSizeBytes: number;
+	fileSizeBytes?: number;
 	validationStepsCompleted?: number;
 	validationStepsFailed?: number;
 }
@@ -239,7 +239,7 @@ interface CaseAuditDetails {
 interface FileAuditDetails {
 	fileId?: string;
 	originalFileName?: string;
-	fileSize: number;
+	fileSize?: number;
 	mimeType?: string;
 	uploadMethod?: 'drag-drop' | 'file-picker' | 'api' | 'import' | 'direct-url' | 'signed-url' | 'download';
 	processingTime?: number;

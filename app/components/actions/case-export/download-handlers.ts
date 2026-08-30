@@ -378,7 +378,6 @@ For questions about this export, contact your Striae system administrator.
 			[error instanceof Error ? error.message : 'Unknown error'],
 			{
 				processingTimeMs: endTime - startTime,
-				fileSizeBytes: 0,
 				validationStepsCompleted: 0,
 				validationStepsFailed: 1,
 			},

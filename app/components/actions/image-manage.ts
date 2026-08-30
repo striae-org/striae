@@ -57,6 +57,7 @@ export const uploadFile = async (
 			id: uploadedImageId,
 			originalFilename: file.name,
 			uploadedAt: new Date().toISOString(),
+			byteLength: file.size,
 		};
 
 		// Update case data using centralized function
@@ -127,7 +128,7 @@ export const deleteFile = async (
 
 		fileToDelete = (caseData.files || []).find((f: FileData) => f.id === fileId);
 		fileName = fileToDelete?.originalFilename || fileId;
-		const fileSize = 0; // We don't store file size, so use 0
+		const fileSize = fileToDelete?.byteLength;
 
 		let imageDeleteFailed = false;
 		let imageMissing = false;
@@ -208,13 +209,13 @@ export const deleteFile = async (
 					caseNumber,
 					fileDetails: {
 						fileId: fileId,
-						fileSize: 0,
+						fileSize: fileToDelete?.byteLength,
 						deleteReason: 'Failed deletion attempt',
 						originalFileName: fileToDelete?.originalFilename,
 					},
 					performanceMetrics: {
 						processingTimeMs: endTime - startTime,
-						fileSizeBytes: 0,
+						fileSizeBytes: fileToDelete?.byteLength,
 					},
 				});
 			} catch (auditError) {
@@ -249,6 +250,7 @@ export const getImageUrl = async (
 			Date.now() - startTime,
 			defaultAccessReason,
 			fileData.originalFilename,
+			fileData.byteLength,
 		);
 
 		return {
@@ -268,6 +270,7 @@ export const getImageUrl = async (
 			Date.now() - startTime,
 			`Unexpected error during ${accessReason || 'image access'}`,
 			fileData.originalFilename,
+			fileData.byteLength,
 		);
 		throw error;
 	}

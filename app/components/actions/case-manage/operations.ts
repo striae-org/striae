@@ -191,7 +191,6 @@ export const createNewCase = async (user: User, caseNumber: string): Promise<Cas
 				},
 				performanceMetrics: {
 					processingTimeMs: endTime - startTime,
-					fileSizeBytes: 0,
 				},
 			});
 		} catch (auditError) {
@@ -299,7 +298,6 @@ export const renameCase = async (user: User, oldCaseNumber: string, newCaseNumbe
 				},
 				performanceMetrics: {
 					processingTimeMs: endTime - startTime,
-					fileSizeBytes: 0,
 				},
 			});
 		} catch (auditError) {
@@ -375,7 +373,7 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 							deletedFiles.push({
 								id: file.id,
 								originalFilename: file.originalFilename,
-								fileSize: 0, // We don't track file size, use 0
+								fileSize: file.byteLength || 0,
 							});
 						} catch (error) {
 							const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -500,11 +498,12 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 
 		// Log successful case deletion with file details
 		const endTime = Date.now();
+		const actuallyDeletedCount = fileCount - missingFiles.length;
 		await auditService.logCaseDeletion(
 			user,
 			caseNumber,
 			caseName,
-			`User-requested deletion via case actions (${fileCount} files deleted)` +
+			`User-requested deletion via case actions (${actuallyDeletedCount} file(s) deleted)` +
 				(missingFiles.length > 0 ? `; ${missingFiles.length} file(s) were already missing` : ''),
 			false, // No backup created for standard deletions
 		);
@@ -532,7 +531,6 @@ export const deleteCase = async (user: User, caseNumber: string): Promise<Delete
 				},
 				performanceMetrics: {
 					processingTimeMs: endTime - startTime,
-					fileSizeBytes: 0,
 				},
 			});
 		} catch (auditError) {
@@ -630,7 +628,6 @@ export const archiveCase = async (user: User, caseNumber: string, archiveReason?
 				},
 				performanceMetrics: {
 					processingTimeMs: Date.now() - startTime,
-					fileSizeBytes: 0,
 				},
 			},
 		};

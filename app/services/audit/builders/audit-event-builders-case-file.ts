@@ -123,7 +123,6 @@ export const buildCaseArchiveAuditParams = (input: BuildCaseArchiveAuditParamsIn
 		performanceMetrics: input.processingTimeMs
 			? {
 					processingTimeMs: input.processingTimeMs,
-					fileSizeBytes: 0,
 				}
 			: undefined,
 	};
@@ -175,7 +174,7 @@ export const buildFileUploadAuditParams = (input: BuildFileUploadAuditParamsInpu
 interface BuildFileDeletionAuditParamsInput {
 	user: User;
 	fileName: string;
-	fileSize: number;
+	fileSize?: number;
 	deleteReason: string;
 	caseNumber: string;
 	fileId?: string;
@@ -212,6 +211,7 @@ interface BuildFileAccessAuditParamsInput {
 	processingTime?: number;
 	accessReason?: string;
 	originalFileName?: string;
+	fileSize?: number;
 }
 
 export const buildFileAccessAuditParams = (input: BuildFileAccessAuditParamsInput): CreateAuditEntryParams => {
@@ -230,7 +230,7 @@ export const buildFileAccessAuditParams = (input: BuildFileAccessAuditParamsInpu
 		fileDetails: {
 			fileId: input.fileId,
 			originalFileName: input.originalFileName,
-			fileSize: 0,
+			fileSize: input.fileSize,
 			uploadMethod: input.accessMethod,
 			processingTime: input.processingTime,
 			sourceLocation: input.accessReason || 'Image viewer',
@@ -238,7 +238,7 @@ export const buildFileAccessAuditParams = (input: BuildFileAccessAuditParamsInpu
 		performanceMetrics: input.processingTime
 			? {
 					processingTimeMs: input.processingTime,
-					fileSizeBytes: 0,
+					fileSizeBytes: input.fileSize,
 				}
 			: undefined,
 	};
@@ -269,14 +269,13 @@ export const buildPDFGenerationAuditParams = (input: BuildPDFGenerationAuditPara
 		workflowPhase: 'casework',
 		performanceMetrics: {
 			processingTimeMs: input.processingTime,
-			fileSizeBytes: input.fileSize || 0,
+			fileSizeBytes: input.fileSize,
 		},
 		fileDetails:
 			input.sourceFileId && input.sourceFileName
 				? {
 						fileId: input.sourceFileId,
 						originalFileName: input.sourceFileName,
-						fileSize: 0,
 					}
 				: undefined,
 	};
