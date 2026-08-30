@@ -7,19 +7,19 @@ import type * as PendingCleanupMarkerModule from '../../../workers/user-worker/s
 
 vi.mock('../../../workers/user-worker/src/storage/user-records', () => ({
 	readUserRecord: vi.fn(),
-	writeUserRecord: vi.fn()
+	writeUserRecord: vi.fn(),
 }));
 
 vi.mock('../../../workers/user-worker/src/firebase/admin', () => ({
-	deleteFirebaseAuthUser: vi.fn()
+	deleteFirebaseAuthUser: vi.fn(),
 }));
 
 vi.mock('../../../workers/user-worker/src/cleanup/case-data-reader', () => ({
-	readCaseFileIds: vi.fn()
+	readCaseFileIds: vi.fn(),
 }));
 
 vi.mock('../../../workers/user-worker/src/encryption-utils', () => ({
-	encryptJsonForStorage: vi.fn()
+	encryptJsonForStorage: vi.fn(),
 }));
 
 vi.mock('../../../workers/user-worker/src/cleanup/pending-cleanup-marker', async (importOriginal) => {
@@ -27,7 +27,7 @@ vi.mock('../../../workers/user-worker/src/cleanup/pending-cleanup-marker', async
 	return {
 		...actual,
 		markPendingCleanupFirebaseAuthDeleted: vi.fn(),
-		markPendingCleanupAuthDeletionComplete: vi.fn()
+		markPendingCleanupAuthDeletionComplete: vi.fn(),
 	};
 });
 
@@ -37,7 +37,7 @@ import { readCaseFileIds } from '../../../workers/user-worker/src/cleanup/case-d
 import { encryptJsonForStorage } from '../../../workers/user-worker/src/encryption-utils';
 import {
 	markPendingCleanupAuthDeletionComplete,
-	markPendingCleanupFirebaseAuthDeleted
+	markPendingCleanupFirebaseAuthDeleted,
 } from '../../../workers/user-worker/src/cleanup/pending-cleanup-marker';
 import { executeUserDeletion } from '../../../workers/user-worker/src/cleanup/account-deletion';
 
@@ -46,7 +46,7 @@ const MARKER_ENVELOPE = {
 	encryptionVersion: '1.0',
 	keyId: 'key-1',
 	dataIv: 'iv-value',
-	wrappedKey: 'wrapped-key-value'
+	wrappedKey: 'wrapped-key-value',
 };
 
 const USER_UID = 'uid1';
@@ -61,7 +61,7 @@ function buildUserData(caseNumbers: string[]): UserData {
 		company: 'Test Co',
 		permitted: true,
 		cases: caseNumbers.map((caseNumber) => ({ caseNumber })),
-		readOnlyCases: []
+		readOnlyCases: [],
 	};
 }
 
@@ -73,12 +73,7 @@ interface EnvOverrides {
 }
 
 function createEnv(overrides: EnvOverrides = {}): Env {
-	const {
-		caseDataObjects = [],
-		batchDeleteThrows = false,
-		confirmationSummaryDeleteThrows = false,
-		markerPutThrows = false
-	} = overrides;
+	const { caseDataObjects = [], batchDeleteThrows = false, confirmationSummaryDeleteThrows = false, markerPutThrows = false } = overrides;
 
 	const list = vi.fn(async () => ({ objects: caseDataObjects, truncated: false }));
 
@@ -112,7 +107,7 @@ function createEnv(overrides: EnvOverrides = {}): Env {
 		STRIAE_FILES: { delete: vi.fn(async () => undefined) } as unknown,
 		USER_DB: { delete: vi.fn(async () => undefined) } as unknown,
 		DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-		DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+		DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 	} as Env;
 }
 
@@ -143,7 +138,7 @@ describe('executeUserDeletion', () => {
 		const caseDataKey = `${encodeURIComponent(USER_UID)}/${encodeURIComponent('CASE-1')}/data.json`;
 		const env = createEnv({
 			caseDataObjects: [{ key: caseDataKey }],
-			batchDeleteThrows: true
+			batchDeleteThrows: true,
 		});
 
 		const result = await executeUserDeletion(env, USER_UID);
@@ -158,9 +153,7 @@ describe('executeUserDeletion', () => {
 		expect(key).toBe(MARKER_KEY);
 		const [serialized] = vi.mocked(encryptJsonForStorage).mock.calls[0];
 		const marker = JSON.parse(serialized as string);
-		expect(marker.failedCases).toEqual([
-			{ caseNumber: 'CASE-1', message: expect.stringContaining('case data delete threw') }
-		]);
+		expect(marker.failedCases).toEqual([{ caseNumber: 'CASE-1', message: expect.stringContaining('case data delete threw') }]);
 		expect(marker.pendingConfirmationSummary).toBe(false);
 	});
 
@@ -190,7 +183,7 @@ describe('executeUserDeletion', () => {
 		const env = createEnv({
 			caseDataObjects: [{ key: caseDataKey }],
 			batchDeleteThrows: true,
-			markerPutThrows: true
+			markerPutThrows: true,
 		});
 
 		await expect(executeUserDeletion(env, USER_UID)).rejects.toThrow('Account deletion blocked:');
@@ -215,9 +208,7 @@ describe('executeUserDeletion', () => {
 
 		const [serialized] = vi.mocked(encryptJsonForStorage).mock.calls[0];
 		const marker = JSON.parse(serialized as string);
-		expect(marker.failedCases).toEqual([
-			{ caseNumber: 'CASE-1', message: expect.stringContaining('missing data-at-rest envelope') }
-		]);
+		expect(marker.failedCases).toEqual([{ caseNumber: 'CASE-1', message: expect.stringContaining('missing data-at-rest envelope') }]);
 	});
 
 	it('folds a confirmation-summary deletion failure into the marker when there are no case errors', async () => {

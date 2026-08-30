@@ -5,7 +5,11 @@ import { deleteFirebaseAuthUser } from '../firebase/admin';
 import { readUserRecord } from '../storage/user-records';
 import type { AccountDeletionProgressEvent, AccountDeletionResult, Env } from '../types';
 import { readCaseFileIds } from './case-data-reader';
-import { markPendingCleanupAuthDeletionComplete, markPendingCleanupFirebaseAuthDeleted, recordPendingCleanupFailure } from './pending-cleanup-marker';
+import {
+	markPendingCleanupAuthDeletionComplete,
+	markPendingCleanupFirebaseAuthDeleted,
+	recordPendingCleanupFailure,
+} from './pending-cleanup-marker';
 
 export async function deleteSingleCase(env: Env, userUid: string, caseNumber: string): Promise<void> {
 	const encodedUserId = encodeURIComponent(userUid);

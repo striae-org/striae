@@ -209,7 +209,7 @@ describe('importConfirmationData audit-trail merge', () => {
 
 		const result = await importConfirmationData(
 			createUser(OWNER_UID),
-			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' })
+			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' }),
 		);
 
 		expect(result.success).toBe(true);
@@ -241,7 +241,7 @@ describe('importConfirmationData audit-trail merge', () => {
 
 		const result = await importConfirmationData(
 			createUser(OWNER_UID),
-			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' })
+			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' }),
 		);
 
 		expect(result.success).toBe(true);
@@ -267,7 +267,7 @@ describe('importConfirmationData audit-trail merge', () => {
 
 		const result = await importConfirmationData(
 			createUser(OWNER_UID),
-			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' })
+			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' }),
 		);
 
 		expect(result.success).toBe(true);
@@ -286,7 +286,7 @@ describe('importConfirmationData audit-trail merge', () => {
 
 		const result = await importConfirmationData(
 			createUser(OWNER_UID),
-			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' })
+			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' }),
 		);
 
 		expect(result.success).toBe(true);
@@ -312,7 +312,7 @@ describe('importConfirmationData audit-trail merge', () => {
 
 		const result = await importConfirmationData(
 			createUser(OWNER_UID),
-			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' })
+			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' }),
 		);
 
 		expect(result.success).toBe(true);
@@ -322,8 +322,8 @@ describe('importConfirmationData audit-trail merge', () => {
 		expect(consoleWarnSpy).toHaveBeenCalledWith(
 			'Failed to merge reviewer audit trail into case audit trail:',
 			expect.objectContaining({
-				message: expect.stringContaining('signed scope case "CASE-999" does not match target case "CASE-001"')
-			})
+				message: expect.stringContaining('signed scope case "CASE-999" does not match target case "CASE-001"'),
+			}),
 		);
 		consoleWarnSpy.mockRestore();
 	});
@@ -343,7 +343,7 @@ describe('importConfirmationData audit-trail merge', () => {
 
 		const result = await importConfirmationData(
 			createUser(OWNER_UID),
-			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' })
+			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' }),
 		);
 
 		expect(result.success).toBe(true);

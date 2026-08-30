@@ -513,9 +513,9 @@ export const Striae = ({ user }: StriaePage) => {
 		try {
 			const deleteResult = await deleteCase(user, currentCase);
 			clearLoadedCaseState();
-			if (deleteResult.missingImages.length > 0) {
+			if (deleteResult.missingFiles.length > 0) {
 				showNotification(
-					`Case deleted. ${deleteResult.missingImages.length} image(s) were not found and were skipped during deletion.`,
+					`Case deleted. ${deleteResult.missingFiles.length} file(s) were not found and were skipped during deletion.`,
 					'warning',
 				);
 			} else {

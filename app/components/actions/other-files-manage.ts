@@ -178,7 +178,7 @@ export const deleteOtherFile = async (
 
 		fileToDelete = (caseData.otherFiles || []).find((f: OtherFileData) => f.id === fileId);
 		fileName = fileToDelete?.originalFilename || fileId;
-		const fileSize = fileToDelete?.byteLength || 0;
+		const fileSize = fileToDelete?.byteLength;
 
 		const deleteResponse = await fetchFilesApi(user, `/${encodeURIComponent(fileId)}`, {
 			method: 'DELETE',
@@ -222,13 +222,13 @@ export const deleteOtherFile = async (
 				validationErrors: [error instanceof Error ? error.message : 'Unknown error'],
 				fileDetails: {
 					fileId,
-					fileSize: fileToDelete?.byteLength || 0,
+					fileSize: fileToDelete?.byteLength,
 					deleteReason,
 					originalFileName: fileToDelete?.originalFilename,
 				},
 				performanceMetrics: {
 					processingTimeMs: Date.now() - startTime,
-					fileSizeBytes: fileToDelete?.byteLength || 0,
+					fileSizeBytes: fileToDelete?.byteLength,
 				},
 			});
 		}
@@ -258,6 +258,7 @@ export const getOtherFileUrl = async (
 			Date.now() - startTime,
 			resolvedAccessReason,
 			fileData.originalFilename,
+			fileData.byteLength,
 		);
 
 		return {
@@ -277,6 +278,7 @@ export const getOtherFileUrl = async (
 			Date.now() - startTime,
 			`Unexpected error during ${resolvedAccessReason}`,
 			fileData.originalFilename,
+			fileData.byteLength,
 		);
 
 		throw error;

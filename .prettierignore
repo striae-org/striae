@@ -1,6 +1,6 @@
 build/
+dist/
 node_modules/
 .wrangler/
-tests/
 package-lock.json
 worker-configuration.d.ts

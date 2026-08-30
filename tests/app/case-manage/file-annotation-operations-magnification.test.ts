@@ -71,9 +71,7 @@ describe('file-annotation-operations magnification round-trip', () => {
 
 	it('returns leftMagnification/rightMagnification unmodified on load', async () => {
 		const stored = createAnnotationData();
-		vi.mocked(fetchDataApi).mockResolvedValue(
-			new Response(JSON.stringify(stored), { status: 200 })
-		);
+		vi.mocked(fetchDataApi).mockResolvedValue(new Response(JSON.stringify(stored), { status: 200 }));
 
 		const result = await getFileAnnotations(createUser(), 'CASE-1', 'file-1');
 

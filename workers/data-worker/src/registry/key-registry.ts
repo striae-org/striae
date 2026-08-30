@@ -10,9 +10,11 @@ export function getNonEmptyString(value: unknown): string | null {
 	return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
 }
 
-function logRegistryDecryptionTelemetry(input: Parameters<typeof logKeyRegistryDecryptionTelemetry>[0] & {
-	scope: 'data-at-rest' | 'export-data' | 'export-image';
-}): void {
+function logRegistryDecryptionTelemetry(
+	input: Parameters<typeof logKeyRegistryDecryptionTelemetry>[0] & {
+		scope: 'data-at-rest' | 'export-data' | 'export-image';
+	},
+): void {
 	logKeyRegistryDecryptionTelemetry(input);
 }
 

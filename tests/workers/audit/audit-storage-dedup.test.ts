@@ -46,9 +46,7 @@ describe('appendAuditEntry retry-safe dedup', () => {
 	});
 
 	it('does not re-append or re-write when entryId already exists (retry after lost response)', async () => {
-		vi.mocked(decryptAuditJsonWithRegistry).mockResolvedValue(
-			JSON.stringify([makeExistingEntry('entry-1')])
-		);
+		vi.mocked(decryptAuditJsonWithRegistry).mockResolvedValue(JSON.stringify([makeExistingEntry('entry-1')]));
 		const bucketFile = { customMetadata: validEnvelope, arrayBuffer: async () => new ArrayBuffer(0) };
 		const bucket = { get: vi.fn(async () => bucketFile), put: vi.fn(async () => undefined) };
 		const env = makeEnv();
@@ -61,9 +59,7 @@ describe('appendAuditEntry retry-safe dedup', () => {
 	});
 
 	it('appends and writes when entryId is new', async () => {
-		vi.mocked(decryptAuditJsonWithRegistry).mockResolvedValue(
-			JSON.stringify([makeExistingEntry('entry-1')])
-		);
+		vi.mocked(decryptAuditJsonWithRegistry).mockResolvedValue(JSON.stringify([makeExistingEntry('entry-1')]));
 		const bucketFile = { customMetadata: validEnvelope, arrayBuffer: async () => new ArrayBuffer(0) };
 		const bucket = { get: vi.fn(async () => bucketFile), put: vi.fn(async () => undefined) };
 		const env = makeEnv();

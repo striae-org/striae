@@ -33,29 +33,29 @@ describe('deleteOtherFile read-only cleanup', () => {
 			createdAt: '2026-08-16T00:00:00.000Z',
 			isReadOnly: true,
 			files: [],
-			otherFiles: [{
-				id: 'associated-file-1',
-				originalFilename: 'review-report.pdf',
-				uploadedAt: '2026-08-16T00:00:00.000Z',
-				contentType: 'application/pdf',
-				byteLength: 2048,
-			}],
+			otherFiles: [
+				{
+					id: 'associated-file-1',
+					originalFilename: 'review-report.pdf',
+					uploadedAt: '2026-08-16T00:00:00.000Z',
+					contentType: 'application/pdf',
+					byteLength: 2048,
+				},
+			],
 		});
 		vi.mocked(fetchFilesApi).mockResolvedValue(new Response(null, { status: 204 }));
 
-		await expect(deleteOtherFile(user, 'CASE-001', 'associated-file-1', undefined, {
-			skipValidation: true,
-			skipCaseDataUpdate: true,
-			suppressAudit: true,
-		})).resolves.toEqual({
+		await expect(
+			deleteOtherFile(user, 'CASE-001', 'associated-file-1', undefined, {
+				skipValidation: true,
+				skipCaseDataUpdate: true,
+				suppressAudit: true,
+			}),
+		).resolves.toEqual({
 			fileMissing: false,
 			fileName: 'review-report.pdf',
 		});
 
-		expect(fetchFilesApi).toHaveBeenCalledWith(
-			user,
-			'/associated-file-1',
-			{ method: 'DELETE' }
-		);
+		expect(fetchFilesApi).toHaveBeenCalledWith(user, '/associated-file-1', { method: 'DELETE' });
 	});
 });

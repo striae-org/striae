@@ -124,4 +124,3 @@ export async function encryptJsonForStorage(plaintextJson: string, publicKeyPem:
 		KEY_LABEL,
 	);
 }
-

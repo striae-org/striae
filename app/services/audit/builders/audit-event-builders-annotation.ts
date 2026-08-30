@@ -55,7 +55,6 @@ export const buildAnnotationCreateAuditParams = (input: BuildAnnotationCreateAud
 				? {
 						fileId: input.imageFileId,
 						originalFileName: input.originalImageFileName,
-						fileSize: 0,
 						mimeType: 'image/*',
 						uploadMethod: 'api',
 					}
@@ -99,7 +98,6 @@ export const buildAnnotationEditAuditParams = (input: BuildAnnotationEditAuditPa
 				? {
 						fileId: input.imageFileId,
 						originalFileName: input.originalImageFileName,
-						fileSize: 0,
 						mimeType: 'image/*',
 						uploadMethod: 'api',
 					}
@@ -141,7 +139,6 @@ export const buildAnnotationDeleteAuditParams = (input: BuildAnnotationDeleteAud
 				? {
 						fileId: input.imageFileId,
 						originalFileName: input.originalImageFileName,
-						fileSize: 0,
 						mimeType: 'image/*',
 						uploadMethod: 'api',
 					}

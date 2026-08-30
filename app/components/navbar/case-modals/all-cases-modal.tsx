@@ -491,10 +491,10 @@ export const CasesModal = ({
 				onCurrentCaseDeleted?.();
 			}
 
-			if (deleteResult.missingImages.length > 0) {
+			if (deleteResult.missingFiles.length > 0) {
 				setActionNotice({
 					type: 'warning',
-					message: `Case deleted. ${deleteResult.missingImages.length} image(s) were missing and skipped.`,
+					message: `Case deleted. ${deleteResult.missingFiles.length} file(s) were missing and skipped.`,
 				});
 			} else {
 				setActionNotice({

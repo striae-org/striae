@@ -145,11 +145,12 @@ class Runner extends EventEmitter {
 			if (!this.activeRun || this.activeRun.id !== runId) return;
 			this.activeRun.lastOutputAt = Date.now();
 			this.activeRun.stuckWarned = false;
-			const text = chunk.toString('utf8');
+			// Strip ANSI escapes before they reach the browser's <pre> pane, which can't render them.
+			const text = stripAnsi(chunk.toString('utf8'));
 			this.emit('event', runId, { type: 'log', stream, text });
 
 			if (stream === 'stdout') {
-				const cleaned = stripAnsi(text).trim();
+				const cleaned = text.trim();
 				if (cleaned) this.emit('event', runId, { type: 'progress', text: cleaned });
 			}
 		};

@@ -489,7 +489,7 @@ class AuditService {
 	public async logFileDeletion(
 		user: User,
 		fileName: string,
-		fileSize: number,
+		fileSize: number | undefined,
 		deleteReason: string,
 		caseNumber: string,
 		fileId?: string,
@@ -522,6 +522,7 @@ class AuditService {
 		processingTime?: number,
 		accessReason?: string,
 		originalFileName?: string,
+		fileSize?: number,
 	): Promise<void> {
 		await this.logEventForUser(
 			user,
@@ -535,6 +536,7 @@ class AuditService {
 				processingTime,
 				accessReason,
 				originalFileName,
+				fileSize,
 			}),
 		);
 	}

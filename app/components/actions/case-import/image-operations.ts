@@ -43,6 +43,7 @@ export async function uploadImageBlob(
 		id: uploadedImageId,
 		originalFilename,
 		uploadedAt: resolveUploadedAt(originalUploadedAt),
+		byteLength: file.size,
 	};
 }
 

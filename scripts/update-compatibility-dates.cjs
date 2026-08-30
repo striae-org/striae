@@ -36,6 +36,38 @@ function getLatestLocallyCompatibleDate() {
 	return null;
 }
 
+function getTestPoolLocallyCompatibleDate(rootDir) {
+	// @cloudflare/vitest-pool-workers bundles its own (often older) workerd,
+	// independent of the top-level wrangler/workerd used for dev/build/deploy.
+	const nestedMainPath = path.join(
+		rootDir,
+		'node_modules',
+		'@cloudflare',
+		'vitest-pool-workers',
+		'node_modules',
+		'workerd',
+		'lib',
+		'main.js',
+	);
+
+	if (!fs.existsSync(nestedMainPath)) {
+		return null;
+	}
+
+	try {
+		// Requiring the resolved absolute path bypasses the parent package's
+		// "exports" map, which otherwise blocks deep subpath requires.
+		const { compatibilityDate } = require(nestedMainPath);
+		if (typeof compatibilityDate === 'string' && DATE_PATTERN.test(compatibilityDate)) {
+			return compatibilityDate;
+		}
+	} catch {
+		// Treated as unavailable.
+	}
+
+	return null;
+}
+
 function getEffectiveCompatibilityDate({ mode = 'current-date', explicitDate } = {}) {
 	if (explicitDate) {
 		if (!DATE_PATTERN.test(explicitDate)) {
@@ -169,9 +201,58 @@ function updateCompatibilityDates(options = {}) {
 	return results;
 }
 
+function getTestWranglerFiles(rootDir) {
+	const testsWorkersDir = path.join(rootDir, 'tests', 'workers');
+
+	if (!fs.existsSync(testsWorkersDir)) {
+		return [];
+	}
+
+	return fs
+		.readdirSync(testsWorkersDir, { withFileTypes: true })
+		.filter((entry) => entry.isDirectory())
+		.map((entry) => path.join(testsWorkersDir, entry.name, 'wrangler.test.jsonc'))
+		.filter((filePath) => fs.existsSync(filePath));
+}
+
+function updateTestCompatibilityDates() {
+	const rootDir = path.resolve(__dirname, '..');
+	const today = getCurrentDate();
+	const testPoolMaxDate = getTestPoolLocallyCompatibleDate(rootDir);
+
+	if (!testPoolMaxDate) {
+		console.warn(
+			'Skipping tests/workers/*/wrangler.test.jsonc: unable to determine @cloudflare/vitest-pool-workers workerd compatibility date.',
+		);
+		return [];
+	}
+
+	const date = testPoolMaxDate < today ? testPoolMaxDate : today;
+	const results = getTestWranglerFiles(rootDir).map((filePath) => updateFile(filePath, date, replaceJsoncCompatibilityDate));
+
+	const updatedCount = results.filter((result) => result.status === 'updated').length;
+	const unchangedCount = results.filter((result) => result.status === 'unchanged').length;
+
+	console.log(`Synced test worker compatibility dates to ${date} (bounded by @cloudflare/vitest-pool-workers workerd)`);
+	console.log(`- Updated: ${updatedCount}`);
+	console.log(`- Unchanged: ${unchangedCount}`);
+
+	for (const result of results) {
+		if (result.status !== 'updated') {
+			console.log(`  ${result.status.toUpperCase()}: ${path.relative(rootDir, result.filePath)}`);
+		}
+	}
+
+	return results;
+}
+
 if (require.main === module) {
 	try {
-		updateCompatibilityDates(parseCliArgs(process.argv));
+		if (process.argv.includes('--tests')) {
+			updateTestCompatibilityDates();
+		} else {
+			updateCompatibilityDates(parseCliArgs(process.argv));
+		}
 	} catch (error) {
 		console.error(error.message);
 		process.exit(1);
@@ -180,7 +261,9 @@ if (require.main === module) {
 
 module.exports = {
 	updateCompatibilityDates,
+	updateTestCompatibilityDates,
 	getLatestLocallyCompatibleDate,
+	getTestPoolLocallyCompatibleDate,
 	getEffectiveCompatibilityDate,
 	parseCliArgs,
 };

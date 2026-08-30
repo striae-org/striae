@@ -92,9 +92,7 @@ describe('audit retrieval — confirmation bundle merge', () => {
 					source: 'confirmation-bundle',
 					importedAt: '2026-08-06T00:00:00.000Z',
 					reviewingExaminerUid: 'reviewer-uid',
-					entries: [
-						makeEntry({ timestamp: '2026-08-04T00:00:00.000Z', action: 'confirmation-create' }),
-					],
+					entries: [makeEntry({ timestamp: '2026-08-04T00:00:00.000Z', action: 'confirmation-create' })],
 				},
 			],
 		} as never);
@@ -150,9 +148,7 @@ describe('audit retrieval — confirmation bundle merge', () => {
 					source: 'confirmation-bundle',
 					importedAt: '2026-08-06T00:00:00.000Z',
 					reviewingExaminerUid: 'reviewer-uid',
-					entries: [
-						makeEntry({ timestamp: '2026-08-04T00:00:00.000Z', action: 'confirmation-create' }),
-					],
+					entries: [makeEntry({ timestamp: '2026-08-04T00:00:00.000Z', action: 'confirmation-create' })],
 				},
 			],
 		} as never);

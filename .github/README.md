@@ -2,8 +2,6 @@
 
 Striae is a specialized, cloud-native platform designed to streamline forensic firearms identification by providing an intuitive environment for digital comparison image annotation, authenticated confirmations, and automated report generation. Built with a focus on security, reliability, and user experience, Striae empowers firearms examiners to efficiently manage case data, collaborate securely, and produce comprehensive forensic reports with confidence.
 
-[![Socket Badge](https://badge.socket.dev/npm/package/@striae-org/striae/10.2.8)](https://badge.socket.dev/npm/package/@striae-org/striae/10.2.8)
-
 ## 🌐 Application URL
 
 **[Live App](https://striae.app)**
@@ -29,6 +27,15 @@ One or more methods, systems, or features of the Striae platform are the subject
 ---
 
 ## 📋 Changelog
+
+## [2026-08-30] - *[Patch Release v10.2.9](https://github.com/striae-org/striae/releases/tag/v10.2.9)* — *Case Deletion Cleanup, Audit Trail Accuracy Fixes, Test Formatting Coverage, Contribution Policy Clarification, and Socket Badge Removal*
+
+- **🗑️ Case Deletion Cleanup** - Removed a duplicated no-files deletion/audit code path in `deleteCase` (`app/components/actions/case-manage/operations.ts`), consolidating into a single shared exit path while preserving the "files(s) were already missing" note in the audit message.
+- **🔍 Audit Trail Accuracy Fixes** - `deleteCase`'s audit message now reports the actual deleted-file count instead of the total case file count; case image files (`FileData`) now track `byteLength` at upload time (mirroring associated files' `OtherFileData.byteLength`); file-delete and file-access audit entries use tracked real sizes instead of hardcoded `0`; and the Audit Trail viewer now shows **"N/A"** instead of a misleading `0` for events/files where no size is tracked.
+- **🧹 Prettier Coverage Extended to Tests and Workers** - `format`/`format:check` now also cover `tests/**/*.{ts,mjs,json,jsonc}` and `workers/**/*.{ts,js}`; removed the now-redundant per-worker `.prettierrc` files and reformatted in-scope files to match.
+- **🖥️ Deploy GUI ANSI Stripping Fix (Bug Fix)** - `scripts/deploy-gui/runner.mjs` now strips ANSI escape sequences from log chunks before emitting the `log` event, preventing raw escape codes from reaching the browser's `<pre>` log pane.
+- **📦 Dependency and Compatibility Maintenance** - Bumped `@cloudflare/vite-plugin` to `^1.54.2`, refreshed `package-lock.json`, and bumped `compatibility_date` to `2026-08-28` in `wrangler.toml.example` and all worker `wrangler.jsonc.example` files.
+- **🤝 Selective Contribution Policy Clarified** - `.github/CONTRIBUTING.md` now explains that Striae moderates contributions closely due to its sensitive forensic workflows and cannot accept unsolicited PRs; contributors should reach out to `dev@striae.org` before starting work.
 
 ## [2026-08-29] - *[Patch Release v10.2.8](https://github.com/striae-org/striae/releases/tag/v10.2.8)* — *Deploy GUI Binary Asset Fix, npm Toolchain Peer-Dependency Correction, and License Audit Refresh*
 

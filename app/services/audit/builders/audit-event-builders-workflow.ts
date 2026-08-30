@@ -152,7 +152,6 @@ export const buildConfirmationCreationAuditParams = (input: BuildConfirmationCre
 				? {
 						fileId: input.imageFileId,
 						originalFileName: input.originalImageFileName,
-						fileSize: 0,
 					}
 				: undefined,
 	};
@@ -242,7 +241,6 @@ export const buildConfirmationImportAuditParams = (input: BuildConfirmationImpor
 				}
 			: {
 					processingTimeMs: 0,
-					fileSizeBytes: 0,
 					validationStepsCompleted: input.confirmationsImported,
 					validationStepsFailed: (input.errors || []).length,
 				},

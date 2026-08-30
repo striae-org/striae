@@ -59,9 +59,7 @@ describe('exportCaseData magnification annotation detection', () => {
 	});
 
 	it('marks a file as having annotations when only leftMagnification/rightMagnification is set', async () => {
-		vi.mocked(fetchFiles).mockResolvedValue([
-			{ id: 'img-1', originalFilename: 'bullet.jpg', uploadedAt: '2026-08-11T00:00:00.000Z' },
-		]);
+		vi.mocked(fetchFiles).mockResolvedValue([{ id: 'img-1', originalFilename: 'bullet.jpg', uploadedAt: '2026-08-11T00:00:00.000Z' }]);
 
 		vi.mocked(getNotes).mockResolvedValue({
 			leftCase: '',
@@ -82,9 +80,7 @@ describe('exportCaseData magnification annotation detection', () => {
 	});
 
 	it('does not mark a file as having annotations when no annotation fields are set', async () => {
-		vi.mocked(fetchFiles).mockResolvedValue([
-			{ id: 'img-2', originalFilename: 'cartridge.jpg', uploadedAt: '2026-08-11T00:00:00.000Z' },
-		]);
+		vi.mocked(fetchFiles).mockResolvedValue([{ id: 'img-2', originalFilename: 'cartridge.jpg', uploadedAt: '2026-08-11T00:00:00.000Z' }]);
 
 		vi.mocked(getNotes).mockResolvedValue({
 			leftCase: '',

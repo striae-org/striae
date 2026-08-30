@@ -98,7 +98,6 @@ export async function storeConfirmation(
 			undefined, // Original examiner UID not available in this context
 			{
 				processingTimeMs: endTime - startTime,
-				fileSizeBytes: 0, // Not applicable for confirmation creation
 			},
 			originalImageId,
 			originalImageFileName,
@@ -122,7 +121,6 @@ export async function storeConfirmation(
 			undefined,
 			{
 				processingTimeMs: endTime - startTime,
-				fileSizeBytes: 0,
 			},
 			originalImageId || currentImageId, // Use originalImageId if available, fallback to currentImageId
 			originalImageFileName,
@@ -437,7 +435,6 @@ export async function exportConfirmationData(user: User, caseNumber: string): Pr
 			undefined,
 			{
 				processingTimeMs: endTime - startTime,
-				fileSizeBytes: 0,
 			},
 			{
 				present: signaturePresent,

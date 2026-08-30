@@ -4,13 +4,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { User } from 'firebase/auth';
 import { deleteCase } from '../../../app/components/actions/case-manage/operations';
-import {
-	getCaseData,
-	validateUserSession,
-	removeUserCase,
-	deleteCaseData,
-	removeCaseConfirmationSummary,
-} from '~/utils/data';
+import { getCaseData, validateUserSession, removeUserCase, deleteCaseData, removeCaseConfirmationSummary } from '~/utils/data';
 import { deleteFileWithoutAudit } from '../../../app/components/actions/case-manage/delete-helpers';
 import { deleteOtherFile } from '../../../app/components/actions/other-files-manage';
 
@@ -106,7 +100,7 @@ describe('deleteCase associated file cleanup', () => {
 
 		const result = await deleteCase(user, 'CASE-001');
 
-		expect(result).toEqual({ missingImages: [] });
+		expect(result).toEqual({ missingFiles: [] });
 
 		expect(deleteFileWithoutAudit).toHaveBeenCalledWith(
 			expect.objectContaining({ uid: 'analyst-1' }),
@@ -115,7 +109,7 @@ describe('deleteCase associated file cleanup', () => {
 			expect.objectContaining({
 				skipCaseDataUpdate: false,
 				skipValidation: false,
-			})
+			}),
 		);
 
 		expect(deleteOtherFile).toHaveBeenCalledWith(
@@ -127,17 +121,14 @@ describe('deleteCase associated file cleanup', () => {
 				suppressAudit: true,
 				skipCaseDataUpdate: false,
 				skipValidation: false,
-			})
+			}),
 		);
 
-		expect(removeUserCase).toHaveBeenCalledWith(
-			expect.objectContaining({ uid: 'analyst-1' }),
-			'CASE-001'
-		);
+		expect(removeUserCase).toHaveBeenCalledWith(expect.objectContaining({ uid: 'analyst-1' }), 'CASE-001');
 		expect(deleteCaseData).toHaveBeenCalledWith(
 			expect.objectContaining({ uid: 'analyst-1' }),
 			'CASE-001',
-			expect.objectContaining({ skipValidation: true })
+			expect.objectContaining({ skipValidation: true }),
 		);
 	});
 });

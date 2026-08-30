@@ -7,6 +7,7 @@ export interface FileData {
 	id: string;
 	originalFilename: string;
 	uploadedAt: string;
+	byteLength?: number;
 }
 
 export interface OtherFileData {

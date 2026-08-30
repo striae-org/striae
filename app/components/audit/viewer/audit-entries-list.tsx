@@ -191,12 +191,14 @@ export const AuditEntriesList = ({ entries }: AuditEntriesListProps) => {
 												</div>
 											)}
 
-											{entry.details.fileDetails.fileSize > 0 && (
-												<div className={styles.detailRow}>
-													<span className={styles.detailLabel}>File Size:</span>
-													<span className={styles.detailValue}>{(entry.details.fileDetails.fileSize / 1024 / 1024).toFixed(2)} MB</span>
-												</div>
-											)}
+											<div className={styles.detailRow}>
+												<span className={styles.detailLabel}>File Size:</span>
+												<span className={styles.detailValue}>
+													{typeof entry.details.fileDetails.fileSize === 'number'
+														? `${(entry.details.fileDetails.fileSize / 1024 / 1024).toFixed(2)} MB`
+														: 'N/A'}
+												</span>
+											</div>
 
 											{entry.details.fileDetails.uploadMethod && (
 												<div className={styles.detailRow}>

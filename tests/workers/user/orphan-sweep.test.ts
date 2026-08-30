@@ -6,13 +6,10 @@ import type { Env } from '../../../workers/user-worker/src/types';
 
 vi.mock('../../../workers/user-worker/src/cleanup/case-data-reader', () => ({
 	getDataAtRestPrivateKeyRegistry: vi.fn(),
-	readCaseFileIds: vi.fn()
+	readCaseFileIds: vi.fn(),
 }));
 
-import {
-	getDataAtRestPrivateKeyRegistry,
-	readCaseFileIds
-} from '../../../workers/user-worker/src/cleanup/case-data-reader';
+import { getDataAtRestPrivateKeyRegistry, readCaseFileIds } from '../../../workers/user-worker/src/cleanup/case-data-reader';
 import { sweepOrphanedFiles } from '../../../workers/user-worker/src/cleanup/orphan-sweep';
 
 const REGISTRY = { activeKeyId: 'k1', keys: { k1: 'pem' } };
@@ -40,20 +37,22 @@ function pagedList<T extends { truncated: boolean }>(pages: T[]) {
 	});
 }
 
-function createEnv(options: {
-	dataPages?: DataPage[];
-	filesPages?: FilesPage[];
-	deleteImpl?: (key: string) => Promise<void>;
-} = {}): Env {
+function createEnv(
+	options: {
+		dataPages?: DataPage[];
+		filesPages?: FilesPage[];
+		deleteImpl?: (key: string) => Promise<void>;
+	} = {},
+): Env {
 	const {
 		dataPages = [{ objects: [], truncated: false }],
 		filesPages = [{ objects: [], truncated: false }],
-		deleteImpl = async () => undefined
+		deleteImpl = async () => undefined,
 	} = options;
 
 	return {
 		STRIAE_DATA: { list: pagedList(dataPages) } as unknown,
-		STRIAE_FILES: { list: pagedList(filesPages), delete: vi.fn(deleteImpl) } as unknown
+		STRIAE_FILES: { list: pagedList(filesPages), delete: vi.fn(deleteImpl) } as unknown,
 	} as Env;
 }
 
@@ -66,7 +65,7 @@ beforeEach(() => {
 describe('sweepOrphanedFiles', () => {
 	it('deletes files not referenced by any case-data record after the grace period', async () => {
 		const env = createEnv({
-			filesPages: [{ objects: [{ key: 'orphan.jpg', uploaded: OLD_UPLOAD }], truncated: false }]
+			filesPages: [{ objects: [{ key: 'orphan.jpg', uploaded: OLD_UPLOAD }], truncated: false }],
 		});
 
 		const result = await sweepOrphanedFiles(env);
@@ -80,7 +79,7 @@ describe('sweepOrphanedFiles', () => {
 		vi.mocked(readCaseFileIds).mockResolvedValue(['referenced.jpg']);
 		const env = createEnv({
 			dataPages: [{ objects: [{ key: 'u1/CASE-1/data.json' }], truncated: false }],
-			filesPages: [{ objects: [{ key: 'referenced.jpg', uploaded: OLD_UPLOAD }], truncated: false }]
+			filesPages: [{ objects: [{ key: 'referenced.jpg', uploaded: OLD_UPLOAD }], truncated: false }],
 		});
 
 		const result = await sweepOrphanedFiles(env);
@@ -92,7 +91,7 @@ describe('sweepOrphanedFiles', () => {
 
 	it('skips files uploaded within the grace period', async () => {
 		const env = createEnv({
-			filesPages: [{ objects: [{ key: 'fresh.jpg', uploaded: RECENT_UPLOAD }], truncated: false }]
+			filesPages: [{ objects: [{ key: 'fresh.jpg', uploaded: RECENT_UPLOAD }], truncated: false }],
 		});
 
 		const result = await sweepOrphanedFiles(env);
@@ -103,7 +102,7 @@ describe('sweepOrphanedFiles', () => {
 
 	it('counts candidates but deletes nothing in dry-run mode', async () => {
 		const env = createEnv({
-			filesPages: [{ objects: [{ key: 'orphan.jpg', uploaded: OLD_UPLOAD }], truncated: false }]
+			filesPages: [{ objects: [{ key: 'orphan.jpg', uploaded: OLD_UPLOAD }], truncated: false }],
 		});
 
 		const result = await sweepOrphanedFiles(env, { dryRun: true });
@@ -117,8 +116,8 @@ describe('sweepOrphanedFiles', () => {
 		const env = createEnv({
 			filesPages: [
 				{ objects: [{ key: 'a.jpg', uploaded: OLD_UPLOAD }], truncated: true, cursor: 'c1' },
-				{ objects: [{ key: 'b.jpg', uploaded: OLD_UPLOAD }], truncated: false }
-			]
+				{ objects: [{ key: 'b.jpg', uploaded: OLD_UPLOAD }], truncated: false },
+			],
 		});
 
 		const result = await sweepOrphanedFiles(env, { maxFileObjectsPerRun: 1 });
@@ -133,9 +132,9 @@ describe('sweepOrphanedFiles', () => {
 		const env = createEnv({
 			dataPages: [
 				{ objects: [{ key: 'u1/CASE-1/data.json' }], truncated: true, cursor: 'c1' },
-				{ objects: [{ key: 'u1/CASE-2/data.json' }], truncated: false }
+				{ objects: [{ key: 'u1/CASE-2/data.json' }], truncated: false },
 			],
-			filesPages: [{ objects: [{ key: 'orphan.jpg', uploaded: OLD_UPLOAD }], truncated: false }]
+			filesPages: [{ objects: [{ key: 'orphan.jpg', uploaded: OLD_UPLOAD }], truncated: false }],
 		});
 
 		const result = await sweepOrphanedFiles(env, { maxDataKeysPerRun: 1 });
@@ -155,14 +154,10 @@ describe('sweepOrphanedFiles', () => {
 		const env = createEnv({
 			dataPages: [
 				{
-					objects: [
-						{ key: 'u1/CASE-1/data.json' },
-						{ key: 'u1/CASE-2/data.json' },
-						{ key: 'u1/CASE-3/data.json' }
-					],
-					truncated: false
-				}
-			]
+					objects: [{ key: 'u1/CASE-1/data.json' }, { key: 'u1/CASE-2/data.json' }, { key: 'u1/CASE-3/data.json' }],
+					truncated: false,
+				},
+			],
 		});
 
 		await sweepOrphanedFiles(env);
@@ -178,7 +173,7 @@ describe('sweepOrphanedFiles', () => {
 		vi.mocked(readCaseFileIds).mockRejectedValueOnce(new Error('missing data-at-rest envelope'));
 		const env = createEnv({
 			dataPages: [{ objects: [{ key: 'u1/CASE-1/data.json' }], truncated: false }],
-			filesPages: [{ objects: [{ key: 'orphan.jpg', uploaded: OLD_UPLOAD }], truncated: false }]
+			filesPages: [{ objects: [{ key: 'orphan.jpg', uploaded: OLD_UPLOAD }], truncated: false }],
 		});
 
 		await expect(sweepOrphanedFiles(env)).rejects.toThrow('missing data-at-rest envelope');
@@ -192,16 +187,16 @@ describe('sweepOrphanedFiles', () => {
 				{
 					objects: [
 						{ key: 'fails.jpg', uploaded: OLD_UPLOAD },
-						{ key: 'succeeds.jpg', uploaded: OLD_UPLOAD }
+						{ key: 'succeeds.jpg', uploaded: OLD_UPLOAD },
 					],
-					truncated: false
-				}
+					truncated: false,
+				},
 			],
 			deleteImpl: async (key: string) => {
 				if (key === 'fails.jpg') {
 					throw new Error('r2 delete failed');
 				}
-			}
+			},
 		});
 
 		const result = await sweepOrphanedFiles(env);

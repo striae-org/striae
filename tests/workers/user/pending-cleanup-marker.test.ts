@@ -5,20 +5,20 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Env } from '../../../workers/user-worker/src/types';
 
 vi.mock('../../../workers/user-worker/src/encryption-utils', () => ({
-	encryptJsonForStorage: vi.fn()
+	encryptJsonForStorage: vi.fn(),
 }));
 
 vi.mock('../../../workers/user-worker/src/cleanup/case-data-reader', () => ({
 	decryptWithKeyRegistry: vi.fn(),
 	extractDataAtRestEnvelope: vi.fn(),
-	getDataAtRestPrivateKeyRegistry: vi.fn()
+	getDataAtRestPrivateKeyRegistry: vi.fn(),
 }));
 
 import { encryptJsonForStorage } from '../../../workers/user-worker/src/encryption-utils';
 import {
 	decryptWithKeyRegistry,
 	extractDataAtRestEnvelope,
-	getDataAtRestPrivateKeyRegistry
+	getDataAtRestPrivateKeyRegistry,
 } from '../../../workers/user-worker/src/cleanup/case-data-reader';
 import {
 	markerKeyFor,
@@ -28,7 +28,7 @@ import {
 	tombstonePendingCleanupMarkerIfUnchanged,
 	writePendingCleanupMarker,
 	writePendingCleanupMarkerIfAbsent,
-	writePendingCleanupMarkerIfUnchanged
+	writePendingCleanupMarkerIfUnchanged,
 } from '../../../workers/user-worker/src/cleanup/pending-cleanup-marker';
 
 const USER_UID = 'uid1';
@@ -40,7 +40,7 @@ const baseMarker = {
 	pendingConfirmationSummary: false,
 	attempts: 0,
 	authDeletionComplete: false,
-	firebaseAuthDeleted: false
+	firebaseAuthDeleted: false,
 };
 
 const validEnvelope = {
@@ -48,7 +48,7 @@ const validEnvelope = {
 	encryptionVersion: '1.0',
 	keyId: 'key-1',
 	dataIv: 'iv-value',
-	wrappedKey: 'wrapped-key-value'
+	wrappedKey: 'wrapped-key-value',
 };
 
 beforeEach(() => {
@@ -67,7 +67,7 @@ describe('writePendingCleanupMarker', () => {
 		const env = {
 			STRIAE_DATA: { put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		const ciphertext = new Uint8Array([1, 2, 3]);
 		vi.mocked(encryptJsonForStorage).mockResolvedValue({ ciphertext, envelope: validEnvelope });
@@ -97,7 +97,7 @@ describe('writePendingCleanupMarker', () => {
 		const env = {
 			STRIAE_DATA: { put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		vi.mocked(encryptJsonForStorage).mockResolvedValue({ ciphertext: new Uint8Array(0), envelope: validEnvelope });
 
@@ -182,7 +182,7 @@ describe('markPendingCleanupFirebaseAuthDeleted', () => {
 		const env = {
 			STRIAE_DATA: { get, put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		vi.mocked(extractDataAtRestEnvelope).mockReturnValue(validEnvelope);
 		vi.mocked(getDataAtRestPrivateKeyRegistry).mockResolvedValue({ activeKeyId: 'key-1', keys: { 'key-1': 'pem' } });
@@ -195,7 +195,7 @@ describe('markPendingCleanupFirebaseAuthDeleted', () => {
 		expect(put).toHaveBeenCalledWith(
 			markerKeyFor(USER_UID),
 			expect.anything(),
-			expect.objectContaining({ onlyIf: { etagMatches: 'etag-1' } })
+			expect.objectContaining({ onlyIf: { etagMatches: 'etag-1' } }),
 		);
 		const [serialized] = vi.mocked(encryptJsonForStorage).mock.calls[0];
 		expect(JSON.parse(serialized as string).firebaseAuthDeleted).toBe(true);
@@ -232,7 +232,7 @@ describe('markPendingCleanupFirebaseAuthDeleted', () => {
 		const env = {
 			STRIAE_DATA: { get, put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		vi.mocked(extractDataAtRestEnvelope).mockReturnValue(validEnvelope);
 		vi.mocked(getDataAtRestPrivateKeyRegistry).mockResolvedValue({ activeKeyId: 'key-1', keys: { 'key-1': 'pem' } });
@@ -251,7 +251,7 @@ describe('writePendingCleanupMarkerIfUnchanged', () => {
 		const env = {
 			STRIAE_DATA: { put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		const ciphertext = new Uint8Array([1, 2, 3]);
 		vi.mocked(encryptJsonForStorage).mockResolvedValue({ ciphertext, envelope: validEnvelope });
@@ -259,11 +259,7 @@ describe('writePendingCleanupMarkerIfUnchanged', () => {
 		const result = await writePendingCleanupMarkerIfUnchanged(env, baseMarker, 'etag-1');
 
 		expect(result).toBe('etag-2');
-		expect(put).toHaveBeenCalledWith(
-			markerKeyFor(USER_UID),
-			ciphertext,
-			expect.objectContaining({ onlyIf: { etagMatches: 'etag-1' } })
-		);
+		expect(put).toHaveBeenCalledWith(markerKeyFor(USER_UID), ciphertext, expect.objectContaining({ onlyIf: { etagMatches: 'etag-1' } }));
 	});
 
 	it('returns null without writing when a concurrent writer already replaced the marker', async () => {
@@ -271,7 +267,7 @@ describe('writePendingCleanupMarkerIfUnchanged', () => {
 		const env = {
 			STRIAE_DATA: { put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		vi.mocked(encryptJsonForStorage).mockResolvedValue({ ciphertext: new Uint8Array(0), envelope: validEnvelope });
 
@@ -304,8 +300,8 @@ describe('tombstonePendingCleanupMarkerIfUnchanged', () => {
 			'',
 			expect.objectContaining({
 				onlyIf: { etagMatches: 'etag-1' },
-				customMetadata: expect.objectContaining({ tombstone: 'true' })
-			})
+				customMetadata: expect.objectContaining({ tombstone: 'true' }),
+			}),
 		);
 	});
 
@@ -325,7 +321,7 @@ describe('writePendingCleanupMarkerIfAbsent', () => {
 		const env = {
 			STRIAE_DATA: { put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		const ciphertext = new Uint8Array([1, 2, 3]);
 		vi.mocked(encryptJsonForStorage).mockResolvedValue({ ciphertext, envelope: validEnvelope });
@@ -342,7 +338,7 @@ describe('writePendingCleanupMarkerIfAbsent', () => {
 		const env = {
 			STRIAE_DATA: { put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		vi.mocked(encryptJsonForStorage).mockResolvedValue({ ciphertext: new Uint8Array(0), envelope: validEnvelope });
 
@@ -371,7 +367,7 @@ describe('recordPendingCleanupFailure', () => {
 		const env = {
 			STRIAE_DATA: { get, put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		vi.mocked(encryptJsonForStorage).mockResolvedValue({ ciphertext: new Uint8Array(0), envelope: validEnvelope });
 
@@ -389,7 +385,7 @@ describe('recordPendingCleanupFailure', () => {
 		const env = {
 			STRIAE_DATA: { get, put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		vi.mocked(extractDataAtRestEnvelope).mockReturnValue(validEnvelope);
 		vi.mocked(getDataAtRestPrivateKeyRegistry).mockResolvedValue({ activeKeyId: 'key-1', keys: { 'key-1': 'pem' } });
@@ -402,7 +398,7 @@ describe('recordPendingCleanupFailure', () => {
 		expect(put).toHaveBeenCalledWith(
 			markerKeyFor(USER_UID),
 			expect.anything(),
-			expect.objectContaining({ onlyIf: { etagMatches: 'etag-1' } })
+			expect.objectContaining({ onlyIf: { etagMatches: 'etag-1' } }),
 		);
 		const [serialized] = vi.mocked(encryptJsonForStorage).mock.calls[0];
 		const merged = JSON.parse(serialized as string);
@@ -416,7 +412,7 @@ describe('recordPendingCleanupFailure', () => {
 		const env = {
 			STRIAE_DATA: { get, put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		vi.mocked(extractDataAtRestEnvelope).mockReturnValue(validEnvelope);
 		vi.mocked(getDataAtRestPrivateKeyRegistry).mockResolvedValue({ activeKeyId: 'key-1', keys: { 'key-1': 'pem' } });
@@ -436,7 +432,7 @@ describe('recordPendingCleanupFailure', () => {
 		const env = {
 			STRIAE_DATA: { get, put },
 			DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+			DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 		} as unknown as Env;
 		vi.mocked(extractDataAtRestEnvelope).mockReturnValue(validEnvelope);
 		vi.mocked(getDataAtRestPrivateKeyRegistry).mockResolvedValue({ activeKeyId: 'key-1', keys: { 'key-1': 'pem' } });
