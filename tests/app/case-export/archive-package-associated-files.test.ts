@@ -168,11 +168,17 @@ describe('buildArchivePackage associated file coverage', () => {
 			user: createUser(),
 			caseNumber: 'CASE-ARCHIVE-1',
 			caseJsonContent: JSON.stringify({ metadata: { caseNumber: 'CASE-ARCHIVE-1' } }),
-			files: [
-				{ fileData: { id: 'img-1', originalFilename: 'bullet.jpg', uploadedAt: '2026-08-11T00:00:00.000Z' }, hasAnnotations: false },
-			],
+			files: [{ fileData: { id: 'img-1', originalFilename: 'bullet.jpg', uploadedAt: '2026-08-11T00:00:00.000Z' }, hasAnnotations: false }],
 			otherFiles: [
-				{ fileData: { id: 'file-1', originalFilename: 'report.pdf', uploadedAt: '2026-08-11T00:00:00.000Z', contentType: 'application/pdf', byteLength: 123 } },
+				{
+					fileData: {
+						id: 'file-1',
+						originalFilename: 'report.pdf',
+						uploadedAt: '2026-08-11T00:00:00.000Z',
+						contentType: 'application/pdf',
+						byteLength: 123,
+					},
+				},
 			],
 			auditConfig: {
 				startDate: '2026-08-10T00:00:00.000Z',
@@ -185,23 +191,24 @@ describe('buildArchivePackage associated file coverage', () => {
 			},
 		});
 
-		const zipSource = typeof (result.zipBlob as Blob).arrayBuffer === 'function'
-			? await (result.zipBlob as Blob).arrayBuffer()
-			: result.zipBlob;
+		const zipSource =
+			typeof (result.zipBlob as Blob).arrayBuffer === 'function' ? await (result.zipBlob as Blob).arrayBuffer() : result.zipBlob;
 		const zip = await JSZip.loadAsync(zipSource);
 		const forensicManifest = JSON.parse(await zip.file('FORENSIC_MANIFEST.json')!.async('text')) as { fileHashes: Record<string, string> };
-		const encryptionManifest = JSON.parse(await zip.file('ENCRYPTION_MANIFEST.json')!.async('text')) as { encryptedFiles: Array<{ filename: string }> };
+		const encryptionManifest = JSON.parse(await zip.file('ENCRYPTION_MANIFEST.json')!.async('text')) as {
+			encryptedFiles: Array<{ filename: string }>;
+		};
 		const readme = await zip.file('README.txt')!.async('text');
 
 		expect(forensicManifest.fileHashes).toEqual(
 			expect.objectContaining({
 				'images/bullet-img-1.jpg': 'b'.repeat(64),
 				'files/report-file-1.pdf': 'c'.repeat(64),
-			})
+			}),
 		);
 
 		expect(encryptionManifest.encryptedFiles.map((entry) => entry.filename)).toEqual(
-			expect.arrayContaining(['images/bullet-img-1.jpg', 'files/report-file-1.pdf'])
+			expect.arrayContaining(['images/bullet-img-1.jpg', 'files/report-file-1.pdf']),
 		);
 
 		expect(readme).toContain('files/ folder with exported associated non-image files (encrypted)');

@@ -56,10 +56,7 @@ function createMockUser(uid: string): User {
 	} as User;
 }
 
-function buildConfirmationPayload(overrides?: {
-	originalCaseOwnerUid?: string;
-	exportedByUid?: string;
-}): string {
+function buildConfirmationPayload(overrides?: { originalCaseOwnerUid?: string; exportedByUid?: string }): string {
 	return JSON.stringify({
 		metadata: {
 			caseNumber: 'CASE-001',
@@ -71,9 +68,7 @@ function buildConfirmationPayload(overrides?: {
 			totalConfirmations: 0,
 			version: '1.0',
 			hash: 'a'.repeat(64),
-			...(overrides?.originalCaseOwnerUid !== undefined
-				? { originalCaseOwnerUid: overrides.originalCaseOwnerUid }
-				: {}),
+			...(overrides?.originalCaseOwnerUid !== undefined ? { originalCaseOwnerUid: overrides.originalCaseOwnerUid } : {}),
 		},
 		confirmations: {},
 	});
@@ -133,12 +128,12 @@ describe('importConfirmationData owner enforcement', () => {
 		arrangeCommonMocks(
 			buildConfirmationPayload({
 				exportedByUid: 'reviewer-uid',
-			})
+			}),
 		);
 
 		const result = await importConfirmationData(
 			createMockUser('owner-uid'),
-			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' })
+			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' }),
 		);
 
 		expect(result.success).toBe(false);
@@ -151,12 +146,12 @@ describe('importConfirmationData owner enforcement', () => {
 			buildConfirmationPayload({
 				originalCaseOwnerUid: 'different-owner',
 				exportedByUid: 'reviewer-uid',
-			})
+			}),
 		);
 
 		const result = await importConfirmationData(
 			createMockUser('owner-uid'),
-			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' })
+			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' }),
 		);
 
 		expect(result.success).toBe(false);
@@ -169,13 +164,13 @@ describe('importConfirmationData owner enforcement', () => {
 			buildConfirmationPayload({
 				originalCaseOwnerUid: 'owner-uid',
 				exportedByUid: 'reviewer-uid',
-			})
+			}),
 		);
 		vi.mocked(checkExistingCase).mockResolvedValue(null);
 
 		const result = await importConfirmationData(
 			createMockUser('owner-uid'),
-			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' })
+			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' }),
 		);
 
 		expect(checkExistingCase).toHaveBeenCalledWith(expect.objectContaining({ uid: 'owner-uid' }), 'CASE-001');
@@ -237,13 +232,11 @@ describe('importConfirmationData owner enforcement', () => {
 			encryptedDataBase64: 'ciphertext',
 		});
 
-		vi.mocked(getVerificationPublicKey).mockReturnValue(
-			'-----BEGIN PUBLIC KEY-----\nTRUSTED\n-----END PUBLIC KEY-----'
-		);
+		vi.mocked(getVerificationPublicKey).mockReturnValue('-----BEGIN PUBLIC KEY-----\nTRUSTED\n-----END PUBLIC KEY-----');
 
 		const result = await importConfirmationData(
 			createMockUser('owner-uid'),
-			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' })
+			new File(['dummy'], 'confirmation.zip', { type: 'application/zip' }),
 		);
 
 		expect(result.success).toBe(false);

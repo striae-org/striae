@@ -233,10 +233,7 @@ describe('importCaseForReview associated file coverage', () => {
 			byteLength: 128,
 		});
 
-		const result = await importCaseForReview(
-			user,
-			new File(['zip-content'], 'case.zip', { type: 'application/zip' })
-		);
+		const result = await importCaseForReview(user, new File(['zip-content'], 'case.zip', { type: 'application/zip' }));
 
 		expect(result.success).toBe(true);
 		expect(result.filesImported).toBe(2);
@@ -246,7 +243,7 @@ describe('importCaseForReview associated file coverage', () => {
 			expect.any(Blob),
 			'ballistic.jpg',
 			'2026-08-11T00:00:00.000Z',
-			expect.any(Function)
+			expect.any(Function),
 		);
 
 		expect(uploadOtherFileBlob).toHaveBeenCalledWith(
@@ -254,7 +251,7 @@ describe('importCaseForReview associated file coverage', () => {
 			expect.any(Blob),
 			'report.pdf',
 			'2026-08-11T00:00:00.000Z',
-			expect.any(Function)
+			expect.any(Function),
 		);
 
 		expect(verifyCasePackageIntegrity).toHaveBeenCalledWith(
@@ -263,23 +260,19 @@ describe('importCaseForReview associated file coverage', () => {
 					'images/ballistic__imgid123.jpg': expect.any(Blob),
 					'files/report__fileid123.pdf': expect.any(Blob),
 				}),
-			})
+			}),
 		);
 
 		expect(storeCaseDataInR2).toHaveBeenCalledWith(
 			expect.objectContaining({ uid: 'analyst-1' }),
 			'CASE-001',
 			expect.objectContaining({ metadata: expect.objectContaining({ caseNumber: 'CASE-001' }) }),
-			[
-				expect.objectContaining({ id: 'new-img-id', originalFilename: 'ballistic.jpg' }),
-			],
-			[
-				expect.objectContaining({ id: 'new-file-id', originalFilename: 'report.pdf' }),
-			],
+			[expect.objectContaining({ id: 'new-img-id', originalFilename: 'ballistic.jpg' })],
+			[expect.objectContaining({ id: 'new-file-id', originalFilename: 'report.pdf' })],
 			expect.any(Map),
 			expect.any(Object),
 			false,
-			undefined
+			undefined,
 		);
 	});
 
@@ -337,10 +330,7 @@ describe('importCaseForReview associated file coverage', () => {
 			byteLength: 64,
 		});
 
-		const result = await importCaseForReview(
-			user,
-			new File(['zip-content'], 'case-only-files.zip', { type: 'application/zip' })
-		);
+		const result = await importCaseForReview(user, new File(['zip-content'], 'case-only-files.zip', { type: 'application/zip' }));
 
 		expect(result.success).toBe(true);
 		expect(result.filesImported).toBe(1);
@@ -351,7 +341,7 @@ describe('importCaseForReview associated file coverage', () => {
 			expect.any(Blob),
 			'notes.txt',
 			'2026-08-11T00:00:00.000Z',
-			expect.any(Function)
+			expect.any(Function),
 		);
 
 		expect(storeCaseDataInR2).toHaveBeenCalledWith(
@@ -359,13 +349,11 @@ describe('importCaseForReview associated file coverage', () => {
 			'CASE-ONLY-FILES',
 			expect.objectContaining({ metadata: expect.objectContaining({ caseNumber: 'CASE-ONLY-FILES' }) }),
 			[],
-			[
-				expect.objectContaining({ id: 'new-file-only-id', originalFilename: 'notes.txt' }),
-			],
+			[expect.objectContaining({ id: 'new-file-only-id', originalFilename: 'notes.txt' })],
 			expect.any(Map),
 			expect.any(Object),
 			false,
-			undefined
+			undefined,
 		);
 	});
 });

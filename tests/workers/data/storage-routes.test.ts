@@ -5,10 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Env } from '../../../workers/data-worker/src/types';
 import { handleStorageRequest } from '../../../workers/data-worker/src/handlers/storage-routes';
 import { encryptJsonForStorage } from '../../../workers/data-worker/src/encryption-utils';
-import {
-	decryptJsonFromStorageWithRegistry,
-	extractDataAtRestEnvelope,
-} from '../../../workers/data-worker/src/registry/key-registry';
+import { decryptJsonFromStorageWithRegistry, extractDataAtRestEnvelope } from '../../../workers/data-worker/src/registry/key-registry';
 
 vi.mock('../../../workers/data-worker/src/encryption-utils', () => ({
 	encryptJsonForStorage: vi.fn(),
@@ -138,10 +135,6 @@ describe('handleStorageRequest PUT always encrypts', () => {
 
 		expect(response.status).toBe(200);
 		await expect(response.json()).resolves.toEqual({ success: true });
-		expect(bucket.put).toHaveBeenCalledWith(
-			'data.json',
-			expect.anything(),
-			{ customMetadata: validEnvelope },
-		);
+		expect(bucket.put).toHaveBeenCalledWith('data.json', expect.anything(), { customMetadata: validEnvelope });
 	});
 });

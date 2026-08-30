@@ -6,8 +6,8 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('../../../workers/data-worker/src/registry/key-registry', () => ({
 	getManifestSigningKeyContext: vi.fn(async () => ({
 		keyId: 'mock-key',
-		privateKeyPem: 'mock-private-key'
-	}))
+		privateKeyPem: 'mock-private-key',
+	})),
 }));
 
 vi.mock('../../../workers/data-worker/src/signature-utils', () => ({
@@ -15,8 +15,8 @@ vi.mock('../../../workers/data-worker/src/signature-utils', () => ({
 		algorithm: 'RSASSA-PSS-SHA-256',
 		keyId: 'mock-key',
 		signedAt: '2026-08-03T00:00:00.000Z',
-		value: 'mock-signature-value'
-	}))
+		value: 'mock-signature-value',
+	})),
 }));
 
 import { handleSignConfirmation } from '../../../workers/data-worker/src/handlers/signing';
@@ -28,7 +28,7 @@ describe('forensic confirmation signing authorization', () => {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'X-Striae-Authenticated-User-Id': 'attacker-uid'
+				'X-Striae-Authenticated-User-Id': 'attacker-uid',
 			},
 			body: JSON.stringify({
 				signatureVersion: '3.0',
@@ -42,39 +42,46 @@ describe('forensic confirmation signing authorization', () => {
 						exportedByCompany: 'Victim Lab',
 						totalConfirmations: 0,
 						version: '1.0',
-						hash: 'a'.repeat(64)
+						hash: 'a'.repeat(64),
 					},
-					confirmations: {}
-				}
-			})
+					confirmations: {},
+				},
+			}),
 		});
 
 		const response = await handleSignConfirmation(
 			request,
 			{
 				USER_WORKER: {
-					fetch: vi.fn(async () => new Response(JSON.stringify({
-						uid: 'attacker-uid',
-						cases: [{ caseNumber: 'CASE-VICTIM-001' }],
-						readOnlyCases: []
-					}), {
-						status: 200,
-						headers: {
-							'Content-Type': 'application/json'
-						}
-					}))
-				}
+					fetch: vi.fn(
+						async () =>
+							new Response(
+								JSON.stringify({
+									uid: 'attacker-uid',
+									cases: [{ caseNumber: 'CASE-VICTIM-001' }],
+									readOnlyCases: [],
+								}),
+								{
+									status: 200,
+									headers: {
+										'Content-Type': 'application/json',
+									},
+								},
+							),
+					),
+				},
 			} as unknown as Env,
-			(data, status = 200) => new Response(JSON.stringify(data), {
-				status,
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			})
+			(data, status = 200) =>
+				new Response(JSON.stringify(data), {
+					status,
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				}),
 		);
 
 		expect(response.status).toBe(403);
-		const payload = await response.json() as {
+		const payload = (await response.json()) as {
 			error?: string;
 		};
 		expect(payload.error).toContain('exporter identity');
@@ -85,7 +92,7 @@ describe('forensic confirmation signing authorization', () => {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'X-Striae-Authenticated-User-Id': 'reviewer-uid'
+				'X-Striae-Authenticated-User-Id': 'reviewer-uid',
 			},
 			body: JSON.stringify({
 				signatureVersion: '3.0',
@@ -101,39 +108,46 @@ describe('forensic confirmation signing authorization', () => {
 						exportedByCompany: 'Reviewer Lab',
 						totalConfirmations: 0,
 						version: '1.0',
-						hash: 'a'.repeat(64)
+						hash: 'a'.repeat(64),
 					},
-					confirmations: {}
-				}
-			})
+					confirmations: {},
+				},
+			}),
 		});
 
 		const response = await handleSignConfirmation(
 			request,
 			{
 				USER_WORKER: {
-					fetch: vi.fn(async () => new Response(JSON.stringify({
-						uid: 'reviewer-uid',
-						cases: [],
-						readOnlyCases: [{ caseNumber: 'CASE-REVIEW-001' }]
-					}), {
-						status: 200,
-						headers: {
-							'Content-Type': 'application/json'
-						}
-					}))
-				}
+					fetch: vi.fn(
+						async () =>
+							new Response(
+								JSON.stringify({
+									uid: 'reviewer-uid',
+									cases: [],
+									readOnlyCases: [{ caseNumber: 'CASE-REVIEW-001' }],
+								}),
+								{
+									status: 200,
+									headers: {
+										'Content-Type': 'application/json',
+									},
+								},
+							),
+					),
+				},
 			} as unknown as Env,
-			(data, status = 200) => new Response(JSON.stringify(data), {
-				status,
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			})
+			(data, status = 200) =>
+				new Response(JSON.stringify(data), {
+					status,
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				}),
 		);
 
 		expect(response.status).toBe(200);
-		const payload = await response.json() as {
+		const payload = (await response.json()) as {
 			success?: boolean;
 			signature?: { keyId?: string; value?: string };
 		};

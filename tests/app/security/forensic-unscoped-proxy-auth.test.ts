@@ -4,7 +4,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../../../functions/api/_shared/firebase-auth', () => ({
-	verifyFirebaseIdentityFromRequest: vi.fn()
+	verifyFirebaseIdentityFromRequest: vi.fn(),
 }));
 
 import { verifyFirebaseIdentityFromRequest } from '../../../functions/api/_shared/firebase-auth';
@@ -21,20 +21,23 @@ describe('data proxy forensic auth forwarding', () => {
 	it('forwards trusted authenticated identity headers for forensic signing requests', async () => {
 		vi.mocked(verifyFirebaseIdentityFromRequest).mockResolvedValue({
 			uid: 'attacker-uid',
-			email: 'attacker@example.com'
+			email: 'attacker@example.com',
 		} as never);
 
-		const upstreamFetch = vi.fn(async () => new Response(JSON.stringify({ success: true }), {
-			status: 200,
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		}));
+		const upstreamFetch = vi.fn(
+			async () =>
+				new Response(JSON.stringify({ success: true }), {
+					status: 200,
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				}),
+		);
 
 		const request = new Request('https://example.com/api/data/api/forensic/sign-confirmation', {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
 				confirmationData: {
@@ -47,20 +50,20 @@ describe('data proxy forensic auth forwarding', () => {
 						exportedByCompany: 'Lab',
 						totalConfirmations: 0,
 						version: '1.0',
-						hash: 'a'.repeat(64)
+						hash: 'a'.repeat(64),
 					},
-					confirmations: {}
-				}
-			})
+					confirmations: {},
+				},
+			}),
 		});
 
 		const response = await onRequest({
 			request,
 			env: {
 				DATA_WORKER: {
-					fetch: upstreamFetch
-				}
-			} as unknown as ProxyEnv
+					fetch: upstreamFetch,
+				},
+			} as unknown as ProxyEnv,
 		});
 
 		expect(response.status).toBe(200);

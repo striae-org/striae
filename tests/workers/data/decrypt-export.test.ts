@@ -4,10 +4,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Env } from '../../../workers/data-worker/src/types';
 import { handleDecryptExport } from '../../../workers/data-worker/src/handlers/decrypt-export';
-import {
-	buildExportDecryptionContext,
-	decryptExportDataWithRegistry,
-} from '../../../workers/data-worker/src/registry/key-registry';
+import { buildExportDecryptionContext, decryptExportDataWithRegistry } from '../../../workers/data-worker/src/registry/key-registry';
 
 vi.mock('../../../workers/data-worker/src/registry/key-registry', () => ({
 	buildExportDecryptionContext: vi.fn(async () => ({})),
@@ -65,15 +62,11 @@ describe('handleDecryptExport designated reviewer gating', () => {
 				metadata: {
 					caseNumber: 'CASE-001',
 				},
-			})
+			}),
 		);
 
-		const response = await handleDecryptExport(
-			createRequest('owner-uid', 'owner@example.com'),
-			{} as Env,
-			createResponder()
-		);
-		const payload = await response.json() as { success?: boolean };
+		const response = await handleDecryptExport(createRequest('owner-uid', 'owner@example.com'), {} as Env, createResponder());
+		const payload = (await response.json()) as { success?: boolean };
 
 		expect(response.status).toBe(200);
 		expect(payload.success).toBe(true);
@@ -86,15 +79,11 @@ describe('handleDecryptExport designated reviewer gating', () => {
 				metadata: {
 					designatedReviewerEmail: 'reviewer@example.com',
 				},
-			})
+			}),
 		);
 
-		const response = await handleDecryptExport(
-			createRequest('owner-uid'),
-			{} as Env,
-			createResponder()
-		);
-		const payload = await response.json() as { error?: string };
+		const response = await handleDecryptExport(createRequest('owner-uid'), {} as Env, createResponder());
+		const payload = (await response.json()) as { error?: string };
 
 		expect(response.status).toBe(403);
 		expect(payload.error).toContain('does not have an email address');
@@ -107,15 +96,11 @@ describe('handleDecryptExport designated reviewer gating', () => {
 				metadata: {
 					designatedReviewerEmail: 'reviewer@example.com',
 				},
-			})
+			}),
 		);
 
-		const response = await handleDecryptExport(
-			createRequest('owner-uid', 'other@example.com'),
-			{} as Env,
-			createResponder()
-		);
-		const payload = await response.json() as { error?: string };
+		const response = await handleDecryptExport(createRequest('owner-uid', 'other@example.com'), {} as Env, createResponder());
+		const payload = (await response.json()) as { error?: string };
 
 		expect(response.status).toBe(403);
 		expect(payload.error).toContain('restricted to the designated reviewer');
@@ -128,15 +113,11 @@ describe('handleDecryptExport designated reviewer gating', () => {
 				metadata: {
 					designatedReviewerEmail: 'Reviewer@Example.com',
 				},
-			})
+			}),
 		);
 
-		const response = await handleDecryptExport(
-			createRequest('owner-uid', 'reviewer@example.com'),
-			{} as Env,
-			createResponder()
-		);
-		const payload = await response.json() as { success?: boolean };
+		const response = await handleDecryptExport(createRequest('owner-uid', 'reviewer@example.com'), {} as Env, createResponder());
+		const payload = (await response.json()) as { success?: boolean };
 
 		expect(response.status).toBe(200);
 		expect(payload.success).toBe(true);
@@ -146,12 +127,8 @@ describe('handleDecryptExport designated reviewer gating', () => {
 		vi.mocked(buildExportDecryptionContext).mockResolvedValueOnce({} as never);
 		vi.mocked(decryptExportDataWithRegistry).mockResolvedValueOnce('not-json');
 
-		const response = await handleDecryptExport(
-			createRequest('owner-uid', 'owner@example.com'),
-			{} as Env,
-			createResponder()
-		);
-		const payload = await response.json() as { error?: string };
+		const response = await handleDecryptExport(createRequest('owner-uid', 'owner@example.com'), {} as Env, createResponder());
+		const payload = (await response.json()) as { error?: string };
 
 		expect(response.status).toBe(400);
 		expect(payload.error).toContain('unable to validate designated reviewer metadata');

@@ -56,12 +56,8 @@ describe('executeUserDeletion associated file cleanup', () => {
 		}));
 
 		const caseData = JSON.stringify({
-			files: [
-				{ id: 'image-file-id' },
-			],
-			otherFiles: [
-				{ id: 'associated-file-id' },
-			],
+			files: [{ id: 'image-file-id' }],
+			otherFiles: [{ id: 'associated-file-id' }],
 		});
 
 		const getMock = vi.fn(async () => ({

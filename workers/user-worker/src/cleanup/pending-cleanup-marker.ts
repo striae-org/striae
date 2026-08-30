@@ -161,7 +161,11 @@ export async function readPendingCleanupMarker(
 		}
 
 		return {
-			marker: { ...parsed, authDeletionComplete: parsed.authDeletionComplete ?? false, firebaseAuthDeleted: parsed.firebaseAuthDeleted ?? false },
+			marker: {
+				...parsed,
+				authDeletionComplete: parsed.authDeletionComplete ?? false,
+				firebaseAuthDeleted: parsed.firebaseAuthDeleted ?? false,
+			},
 			etag: file.etag,
 		};
 	} catch (error) {

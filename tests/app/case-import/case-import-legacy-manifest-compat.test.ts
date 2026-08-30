@@ -53,9 +53,7 @@ vi.mock('../../../app/components/actions/case-import/annotation-import', () => (
 }));
 
 vi.mock('../../../app/components/actions/case-import/validation', async () => {
-	const actual = await vi.importActual<typeof CaseImportValidationModule>(
-		'../../../app/components/actions/case-import/validation'
-	);
+	const actual = await vi.importActual<typeof CaseImportValidationModule>('../../../app/components/actions/case-import/validation');
 
 	return {
 		...actual,
@@ -89,42 +87,46 @@ function createUser(uid: string): User {
 async function createLegacyExportZip(): Promise<File> {
 	const zip = new JSZip();
 	zip.file('CASE-LEGACY-1_data.json', new Uint8Array([1, 2, 3, 4]));
-	zip.file('FORENSIC_MANIFEST.json', JSON.stringify({
-		manifestVersion: '4.0',
-		caseNumber: 'CASE-LEGACY-1',
-		createdAt: '2026-08-11T00:00:00.000Z',
-		dataHash: 'a'.repeat(64),
-		manifestHash: 'b'.repeat(64),
-		totalFiles: 3,
-		imageHashes: {
-			'images/legacy-image-img123.jpg': 'c'.repeat(64),
-			'files/legacy-report-file123.pdf': 'd'.repeat(64),
-		},
-		signature: {
-			algorithm: 'RSASSA-PSS-SHA-256',
-			keyId: 'sig-key-legacy',
-			signedAt: '2026-08-11T00:00:00.000Z',
-			value: 'legacy-signature',
-		},
-	}));
-	zip.file('ENCRYPTION_MANIFEST.json', JSON.stringify({
-		encryptionVersion: '1.0',
-		algorithm: 'RSA-OAEP-AES-256-GCM',
-		keyId: 'enc-key-legacy',
-		wrappedKey: 'wrapped-key',
-		dataIv: 'data-iv',
-		encryptedImages: [
-			{ filename: 'images/legacy-image-img123.jpg', encryptedHash: 'e'.repeat(64), iv: 'iv-1' },
-			{ filename: 'files/legacy-report-file123.pdf', encryptedHash: 'f'.repeat(64), iv: 'iv-2' },
-		],
-	}));
+	zip.file(
+		'FORENSIC_MANIFEST.json',
+		JSON.stringify({
+			manifestVersion: '4.0',
+			caseNumber: 'CASE-LEGACY-1',
+			createdAt: '2026-08-11T00:00:00.000Z',
+			dataHash: 'a'.repeat(64),
+			manifestHash: 'b'.repeat(64),
+			totalFiles: 3,
+			imageHashes: {
+				'images/legacy-image-img123.jpg': 'c'.repeat(64),
+				'files/legacy-report-file123.pdf': 'd'.repeat(64),
+			},
+			signature: {
+				algorithm: 'RSASSA-PSS-SHA-256',
+				keyId: 'sig-key-legacy',
+				signedAt: '2026-08-11T00:00:00.000Z',
+				value: 'legacy-signature',
+			},
+		}),
+	);
+	zip.file(
+		'ENCRYPTION_MANIFEST.json',
+		JSON.stringify({
+			encryptionVersion: '1.0',
+			algorithm: 'RSA-OAEP-AES-256-GCM',
+			keyId: 'enc-key-legacy',
+			wrappedKey: 'wrapped-key',
+			dataIv: 'data-iv',
+			encryptedImages: [
+				{ filename: 'images/legacy-image-img123.jpg', encryptedHash: 'e'.repeat(64), iv: 'iv-1' },
+				{ filename: 'files/legacy-report-file123.pdf', encryptedHash: 'f'.repeat(64), iv: 'iv-2' },
+			],
+		}),
+	);
 	zip.file('images/legacy-image-img123.jpg', new Uint8Array([9, 9, 9]));
 	zip.file('files/legacy-report-file123.pdf', new Uint8Array([8, 8, 8]));
 
 	const zipBlob = await zip.generateAsync({ type: 'blob' });
-	const zipSource = typeof zipBlob.arrayBuffer === 'function'
-		? await zipBlob.arrayBuffer()
-		: zipBlob;
+	const zipSource = typeof zipBlob.arrayBuffer === 'function' ? await zipBlob.arrayBuffer() : zipBlob;
 	return new File([zipSource], 'legacy-case.zip', { type: 'application/zip' });
 }
 
@@ -230,7 +232,7 @@ describe('importCaseForReview legacy manifest compatibility', () => {
 			expect.objectContaining({
 				'images/legacy-image-img123.jpg': expect.any(String),
 				'files/legacy-report-file123.pdf': expect.any(String),
-			})
+			}),
 		);
 
 		expect(verifyCasePackageIntegrity).toHaveBeenCalledWith(
@@ -239,23 +241,19 @@ describe('importCaseForReview legacy manifest compatibility', () => {
 					'images/legacy-image-img123.jpg': expect.any(Blob),
 					'files/legacy-report-file123.pdf': expect.any(Blob),
 				}),
-			})
+			}),
 		);
 
 		expect(storeCaseDataInR2).toHaveBeenCalledWith(
 			expect.objectContaining({ uid: 'legacy-analyst' }),
 			'CASE-LEGACY-1',
 			expect.objectContaining({ metadata: expect.objectContaining({ caseNumber: 'CASE-LEGACY-1' }) }),
-			[
-				expect.objectContaining({ id: 'imported-img-id', originalFilename: 'legacy-image.jpg' }),
-			],
-			[
-				expect.objectContaining({ id: 'imported-file-id', originalFilename: 'legacy-report.pdf' }),
-			],
+			[expect.objectContaining({ id: 'imported-img-id', originalFilename: 'legacy-image.jpg' })],
+			[expect.objectContaining({ id: 'imported-file-id', originalFilename: 'legacy-report.pdf' })],
 			expect.any(Map),
 			expect.any(Object),
 			false,
-			undefined
+			undefined,
 		);
 	});
 });

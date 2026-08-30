@@ -5,11 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { User } from 'firebase/auth';
 import { deleteReadOnlyCase } from '../../../app/components/actions/case-import/storage-operations';
 import { fetchDataApi } from '~/utils/api';
-import {
-	getUserReadOnlyCases,
-	removeCaseConfirmationSummary,
-	updateUserData,
-} from '~/utils/data';
+import { getUserReadOnlyCases, removeCaseConfirmationSummary, updateUserData } from '~/utils/data';
 import { deleteOtherFile } from '../../../app/components/actions/other-files-manage';
 
 vi.mock('~/utils/api', () => ({
@@ -35,16 +31,23 @@ describe('read-only case associated-file cleanup', () => {
 	it('deletes associated files before clearing an imported review case', async () => {
 		const user = { uid: 'reviewer-1', email: 'reviewer@example.com' } as User;
 		vi.mocked(fetchDataApi)
-			.mockResolvedValueOnce(new Response(JSON.stringify({
-				files: [],
-				otherFiles: [{
-					id: 'associated-file-1',
-					originalFilename: 'review-report.pdf',
-					uploadedAt: '2026-08-16T00:00:00.000Z',
-					contentType: 'application/pdf',
-					byteLength: 2048,
-				}],
-			}), { status: 200 }))
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						files: [],
+						otherFiles: [
+							{
+								id: 'associated-file-1',
+								originalFilename: 'review-report.pdf',
+								uploadedAt: '2026-08-16T00:00:00.000Z',
+								contentType: 'application/pdf',
+								byteLength: 2048,
+							},
+						],
+					}),
+					{ status: 200 },
+				),
+			)
 			.mockResolvedValueOnce(new Response(null, { status: 204 }));
 		vi.mocked(deleteOtherFile).mockResolvedValue({
 			fileMissing: false,
@@ -82,12 +85,8 @@ describe('read-only case associated-file cleanup', () => {
 				skipValidation: true,
 				skipCaseDataUpdate: true,
 				suppressAudit: true,
-			})
+			}),
 		);
-		expect(fetchDataApi).toHaveBeenLastCalledWith(
-			user,
-			'/reviewer-1/CASE-001/data.json',
-			{ method: 'DELETE' }
-		);
+		expect(fetchDataApi).toHaveBeenLastCalledWith(user, '/reviewer-1/CASE-001/data.json', { method: 'DELETE' });
 	});
 });

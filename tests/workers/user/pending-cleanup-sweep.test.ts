@@ -7,21 +7,21 @@ import { markerKeyFor } from '../../../workers/user-worker/src/cleanup/pending-c
 
 vi.mock('../../../workers/user-worker/src/cleanup/account-deletion', () => ({
 	deleteSingleCase: vi.fn(),
-	deleteUserConfirmationSummary: vi.fn()
+	deleteUserConfirmationSummary: vi.fn(),
 }));
 
 vi.mock('../../../workers/user-worker/src/firebase/admin', () => ({
-	checkFirebaseAuthUserExists: vi.fn()
+	checkFirebaseAuthUserExists: vi.fn(),
 }));
 
 vi.mock('../../../workers/user-worker/src/cleanup/case-data-reader', () => ({
 	decryptWithKeyRegistry: vi.fn(),
 	extractDataAtRestEnvelope: vi.fn(),
-	getDataAtRestPrivateKeyRegistry: vi.fn()
+	getDataAtRestPrivateKeyRegistry: vi.fn(),
 }));
 
 vi.mock('../../../workers/user-worker/src/encryption-utils', () => ({
-	encryptJsonForStorage: vi.fn()
+	encryptJsonForStorage: vi.fn(),
 }));
 
 import { deleteSingleCase, deleteUserConfirmationSummary } from '../../../workers/user-worker/src/cleanup/account-deletion';
@@ -29,7 +29,7 @@ import { checkFirebaseAuthUserExists } from '../../../workers/user-worker/src/fi
 import {
 	decryptWithKeyRegistry,
 	extractDataAtRestEnvelope,
-	getDataAtRestPrivateKeyRegistry
+	getDataAtRestPrivateKeyRegistry,
 } from '../../../workers/user-worker/src/cleanup/case-data-reader';
 import { encryptJsonForStorage } from '../../../workers/user-worker/src/encryption-utils';
 import { sweepPendingCaseCleanup } from '../../../workers/user-worker/src/cleanup/pending-cleanup-sweep';
@@ -43,7 +43,7 @@ const validEnvelope = {
 	encryptionVersion: '1.0',
 	keyId: 'key-1',
 	dataIv: 'iv-value',
-	wrappedKey: 'wrapped-key-value'
+	wrappedKey: 'wrapped-key-value',
 };
 
 const marker = {
@@ -52,7 +52,7 @@ const marker = {
 	failedCases: [{ caseNumber: 'CASE-1', message: 'boom' }],
 	pendingConfirmationSummary: false,
 	attempts: 0,
-	authDeletionComplete: true
+	authDeletionComplete: true,
 };
 
 function createEnv(markerObjects: { key: string }[] = [{ key: MARKER_KEY }]): Env {
@@ -60,7 +60,7 @@ function createEnv(markerObjects: { key: string }[] = [{ key: MARKER_KEY }]): En
 	const get = vi.fn(async () => ({
 		etag: 'etag-1',
 		customMetadata: validEnvelope,
-		arrayBuffer: async () => new ArrayBuffer(0)
+		arrayBuffer: async () => new ArrayBuffer(0),
 	}));
 	const put = vi.fn(async () => ({ etag: 'etag-2' }));
 
@@ -68,7 +68,7 @@ function createEnv(markerObjects: { key: string }[] = [{ key: MARKER_KEY }]): En
 		STRIAE_DATA: { list, get, put },
 		USER_DB: { delete: vi.fn(async () => undefined) },
 		DATA_AT_REST_ENCRYPTION_PUBLIC_KEY: 'public-key-pem',
-		DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1'
+		DATA_AT_REST_ENCRYPTION_KEY_ID: 'key-1',
 	} as unknown as Env;
 }
 
@@ -87,14 +87,21 @@ describe('sweepPendingCaseCleanup', () => {
 
 		const result = await sweepPendingCaseCleanup(env);
 
-		expect(result).toEqual({ processed: 1, resolved: 1, stillFailing: 0, conflicted: 0, awaitingFinalization: 0, verifiedByFirebaseLookup: 0 });
+		expect(result).toEqual({
+			processed: 1,
+			resolved: 1,
+			stillFailing: 0,
+			conflicted: 0,
+			awaitingFinalization: 0,
+			verifiedByFirebaseLookup: 0,
+		});
 		expect(env.STRIAE_DATA.put).toHaveBeenCalledWith(
 			MARKER_KEY,
 			'',
 			expect.objectContaining({
 				onlyIf: { etagMatches: 'etag-1' },
-				customMetadata: expect.objectContaining({ tombstone: 'true' })
-			})
+				customMetadata: expect.objectContaining({ tombstone: 'true' }),
+			}),
 		);
 	});
 
@@ -105,7 +112,14 @@ describe('sweepPendingCaseCleanup', () => {
 
 		const result = await sweepPendingCaseCleanup(env);
 
-		expect(result).toEqual({ processed: 1, resolved: 0, stillFailing: 0, conflicted: 1, awaitingFinalization: 0, verifiedByFirebaseLookup: 0 });
+		expect(result).toEqual({
+			processed: 1,
+			resolved: 0,
+			stillFailing: 0,
+			conflicted: 1,
+			awaitingFinalization: 0,
+			verifiedByFirebaseLookup: 0,
+		});
 	});
 
 	it('leaves the marker and case data untouched while account deletion has not finalized', async () => {
@@ -115,7 +129,14 @@ describe('sweepPendingCaseCleanup', () => {
 
 		const result = await sweepPendingCaseCleanup(env);
 
-		expect(result).toEqual({ processed: 1, resolved: 0, stillFailing: 0, conflicted: 0, awaitingFinalization: 1, verifiedByFirebaseLookup: 0 });
+		expect(result).toEqual({
+			processed: 1,
+			resolved: 0,
+			stillFailing: 0,
+			conflicted: 0,
+			awaitingFinalization: 1,
+			verifiedByFirebaseLookup: 0,
+		});
 		expect(deleteSingleCase).not.toHaveBeenCalled();
 		expect(env.STRIAE_DATA.put).not.toHaveBeenCalled();
 		expect(env.USER_DB.delete).not.toHaveBeenCalled();
@@ -128,7 +149,14 @@ describe('sweepPendingCaseCleanup', () => {
 
 		const result = await sweepPendingCaseCleanup(env);
 
-		expect(result).toEqual({ processed: 1, resolved: 0, stillFailing: 0, conflicted: 0, awaitingFinalization: 1, verifiedByFirebaseLookup: 0 });
+		expect(result).toEqual({
+			processed: 1,
+			resolved: 0,
+			stillFailing: 0,
+			conflicted: 0,
+			awaitingFinalization: 1,
+			verifiedByFirebaseLookup: 0,
+		});
 		expect(deleteSingleCase).not.toHaveBeenCalled();
 		expect(env.USER_DB.delete).not.toHaveBeenCalled();
 	});
@@ -136,13 +164,20 @@ describe('sweepPendingCaseCleanup', () => {
 	it('proceeds without a Firebase lookup when the marker already has the firebaseAuthDeleted stage flag', async () => {
 		vi.mocked(deleteSingleCase).mockResolvedValue(undefined);
 		vi.mocked(decryptWithKeyRegistry).mockResolvedValue(
-			JSON.stringify({ ...marker, authDeletionComplete: false, firebaseAuthDeleted: true })
+			JSON.stringify({ ...marker, authDeletionComplete: false, firebaseAuthDeleted: true }),
 		);
 		const env = createEnv();
 
 		const result = await sweepPendingCaseCleanup(env);
 
-		expect(result).toEqual({ processed: 1, resolved: 1, stillFailing: 0, conflicted: 0, awaitingFinalization: 0, verifiedByFirebaseLookup: 0 });
+		expect(result).toEqual({
+			processed: 1,
+			resolved: 1,
+			stillFailing: 0,
+			conflicted: 0,
+			awaitingFinalization: 0,
+			verifiedByFirebaseLookup: 0,
+		});
 		expect(checkFirebaseAuthUserExists).not.toHaveBeenCalled();
 		expect(env.USER_DB.delete).toHaveBeenCalledWith(USER_UID);
 	});
@@ -155,7 +190,14 @@ describe('sweepPendingCaseCleanup', () => {
 
 		const result = await sweepPendingCaseCleanup(env);
 
-		expect(result).toEqual({ processed: 1, resolved: 1, stillFailing: 0, conflicted: 0, awaitingFinalization: 0, verifiedByFirebaseLookup: 1 });
+		expect(result).toEqual({
+			processed: 1,
+			resolved: 1,
+			stillFailing: 0,
+			conflicted: 0,
+			awaitingFinalization: 0,
+			verifiedByFirebaseLookup: 1,
+		});
 		expect(env.USER_DB.delete).toHaveBeenCalledWith(USER_UID);
 	});
 
@@ -165,7 +207,14 @@ describe('sweepPendingCaseCleanup', () => {
 
 		const result = await sweepPendingCaseCleanup(env);
 
-		expect(result).toEqual({ processed: 1, resolved: 0, stillFailing: 1, conflicted: 0, awaitingFinalization: 0, verifiedByFirebaseLookup: 0 });
+		expect(result).toEqual({
+			processed: 1,
+			resolved: 0,
+			stillFailing: 1,
+			conflicted: 0,
+			awaitingFinalization: 0,
+			verifiedByFirebaseLookup: 0,
+		});
 		expect(env.STRIAE_DATA.put).toHaveBeenCalledTimes(1);
 
 		const [key, , options] = vi.mocked(env.STRIAE_DATA.put).mock.calls[0];
@@ -174,9 +223,7 @@ describe('sweepPendingCaseCleanup', () => {
 		const [serialized] = vi.mocked(encryptJsonForStorage).mock.calls[0];
 		const rewritten = JSON.parse(serialized as string);
 		expect(rewritten.attempts).toBe(1);
-		expect(rewritten.failedCases).toEqual([
-			{ caseNumber: 'CASE-1', message: 'still broken' }
-		]);
+		expect(rewritten.failedCases).toEqual([{ caseNumber: 'CASE-1', message: 'still broken' }]);
 	});
 
 	it('retries a pending confirmation-summary deletion alongside failed cases', async () => {
@@ -187,7 +234,14 @@ describe('sweepPendingCaseCleanup', () => {
 
 		const result = await sweepPendingCaseCleanup(env);
 
-		expect(result).toEqual({ processed: 1, resolved: 0, stillFailing: 1, conflicted: 0, awaitingFinalization: 0, verifiedByFirebaseLookup: 0 });
+		expect(result).toEqual({
+			processed: 1,
+			resolved: 0,
+			stillFailing: 1,
+			conflicted: 0,
+			awaitingFinalization: 0,
+			verifiedByFirebaseLookup: 0,
+		});
 		const [serialized] = vi.mocked(encryptJsonForStorage).mock.calls[0];
 		expect(JSON.parse(serialized as string).pendingConfirmationSummary).toBe(true);
 	});
@@ -197,7 +251,14 @@ describe('sweepPendingCaseCleanup', () => {
 
 		const result = await sweepPendingCaseCleanup(env);
 
-		expect(result).toEqual({ processed: 0, resolved: 0, stillFailing: 0, conflicted: 0, awaitingFinalization: 0, verifiedByFirebaseLookup: 0 });
+		expect(result).toEqual({
+			processed: 0,
+			resolved: 0,
+			stillFailing: 0,
+			conflicted: 0,
+			awaitingFinalization: 0,
+			verifiedByFirebaseLookup: 0,
+		});
 		expect(deleteSingleCase).not.toHaveBeenCalled();
 		expect(env.STRIAE_DATA.put).not.toHaveBeenCalled();
 	});
