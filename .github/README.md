@@ -2,8 +2,6 @@
 
 Striae is a specialized, cloud-native platform designed to streamline forensic firearms identification by providing an intuitive environment for digital comparison image annotation, authenticated confirmations, and automated report generation. Built with a focus on security, reliability, and user experience, Striae empowers firearms examiners to efficiently manage case data, collaborate securely, and produce comprehensive forensic reports with confidence.
 
-[![Socket Badge](https://badge.socket.dev/npm/package/@striae-org/striae/10.2.8)](https://badge.socket.dev/npm/package/@striae-org/striae/10.2.8)
-
 ## 🌐 Application URL
 
 **[Live App](https://striae.app)**
