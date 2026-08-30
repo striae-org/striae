@@ -30,7 +30,7 @@ One or more methods, systems, or features of the Striae platform are the subject
 
 ## [2026-08-30] - *[Patch Release v10.2.9](https://github.com/striae-org/striae/releases/tag/v10.2.9)* — *Case Deletion Cleanup, Test Formatting Coverage, Contribution Policy Clarification, and Socket Badge Removal*
 
-- **🗑️ Case Deletion Cleanup** - Removed a duplicated no-files deletion/audit code path in `deleteCase` (`app/components/actions/case-manage/operations.ts`), consolidating into a single shared exit path while preserving the "already missing images" note in the audit message.
+- **🗑️ Case Deletion Cleanup** - Removed a duplicated no-files deletion/audit code path in `deleteCase` (`app/components/actions/case-manage/operations.ts`), consolidating into a single shared exit path while preserving the "files(s) were already missing" note in the audit message.
 - **🧹 Prettier Coverage Extended to Tests and Workers** - `format`/`format:check` now also cover `tests/**/*.{ts,mjs,json,jsonc}` and `workers/**/*.{ts,js}`; removed the now-redundant per-worker `.prettierrc` files and reformatted in-scope files to match.
 - **🖥️ Deploy GUI ANSI Stripping Fix (Bug Fix)** - `scripts/deploy-gui/runner.mjs` now strips ANSI escape sequences from log chunks before emitting the `log` event, preventing raw escape codes from reaching the browser's `<pre>` log pane.
 - **📦 Dependency and Compatibility Maintenance** - Bumped `@cloudflare/vite-plugin` to `^1.54.2`, refreshed `package-lock.json`, and bumped `compatibility_date` to `2026-08-28` in `wrangler.toml.example` and all worker `wrangler.jsonc.example` files.

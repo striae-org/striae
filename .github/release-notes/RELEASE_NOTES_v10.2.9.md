@@ -14,7 +14,7 @@ v10.2.9 is a small follow-up patch to v10.2.7/v10.2.8. It removes a duplicated d
 
 ### Case Deletion Cleanup
 
-- **Deduplicated No-Files Deletion Path (Internal Refactor)** - `deleteCase` in `app/components/actions/case-manage/operations.ts` previously had a separate, near-duplicate code block for removing user case data, cleaning up the confirmation summary, and audit-logging the deletion when a case had no files to delete. That block has been removed in favor of a single shared exit path, with the `missingImages` tracking variable hoisted so the "already missing" note in the audit message is preserved regardless of whether the case had files.
+- **Deduplicated No-Files Deletion Path (Internal Refactor)** - `deleteCase` in `app/components/actions/case-manage/operations.ts` previously had a separate, near-duplicate code block for removing user case data, cleaning up the confirmation summary, and audit-logging the deletion when a case had no files to delete. That block has been removed in favor of a single shared exit path, with the `missingFiles` tracking variable hoisted so the "already missing" note in the audit message is preserved regardless of whether the case had files.
 
 ### Test Formatting and Deploy GUI Log Cleanup
 
