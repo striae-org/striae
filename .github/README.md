@@ -28,6 +28,14 @@ One or more methods, systems, or features of the Striae platform are the subject
 
 ## 📋 Changelog
 
+## [2026-08-30] - *[Patch Release v10.2.9](https://github.com/striae-org/striae/releases/tag/v10.2.9)* — *Case Deletion Cleanup, Test Formatting Coverage, Contribution Policy Clarification, and Socket Badge Removal*
+
+- **🗑️ Case Deletion Cleanup** - Removed a duplicated no-files deletion/audit code path in `deleteCase` (`app/components/actions/case-manage/operations.ts`), consolidating into a single shared exit path while preserving the "already missing images" note in the audit message.
+- **🧹 Prettier Coverage Extended to Tests and Workers** - `format`/`format:check` now also cover `tests/**/*.{ts,mjs,json,jsonc}` and `workers/**/*.{ts,js}`; removed the now-redundant per-worker `.prettierrc` files and reformatted in-scope files to match.
+- **🖥️ Deploy GUI ANSI Stripping Fix (Bug Fix)** - `scripts/deploy-gui/runner.mjs` now strips ANSI escape sequences from log chunks before emitting the `log` event, preventing raw escape codes from reaching the browser's `<pre>` log pane.
+- **📦 Dependency and Compatibility Maintenance** - Bumped `@cloudflare/vite-plugin` to `^1.54.2`, refreshed `package-lock.json`, and bumped `compatibility_date` to `2026-08-28` in `wrangler.toml.example` and all worker `wrangler.jsonc.example` files.
+- **🤝 Selective Contribution Policy Clarified** - `.github/CONTRIBUTING.md` now explains that Striae moderates contributions closely due to its sensitive forensic workflows and cannot accept unsolicited PRs; contributors should reach out to `dev@striae.org` before starting work.
+
 ## [2026-08-29] - *[Patch Release v10.2.8](https://github.com/striae-org/striae/releases/tag/v10.2.8)* — *Deploy GUI Binary Asset Fix, npm Toolchain Peer-Dependency Correction, and License Audit Refresh*
 
 - **🖥️ Deploy GUI Binary Asset Fix (Bug Fix)** - Fixed `scripts/deploy-gui/server.mjs`'s static-file handler so only `index.html` is read in text mode (for token substitution); all other static assets are now read as a raw buffer instead of `utf8`, preventing binary asset corruption when served by the deploy GUI.
