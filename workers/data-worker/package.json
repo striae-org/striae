@@ -8,8 +8,8 @@
     "start": "wrangler dev"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.22.0",
-    "wrangler": "^4.127.1"
+    "@cloudflare/vitest-pool-workers": "^0.23.0",
+    "wrangler": "^4.149.0"
   },
   "allowScripts": {
     "esbuild": true,
